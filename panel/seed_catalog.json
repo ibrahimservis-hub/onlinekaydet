@@ -1,0 +1,151 @@
+{
+ "settings": {
+  "shipping": 49.9,
+  "free_ship_over": 750,
+  "cod": false,
+  "bank": {
+   "holder": "MODA EKRU E-TİCARET HİZMETLERİ TEKSTİL SANAYİ VE TİCARET LİMİTED ŞİRKETİ",
+   "bank": "Banka adını yazın",
+   "iban": "TR00 0000 0000 0000 0000 0000 00"
+  }
+ },
+ "categories": [
+  {
+   "id": "bakim",
+   "name": "Servis ve Bakım Paketleri",
+   "icon": "wrench"
+  },
+  {
+   "id": "yedek",
+   "name": "Yedek Parça ve Bakım Ürünleri",
+   "icon": "box"
+  },
+  {
+   "id": "aksesuar",
+   "name": "Aksesuar ve Güvenlik",
+   "icon": "shield"
+  }
+ ],
+ "products": [
+  {
+   "id": "kombi-yillik-bakim",
+   "name": "Kombi Yıllık Bakım Paketi",
+   "cat": "bakim",
+   "icon": "flame",
+   "price": 1250,
+   "old": 1490,
+   "desc": "Yıllık periyodik kombi bakımı; yanma, basınç ve güvenlik kontrolleri. Satın alma sonrası randevu planlanır.",
+   "badge": "Çok Satan"
+  },
+  {
+   "id": "klima-bakim-temizlik",
+   "name": "Klima Bakım ve Temizlik Paketi",
+   "cat": "bakim",
+   "icon": "snow",
+   "price": 950,
+   "old": 1100,
+   "desc": "İç ünite filtre, serpantin ve drenaj temizliği ile genel çalışma kontrolü. Randevu planlanır.",
+   "badge": ""
+  },
+  {
+   "id": "klima-gaz-dolum",
+   "name": "Klima Gaz Dolumu (R32)",
+   "cat": "bakim",
+   "icon": "snow",
+   "price": 1450,
+   "old": 0,
+   "desc": "Kaçak kontrolü ve gaz basınç ölçümüyle birlikte gaz dolumu hizmeti. Randevu planlanır.",
+   "badge": ""
+  },
+  {
+   "id": "tv-montaj",
+   "name": "TV Montaj Hizmeti",
+   "cat": "bakim",
+   "icon": "tv",
+   "price": 600,
+   "old": 0,
+   "desc": "Duvara TV montajı ve kablo düzenlemesi. Randevu planlanır.",
+   "badge": ""
+  },
+  {
+   "id": "kombi-su-filtresi",
+   "name": "Kombi Su Filtresi",
+   "cat": "yedek",
+   "icon": "flame",
+   "price": 190,
+   "old": 0,
+   "desc": "Kombi giriş hattı için mıknatıslı su filtresi.",
+   "badge": ""
+  },
+  {
+   "id": "kombi-doldurma-hortumu",
+   "name": "Kombi Doldurma Hortumu",
+   "cat": "yedek",
+   "icon": "flame",
+   "price": 160,
+   "old": 0,
+   "desc": "Basınç tamamlama için esnek doldurma hortumu.",
+   "badge": ""
+  },
+  {
+   "id": "buzdolabi-su-filtresi",
+   "name": "Buzdolabı Su Filtresi (Muadil)",
+   "cat": "yedek",
+   "icon": "fridge",
+   "price": 350,
+   "old": 420,
+   "desc": "Su pınarlı buzdolapları için muadil su filtresi.",
+   "badge": ""
+  },
+  {
+   "id": "camasir-giris-hortumu",
+   "name": "Çamaşır Makinesi Giriş Hortumu Seti",
+   "cat": "yedek",
+   "icon": "wash",
+   "price": 220,
+   "old": 0,
+   "desc": "Emniyet valfli, 2 adet su giriş hortumu.",
+   "badge": ""
+  },
+  {
+   "id": "bulasik-bakim-seti",
+   "name": "Bulaşık Makinesi Bakım Seti",
+   "cat": "yedek",
+   "icon": "dish",
+   "price": 280,
+   "old": 0,
+   "desc": "Kireç ve yağ çözücü temizleme seti.",
+   "badge": "Yeni"
+  },
+  {
+   "id": "kurutma-temizlik-seti",
+   "name": "Kurutma Makinesi Kondenser Temizlik Seti",
+   "cat": "yedek",
+   "icon": "dryer",
+   "price": 310,
+   "old": 0,
+   "desc": "Kondenser ve filtre temizliği için bakım seti.",
+   "badge": ""
+  },
+  {
+   "id": "tv-duvar-aski-32-65",
+   "name": "TV Duvar Askı Aparatı (32-65 inç)",
+   "cat": "aksesuar",
+   "icon": "tv",
+   "price": 420,
+   "old": 0,
+   "desc": "Sabit tip duvar askı aparatı, montaj vidaları dahil.",
+   "badge": ""
+  },
+  {
+   "id": "dogalgaz-dedektoru",
+   "name": "Doğalgaz Kaçak Dedektörü",
+   "cat": "aksesuar",
+   "icon": "drop",
+   "price": 790,
+   "old": 890,
+   "desc": "Sesli ve ışıklı uyarı veren prize takılır dedektör.",
+   "badge": "İndirim"
+  }
+ ]
+}
