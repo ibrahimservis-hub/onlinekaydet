@@ -2872,6 +2872,8 @@ import surum
 surum.register(api_router, db, {"require_admin": require_admin})
 import servis_ayar
 servis_ayar.setup(app, api_router, db, get_current_user, tenant)
+import sahip
+sahip.register(app, api_router, db, {"require_admin": require_admin, "get_current_user": get_current_user})
 gsc_auto.register(api_router, db, {"require_admin": require_admin, "JWT_SECRET": JWT_SECRET})
 try:
     import brand_import
@@ -2936,7 +2938,7 @@ async def _firm_ctx(request: Request, call_next):
                         return _JR({"detail": _gm}, status_code=403)
     except Exception:                                   # noqa: BLE001
         pass
-    if ft is not None and request.url.path.startswith(("/api/admin/firms", "/api/admin/firm-template", "/api/admin/packages")):
+    if ft is not None and request.url.path.startswith(("/api/admin/firms", "/api/admin/firm-template", "/api/admin/packages", "/api/admin/sectors", "/api/admin/subscriptions", "/api/admin/overview")):
         tenant.reset(ft)                                # firma yöneticisi platform (sahip) uçlarına giremez
         return _JR({"detail": "Bu işlem yalnızca platform sahibine açık"}, status_code=403)
     try:

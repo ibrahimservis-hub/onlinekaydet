@@ -66,6 +66,7 @@ class FirmIn(BaseModel):
     usage_days: Optional[int] = None
     package: Optional[str] = None
     modules: Optional[list] = None
+    sector: Optional[str] = None
 
 
 class FirmUp(BaseModel):
@@ -293,7 +294,10 @@ def register(api_router, db, deps):
              "phone": (p.phone or "").strip(), "address": (p.address or "").strip(), "tax_no": (p.tax_no or "").strip(),
              "tax_office": (p.tax_office or "").strip(), "features": feats(p.features), "status": "aktif", "created_at": _now(),
              "logo": clean_logo(p.logo), "expires_at": "",
-             "package": (p.package or ""), "modules": await resolve_modules(p.package, p.modules)}
+             "package": (p.package or ""), "modules": await resolve_modules(p.package, p.modules), "sector": (p.sector or "")}
+        import sektor
+        if p.sector and p.sector not in sektor.SECTORS:
+            raise HTTPException(status_code=400, detail="Bilinmeyen sektör")
         if p.usage_days and p.usage_days > 0:
             f["expires_at"] = (datetime.now(timezone.utc) + timedelta(days=min(p.usage_days, 36500))).isoformat()
         fdb = db.firm(f["db"])
@@ -309,8 +313,11 @@ def register(api_router, db, deps):
         await push_settings(f)
         await db.main().firms.insert_one(dict(f))
         await audit(me, "FİRMA EKLEDİ", name)
+        import sahip
+        setup_res = await sahip.on_create(db, f, p.password)
         f.pop("db", None)
         f.pop("_id", None)
+        f["setup"] = setup_res
         f["has_logo"] = bool(f.pop("logo", ""))
         return f
 
