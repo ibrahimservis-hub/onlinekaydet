@@ -228,3 +228,19 @@ footer .cp{display:flex;justify-content:space-between;gap:12px;border-top:1px so
 .pc .pill{background:#fff;color:#0f1f46}.pc.pop .pill{background:linear-gradient(135deg,#b84d08,#c05409);color:#fff}
 @media(max-width:1060px){.vb .p2{background:linear-gradient(100deg,#0c7a43,#12904f)}}
 footer .g img{height:34px;width:auto}
+/* geliştirme: cila */
+html{scroll-behavior:smooth;scroll-padding-top:84px}
+header{transition:box-shadow .2s}header.sc{box-shadow:0 6px 22px #0f1f4620}
+header nav.m a{position:relative;padding:6px 0}
+header nav.m a:after{content:"";position:absolute;left:0;right:0;bottom:-2px;height:2px;background:var(--o);transform:scaleX(0);transition:transform .2s;transform-origin:left}
+header nav.m a:hover:after,header nav.m a[aria-current]:after{transform:scaleX(1)}
+.pill{transition:transform .15s,box-shadow .15s,filter .15s}.pill:hover{transform:translateY(-1px);filter:brightness(1.05)}.pill:active{transform:translateY(1px)}
+.sg a,.pc,details,.kz{transition:transform .18s,box-shadow .18s}
+.sg a:hover,.pc:hover{transform:translateY(-3px)}
+.pc.pop:hover{transform:translateY(-7px)}
+input:focus,select:focus{outline:3px solid #ff9a3c;outline-offset:1px}
+.frm [aria-invalid=true]{border-color:#b42318!important}
+details[open] summary{color:var(--o2)}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+:root{--o2:#a8470a}
+.tsx div:nth-child(1){background:#1f5fe0!important}.tsx div:nth-child(2){background:#c05409!important}.tsx div:nth-child(3){background:#12804a!important}.tsx div:nth-child(4){background:#6a4fd8!important}
