@@ -1,0 +1,23 @@
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,sans-serif;color:#222;font-size:15px;line-height:1.5}
+a{color:inherit}.w{max-width:1200px;margin:0 auto;padding:0 40px}
+.ph{background:repeating-linear-gradient(135deg,#e9ecf1 0 12px,#e2e6ec 12px 24px);display:grid;place-items:center;color:#8b94a3;font-size:12px;border-radius:4px}
+.badge{position:fixed;left:14px;top:auto;bottom:14px;background:#000a;color:#fff;font-size:11px;padding:4px 9px;border-radius:3px;z-index:9}
+h1,h2,h3{margin:0;line-height:1.15}.btn{display:inline-block;padding:12px 22px;font-weight:700;border-radius:4px;font-size:14px}
+.ic{width:42px;height:42px;border-radius:4px;display:grid;place-items:center;font-weight:800;font-size:13px}
+@media(max-width:600px){
+.w{padding:0 18px!important}
+.hero .w,.sv,.how,.rv,.ft .w,.pk,.bd .w,.gw,.fl,.sm,.cs,.cal .w,.pl,.pr>.w{grid-template-columns:1fr!important;gap:14px!important}
+.ar{grid-template-columns:1fr 1fr!important}.bd .w{grid-template-columns:1fr 1fr!important}.pr>.w{grid-template-columns:1fr 1fr!important}
+.pick{grid-template-columns:1fr!important;border-radius:14px!important}.pick div{border:0!important;border-bottom:1px solid #e3edf1!important}.pick .g{padding:12px!important}
+.nav a:not(.cta),.nav .m,.top,.nav .w>span:not(.cta):not(.ph0){display:none!important}.br .w span{font-size:15px!important}
+.nav .w{gap:10px!important}.nav .cta,.nav .ph0{padding:8px 12px!important;font-size:12.5px!important}
+.nav{text-align:left!important}.nav .lg{font-size:24px!important}
+h1{font-size:30px!important;letter-spacing:-.8px!important}.sec h2,.bz h2,.cal h2{font-size:23px!important}
+.hero{padding:34px 0!important}.hero p{font-size:15px!important}.btn.g{margin:10px 0 0!important;display:block;text-align:center}.btn.o,.call{display:block!important;text-align:center;font-size:17px!important}
+.br .w{flex-wrap:wrap}.ft .w{display:block!important}.ft .w>*{display:block;margin-bottom:10px}
+.ph1,.ph2,.ph3,.ph4{height:180px!important}.sec{padding:36px 0!important}
+.wa{top:auto!important;bottom:70px;right:12px;position:fixed!important}
+.steps div{font-size:9.5px!important}.badge{font-size:10px}
+.cal .bx{margin-top:6px}.top .w,.ft .w{flex-direction:column}
+}
+.ic{padding:0!important;border:0!important;width:44px!important;height:44px!important;display:grid!important;place-items:center!important}.ic svg{display:block}
