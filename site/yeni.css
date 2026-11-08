@@ -60,9 +60,10 @@ h2,h2:has(em),.dk h2{font-size:28px}
 .nh h1{font-size:38px;line-height:1.06;letter-spacing:-1.4px;margin:14px 0;font-weight:800}
 .nh h1 u{text-decoration:none;background:linear-gradient(transparent 66%,#f27a1a66 66%)}
 .nh .lead{font-size:16.5px;line-height:1.55;color:var(--mu);margin:0 0 20px;max-width:540px}
-.nh .chips{display:flex;gap:8px;overflow:auto;margin:0 -20px 4px;padding:0 20px 4px;scrollbar-width:none}
+.nh .chips{display:flex;flex-wrap:nowrap;gap:8px;overflow:auto;margin:0 -20px 4px;padding:0 20px 4px;scrollbar-width:none}
 .nh .chips button{white-space:nowrap;padding:9px 14px;border:1.5px solid var(--ink);border-radius:8px;font:600 14px inherit;font-family:inherit;background:transparent;color:var(--ink);cursor:pointer}
 .nh .chips button.on{background:var(--ink);color:#fff}
+.nh .chips a{white-space:nowrap;padding:9px 14px;border:1.5px solid var(--ink);border-radius:8px;font-weight:600;font-size:14px;background:transparent;color:var(--ink);text-decoration:none}.nh .chips a.on{background:var(--ink);color:#fff}
 .nh .nhc{display:flex;gap:16px;align-items:center;margin:24px 0 8px;flex-wrap:wrap}
 .nh .nhc .bt{height:54px;padding:0 26px;font-size:16px}
 .nh .nhc .tel{font-weight:700;font-size:15.5px;display:flex;align-items:center;gap:8px;color:var(--ink)}

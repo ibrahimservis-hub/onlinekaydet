@@ -1,7 +1,7 @@
 import re,json,sys
 sys.path.insert(0,'/home/claude/onlinekaydet/panel')
 import sektor as S
-T=open('sektor-kombi.html').read()
+T=open('sektor-kombi.tpl').read()
 CHIPS_OLD='<div class="chips"><span>Baymak</span><span>Vaillant</span><span>Demirdöküm</span><span>Bosch</span><span>ECA</span><span>Buderus</span><span>Ariston</span><span>Viessmann</span></div>'
 CK_OLD=re.search(r'<div class="ck">.*?</div></div></div></div></section>',T,re.S).group(0)
 FAQ_OLD=re.search(r'<div class="faq">.*?</div></div></div></section>',T,re.S).group(0)
@@ -70,6 +70,25 @@ def seo(d,url,faq):
     ld={"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","name":"OnlineKaydet — "+d['name']+" servisleri için servis takip programı","applicationCategory":"BusinessApplication","operatingSystem":"Web, Android","description":d['meta'],"url":url,"publisher":{"@type":"Organization","name":"OnlineKaydet","url":"https://onlinekaydet.com"}},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":q,"acceptedAnswer":{"@type":"Answer","text":a}} for q,a in faq]}]}
     return (f'<meta name="description" content="{d["meta"]}"><link rel="canonical" href="{url}"><meta property="og:title" content="{d["name"]} servisi programı — OnlineKaydet"><meta property="og:description" content="{d["meta"]}"><meta property="og:type" content="website"><meta property="og:url" content="{url}">'
             '<script type="application/ld+json">'+json.dumps(ld,ensure_ascii=False)+'</script>')
+
+FIS={'kombi':("Kombi","Ayşe Y. · Bornova","Baymak Duo-Tec 24","Isıtmıyor, E01 hatası","Hasan Y.","Parça değişti, fotoğraf eklendi","1.250"),
+'klima':("Klima","Mehmet K. · Karşıyaka","Daikin 12.000 BTU","Soğutmuyor, gaz kaçağı şüphesi","Emre T.","Gaz dolumu yapıldı, test edildi","1.800"),
+'beyaz-esya':("Beyaz eşya","Selin D. · Bayraklı","Arçelik çamaşır makinesi","Su boşaltmıyor","Murat Ş.","Pompa değişti, fotoğraf eklendi","950"),
+'elektronik':("Elektronik","Can A. · Buca","Samsung 55\" televizyon","Görüntü yok, ses var","Okan B.","Arka ışık şeridi değişti","2.100"),
+'bilgisayar':("Bilgisayar","Deniz Ö. · Konak","Dizüstü bilgisayar","Açılmıyor, şarj olmuyor","Burak Y.","Şarj soketi değişti, test edildi","1.100"),
+'tesisat':("Tesisat","Ali R. · Çiğli","Banyo gideri","Su gitmiyor, tıkanıklık","Kemal S.","Tıkanıklık açıldı, kamera ile kontrol","700"),
+'elektrik':("Elektrik","Zeynep A. · Bornova","Daire sigorta panosu","Sürekli sigorta atıyor","Ferhat K.","Kaçak akım rölesi değişti, ölçüm yapıldı","1.400"),
+'guvenlik':("Güvenlik","Orhan T. · Karşıyaka","Hikvision 8 kameralı set","Kayıt almıyor, uzaktan erişim yok","Serkan D.","Disk değişti, uzaktan erişim test edildi","2.300")}
+CH=[('Kombi','sektor-kombi'),('Klima','sektor-klima'),('Beyaz eşya','sektor-beyaz-esya'),('Elektronik','sektor-elektronik'),('Bilgisayar','sektor-bilgisayar'),('Tesisat','sektor-tesisat'),('Elektrik','sektor-elektrik'),('Güvenlik','sektor-guvenlik')]
+def hero(d,k):
+    f=d['file']; x=FIS[k]; T_=["09:12","10:05","10:48","11:02"]; L=["Kayıt açıldı","Usta yolda, müşteriye SMS gitti",x[5],"İmzalı fiş SMS ile gönderildi"]
+    chips=''.join(f'<a href="{h}.html"'+(' class="on"' if h==f else '')+f'>{n}</a>' for n,h in CH)
+    tl=''.join(f'<div><span class="t">{t}</span><span class="d{" o" if i==3 else ""}"></span><b>{L[i]}</b></div>' for i,t in enumerate(T_))
+    fis=f'<div class="top"><span class="no">İŞ EMRİ #2417</span><span class="sec">{x[0]} · örnek kayıt</span></div><dl><dt>Müşteri</dt><dd>{x[1]}</dd><dt>Cihaz</dt><dd>{x[2]}</dd><dt>Arıza</dt><dd>{x[3]}</dd><dt>Usta</dt><dd>{x[4]}</dd></dl><div class="tl">{tl}</div><div class="ftr"><span class="tot">TOPLAM {x[6]} ₺</span><span class="stamp">TAHSİL EDİLDİ</span></div>'
+    h1=d['h1'].replace('<em>','<u>').replace('</em>','</u>')
+    return (f'<div class="nh"><div class="w"><div class="ng"><div><span class="eb">{d["tag"]}</span><h1>{h1}</h1><p class="lead">{d["lead"]}</p>'
+            f'<div class="chips">{chips}</div><div class="nhc"><a class="bt o lg" href="#kayit">Ücretsiz Dene</a><a class="tel" href="tel:05444444004"><i data-i="phone"></i>0544 444 40 04</a></div><div class="note">Fiş örnek bir kayıttır.</div></div>'
+            f'<div><div class="nfs">{fis}</div></div></div></div></div>')
 def build(k,d):
     s=T; key=d.get('key',k); sec=S.SECTORS[key]; name=d['name']
     R=lambda a,b: s.replace(a,b,1) if a in s else (_ for _ in ()).throw(SystemExit('YOK: '+a[:50]))
@@ -106,6 +125,11 @@ def build(k,d):
     s=s.replace('<a class="bt lg" href="#">Canlı Demoyu Gör</a>','<a class="bt lg" href="demo.html">Canlı Demoyu Gör</a>').replace('<a class="bt o lg" href="#">Paketleri İncele</a>','<a class="bt o lg" href="fiyatlar.html">Paketleri İncele</a>')
     url='https://onlinekaydet.com/'+d['file']+'.html'
     s=s.replace('</title>','</title>'+seo(d,url,d['faq']),1)
+    s=re.sub(r'<div class="ih">.*?</div></div></div></div></div>\n',lambda m:hero(d,k)+'\n',s,count=1,flags=re.S)
     open(d['file']+'.html','w').write(s)
 for k,d in D.items(): build(k,d)
 print('ok',len(D))
+# kombi: şablonun kendisi, yalnızca üst bölüm yenilenir
+_k=dict(file='sektor-kombi',tag='Kombi servisleri için',h1='Kombi servisi için <em>servis takip programı</em>',lead='Bakım hatırlatma, arıza kaydı, usta atama, yedek parça ve imzalı servis fişi. Marka ve model listesi, kontrol listesi hazır gelir.')
+_s=re.sub(r'<div class="ih">.*?</div></div></div></div></div>\n',lambda m:hero(_k,'kombi')+'\n',T,count=1,flags=re.S)
+open('sektor-kombi.html','w').write(_s)
