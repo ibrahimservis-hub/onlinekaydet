@@ -94,3 +94,5 @@ h2,h2:has(em),.dk h2{font-size:28px}
 .nh .ng>div{min-width:0}
 .nh .nhc .tel i{background:none!important;color:var(--or-d)!important;width:22px;height:22px;padding:0!important;border-radius:0!important}.nh .note{text-align:left}
 .nfs .top,.nfs .tl,.nfs .no,.nfs .sec,.nfs dl{position:static;width:auto;margin-left:0}.nfs .no{color:var(--ink)}
+
+.nh .nhl{display:inline-block;margin:10px 0 0;font-weight:700;font-size:14.5px;color:var(--or-d);text-decoration:none;border-bottom:1.5px solid var(--or-d)}.nh .nhl[hidden]{display:none}
