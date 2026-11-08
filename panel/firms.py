@@ -18,16 +18,25 @@ from pydantic import BaseModel
 import tenant
 
 MODULES = {"servis": "Servis kayıtları", "personel": "Usta / personel", "muhasebe": "Muhasebe ve kasa", "rapor": "Raporlar",
-           "sms": "SMS ve mesaj şablonları", "magaza": "Yedek parça mağazası", "site": "Web sitesi", "pazarlama": "Pazarlama"}
+           "sms": "SMS ve mesaj şablonları", "magaza": "Yedek parça mağazası", "site": "Web sitesi", "pazarlama": "Pazarlama",
+           "bakim": "Bakım hatırlatma ve garanti", "teklif": "Teklif ve onay", "bayi": "Bayi (B2B)", "qr": "QR cihaz etiketi",
+           "atama": "Otomatik usta atama", "takip": "Canlı usta takibi"}
+# Henüz yazılmamış Kurumsal modüller: satış sayfasında "Yakında"; atanamaz, yalnızca bilgi olarak listelenir.
+SOON = {"odeme": "Ödeme linki (online tahsilat)", "efatura": "E-arşiv fatura bağlantısı", "portal": "Müşteri portalı",
+        "offline": "Çevrimdışı usta uygulaması", "arayan": "Arayan numara tanıma"}
 # modül -> kapatıldığında engellenen API ön ekleri (servis çekirdektir, kapatılamaz)
 MODULE_PREFIX = {"muhasebe": ("finance", "cash", "accounting", "receivables", "profit", "export-xlsx"),
                  "rapor": ("rapor", "reports", "analytics", "performance"),
                  "magaza": ("shop", "parts"), "site": ("site", "site-reviews-settings", "media", "studio", "visitors"),
-                 "pazarlama": ("mkt", "growth"), "sms": ("msg-templates", "governance/notify")}
+                 "pazarlama": ("mkt", "growth"), "sms": ("msg-templates", "governance/notify"),
+                 "bakim": ("maintenance", "warranty-claims"), "teklif": ("quotes",), "bayi": ("dealers", "partners"),
+                 "qr": ("qr",), "atama": ("autoassign",), "takip": ("admin/tech-locations",)}
 DEFAULT_PACKAGES = {
     "baslangic": {"name": "Başlangıç", "price": 0, "modules": ["servis", "personel"]},
     "profesyonel": {"name": "Profesyonel", "price": 0, "modules": ["servis", "personel", "muhasebe", "rapor", "sms"]},
     "tam": {"name": "Tam Paket", "price": 0, "modules": list(["servis", "personel", "muhasebe", "rapor", "sms", "magaza", "site", "pazarlama"])},
+    "kurumsal": {"name": "Kurumsal", "price": 0, "modules": ["servis", "personel", "muhasebe", "rapor", "sms", "magaza", "site", "pazarlama",
+                                                          "bakim", "teklif", "bayi", "qr", "atama", "takip"]},
 }
 DEFAULT_FEATURES = {"customer_add": True}
 FEATURE_LABELS = {"customer_add": "Müşteriyi kendi ekleme"}
@@ -154,7 +163,10 @@ def register(api_router, db, deps):
 
     async def packages_get():
         d = await db.main().app_settings.find_one({"_id": "packages"}, {"_id": 0}) or {}
-        return d.get("items") or DEFAULT_PACKAGES
+        items = d.get("items")
+        if not items:
+            return DEFAULT_PACKAGES
+        return {**items, **{k: v for k, v in DEFAULT_PACKAGES.items() if k == "kurumsal" and k not in items}}
 
     def clean_modules(v):
         out = ["servis"] + [m for m in (v or []) if m in MODULES and m != "servis"]
@@ -171,7 +183,7 @@ def register(api_router, db, deps):
     @api_router.get("/admin/packages")
     async def packages_list(me: dict = Depends(require_admin)):
         need_main()
-        return {"packages": await packages_get(), "modules": MODULES}
+        return {"packages": await packages_get(), "modules": MODULES, "soon": SOON}
 
     @api_router.put("/admin/packages")
     async def packages_save(body: dict, me: dict = Depends(require_admin)):
@@ -212,7 +224,7 @@ def register(api_router, db, deps):
     async def firm_package(request: Request, user: dict = Depends(get_current_user)):
         f = await my_firm(request)
         mods = f.get("modules") or list(MODULES)
-        return {"package": f.get("package", ""), "modules": mods, "labels": {m: MODULES[m] for m in MODULES}, "locked": [m for m in MODULES if m not in mods]}
+        return {"package": f.get("package", ""), "modules": mods, "labels": {m: MODULES[m] for m in MODULES}, "locked": [m for m in MODULES if m not in mods], "soon": SOON}
 
     async def push_settings(f):
         fdb = db.firm(f["db"])
