@@ -54,7 +54,7 @@ def _fail(exc):
 
     def app(environ, start_response):
         start_response("500 Internal Server Error", [("Content-Type", "text/plain; charset=utf-8")])
-        return ["Panel baslatilamadi. servisplus-panel/startup-error.log dosyasina bakin.".encode("utf-8")]
+        return ["Panel baslatilamadi. onlinekaydet_app/startup-error.log dosyasina bakin.".encode("utf-8")]
     return app
 
 
@@ -195,7 +195,14 @@ def _boot():
         if "server" not in box:
             raise RuntimeError("Sunucu modulu yuklenemedi (MONGO_URL / bagimliliklari kontrol edin)")
         server = box["server"]
-        asyncio.run_coroutine_threadsafe(server.app.router.startup(), _loop).result(600)
+        async def _run_startup():
+            r = server.app.router
+            if hasattr(r, "startup"):            # eski Starlette
+                await r.startup()
+            else:                                # yeni Starlette: on_event isleyicileri lifespan ile calisir
+                box["lifespan"] = r.lifespan_context(server.app)
+                await box["lifespan"].__aenter__()
+        asyncio.run_coroutine_threadsafe(_run_startup(), _loop).result(600)
         from a2wsgi import ASGIMiddleware
         _state["app"] = ASGIMiddleware(server.app, loop=_loop)
         _state["loop"] = _loop
@@ -251,7 +258,7 @@ def application(environ, start_response):
     if _state["ready"]:
         return _wrap(_state["app"](environ, start_response), _state["loop"])
     if _state["error"] is not None:
-        msg = "Panel baslatilamadi. servisplus-panel/startup-error.log dosyasina bakin."
+        msg = "Panel baslatilamadi. onlinekaydet_app/startup-error.log dosyasina bakin."
         start_response("500 Internal Server Error", [("Content-Type", "text/plain; charset=utf-8")])
     else:
         msg = "Panel basliyor (ilk acilis 1-3 dakika surebilir). Birkac dakika sonra sayfayi yenileyin.\n\n--- durum (pid %s) ---\n%s" % (os.getpid(), "\n".join(_mem) or "(henuz kayit yok)")
