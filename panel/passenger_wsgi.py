@@ -340,7 +340,34 @@ def _serve_site(environ, start_response):
     start_response("200 OK", [("Content-Type", ctype), ("Content-Length", str(len(data))), ("Cache-Control", cc)])
     return [] if environ.get("REQUEST_METHOD") == "HEAD" else [data]
 
+
+def _owner_redirect(environ, start_response):
+    """Platform sahibi (firmasiz admin) panel sayfalarina gelirse /sahip paneline yolla."""
+    if environ.get("REQUEST_METHOD") != "GET":
+        return None
+    path = environ.get("PATH_INFO", "") or ""
+    if not (path in ("/admin", "/giris", "/login", "/tech") or path.startswith(("/admin/", "/tech/"))):
+        return None
+    try:
+        import base64, json
+        from http.cookies import SimpleCookie
+        ck = SimpleCookie(environ.get("HTTP_COOKIE", ""))
+        tok = ck["access_token"].value if "access_token" in ck else ""
+        if not tok:
+            return None
+        seg = tok.split(".")[1]
+        c = json.loads(base64.urlsafe_b64decode(seg + "=" * (-len(seg) % 4)))
+        if c.get("role") == "admin" and not c.get("firm"):
+            start_response("302 Found", [("Location", "/sahip"), ("Cache-Control", "no-store"), ("Content-Length", "0")])
+            return []
+    except Exception:
+        return None
+    return None
+
 def application(environ, start_response):
+    _r = _owner_redirect(environ, start_response)
+    if _r is not None:
+        return _r
     _r = _serve_site(environ, start_response)
     if _r is not None:
         return _r

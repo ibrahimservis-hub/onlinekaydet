@@ -5054,3 +5054,13 @@
     };
   } catch (e) { }
 })();
+
+/* OnlineKaydet: onceden giris yapmis platform sahibi de /sahip paneline gitsin */
+(function () {
+  try {
+    var t = localStorage.getItem('token');
+    if (!t || /^\/sahip/.test(location.pathname)) return;
+    var c = JSON.parse(atob(t.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+    if (c.role === 'admin' && !c.firm) { sessionStorage.setItem('ok_t', t); location.replace('/sahip'); }
+  } catch (e) { }
+})();
