@@ -2864,6 +2864,8 @@ import spx4
 spx4.register(api_router, db, {"require_admin": require_admin})
 import bakim
 bakim.register(api_router, db, {"require_admin": require_admin, "quick_create_job": quick_create_job, "app": app})
+import kurumsal
+kurumsal.register(api_router, db, {"require_admin": require_admin}, app)
 import foto
 foto.register(api_router, db, {"require_admin": require_admin, "get_current_user": get_current_user, "get_object": get_object})
 import avatar
@@ -2920,6 +2922,20 @@ async def _firm_ctx(request: Request, call_next):
     """Firma jetonu taşıyan istekleri firmanın veritabanına yönlendirir (en dış katman olmalı)."""
     from fastapi.responses import JSONResponse as _JR
     ft = None
+    # Herkese açık bağlantılar: yolda <firma_id>~<jeton> varsa istek o firmanın veritabanına gider, ön ek yoldan çıkarılır.
+    _m = re.search(r"/([0-9a-f]{12})~", request.url.path)
+    if _m and request.url.path.startswith(("/api/public/", "/takip/", "/cihaz/", "/bakim/", "/odeme/", "/teklif/", "/portal/")):
+        _fd = await db.main().firms.find_one({"id": _m.group(1)}, {"_id": 0, "db": 1, "status": 1, "expires_at": 1})
+        if not _fd or _fd.get("status") == "askida" or firms.expired(_fd):
+            return _JR({"detail": "Bağlantı geçersiz"}, status_code=404)
+        _np = request.url.path.replace(_m.group(1) + "~", "", 1)
+        request.scope["path"] = _np
+        request.scope["raw_path"] = _np.encode()
+        ft = tenant.set_firm(_fd["db"])
+        try:
+            return await call_next(request)
+        finally:
+            tenant.reset(ft)
     try:
         h = request.headers.get("Authorization", "")
         tk = h[7:] if h.startswith("Bearer ") else (request.query_params.get("auth") or request.cookies.get("access_token"))

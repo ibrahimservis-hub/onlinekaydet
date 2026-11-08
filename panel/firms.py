@@ -20,23 +20,25 @@ import tenant
 MODULES = {"servis": "Servis kayıtları", "personel": "Usta / personel", "muhasebe": "Muhasebe ve kasa", "rapor": "Raporlar",
            "sms": "SMS ve mesaj şablonları", "magaza": "Yedek parça mağazası", "site": "Web sitesi", "pazarlama": "Pazarlama",
            "bakim": "Bakım hatırlatma ve garanti", "teklif": "Teklif ve onay", "bayi": "Bayi (B2B)", "qr": "QR cihaz etiketi",
-           "atama": "Otomatik usta atama", "takip": "Canlı usta takibi"}
-# Henüz yazılmamış Kurumsal modüller: satış sayfasında "Yakında"; atanamaz, yalnızca bilgi olarak listelenir.
-SOON = {"odeme": "Ödeme linki (online tahsilat)", "efatura": "E-arşiv fatura bağlantısı", "portal": "Müşteri portalı",
-        "offline": "Çevrimdışı usta uygulaması", "arayan": "Arayan numara tanıma"}
+           "atama": "Otomatik usta atama", "takip": "Canlı usta takibi", "odeme": "Ödeme linki (online tahsilat)",
+           "efatura": "E-arşiv fatura bağlantısı", "portal": "Müşteri portalı", "arayan": "Arayan numara tanıma"}
+# Henüz yazılmamış modül kalmadı; yeni özellikler önce buraya "yakında" olarak eklenir.
+SOON = {}
 # modül -> kapatıldığında engellenen API ön ekleri (servis çekirdektir, kapatılamaz)
 MODULE_PREFIX = {"muhasebe": ("finance", "cash", "accounting", "receivables", "profit", "export-xlsx"),
                  "rapor": ("rapor", "reports", "analytics", "performance"),
                  "magaza": ("shop", "parts"), "site": ("site", "site-reviews-settings", "media", "studio", "visitors"),
                  "pazarlama": ("mkt", "growth"), "sms": ("msg-templates", "governance/notify"),
                  "bakim": ("maintenance", "warranty-claims"), "teklif": ("quotes",), "bayi": ("dealers", "partners"),
-                 "qr": ("qr",), "atama": ("autoassign",), "takip": ("admin/tech-locations",)}
+                 "qr": ("qr",), "atama": ("autoassign",), "takip": ("admin/tech-locations",),
+                 "odeme": ("pay",), "efatura": ("einvoice",), "portal": ("portal-admin",), "arayan": ("caller",)}
+ALL_MODS = ["servis", "personel", "muhasebe", "rapor", "sms", "magaza", "site", "pazarlama",
+            "bakim", "teklif", "bayi", "qr", "atama", "takip", "odeme", "efatura", "portal", "arayan"]
 DEFAULT_PACKAGES = {
     "baslangic": {"name": "Başlangıç", "price": 0, "modules": ["servis", "personel"]},
     "profesyonel": {"name": "Profesyonel", "price": 0, "modules": ["servis", "personel", "muhasebe", "rapor", "sms"]},
-    "tam": {"name": "Tam Paket", "price": 0, "modules": list(["servis", "personel", "muhasebe", "rapor", "sms", "magaza", "site", "pazarlama"])},
-    "kurumsal": {"name": "Kurumsal", "price": 0, "modules": ["servis", "personel", "muhasebe", "rapor", "sms", "magaza", "site", "pazarlama",
-                                                          "bakim", "teklif", "bayi", "qr", "atama", "takip"]},
+    "tam": {"name": "Tam Paket", "price": 0, "modules": ["servis", "personel", "muhasebe", "rapor", "sms", "magaza", "site", "pazarlama"]},
+    "kurumsal": {"name": "Kurumsal", "price": 0, "modules": list(ALL_MODS)},
 }
 DEFAULT_FEATURES = {"customer_add": True}
 FEATURE_LABELS = {"customer_add": "Müşteriyi kendi ekleme"}

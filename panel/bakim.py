@@ -4,6 +4,7 @@ Yönetim: Servis Kayıtları sayfasındaki "Bakım zamanı gelenler" kartı → 
 Müşteri: hatırlatma mesajındaki /bakim/<jeton> bağlantısı → tek dokunuşla servis talebi (iş emri) oluşur.
 Mevcut hatırlatma motoruna (growth.py) dokunmaz; yalnızca ekleme yapar. Mesaj kanalı/ayarı bildirim ayarlarından gelir.
 """
+import tenant
 import hashlib
 import re
 import secrets
@@ -135,7 +136,7 @@ def register(api_router, db, deps):
                 continue
             old = await db.maintenance_reminders.find_one({"key": r["key"]}, {"_id": 0}) or {}
             tok = old.get("token") or secrets.token_urlsafe(12)
-            link = base.rstrip("/") + "/bakim/" + tok
+            link = base.rstrip("/") + "/bakim/" + tenant.public_token(tok)
             links[r["key"]] = link
             text = (f"Merhaba {_first(r['name'])}, {r['device'] or 'cihazınız'} için yıllık bakım zamanı geldi. "
                     f"Tek dokunuşla servis kaydı oluşturmak için: {link}" + (f" — Bilgi: {tel}" if tel else ""))

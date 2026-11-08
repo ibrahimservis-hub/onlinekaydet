@@ -62,3 +62,11 @@ class TenantDB:
 
     def firm_db_name(self, firm_id):
         return "%s_f_%s" % (self._main, firm_id)
+
+
+def public_token(tok):
+    """Müşteriye giden herkese açık bağlantılarda firmayı belirtir: <firma_id>~<jeton>. Firma bağlamı yoksa jeton aynen kalır."""
+    d = current()
+    if d and "_f_" in d:
+        return d.rsplit("_f_", 1)[1] + "~" + str(tok)
+    return str(tok)

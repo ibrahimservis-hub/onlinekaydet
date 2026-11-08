@@ -4,6 +4,7 @@ günlük patron özeti, cihaza göre kontrol listeleri, cihaz QR etiketi + herke
 Alacak takibi bir İZLEME katmanıdır: servis geliri kasaya iş tamamlanınca tahakkuk olarak işlenmeye devam eder;
 `payment` alanı yoksa iş "ödendi" sayılır (eski kayıtlar bozulmaz).
 """
+import tenant
 import io
 import re
 import time
@@ -645,7 +646,7 @@ def register(api_router, db, deps):
         d, tok = await ensure_token(device_id)
         import segno
         buf = io.BytesIO()
-        segno.make(f"{base}/cihaz/{tok}", error="m").save(buf, kind="svg", scale=6, border=2, xmldecl=False)
+        segno.make(f"{base}/cihaz/{tenant.public_token(tok)}", error="m").save(buf, kind="svg", scale=6, border=2, xmldecl=False)
         return Response(buf.getvalue(), media_type="image/svg+xml")
 
     async def _job_device_token(job_id, user):
@@ -673,7 +674,7 @@ def register(api_router, db, deps):
         if not re.match(r"^https?://[\w.:-]+$", base):
             raise HTTPException(422, "base geçersiz")
         job, d, tok = await _job_device_token(job_id, user)
-        return {"token": tok, "url": f"{base}/cihaz/{tok}", "brand": d.get("brand_name", ""), "model": d.get("model", ""),
+        return {"token": tok, "url": f"{base}/cihaz/{tenant.public_token(tok)}", "brand": d.get("brand_name", ""), "model": d.get("model", ""),
                 "type": d.get("type", ""), "job_number": job.get("job_number", ""), "customer": job.get("customer_name", "")}
 
     @api_router.get("/qr/jobs/{job_id}/png")
@@ -683,7 +684,7 @@ def register(api_router, db, deps):
         _, _, tok = await _job_device_token(job_id, user)
         import segno
         buf = io.BytesIO()
-        segno.make(f"{base}/cihaz/{tok}", error="m").save(buf, kind="png", scale=10, border=1)
+        segno.make(f"{base}/cihaz/{tenant.public_token(tok)}", error="m").save(buf, kind="png", scale=10, border=1)
         return Response(buf.getvalue(), media_type="image/png")
 
     _hits = defaultdict(list)

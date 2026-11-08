@@ -411,6 +411,28 @@ def register(api_router, db, deps):
             raise HTTPException(status_code=502, detail="Gönderilemedi: " + str(e)[:150])
         return await db.invoices.find_one({"id": iid}, {"_id": 0})
 
+    # ============================================================ E-ARŞİV (entegratör webhook'u): bağlantı testi + tek tıkla kes ve gönder
+    @api_router.post("/einvoice/test")
+    async def einvoice_test(_: dict = Depends(require_admin)):
+        s = await settings()
+        url = s["invoice"].get("webhook_url")
+        if not url:
+            raise HTTPException(status_code=400, detail="Entegratör webhook adresi tanımlı değil (Muhasebe → KDV & Fatura → Ayarlar)")
+        import asyncio
+        hd = {"Content-Type": "application/json", **notify._headers(s["invoice"].get("webhook_headers", ""))}
+        try:
+            r = await asyncio.to_thread(lambda: requests.post(url, json={"test": True, "company": s["company"]}, headers=hd, timeout=15))
+        except Exception as e:                          # noqa: BLE001
+            return {"ok": False, "message": "Bağlanılamadı: " + str(e)[:140]}
+        return {"ok": r.status_code < 300, "status": r.status_code, "message": "Bağlantı başarılı" if r.status_code < 300 else f"Entegratör HTTP {r.status_code} döndü: {r.text[:120]}"}
+
+    @api_router.post("/einvoice/jobs/{job_id}/issue")
+    async def einvoice_issue(job_id: str, payload: dict, user: dict = Depends(require_admin)):
+        inv = await invoice_from_job(job_id, payload or {}, user)
+        if inv.get("status") in ("gonderildi", "kesildi"):
+            return inv
+        return await invoice_send(inv["id"], user)
+
     # ============================================================ MUHASEBECİ PAKETİ
     @api_router.get("/finance/accountant-pack")
     async def accountant_pack(month: Optional[str] = None, _: dict = Depends(require_admin)):

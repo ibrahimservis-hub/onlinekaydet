@@ -9,6 +9,7 @@ Desteklenen sağlayıcılar:
   smtp    : e-posta
 Her gönderim `outbox` koleksiyonuna yazılır (durum, hata).
 """
+import tenant
 import asyncio
 import secrets
 import json
@@ -421,7 +422,7 @@ async def job_event(db, event: str, job: dict):
             return None                                  # aynı olay için çift gönderim yok
         link = ""
         if job.get("track_token"):
-            link = (c.get("base_url") or "https://bayi.servisplus.net.tr").rstrip("/") + "/takip/" + job["track_token"]
+            link = (c.get("base_url") or "https://bayi.servisplus.net.tr").rstrip("/") + "/takip/" + tenant.public_token(job["track_token"])
         text = render(c["templates"].get(event, ""), {
             "ad": (job.get("customer_name") or "").split(" ")[0], "usta": job.get("assigned_technician_name", ""),
             "link": link, "is_no": job.get("job_number", "")})
@@ -629,7 +630,7 @@ async def reminder_sweep(db, tz=None):
             if not j.get("track_token"):
                 j["track_token"] = secrets.token_urlsafe(12)
                 await db.service_jobs.update_one({"id": j["id"]}, {"$set": {"track_token": j["track_token"]}})
-            link = (c.get("base_url") or "https://bayi.servisplus.net.tr").rstrip("/") + "/takip/" + j["track_token"]
+            link = (c.get("base_url") or "https://bayi.servisplus.net.tr").rstrip("/") + "/takip/" + tenant.public_token(j["track_token"])
             if r.get("customer") and norm_msisdn(j.get("customer_phone") or "") and not await db.outbox.find_one({"kind": "job_reminder", "ref": j["id"], "status": "sent"}):
                 txt = render(r.get("customer_template", ""), {"ad": (j.get("customer_name") or "").split(" ")[0], "zaman": when[11:], "usta": j.get("assigned_technician_name", "") or "ustamız", "link": link, "is_no": j.get("job_number", "")})
                 res = await send(db, c.get("channel", "sms"), j["customer_phone"], txt, kind="job_reminder", ref=j["id"], cfg=cfg)
