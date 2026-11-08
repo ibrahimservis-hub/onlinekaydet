@@ -1,0 +1,21 @@
+.vb{display:none}
+.burger{color:var(--ink,#0f1f46)}
+.mnu{display:none}
+@media(max-width:900px){
+body{padding-bottom:calc(84px + env(safe-area-inset-bottom))!important}
+.vb{position:fixed;z-index:90;left:0;right:0;bottom:0;display:grid;grid-template-columns:1.22fr 1fr;gap:10px;padding:12px 12px calc(12px + env(safe-area-inset-bottom));background:#fff;border-top:1px solid #e2dccd;box-shadow:0 -6px 18px rgba(15,31,70,.10)}
+.vb a{height:54px;border-radius:30px;display:flex;align-items:center;justify-content:center;gap:7px;color:#fff;font-weight:700;font-size:14px;letter-spacing:-.1px;white-space:nowrap;text-decoration:none}
+.vb .p1{background:linear-gradient(100deg,#0a1840,#193577);box-shadow:inset 0 0 0 2px #7f97d6}
+.vb .p2{background:linear-gradient(100deg,#2a8f63,#3fae7c);box-shadow:inset 0 0 0 2px #8fdcb6}
+.vb .ci{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.16);display:grid;place-items:center;flex:none}.vb .ci svg{width:16px;height:16px}
+.mnu.on{display:flex;position:fixed;z-index:80;left:0;right:0;bottom:0;flex-direction:column;background:#fbf8f1;padding-bottom:calc(84px + env(safe-area-inset-bottom))}
+.mn-l{flex:1;overflow:auto;padding:6px 20px}
+.mn-l a{display:flex;align-items:center;gap:14px;padding:10px 0;border-bottom:1.5px solid #d8cfbd;color:#0f1f46;text-decoration:none}
+.mn-l a b{font:700 12px ui-monospace,Menlo,Consolas,monospace;color:#f27a1a;width:22px}
+.mn-l a span{flex:1;font-weight:800;font-size:18px;line-height:1.15;letter-spacing:-.3px;display:flex;flex-direction:column;gap:1px}
+.mn-l a small{font-weight:500;font-size:12.5px;line-height:1.2;color:#5b6784;letter-spacing:0}
+.mn-l a svg{opacity:.6}
+.mn-f{display:grid;grid-template-columns:1fr 1.3fr;gap:10px;padding:14px 20px;border-top:1.5px solid #0f1f46;background:#fffdf8}
+.mn-f a{height:50px;border-radius:10px;display:grid;place-items:center;font-weight:800;font-size:15.5px;text-decoration:none}
+.mn-g{border:1.5px solid #0f1f46;color:#0f1f46}.mn-c{background:#f27a1a;color:#fff;box-shadow:0 3px 0 #d9650c}
+}
