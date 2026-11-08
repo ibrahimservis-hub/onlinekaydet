@@ -1,0 +1,19 @@
+@media(max-width:900px){
+.burger{color:#fff}
+.vb{background:var(--ink,#0f1f46);border-top:0;box-shadow:none}
+.vb .p1{background:#fff;color:#0f1f46;box-shadow:none;border-radius:6px}
+.vb .p1 .ci{background:#0f1f46}
+.vb .p2{background:#f27a1a;color:#0f1f46;box-shadow:none;border-radius:6px}
+.vb .p2 .ci{background:#0f1f46}
+.vb a{font-size:15px;font-weight:700}
+.mnu.on{background:#0f1f46;color:#fff}
+.mn-l a{border-bottom:2px solid #2a3a68;color:#fff;padding:14px 0}
+.mn-l a b{display:none}
+.mn-l a span{font-family:'AR',sans-serif;font-stretch:70%;font-weight:850;font-size:34px;letter-spacing:0;line-height:1}
+.mn-l a small{font-family:'AR',sans-serif;font-stretch:100%;font-weight:450;font-size:14px;color:#aeb9d6}
+.mn-l a svg{opacity:1;color:#f27a1a}
+.mn-f{background:#0f1f46;border-top:0}
+.mn-g{border:2px solid #fff;color:#fff;border-radius:6px}
+.mn-c{background:#f27a1a;color:#0f1f46;box-shadow:none;border-radius:6px}
+.mn-f a:focus-visible,.mn-l a:focus-visible{outline:3px solid #f27a1a;outline-offset:2px}
+}
