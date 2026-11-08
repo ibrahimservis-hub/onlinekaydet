@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /odeme/
+Disallow: /teklif/
+Disallow: /portal/
+Disallow: /takip/
+Sitemap: https://onlinekaydet.com/sitemap.xml

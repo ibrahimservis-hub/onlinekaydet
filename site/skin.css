@@ -1,0 +1,32 @@
+/* Ticimax tarzı ortak görünüm — tüm satış sayfalarında en sonda yüklenir */
+:root{--nv:#14275a;--nv2:#0d1b42;--or:#3b82f6;--or-d:#2563eb;--or-l:#eaf1fd;--bl:#3b82f6;--bl-l:#eaf1fd;--gr:#4cc364;--bg:#eef1f6;--r:18px}
+body{font-family:Inter,"Segoe UI",Arial,sans-serif}
+.camp{background:linear-gradient(90deg,#2a3f7e,#1b2c63)}.camp a{background:transparent;color:#fff;border:1.5px solid #fff;border-radius:30px}
+header{background:var(--nv);border-bottom:0;backdrop-filter:none}header .m{color:#fff}header .m a:hover{background:#ffffff1a}header .m .dd:after{border-color:#fff}
+header .lg2{color:#fff}header .tel{color:#fff}header .tel i{background:#ffffff22;color:#fff}header .tel small{color:#b9c6e6}
+header .bt,header .bt.o{background:#fff;color:var(--nv);border:0;border-radius:30px;padding:11px 22px;font-size:14.5px}header .burger{background:#ffffff1a;border-color:#ffffff33;color:#fff}
+.bt{border-radius:30px}.bt.o{background:linear-gradient(90deg,#3b82f6,#6aa6ff);border:0;color:#fff}.bt.lg{padding:16px 30px}
+.hero{background:radial-gradient(900px 520px at 85% 35%,#2f4a9a66,transparent),linear-gradient(135deg,#0d1b42 0%,#14275a 55%,#1e3578 100%);color:#fff}
+.hero:before,.hero:after{display:none}.hero h1{color:#fff;font-weight:500;letter-spacing:-1.6px;font-size:54px}.hero h1 em{color:#fff;font-weight:800;font-style:normal}
+.hero .lead{color:#c9d4ee}.hl li{color:#e6ecfb}.hl i{background:var(--gr)}.hph{color:#fff}.hph i{background:#ffffff22;color:#fff}.hph small{color:#b9c6e6}
+.tag{background:#ffffff14;border-color:#ffffff33;color:#fff;box-shadow:none}
+h2{font-weight:300;letter-spacing:-1px;font-size:42px;color:var(--nv)}h2 em{font-style:normal;color:var(--nv);font-weight:700}
+.dk h2{color:#fff}.dk h2 em{color:#fff}.dk{background:linear-gradient(135deg,#0d1b42,#14275a)}
+.eb{background:#e2e9f7;color:var(--nv)}.sh p{color:#5d6985}
+.bx{border-radius:20px}.bx.or{background:#eaf1fd;border-color:#d3e2fa}.bx.nv{background:linear-gradient(135deg,#0d1b42,#1b2f6b)}
+.q{background:#fff;border:0;border-radius:36px;padding:22px 26px 22px 32px;box-shadow:0 6px 18px rgba(20,39,90,.07);position:relative;padding-right:90px}.q b{font-size:17px;font-weight:500}
+.q:after{content:"+";position:absolute;right:20px;top:14px;width:50px;height:50px;border-radius:50%;background:var(--gr);color:#fff;display:grid;place-items:center;font-size:28px;line-height:1}.q.o:after{content:"–"}
+footer{background:var(--nv2)}footer h5{display:inline-block;font-size:16.5px;padding-bottom:8px;border-bottom:3px solid var(--gr);margin-bottom:14px}footer .cp{border-top-color:#ffffff22}
+.pc{border-radius:24px}.pc.hot{border-color:var(--bl)}
+@media(max-width:900px){.hero h1{font-size:38px}h2{font-size:32px}.q{padding-right:76px}.q:after{width:42px;height:42px;right:16px;top:12px}}
+h2{font-weight:600!important}h2:has(em){font-weight:300!important}h2 em{font-weight:700!important}.dk h2{font-weight:600!important}.dk h2:has(em){font-weight:300!important}
+.q b:after,.q b:before{display:none!important}.q.o{padding-bottom:22px}
+.ih{background:radial-gradient(800px 420px at 85% 30%,#2f4a9a66,transparent),linear-gradient(135deg,#0d1b42 0%,#14275a 60%,#1e3578 100%)!important;color:#fff}
+.ih:before,.ih:after{display:none!important}.ih h1{color:#fff!important;font-weight:500;letter-spacing:-1.2px}.ih h1 em{color:#fff!important;font-weight:800;font-style:normal}
+.ih .lead,.ih p{color:#c9d4ee}.ih .bc,.ih .bc a{color:#aebde0}.ih .eb{background:#ffffff1f;color:#fff}.ih .tag{background:#ffffff14;border-color:#ffffff33;color:#fff}
+.ih .hl li{color:#e6ecfb}.ih .bt:not(.o){background:#fff;color:var(--nv);border:0}
+.ih .pc,.ih .box,.ih .ft,.ih .fl,.ih .lap{color:var(--ink)}.ih .pc p,.ih .box p{color:var(--mu)}
+.ih .tog,.ih .seg{color:var(--nv)}
+.sticky{grid-template-columns:.8fr 1.1fr 1.4fr!important;gap:8px!important}.sticky .bt{border-radius:30px;font-size:14px}.sticky .bt.wa{background:#25d366;color:#fff;border:0}
+.sx a{display:block;background:#fff;border:1px solid var(--ln);border-radius:var(--r);padding:28px;transition:.2s}.sx a:hover{box-shadow:0 20px 44px rgba(20,39,90,.14);transform:translateY(-3px)}.sx a:nth-child(even) i{background:var(--or-l);color:var(--or-d)}
+@media(max-width:900px){.sx a{padding:18px}}
