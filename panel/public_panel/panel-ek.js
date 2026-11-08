@@ -5024,3 +5024,33 @@
   }
   setInterval(function () { try { strip(); fab(); } catch (e) { } }, 700);
 })();
+
+/* OnlineKaydet: platform sahibi (firmasiz yonetici) giris yapinca /sahip paneline git */
+(function () {
+  function go(txt) {
+    try {
+      var j = JSON.parse(txt);
+      if (!j || !j.token) return;
+      var c = JSON.parse(atob(j.token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+      if (c.role === 'admin' && !c.firm) { sessionStorage.setItem('ok_t', j.token); location.href = '/sahip'; }
+    } catch (e) { }
+  }
+  try {
+    var xo = XMLHttpRequest.prototype.open;
+    XMLHttpRequest.prototype.open = function (m, u) {
+      var self = this;
+      if (/\/auth\/login/.test(String(u)) && /POST/i.test(m)) {
+        this.addEventListener('load', function () { if (self.status === 200) go(self.responseText); });
+      }
+      return xo.apply(this, arguments);
+    };
+    var of = window.fetch;
+    window.fetch = function (u) {
+      var p = of.apply(this, arguments);
+      try {
+        if (/\/auth\/login/.test(String(u && u.url || u))) p.then(function (r) { if (r.ok) r.clone().text().then(go); });
+      } catch (e) { }
+      return p;
+    };
+  } catch (e) { }
+})();
