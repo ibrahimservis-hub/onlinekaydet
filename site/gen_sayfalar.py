@@ -121,12 +121,12 @@ TEMA = {
 }
 SEKTOR_AD = {'kombi': 'Kombi', 'klima': 'Klima', 'beyaz': 'Beyaz eşya', 'elektronik': 'Elektronik', 'bilgisayar': 'Bilgisayar', 'tesisat': 'Tesisat', 'elektrik': 'Elektrik', 'guvenlik': 'Güvenlik'}
 def p_temalar():
-    os.makedirs('temalar', exist_ok=True)
+    os.makedirs('tema-onizleme', exist_ok=True)
     src = os.path.join(os.path.dirname(D), 'themes', 'html')
     for f in os.listdir(src):
         if f.endswith('.html'):
-            shutil.copy(os.path.join(src, f), os.path.join('temalar', f))
-    th = sorted(os.listdir('temalar'), key=lambda x: (int(re.match(r'\d+', x).group()), x))
+            shutil.copy(os.path.join(src, f), os.path.join('tema-onizleme', f))
+    th = sorted(os.listdir('tema-onizleme'), key=lambda x: (int(re.match(r'\d+', x).group()), x))
     cards, secs = [], {}
     meta = {t['slug']: t for t in json.load(open('themes.json'))}
     for f in th:
@@ -136,7 +136,7 @@ def p_temalar():
         m = meta.get(slug, {})
         dark, acc = m.get('dark', '#0f1f46'), m.get('accent', '#f27a1a')
         secs.setdefault(sk, []).append(
-            '<a class="tm" href="temalar/%s" target="_blank" rel="noopener"><span class="sw"><i style="background:%s"></i><i style="background:%s"></i></span><b>%s</b><small>%s teması</small><span class="go">Önizle →</span></a>' % (f, dark, acc, nm, SEKTOR_AD[sk]))
+            '<a class="tm" href="tema-onizleme/%s" target="_blank" rel="noopener"><span class="sw"><i style="background:%s"></i><i style="background:%s"></i></span><b>%s</b><small>%s teması</small><span class="go">Önizle →</span></a>' % (f, dark, acc, nm, SEKTOR_AD[sk]))
     inner = ''
     for sk in SEKTOR_AD:
         if sk in secs:
@@ -293,7 +293,7 @@ def p_desi():
         acts='<a class="bt" href="komisyon-hesaplama.html">Komisyon hesapla</a>')
 
 PAGES = [p_iletisim, p_temalar, p_entegrasyon, p_usta, p_neden, p_blog, p_destek, p_komisyon, p_desi]
-NEW = ['iletisim', 'temalar', 'entegrasyonlar', 'usta-uygulamasi', 'neden-onlinekaydet', 'blog', 'destek', 'komisyon-hesaplama', 'desi-hesaplama'] + ['blog-' + p[0] for p in POSTS]
+NEW = ['iletisim', 'tema-onizleme', 'entegrasyonlar', 'usta-uygulamasi', 'neden-onlinekaydet', 'blog', 'destek', 'komisyon-hesaplama', 'desi-hesaplama'] + ['blog-' + p[0] for p in POSTS]
 
 def update_all():
     for f in os.listdir('.'):
