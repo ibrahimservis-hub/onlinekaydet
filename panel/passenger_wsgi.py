@@ -150,6 +150,28 @@ def _wrap(resp, loop):
         _drain(loop)
 
 
+def _patch_assets():
+    """Panel arayuz paketi baska bir sitenin API adresine gomulu gelirse (bayi.servisplus.net.tr),
+    istekleri bu sitenin kendi /api adresine cevirir. Her acilista calisir, tekrar calistirmak zararsizdir."""
+    try:
+        js = os.path.join(HERE, "public_panel", "static", "js")
+        for n in sorted(os.listdir(js)):
+            if not (n.startswith("main.") and n.endswith(".js")):
+                continue
+            p = os.path.join(js, n)
+            with open(p, "rb") as fh:
+                b = fh.read()
+            o = b
+            b = b.replace(b'"https://bayi.servisplus.net.tr/api"', b'"/api"')
+            b = b.replace(b'"https://bayi.servisplus.net.tr"', b'""')
+            if b != o:
+                with open(p, "wb") as fh:
+                    fh.write(b)
+                _progress("arayuz paketi duzeltildi: " + n)
+    except Exception as e:       # noqa: BLE001
+        _progress("arayuz duzeltme atlandi: %s" % e)
+
+
 def _boot():
     """Yükleme + başlangıç işlerini arka planda yapar; web sunucusu beklemeden yanıt verebilsin."""
     try:
@@ -160,6 +182,7 @@ def _boot():
         import time as _tm
         _t_boot = _tm.time()
         _progress("surec basladi (pid %s)" % os.getpid())
+        _patch_assets()
         threading.Thread(target=_watchdog, name="panel-watch", daemon=True).start()
         _loop = asyncio.new_event_loop()
         ready = threading.Event()
