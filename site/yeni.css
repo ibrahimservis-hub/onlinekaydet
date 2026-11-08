@@ -170,3 +170,61 @@ body{color:#0f1f46}.lead,.pc ul,details p,.kz p{color:#2d3a66}
 .pill.ol{background:#fff;box-shadow:none}.pc .pill{box-shadow:none}.pc.pop .pill{box-shadow:0 6px 14px #f2760a55}
 .cb{background:radial-gradient(500px 300px at 85% 50%,#4f86ff88,transparent 70%),linear-gradient(110deg,#091740,#1f5fe0)}
 summary{font-weight:700}details{box-shadow:0 4px 14px #1f4fb528}
+
+/* ===== ortak: sayfa üstü, menü, alt bar, altbilgi, form ===== */
+header .lg2{font-weight:700;font-size:14px}
+header nav.m a[aria-current]{color:var(--o2)}
+.skip{position:absolute;left:-9999px;top:0;background:#fff;color:#0f1f46;padding:10px 16px;z-index:100;border-radius:0 0 8px 0}.skip:focus{left:0}
+:focus-visible{outline:3px solid #ff9a3c;outline-offset:2px}
+.crumb{font-size:13px;color:#c9d3ee;margin-bottom:14px}.crumb a{color:#fff;text-decoration:underline;text-underline-offset:3px}
+.pgh{background:radial-gradient(520px 340px at 88% 40%,#4f86ff77,transparent 70%),linear-gradient(100deg,#091740 0%,#0f2a6e 55%,#1f5fe0 100%);color:#fff}
+.pgh .w{padding-top:44px;padding-bottom:48px;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:30px;align-items:center}
+.pgh h1{font-size:42px;line-height:1.1;font-weight:800;letter-spacing:-.02em}
+.pgh p{color:#d6def3;font-size:17px;margin:14px 0 18px;max-width:560px}
+.pgh .ticks{list-style:none;padding:0;display:grid;gap:7px;margin:0 0 6px}.pgh .ticks li:before{content:"✓";color:#ff9a3c;font-weight:800;margin-right:10px}
+.mnu{display:none}
+@media(max-width:1060px){
+ body{padding-bottom:calc(84px + env(safe-area-inset-bottom))!important}
+ .vb{position:fixed;z-index:90;left:0;right:0;bottom:0;display:grid;grid-template-columns:1.2fr 1fr;gap:10px;padding:11px 12px calc(11px + env(safe-area-inset-bottom));background:#fff;border-top:1px solid #dbe4f7;box-shadow:0 -8px 24px #1f4fb52e}
+ .vb a{height:54px;border-radius:30px;display:flex;align-items:center;justify-content:center;gap:8px;color:#fff;font-weight:800;font-size:15px;white-space:nowrap}
+ .vb .p1{background:linear-gradient(100deg,#0f2a6e,#1f5fe0);box-shadow:0 6px 16px #1f5fe055}
+ .vb .p2{background:linear-gradient(100deg,#13a35a,#2ed47a);box-shadow:0 6px 16px #13a35a55}
+ .vb .ci{width:30px;height:30px;border-radius:50%;background:#ffffff2e;display:grid;place-items:center;flex:none}.vb .ci svg{width:16px;height:16px}
+ .mnu.on{display:flex;position:fixed;z-index:80;left:0;right:0;bottom:0;flex-direction:column;background:radial-gradient(500px 300px at 90% 10%,#4f86ff88,transparent 70%),linear-gradient(160deg,#091740,#0f2a6e 60%,#1f5fe0);padding-bottom:calc(84px + env(safe-area-inset-bottom))}
+ .mn-l{flex:1;overflow:auto;padding:8px 22px}
+ .mn-l a{display:flex;align-items:center;gap:14px;padding:15px 0;border-bottom:1px solid #ffffff2a;color:#fff}
+ .mn-l a b{display:none}.mn-l a span{flex:1;font-weight:800;font-size:21px;line-height:1.15;display:flex;flex-direction:column;gap:2px}
+ .mn-l a small{font-weight:500;font-size:13px;color:#b9c8ee}.mn-l a svg{color:#ff9a3c}
+ .mn-f{display:grid;grid-template-columns:1fr 1.3fr;gap:10px;padding:14px 22px}
+ .mn-f a{height:52px;border-radius:30px;display:grid;place-items:center;font-weight:800;font-size:16px}
+ .mn-g{border:2px solid #fff;color:#fff}.mn-c{background:linear-gradient(135deg,#f2760a,#ff9a3c);color:#fff;box-shadow:0 6px 16px #f2760a66}
+ .pgh .w{grid-template-columns:1fr;padding-top:34px;padding-bottom:36px}.pgh h1{font-size:32px}
+}
+@media(min-width:1061px){.vb{display:none}}
+/* form bölümü */
+.dkk{background:radial-gradient(500px 300px at 85% 40%,#4f86ff77,transparent 70%),linear-gradient(110deg,#091740,#1f5fe0);color:#fff;padding:44px 0}
+.dkk .fc{display:grid;grid-template-columns:1fr 1fr;gap:34px;align-items:center}.dkk .fc>*{min-width:0}
+.dkk h2{font-size:32px;line-height:1.15}.dkk p{color:#d6def3;margin:8px 0 16px}
+.dkk .big{display:inline-block;font-size:30px;font-weight:800;color:#ff9a3c}
+.dkk .frm,.frm.st{display:grid;grid-template-columns:1fr 1fr;gap:12px;background:#fff;border-radius:16px;padding:20px;color:#0f1f46;box-shadow:0 18px 40px #0006}
+.dkk .frm label{position:static;font-size:13px;font-weight:700;color:#2d3a66;display:block;margin-bottom:4px;left:auto}
+.dkk .frm input,.dkk .frm select{width:100%;height:46px;border:1.5px solid #cfd8ee;border-radius:10px;padding:0 12px;font-size:15px;background:#fff;color:#0f1f46;margin:0}
+.dkk .frm .bt{grid-column:1/-1;justify-self:stretch;text-align:center;display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#f2760a,#ff8f2e);color:#fff;font-weight:800;border-radius:999px;padding:14px;cursor:pointer;box-shadow:0 6px 16px #f2760a55}
+.dkk .frm small{grid-column:1/-1;color:#59628a;font-size:12px}
+@media(max-width:1060px){.dkk .fc{grid-template-columns:1fr}.dkk .frm{grid-template-columns:1fr}.dkk h2{font-size:26px}}
+/* altbilgi */
+footer{background:#091740;color:#b9c8ee;padding:44px 0 26px;font-size:14px}
+footer .w{display:block}footer .g{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:28px}
+footer .g>*{min-width:0}footer p{margin-top:12px;max-width:300px;line-height:1.5}
+footer h5{color:#fff;font-size:14px;margin-bottom:10px}footer .g a{display:block;margin:0 0 7px;color:#b9c8ee}footer .g a:hover{color:#ff9a3c}
+footer .cp{display:flex;justify-content:space-between;gap:12px;border-top:1px solid #ffffff22;margin-top:26px;padding-top:16px;font-size:13px}
+@media(max-width:700px){footer .g{grid-template-columns:1fr 1fr}footer .g>div:first-child{grid-column:1/-1}}
+@media(max-width:1060px){.mn-f{background:transparent;border-top:1px solid #ffffff2a}.mn-l{border:0}}
+/* erişilebilir turuncu: beyaz yazı >= 4.5:1 */
+.pill,.pc.pop .pill,.dkk .frm .bt,.mn-c{background:linear-gradient(135deg,#b84d08,#c05409);color:#fff}
+.pill.ol{background:#fff;color:#a8470a}
+.pc.pop h3{background:linear-gradient(135deg,#b84d08,#c05409)}
+.pc .tag{color:#a8470a}
+.pc .pill{background:#fff;color:#0f1f46}.pc.pop .pill{background:linear-gradient(135deg,#b84d08,#c05409);color:#fff}
+@media(max-width:1060px){.vb .p2{background:linear-gradient(100deg,#0c7a43,#12904f)}}
+footer .g img{height:34px;width:auto}

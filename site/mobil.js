@@ -20,5 +20,5 @@ function open(o){if(o){scrollTo(0,0);m.style.top=document.querySelector('header'
 b.addEventListener('click',function(){open(!m.classList.contains('on'))});
 m.addEventListener('click',function(e){if(e.target.closest('a'))open(false)});
 document.addEventListener('keydown',function(e){if(e.key=='Escape'&&m.classList.contains('on')){open(false);b.focus()}if(e.key=='Tab'&&m.classList.contains('on')){var els=[b].concat([].slice.call(m.querySelectorAll('a'))),i=els.indexOf(document.activeElement);if(e.shiftKey&&i<=0){e.preventDefault();els[els.length-1].focus()}else if(!e.shiftKey&&i==els.length-1){e.preventDefault();els[0].focus()}}});
-addEventListener('resize',function(){if(innerWidth>900)open(false)});
+addEventListener('resize',function(){if(innerWidth>1060)open(false)});
 })();
