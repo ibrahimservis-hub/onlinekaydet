@@ -1,0 +1,12 @@
+---
+# cPanel > Git Version Control > "Deploy HEAD Commit" bu dosyayı çalıştırır.
+# Varsayımlar: alan adı kök klasörü ~/onlinekaydet.com, Python uygulama klasörü ~/onlinekaydet_app.
+# Farklıysa aşağıdaki iki yolu kendi hesabınıza göre değiştirin.
+deployment:
+  tasks:
+    - export SITE=$HOME/onlinekaydet.com
+    - export APP=$HOME/onlinekaydet_app
+    - mkdir -p $SITE $APP
+    - /bin/cp -R site/. $SITE/
+    - /bin/rsync -a --exclude='.env' --exclude='uploads' --exclude='__pycache__' panel/ $APP/
+    - mkdir -p $APP/tmp && touch $APP/tmp/restart.txt

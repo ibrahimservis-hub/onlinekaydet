@@ -1,0 +1,17 @@
+fastapi>=0.110
+a2wsgi>=1.10
+motor>=3.3
+pymongo>=4.6
+python-multipart
+pyjwt
+bcrypt
+python-dotenv
+requests
+email-validator
+reportlab
+beautifulsoup4
+segno
+pillow
+openpyxl
+cryptography
+sentry-sdk
