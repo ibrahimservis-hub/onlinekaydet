@@ -4,7 +4,7 @@ body{font:400 15px/1.5 'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-seri
 img{max-width:100%;height:auto;display:block}a{color:inherit;text-decoration:none}
 .w{max-width:1240px;margin:0 auto;padding:0 28px}
 header{background:#fff;border-bottom:1px solid var(--l);position:sticky;top:0;z-index:20}
-.hr{display:flex;align-items:center;gap:30px;height:74px}.hr img{height:42px;width:auto}
+.hr{display:flex;align-items:center;gap:30px;height:82px}.hr img{height:52px;width:auto}
 .hr nav{display:flex;gap:26px;margin-left:34px;font-weight:600;font-size:14px}.hr nav a:hover{color:var(--o)}
 .hr .r{margin-left:auto;display:flex;align-items:center;gap:22px}
 .tel{font-weight:700;font-size:14px;white-space:nowrap}
