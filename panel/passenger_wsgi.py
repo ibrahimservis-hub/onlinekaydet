@@ -151,23 +151,50 @@ def _wrap(resp, loop):
 
 
 def _patch_assets():
-    """Panel arayuz paketi baska bir sitenin API adresine gomulu gelirse (bayi.servisplus.net.tr),
-    istekleri bu sitenin kendi /api adresine cevirir. Her acilista calisir, tekrar calistirmak zararsizdir."""
+    """Panel arayuzu baska bir markanin paketinden geldiginde (ServisPlus): gomulu API adresini bu sitenin
+    /api adresine, marka adini OnlineKaydet'e cevirir, ucuncu taraf analiz adresini kapatir.
+    Her acilista calisir; degisecek bir sey kalmadiysa dosyaya dokunmaz."""
     try:
-        js = os.path.join(HERE, "public_panel", "static", "js")
-        for n in sorted(os.listdir(js)):
-            if not (n.startswith("main.") and n.endswith(".js")):
+        import re as _re
+        pp = os.path.join(HERE, "public_panel")
+        rep = [
+            (b'"https://bayi.servisplus.net.tr/api"', b'"/api"'),
+            (b'"https://bayi.servisplus.net.tr"', b'""'),
+            (b'https://bayi.servisplus.net.tr/logo-servisplus.jpg', b'https://onlinekaydet.com/logo-servisplus.jpg'),
+            (b'https://servisplus.net.tr/images/logo.png', b'/logo-servisplus.jpg'),
+            (b'us-assets.i.posthog.com', b'posthog.invalid'),
+            (b'us.i.posthog.com', b'posthog.invalid'),
+            (b'ServisPlus', b'OnlineKaydet'),
+        ]
+        files = []
+        js = os.path.join(pp, "static", "js")
+        if os.path.isdir(js):
+            files += [os.path.join(js, n) for n in sorted(os.listdir(js)) if n.startswith("main.") and n.endswith(".js")]
+        files += [os.path.join(pp, n) for n in ("panel-ek.js", "belge.js", "spx-sw.js", "sw.js", "index.html", "manifest.json")]
+        for p in files:
+            if not os.path.isfile(p):
                 continue
-            p = os.path.join(js, n)
             with open(p, "rb") as fh:
                 b = fh.read()
             o = b
-            b = b.replace(b'"https://bayi.servisplus.net.tr/api"', b'"/api"')
-            b = b.replace(b'"https://bayi.servisplus.net.tr"', b'""')
+            for a, z in rep:
+                b = b.replace(a, z)
             if b != o:
                 with open(p, "wb") as fh:
                     fh.write(b)
-                _progress("arayuz paketi duzeltildi: " + n)
+                _progress("marka/adres duzeltildi: " + os.path.basename(p))
+        idx = os.path.join(pp, "index.html")
+        if os.path.isfile(idx):                    # onbellekteki eski ek dosyalar yenilensin: surum = dosya zamani
+            with open(idx, "rb") as fh:
+                h = fh.read()
+            o = h
+            for n in ("panel-ek.js", "belge.js"):
+                f = os.path.join(pp, n)
+                if os.path.isfile(f):
+                    h = _re.sub(n.replace(".", r"\.").encode() + rb"\?v=[0-9a-z]+", (n + "?v=" + str(int(os.path.getmtime(f)))).encode(), h)
+            if h != o:
+                with open(idx, "wb") as fh:
+                    fh.write(h)
     except Exception as e:       # noqa: BLE001
         _progress("arayuz duzeltme atlandi: %s" % e)
 
