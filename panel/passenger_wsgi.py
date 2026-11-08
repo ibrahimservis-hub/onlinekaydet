@@ -299,7 +299,51 @@ def _ensure_started():
         threading.Thread(target=_boot, name="panel-boot", daemon=True).start()
 
 
+
+import mimetypes as _mt
+_SITE = os.environ.get("SITE_DIR") or os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "onlinekaydet.com")
+if not os.path.isdir(_SITE):
+    _SITE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "site")
+_RESERVED = ("/api", "/static", "/giris", "/login", "/panel", "/uploads", "/brand", "/fonts", "/pdfjs", "/rehber")
+
+
+def _site_file(path):
+    """Satis sitesi (statik) dosyasini bul; panel yollarina dokunma."""
+    if path == "/" or path == "":
+        cand = "index.html"
+    else:
+        if path.startswith(_RESERVED):
+            return None
+        cand = path.lstrip("/")
+    cand = os.path.normpath(cand)
+    if cand.startswith("..") or os.path.isabs(cand):
+        return None
+    for c in (cand, cand + ".html", os.path.join(cand, "index.html")):
+        fp = os.path.join(_SITE, c)
+        if os.path.isfile(fp):
+            return fp
+    return None
+
+
+def _serve_site(environ, start_response):
+    if environ.get("REQUEST_METHOD") not in ("GET", "HEAD"):
+        return None
+    fp = _site_file(environ.get("PATH_INFO", "/") or "/")
+    if not fp:
+        return None
+    ctype = _mt.guess_type(fp)[0] or "application/octet-stream"
+    if ctype.startswith("text/") or ctype in ("application/javascript", "application/json", "application/xml"):
+        ctype += "; charset=utf-8"
+    with open(fp, "rb") as f:
+        data = f.read()
+    cc = "no-cache" if fp.endswith(".html") else "public, max-age=86400"
+    start_response("200 OK", [("Content-Type", ctype), ("Content-Length", str(len(data))), ("Cache-Control", cc)])
+    return [] if environ.get("REQUEST_METHOD") == "HEAD" else [data]
+
 def application(environ, start_response):
+    _r = _serve_site(environ, start_response)
+    if _r is not None:
+        return _r
     _ensure_started()
     if not _state["ready"] and _state["error"] is None:
         # Bu hosting arka plan islerini istekler arasinda durduruyor olabilir; bu yuzden
