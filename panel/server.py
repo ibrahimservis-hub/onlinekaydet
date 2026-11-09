@@ -2720,6 +2720,11 @@ async def _limit_threads():
     """asyncio.to_thread havuzunu sınırla: hosting iş parçacığı kotasını aşmasın."""
     from concurrent.futures import ThreadPoolExecutor
     asyncio.get_running_loop().set_default_executor(ThreadPoolExecutor(max_workers=8, thread_name_prefix="spx"))
+    try:
+        import anyio.to_thread
+        anyio.to_thread.current_default_thread_limiter().total_tokens = 8
+    except Exception:  # noqa: BLE001
+        pass
 
 
 @app.on_event("startup")

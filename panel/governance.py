@@ -603,7 +603,8 @@ def register(api_router, db, deps):
             ok = True
         except Exception:                               # noqa: BLE001
             ok = False
-        return {"ok": ok, "uptime_s": int(time.time() - STARTED)}
+        import threading as _th, os as _os
+        return {"ok": ok, "uptime_s": int(time.time() - STARTED), "threads": _th.active_count(), "pid": _os.getpid(), "names": sorted({t.name.split("_")[0].split("-")[0] for t in _th.enumerate()})[:12]}
 
     @api_router.get("/governance/roles")
     async def roles(_: dict = Depends(get_current_user)):
