@@ -392,7 +392,8 @@ def application(environ, start_response):
         if environ.get("REQUEST_METHOD") in ("GET", "HEAD") and not p.startswith(_PANEL_PATHS):
             environ["PATH_INFO"] = "/api/public/hosted-site"        # firmanın temalı sitesi
             environ["REQUEST_URI"] = "/api/public/hosted-site"
-            environ["QUERY_STRING"] = ""
+            import urllib.parse as _up
+            environ["QUERY_STRING"] = "p=" + _up.quote(p)
         _ensure_started()
         if not _state["ready"] and _state["error"] is None:
             _done.wait(25)

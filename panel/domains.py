@@ -241,6 +241,11 @@ def register(api_router, db, deps):
         host = (request.headers.get("x-forwarded-host") or request.headers.get("host") or "").split(":")[0].lower()
         if not tenant.current():
             return HTMLResponse("<!doctype html><meta charset=utf-8><title>Site bulunamadı</title><p style='font:16px system-ui;padding:40px'>Bu alan adı için yayınlanmış bir site yok.</p>", status_code=404)
+        _fn = getattr(api_router, "site_custom_serve", None)
+        if _fn:
+            _h = await _fn(request.query_params.get("p", "/"))
+            if _h:
+                return HTMLResponse(_h, headers={"Cache-Control": "no-cache"})
         brand = await db.app_settings.find_one({"_id": "brand"}, {"_id": 0}) or {}
         g = await db.app_settings.find_one({"_id": "global"}, {"_id": 0}) or {}
         f = await db.main().firms.find_one({"db": tenant.current()}, {"_id": 0, "name": 1, "phone": 1}) or {}

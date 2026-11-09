@@ -301,7 +301,7 @@
     return fetch(API + path, o).then(function (r) { return r.text().then(function (t) { var j = {}; try { j = JSON.parse(t); } catch (e) { } if (!r.ok) { var d = j && j.detail; throw new Error(typeof d === 'string' ? d : (d && d[0] && d[0].msg) || ('Hata ' + r.status)); } return j; }); });
   }
   function fail(e) { toast(e.message || 'İşlem başarısız'); }
-  var TABS = [['firmalar', 'Firmalar'], ['domain', 'Alan Adı & Site'], ['paket', 'Paketim'], ['mgayar', 'Mağaza Ayarları'], ['moduller', 'Aç / Kapat & Ayarlar'], ['seo', 'SEO · 301 · 404'], ['yeni', 'Yeni Sipariş'], ['pazar', 'Pazaryerleri'], ['yetki', 'Kullanıcılar & Yetkiler'], ['gsc', 'Google Search Console'], ['urunler', 'Ürün Yönetimi'], ['marka', 'Marka Ürün Aktarma'], ['m360', 'Müşteri 360'], ['kaynak', 'Kaynak & Arama Analizi'], ['ustapuan', 'Usta Puanlama'], ['ustagecmis', 'Usta İş Geçmişi'], ['cari', 'Cari & Trend'], ['tahsilat', 'Teknisyen Tahsilat'], ['atolye', 'Atölye'], ['canli', 'Canlı Ziyaretçiler'], ['wa', 'WhatsApp & Bildirim'], ['daha', 'Daha Fazlası'], ['bildirim', 'Bildirimler'], ['memnun', 'Müşteri Memnuniyeti'], ['vade', 'Usta Borç Vadesi'], ['harita', 'Günün İş Haritası'], ['onay', 'Onay Bekleyenler'], ['rapor', 'Rapor Merkezi'], ['kurulum', 'Kurulum Durumu']];
+  var TABS = [['firmalar', 'Firmalar'], ['siteduz', 'Site Düzenleyici'], ['domain', 'Alan Adı & Site'], ['paket', 'Paketim'], ['mgayar', 'Mağaza Ayarları'], ['moduller', 'Aç / Kapat & Ayarlar'], ['seo', 'SEO · 301 · 404'], ['yeni', 'Yeni Sipariş'], ['pazar', 'Pazaryerleri'], ['yetki', 'Kullanıcılar & Yetkiler'], ['gsc', 'Google Search Console'], ['urunler', 'Ürün Yönetimi'], ['marka', 'Marka Ürün Aktarma'], ['m360', 'Müşteri 360'], ['kaynak', 'Kaynak & Arama Analizi'], ['ustapuan', 'Usta Puanlama'], ['ustagecmis', 'Usta İş Geçmişi'], ['cari', 'Cari & Trend'], ['tahsilat', 'Teknisyen Tahsilat'], ['atolye', 'Atölye'], ['canli', 'Canlı Ziyaretçiler'], ['wa', 'WhatsApp & Bildirim'], ['daha', 'Daha Fazlası'], ['bildirim', 'Bildirimler'], ['memnun', 'Müşteri Memnuniyeti'], ['vade', 'Usta Borç Vadesi'], ['harita', 'Günün İş Haritası'], ['onay', 'Onay Bekleyenler'], ['rapor', 'Rapor Merkezi'], ['kurulum', 'Kurulum Durumu']];
   function build() {
     ov = document.createElement('div'); ov.id = 'spx-ov';
     ov.innerHTML = '<header><button class="spx-b" id="spx-menu">☰ Menü</button><h2 id="spx-h">Site Yönetimi</h2><button class="spx-b" id="spx-x">Kapat ✕</button></header><div id="spx-tabs"></div><div id="spx-body">Yükleniyor…</div>';
@@ -314,9 +314,9 @@
   function body() { return $('#spx-body'); }
   function draw() {
     Array.prototype.forEach.call($('#spx-tabs').children, function (b) { b.classList.toggle('on', b.getAttribute('data-t') === TAB); });
-    var hh = $('#spx-h'); if (hh) hh.textContent = ({ firmalar: 'Firmalar', domain: 'Alan Adı & Site', paket: 'Paketim', mgayar: 'Mağaza Ayarları', daha: 'Daha Fazlası', bildirim: 'Bildirimler', memnun: 'Müşteri Memnuniyeti', vade: 'Usta Borç Vadesi', harita: 'Günün İş Haritası', moduller: 'Aç/Kapat & Entegrasyonlar', seo: 'SEO · 301 · 404', yeni: 'Yeni Sipariş Gir', pazar: 'Pazaryerleri', yetki: 'Kullanıcılar & Yetkiler', gsc: 'Google Search Console', marka: 'Marka Ürün Aktarma', urunler: 'Ürün Yönetimi', m360: 'Müşteri 360', kaynak: 'Kaynak & Arama Analizi', ustapuan: 'Usta Puanlama', ustagecmis: 'Usta İş Geçmişi', cari: 'Cari & Trend', tahsilat: 'Teknisyen Tahsilat', atolye: 'Atölye (Cihaz Teslim Alma)', sohbet: 'Canlı Sohbet', canli: 'Canlı Ziyaretçiler', wa: 'WhatsApp & Bildirim Ayarları', onay: 'Onay Bekleyenler', rapor: 'Rapor Merkezi', kurulum: 'Kurulum Durumu' })[TAB];
+    var hh = $('#spx-h'); if (hh) hh.textContent = ({ firmalar: 'Firmalar', siteduz: 'Site Düzenleyici', domain: 'Alan Adı & Site', paket: 'Paketim', mgayar: 'Mağaza Ayarları', daha: 'Daha Fazlası', bildirim: 'Bildirimler', memnun: 'Müşteri Memnuniyeti', vade: 'Usta Borç Vadesi', harita: 'Günün İş Haritası', moduller: 'Aç/Kapat & Entegrasyonlar', seo: 'SEO · 301 · 404', yeni: 'Yeni Sipariş Gir', pazar: 'Pazaryerleri', yetki: 'Kullanıcılar & Yetkiler', gsc: 'Google Search Console', marka: 'Marka Ürün Aktarma', urunler: 'Ürün Yönetimi', m360: 'Müşteri 360', kaynak: 'Kaynak & Arama Analizi', ustapuan: 'Usta Puanlama', ustagecmis: 'Usta İş Geçmişi', cari: 'Cari & Trend', tahsilat: 'Teknisyen Tahsilat', atolye: 'Atölye (Cihaz Teslim Alma)', sohbet: 'Canlı Sohbet', canli: 'Canlı Ziyaretçiler', wa: 'WhatsApp & Bildirim Ayarları', onay: 'Onay Bekleyenler', rapor: 'Rapor Merkezi', kurulum: 'Kurulum Durumu' })[TAB];
     body().innerHTML = 'Yükleniyor…';
-    ({ firmalar: drawFirmalar, domain: drawDomain, paket: drawPaket, mgayar: drawMgAyar, daha: drawDaha, bildirim: drawBildirim, memnun: drawMemnun, vade: drawVade, harita: drawHarita, moduller: drawMod, seo: drawSeo, yeni: drawNew, pazar: drawMkt, yetki: drawUsers, gsc: drawGsc, marka: drawBrand, urunler: drawProducts, m360: drawM360, kaynak: drawKaynak, ustapuan: drawUstaPuan, ustagecmis: drawUstaGecmis, cari: drawCari, tahsilat: drawTahsilat, atolye: drawAtolye, sohbet: drawSohbet, canli: drawCanli, wa: drawWa, onay: drawOnay, rapor: drawRapor, kurulum: drawKurulum })[TAB]();
+    ({ firmalar: drawFirmalar, siteduz: drawSiteEd, domain: drawDomain, paket: drawPaket, mgayar: drawMgAyar, daha: drawDaha, bildirim: drawBildirim, memnun: drawMemnun, vade: drawVade, harita: drawHarita, moduller: drawMod, seo: drawSeo, yeni: drawNew, pazar: drawMkt, yetki: drawUsers, gsc: drawGsc, marka: drawBrand, urunler: drawProducts, m360: drawM360, kaynak: drawKaynak, ustapuan: drawUstaPuan, ustagecmis: drawUstaGecmis, cari: drawCari, tahsilat: drawTahsilat, atolye: drawAtolye, sohbet: drawSohbet, canli: drawCanli, wa: drawWa, onay: drawOnay, rapor: drawRapor, kurulum: drawKurulum })[TAB]();
   }
   /* ===== Firmalar: paneli kendi verisiyle kullanan müşteri firmalar ===== */
   var FM = { sel: '', tab: 'bilgi', job: '', q: '', flt: '', newOpen: false };
@@ -1543,7 +1543,7 @@
     ['Ustalar', [['/admin/technicians', 'Teknisyenler'], ['/admin/dealers', 'Bayilik Başvuruları'], ['ek:ustapuan', 'Usta Puanlama', 'user'], ['ek:ustagecmis', 'Usta İş Geçmişi', 'user'], ['/admin/performance', 'Performans'], ['/admin/team', 'Ekip Merkezi'], ['/admin/announcements', 'Duyurular']]],
     ['Muhasebe', [['/admin/accounting', 'Muhasebe'], ['ek:tahsilat', 'Teknisyen Tahsilat', 'cart'], ['ek:cari', 'Cari & Trend', 'cart'], ['ek:vade', 'Usta Borç Vadesi', 'cart'], ['ek:memnun', 'Müşteri Memnuniyeti', 'user'], ['/admin/reports', 'Raporlar']]],
     ['Mağaza & Satış', [['/admin/shop', 'Mağaza'], ['ek:yeni', 'Yeni Sipariş Gir', 'plus'], ['ek:mgayar', 'Mağaza Ayarları', 'gear'], ['ek:pazar', 'Pazaryerleri', 'cart'], ['ek:urunler', 'Ürün Yönetimi', 'cart'], ['ek:marka', 'Marka Ürün Aktarma', 'cart'], ['/admin/coupons', 'Kuponlar']]],
-    ['Web Sitesi', [['/admin/site-features', 'Site Özellikleri'], ['ek:domain', 'Alan Adı & Site', 'gear'], ['ek:moduller', 'Aç/Kapat & Entegrasyonlar', 'gear'], ['ek:seo', 'SEO · 301 · 404', 'search'], ['/admin/site-studio', 'Site Stüdyosu'], ['/admin/media', 'Medya Kütüphanesi'], ['/admin/integration', 'Site Entegrasyonu']]],
+    ['Web Sitesi', [['/admin/site-features', 'Site Özellikleri'], ['ek:siteduz', 'Site Düzenleyici', 'gear'], ['ek:domain', 'Alan Adı & Site', 'gear'], ['ek:moduller', 'Aç/Kapat & Entegrasyonlar', 'gear'], ['ek:seo', 'SEO · 301 · 404', 'search'], ['/admin/site-studio', 'Site Stüdyosu'], ['/admin/media', 'Medya Kütüphanesi'], ['/admin/integration', 'Site Entegrasyonu']]],
     ['Pazarlama & İletişim', [['/admin/messages', 'İletişim Mesajları'], ['ek:sohbet', 'Canlı Sohbet', 'live'], ['/admin/reviews', 'Yorumlar'], ['ek:gsc', 'Google Search Console', 'search'], ['/admin/marketing', 'Pazarlama Merkezi'], ['ek:canli', 'Canlı Ziyaretçiler', 'search'], ['ek:wa', 'WhatsApp & Bildirim', 'gear'], ['ek:kaynak', 'Kaynak & Arama Analizi', 'search'], ['/admin/growth', 'Büyüme Merkezi'], ['/admin/visitors', 'Ziyaretçiler']]],
     ['Yönetim', [['/admin/settings', 'Ayarlar'], ['ek:yetki', 'Kullanıcılar & Yetkiler', 'user'], ['ek:firmalar', 'Firmalar', 'user'], ['/admin/security', 'Güvenlik'], ['/admin/governance', 'Yedek & Denetim'], ['ek:paket', 'Paketim', 'box'], ['/admin/account', 'Hesabım']]]
   ];
@@ -1558,7 +1558,7 @@
     '/admin/security': [['alerts', 'Güvenlik Uyarıları'], ['logins', 'Giriş Kayıtları'], ['failed', 'Hatalı Girişler'], ['devices', 'Cihazlar'], ['settings', 'Kurallar']],
     '/admin/governance': [['health', 'Sistem Sağlığı'], ['backups', 'Yedekler'], ['audit', 'Denetim Kaydı'], ['trash', 'Çöp Kutusu'], ['notify', 'Bildirim Kanalları']]
   };
-  var MPERM = { '/admin': 'dashboard', '/admin/jobs': 'jobs', '/admin/appointments': 'appointments', '/admin/quotes': 'quotes', '/admin/warranty': 'warranty', '/admin/customers': 'customers', '/admin/technicians': 'technicians', '/admin/parts': 'parts', '/admin/shop': 'shop', 'ek:yeni': 'shop', 'ek:mgayar': 'shop', 'ek:atolye': 'jobs', 'ek:ustagecmis': 'technicians', 'ek:tahsilat': 'accounting', 'ek:vade': 'accounting', 'ek:memnun': 'reports', 'ek:rapor': 'reports', 'ek:kurulum': 'settings', 'ek:harita': 'jobs', 'ek:canli': 'visitors', 'ek:wa': 'integration', 'ek:pazar': 'shop', 'ek:marka': 'shop', 'ek:urunler': 'shop', '/admin/coupons': 'coupons', '/admin/site-features': 'site_features', 'ek:moduller': 'site_features', 'ek:domain': 'site_features', 'ek:seo': 'seo', 'ek:gsc': 'marketing', '/admin/site-studio': 'studio', '/admin/media': 'studio', '/admin/integration': 'integration', '/admin/messages': 'messages', '/admin/reviews': 'reviews', '/admin/dealers': 'dealers', '/admin/marketing': 'marketing', '/admin/growth': 'growth', '/admin/visitors': 'visitors', '/admin/team': 'team', '/admin/performance': 'performance', '/admin/announcements': 'announcements', '/admin/diagnosis': 'diagnosis', '/admin/brands': 'brands', '/admin/accounting': 'accounting', '/admin/reports': 'reports', '/admin/settings': 'settings' };
+  var MPERM = { '/admin': 'dashboard', '/admin/jobs': 'jobs', '/admin/appointments': 'appointments', '/admin/quotes': 'quotes', '/admin/warranty': 'warranty', '/admin/customers': 'customers', '/admin/technicians': 'technicians', '/admin/parts': 'parts', '/admin/shop': 'shop', 'ek:yeni': 'shop', 'ek:mgayar': 'shop', 'ek:atolye': 'jobs', 'ek:ustagecmis': 'technicians', 'ek:tahsilat': 'accounting', 'ek:vade': 'accounting', 'ek:memnun': 'reports', 'ek:rapor': 'reports', 'ek:kurulum': 'settings', 'ek:harita': 'jobs', 'ek:canli': 'visitors', 'ek:wa': 'integration', 'ek:pazar': 'shop', 'ek:marka': 'shop', 'ek:urunler': 'shop', '/admin/coupons': 'coupons', '/admin/site-features': 'site_features', 'ek:moduller': 'site_features', 'ek:domain': 'site_features', 'ek:siteduz': 'site_features', 'ek:seo': 'seo', 'ek:gsc': 'marketing', '/admin/site-studio': 'studio', '/admin/media': 'studio', '/admin/integration': 'integration', '/admin/messages': 'messages', '/admin/reviews': 'reviews', '/admin/dealers': 'dealers', '/admin/marketing': 'marketing', '/admin/growth': 'growth', '/admin/visitors': 'visitors', '/admin/team': 'team', '/admin/performance': 'performance', '/admin/announcements': 'announcements', '/admin/diagnosis': 'diagnosis', '/admin/brands': 'brands', '/admin/accounting': 'accounting', '/admin/reports': 'reports', '/admin/settings': 'settings' };
   /* ServisPlus'ın kendi sitesini yöneten ekranlar: müşteri firmanın panelinde görünmez (kendi sitesi: Alan Adı & Site) */
   var FIRM_HIDE = { '/admin/site-studio': 1, '/admin/media': 1, '/admin/site-features': 1, '/admin/integration': 1, 'ek:moduller': 1, 'ek:seo': 1, 'ek:gsc': 1, '/admin/visitors': 1, 'ek:canli': 1 };
   setInterval(function () { try { if (FIRM) { var p = location.pathname.replace(/\/$/, ''); Object.keys(FIRM_HIDE).forEach(function (k) { if (k.indexOf('/') === 0 && (p === k || p.indexOf(k + '/') === 0)) location.replace('/admin?sitem=1'); }); } } catch (e) { } }, 800);
@@ -1567,7 +1567,7 @@
   /* Menü öğesi -> paket modülü (firmanın paketinde olmayan modüller menüde gizlenir; sunucu da kapıyı ayrıca kapatır) */
   var MODKEY = { '/admin/accounting': 'muhasebe', 'ek:tahsilat': 'muhasebe', 'ek:cari': 'muhasebe', 'ek:vade': 'muhasebe', '/admin/reports': 'rapor', 'ek:rapor': 'rapor', 'ek:memnun': 'rapor',
     '/admin/performance': 'rapor', '/admin/shop': 'magaza', 'ek:yeni': 'magaza', 'ek:mgayar': 'magaza', 'ek:pazar': 'magaza', 'ek:urunler': 'magaza', 'ek:marka': 'magaza', '/admin/parts': 'magaza',
-    '/admin/site-features': 'site', 'ek:moduller': 'site', 'ek:seo': 'site', 'ek:domain': 'site', '/admin/site-studio': 'site', '/admin/media': 'site', '/admin/visitors': 'site', 'ek:canli': 'site',
+    '/admin/site-features': 'site', 'ek:moduller': 'site', 'ek:seo': 'site', 'ek:domain': 'site', 'ek:siteduz': 'site', '/admin/site-studio': 'site', '/admin/media': 'site', '/admin/visitors': 'site', 'ek:canli': 'site',
     '/admin/marketing': 'pazarlama', '/admin/growth': 'pazarlama', '/admin/coupons': 'pazarlama', 'ek:kaynak': 'pazarlama', 'ek:gsc': 'pazarlama', 'ek:wa': 'sms',
     '/admin/quotes': 'teklif', '/admin/warranty': 'bakim', '/admin/dealers': 'bayi' };
   var PKGMODS = null, PKGBUSY = false, PKGTOK = '';
@@ -2937,6 +2937,75 @@
         call('PUT', '/shop/settings', { title: $('#ma_t').value, contact_phone: $('#ma_ph').value, order_prefix: $('#ma_pre').value, subtitle: $('#ma_st').value, shipping_fee: parseFloat($('#ma_sf').value) || 0, free_shipping_over: parseFloat($('#ma_fs').value) || 0, bank_accounts: list, payment_note: $('#ma_pn').value, terms: $('#ma_tm').value }).then(function () { toast('Mağaza ayarları kaydedildi'); }).catch(fail);
       };
     }).catch(fail);
+  }
+  /* ===== Site Düzenleyici: tema sitesini olduğu gibi düzenle (metin, resim, bağlantı, bölüm, footer, yeni sayfa) ===== */
+  function drawSiteEd() {
+    var CUR = '', DOC = null, SEL = null, DIRTY = false;
+    body().innerHTML = '<div class="spx-card"><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><select id="se_pg" style="min-width:180px"></select><button class="spx-b" id="se_np">+ Yeni sayfa</button><span style="flex:1"></span><span id="se_st" style="font-size:13px;color:#64748b"></span><button class="spx-b" id="se_pv">Önizle</button><button class="spx-b" id="se_rs" style="color:#b91c1c">Sıfırla</button><button class="spx-b p" id="se_sv">Kaydet ve yayınla</button></div>' +
+      '<small style="display:block;color:#64748b;margin-top:8px">Yazıya tıklayıp doğrudan yazın. Resme, bağlantıya veya bölüme tıklayınca üstte seçenekleri çıkar. Değişiklikler "Kaydet ve yayınla" ile alan adınızda yayına girer.</small></div>' +
+      '<div style="position:relative"><div id="se_tb" style="display:none;position:absolute;z-index:5;background:#0f172a;color:#fff;border-radius:10px;padding:6px;gap:4px;flex-wrap:wrap;box-shadow:0 8px 24px rgba(0,0,0,.25);max-width:520px"></div><iframe id="se_fr" sandbox="allow-scripts allow-same-origin" style="width:100%;height:78vh;border:1px solid #cbd5e1;border-radius:10px;background:#fff"></iframe></div>';
+    var st = function (t, c) { var e = $('#se_st'); if (e) { e.textContent = t; e.style.color = c || '#64748b'; } };
+    var bt = function (label, fn, danger) { var b = document.createElement('button'); b.textContent = label; b.style.cssText = 'background:' + (danger ? '#b91c1c' : '#1e293b') + ';color:#fff;border:0;border-radius:7px;padding:6px 10px;font:600 12.5px system-ui;cursor:pointer'; b.onclick = function (e) { e.stopPropagation(); fn(); }; return b; };
+    function pick(cb) { var i = document.createElement('input'); i.type = 'file'; i.accept = 'image/*'; i.onchange = function () { var f = i.files[0]; if (!f) return; var r = new FileReader(); r.onload = function () { var im = new Image(); im.onload = function () { var mx = 1400, k = Math.min(1, mx / Math.max(im.width, im.height)), c = document.createElement('canvas'); c.width = Math.round(im.width * k); c.height = Math.round(im.height * k); c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); cb(c.toDataURL(f.type === 'image/png' && f.size < 300000 ? 'image/png' : 'image/jpeg', 0.8)); }; im.src = r.result; }; r.readAsDataURL(f); }; i.click(); }
+    function blockOf(el) { var b = el; while (b && b.parentElement && b.parentElement !== DOC.body) b = b.parentElement; return b && b.parentElement === DOC.body ? b : null; }
+    function toolbar(el) {
+      var tb = $('#se_tb'), fr = $('#se_fr'); tb.innerHTML = '';
+      if (!el || el === DOC.body || el === DOC.documentElement) { tb.style.display = 'none'; return; }
+      var tag = el.tagName;
+      if (tag === 'IMG') { tb.appendChild(bt('Resmi değiştir', function () { pick(function (u) { el.removeAttribute('srcset'); el.setAttribute('src', u); DIRTY = true; }); })); tb.appendChild(bt('Açıklama (alt)', function () { var v = prompt('Resim açıklaması (arama motorları için):', el.getAttribute('alt') || ''); if (v !== null) { el.setAttribute('alt', v); DIRTY = true; } })); }
+      var a = el.closest('a'); if (a) tb.appendChild(bt('Bağlantı', function () { var v = prompt('Bu düğme/bağlantı nereye gitsin? (örn: tel:05xx..., https://..., /sayfa-adi)', a.getAttribute('href') || ''); if (v !== null) { a.setAttribute('href', v); DIRTY = true; } }));
+      var bg = DOC.defaultView.getComputedStyle(el).backgroundImage; if (bg && bg !== 'none' && /url\(/.test(bg)) tb.appendChild(bt('Arka plan resmi', function () { pick(function (u) { el.style.backgroundImage = 'url(' + u + ')'; DIRTY = true; }); }));
+      tb.appendChild(bt('Yazı rengi', function () { var i = document.createElement('input'); i.type = 'color'; i.oninput = function () { el.style.color = i.value; DIRTY = true; }; i.click(); }));
+      tb.appendChild(bt('Zemin rengi', function () { var i = document.createElement('input'); i.type = 'color'; i.oninput = function () { el.style.backgroundColor = i.value; DIRTY = true; }; i.click(); }));
+      var b = blockOf(el);
+      if (b) {
+        tb.appendChild(bt('Bölümü yukarı', function () { if (b.previousElementSibling && b.previousElementSibling.tagName !== 'SCRIPT') { b.parentElement.insertBefore(b, b.previousElementSibling); DIRTY = true; } }));
+        tb.appendChild(bt('Bölümü aşağı', function () { var n = b.nextElementSibling; if (n && n.tagName !== 'SCRIPT') { b.parentElement.insertBefore(n, b); DIRTY = true; } }));
+        tb.appendChild(bt('Bölümü kopyala', function () { var c = b.cloneNode(true); b.parentElement.insertBefore(c, b.nextSibling); DIRTY = true; wire(c); }));
+        tb.appendChild(bt('Bölümü sil', function () { if (confirm('Bu bölüm silinsin mi?')) { b.remove(); DIRTY = true; toolbar(null); } }, true));
+      }
+      var r = el.getBoundingClientRect(), fr0 = fr.getBoundingClientRect(), top = r.top + 4;
+      tb.style.display = 'flex'; tb.style.left = Math.max(0, Math.min(r.left, fr0.width - 300)) + 'px'; tb.style.top = Math.max(6, Math.min(top, fr0.height - 80)) + 'px';
+    }
+    var TEXTY = { SCRIPT: 1, STYLE: 1, NOSCRIPT: 1, SVG: 1, PATH: 1, IFRAME: 1, SELECT: 1, OPTION: 1, TEXTAREA: 1, INPUT: 1 };
+    function wire(root) {
+      Array.prototype.forEach.call(root.querySelectorAll('*'), function (el) {
+        if (TEXTY[el.tagName.toUpperCase()]) return;
+        var own = ''; Array.prototype.forEach.call(el.childNodes, function (n) { if (n.nodeType === 3) own += n.nodeValue; });
+        if (own.trim().length > 0) el.setAttribute('contenteditable', 'true');
+      });
+    }
+    function load(page) {
+      CUR = page || ''; st('Yükleniyor…');
+      call('GET', '/site/edit' + (CUR ? '?page=' + encodeURIComponent(CUR) : '')).then(function (r) {
+        var sel = $('#se_pg'); sel.innerHTML = '<option value="">Ana sayfa</option>' + (r.pages || []).map(function (p) { return '<option value="' + esc(p.slug) + '"' + (p.slug === CUR ? ' selected' : '') + '>' + esc(p.title) + '</option>'; }).join('');
+        var fr = $('#se_fr');
+        fr.onload = function () {
+          DOC = fr.contentDocument; if (!DOC) return;
+          var s = DOC.createElement('style'); s.setAttribute('data-spx-ed', '1'); s.textContent = '[contenteditable]{outline:none;cursor:text}[contenteditable]:hover{outline:2px dashed #60a5fa;outline-offset:2px}[contenteditable]:focus{outline:2px solid #2563eb;outline-offset:2px}img:hover{outline:2px dashed #60a5fa;cursor:pointer}*{scroll-behavior:auto!important}';
+          DOC.head.appendChild(s); wire(DOC.body);
+          DOC.addEventListener('click', function (e) { var t = e.target; if (t.closest('a,button,form,label')) e.preventDefault(); SEL = t; toolbar(t); }, true);
+          DOC.addEventListener('submit', function (e) { e.preventDefault(); }, true);
+          DOC.addEventListener('input', function () { DIRTY = true; st('Kaydedilmemiş değişiklik var', '#b45309'); }, true);
+          DOC.addEventListener('scroll', function () { $('#se_tb').style.display = 'none'; }, true);
+          st(r.custom ? 'Düzenlenmiş sürüm' : 'Tema (henüz değiştirmediniz)');
+        };
+        fr.srcdoc = r.html.replace(/<head([^>]*)>/i, '<head$1><base target="_blank">');
+        DIRTY = false;
+      }).catch(function (e) { st(e.message || 'Yüklenemedi', '#b91c1c'); fail(e); });
+    }
+    function serialize() {
+      var c = DOC.documentElement.cloneNode(true);
+      Array.prototype.forEach.call(c.querySelectorAll('[data-spx-ed],base'), function (n) { n.remove(); });
+      Array.prototype.forEach.call(c.querySelectorAll('[contenteditable]'), function (n) { n.removeAttribute('contenteditable'); });
+      return '<!DOCTYPE html>\n' + c.outerHTML;
+    }
+    $('#se_pg').onchange = function () { if (DIRTY && !confirm('Kaydedilmemiş değişiklikler silinsin mi?')) { this.value = CUR; return; } load(this.value); };
+    $('#se_np').onclick = function () { var t = prompt('Yeni sayfanın başlığı (örn: Hakkımızda, Servis Bölgeleri):'); if (!t) return; call('POST', '/site/pages', { title: t }).then(function (r) { toast('Sayfa açıldı: /' + r.slug); load(r.slug); }).catch(fail); };
+    $('#se_sv').onclick = function () { if (!DOC) return; st('Kaydediliyor…'); call('PUT', '/site/edit', { page: CUR, html: serialize() }).then(function () { DIRTY = false; st('Kaydedildi ve yayında ✓', '#15803d'); toast('Site güncellendi'); }).catch(function (e) { st('Kaydedilemedi', '#b91c1c'); fail(e); }); };
+    $('#se_pv').onclick = function () { if (!DOC) return; var w = window.open('', '_blank'); if (w) { w.document.open(); w.document.write(serialize()); w.document.close(); } };
+    $('#se_rs').onclick = function () { if (!confirm(CUR ? 'Bu sayfa silinsin mi?' : 'Ana sayfadaki tüm değişiklikler silinip seçili temaya dönülsün mü?')) return; call('DELETE', '/site/edit' + (CUR ? '?page=' + encodeURIComponent(CUR) : '')).then(function () { toast(CUR ? 'Sayfa silindi' : 'Temaya dönüldü'); load(''); }).catch(fail); };
+    load('');
   }
   function drawPaket() {
     call('GET', '/firm/package').then(function (r) {
