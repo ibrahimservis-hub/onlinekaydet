@@ -184,14 +184,17 @@ def register(api_router, db, deps):
         if page:
             p = next((x for x in d.get("pages", []) if x["slug"] == page), None)
             if p:
-                return {"html": await inline_imgs(p["html"]), "custom": True, "pages": pages, "page": page, "title": p.get("title", page)}
+                _c = await build_ctx(inline=True)
+                _h = sitegen.rebase(p["html"], await themed_home(_c), _c, p.get("title") or page, page) if _c else p["html"]
+                return {"html": await inline_imgs(_h), "custom": True, "pages": pages, "page": page, "title": p.get("title", page)}
             ctx = await build_ctx(inline=True)
-            home = d.get("html") or (await themed_home(ctx) if ctx else "")
+            home = (await themed_home(ctx)) if ctx else (d.get("html") or "")
             r = sitegen.render_page(home, ctx, page) if ctx else None
             if not r:
                 raise HTTPException(404, "Sayfa bulunamadı")
             return {"html": r[0], "custom": False, "pages": pages, "page": page, "title": r[1]}
-        if d.get("html"):
+        _cc = await build_ctx()
+        if d.get("html") and not (_cc and d.get("home_theme") and d["home_theme"] != _cc["th"]["slug"]):
             return {"html": await inline_imgs(d["html"]), "custom": True, "pages": pages, "page": ""}
         h = await theme_html()
         if h is None:
@@ -221,7 +224,8 @@ def register(api_router, db, deps):
                 p["title"] = str(payload["title"]).strip()[:80]
             await db.app_settings.update_one({"_id": "site_custom"}, {"$set": {"pages": pages, "updated_at": _now()}}, upsert=True)
         else:
-            await db.app_settings.update_one({"_id": "site_custom"}, {"$set": {"html": h, "updated_at": _now()}}, upsert=True)
+            _cx2 = await build_ctx()
+            await db.app_settings.update_one({"_id": "site_custom"}, {"$set": {"html": h, "updated_at": _now(), "home_theme": _cx2["th"]["slug"] if _cx2 else ""}}, upsert=True)
         return {"ok": True}
 
     @api_router.delete("/site/edit")
@@ -252,7 +256,7 @@ def register(api_router, db, deps):
         brand = await db.app_settings.find_one({"_id": "brand"}, {"_id": 0}) or {}
         name, tel, _f = await identity()
         content = clean_html(payload.get("content") or "") or ('<section style="max-width:960px;margin:0 auto;padding:56px 22px"><h1>%s</h1><p>Bu metni düzenleyin.</p></section>' % _html.escape(title))
-        home = d.get("html") or await theme_html() or ""
+        home = await theme_html() or d.get("html") or ""
         _cx = await build_ctx()
         full = (sitegen.assemble(home, _cx, title, content) if (_cx and home) else None) or (compose_page(home, title, content) if home else None)
         pages.append({"slug": slug, "title": title, "html": full or page_template(title, name, tel, brand.get("dark"), brand.get("accent"))})
@@ -477,6 +481,8 @@ def register(api_router, db, deps):
         if p == "sitemap.xml" and host and ctx:
             return sitegen.sitemap(ctx, host, [x["slug"] for x in d.get("pages", []) if x["slug"] not in {i["slug"] for i in sitegen.page_index(ctx)}], str(d.get("updated_at") or "")), "application/xml"
         home = d.get("html")
+        if home is not None and ctx and d.get("home_theme") and d["home_theme"] != ctx["th"]["slug"]:
+            home = None  # tema değişti: eski temadan kalma ana sayfa kaydı kullanılmaz
         if home is None and ctx:
             home = await themed_home(ctx)
         if home is None:
@@ -487,6 +493,8 @@ def register(api_router, db, deps):
             pg = next((x for x in d.get("pages", []) if x["slug"] == p), None)
             if pg:
                 h = pg["html"]
+                if ctx and home:
+                    h = sitegen.rebase(h, await themed_home(ctx), ctx, pg.get("title") or p, p)
             else:
                 r = sitegen.render_page(home, ctx, p) if ctx else None
                 if not r:

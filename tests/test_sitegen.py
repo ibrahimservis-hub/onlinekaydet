@@ -155,6 +155,22 @@ with TestClient(s.app) as c:
         sm = pub("/sitemap.xml").text; assert "<priority>" in sm and "otomatik-site.com/sss" in sm
         pv = c.get("/api/site/preview?path=/", headers=H).text; assert "{{H}}" not in pv and 'rel="canonical"' not in pv
     t("temaya özgü SEO: canonical, OG, JSON-LD, sosyal ikonlar, sitemap", seo)
+    def drift():
+        # editörde kaydedilen sayfa, tema değişince yeni temanın menü/alt bilgisiyle gelir
+        r = c.post("/api/site/pages", headers=H, json={"title": "Sertifikalarımız"}); assert r.status_code == 200, r.text
+        sl = r.json()["slug"]
+        e = c.get("/api/site/edit?page=" + sl, headers=H).json(); assert e["custom"]
+        assert c.put("/api/site/edit", headers=H, json={"html": e["html"], "page": sl}).status_code == 200
+        before = pub("/" + sl).text
+        assert "spx-ph" in before and "Sertifikalarımız" in before
+        bd = c.get("/api/brand", headers=H).json(); cur = bd["brand"]["theme"]
+        other = next(t_ for t_ in bd["themes"] if t_["slug"] != cur and t_.get("dark") != bd["brand"].get("dark"))
+        assert c.put("/api/brand", headers=H, json={**bd["brand"], "theme": other["slug"], "dark": other["dark"], "accent": other["accent"]}).status_code == 200
+        import domains; domains._cache["t"] = 0
+        after = pub("/" + sl).text
+        assert after != before and "Sertifikalarımız" in after and "spx-ph" in after
+        assert "application/ld+json" in after
+    t("editörde kaydedilen sayfa güncel tema kabuğuyla servis edilir", drift)
 print("OK %d/%d" % (len(ok), len(ok) + len(bad)))
 for n in ok: print("  ✔", n)
 for n, e in bad: print("  ✘", n, "\n", e)

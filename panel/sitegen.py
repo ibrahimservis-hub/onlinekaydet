@@ -687,17 +687,25 @@ def render_page(home_html, ctx, slug):
 
 def assemble(home_html, ctx, title, content, kind="page", slug="", extra=""):
     """Ana sayfanın menü + alt bilgi + mobil çubuğuyla, verilen içerikten sayfa kurar."""
+    main = ('<div class="ed" data-nm="İçerik"><section class="spx-ph"><div class="w"><span class="eyebrow">%s</span><h1>%s</h1></div></section>'
+            '<section class="sec"><div class="w spx-c">%s%s</div></section></div>' % (E(ctx["name"]), E(title), content, _cta(ctx)))
+    return assemble_mid(home_html, ctx, title, [["İçerik", main]], kind, slug, extra)
+
+
+FIXED_NAMES = ("Menü", "Mobil menü", "Alt bilgi", "Mobil bar")
+
+
+def assemble_mid(home_html, ctx, title, mids, kind="page", slug="", extra=""):
+    """Güncel temanın başlık/menü/alt bilgisi + verilen orta bölümler. Tema değişince kayıtlı sayfalar da yeni temaya geçer."""
     parts = split_blocks(home_html)
     if not parts:
         return None
     pre, blocks, tail = parts
     keep = []
     for b in blocks:
-        if b[0] in ("Menü", "Mobil menü", "Alt bilgi", "Mobil bar"):
+        if b[0] in FIXED_NAMES:
             keep.append([b[0], re.sub(r'href="#([^"]*)"', lambda m: 'href="/%s"' % (("#" + m.group(1)) if m.group(1) not in ("", "top") else ""), b[1])])
-    main = ('<div class="ed" data-nm="İçerik"><section class="spx-ph"><div class="w"><span class="eyebrow">%s</span><h1>%s</h1></div></section>'
-            '<section class="sec"><div class="w spx-c">%s%s</div></section></div>' % (E(ctx["name"]), E(title), content, _cta(ctx)))
-    out_blocks = [b for b in keep if b[0] in ("Menü", "Mobil menü")] + [["İçerik", main]] + [b for b in keep if b[0] in ("Alt bilgi", "Mobil bar")]
+    out_blocks = [b for b in keep if b[0] in ("Menü", "Mobil menü")] + list(mids) + [b for b in keep if b[0] in ("Alt bilgi", "Mobil bar")]
     pre2 = _IMVAR.sub(lambda m: m.group(0).split(":")[0] + ":none", pre)
     out = join_blocks(pre2, out_blocks, tail)
     out = re.sub(r"<title>.*?</title>", "<title>%s · %s</title>" % (E(title), E(ctx["name"])), out, count=1, flags=re.S)
@@ -705,6 +713,17 @@ def assemble(home_html, ctx, title, content, kind="page", slug="", extra=""):
     out = _set_desc(out, desc)
     out = seo_inject(out, seo_block(ctx, title, desc, slug, {"faq": "faq", "service": "service"}.get(kind, "page")))
     return out.replace("</head>", CSS + "</head>", 1)
+
+
+def rebase(saved_html, home_html, ctx, title, slug=""):
+    """Kayıtlı (düzenleyiciden gelen) sayfanın içeriğini güncel tema kabuğuna oturtur. Ayrıştırılamazsa olduğu gibi döner."""
+    sp = split_blocks(saved_html)
+    if not sp or not home_html or not ctx:
+        return saved_html
+    mids = [b for b in sp[1] if b[0] not in FIXED_NAMES]
+    if not mids:
+        return saved_html
+    return assemble_mid(home_html, ctx, title, mids, "page", slug) or saved_html
 
 
 def sitemap(ctx, host, extra=(), lastmod=""):
