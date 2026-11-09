@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex"><script>document.documentElement.classList.add("js")</script><title>OnlineKaydet: servis kaydı, usta takibi, hazır web sitesi</title>
+<meta name="description" content="Teknik servisler için servis kaydı, usta takibi ve hazır web sitesi. Kurulumu biz yaparız, ilk ay ücretsiz.">
+<style>
+/* Hallmark · shape: Bento Grid · genre: modern-minimal · theme: Furrow (deal 1/3, seed teknik-servisler-servis-kayd-0e42·98b7c3bc·2026-11-08·r0) · job: try · draw: c366e6
+ * hero: Stage · nav: wordmark, links, two keys (swap from search-led bar: no search on this page) · footer: index columns · imagery: the real panel screenshot and the receipt built live · signature: the service receipt writes itself and is stamped closed
+ * axes: light/grotesk-sans/warm · posture: committed · contrast: pass · fold: pass · v2.0.0 */
+/* Hallmark · pre-emit critique: P4 H4 E4 S3 R3 V4 · weakest: S, bento cells share one ruled voice; kept the ink head on the receipt as the only dark mass */
+/* waive 47b: motion is expressive on request (user asked "abartılı"); transform and opacity only, reduced-motion and no-script fallbacks hold */
+@import url("./hm-tokens.css");
+@import url("./hm-base.css");
+@font-face{font-family:"Red Hat Display";src:url(fonts/red-hat-display-latin-ext-600-normal.woff2) format("woff2");font-weight:600;font-display:swap;unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:"Red Hat Display";src:url(fonts/red-hat-display-latin-600-normal.woff2) format("woff2");font-weight:600;font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"Red Hat Text";src:url(fonts/red-hat-text-latin-ext-400-normal.woff2) format("woff2");font-weight:400;font-display:swap;unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:"Red Hat Text";src:url(fonts/red-hat-text-latin-400-normal.woff2) format("woff2");font-weight:400;font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"Red Hat Text";src:url(fonts/red-hat-text-latin-ext-500-normal.woff2) format("woff2");font-weight:500;font-display:swap;unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:"Red Hat Text";src:url(fonts/red-hat-text-latin-500-normal.woff2) format("woff2");font-weight:500;font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"Red Hat Mono";src:url(fonts/red-hat-mono-latin-ext-400-normal.woff2) format("woff2");font-weight:400;font-display:swap;unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:"Red Hat Mono";src:url(fonts/red-hat-mono-latin-400-normal.woff2) format("woff2");font-weight:400;font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"Red Hat Mono";src:url(fonts/red-hat-mono-latin-ext-500-normal.woff2) format("woff2");font-weight:500;font-display:swap;unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:"Red Hat Mono";src:url(fonts/red-hat-mono-latin-500-normal.woff2) format("woff2");font-weight:500;font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+:root{--container:1280px;--gutter:48px}
+body{font-weight:400;color:var(--color-ink-2)}
+.container{max-width:var(--container)}
+h1,h2,h3{color:var(--color-ink)}
+.btn{white-space:nowrap;display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 var(--space-lg);border:var(--rule-hair) solid var(--color-rule);border-radius:var(--radius-pill);font:500 var(--text-md)/1 var(--font-body);text-decoration:none;background:var(--color-paper-2);color:var(--color-ink);box-shadow:inset 0 1px 0 var(--color-sheet),0 1px 1px var(--color-rule);transition:transform var(--dur-short) var(--ease-out),box-shadow var(--dur-short) var(--ease-out)}
+.btn:hover{transform:translateY(-3px);box-shadow:inset 0 1px 0 var(--color-sheet),0 8px 0 -4px var(--color-ink)}
+.btn:active{transform:translateY(1px);box-shadow:inset 0 1px 0 var(--color-sheet)}
+.btn--primary{background:var(--color-accent);color:var(--color-accent-ink);border-color:color-mix(in oklab,var(--color-accent) 78%,var(--color-ink));box-shadow:inset 0 1px 0 color-mix(in oklab,var(--color-sheet) 32%,transparent),inset 0 -1px 0 color-mix(in oklab,var(--color-ink) 10%,transparent)}
+.btn--primary:hover{box-shadow:inset 0 1px 0 color-mix(in oklab,var(--color-sheet) 32%,transparent),0 8px 0 -4px var(--color-ink)}
+.btn--primary.nudge{animation:nudge 3.2s 3.4s var(--ease-out) infinite}
+@keyframes nudge{0%,78%,100%{transform:none}86%{transform:translateY(-6px)}93%{transform:translateY(0)}96%{transform:translateY(-2px)}}
+/* nav */
+.nav{position:sticky;top:0;z-index:var(--z-sticky-nav);background:var(--color-paper);border-bottom:var(--rule-hair) solid var(--color-ink);animation:navin .7s var(--ease-out) both}
+@keyframes navin{from{transform:translateY(-100%)}}
+.nav .container{display:flex;align-items:center;gap:var(--space-lg);min-height:72px}
+.nav img{width:184px;height:auto}
+.nav ul{display:flex;gap:var(--space-lg);list-style:none;margin:0 0 0 auto;padding:0}
+.nav ul a{display:inline-block;padding:var(--space-xs) var(--space-3xs);font-weight:500;font-size:var(--text-sm);text-decoration:none;position:relative}
+.nav ul a::after{content:"";position:absolute;left:0;right:0;bottom:4px;height:2px;background:var(--color-accent);transform:scaleX(0);transform-origin:left;transition:transform var(--dur-short) var(--ease-out)}
+.nav ul a:hover::after{transform:scaleX(1)}
+.nav .btn{min-height:44px;padding:0 var(--space-md);font-size:var(--text-sm)}
+.nav .num{font-family:var(--font-outlier);font-weight:500}
+/* hero */
+.hero{padding:var(--space-2xl) 0 var(--space-3xl)}
+.hero .container{display:grid;grid-template-columns:minmax(0,4.3fr) minmax(0,7fr);gap:var(--space-lg);align-items:center}
+.hero h1{max-width:9ch;font-size:clamp(3rem,5.2vw,5.4rem);line-height:.98}
+.hero h1 .w{display:block;overflow:hidden;padding-bottom:.08em}
+.hero h1 .w>span{display:inline-block;animation:rise .9s var(--ease-out) both}
+.hero h1 .w:nth-child(2)>span{animation-delay:.14s}.hero h1 .w:nth-child(3)>span{animation-delay:.28s}
+@keyframes rise{from{transform:translateY(112%) rotate(5deg)}}
+.hero .lead{margin-top:var(--space-lg);color:var(--color-muted);max-width:30ch;animation:fade .8s .55s var(--ease-out) both}
+.actions{display:flex;flex-wrap:wrap;gap:var(--space-sm);margin-top:var(--space-xl);animation:fade .8s .7s var(--ease-out) both}
+.hero .small{margin-top:var(--space-md);font-size:var(--text-sm);color:var(--color-muted);animation:fade .8s .85s var(--ease-out) both}
+@keyframes fade{from{opacity:0;transform:translateY(28px)}}
+.stage{position:relative;min-height:540px}
+.shot{position:absolute;right:0;top:56px;width:90%;border-radius:var(--radius-card);background:var(--color-sheet);box-shadow:0 0 0 1px var(--color-ink),var(--shadow-card);overflow:hidden;animation:slide 1.1s .25s var(--ease-out) both}
+@keyframes slide{from{opacity:0;transform:translateX(90px) rotate(2.5deg)}}
+.shot img{width:100%}
+.shot figcaption{padding:var(--space-xs) var(--space-md);border-top:var(--rule-hair) solid var(--color-rule);font-size:var(--text-xs);color:var(--color-muted);background:var(--color-paper-2)}
+.entry{margin:0;position:absolute;left:0;bottom:0;width:min(60%,400px);border-radius:var(--radius-entry);background:var(--color-paper-2);box-shadow:0 0 0 1px var(--color-ink),var(--shadow-lift);overflow:hidden;animation:drop 1.2s .6s var(--ease-out) both;cursor:pointer;transition:transform var(--dur-long) var(--ease-out)}
+.entry:hover{transform:translateY(-8px) rotate(-1.2deg)}
+@keyframes drop{0%{opacity:0;transform:translateY(-320px) rotate(-12deg)}55%{opacity:1}100%{transform:none}}
+.entry.shake{animation:drop 1.2s .6s var(--ease-out) both,shake .45s 3.9s var(--ease-out)}
+@keyframes shake{0%,100%{transform:none}20%{transform:translate(-6px,3px) rotate(-.6deg)}45%{transform:translate(6px,-3px) rotate(.6deg)}70%{transform:translate(-3px,-2px)}}
+.entry-head{display:flex;justify-content:space-between;align-items:flex-end;background:var(--color-ink);color:var(--color-paper-2);padding:var(--space-sm) var(--space-lg)}
+.entry-head b{font:600 var(--text-sm)/1.2 var(--font-body);color:var(--color-paper-2)}
+.entry-head .t{font:600 2.75rem/1 var(--font-display);letter-spacing:var(--tracking-display);font-variant-numeric:tabular-nums}
+.cells{display:grid;grid-template-columns:1fr 1fr;background:linear-gradient(var(--color-grid) 1px,transparent 1px) 0 0/8px 8px,linear-gradient(90deg,var(--color-grid) 1px,transparent 1px) 0 0/8px 8px,var(--color-paper-2)}
+.cells>div{padding:var(--space-xs) var(--space-lg) var(--space-sm);border-bottom:1px solid var(--color-ink);opacity:0;transform:translateX(-24px);animation:cell .5s var(--ease-out) forwards;animation-delay:calc(var(--i)*.32s + 1.7s)}
+.cells>div:nth-child(odd){border-right:1px solid var(--color-ink)}
+.cells small{display:block;font-size:var(--text-xs);color:var(--color-muted);font-weight:500}
+.cells span{display:block;font-weight:500;color:var(--color-ink);font-size:var(--text-sm);line-height:1.35}
+.cells .num{font-family:var(--font-outlier)}
+@keyframes cell{to{opacity:1;transform:none}}
+.entry-foot{position:relative;display:flex;justify-content:space-between;align-items:center;padding:var(--space-sm) var(--space-lg);gap:var(--space-sm)}
+.entry-foot .total{font:600 1.5rem/1 var(--font-display);letter-spacing:var(--tracking-display);font-variant-numeric:tabular-nums;color:var(--color-ink)}
+.tag{display:inline-block;padding:var(--space-2xs) var(--space-sm);border-radius:var(--radius-pill);background:var(--color-accent);color:var(--color-accent-ink);font-weight:500;font-size:var(--text-sm);box-shadow:0 0 0 1px var(--color-ink);opacity:0;transform:rotate(-14deg) scale(3.4);animation:slam .55s cubic-bezier(.5,0,.3,1.35) forwards;animation-delay:3.85s}
+@keyframes slam{70%{opacity:1;transform:rotate(-5deg) scale(.9)}100%{opacity:1;transform:rotate(-5deg) scale(1)}}
+.replay.go .cells>div,.replay.go .tag{animation:none}
+/* ticker */
+.ticker{overflow:hidden;background:var(--color-ink);color:var(--color-paper-2)}
+.ticker-in{display:flex;width:max-content;animation:run 34s linear infinite}
+.ticker:hover .ticker-in{animation-play-state:paused}
+.ticker span{padding:var(--space-md) var(--space-xl);font:600 var(--text-xl)/1 var(--font-display);letter-spacing:var(--tracking-display);white-space:nowrap}
+.ticker span+span::before{content:"";display:inline-block;width:10px;height:10px;margin-right:var(--space-xl);background:var(--color-accent);transform:rotate(45deg) translateY(-2px)}
+@keyframes run{to{transform:translateX(-50%)}}
+/* sections */
+.sec{padding:var(--section-gap-s) 0 0}
+.sec h2{max-width:18ch}
+.sec .intro{margin-top:var(--space-md);color:var(--color-muted);max-width:44ch}
+.js .rv{opacity:0;transform:translateY(64px) rotate(1.4deg);transition:opacity .7s var(--ease-out),transform .9s var(--ease-out);transition-delay:calc(var(--d,0)*.1s)}
+.js .rv.in{opacity:1;transform:none}
+.bento{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:var(--space-md);margin-top:var(--space-xl)}
+.cell{position:relative;border-radius:var(--radius-entry);background:var(--color-paper-2);box-shadow:0 0 0 1px var(--color-rule);padding:var(--space-lg);transition:transform var(--dur-long) var(--ease-out),box-shadow var(--dur-long) var(--ease-out)}
+.cell:hover{transform:translateY(-8px);box-shadow:0 0 0 1px var(--color-ink),var(--shadow-lift)}
+.cell h3{margin-bottom:var(--space-xs)}
+.cell p{color:var(--color-muted)}
+.c-kayit{grid-column:span 7;min-height:300px;background:var(--color-accent);box-shadow:0 0 0 1px var(--color-ink)}
+.c-kayit p{color:var(--color-ink)}
+.c-usta{grid-column:span 5}
+.c-para{grid-column:span 5}
+.c-web{grid-column:span 7}
+.c-excel{grid-column:span 12;display:flex;align-items:center;justify-content:space-between;gap:var(--space-lg);flex-wrap:wrap;background:var(--color-paper-3)}
+.ruled{list-style:none;margin:var(--space-lg) 0 0;padding:0;border-top:1px solid var(--color-ink)}
+.ruled li{display:flex;justify-content:space-between;gap:var(--space-md);padding:var(--space-sm) 0;border-bottom:1px solid var(--color-rule);font-weight:500;color:var(--color-ink)}
+.c-kayit .ruled li{border-bottom-color:color-mix(in oklab,var(--color-ink) 28%,transparent)}
+.ruled .num{font-family:var(--font-outlier);font-weight:500}
+.ruled li.sum{border-top:2px solid var(--color-ink);border-bottom:0;font:600 var(--text-xl)/1.2 var(--font-display)}
+.chips{display:flex;flex-wrap:wrap;gap:var(--space-xs);margin-top:var(--space-lg)}
+.chip{padding:var(--space-2xs) var(--space-sm);border-radius:var(--radius-pill);background:var(--color-paper-3);font-size:var(--text-sm);font-weight:500;color:var(--color-ink);text-decoration:none;box-shadow:0 0 0 1px var(--color-rule);transition:transform var(--dur-short) var(--ease-out),background var(--dur-short)}
+.chip:hover{transform:translateY(-3px) rotate(-1.5deg);background:var(--color-accent-soft)}
+.big{font:600 clamp(3rem,6vw,5rem)/.95 var(--font-display);letter-spacing:var(--tracking-display);color:var(--color-ink);font-variant-numeric:tabular-nums}
+.pair{display:flex;gap:var(--space-xl);margin-top:var(--space-lg)}
+.pair p{font-size:var(--text-sm)}
+/* screenshot band */
+.panel{margin-top:var(--space-xl);border-radius:var(--radius-card);background:var(--color-sheet);box-shadow:0 0 0 1px var(--color-ink),var(--shadow-lift);overflow:hidden}
+.js .panel{opacity:0;transform:translateY(80px) scale(.94) rotate(-1deg);transition:opacity .8s var(--ease-out),transform 1.1s var(--ease-out)}
+.js .panel.in{opacity:1;transform:none}
+.panel figcaption{padding:var(--space-sm) var(--space-md);border-top:var(--rule-hair) solid var(--color-rule);font-size:var(--text-sm);color:var(--color-muted);background:var(--color-paper-2)}
+/* index lists */
+.split{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:var(--space-2xl);align-items:start}
+.index{list-style:none;margin:0;padding:0;border-top:1px solid var(--color-ink)}
+.index li{border-bottom:1px solid var(--color-rule)}
+.index a{display:flex;justify-content:space-between;align-items:center;gap:var(--space-md);padding:var(--space-md) var(--space-xs);text-decoration:none;font:600 var(--text-title)/1.2 var(--font-display);letter-spacing:var(--tracking-display);color:var(--color-ink);transition:background var(--dur-short)}
+.index a:hover{background:var(--color-accent-soft)}
+.index a span{display:inline-block;transition:transform var(--dur-short) var(--ease-out)}
+.index a:hover span{transform:translateX(8px)}
+.index a span{font:500 var(--text-sm)/1 var(--font-body);color:var(--color-muted);letter-spacing:0}
+.steps{counter-reset:s}
+.steps li{display:grid;grid-template-columns:72px 1fr;gap:var(--space-md);padding:var(--space-lg) 0;border-bottom:1px solid var(--color-rule)}
+.steps li::before{counter-increment:s;content:counter(s);font:600 3.5rem/1 var(--font-display);color:var(--color-ink);font-variant-numeric:tabular-nums}
+.steps h3{margin-bottom:var(--space-2xs)}.steps p{color:var(--color-muted)}
+/* field band */
+.field{margin-top:var(--section-gap-s);background:var(--color-accent);color:var(--color-accent-ink);padding:var(--space-3xl) 0;background-image:repeating-linear-gradient(0deg,transparent 0 31px,color-mix(in oklab,var(--color-ink) 12%,transparent) 31px 32px)}
+.field h2{max-width:14ch}
+.field .tel{display:inline-block;white-space:nowrap;margin-top:var(--space-lg);font:600 clamp(2.5rem,8vw,7rem)/1 var(--font-display);letter-spacing:var(--tracking-display);color:var(--color-ink);text-decoration:none;font-variant-numeric:tabular-nums;transition:transform var(--dur-long) var(--ease-out)}
+.field .tel:hover{transform:scale(1.04) rotate(-1.2deg)}
+.field p{margin-top:var(--space-md);color:var(--color-ink)}
+.facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--space-xl);margin-top:var(--space-2xl);padding-top:var(--space-lg);border-top:2px solid var(--color-ink)}
+.facts h3{font-size:var(--text-xl)}.facts p{margin-top:var(--space-2xs)}
+/* footer */
+footer{padding:var(--space-3xl) 0 var(--space-xl)}
+footer .container{display:grid;grid-template-columns:minmax(0,2fr) repeat(3,minmax(0,1fr));gap:var(--space-xl)}
+footer h3{font-size:var(--text-md);margin-bottom:var(--space-sm);font-family:var(--font-body);font-weight:500;letter-spacing:0}
+footer ul{list-style:none;margin:0;padding:0;display:grid;gap:var(--space-xs)}
+footer a{overflow-wrap:anywhere;text-decoration:none;color:var(--color-muted);font-size:var(--text-sm)}footer a:hover{color:var(--color-ink);text-decoration:underline}
+footer .about{color:var(--color-muted);font-size:var(--text-sm);margin-top:var(--space-sm);max-width:32ch}
+@media (max-width:30rem){footer .container{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:40rem){.nav img{width:136px;height:auto}.nav .container{gap:var(--space-sm)}.facts{grid-template-columns:minmax(0,1fr);gap:var(--space-lg)}.nav .btn{padding:0 var(--space-sm)}}
+@media (max-width:60rem){
+ .hero .container,.split{grid-template-columns:minmax(0,1fr)}
+ .stage{min-height:0;display:grid;gap:var(--space-md)}
+ .shot,.entry{position:relative;width:100%}
+ .entry{order:-1;max-width:420px}
+ .nav ul{display:none}.nav .btn--ghost{display:none}.nav .btn--primary{margin-left:auto}
+ .c-kayit,.c-usta,.c-para,.c-web{grid-column:span 12}
+ footer .container{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:30rem){footer .container{grid-template-columns:minmax(0,1fr)}}
+@media (prefers-reduced-motion:reduce){
+ .nav,.hero h1 .w>span,.hero .lead,.actions,.hero .small,.shot,.entry,.btn--primary.nudge,.ticker-in{animation:none!important}
+ .cells>div,.js .rv,.js .panel{opacity:1!important;transform:none!important;animation:none!important;transition:none!important}
+ .tag{opacity:1!important;transform:rotate(-5deg)!important;animation:none!important}
+ .ticker-in{width:auto;flex-wrap:wrap}
+}
+</style></head>
+<body>
+<header class="nav"><div class="container">
+ <a href="/" aria-label="OnlineKaydet ana sayfa"><img src="logo-renkli-s.png" alt="OnlineKaydet" width="184" height="46"></a>
+ <ul><li><a href="ozellikler.html">Ürün</a></li><li><a href="sektorler.html">Sektörler</a></li><li><a href="temalar.html">Temalar</a></li><li><a href="fiyatlar.html">Fiyatlar</a></li><li><a href="destek.html">Destek</a></li></ul>
+ <a class="btn btn--ghost num" href="tel:+905444444004">0544 444 40 04</a>
+ <a class="btn btn--primary" href="demo.html">Ücretsiz deneyin</a>
+</div></header>
+
+<main>
+<section class="hero"><div class="container">
+ <div>
+  <h1><span class="w"><span>Servis</span></span><span class="w"><span>kaydı, tek</span></span><span class="w"><span>defterde.</span></span></h1>
+  <p class="lead">Kayıt, usta, tahsilat ve web siteniz tek yerde; kurulumu biz yaparız.</p>
+  <div class="actions"><a class="btn btn--primary nudge" href="demo.html">Ücretsiz deneyin</a><a class="btn num" href="tel:+905444444004">0544 444 40 04</a></div>
+ </div>
+ <div class="stage">
+  <figure class="shot" style="margin:0"><img src="s1.png" width="1184" height="698" alt="OnlineKaydet panelinde bugünün programı, açık servis kayıtları ve aylık tahsilat"></figure>
+  <figure class="entry shake replay" id="entry" role="img" aria-label="Örnek servis fişi: Ayşe Yılmaz, Baymak Luna 3 Comfort, toplam 1.150 lira, kapandı">
+   <div class="entry-head"><b>Servis fişi</b><span class="t num">SV-1049</span></div>
+   <div class="cells">
+    <div style="--i:0"><small>Müşteri</small><span>Ayşe Yılmaz</span></div>
+    <div style="--i:1"><small>Cihaz</small><span>Baymak Luna 3 Comfort</span></div>
+    <div style="--i:2"><small>Arıza</small><span class="num">E01 hata kodu</span></div>
+    <div style="--i:3"><small>Yapılan</small><span>Basınç ayarlandı</span></div>
+    <div style="--i:4"><small>Parça</small><span class="num">650 ₺</span></div>
+    <div style="--i:5"><small>İşçilik</small><span class="num">500 ₺</span></div>
+   </div>
+   <div class="entry-foot"><span class="total num" id="total">1.150 ₺</span><span class="tag">Kapandı</span></div>
+  </figure>
+ </div>
+</div></section>
+
+<div class="ticker" aria-label="Hazır sektörler"><div class="ticker-in">
+ <span>Kombi</span><span>Klima</span><span>Beyaz eşya</span><span>Bilgisayar</span><span>Elektrik</span><span>Elektronik</span><span>Güvenlik</span><span>Tesisat</span>
+ <span>Kombi</span><span>Klima</span><span>Beyaz eşya</span><span>Bilgisayar</span><span>Elektrik</span><span>Elektronik</span><span>Güvenlik</span><span>Tesisat</span>
+</div></div>
+
+<section class="sec"><div class="container">
+ <h2 class="rv">Defter yerine panel</h2>
+ <p class="intro rv" style="--d:1">Aynı sadelik, ama kayıt kaybolmaz.</p>
+ <div class="bento">
+  <article class="cell c-kayit rv"><h3>Kayıt</h3><p>Müşteri, cihaz, arıza ve randevu tek kayıtta. Aynı müşteri tekrar arayınca geçmişi hazır.</p>
+   <ul class="ruled"><li>Müşteri<span class="num">Ayşe Yılmaz</span></li><li>Cihaz<span class="num">Baymak Luna 3</span></li><li>Arıza<span class="num">E01</span></li></ul></article>
+  <article class="cell c-usta rv" style="--d:1"><h3>Usta</h3><p>İş ustanın telefonuna gider. Usta fotoğraf çeker, müşteri imzayı ekrana atar, fiş PDF olarak çıkar.</p>
+   <ul class="ruled"><li>Fotoğraf<span class="num">işten önce, sonra</span></li><li>İmza<span class="num">ekrandan</span></li><li>Fiş<span class="num">PDF</span></li></ul></article>
+  <article class="cell c-para rv" style="--d:2"><h3>Tahsilat</h3><p>Kimin ne kadar tahsil ettiği ve bekleyen ödemeler panelde.</p>
+   <ul class="ruled"><li>Parça<span class="num">650 ₺</span></li><li>İşçilik<span class="num">500 ₺</span></li><li class="sum">Toplam<span class="num">1.150 ₺</span></li></ul></article>
+  <article class="cell c-web rv" style="--d:3"><h3>Web siteniz</h3><p>Sektörünüze göre hazır tema seçin, kurulumu biz yapalım.</p>
+   <div class="pair"><div><div class="big num">30</div><p>hazır tema</p></div><div><div class="big num">8</div><p>sektör</p></div></div></article>
+  <article class="cell c-excel rv"><div><h3>Defteriniz Excel’de mi?</h3><p>Kayıtlarınızı biz aktarırız.</p></div><a class="btn btn--primary" href="demo.html">Ücretsiz deneyin</a></article>
+ </div>
+</div></section>
+
+<section class="sec"><div class="container split">
+ <div><h2 class="rv">Sektörünüze göre</h2><p class="intro rv" style="--d:1">Her sektörün kendi sayfası ve hazır teması var.</p></div>
+ <ul class="index rv" style="--d:2">
+  <li><a href="sektor-kombi.html">Kombi servisi <span>Sayfayı aç</span></a></li>
+  <li><a href="sektor-klima.html">Klima servisi <span>Sayfayı aç</span></a></li>
+  <li><a href="sektor-beyaz-esya.html">Beyaz eşya servisi <span>Sayfayı aç</span></a></li>
+  <li><a href="sektor-bilgisayar.html">Bilgisayar servisi <span>Sayfayı aç</span></a></li>
+  <li><a href="sektor-elektrik.html">Elektrik <span>Sayfayı aç</span></a></li>
+  <li><a href="sektor-elektronik.html">Elektronik servisi <span>Sayfayı aç</span></a></li>
+  <li><a href="sektor-guvenlik.html">Güvenlik sistemleri <span>Sayfayı aç</span></a></li>
+  <li><a href="sektor-tesisat.html">Tesisat <span>Sayfayı aç</span></a></li>
+ </ul>
+</div></section>
+
+<section class="sec"><div class="container split">
+ <div><h2 class="rv">Üç adımda başlayın</h2></div>
+ <ol class="index steps rv" style="--d:1;list-style:none;padding:0;margin:0">
+  <li><div><h3>Bizi arayın</h3><p>Firmanızı ve sektörünüzü anlatın.</p></div></li>
+  <li><div><h3>Biz kuralım</h3><p>Panel, web siteniz ve Excel kayıtlarınız hazır gelir.</p></div></li>
+  <li><div><h3>İlk ay ücretsiz kullanın</h3><p>Beğenmezseniz bırakın.</p></div></li>
+ </ol>
+</div></section>
+
+<section class="field"><div class="container">
+ <h2 class="rv">Bir telefon yeter.</h2>
+ <a class="tel num rv" style="--d:1" href="tel:+905444444004">0544 444 40 04</a>
+ <p class="rv" style="--d:2">Her gün arayın, kurulumu birlikte başlatalım.</p>
+ <div class="facts rv" style="--d:3"><div><h3>İlk ay ücretsiz</h3><p>Beğenmezseniz bırakın.</p></div><div><h3>Kurulumu biz yaparız</h3><p>Panel ve web siteniz hazır gelir.</p></div><div><h3>Excel aktarımı bizden</h3><p>Defter kayıtlarınız kaybolmaz.</p></div></div>
+</div></section>
+</main>
+
+<footer><div class="container">
+ <div><img src="logo-renkli-s.png" alt="OnlineKaydet" width="160" height="40"><p class="about">Teknik servisler için servis kaydı, usta takibi ve hazır web sitesi.</p></div>
+ <nav aria-label="Ürün"><h3>Ürün</h3><ul><li><a href="ozellikler.html">Özellikler</a></li><li><a href="usta-uygulamasi.html">Usta uygulaması</a></li><li><a href="entegrasyonlar.html">Entegrasyonlar</a></li><li><a href="fiyatlar.html">Fiyatlar</a></li></ul></nav>
+ <nav aria-label="Keşfet"><h3>Keşfet</h3><ul><li><a href="temalar.html">Temalar</a></li><li><a href="sektorler.html">Sektörler</a></li><li><a href="blog.html">Blog</a></li><li><a href="neden-onlinekaydet.html">Neden OnlineKaydet</a></li></ul></nav>
+ <nav aria-label="Destek"><h3>Destek</h3><ul><li><a href="destek.html">Yardım</a></li><li><a href="iletisim.html">İletişim</a></li><li><a href="demo.html">Demo hesabı</a></li></ul></nav>
+</div></footer>
+
+<script>
+(function(){
+ var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.15});
+ document.querySelectorAll('.rv,.panel').forEach(function(el){io.observe(el)});
+ var en=document.getElementById('entry');
+ if(en){en.addEventListener('click',function(){
+  var c=en.cloneNode(true);c.id='entry';en.parentNode.replaceChild(c,en);en=c;
+  c.classList.remove('shake');void c.offsetWidth;c.classList.add('shake');
+  c.addEventListener('click',arguments.callee);
+ });}
+})();
+</script>
+</body></html>
