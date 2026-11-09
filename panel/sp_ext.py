@@ -23,6 +23,7 @@ from fastapi.responses import Response, RedirectResponse, JSONResponse
 from pydantic import BaseModel
 
 import shop as shopmod
+import markets_hub
 import shop_sync
 
 log = logging.getLogger("sp_ext")
@@ -45,6 +46,9 @@ MODULES = [
     ("trendyol", "Pazaryeri", "Trendyol", "Sipariş çekme, stok/fiyat gönderme.", False),
     ("hepsiburada", "Pazaryeri", "Hepsiburada", "Sipariş çekme, stok/fiyat gönderme.", False),
     ("n11", "Pazaryeri", "N11", "Sipariş çekme, stok/fiyat gönderme.", False),
+    ("ciceksepeti", "Pazaryeri", "Çiçeksepeti", "Siparişler 5 dakikada bir otomatik gelir, stok/fiyat gönderilir. Bağlantıyı gerçek hesapla test edin.", False),
+    ("pazarama", "Pazaryeri", "Pazarama", "Siparişler 5 dakikada bir otomatik gelir, stok gönderilir. Bağlantıyı gerçek hesapla test edin.", False),
+    ("pttavm", "Pazaryeri", "PttAVM", "Siparişler 5 dakikada bir otomatik gelir, stok/fiyat gönderilir. Bağlantıyı gerçek hesapla test edin.", False),
     ("seo_bulk", "SEO", "Toplu SEO güncelleme", "Sayfa yoluna göre başlık / açıklama / robots kuralları.", False),
     ("log404", "SEO", "404 yönetimi", "Bulunamayan adresleri kaydeder.", False),
     ("redirects", "SEO", "301 yönlendirmeleri", "Eski adresleri yenisine yönlendirir.", False),
@@ -95,6 +99,9 @@ CONFIG_FIELDS = {
     "trendyol": {"seller_id": ("Satıcı ID", False), "api_key": ("API Key", True), "api_secret": ("API Secret", True)},
     "hepsiburada": {"merchant_id": ("Merchant ID", False), "service_key": ("Servis Anahtarı", True), "developer": ("Geliştirici kullanıcı adı", False)},
     "n11": {"app_key": ("App Key", True), "app_secret": ("App Secret", True)},
+    "ciceksepeti": {"api_key": ("API Key", True), "orders_url": ("Sipariş adresi (boş = varsayılan)", False), "stock_url": ("Stok adresi (boş = varsayılan)", False)},
+    "pazarama": {"client_id": ("Client ID", False), "client_secret": ("Client Secret", True), "orders_url": ("Sipariş adresi (boş = varsayılan)", False), "stock_url": ("Stok adresi (boş = varsayılan)", False)},
+    "pttavm": {"api_key": ("Api-Key", True), "access_token": ("Access-Token", True), "orders_url": ("Sipariş adresi (boş = varsayılan)", False), "stock_url": ("Stok adresi (boş = varsayılan)", False)},
     "social": {"instagram": ("Instagram (hesap adı veya adres)", False), "facebook": ("Facebook sayfası (ad veya adres)", False), "x": ("X / Twitter (hesap adı veya adres)", False),
                "youtube": ("YouTube kanalı (adres)", False), "tiktok": ("TikTok (hesap adı veya adres)", False), "linkedin": ("LinkedIn şirket sayfası (adres)", False),
                "pinterest": ("Pinterest (hesap adı veya adres)", False), "telegram": ("Telegram (kullanıcı adı veya adres)", False),
@@ -663,35 +670,30 @@ def register(api_router, db, deps):
         return {"orders": "https://api.n11.com/rest/delivery/v1/shipmentPackages?size=50", "stock": "https://api.n11.com/ms/product/tasks/price-stock-update"}
 
     def check_market(mid: str):
-        if mid not in ("trendyol", "hepsiburada", "n11"):
+        if mid not in markets_hub.ALL:
             raise HTTPException(status_code=404, detail="Bilinmeyen pazaryeri")
 
     @api_router.post("/admin/market/{mid}/test")
     async def market_test(mid: str, _: dict = adm):
         check_market(mid)
-        u = market_urls(mid, await cfg(mid))
-        code, data = await market_request(mid, "GET", u["orders"])
-        return {"ok": code < 300, "status": code, "message": "Bağlantı başarılı" if code < 300 else (str(data)[:200] or "Hata")}
+        c = await shop_sync.market_cfg(db, mid)
+        if not markets_hub.connected(mid, c):
+            raise HTTPException(status_code=400, detail="Önce anahtarları girin (Aç/Kapat & Ayarlar)")
+        try:
+            rows = await markets_hub.fetch(mid, c)
+        except Exception as e:                                         # noqa: BLE001
+            return {"ok": False, "status": 0, "message": str(e)[:240]}
+        return {"ok": True, "status": 200, "message": f"Bağlantı başarılı ({len(rows)} sipariş görüldü)"}
 
     @api_router.post("/admin/market/{mid}/pull-orders")
     async def market_pull(mid: str, _: dict = adm):
         check_market(mid)
-        u = market_urls(mid, await cfg(mid))
-        code, data = await market_request(mid, "GET", u["orders"])
-        if code >= 300:
-            raise HTTPException(status_code=502, detail=f"{mid} yanıtı {code}: {str(data)[:200]}")
-        rows = data.get("content") or data.get("items") or data.get("data") or data.get("shipmentPackages") or (data if isinstance(data, list) else [])
-        n = 0
-        for r in rows:
-            key = str(r.get("orderNumber") or r.get("id") or r.get("packageNumber") or r.get("orderId") or uuid.uuid4().hex)
-            doc = {"market": mid, "key": key, "raw": r, "pulled_at": now_iso(), "number": key,
-                   "total": r.get("totalPrice") or r.get("totalAmount") or r.get("grossAmount") or 0,
-                   "customer": (str(r.get("customerFirstName", "")) + " " + str(r.get("customerLastName", ""))).strip() or str(r.get("customerName") or ""),
-                   "status": r.get("status") or r.get("packageStatus") or ""}
-            await db.sp_market_orders.update_one({"market": mid, "key": key}, {"$set": doc}, upsert=True)
-            await shop_sync.apply_market_order(db, mid, key, r)       # pazaryeri siparişi tek havuzdan düşer, diğer kanallara yansır
-            n += 1
-        return {"ok": True, "pulled": n}
+        try:
+            return await markets_hub.pull(db, mid)                      # sipariş listesine yazar, stoğu bir kez düşer
+        except HTTPException:
+            raise
+        except Exception as e:                                         # noqa: BLE001
+            raise HTTPException(status_code=502, detail=str(e)[:240])
 
     @api_router.get("/admin/market/orders")
     async def market_orders(_: dict = adm):

@@ -2896,6 +2896,8 @@ firms.register(api_router, db, {"require_admin": require_admin, "get_current_use
 import leads; leads.register(api_router, db, {"require_admin": require_admin})
 sp_ext.register(api_router, db, {"require_admin": require_admin, "get_current_user": get_current_user, "verify_password": verify_password,
                                  "JWT_SECRET": JWT_SECRET, "JWT_ALGORITHM": JWT_ALGORITHM})
+import markets_hub
+markets_hub.register(api_router, db, {"require_admin": require_admin})
 import gsc_auto
 import spx4
 spx4.register(api_router, db, {"require_admin": require_admin})
@@ -3439,6 +3441,17 @@ async def _firm_maint_start():
     try:
         if firms.MAINT_LOOP:
             asyncio.create_task(firms.MAINT_LOOP())
+    except Exception:                                    # noqa: BLE001
+        pass
+
+
+@app.on_event("startup")
+async def _market_auto_start():
+    """Pazaryeri siparişleri otomatik düşsün (5 dk'da bir; markets_hub tek işçi kilidi kullanır)."""
+    try:
+        if os.environ.get('BACKGROUND_JOBS', '1') != '0' and os.environ.get('MARKET_AUTO', '1') != '0':
+            import markets_hub
+            app.state.market_auto = asyncio.create_task(markets_hub.auto_loop(db, firms, tenant))
     except Exception:                                    # noqa: BLE001
         pass
 

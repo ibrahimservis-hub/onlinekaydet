@@ -50,6 +50,12 @@ def connected(mk: str, c: dict) -> bool:
         return bool(c.get("merchant_id") and c.get("service_key"))
     if mk == "n11":
         return bool(c.get("app_key") and c.get("app_secret"))
+    if mk == "ciceksepeti":
+        return bool(c.get("api_key"))
+    if mk == "pazarama":
+        return bool(c.get("client_id") and c.get("client_secret"))
+    if mk == "pttavm":
+        return bool(c.get("api_key") and c.get("access_token"))
     return False
 
 
@@ -68,7 +74,11 @@ async def http(method: str, url: str, headers: dict, body=None):
         return await HTTP["fn"](method, url, headers, body)
 
     def go():
-        r = requests.request(method, url, headers=headers, data=json.dumps(body) if body is not None else None, timeout=25)
+        if isinstance(body, dict) and "__form__" in body:
+            data = body["__form__"]                       # form gövdesi (OAuth anahtar isteği)
+        else:
+            data = json.dumps(body) if body is not None else None
+        r = requests.request(method, url, headers=headers, data=data, timeout=25)
         try:
             return r.status_code, r.json()
         except Exception:                                  # noqa: BLE001
@@ -98,6 +108,22 @@ def stock_body(mk: str, prods: list) -> object:
                                                              "salePrice": ch.channel_price(p, mk), "currencyType": "TL"} for p in prods]}}
 
 
+def _attr_list(cm: dict, attrs: dict) -> list:
+    """Kategori özellikleri: değer listede varsa değer kodu, yoksa serbest metin olarak gönderilir."""
+    meta = {str(a.get("id")): a for a in (cm.get("required_attrs") or [])}
+    out = []
+    for k, v in attrs.items():
+        v = str(v).strip()
+        if not str(k).isdigit() or not v:
+            continue
+        vals = {str(x.get("id")) for x in (meta.get(str(k)) or {}).get("values") or []}
+        if v.isdigit() and (not vals or v in vals):
+            out.append({"attributeId": int(k), "attributeValueId": int(v)})
+        else:
+            out.append({"attributeId": int(k), "customAttributeValue": v})
+    return out
+
+
 def trendyol_item(p: dict, cm: dict, bm: dict, settings: dict) -> dict:
     """Trendyol createProducts (v2) kalemi — alan adları resmi belgedeki gibi."""
     attrs = {**(cm.get("attrs") or {}), **((p.get("market_attrs") or {}).get("trendyol") or {})}
@@ -106,7 +132,7 @@ def trendyol_item(p: dict, cm: dict, bm: dict, settings: dict) -> dict:
             "description": (p.get("description") or p.get("short") or "")[:30000], "currencyType": "TRY",
             "listPrice": max(float(p.get("old_price") or 0), ch.channel_price(p, "trendyol")), "salePrice": ch.channel_price(p, "trendyol"), "vatRate": int(p.get("kdv", 20)),
             "images": [{"url": u} for u in (settings.get("abs_images") or {}).get(p["id"], p.get("images") or [])][:8],
-            "attributes": [{"attributeId": int(k), "attributeValueId": int(v)} for k, v in attrs.items() if str(k).isdigit() and str(v).isdigit()]}
+            "attributes": _attr_list(cm, attrs)}
     if settings.get("cargo_company_id"):
         item["cargoCompanyId"] = int(settings["cargo_company_id"])
     return item
@@ -207,7 +233,13 @@ def register(api_router, db, deps):
         ext = str(payload.get("ext_id", "")).strip()[:40]
         if ext and not ext.isdigit() and mk == "trendyol":
             raise HTTPException(422, "Trendyol kategori kodu sayı olmalı")
-        req = [{"id": str(a.get("id"))[:20], "name": str(a.get("name", ""))[:60]} for a in (payload.get("required_attrs") or [])[:40] if a.get("id") is not None]
+        req = []
+        for a in (payload.get("required_attrs") or [])[:60]:
+            aid = str(a.get("id") if a.get("id") not in (None, "") else "n_" + re.sub(r"[^a-z0-9]+", "_", str(a.get("name", "")).lower())).strip()[:30]
+            if not aid or aid == "n_":
+                continue
+            vals = [{"id": str(v.get("id"))[:20], "name": str(v.get("name", ""))[:80]} for v in (a.get("values") or [])[:500] if isinstance(v, dict) and v.get("id") is not None]
+            req.append({"id": aid, "name": str(a.get("name", ""))[:60], "required": a.get("required", True) is not False, "allow_custom": bool(a.get("allow_custom")), "values": vals})
         attrs = {str(k)[:20]: str(v)[:40] for k, v in (payload.get("attrs") or {}).items()}
         if not ext:
             await db.market_catmap.delete_one({"market": mk, "category_id": cid})
@@ -215,6 +247,30 @@ def register(api_router, db, deps):
             await db.market_catmap.update_one({"market": mk, "category_id": cid}, {"$set": {"market": mk, "category_id": cid, "ext_id": ext, "ext_name": str(payload.get("ext_name", ""))[:120],
                                                                                           "required_attrs": req, "attrs": attrs, "updated_at": _now()}}, upsert=True)
         return {"ok": True}
+
+    @api_router.get("/shop/channels/{mk}/category-attrs")
+    async def category_attrs(mk: str, ext_id: str, _: dict = adm):
+        """Pazaryerinin kategori özelliklerini (renk, beden/ebat ...) ve seçilebilir değerlerini getirir. Şimdilik yalnızca Trendyol'da otomatik."""
+        check_mk(mk)
+        ext_id = str(ext_id).strip()
+        if mk != "trendyol":
+            raise HTTPException(501, "Bu pazaryerinde özellikler elle eklenir (Özellik ekle düğmesi); satıcı panelindeki kategori şablonundaki adları yazın.")
+        if not ext_id.isdigit():
+            raise HTTPException(422, "Önce Trendyol kategori kodunu (sayı) girin")
+        c = await market_cfg(db, mk)
+        if not connected(mk, c):
+            raise HTTPException(400, "Önce Trendyol anahtarlarını girin (Pazaryerleri > Aç/Kapat & Ayarlar)")
+        code, data = await http("GET", f"https://apigw.trendyol.com/integration/product/product-categories/{ext_id}/attributes", _headers(mk, c))
+        if code >= 300:
+            raise HTTPException(502, f"Trendyol yanıtı {code}: {str(data)[:160]}")
+        out = []
+        for a in (data.get("categoryAttributes") or []):
+            at = a.get("attribute") or {}
+            if at.get("id") is None:
+                continue
+            out.append({"id": str(at["id"]), "name": at.get("name", ""), "required": bool(a.get("required")), "allow_custom": bool(a.get("allowCustom")),
+                        "values": [{"id": str(v.get("id")), "name": v.get("name", "")} for v in (a.get("attributeValues") or []) if v.get("id") is not None][:500]})
+        return {"attrs": out}
 
     @api_router.put("/shop/channels/{mk}/brandmap")
     async def brandmap_put(mk: str, payload: dict, _: dict = adm):
@@ -493,7 +549,12 @@ async def process_queue(db, limit=100):
                 err = "Pazaryeri bağlantı bilgileri eksik"
             elif prods:
                 try:
-                    code, data = await http("POST", urls(mk, c)["stock"], _headers(mk, c), stock_body(mk, prods))
+                    if mk in ("ciceksepeti", "pazarama", "pttavm"):
+                        import markets_hub
+                        u_, b_ = markets_hub.stock_request(mk, c, prods)
+                        code, data = await http(c.get("stock_method") or ("PUT" if mk == "ciceksepeti" else "POST"), u_, await markets_hub.headers(mk, c), b_)
+                    else:
+                        code, data = await http("POST", urls(mk, c)["stock"], _headers(mk, c), stock_body(mk, prods))
                     if code >= 300:
                         err = f"{mk} yanıtı {code}: {str(data)[:160]}"
                 except Exception as e:                       # noqa: BLE001

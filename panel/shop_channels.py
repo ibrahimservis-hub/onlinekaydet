@@ -16,9 +16,9 @@ MARKETS = {
     "trendyol": {"name": "Trendyol", "live": True},
     "hepsiburada": {"name": "Hepsiburada", "live": True},
     "n11": {"name": "N11", "live": True},
-    "ciceksepeti": {"name": "Çiçeksepeti", "live": False},
-    "pazarama": {"name": "Pazarama", "live": False},
-    "pttavm": {"name": "PttAVM", "live": False},
+    "ciceksepeti": {"name": "Çiçeksepeti", "live": True},
+    "pazarama": {"name": "Pazarama", "live": True},
+    "pttavm": {"name": "PttAVM", "live": True},
 }
 KDV_RATES = (0, 1, 10, 20)
 
@@ -33,7 +33,11 @@ REQUIRED = {
             ("images", "En az 1 görsel"), ("description", "Açıklama"), ("price", "Fiyat"), ("kdv", "KDV oranı"), ("delivery_days", "Hazırlık süresi (gün)"),
             ("attrs", "Kategorinin zorunlu özellikleri")],
 }
-TITLE_MAX = {"trendyol": 100, "hepsiburada": 200, "n11": 255}
+_BASIC = [("barcode", "Barkod"), ("sku", "Stok kodu"), ("name", "Ürün adı"), ("brand", "Marka"), ("category_map", "{m} kategori eşlemesi"),
+          ("images", "En az 1 görsel"), ("description", "Açıklama"), ("price", "Fiyat"), ("kdv", "KDV oranı")]
+for _mk, _nm in (("ciceksepeti", "Çiçeksepeti"), ("pazarama", "Pazarama"), ("pttavm", "PttAVM")):
+    REQUIRED[_mk] = [(a, b.replace("{m}", _nm)) for a, b in _BASIC] + [("attrs", "Kategorinin zorunlu özellikleri")]
+TITLE_MAX = {"trendyol": 100, "hepsiburada": 200, "n11": 255, "ciceksepeti": 150, "pazarama": 200, "pttavm": 200}
 
 
 def _now() -> str:
@@ -117,7 +121,7 @@ def issues(p: dict, mk: str, catmap: dict = None, brandmap: dict = None, setting
         elif f == "delivery_days":
             bad = int(p.get("delivery_days") or 0) <= 0
         elif f == "attrs":
-            need = [a for a in (cm.get("required_attrs") or [])]
+            need = [a for a in (cm.get("required_attrs") or []) if a.get("required", True) is not False]
             have = dict(cm.get("attrs") or {})
             have.update((p.get("market_attrs") or {}).get(mk) or {})
             miss = [a.get("name") or str(a.get("id")) for a in need if str(a.get("id")) not in {str(k) for k, v in have.items() if v}]

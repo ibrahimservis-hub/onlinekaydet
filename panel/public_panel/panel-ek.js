@@ -5508,25 +5508,64 @@
     }
   }
   function mgMap() {
-    var mk = MG.mk;
+    var mk = MG.mk, MKN = (MGM.filter(function (x) { return x[0] === mk; })[0] || [0, mk])[1], CM = {};
     call('GET', '/shop/channels/' + mk + '/catmap').then(function (r) {
-      var h = '<div class="spx-card"><b>Kategori eşleme</b><small style="display:block;color:#64748b">Kendi kategoriniz tek kaynaktır. Pazaryerinin kategori kodunu (' + mk + ' satıcı panelindeki kategori no) girin. Zorunlu özellikleri her satıra <code>kod:ad</code>, seçilen değerleri <code>kod=değerkodu</code> olarak yazın.</small>' +
-        (r.categories.length ? r.categories.map(function (c) {
-          var m = c.map || {};
-          return '<div class="mg-row" data-cid="' + c.id + '" style="align-items:flex-start"><div style="max-width:200px"><b>' + esc(c.name) + '</b></div><div>' + mgIn('mc_e' + c.id, 'Pazaryeri kategori kodu', m.ext_id || '', 'text') + '</div><div><label>Zorunlu özellikler (kod:ad)<textarea rows="3" id="mc_r' + c.id + '">' + esc((m.required_attrs || []).map(function (a) { return a.id + ':' + a.name; }).join('\n')) + '</textarea></label></div><div><label>Seçilen değerler (kod=değer)<textarea rows="3" id="mc_a' + c.id + '">' + esc(Object.keys(m.attrs || {}).map(function (k) { return k + '=' + m.attrs[k]; }).join('\n')) + '</textarea></label></div><div><button class="spx-b p" data-cs="' + c.id + '">Kaydet</button></div></div>';
-        }).join('') : '<div class="mg-w">Önce “Yeni ürün” ekranından kategori ekleyin.</div>') + '</div>';
-      h += '<div class="spx-card"><b>Marka kodları</b><small style="display:block;color:#64748b">Her marka için pazaryerindeki marka numarası.</small>' + (r.brands.length ? r.brands.map(function (b) { return '<div class="mg-row"><div>' + esc(b.name) + '</div><div>' + '<input class="mg_br" data-b="' + esc(b.name) + '" value="' + esc(b.ext_id) + '" placeholder="marka no"></div></div>'; }).join('') + '<button class="spx-b p" id="mg_bs" style="margin-top:8px">Marka kodlarını kaydet</button>' : '<div style="color:#64748b">Üründe marka girilince burada listelenir.</div>') + '</div>';
+      var colorLike = function (n) { return /renk|color/i.test(n || ''); };
+      r.categories.forEach(function (c) {
+        var m = c.map || {}, at = m.attrs || {};
+        CM[c.id] = { ext: m.ext_id || '', attrs: (m.required_attrs || []).map(function (a) { return { id: a.id, name: a.name, required: a.required !== false, allow_custom: !!a.allow_custom, values: a.values || [], def: at[a.id] || '' }; }) };
+      });
+      var attrRow = function (cid, a, i) {
+        var val = a.values && a.values.length ? '<select data-f="def" data-c="' + cid + '" data-i="' + i + '"><option value="">— seçin —</option>' + a.values.map(function (v) { return '<option value="' + esc(v.id) + '"' + (String(v.id) === String(a.def) ? ' selected' : '') + '>' + esc(v.name) + '</option>'; }).join('') + '</select>'
+          : '<input data-f="def" data-c="' + cid + '" data-i="' + i + '" value="' + esc(a.def) + '" placeholder="' + (colorLike(a.name) ? 'örn. Beyaz' : 'değer yazın') + '">';
+        return '<tr><td><input data-f="name" data-c="' + cid + '" data-i="' + i + '" value="' + esc(a.name) + '" placeholder="Özellik adı (örn. Renk, Ebat)"></td>' +
+          '<td style="width:110px"><input data-f="id" data-c="' + cid + '" data-i="' + i + '" value="' + esc(String(a.id || '').indexOf('n_') === 0 ? '' : a.id) + '" placeholder="' + (mk === 'trendyol' ? 'Trendyol kodu' : 'kod (isteğe bağlı)') + '"></td>' +
+          '<td style="width:70px;text-align:center"><label class="spx-sw"><input type="checkbox" data-f="req" data-c="' + cid + '" data-i="' + i + '"' + (a.required ? ' checked' : '') + '><i></i></label></td>' +
+          '<td>' + val + '</td><td style="width:40px"><button type="button" class="spx-b" data-act="del" data-c="' + cid + '" data-i="' + i + '" title="Satırı sil">✕</button></td></tr>';
+      };
+      var catCard = function (c) {
+        var s = CM[c.id];
+        return '<div class="spx-card" data-card="' + c.id + '" style="border:1px solid #e2e8f0"><div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap"><div style="min-width:180px"><b style="font-size:15px">' + esc(c.name) + '</b><small style="display:block;color:#64748b">kendi kategoriniz</small></div>' +
+          '<div style="flex:1;min-width:220px"><label>' + esc(MKN) + ' kategori kodu<input data-f="ext" data-c="' + c.id + '" value="' + esc(s.ext) + '" placeholder="satıcı panelindeki kategori no"></label></div>' +
+          (mk === 'trendyol' ? '<button type="button" class="spx-b" data-act="fetch" data-c="' + c.id + '">Özellikleri ' + esc(MKN) + '’dan getir</button>' : '') + '</div>' +
+          '<div style="margin-top:10px;overflow:auto"><table class="mg-tb" style="width:100%"><tr><th>Özellik</th><th>Kod</th><th>Zorunlu</th><th>Tüm ürünlerde aynı değer</th><th></th></tr>' + (s.attrs.length ? s.attrs.map(function (a, i) { return attrRow(c.id, a, i); }).join('') : '<tr><td colspan="5" style="color:#64748b">Bu kategori için özellik eklenmedi. “Özellik ekle” ile renk, ebat/beden gibi pazaryerinin istediği alanları tanımlayın.</td></tr>') + '</table></div>' +
+          '<div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;align-items:center"><button type="button" class="spx-b" data-act="add" data-c="' + c.id + '">+ Özellik ekle</button><button type="button" class="spx-b" data-act="add" data-n="Renk" data-c="' + c.id + '">+ Renk</button><button type="button" class="spx-b" data-act="add" data-n="Ebat / Beden" data-c="' + c.id + '">+ Ebat / Beden</button>' +
+          '<span style="flex:1"></span><button type="button" class="spx-b p" data-act="save" data-c="' + c.id + '">Kaydet</button></div></div>';
+      };
+      var h = '<div class="spx-card"><b>' + esc(MKN) + ' · kategori ve özellik eşleme</b><small style="display:block;color:#64748b;margin-top:4px;line-height:1.5">' + esc(MKN) + ' her kategori için kendi zorunlu alanlarını ister (örneğin renk, ebat/beden, malzeme). Burada kategori başına <b>bir kez</b> tanımlarsınız. Bütün ürünlerde aynı olan değeri sağdaki kutuya yazın; ürüne göre değişen değerleri (her ürünün rengi gibi) boş bırakın, <b>ürün ekranı → Pazaryeri ve Kanallar</b> sekmesinde ürün ürün girersiniz. Eksik alan varsa ürün listesinde “Eksik” görünür ve neyin eksik olduğu yazar.' +
+        (mk === 'trendyol' ? '' : '<br><span style="color:#92400e">Bu pazaryerinde özellik listesi otomatik gelmez: satıcı panelindeki kategori şablonunda yazan adları elle ekleyin.</span>') + '</small></div>';
+      h += r.categories.length ? r.categories.map(catCard).join('') : '<div class="spx-card"><div class="mg-w">Önce “Ürün Ekle” ekranından kategori ekleyin; sonra burada pazaryeri kodlarını eşlersiniz.</div></div>';
+      h += '<div class="spx-card"><b>Marka kodları</b><small style="display:block;color:#64748b">Her markanın ' + esc(MKN) + ' numarası (marka kodu zorunlu olan pazaryerlerinde gerekir).</small>' + (r.brands.length ? r.brands.map(function (b) { return '<div class="mg-row"><div>' + esc(b.name) + '</div><div>' + '<input class="mg_br" data-b="' + esc(b.name) + '" value="' + esc(b.ext_id) + '" placeholder="marka no"></div></div>'; }).join('') + '<button class="spx-b p" id="mg_bs" style="margin-top:8px">Marka kodlarını kaydet</button>' : '<div style="color:#64748b">Üründe marka girilince burada listelenir.</div>') + '</div>';
       var s = r.settings || {};
       h += '<div class="spx-card"><b>Kanal ayarları</b><div class="spx-g" style="margin-top:8px">' + mgIn('ms_cc', mk === 'trendyol' ? 'Kargo firması kodu' : 'Kargo / şablon kodu', s.cargo_company_id || '') + mgIn('ms_sh', 'Sevkiyat şablonu', s.shipment_template || '') + '</div><button class="spx-b p" id="ms_s" style="margin-top:8px">Kaydet</button> <button class="spx-b" id="mg_back">‹ Ürünlere dön</button></div>';
       $('#mg_main').innerHTML = h;
       $('#mg_back').onclick = function () { MG.view = 'urun'; drawKanal(); };
       $('#ms_s').onclick = function () { call('PUT', '/shop/channels/' + mk + '/settings', { cargo_company_id: $('#ms_cc').value, shipment_template: $('#ms_sh').value }).then(function () { toast('Kaydedildi'); }).catch(fail); };
       if ($('#mg_bs')) $('#mg_bs').onclick = function () { var m = {}; Array.prototype.forEach.call(document.querySelectorAll('.mg_br'), function (i) { if (i.value.trim()) m[i.getAttribute('data-b')] = i.value.trim(); }); call('PUT', '/shop/channels/' + mk + '/brandmap', { map: m }).then(function () { toast('Marka kodları kaydedildi'); }).catch(fail); };
-      $('#mg_main').onclick = function (e) {
-        var b = e.target.closest('[data-cs]'); if (!b) return; var id = b.getAttribute('data-cs');
-        var req = $('#mc_r' + id).value.split('\n').map(function (l) { var p = l.split(':'); return p[0].trim() ? { id: p[0].trim(), name: (p[1] || '').trim() } : null; }).filter(Boolean);
-        var at = {}; $('#mc_a' + id).value.split('\n').forEach(function (l) { var p = l.split('='); if (p[0].trim() && (p[1] || '').trim()) at[p[0].trim()] = p[1].trim(); });
-        call('PUT', '/shop/channels/' + mk + '/catmap/' + id, { ext_id: $('#mc_e' + id).value, required_attrs: req, attrs: at }).then(function () { toast('Eşleme kaydedildi'); }).catch(fail);
+      var redraw = function (cid) { var el = document.querySelector('[data-card="' + cid + '"]'); if (el) { var t = document.createElement('div'); t.innerHTML = catCard({ id: cid, name: (r.categories.filter(function (x) { return x.id === cid; })[0] || {}).name }); el.parentNode.replaceChild(t.firstChild, el); } };
+      var main = $('#mg_main');
+      var setf = function (e) {
+        var t = e.target, f = t.getAttribute && t.getAttribute('data-f'); if (!f) return; var cid = t.getAttribute('data-c'), s = CM[cid], i = t.getAttribute('data-i');
+        if (f === 'ext') s.ext = t.value; else if (f === 'name') s.attrs[i].name = t.value; else if (f === 'id') s.attrs[i].id = t.value.trim(); else if (f === 'def') s.attrs[i].def = t.value; else if (f === 'req') s.attrs[i].required = t.checked;
+      };
+      main.oninput = setf; main.onchange = setf;
+      main.onclick = function (e) {
+        var b = e.target.closest('[data-act]'); if (!b) return; var act = b.getAttribute('data-act'), cid = b.getAttribute('data-c'), s = CM[cid];
+        if (act === 'add') { s.attrs.push({ id: '', name: b.getAttribute('data-n') || '', required: true, allow_custom: false, values: [], def: '' }); redraw(cid); }
+        else if (act === 'del') { s.attrs.splice(+b.getAttribute('data-i'), 1); redraw(cid); }
+        else if (act === 'fetch') {
+          if (!s.ext) return toast('Önce ' + MKN + ' kategori kodunu girin'); b.disabled = true; b.textContent = 'Getiriliyor…';
+          call('GET', '/shop/channels/' + mk + '/category-attrs?ext_id=' + encodeURIComponent(s.ext)).then(function (x) {
+            var old = {}; s.attrs.forEach(function (a) { old[a.id] = a.def; });
+            s.attrs = x.attrs.map(function (a) { return { id: a.id, name: a.name, required: a.required, allow_custom: a.allow_custom, values: a.values, def: old[a.id] || '' }; });
+            toast(x.attrs.length + ' özellik geldi'); redraw(cid);
+          }).catch(function (er) { b.disabled = false; b.textContent = 'Özellikleri ' + MKN + '’dan getir'; fail(er); });
+        } else if (act === 'save') {
+          var req = [], at = {};
+          for (var i = 0; i < s.attrs.length; i++) { var a = s.attrs[i]; if (!(a.name || '').trim() && !(a.id || '').trim()) continue; if (!(a.name || '').trim()) return toast((i + 1) + '. satırda özellik adı gerekli'); req.push({ id: a.id, name: a.name.trim(), required: a.required, allow_custom: a.allow_custom, values: a.values }); if ((a.def || '').trim()) at[a.id || ('n_' + a.name.toLowerCase().replace(/[^a-z0-9]+/g, '_'))] = a.def.trim(); }
+          b.disabled = true;
+          call('PUT', '/shop/channels/' + mk + '/catmap/' + cid, { ext_id: s.ext, required_attrs: req, attrs: at }).then(function () { b.disabled = false; toast('Eşleme kaydedildi'); }).catch(function (er) { b.disabled = false; fail(er); });
+        }
       };
     }).catch(fail);
   }
@@ -5577,8 +5616,33 @@
         row('Rozet', inp('pe_badge', P.badge, 'text', 'örn. Yeni, Fırsat')) + row('Sıra', inp('pe_sort', P.sort == null ? 100 : P.sort, 'number')) + row('Etiketler', inp('pe_tags', (P.tags || []).join(', ')), 'Virgülle ayırın.') + '</div>' +
         '<div class="spx-card pe_p" data-p="k" style="display:none"><div class="mg-row"><label class="spx-sw"><input type="checkbox" id="pe_c_site"' + ((CH.site || {}).enabled === false ? '' : ' checked') + '><i></i></label><div><b>Site mağazası</b></div></div>' +
         MGM.map(function (m) { var c = CH[m[0]] || {}; return '<div class="mg-row"><label class="spx-sw"><input type="checkbox" id="pe_c_' + m[0] + '"' + (c.enabled ? ' checked' : '') + '><i></i></label><div><b>' + m[1] + '</b></div><div style="max-width:150px">' + mgIn('pe_b_' + m[0], 'Güvenlik payı', c.buffer || 0, 'number', '', 'min="0"') + '</div><div style="max-width:170px">' + mgIn('pe_pp_' + m[0], 'Kanal fiyatı (boş = site)', c.price || '', 'number', '', 'min="0" step="0.01"') + '</div></div>'; }).join('') +
-        '<div class="mg-w">Pazaryeri kategorisi, marka kodu ve zorunlu özellikler “Kanal & Stok” ekranından bir kez eşlenir. Eksik olan ne varsa orada ürün satırında yazar.</div></div>';
+        '<div id="pe_attrs" style="margin-top:12px"></div><div class="mg-w">Kategori kodu, marka kodu ve özellik şablonu (renk, ebat/beden gibi) “Pazaryeri ayarları” ekranından kategori başına bir kez eşlenir; ürüne özel değerleri yukarıdaki bölümde girersiniz.</div></div>';
       body().innerHTML = h;
+      var MA = JSON.parse(JSON.stringify(P.market_attrs || {})), CMC = {};
+      var loadAttrs = function () {
+        var box = $('#pe_attrs'); if (!box) return;
+        var on = MGM.filter(function (m) { var e = $('#pe_c_' + m[0]); return e && e.checked; });
+        if (!on.length) { box.innerHTML = ''; return; }
+        Promise.all(on.map(function (m) { return CMC[m[0]] ? Promise.resolve(CMC[m[0]]) : call('GET', '/shop/channels/' + m[0] + '/catmap').then(function (r) { CMC[m[0]] = r; return r; }).catch(function () { return { categories: [] }; }); })).then(function (rs) {
+          box.innerHTML = on.map(function (m, k) {
+            var cm = null, cn = ''; (rs[k].categories || []).forEach(function (c) { if (!cm && c.map && (c.id === MAIN || SEL.indexOf(c.id) >= 0)) { cm = c.map; cn = c.name; } });
+            var hd = '<div style="font-weight:800;margin:10px 0 4px">' + esc(m[1]) + ' · ürün özellikleri</div>';
+            if (!cm || !cm.ext_id) return hd + '<div class="mg-w">Bu ürünün kategorisi ' + esc(m[1]) + ' için henüz eşlenmemiş. <a href="#" data-mkmap="' + m[0] + '">Kategori eşlemesini aç</a></div>';
+            if (!(cm.required_attrs || []).length) return hd + '<div class="mg-w">' + esc(cn) + ' kategorisinde tanımlı özellik yok. Renk, ebat/beden gibi alanlar gerekiyorsa <a href="#" data-mkmap="' + m[0] + '">kategori eşlemesinden ekleyin</a>.</div>';
+            return hd + '<div style="color:#64748b;font-size:12px;margin-bottom:6px">Kategori: ' + esc(cn) + ' · boş bıraktığınız alan kategori varsayılanını kullanır (varsa).</div>' + cm.required_attrs.map(function (a) {
+              var cur = (MA[m[0]] || {})[a.id] || '', dv = (cm.attrs || {})[a.id] || '', dn = dv;
+              (a.values || []).forEach(function (v) { if (String(v.id) === String(dv)) dn = v.name; });
+              var ctl = (a.values && a.values.length) ? '<select data-ma="' + m[0] + '|' + esc(a.id) + '"><option value="">' + (dv ? 'Kategori varsayılanı: ' + esc(dn) : '— seçin —') + '</option>' + a.values.map(function (v) { return '<option value="' + esc(v.id) + '"' + (String(v.id) === String(cur) ? ' selected' : '') + '>' + esc(v.name) + '</option>'; }).join('') + '</select>'
+                : '<input data-ma="' + m[0] + '|' + esc(a.id) + '" value="' + esc(cur) + '" placeholder="' + (dv ? 'Kategori varsayılanı: ' + esc(dv) : (/renk/i.test(a.name) ? 'örn. Beyaz' : /ebat|beden|boyut/i.test(a.name) ? 'örn. 24 kW / XL / 60x90' : 'değer yazın')) + '" style="max-width:420px">';
+              return row(esc(a.name) + (a.required === false ? '' : ' <span style="color:#dc2626">*</span>'), ctl);
+            }).join('');
+          }).join('');
+        });
+      };
+      $('#pe_attrs').oninput = $('#pe_attrs').onchange = function (e) { var t = e.target, k = t.getAttribute && t.getAttribute('data-ma'); if (!k) return; var q = k.split('|'); MA[q[0]] = MA[q[0]] || {}; if (t.value.trim()) MA[q[0]][q[1]] = t.value.trim(); else delete MA[q[0]][q[1]]; };
+      $('#pe_attrs').onclick = function (e) { var a = e.target.closest('[data-mkmap]'); if (a) { e.preventDefault(); window.__spxMk(a.getAttribute('data-mkmap'), 'map'); } };
+      $('#pe_tabs').addEventListener('click', function (e) { var b = e.target.closest('[data-pt]'); if (b && b.getAttribute('data-pt') === 'k') loadAttrs(); });
+      MGM.forEach(function (m) { var e = $('#pe_c_' + m[0]); if (e) e.addEventListener('change', loadAttrs); });
       var tl = function () { $('#pe_tl').textContent = $('#pe_name').value.length + ' / 100 karakter (Trendyol sınırı 100)'; }; tl(); $('#pe_name').oninput = tl;
       var cc = function (a, b, m) { var n = $(a).value.length; $(b).textContent = n + ' / ' + m; pv(); }, pv = function () { $('#pe_pv').innerHTML = '<div style="color:#1a0dab;font-size:17px">' + esc($('#pe_st').value || $('#pe_name').value || 'Ürün başlığı') + '</div><div style="color:#006621;font-size:12px">' + esc(location.host) + '/magaza</div><div style="color:#545454;font-size:13px">' + esc($('#pe_sd').value || $('#pe_short').value || 'Açıklama burada görünür.') + '</div>'; };
       $('#pe_st').oninput = function () { cc('#pe_st', '#pe_stc', 70); }; $('#pe_sd').oninput = function () { cc('#pe_sd', '#pe_sdc', 170); }; cc('#pe_st', '#pe_stc', 70); cc('#pe_sd', '#pe_sdc', 170);
@@ -5610,7 +5674,7 @@
         var b = { name: v('name'), slug: v('slug').trim(), brand: v('brand'), model: v('model'), supplier: v('sup'), category_ids: SEL, category_id: MAIN, barcode: v('bar').trim(), gtin: v('gtin').trim(), sku: v('sku').trim(), short: v('short'), description: v('desc'), specs: SP.filter(function (s) { return s.k && s.v; }),
           price: parseFloat(v('price')) || 0, old_price: parseFloat(v('old')) || 0, kdv: parseInt(v('kdv'), 10), cost: parseFloat(v('cost')) || 0, stock: parseInt(v('stock'), 10) || 0, track_stock: $('#pe_track').checked, shelf: v('shelf'), min_stock: parseInt(v('min'), 10) || 0, unit: v('unit'),
           desi: parseFloat(v('desi')) || 0, weight: parseFloat(v('wt')) || 0, delivery_days: parseInt(v('dd'), 10) || 0, warranty_months: parseInt(v('war'), 10) || 0, images: IM, seo_title: v('st'), seo_desc: v('sd'), seo_keywords: v('sk'),
-          active: $('#pe_act').checked, featured: $('#pe_ft').checked, badge: v('badge'), sort: parseInt(v('sort'), 10) || 100, tags: v('tags').split(',').map(function (x) { return x.trim(); }).filter(Boolean), channels: ch };
+          active: $('#pe_act').checked, featured: $('#pe_ft').checked, badge: v('badge'), sort: parseInt(v('sort'), 10) || 100, tags: v('tags').split(',').map(function (x) { return x.trim(); }).filter(Boolean), channels: ch, market_attrs: MA };
         if (!b.slug) delete b.slug;
         btn.disabled = true;
         call(id ? 'PUT' : 'POST', '/shop/products' + (id ? '/' + id : ''), b).then(function (r) { toast('Ürün kaydedildi'); btn.disabled = false; if (close) { MG.edit = ''; TAB = 'kanal'; draw(); } else if (!id) { MG.edit = r.id; drawUrunEkle(); } }).catch(function (e) { btn.disabled = false; fail(e); });

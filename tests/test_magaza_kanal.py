@@ -110,7 +110,7 @@ with TestClient(s.app) as c:
     def export():
         r = c.get("/api/shop/channels/trendyol/export.csv", headers=O); assert r.status_code == 200 and S["bc"] in r.text and "BYM-24" in r.text
         o = c.get("/api/shop/channels", headers=O).json(); tr = [x for x in o["channels"] if x["id"] == "trendyol"][0]; assert tr["counts"].get("yayinda") == 1, tr
-        assert c.get("/api/shop/channels/pttavm/products", headers=O).status_code == 404, "henüz desteklenmeyen pazaryeri"
+        assert c.get("/api/shop/channels/amazon/products", headers=O).status_code == 404, "henüz desteklenmeyen pazaryeri"
     t("CSV dışa aktarma, kanal özeti, desteklenmeyen pazaryeri 404", export)
     def gtin():
         assert ch.gtin_valid(S["bc"]) and not ch.gtin_valid("12345") and not ch.gtin_valid(S["bc"][:-1] + "0" if S["bc"][-1] != "0" else S["bc"][:-1] + "1")

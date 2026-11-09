@@ -566,9 +566,9 @@ def register(api_router, db, deps):
         if st:
             if st not in ORDER_STATUSES:
                 raise HTTPException(422, "Geçersiz durum")
-            if st == "iptal" and o["status"] != "iptal":
+            if st == "iptal" and o["status"] != "iptal" and not o.get("external"):
                 await restock(o)
-            if o["status"] == "iptal" and st != "iptal":
+            if o["status"] == "iptal" and st != "iptal" and not o.get("external"):
                 for it in o["items"]:
                     await db.shop_products.update_one({"id": it["product_id"], "track_stock": True}, {"$inc": {"stock": -it["qty"], "sold": it["qty"]}})
                 await stock_changed(db, [it["product_id"] for it in o["items"]])
@@ -587,8 +587,8 @@ def register(api_router, db, deps):
         o = await db.shop_orders.find_one({"id": oid}, {"_id": 0})
         if not o:
             raise HTTPException(404, "Sipariş bulunamadı")
-        if o["status"] != "iptal":
-            await restock(o)
+        if o["status"] != "iptal" and not o.get("external"):
+            await restock(o)                                   # pazaryeri siparişinin stoğu pazaryeri akışıyla yönetilir
         await db.shop_orders.delete_one({"id": oid})
         return {"ok": True}
 
