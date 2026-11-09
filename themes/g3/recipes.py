@@ -129,3 +129,6 @@ R = [
     nav='center', hero='shop', mbar='cart', ft='cen', hidx=1, tools=['kombi.teshis', 'kombi.kw'], tv0='d', tv1='a', shopv='mag',
     order=['shop', 'brands', 'tool0', 'proof', 'faq', 'book', 'cta'], style='Mağaza · ısıtma parçaları · editoryal'),
 ]
+
+from .recipes_p import extend as _ext  # noqa: E402
+_ext(R, mk)

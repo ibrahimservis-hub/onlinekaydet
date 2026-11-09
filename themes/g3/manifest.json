@@ -23,7 +23,7 @@
   "fd": "fraunces",
   "fb": "manrope",
   "dark": false,
-  "kb": 795
+  "kb": 825
  },
  {
   "slug": "2-klima",
@@ -49,7 +49,7 @@
   "fd": "sora",
   "fb": "figtree",
   "dark": false,
-  "kb": 729
+  "kb": 760
  },
  {
   "slug": "3-beyaz-esya",
@@ -153,7 +153,7 @@
   "fd": "bricolage",
   "fb": "plex",
   "dark": false,
-  "kb": 775
+  "kb": 806
  },
  {
   "slug": "07-kombi-kizil",
@@ -205,7 +205,7 @@
   "fd": "playfair",
   "fb": "figtree",
   "dark": false,
-  "kb": 850
+  "kb": 881
  },
  {
   "slug": "09-kombi-cam",
@@ -231,7 +231,7 @@
   "fd": "outfit",
   "fb": "instrument",
   "dark": false,
-  "kb": 729
+  "kb": 760
  },
  {
   "slug": "10-klima-buz",
@@ -257,7 +257,7 @@
   "fd": "spacegrotesk",
   "fb": "manrope",
   "dark": false,
-  "kb": 765
+  "kb": 795
  },
  {
   "slug": "11-klima-poyraz",
@@ -283,7 +283,7 @@
   "fd": "newsreader",
   "fb": "instrument",
   "dark": false,
-  "kb": 934
+  "kb": 964
  },
  {
   "slug": "12-klima-okyanus",
@@ -309,7 +309,7 @@
   "fd": "syne",
   "fb": "plex",
   "dark": false,
-  "kb": 780
+  "kb": 811
  },
  {
   "slug": "13-beyaz-kaymak",
@@ -986,5 +986,1617 @@
   "fb": "figtree",
   "dark": false,
   "kb": 830
+ },
+ {
+  "slug": "p01-cine-kombi",
+  "sector": "kombi",
+  "nm": "Alev Kombi",
+  "city": "İzmir",
+  "style": "Premium · Sinema · kombi",
+  "hero": "p_cine",
+  "nav": "premium",
+  "mbar": "fab",
+  "ft": "cols",
+  "tools": [
+   "Kombi hata kodu çözücü",
+   "Yıllık kombi bakımı hatırlatıcı"
+  ],
+  "pal": [
+   "#0b0b0c",
+   "#f5f2ec",
+   "#1c1c1d",
+   "#070708",
+   "#ff5a1f"
+  ],
+  "fd": "syne",
+  "fb": "manrope",
+  "dark": true,
+  "kb": 761
+ },
+ {
+  "slug": "p02-edit-klima",
+  "sector": "klima",
+  "nm": "Serin Klima",
+  "city": "Bursa",
+  "style": "Premium · Editoryal · klima",
+  "hero": "p_edit",
+  "nav": "premium",
+  "mbar": "dock",
+  "ft": "cols",
+  "tools": [
+   "Klima hata kodu çözücü",
+   "Klima bakım ve filtre hatırlatıcı"
+  ],
+  "pal": [
+   "#f4efe6",
+   "#1a1612",
+   "#e5e1d8",
+   "#302c27",
+   "#b4531f"
+  ],
+  "fd": "fraunces",
+  "fb": "figtree",
+  "dark": false,
+  "kb": 814
+ },
+ {
+  "slug": "p03-neon-beyaz-esya",
+  "sector": "beyaz_esya",
+  "nm": "Beyaz Atölye",
+  "city": "Konya",
+  "style": "Premium · Neon · beyaz esya",
+  "hero": "p_neon",
+  "nav": "premium",
+  "mbar": "pill",
+  "ft": "cols",
+  "tools": [
+   "Yedek parça talebi hazırlayıcı",
+   "Aylık cihaz bakım listesi"
+  ],
+  "pal": [
+   "#070a12",
+   "#e8ecff",
+   "#181b23",
+   "#05060c",
+   "#3b82f6"
+  ],
+  "fd": "sora",
+  "fb": "figtree",
+  "dark": true,
+  "kb": 762
+ },
+ {
+  "slug": "p04-lux-elektronik",
+  "sector": "elektronik",
+  "nm": "Devre Teknik",
+  "city": "Gaziantep",
+  "style": "Premium · Lüks · elektronik",
+  "hero": "p_lux",
+  "nav": "premium",
+  "mbar": "one",
+  "ft": "cols",
+  "tools": [
+   "Cihaz teslim fişi önizleme",
+   "Televizyon arıza sihirbazı"
+  ],
+  "pal": [
+   "#0d0c0a",
+   "#efe7d6",
+   "#1e1d1b",
+   "#080806",
+   "#d8b567"
+  ],
+  "fd": "fraunces",
+  "fb": "manrope",
+  "dark": true,
+  "kb": 825
+ },
+ {
+  "slug": "p05-cine-bilgisayar",
+  "sector": "bilgisayar",
+  "nm": "Bit Servis",
+  "city": "Bursa",
+  "style": "Premium · Sinema · bilgisayar",
+  "hero": "p_cine",
+  "nav": "premium",
+  "mbar": "bubble",
+  "ft": "big",
+  "tools": [
+   "Cihaz sağlık testi",
+   "Veri kurtarma acil rehberi"
+  ],
+  "pal": [
+   "#0a0f14",
+   "#f5f2ec",
+   "#1b2024",
+   "#060a0d",
+   "#22d3ee"
+  ],
+  "fd": "sora",
+  "fb": "manrope",
+  "dark": true,
+  "kb": 776
+ },
+ {
+  "slug": "p06-edit-tesisat",
+  "sector": "tesisat",
+  "nm": "Akış Tesisat",
+  "city": "Konya",
+  "style": "Premium · Editoryal · tesisat",
+  "hero": "p_edit",
+  "nav": "premium",
+  "mbar": "status",
+  "ft": "big",
+  "tools": [
+   "Damlayan musluk maliyeti",
+   "Acil durum ilk müdahale"
+  ],
+  "pal": [
+   "#f6f2ec",
+   "#1a1612",
+   "#e7e3de",
+   "#302c28",
+   "#0f766e"
+  ],
+  "fd": "playfair",
+  "fb": "figtree",
+  "dark": false,
+  "kb": 808
+ },
+ {
+  "slug": "p07-neon-elektrik",
+  "sector": "elektrik",
+  "nm": "Volt Atölyesi",
+  "city": "Gaziantep",
+  "style": "Premium · Neon · elektrik",
+  "hero": "p_neon",
+  "nav": "premium",
+  "mbar": "seg",
+  "ft": "big",
+  "tools": [
+   "Pano sigorta seçici",
+   "Elektrik acil durum rehberi"
+  ],
+  "pal": [
+   "#0a0814",
+   "#e8ecff",
+   "#1b1924",
+   "#06050d",
+   "#06b6d4"
+  ],
+  "fd": "spacegrotesk",
+  "fb": "figtree",
+  "dark": true,
+  "kb": 734
+ },
+ {
+  "slug": "p08-lux-guvenlik",
+  "sector": "guvenlik",
+  "nm": "Kale Güvenlik",
+  "city": "İstanbul",
+  "style": "Premium · Lüks · guvenlik",
+  "hero": "p_lux",
+  "nav": "premium",
+  "mbar": "fab",
+  "ft": "big",
+  "tools": [
+   "Güvenlik açığı kontrol listesi",
+   "Bakım sözleşmesi seçici"
+  ],
+  "pal": [
+   "#0c0b0e",
+   "#efe7d6",
+   "#1d1c1f",
+   "#080709",
+   "#c9a45c"
+  ],
+  "fd": "playfair",
+  "fb": "manrope",
+  "dark": true,
+  "kb": 838
+ },
+ {
+  "slug": "p09-edit-kombi",
+  "sector": "kombi",
+  "nm": "Sıcak Yuva Kombi",
+  "city": "Konya",
+  "style": "Premium · Editoryal · kombi",
+  "hero": "p_edit",
+  "nav": "premium",
+  "mbar": "pill",
+  "ft": "cen",
+  "tools": [
+   "Kombi hata kodu çözücü",
+   "Kombi sorun sihirbazı"
+  ],
+  "pal": [
+   "#faf7f2",
+   "#1a1612",
+   "#ebe8e3",
+   "#302c28",
+   "#1d4ed8"
+  ],
+  "fd": "dmserif",
+  "fb": "manrope",
+  "dark": false,
+  "kb": 789
+ },
+ {
+  "slug": "p10-neon-klima",
+  "sector": "klima",
+  "nm": "Esinti Klima",
+  "city": "Gaziantep",
+  "style": "Premium · Neon · klima",
+  "hero": "p_neon",
+  "nav": "premium",
+  "mbar": "one",
+  "ft": "cen",
+  "tools": [
+   "Klima elektrik gideri",
+   "Klima hata kodu çözücü"
+  ],
+  "pal": [
+   "#06100f",
+   "#e8ecff",
+   "#172120",
+   "#040a0a",
+   "#8b5cf6"
+  ],
+  "fd": "intertight",
+  "fb": "manrope",
+  "dark": true,
+  "kb": 918
+ },
+ {
+  "slug": "p11-lux-beyaz-esya",
+  "sector": "beyaz_esya",
+  "nm": "Usta Beyaz Eşya",
+  "city": "İstanbul",
+  "style": "Premium · Lüks · beyaz esya",
+  "hero": "p_lux",
+  "nav": "premium",
+  "mbar": "split",
+  "ft": "cen",
+  "tools": [
+   "Yedek parça talebi hazırlayıcı",
+   "Tamir mi, yeni cihaz mı?"
+  ],
+  "pal": [
+   "#0a0d0c",
+   "#efe7d6",
+   "#1b1e1d",
+   "#060808",
+   "#e0b97a"
+  ],
+  "fd": "dmserif",
+  "fb": "figtree",
+  "dark": true,
+  "kb": 751
+ },
+ {
+  "slug": "p12-cine-elektronik",
+  "sector": "elektronik",
+  "nm": "Piksel Servis",
+  "city": "Adana",
+  "style": "Premium · Sinema · elektronik",
+  "hero": "p_cine",
+  "nav": "premium",
+  "mbar": "bubble",
+  "ft": "cen",
+  "tools": [
+   "Cihaz teslim fişi önizleme",
+   "Televizyon hata ve LED kodu çözücü"
+  ],
+  "pal": [
+   "#100b0b",
+   "#f5f2ec",
+   "#211c1c",
+   "#0a0707",
+   "#f43f5e"
+  ],
+  "fd": "outfit",
+  "fb": "manrope",
+  "dark": true,
+  "kb": 804
+ },
+ {
+  "slug": "p13-edit-bilgisayar",
+  "sector": "bilgisayar",
+  "nm": "Çekirdek Bilgisayar",
+  "city": "Gaziantep",
+  "style": "Premium · Editoryal · bilgisayar",
+  "hero": "p_edit",
+  "nav": "premium",
+  "mbar": "seg",
+  "ft": "cols",
+  "tools": [
+   "Cihaz sağlık testi",
+   "Yükseltme önerisi"
+  ],
+  "pal": [
+   "#f3f1ec",
+   "#1a1612",
+   "#e4e3de",
+   "#302c28",
+   "#be123c"
+  ],
+  "fd": "fraunces",
+  "fb": "manrope",
+  "dark": false,
+  "kb": 802
+ },
+ {
+  "slug": "p14-neon-tesisat",
+  "sector": "tesisat",
+  "nm": "Damla Usta",
+  "city": "İstanbul",
+  "style": "Premium · Neon · tesisat",
+  "hero": "p_neon",
+  "nav": "premium",
+  "mbar": "fab",
+  "ft": "cols",
+  "tools": [
+   "Damlayan musluk maliyeti",
+   "İş süresi planlayıcı"
+  ],
+  "pal": [
+   "#0c0a12",
+   "#e8ecff",
+   "#1d1b23",
+   "#08060c",
+   "#10b981"
+  ],
+  "fd": "sora",
+  "fb": "manrope",
+  "dark": true,
+  "kb": 726
+ },
+ {
+  "slug": "p15-lux-elektrik",
+  "sector": "elektrik",
+  "nm": "Akım Elektrik",
+  "city": "Adana",
+  "style": "Premium · Lüks · elektrik",
+  "hero": "p_lux",
+  "nav": "premium",
+  "mbar": "dock",
+  "ft": "cols",
+  "tools": [
+   "Pano sigorta seçici",
+   "Kablo kesiti hesabı"
+  ],
+  "pal": [
+   "#100d0b",
+   "#efe7d6",
+   "#211e1c",
+   "#0a0807",
+   "#b8935a"
+  ],
+  "fd": "fraunces",
+  "fb": "figtree",
+  "dark": true,
+  "kb": 768
+ },
+ {
+  "slug": "p16-cine-guvenlik",
+  "sector": "guvenlik",
+  "nm": "Gözcü Sistem",
+  "city": "Eskişehir",
+  "style": "Premium · Sinema · guvenlik",
+  "hero": "p_cine",
+  "nav": "premium",
+  "mbar": "pill",
+  "ft": "cols",
+  "tools": [
+   "Kamera kayıt depolama hesabı",
+   "Güvenlik açığı kontrol listesi"
+  ],
+  "pal": [
+   "#0b100c",
+   "#f5f2ec",
+   "#1c211d",
+   "#070a08",
+   "#a3e635"
+  ],
+  "fd": "bricolage",
+  "fb": "manrope",
+  "dark": true,
+  "kb": 756
+ },
+ {
+  "slug": "p17-neon-kombi",
+  "sector": "kombi",
+  "nm": "Termo Usta",
+  "city": "İstanbul",
+  "style": "Premium · Neon · kombi",
+  "hero": "p_neon",
+  "nav": "premium",
+  "mbar": "split",
+  "ft": "min",
+  "tools": [
+   "Kombi hata kodu çözücü",
+   "Kombi kapasitesi hesabı"
+  ],
+  "pal": [
+   "#080d18",
+   "#e8ecff",
+   "#191e28",
+   "#050810",
+   "#f43f5e"
+  ],
+  "fd": "outfit",
+  "fb": "plex",
+  "dark": true,
+  "kb": 847
+ },
+ {
+  "slug": "p18-lux-klima",
+  "sector": "klima",
+  "nm": "Zirve Soğutma",
+  "city": "Adana",
+  "style": "Premium · Lüks · klima",
+  "hero": "p_lux",
+  "nav": "premium",
+  "mbar": "bubble",
+  "ft": "min",
+  "tools": [
+   "Klima bakım ve filtre hatırlatıcı",
+   "BTU hesaplayıcı"
+  ],
+  "pal": [
+   "#0b0c10",
+   "#efe7d6",
+   "#1c1d21",
+   "#07080a",
+   "#cfae6f"
+  ],
+  "fd": "newsreader",
+  "fb": "instrument",
+  "dark": true,
+  "kb": 963
+ },
+ {
+  "slug": "p19-cine-beyaz-esya",
+  "sector": "beyaz_esya",
+  "nm": "Ev Servis",
+  "city": "Eskişehir",
+  "style": "Premium · Sinema · beyaz esya",
+  "hero": "p_cine",
+  "nav": "premium",
+  "mbar": "status",
+  "ft": "min",
+  "tools": [
+   "Yedek parça talebi hazırlayıcı",
+   "Arıza belirtisi rehberi"
+  ],
+  "pal": [
+   "#0d0b14",
+   "#f5f2ec",
+   "#1e1c24",
+   "#08070d",
+   "#fbbf24"
+  ],
+  "fd": "syne",
+  "fb": "instrument",
+  "dark": true,
+  "kb": 740
+ },
+ {
+  "slug": "p20-edit-elektronik",
+  "sector": "elektronik",
+  "nm": "Sinyal Elektronik",
+  "city": "Ankara",
+  "style": "Premium · Editoryal · elektronik",
+  "hero": "p_edit",
+  "nav": "premium",
+  "mbar": "seg",
+  "ft": "min",
+  "tools": [
+   "Cihaz teslim fişi önizleme",
+   "Onarım değer hesabı"
+  ],
+  "pal": [
+   "#f7f3f0",
+   "#1a1612",
+   "#e8e4e2",
+   "#302c28",
+   "#6d28d9"
+  ],
+  "fd": "newsreader",
+  "fb": "manrope",
+  "dark": false,
+  "kb": 997
+ },
+ {
+  "slug": "p21-neon-bilgisayar",
+  "sector": "bilgisayar",
+  "nm": "Kod Teknik",
+  "city": "Adana",
+  "style": "Premium · Neon · bilgisayar",
+  "hero": "p_neon",
+  "nav": "premium",
+  "mbar": "dock",
+  "ft": "cen",
+  "tools": [
+   "Cihaz sağlık testi",
+   "Bakım paketi süre hesabı"
+  ],
+  "pal": [
+   "#070a12",
+   "#e8ecff",
+   "#181b23",
+   "#05060c",
+   "#f59e0b"
+  ],
+  "fd": "intertight",
+  "fb": "plex",
+  "dark": true,
+  "kb": 943
+ },
+ {
+  "slug": "p22-lux-tesisat",
+  "sector": "tesisat",
+  "nm": "Mavi Tesisat",
+  "city": "Eskişehir",
+  "style": "Premium · Lüks · tesisat",
+  "hero": "p_lux",
+  "nav": "premium",
+  "mbar": "pill",
+  "ft": "cen",
+  "tools": [
+   "Damlayan musluk maliyeti",
+   "Su kaçağı testi"
+  ],
+  "pal": [
+   "#0d0c0a",
+   "#efe7d6",
+   "#1e1d1b",
+   "#080806",
+   "#d4a373"
+  ],
+  "fd": "dmserif",
+  "fb": "instrument",
+  "dark": true,
+  "kb": 716
+ },
+ {
+  "slug": "p23-cine-elektrik",
+  "sector": "elektrik",
+  "nm": "Işın Elektrik",
+  "city": "Ankara",
+  "style": "Premium · Sinema · elektrik",
+  "hero": "p_cine",
+  "nav": "premium",
+  "mbar": "one",
+  "ft": "cen",
+  "tools": [
+   "Pano sigorta seçici",
+   "Aylık elektrik gideri"
+  ],
+  "pal": [
+   "#0a1210",
+   "#f5f2ec",
+   "#1b2321",
+   "#060c0a",
+   "#38bdf8"
+  ],
+  "fd": "sora",
+  "fb": "instrument",
+  "dark": true,
+  "kb": 761
+ },
+ {
+  "slug": "p24-edit-guvenlik",
+  "sector": "guvenlik",
+  "nm": "Kalkan Güvenlik",
+  "city": "Antalya",
+  "style": "Premium · Editoryal · guvenlik",
+  "hero": "p_edit",
+  "nav": "premium",
+  "mbar": "split",
+  "ft": "cen",
+  "tools": [
+   "Bakım sözleşmesi seçici",
+   "Güvenlik keşif sihirbazı"
+  ],
+  "pal": [
+   "#eef2ef",
+   "#1a1612",
+   "#e0e3e1",
+   "#2f2c28",
+   "#166534"
+  ],
+  "fd": "dmserif",
+  "fb": "manrope",
+  "dark": false,
+  "kb": 732
+ },
+ {
+  "slug": "p25-lux-kombi",
+  "sector": "kombi",
+  "nm": "Kor Isı",
+  "city": "Eskişehir",
+  "style": "Premium · Lüks · kombi",
+  "hero": "p_lux",
+  "nav": "premium",
+  "mbar": "status",
+  "ft": "big",
+  "tools": [
+   "Kombi hata kodu çözücü",
+   "Kombi sorun sihirbazı"
+  ],
+  "pal": [
+   "#0c0b0e",
+   "#efe7d6",
+   "#1d1c1f",
+   "#080709",
+   "#bfa06a"
+  ],
+  "fd": "playfair",
+  "fb": "manrope",
+  "dark": true,
+  "kb": 893
+ },
+ {
+  "slug": "p26-cine-klima",
+  "sector": "klima",
+  "nm": "Bora Klima",
+  "city": "Ankara",
+  "style": "Premium · Sinema · klima",
+  "hero": "p_cine",
+  "nav": "premium",
+  "mbar": "seg",
+  "ft": "big",
+  "tools": [
+   "BTU hesaplayıcı",
+   "Klima elektrik gideri"
+  ],
+  "pal": [
+   "#0b0b0c",
+   "#f5f2ec",
+   "#1c1c1d",
+   "#070708",
+   "#fb7185"
+  ],
+  "fd": "outfit",
+  "fb": "figtree",
+  "dark": true,
+  "kb": 751
+ },
+ {
+  "slug": "p27-edit-beyaz-esya",
+  "sector": "beyaz_esya",
+  "nm": "Özen Beyaz Eşya",
+  "city": "Antalya",
+  "style": "Premium · Editoryal · beyaz esya",
+  "hero": "p_edit",
+  "nav": "premium",
+  "mbar": "fab",
+  "ft": "big",
+  "tools": [
+   "Yedek parça talebi hazırlayıcı",
+   "Tamir mi, yeni cihaz mı?"
+  ],
+  "pal": [
+   "#f2f4f7",
+   "#1a1612",
+   "#e3e5e8",
+   "#302c29",
+   "#c2410c"
+  ],
+  "fd": "playfair",
+  "fb": "instrument",
+  "dark": false,
+  "kb": 872
+ },
+ {
+  "slug": "p28-neon-elektronik",
+  "sector": "elektronik",
+  "nm": "Ekran Atölyesi",
+  "city": "Kayseri",
+  "style": "Premium · Neon · elektronik",
+  "hero": "p_neon",
+  "nav": "premium",
+  "mbar": "dock",
+  "ft": "big",
+  "tools": [
+   "Cihaz teslim fişi önizleme",
+   "Televizyon hata ve LED kodu çözücü"
+  ],
+  "pal": [
+   "#0a0814",
+   "#e8ecff",
+   "#1b1924",
+   "#06050d",
+   "#ec4899"
+  ],
+  "fd": "spacegrotesk",
+  "fb": "plex",
+  "dark": true,
+  "kb": 840
+ },
+ {
+  "slug": "p29-lux-bilgisayar",
+  "sector": "bilgisayar",
+  "nm": "Veri Atölyesi",
+  "city": "Ankara",
+  "style": "Premium · Lüks · bilgisayar",
+  "hero": "p_lux",
+  "nav": "premium",
+  "mbar": "one",
+  "ft": "min",
+  "tools": [
+   "Cihaz sağlık testi",
+   "Yükseltme önerisi"
+  ],
+  "pal": [
+   "#0a0d0c",
+   "#efe7d6",
+   "#1b1e1d",
+   "#060808",
+   "#c8a96b"
+  ],
+  "fd": "newsreader",
+  "fb": "manrope",
+  "dark": true,
+  "kb": 971
+ },
+ {
+  "slug": "p30-cine-tesisat",
+  "sector": "tesisat",
+  "nm": "Pınar Tesisat",
+  "city": "Antalya",
+  "style": "Premium · Sinema · tesisat",
+  "hero": "p_cine",
+  "nav": "premium",
+  "mbar": "split",
+  "ft": "min",
+  "tools": [
+   "Damlayan musluk maliyeti",
+   "İş süresi planlayıcı"
+  ],
+  "pal": [
+   "#0a0f14",
+   "#f5f2ec",
+   "#1b2024",
+   "#060a0d",
+   "#34d399"
+  ],
+  "fd": "bricolage",
+  "fb": "figtree",
+  "dark": true,
+  "kb": 729
+ },
+ {
+  "slug": "p31-edit-elektrik",
+  "sector": "elektrik",
+  "nm": "Gerilim Usta",
+  "city": "Kayseri",
+  "style": "Premium · Editoryal · elektrik",
+  "hero": "p_edit",
+  "nav": "premium",
+  "mbar": "bubble",
+  "ft": "min",
+  "tools": [
+   "Pano sigorta seçici",
+   "Kablo kesiti hesabı"
+  ],
+  "pal": [
+   "#faf5ee",
+   "#1a1612",
+   "#ebe6e0",
+   "#302c28",
+   "#0369a1"
+  ],
+  "fd": "newsreader",
+  "fb": "instrument",
+  "dark": false,
+  "kb": 953
+ },
+ {
+  "slug": "p32-neon-guvenlik",
+  "sector": "guvenlik",
+  "nm": "Nöbet Alarm",
+  "city": "İzmir",
+  "style": "Premium · Neon · guvenlik",
+  "hero": "p_neon",
+  "nav": "premium",
+  "mbar": "status",
+  "ft": "min",
+  "tools": [
+   "Güvenlik keşif sihirbazı",
+   "Kamera kayıt depolama hesabı"
+  ],
+  "pal": [
+   "#06100f",
+   "#e8ecff",
+   "#172120",
+   "#040a0a",
+   "#14b8a6"
+  ],
+  "fd": "outfit",
+  "fb": "plex",
+  "dark": true,
+  "kb": 791
+ },
+ {
+  "slug": "p33-cine-kombi",
+  "sector": "kombi",
+  "nm": "Yuva Kombi",
+  "city": "Antalya",
+  "style": "Premium · Sinema · kombi",
+  "hero": "p_cine",
+  "nav": "premium",
+  "mbar": "fab",
+  "ft": "cols",
+  "tools": [
+   "Kombi hata kodu çözücü",
+   "Yıllık kombi bakımı hatırlatıcı"
+  ],
+  "pal": [
+   "#100b0b",
+   "#f5f2ec",
+   "#211c1c",
+   "#0a0707",
+   "#f97316"
+  ],
+  "fd": "syne",
+  "fb": "manrope",
+  "dark": true,
+  "kb": 760
+ },
+ {
+  "slug": "p34-edit-klima",
+  "sector": "klima",
+  "nm": "Mavi Klima",
+  "city": "Kayseri",
+  "style": "Premium · Editoryal · klima",
+  "hero": "p_edit",
+  "nav": "premium",
+  "mbar": "dock",
+  "ft": "cols",
+  "tools": [
+   "Montaj ön keşif",
+   "BTU hesaplayıcı"
+  ],
+  "pal": [
+   "#f4efe6",
+   "#1a1612",
+   "#e5e1d8",
+   "#302c27",
+   "#9d174d"
+  ],
+  "fd": "fraunces",
+  "fb": "figtree",
+  "dark": false,
+  "kb": 783
+ },
+ {
+  "slug": "p35-neon-beyaz-esya",
+  "sector": "beyaz_esya",
+  "nm": "Berrak Servis",
+  "city": "İzmir",
+  "style": "Premium · Neon · beyaz esya",
+  "hero": "p_neon",
+  "nav": "premium",
+  "mbar": "pill",
+  "ft": "cols",
+  "tools": [
+   "Yedek parça talebi hazırlayıcı",
+   "Aylık cihaz bakım listesi"
+  ],
+  "pal": [
+   "#0c0a12",
+   "#e8ecff",
+   "#1d1b23",
+   "#08060c",
+   "#6366f1"
+  ],
+  "fd": "sora",
+  "fb": "figtree",
+  "dark": true,
+  "kb": 762
+ },
+ {
+  "slug": "p36-lux-elektronik",
+  "sector": "elektronik",
+  "nm": "Çip Teknik",
+  "city": "Bursa",
+  "style": "Premium · Lüks · elektronik",
+  "hero": "p_lux",
+  "nav": "premium",
+  "mbar": "one",
+  "ft": "cols",
+  "tools": [
+   "Cihaz teslim fişi önizleme",
+   "Televizyon arıza sihirbazı"
+  ],
+  "pal": [
+   "#100d0b",
+   "#efe7d6",
+   "#211e1c",
+   "#0a0807",
+   "#d9b99b"
+  ],
+  "fd": "fraunces",
+  "fb": "manrope",
+  "dark": true,
+  "kb": 826
+ },
+ {
+  "slug": "p37-cine-bilgisayar",
+  "sector": "bilgisayar",
+  "nm": "Nano Bilgisayar",
+  "city": "Kayseri",
+  "style": "Premium · Sinema · bilgisayar",
+  "hero": "p_cine",
+  "nav": "premium",
+  "mbar": "bubble",
+  "ft": "big",
+  "tools": [
+   "Cihaz sağlık testi",
+   "Veri kurtarma acil rehberi"
+  ],
+  "pal": [
+   "#0b100c",
+   "#f5f2ec",
+   "#1c211d",
+   "#070a08",
+   "#c084fc"
+  ],
+  "fd": "sora",
+  "fb": "manrope",
+  "dark": true,
+  "kb": 776
+ },
+ {
+  "slug": "p38-edit-tesisat",
+  "sector": "tesisat",
+  "nm": "Derin Tesisat",
+  "city": "İzmir",
+  "style": "Premium · Editoryal · tesisat",
+  "hero": "p_edit",
+  "nav": "premium",
+  "mbar": "status",
+  "ft": "big",
+  "tools": [
+   "Damlayan musluk maliyeti",
+   "Acil durum ilk müdahale"
+  ],
+  "pal": [
+   "#f6f2ec",
+   "#1a1612",
+   "#e7e3de",
+   "#302c28",
+   "#a16207"
+  ],
+  "fd": "playfair",
+  "fb": "figtree",
+  "dark": false,
+  "kb": 808
+ },
+ {
+  "slug": "p39-neon-elektrik",
+  "sector": "elektrik",
+  "nm": "Kıvılcım Elektrik",
+  "city": "Bursa",
+  "style": "Premium · Neon · elektrik",
+  "hero": "p_neon",
+  "nav": "premium",
+  "mbar": "seg",
+  "ft": "big",
+  "tools": [
+   "Pano sigorta seçici",
+   "Elektrik acil durum rehberi"
+  ],
+  "pal": [
+   "#080d18",
+   "#e8ecff",
+   "#191e28",
+   "#050810",
+   "#22d3ee"
+  ],
+  "fd": "spacegrotesk",
+  "fb": "figtree",
+  "dark": true,
+  "kb": 733
+ },
+ {
+  "slug": "p40-lux-guvenlik",
+  "sector": "guvenlik",
+  "nm": "Bekçi Kamera",
+  "city": "Konya",
+  "style": "Premium · Lüks · guvenlik",
+  "hero": "p_lux",
+  "nav": "premium",
+  "mbar": "fab",
+  "ft": "big",
+  "tools": [
+   "Alarm bölge planlayıcı",
+   "Güvenlik keşif sihirbazı"
+  ],
+  "pal": [
+   "#0b0c10",
+   "#efe7d6",
+   "#1c1d21",
+   "#07080a",
+   "#9fb8a3"
+  ],
+  "fd": "playfair",
+  "fb": "manrope",
+  "dark": true,
+  "kb": 838
+ },
+ {
+  "slug": "p41-edit-kombi",
+  "sector": "kombi",
+  "nm": "Konfor Isı",
+  "city": "İzmir",
+  "style": "Premium · Editoryal · kombi",
+  "hero": "p_edit",
+  "nav": "premium",
+  "mbar": "pill",
+  "ft": "cen",
+  "tools": [
+   "Kombi hata kodu çözücü",
+   "Kombi sorun sihirbazı"
+  ],
+  "pal": [
+   "#faf7f2",
+   "#1a1612",
+   "#ebe8e3",
+   "#302c28",
+   "#0e7490"
+  ],
+  "fd": "dmserif",
+  "fb": "manrope",
+  "dark": false,
+  "kb": 788
+ },
+ {
+  "slug": "p42-neon-klima",
+  "sector": "klima",
+  "nm": "İklim Atölyesi",
+  "city": "Bursa",
+  "style": "Premium · Neon · klima",
+  "hero": "p_neon",
+  "nav": "premium",
+  "mbar": "one",
+  "ft": "cen",
+  "tools": [
+   "Klima hata kodu çözücü",
+   "Klima bakım ve filtre hatırlatıcı"
+  ],
+  "pal": [
+   "#070a12",
+   "#e8ecff",
+   "#181b23",
+   "#05060c",
+   "#a855f7"
+  ],
+  "fd": "intertight",
+  "fb": "manrope",
+  "dark": true,
+  "kb": 919
+ },
+ {
+  "slug": "p43-lux-beyaz-esya",
+  "sector": "beyaz_esya",
+  "nm": "Düzen Beyaz Eşya",
+  "city": "Konya",
+  "style": "Premium · Lüks · beyaz esya",
+  "hero": "p_lux",
+  "nav": "premium",
+  "mbar": "split",
+  "ft": "cen",
+  "tools": [
+   "Yedek parça talebi hazırlayıcı",
+   "Tamir mi, yeni cihaz mı?"
+  ],
+  "pal": [
+   "#0d0c0a",
+   "#efe7d6",
+   "#1e1d1b",
+   "#080806",
+   "#b9c4cf"
+  ],
+  "fd": "dmserif",
+  "fb": "figtree",
+  "dark": true,
+  "kb": 749
+ },
+ {
+  "slug": "p44-cine-elektronik",
+  "sector": "elektronik",
+  "nm": "Voltaj Servis",
+  "city": "Gaziantep",
+  "style": "Premium · Sinema · elektronik",
+  "hero": "p_cine",
+  "nav": "premium",
+  "mbar": "bubble",
+  "ft": "cen",
+  "tools": [
+   "Cihaz teslim fişi önizleme",
+   "Televizyon hata ve LED kodu çözücü"
+  ],
+  "pal": [
+   "#0d0b14",
+   "#f5f2ec",
+   "#1e1c24",
+   "#08070d",
+   "#2dd4bf"
+  ],
+  "fd": "outfit",
+  "fb": "manrope",
+  "dark": true,
+  "kb": 804
+ },
+ {
+  "slug": "p45-edit-bilgisayar",
+  "sector": "bilgisayar",
+  "nm": "Sistem Servis",
+  "city": "Bursa",
+  "style": "Premium · Editoryal · bilgisayar",
+  "hero": "p_edit",
+  "nav": "premium",
+  "mbar": "seg",
+  "ft": "cols",
+  "tools": [
+   "Cihaz sağlık testi",
+   "Yükseltme önerisi"
+  ],
+  "pal": [
+   "#f3f1ec",
+   "#1a1612",
+   "#e4e3de",
+   "#302c28",
+   "#4d7c0f"
+  ],
+  "fd": "fraunces",
+  "fb": "manrope",
+  "dark": false,
+  "kb": 803
+ },
+ {
+  "slug": "p46-neon-tesisat",
+  "sector": "tesisat",
+  "nm": "Boru Atölyesi",
+  "city": "Konya",
+  "style": "Premium · Neon · tesisat",
+  "hero": "p_neon",
+  "nav": "premium",
+  "mbar": "fab",
+  "ft": "cols",
+  "tools": [
+   "Damlayan musluk maliyeti",
+   "İş süresi planlayıcı"
+  ],
+  "pal": [
+   "#0a0814",
+   "#e8ecff",
+   "#1b1924",
+   "#06050d",
+   "#84cc16"
+  ],
+  "fd": "sora",
+  "fb": "manrope",
+  "dark": true,
+  "kb": 726
+ },
+ {
+  "slug": "p47-lux-elektrik",
+  "sector": "elektrik",
+  "nm": "Tel Elektrik",
+  "city": "Gaziantep",
+  "style": "Premium · Lüks · elektrik",
+  "hero": "p_lux",
+  "nav": "premium",
+  "mbar": "dock",
+  "ft": "cols",
+  "tools": [
+   "Pano sigorta seçici",
+   "Kablo kesiti hesabı"
+  ],
+  "pal": [
+   "#0c0b0e",
+   "#efe7d6",
+   "#1d1c1f",
+   "#080709",
+   "#e6c9a8"
+  ],
+  "fd": "fraunces",
+  "fb": "figtree",
+  "dark": true,
+  "kb": 769
+ },
+ {
+  "slug": "p48-cine-guvenlik",
+  "sector": "guvenlik",
+  "nm": "Siper Güvenlik",
+  "city": "İstanbul",
+  "style": "Premium · Sinema · guvenlik",
+  "hero": "p_cine",
+  "nav": "premium",
+  "mbar": "pill",
+  "ft": "cols",
+  "tools": [
+   "Güvenlik açığı kontrol listesi",
+   "Bakım sözleşmesi seçici"
+  ],
+  "pal": [
+   "#0a1210",
+   "#f5f2ec",
+   "#1b2321",
+   "#060c0a",
+   "#facc15"
+  ],
+  "fd": "bricolage",
+  "fb": "manrope",
+  "dark": true,
+  "kb": 755
+ },
+ {
+  "slug": "p49-neon-kombi",
+  "sector": "kombi",
+  "nm": "Ateş Kombi",
+  "city": "Konya",
+  "style": "Premium · Neon · kombi",
+  "hero": "p_neon",
+  "nav": "premium",
+  "mbar": "split",
+  "ft": "min",
+  "tools": [
+   "Kombi hata kodu çözücü",
+   "Kombi kapasitesi hesabı"
+  ],
+  "pal": [
+   "#06100f",
+   "#e8ecff",
+   "#172120",
+   "#040a0a",
+   "#0ea5e9"
+  ],
+  "fd": "outfit",
+  "fb": "plex",
+  "dark": true,
+  "kb": 846
+ },
+ {
+  "slug": "p50-lux-klima",
+  "sector": "klima",
+  "nm": "Nefes Klima",
+  "city": "Gaziantep",
+  "style": "Premium · Lüks · klima",
+  "hero": "p_lux",
+  "nav": "premium",
+  "mbar": "bubble",
+  "ft": "min",
+  "tools": [
+   "Klima elektrik gideri",
+   "Klima hata kodu çözücü"
+  ],
+  "pal": [
+   "#0a0d0c",
+   "#efe7d6",
+   "#1b1e1d",
+   "#060808",
+   "#c6a15b"
+  ],
+  "fd": "newsreader",
+  "fb": "instrument",
+  "dark": true,
+  "kb": 964
+ },
+ {
+  "slug": "p51-cine-beyaz-esya",
+  "sector": "beyaz_esya",
+  "nm": "Pırıl Servis",
+  "city": "İstanbul",
+  "style": "Premium · Sinema · beyaz esya",
+  "hero": "p_cine",
+  "nav": "premium",
+  "mbar": "status",
+  "ft": "min",
+  "tools": [
+   "Yedek parça talebi hazırlayıcı",
+   "Arıza belirtisi rehberi"
+  ],
+  "pal": [
+   "#0b0b0c",
+   "#f5f2ec",
+   "#1c1c1d",
+   "#070708",
+   "#60a5fa"
+  ],
+  "fd": "syne",
+  "fb": "instrument",
+  "dark": true,
+  "kb": 740
+ },
+ {
+  "slug": "p52-edit-elektronik",
+  "sector": "elektronik",
+  "nm": "Işık Elektronik",
+  "city": "Adana",
+  "style": "Premium · Editoryal · elektronik",
+  "hero": "p_edit",
+  "nav": "premium",
+  "mbar": "seg",
+  "ft": "min",
+  "tools": [
+   "Cihaz teslim fişi önizleme",
+   "Onarım değer hesabı"
+  ],
+  "pal": [
+   "#f7f3f0",
+   "#1a1612",
+   "#e8e4e2",
+   "#302c28",
+   "#b91c1c"
+  ],
+  "fd": "newsreader",
+  "fb": "manrope",
+  "dark": false,
+  "kb": 996
+ },
+ {
+  "slug": "p53-neon-bilgisayar",
+  "sector": "bilgisayar",
+  "nm": "Bayt Teknik",
+  "city": "Gaziantep",
+  "style": "Premium · Neon · bilgisayar",
+  "hero": "p_neon",
+  "nav": "premium",
+  "mbar": "dock",
+  "ft": "cen",
+  "tools": [
+   "Cihaz sağlık testi",
+   "Bakım paketi süre hesabı"
+  ],
+  "pal": [
+   "#0c0a12",
+   "#e8ecff",
+   "#1d1b23",
+   "#08060c",
+   "#f97316"
+  ],
+  "fd": "intertight",
+  "fb": "plex",
+  "dark": true,
+  "kb": 944
+ },
+ {
+  "slug": "p54-lux-tesisat",
+  "sector": "tesisat",
+  "nm": "Berrak Tesisat",
+  "city": "İstanbul",
+  "style": "Premium · Lüks · tesisat",
+  "hero": "p_lux",
+  "nav": "premium",
+  "mbar": "pill",
+  "ft": "cen",
+  "tools": [
+   "Damlayan musluk maliyeti",
+   "Su kaçağı testi"
+  ],
+  "pal": [
+   "#100d0b",
+   "#efe7d6",
+   "#211e1c",
+   "#0a0807",
+   "#d7b98e"
+  ],
+  "fd": "dmserif",
+  "fb": "instrument",
+  "dark": true,
+  "kb": 714
+ },
+ {
+  "slug": "p55-cine-elektrik",
+  "sector": "elektrik",
+  "nm": "Aydın Elektrik",
+  "city": "Adana",
+  "style": "Premium · Sinema · elektrik",
+  "hero": "p_cine",
+  "nav": "premium",
+  "mbar": "one",
+  "ft": "cen",
+  "tools": [
+   "Pano sigorta seçici",
+   "Aylık elektrik gideri"
+  ],
+  "pal": [
+   "#0a0f14",
+   "#f5f2ec",
+   "#1b2024",
+   "#060a0d",
+   "#ef4444"
+  ],
+  "fd": "sora",
+  "fb": "instrument",
+  "dark": true,
+  "kb": 762
+ },
+ {
+  "slug": "p56-edit-guvenlik",
+  "sector": "guvenlik",
+  "nm": "Şahin Güvenlik",
+  "city": "Eskişehir",
+  "style": "Premium · Editoryal · guvenlik",
+  "hero": "p_edit",
+  "nav": "premium",
+  "mbar": "split",
+  "ft": "cen",
+  "tools": [
+   "Kamera kayıt depolama hesabı",
+   "Güvenlik açığı kontrol listesi"
+  ],
+  "pal": [
+   "#eef2ef",
+   "#1a1612",
+   "#e0e3e1",
+   "#2f2c28",
+   "#7c3aed"
+  ],
+  "fd": "dmserif",
+  "fb": "manrope",
+  "dark": false,
+  "kb": 731
+ },
+ {
+  "slug": "p57-lux-kombi",
+  "sector": "kombi",
+  "nm": "Isı Atölyesi",
+  "city": "İstanbul",
+  "style": "Premium · Lüks · kombi",
+  "hero": "p_lux",
+  "nav": "premium",
+  "mbar": "status",
+  "ft": "big",
+  "tools": [
+   "Kombi hata kodu çözücü",
+   "Kombi sorun sihirbazı"
+  ],
+  "pal": [
+   "#0b0c10",
+   "#efe7d6",
+   "#1c1d21",
+   "#07080a",
+   "#caa472"
+  ],
+  "fd": "playfair",
+  "fb": "manrope",
+  "dark": true,
+  "kb": 894
+ },
+ {
+  "slug": "p58-cine-klima",
+  "sector": "klima",
+  "nm": "Kuzey Soğutma",
+  "city": "Adana",
+  "style": "Premium · Sinema · klima",
+  "hero": "p_cine",
+  "nav": "premium",
+  "mbar": "seg",
+  "ft": "big",
+  "tools": [
+   "Klima bakım ve filtre hatırlatıcı",
+   "BTU hesaplayıcı"
+  ],
+  "pal": [
+   "#100b0b",
+   "#f5f2ec",
+   "#211c1c",
+   "#0a0707",
+   "#e879f9"
+  ],
+  "fd": "outfit",
+  "fb": "figtree",
+  "dark": true,
+  "kb": 750
+ },
+ {
+  "slug": "p59-edit-beyaz-esya",
+  "sector": "beyaz_esya",
+  "nm": "Sağlam Beyaz Eşya",
+  "city": "Eskişehir",
+  "style": "Premium · Editoryal · beyaz esya",
+  "hero": "p_edit",
+  "nav": "premium",
+  "mbar": "fab",
+  "ft": "big",
+  "tools": [
+   "Yedek parça talebi hazırlayıcı",
+   "Tamir mi, yeni cihaz mı?"
+  ],
+  "pal": [
+   "#f2f4f7",
+   "#1a1612",
+   "#e3e5e8",
+   "#302c29",
+   "#115e59"
+  ],
+  "fd": "playfair",
+  "fb": "instrument",
+  "dark": false,
+  "kb": 874
+ },
+ {
+  "slug": "p60-neon-elektronik",
+  "sector": "elektronik",
+  "nm": "Nokta Teknik",
+  "city": "Ankara",
+  "style": "Premium · Neon · elektronik",
+  "hero": "p_neon",
+  "nav": "premium",
+  "mbar": "dock",
+  "ft": "big",
+  "tools": [
+   "Cihaz teslim fişi önizleme",
+   "Televizyon hata ve LED kodu çözücü"
+  ],
+  "pal": [
+   "#080d18",
+   "#e8ecff",
+   "#191e28",
+   "#050810",
+   "#d946ef"
+  ],
+  "fd": "spacegrotesk",
+  "fb": "plex",
+  "dark": true,
+  "kb": 840
+ },
+ {
+  "slug": "p61-lux-bilgisayar",
+  "sector": "bilgisayar",
+  "nm": "Piksel PC",
+  "city": "Adana",
+  "style": "Premium · Lüks · bilgisayar",
+  "hero": "p_lux",
+  "nav": "premium",
+  "mbar": "one",
+  "ft": "min",
+  "tools": [
+   "Cihaz sağlık testi",
+   "Yükseltme önerisi"
+  ],
+  "pal": [
+   "#0d0c0a",
+   "#efe7d6",
+   "#1e1d1b",
+   "#080806",
+   "#d8b567"
+  ],
+  "fd": "newsreader",
+  "fb": "manrope",
+  "dark": true,
+  "kb": 972
+ },
+ {
+  "slug": "p62-cine-tesisat",
+  "sector": "tesisat",
+  "nm": "Çözüm Su",
+  "city": "Eskişehir",
+  "style": "Premium · Sinema · tesisat",
+  "hero": "p_cine",
+  "nav": "premium",
+  "mbar": "split",
+  "ft": "min",
+  "tools": [
+   "Damlayan musluk maliyeti",
+   "İş süresi planlayıcı"
+  ],
+  "pal": [
+   "#0b100c",
+   "#f5f2ec",
+   "#1c211d",
+   "#070a08",
+   "#84cc16"
+  ],
+  "fd": "bricolage",
+  "fb": "figtree",
+  "dark": true,
+  "kb": 729
  }
 ]

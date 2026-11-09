@@ -5,7 +5,7 @@ Yer tutucular: demo telefon 0532 000 00 00 / 905320000000, demo firma adı, __AP
 import json, os, sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-from g3 import base, tools, navs, heroes, sections, content
+from g3 import base, tools, navs, heroes, sections, content, premium
 from g3.recipes import R
 from g3.base import ic, lum, mix, face, stack, img64
 
@@ -83,6 +83,8 @@ def build(r):
     mut = mix(ink, bg, .62 if not dark else .66)
     # bağlantılar
     order = r['order']
+    if r.get('premium'):
+        x.css('pm.base', '')
     labels = {'svc': ('Hizmetler', '#hizmet'), 'proc': ('Süreç', '#surec'), 'proof': ('Yorumlar', '#yorum'), 'areas': ('Bölgeler', '#bolge'), 'price': ('Fiyatlar', '#fiyat'), 'faq': ('SSS', '#sss'), 'why': ('Neden biz', '#neden'), 'ba': ('Çalışmalarımız', '#once-sonra')}
     toolkey = tools.TOOLS[r['tools'][0]]['id']
     x.links = [('Hizmetler', '#hizmet'), (TOOL_LABEL.get(toolkey, 'Araç'), '#arac')]
@@ -94,7 +96,7 @@ def build(r):
     x.links.append(('Randevu', '#randevu'))
     # gövde
     parts = [navs.nav(x), navs.drawer(x), heroes.hero(x)]
-    names = {'svc': 'Hizmetler', 'proc': 'Nasıl çalışıyoruz', 'proof': 'Yorumlar', 'brands': 'Markalar', 'ba': 'Önce / Sonra', 'areas': 'Hizmet bölgeleri', 'why': 'Neden biz', 'price': 'Fiyatlar', 'faq': 'Sık sorulanlar', 'cta': 'Çağrı bandı', 'book': 'Randevu', 'info': 'İletişim', 'tool0': 'Araç', 'tool1': 'İkinci araç', 'shop': 'Ürünler'}
+    names = {'svc': 'Hizmetler', 'proc': 'Nasıl çalışıyoruz', 'proof': 'Yorumlar', 'brands': 'Markalar', 'ba': 'Önce / Sonra', 'areas': 'Hizmet bölgeleri', 'why': 'Neden biz', 'price': 'Fiyatlar', 'faq': 'Sık sorulanlar', 'cta': 'Çağrı bandı', 'book': 'Randevu', 'info': 'İletişim', 'tool0': 'Araç', 'tool1': 'İkinci araç', 'shop': 'Ürünler', 'pstat': 'Rakamlar', 'pmq': 'Kayan bant', 'pqc': 'Teklif bandı'}
     for tkn in order:
         if tkn == 'svc': h = sections.services(x, r['svc'])
         elif tkn == 'proc': h = sections.process(x, r['proc'])
@@ -111,9 +113,14 @@ def build(r):
         elif tkn == 'tool0': h = sections.toolsec(x, 0, r['tv0'])
         elif tkn == 'tool1': h = sections.toolsec(x, 1, r['tv1'], alt=True)
         elif tkn == 'shop': h = sections.shop(x, r.get('shopv', 'grid'))
+        elif tkn == 'pstat': h = premium.stats(x)
+        elif tkn == 'pmq': h = premium.marquee(x)
+        elif tkn == 'pqc': h = premium.quote_cta(x)
         else: continue
-        parts.append(navs.ed(names[tkn], h))
+        parts.append(navs.ed(names[tkn], h, off=(tkn == 'shop' and bool(r.get('premium')))))
     parts += [navs.footer(x), navs.mbar(x)]
+    if r.get('premium'):
+        parts = [p.replace('Randevu al', 'Teklif alın') for p in parts]
     # paylaşılan JS adları
     x.js('DRW')
     # yazı tipleri
@@ -133,8 +140,12 @@ def build(r):
     skin = base.BTN[r['btn']] + base.CARD[r['card']] + base.FIELD[r['field']] + base.HEAD[r['head']]
     if r['hero'] == 'edit':
         skin += f"h1{{--hw1:{r['hw']}}}"
+    if r.get('premium'):
+        x.css('pm.motion', premium.MOTION_CSS)
+        x.bodycls.append('pm pm-' + r.get('dir', 'x'))
+        x.js('PM')
     css = faces + root + base.CORE + skin + ''.join(x._css.values())
-    js = tools.RUNTIME + (f"var KB={tools.kb_json(x.kb)};" if x.kb else '') + ''.join(x.tool_js) + ''.join(sections.JS[n] for n in x._js)
+    js = tools.RUNTIME + (f"var KB={tools.kb_json(x.kb)};" if x.kb else '') + ''.join(x.tool_js) + ''.join(sections.JS[n] for n in x._js if n != 'PM') + (premium.MOTION_JS if 'PM' in x._js else '')
     body_cls = ' '.join(x.bodycls)
     desc = f'{x.nm} — {x.city} {x.c["tag"]}. Randevu, yazılı fiyat ve garantili servis.'
     html = (f'<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>{x.nm} · {x.c["label"]} servisi · {x.city}</title>'
@@ -152,7 +163,7 @@ def main():
     for r in R:
         html, x = build(r)
         open(os.path.join(OUT, r['slug'] + '.html'), 'w', encoding='utf-8').write(html)
-        themes.append(dict(slug=r['slug'], sector=r['sector'], dark=r['pal'][3], accent=r['pal'][4], soft=r['pal'][2], radius=r['r'], name=r['nm']))
+        themes.append(dict(slug=r['slug'], sector=r['sector'], dark=r['pal'][3], accent=r['pal'][4], soft=r['pal'][2], radius=r['r'], name=r['nm'], **({'premium': True} if r.get('premium') else {})))
         manifest.append(dict(slug=r['slug'], sector=r['sector'], nm=r['nm'], city=r['city'], style=r['style'], hero=r['hero'], nav=r['nav'], mbar=r['mbar'], ft=r['ft'],
                              tools=[tools.TOOLS[t]['title'] for t in r['tools']], pal=list(r['pal']), fd=r['fd'], fb=r['fb'], dark=bool(r.get('dark')),
                              kb=len(html) // 1024))

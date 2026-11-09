@@ -419,7 +419,7 @@ def register(api_router, db, deps):
         return Response(base64.b64decode(m.group(2)), media_type=m.group(1), headers={"Cache-Control": "public, max-age=86400", "Content-Security-Policy": "sandbox"})
 
     async def base_blocks(ctx, with_edits):
-        p2 = dict(ctx["p"], layout={})
+        p2 = dict(ctx["p"], layout={"_all": True})
         if not with_edits:
             p2["edits"] = {}
         h = sitegen.apply_profile(raw_theme(ctx["th"]["slug"]), ctx["th"], dict(ctx, p=p2))
@@ -441,7 +441,7 @@ def register(api_router, db, deps):
         for n in order:
             soup = BeautifulSoup(blocks[n], "html.parser")
             hd = soup.find(["h1", "h2", "h3"])
-            out.append({"name": n, "hidden": n in (lay.get("hidden") or []), "title": " ".join(hd.get_text().split())[:70] if hd else "", "n": len(sitegen.edit_nodes(soup))})
+            out.append({"name": n, "hidden": n in (lay.get("hidden") or []) or (sitegen.dflt_off(blocks[n]) and n not in (lay.get("order") or [])), "title": " ".join(hd.get_text().split())[:70] if hd else "", "n": len(sitegen.edit_nodes(soup))})
         return {"blocks": out}
 
     @api_router.get("/site/block-text")

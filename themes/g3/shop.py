@@ -48,6 +48,13 @@ PRODUCTS = {
   ('EL-1604', 'Kontaktör 25A', 'Tek / üç faz', 'Pano', 460, 2), ('EL-1710', 'Zaman rölesi', 'Merdiven aydınlatma', 'Röle', 310, 2),
   ('EL-1802', 'Parafudr (gerilim koruma)', 'Pano girişi', 'Koruma', 980, 1), ('EL-1920', 'Kablo kanalı 25x16 (2 m)', 'Tüm tesisat', 'Aksesuar', 70, 2),
   ('EL-2001', 'Fotoselli sensör', 'Dış mekân', 'Sensör', 240, 0), ('EL-2108', 'Sayaç yanı pano seti', 'Dağıtım', 'Pano', 1850, 2)],
+ 'bilgisayar': [
+  ('BG-1001', 'SSD 512 GB NVMe', 'Tüm modern dizüstü ve masaüstüler', 'Depolama', 1450, 2), ('BG-1102', 'SSD 1 TB SATA 2.5"', 'Eski dizüstü ve masaüstüler', 'Depolama', 1790, 2),
+  ('BG-1210', 'DDR4 8 GB 3200 MHz RAM', 'Masaüstü', 'Bellek', 780, 2), ('BG-1215', 'DDR4 SODIMM 16 GB RAM', 'Dizüstü', 'Bellek', 1380, 1),
+  ('BG-1320', 'Dizüstü batarya (model seçimiyle)', 'Asus, Lenovo, HP, Monster', 'Batarya', 1150, 2), ('BG-1410', 'Şarj adaptörü 65 W', 'Dizüstü (uç seçimiyle)', 'Adaptör', 520, 2),
+  ('BG-1505', 'Dizüstü ekran 15.6" FHD', 'Model seçimiyle', 'Ekran', 2450, 1), ('BG-1602', 'Klavye (Türkçe Q)', 'Model seçimiyle', 'Klavye', 480, 2),
+  ('BG-1710', 'Termal macun (4 g)', 'Tüm işlemciler', 'Sarf', 140, 2), ('BG-1820', 'Soğutucu fan', 'Dizüstü / kasa', 'Soğutma', 260, 2),
+  ('BG-1905', 'Güç kaynağı 550 W', 'Masaüstü', 'Güç', 1280, 0), ('BG-2010', 'USB-C hub 7 in 1', 'Tüm cihazlar', 'Aksesuar', 640, 2)],
  'elektronik': [
   ('EK-1001', 'TV arka aydınlatma LED şerit', '40-43 inç', 'TV', 380, 2), ('EK-1102', 'TV güç kartı', 'Samsung, LG, Vestel', 'TV', 1250, 1),
   ('EK-1210', 'Ana kart (T-Con)', '43 inç 4K', 'TV', 960, 1), ('EK-1312', 'HDMI kablo 2.1 (2 m)', 'Tüm cihazlar', 'Kablo', 190, 2),

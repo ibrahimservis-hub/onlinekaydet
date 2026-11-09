@@ -209,7 +209,7 @@ def page_index(ctx, all_=False):
 
 
 # ------------------------------------------------------------------ tema yapısı
-_ED = re.compile(r'<div class="ed" data-nm="([^"]*)">')
+_ED = re.compile(r'<div class="ed" data-nm="([^"]*)"[^>]*>')
 
 
 def split_blocks(h):
@@ -405,11 +405,18 @@ def middle_names(blocks):
     return [b[0] for b in blocks if b[0] not in FIXED_TOP + FIXED_BOTTOM]
 
 
+def dflt_off(html):
+    """Varsayılan kapalı bölüm (örn. premium temalardaki mağaza): müşteri 'Göster' deyip düzeni kaydedene dek yayında görünmez."""
+    return 'data-dflt="off"' in html[:300]
+
+
 def apply_layout(blocks, ctx):
     """Müşterinin bölüm sırası, gizlediği bölümler ve metin düzenlemeleri."""
     lay = ctx["p"].get("layout") or {}
     order = [n for n in (lay.get("order") or []) if isinstance(n, str)]
     hidden = set(lay.get("hidden") or [])
+    if not lay.get("_all"):
+        hidden |= {b[0] for b in blocks if dflt_off(b[1]) and b[0] not in order}
     top = [b for b in blocks if b[0] in FIXED_TOP]
     bot = [b for b in blocks if b[0] in FIXED_BOTTOM]
     mid = [b for b in blocks if b[0] not in FIXED_TOP + FIXED_BOTTOM]

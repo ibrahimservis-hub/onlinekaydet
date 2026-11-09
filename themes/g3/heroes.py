@@ -36,6 +36,9 @@ BASE = """.hr{position:relative}.hr .trust{display:flex;flex-wrap:wrap;gap:10px 
 def hero(X):
     k = X.r['hero']
     X.css('hero.base', BASE)
+    if k.startswith('p_'):
+        from . import premium
+        return ed('Ana görsel', premium.HERO[k[2:]](X))
     return ed('Ana görsel', globals()['hero_' + k](X))
 
 

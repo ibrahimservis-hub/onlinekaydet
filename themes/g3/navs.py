@@ -5,8 +5,8 @@ TEL = '0532 000 00 00'
 TELRAW = '905320000000'
 
 
-def ed(nm, h):
-    return f'<div class="ed" data-nm="{nm}">{h}</div>'
+def ed(nm, h, off=False):
+    return f'<div class="ed" data-nm="{nm}"' + (' data-dflt="off"' if off else '') + f'>{h}</div>'
 
 
 def logo(X, cls=''):
@@ -54,6 +54,9 @@ NAVCSS = {
 
 def nav(X):
     k = X.r['nav']
+    if k == 'premium':
+        from . import premium
+        return premium.nav(X)
     X.css('nav.base', NAVCSS['base'])
     cta = f'<a class="btn nv-cta" href="#randevu">{X.r.get("cta", "Randevu al")}</a>'
     burger = '<label class="bgr" for="mn" aria-label="Menü">' + ic('mn', 22) + '</label>'
