@@ -392,6 +392,41 @@ def make_middleware(db, get_current_user):
     return middleware
 
 
+def reap_stale():
+    """Yeniden başlatmalardan kalan eski uygulama süreçlerini (aynı klasör, bizden eski) kapatır: hosting iş parçacığı kotasını doldurmasın."""
+    import os, glob, signal
+    me, killed = os.getpid(), []
+    try:
+        cwd = os.path.realpath(os.getcwd())
+        anc, p = {me}, me
+        for _ in range(6):
+            try:
+                p = int(open("/proc/%d/stat" % p).read().rsplit(")", 1)[1].split()[1])
+            except Exception:  # noqa: BLE001
+                break
+            if p <= 1:
+                break
+            anc.add(p)
+        my_start = int(open("/proc/%d/stat" % me).read().rsplit(")", 1)[1].split()[19])
+        uid = os.getuid()
+        for d in glob.glob("/proc/[0-9]*"):
+            try:
+                pid = int(d.rsplit("/", 1)[1])
+                if pid in anc or "Uid:\t%d" % uid not in open(d + "/status").read():
+                    continue
+                if os.path.realpath(os.readlink(d + "/cwd")) != cwd:
+                    continue
+                st = int(open(d + "/stat").read().rsplit(")", 1)[1].split()[19])
+                if st < my_start - 300:                    # bizden en az 3 sn eski
+                    os.kill(pid, signal.SIGTERM)
+                    killed.append(pid)
+            except Exception:  # noqa: BLE001
+                continue
+    except Exception:  # noqa: BLE001
+        pass
+    return killed
+
+
 def _acct():
     """Hesaptaki tüm süreçlerin iş parçacığı dökümü (hosting kotası teşhisi)."""
     import os, glob

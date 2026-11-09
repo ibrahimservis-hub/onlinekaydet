@@ -2716,6 +2716,25 @@ async def _setup_schema():
 
 
 @app.on_event("startup")
+async def _reap_later():
+    if os.environ.get("REAP_STALE", "1") == "0":
+        return
+    await asyncio.sleep(30)
+    try:
+        import governance
+        k = await asyncio.get_running_loop().run_in_executor(None, governance.reap_stale)
+        if k:
+            logger.info("eski sureçler kapatildi: %s", k)
+    except Exception:  # noqa: BLE001
+        pass
+
+
+@app.on_event("startup")
+async def _reap_start():
+    asyncio.get_running_loop().create_task(_reap_later())
+
+
+@app.on_event("startup")
 async def _limit_threads():
     """asyncio.to_thread havuzunu sınırla: hosting iş parçacığı kotasını aşmasın."""
     from concurrent.futures import ThreadPoolExecutor
