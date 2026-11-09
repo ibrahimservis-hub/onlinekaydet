@@ -3313,7 +3313,7 @@
       var rest = PAGES.filter(function (p) { return !used[p.slug]; }); return out + (rest.length ? '<optgroup label="Diğer">' + rest.map(opt).join('') + '</optgroup>' : '');
     }
     var TOPN = { Menü: 1 };
-    function topBlocks() { return DOC ? Array.prototype.filter.call(DOC.body.children, function (e) { return !/^(SCRIPT|STYLE|NOSCRIPT|LINK|TEMPLATE)$/.test(e.tagName) && !(e.hasAttribute && e.hasAttribute('data-spx-ed')); }) : []; }
+    function topBlocks() { return DOC ? Array.prototype.filter.call(DOC.body.children, function (e) { return !/^(SCRIPT|STYLE|NOSCRIPT|LINK|TEMPLATE|INPUT|META|BR)$/.test(e.tagName) && !(e.hasAttribute && e.hasAttribute('data-spx-ed')); }) : []; }
     function blkName(e, i) { var n = e.getAttribute('data-nm'); if (n) return n; var h = e.querySelector('h1,h2,h3'); var t = h ? h.textContent.trim() : (e.textContent || '').trim(); return (e.tagName === 'HEADER' || e.tagName === 'NAV' ? 'Üst menü' : e.tagName === 'FOOTER' ? 'Alt bilgi' : 'Bölüm ' + (i + 1)) + (t && !n ? ' — ' + t.slice(0, 26) : ''); }
     function rSecsEd() {
       var box = $('#se_secs'); if (!box || !DOC) return; var L = topBlocks(), from = -1;
