@@ -155,14 +155,16 @@ def quote_cta(X):
 # ------------------------------------------------------------------ HAREKET KATMANI
 MOTION_CSS = """html.pmj .pmr{opacity:0;transform:translateY(28px);transition:opacity .8s cubic-bezier(.2,.7,.2,1),transform .8s cubic-bezier(.2,.7,.2,1);transition-delay:var(--d,0s)}html.pmj .pmr.pmi{opacity:1;transform:none}
 .pgb{position:fixed;left:0;top:0;height:3px;width:100%;transform:scaleX(0);transform-origin:left;background:var(--ac);z-index:99;pointer-events:none}
-.pm .btn{transition:transform .25s,box-shadow .25s,background .25s}.pm .btn:hover{transform:translateY(-3px)}.pm .btn:active{transform:translateY(0) scale(.98)}
+.pm .btn{position:relative;overflow:hidden;transition:transform .25s,box-shadow .25s,background .25s}.pm .btn:not(.o):after{content:"";position:absolute;top:0;bottom:0;width:40%;left:-60%;background:linear-gradient(100deg,transparent,#ffffff55,transparent);transform:skewX(-20deg);animation:shn 4.5s ease-in-out infinite}@keyframes shn{0%,60%{left:-60%}100%{left:130%}}
+.hrp .ph{translate:0 var(--py,0px)}.he .vis .b{animation:fl 7s ease-in-out infinite}.he .vis .st{animation:fl 5s ease-in-out -2s infinite}.hc .pcd{animation:fl 8s ease-in-out infinite}.hn .bn .glass{animation:fl 9s ease-in-out infinite}.hn .bn .glass:nth-child(2){animation-delay:-3s}.hn .bn .glass:nth-child(3){animation-delay:-6s}
+@keyframes fl{50%{translate:0 -10px}}.pm .ed section h2{background:linear-gradient(currentColor,currentColor) 0 100%/0 2px no-repeat;transition:background-size 1s .3s}.pm .ed .pmi h2,.pm .ed h2.pmi{background-size:60px 2px;padding-bottom:10px}.pm .btn:hover{transform:translateY(-3px)}.pm .btn:active{transform:translateY(0) scale(.98)}
 .pm a:focus-visible,.pm button:focus-visible,.pm input:focus-visible,.pm select:focus-visible{outline:2px solid var(--ac);outline-offset:3px}
 .pm .ed:not(:first-child) article,.pm .ed:not(:first-child) li{transition:transform .35s cubic-bezier(.2,.7,.2,1),box-shadow .35s}.pm .ed:not(:first-child) article:hover{transform:translateY(-5px);box-shadow:0 26px 50px -26px #0006}
 .pm .ed:not(:first-child) .ph{transition:transform .8s cubic-bezier(.2,.7,.2,1)}.pm .ed:not(:first-child):hover .ph{transform:scale(1.03)}
-@media(prefers-reduced-motion:reduce){html.pmj .pmr{opacity:1;transform:none;transition:none}.pm *{scroll-behavior:auto!important}}"""
+@media(prefers-reduced-motion:reduce){.pm .btn:after,.hrp *{animation:none!important}html.pmj .pmr{opacity:1;transform:none;transition:none}.pm *{scroll-behavior:auto!important}}"""
 
 MOTION_JS = r"""(function(){var d=document.documentElement,rm=matchMedia('(prefers-reduced-motion:reduce)').matches,ifr=false;try{ifr=window.top!==window}catch(e){ifr=true}
-var h=document.querySelector('.pnv');function sc(){var y=scrollY;if(h)h.classList.toggle('sc',y>40);var b=document.querySelector('.pgb');if(b){var m=document.documentElement.scrollHeight-innerHeight;b.style.transform='scaleX('+(m>0?y/m:0)+')'}}
+var h=document.querySelector('.pnv');function sc(){var y=scrollY;var hr=document.querySelector('.hrp');if(hr&&y<1200&&!rm)hr.style.setProperty('--py',(y*.12)+'px');if(h)h.classList.toggle('sc',y>40);var b=document.querySelector('.pgb');if(b){var m=document.documentElement.scrollHeight-innerHeight;b.style.transform='scaleX('+(m>0?y/m:0)+')'}}
 var pb=document.createElement('i');pb.className='pgb';document.body.appendChild(pb);addEventListener('scroll',sc,{passive:true});sc();
 function cnt(e){var t=parseFloat(e.dataset.to),f=parseInt(e.dataset.d||0),s=e.dataset.sf||'',t0=performance.now(),D=1400;function fm(v){var x=f?v.toFixed(f).replace('.',','):Math.round(v).toLocaleString('tr-TR');return x+s}
 function st(n){var p=Math.min(1,(n-t0)/D),v=t*(1-Math.pow(1-p,3));e.textContent=fm(v);if(p<1)requestAnimationFrame(st)}requestAnimationFrame(st)}

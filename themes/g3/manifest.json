@@ -23,7 +23,7 @@
   "fd": "fraunces",
   "fb": "manrope",
   "dark": false,
-  "kb": 825
+  "kb": 826
  },
  {
   "slug": "2-klima",
@@ -49,7 +49,7 @@
   "fd": "sora",
   "fb": "figtree",
   "dark": false,
-  "kb": 760
+  "kb": 761
  },
  {
   "slug": "3-beyaz-esya",
@@ -153,7 +153,7 @@
   "fd": "bricolage",
   "fb": "plex",
   "dark": false,
-  "kb": 806
+  "kb": 807
  },
  {
   "slug": "07-kombi-kizil",
@@ -205,7 +205,7 @@
   "fd": "playfair",
   "fb": "figtree",
   "dark": false,
-  "kb": 881
+  "kb": 882
  },
  {
   "slug": "09-kombi-cam",
@@ -231,7 +231,7 @@
   "fd": "outfit",
   "fb": "instrument",
   "dark": false,
-  "kb": 760
+  "kb": 761
  },
  {
   "slug": "10-klima-buz",
@@ -257,7 +257,7 @@
   "fd": "spacegrotesk",
   "fb": "manrope",
   "dark": false,
-  "kb": 795
+  "kb": 796
  },
  {
   "slug": "11-klima-poyraz",
@@ -283,7 +283,7 @@
   "fd": "newsreader",
   "fb": "instrument",
   "dark": false,
-  "kb": 964
+  "kb": 965
  },
  {
   "slug": "12-klima-okyanus",
@@ -309,7 +309,7 @@
   "fd": "syne",
   "fb": "plex",
   "dark": false,
-  "kb": 811
+  "kb": 812
  },
  {
   "slug": "13-beyaz-kaymak",
@@ -1011,7 +1011,7 @@
   "fd": "syne",
   "fb": "manrope",
   "dark": true,
-  "kb": 761
+  "kb": 762
  },
  {
   "slug": "p02-edit-klima",
@@ -1037,7 +1037,7 @@
   "fd": "fraunces",
   "fb": "figtree",
   "dark": false,
-  "kb": 814
+  "kb": 815
  },
  {
   "slug": "p03-neon-beyaz-esya",
@@ -1063,7 +1063,7 @@
   "fd": "sora",
   "fb": "figtree",
   "dark": true,
-  "kb": 762
+  "kb": 763
  },
  {
   "slug": "p04-lux-elektronik",
@@ -1089,7 +1089,7 @@
   "fd": "fraunces",
   "fb": "manrope",
   "dark": true,
-  "kb": 825
+  "kb": 826
  },
  {
   "slug": "p05-cine-bilgisayar",
@@ -1115,7 +1115,7 @@
   "fd": "sora",
   "fb": "manrope",
   "dark": true,
-  "kb": 776
+  "kb": 777
  },
  {
   "slug": "p06-edit-tesisat",
@@ -1141,7 +1141,7 @@
   "fd": "playfair",
   "fb": "figtree",
   "dark": false,
-  "kb": 808
+  "kb": 809
  },
  {
   "slug": "p07-neon-elektrik",
@@ -1167,7 +1167,7 @@
   "fd": "spacegrotesk",
   "fb": "figtree",
   "dark": true,
-  "kb": 734
+  "kb": 735
  },
  {
   "slug": "p08-lux-guvenlik",
@@ -1193,7 +1193,7 @@
   "fd": "playfair",
   "fb": "manrope",
   "dark": true,
-  "kb": 838
+  "kb": 839
  },
  {
   "slug": "p09-edit-kombi",
@@ -1219,7 +1219,7 @@
   "fd": "dmserif",
   "fb": "manrope",
   "dark": false,
-  "kb": 789
+  "kb": 790
  },
  {
   "slug": "p10-neon-klima",
@@ -1245,7 +1245,7 @@
   "fd": "intertight",
   "fb": "manrope",
   "dark": true,
-  "kb": 918
+  "kb": 919
  },
  {
   "slug": "p11-lux-beyaz-esya",
@@ -1271,7 +1271,7 @@
   "fd": "dmserif",
   "fb": "figtree",
   "dark": true,
-  "kb": 751
+  "kb": 752
  },
  {
   "slug": "p12-cine-elektronik",
@@ -1297,7 +1297,7 @@
   "fd": "outfit",
   "fb": "manrope",
   "dark": true,
-  "kb": 804
+  "kb": 805
  },
  {
   "slug": "p13-edit-bilgisayar",
@@ -1323,7 +1323,7 @@
   "fd": "fraunces",
   "fb": "manrope",
   "dark": false,
-  "kb": 802
+  "kb": 803
  },
  {
   "slug": "p14-neon-tesisat",
@@ -1349,7 +1349,7 @@
   "fd": "sora",
   "fb": "manrope",
   "dark": true,
-  "kb": 726
+  "kb": 727
  },
  {
   "slug": "p15-lux-elektrik",
@@ -1375,7 +1375,7 @@
   "fd": "fraunces",
   "fb": "figtree",
   "dark": true,
-  "kb": 768
+  "kb": 769
  },
  {
   "slug": "p16-cine-guvenlik",
@@ -1401,7 +1401,7 @@
   "fd": "bricolage",
   "fb": "manrope",
   "dark": true,
-  "kb": 756
+  "kb": 757
  },
  {
   "slug": "p17-neon-kombi",
@@ -1427,7 +1427,7 @@
   "fd": "outfit",
   "fb": "plex",
   "dark": true,
-  "kb": 847
+  "kb": 848
  },
  {
   "slug": "p18-lux-klima",
@@ -1453,7 +1453,7 @@
   "fd": "newsreader",
   "fb": "instrument",
   "dark": true,
-  "kb": 963
+  "kb": 964
  },
  {
   "slug": "p19-cine-beyaz-esya",
@@ -1479,7 +1479,7 @@
   "fd": "syne",
   "fb": "instrument",
   "dark": true,
-  "kb": 740
+  "kb": 741
  },
  {
   "slug": "p20-edit-elektronik",
@@ -1505,7 +1505,7 @@
   "fd": "newsreader",
   "fb": "manrope",
   "dark": false,
-  "kb": 997
+  "kb": 998
  },
  {
   "slug": "p21-neon-bilgisayar",
@@ -1531,7 +1531,7 @@
   "fd": "intertight",
   "fb": "plex",
   "dark": true,
-  "kb": 943
+  "kb": 944
  },
  {
   "slug": "p22-lux-tesisat",
@@ -1557,7 +1557,7 @@
   "fd": "dmserif",
   "fb": "instrument",
   "dark": true,
-  "kb": 716
+  "kb": 717
  },
  {
   "slug": "p23-cine-elektrik",
@@ -1583,7 +1583,7 @@
   "fd": "sora",
   "fb": "instrument",
   "dark": true,
-  "kb": 761
+  "kb": 762
  },
  {
   "slug": "p24-edit-guvenlik",
@@ -1609,7 +1609,7 @@
   "fd": "dmserif",
   "fb": "manrope",
   "dark": false,
-  "kb": 732
+  "kb": 733
  },
  {
   "slug": "p25-lux-kombi",
@@ -1635,7 +1635,7 @@
   "fd": "playfair",
   "fb": "manrope",
   "dark": true,
-  "kb": 893
+  "kb": 894
  },
  {
   "slug": "p26-cine-klima",
@@ -1661,7 +1661,7 @@
   "fd": "outfit",
   "fb": "figtree",
   "dark": true,
-  "kb": 751
+  "kb": 752
  },
  {
   "slug": "p27-edit-beyaz-esya",
@@ -1687,7 +1687,7 @@
   "fd": "playfair",
   "fb": "instrument",
   "dark": false,
-  "kb": 872
+  "kb": 873
  },
  {
   "slug": "p28-neon-elektronik",
@@ -1713,7 +1713,7 @@
   "fd": "spacegrotesk",
   "fb": "plex",
   "dark": true,
-  "kb": 840
+  "kb": 841
  },
  {
   "slug": "p29-lux-bilgisayar",
@@ -1739,7 +1739,7 @@
   "fd": "newsreader",
   "fb": "manrope",
   "dark": true,
-  "kb": 971
+  "kb": 972
  },
  {
   "slug": "p30-cine-tesisat",
@@ -1765,7 +1765,7 @@
   "fd": "bricolage",
   "fb": "figtree",
   "dark": true,
-  "kb": 729
+  "kb": 730
  },
  {
   "slug": "p31-edit-elektrik",
@@ -1791,7 +1791,7 @@
   "fd": "newsreader",
   "fb": "instrument",
   "dark": false,
-  "kb": 953
+  "kb": 954
  },
  {
   "slug": "p32-neon-guvenlik",
@@ -1817,7 +1817,7 @@
   "fd": "outfit",
   "fb": "plex",
   "dark": true,
-  "kb": 791
+  "kb": 792
  },
  {
   "slug": "p33-cine-kombi",
@@ -1843,7 +1843,7 @@
   "fd": "syne",
   "fb": "manrope",
   "dark": true,
-  "kb": 760
+  "kb": 761
  },
  {
   "slug": "p34-edit-klima",
@@ -1869,7 +1869,7 @@
   "fd": "fraunces",
   "fb": "figtree",
   "dark": false,
-  "kb": 783
+  "kb": 784
  },
  {
   "slug": "p35-neon-beyaz-esya",
@@ -1895,7 +1895,7 @@
   "fd": "sora",
   "fb": "figtree",
   "dark": true,
-  "kb": 762
+  "kb": 763
  },
  {
   "slug": "p36-lux-elektronik",
@@ -1921,7 +1921,7 @@
   "fd": "fraunces",
   "fb": "manrope",
   "dark": true,
-  "kb": 826
+  "kb": 827
  },
  {
   "slug": "p37-cine-bilgisayar",
@@ -1947,7 +1947,7 @@
   "fd": "sora",
   "fb": "manrope",
   "dark": true,
-  "kb": 776
+  "kb": 777
  },
  {
   "slug": "p38-edit-tesisat",
@@ -1973,7 +1973,7 @@
   "fd": "playfair",
   "fb": "figtree",
   "dark": false,
-  "kb": 808
+  "kb": 809
  },
  {
   "slug": "p39-neon-elektrik",
@@ -1999,7 +1999,7 @@
   "fd": "spacegrotesk",
   "fb": "figtree",
   "dark": true,
-  "kb": 733
+  "kb": 734
  },
  {
   "slug": "p40-lux-guvenlik",
@@ -2025,7 +2025,7 @@
   "fd": "playfair",
   "fb": "manrope",
   "dark": true,
-  "kb": 838
+  "kb": 839
  },
  {
   "slug": "p41-edit-kombi",
@@ -2051,7 +2051,7 @@
   "fd": "dmserif",
   "fb": "manrope",
   "dark": false,
-  "kb": 788
+  "kb": 789
  },
  {
   "slug": "p42-neon-klima",
@@ -2077,7 +2077,7 @@
   "fd": "intertight",
   "fb": "manrope",
   "dark": true,
-  "kb": 919
+  "kb": 920
  },
  {
   "slug": "p43-lux-beyaz-esya",
@@ -2103,7 +2103,7 @@
   "fd": "dmserif",
   "fb": "figtree",
   "dark": true,
-  "kb": 749
+  "kb": 750
  },
  {
   "slug": "p44-cine-elektronik",
@@ -2129,7 +2129,7 @@
   "fd": "outfit",
   "fb": "manrope",
   "dark": true,
-  "kb": 804
+  "kb": 805
  },
  {
   "slug": "p45-edit-bilgisayar",
@@ -2155,7 +2155,7 @@
   "fd": "fraunces",
   "fb": "manrope",
   "dark": false,
-  "kb": 803
+  "kb": 804
  },
  {
   "slug": "p46-neon-tesisat",
@@ -2181,7 +2181,7 @@
   "fd": "sora",
   "fb": "manrope",
   "dark": true,
-  "kb": 726
+  "kb": 727
  },
  {
   "slug": "p47-lux-elektrik",
@@ -2207,7 +2207,7 @@
   "fd": "fraunces",
   "fb": "figtree",
   "dark": true,
-  "kb": 769
+  "kb": 770
  },
  {
   "slug": "p48-cine-guvenlik",
@@ -2233,7 +2233,7 @@
   "fd": "bricolage",
   "fb": "manrope",
   "dark": true,
-  "kb": 755
+  "kb": 756
  },
  {
   "slug": "p49-neon-kombi",
@@ -2259,7 +2259,7 @@
   "fd": "outfit",
   "fb": "plex",
   "dark": true,
-  "kb": 846
+  "kb": 847
  },
  {
   "slug": "p50-lux-klima",
@@ -2285,7 +2285,7 @@
   "fd": "newsreader",
   "fb": "instrument",
   "dark": true,
-  "kb": 964
+  "kb": 965
  },
  {
   "slug": "p51-cine-beyaz-esya",
@@ -2311,7 +2311,7 @@
   "fd": "syne",
   "fb": "instrument",
   "dark": true,
-  "kb": 740
+  "kb": 741
  },
  {
   "slug": "p52-edit-elektronik",
@@ -2337,7 +2337,7 @@
   "fd": "newsreader",
   "fb": "manrope",
   "dark": false,
-  "kb": 996
+  "kb": 997
  },
  {
   "slug": "p53-neon-bilgisayar",
@@ -2363,7 +2363,7 @@
   "fd": "intertight",
   "fb": "plex",
   "dark": true,
-  "kb": 944
+  "kb": 945
  },
  {
   "slug": "p54-lux-tesisat",
@@ -2389,7 +2389,7 @@
   "fd": "dmserif",
   "fb": "instrument",
   "dark": true,
-  "kb": 714
+  "kb": 715
  },
  {
   "slug": "p55-cine-elektrik",
@@ -2415,7 +2415,7 @@
   "fd": "sora",
   "fb": "instrument",
   "dark": true,
-  "kb": 762
+  "kb": 763
  },
  {
   "slug": "p56-edit-guvenlik",
@@ -2441,7 +2441,7 @@
   "fd": "dmserif",
   "fb": "manrope",
   "dark": false,
-  "kb": 731
+  "kb": 732
  },
  {
   "slug": "p57-lux-kombi",
@@ -2467,7 +2467,7 @@
   "fd": "playfair",
   "fb": "manrope",
   "dark": true,
-  "kb": 894
+  "kb": 895
  },
  {
   "slug": "p58-cine-klima",
@@ -2493,7 +2493,7 @@
   "fd": "outfit",
   "fb": "figtree",
   "dark": true,
-  "kb": 750
+  "kb": 751
  },
  {
   "slug": "p59-edit-beyaz-esya",
@@ -2519,7 +2519,7 @@
   "fd": "playfair",
   "fb": "instrument",
   "dark": false,
-  "kb": 874
+  "kb": 875
  },
  {
   "slug": "p60-neon-elektronik",
@@ -2545,7 +2545,7 @@
   "fd": "spacegrotesk",
   "fb": "plex",
   "dark": true,
-  "kb": 840
+  "kb": 841
  },
  {
   "slug": "p61-lux-bilgisayar",
@@ -2571,7 +2571,7 @@
   "fd": "newsreader",
   "fb": "manrope",
   "dark": true,
-  "kb": 972
+  "kb": 973
  },
  {
   "slug": "p62-cine-tesisat",
@@ -2597,6 +2597,6 @@
   "fd": "bricolage",
   "fb": "figtree",
   "dark": true,
-  "kb": 729
+  "kb": 730
  }
 ]
