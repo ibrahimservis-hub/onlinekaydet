@@ -204,9 +204,5 @@ h2{font-size:clamp(34px,10vw,48px)}
 .faq summary{font-size:20px}
 .sx a{padding:18px 0}.sx h3{font-size:30px}
 .mx{font-size:14px}
-.vb{display:grid;grid-template-columns:1fr 1fr;position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--g0);border-top:1px solid var(--hl);padding-bottom:env(safe-area-inset-bottom)}
-.vb a{display:flex;align-items:center;justify-content:center;min-height:54px;color:#fff;font:500 15px var(--f)}
-.vb a+a{border-left:1px solid var(--hl);color:var(--ch)}
-body{padding-bottom:54px}
 }
 @media(max-width:700px){.dl dd span:not(:last-child):after{display:none}.dl dd span{margin-right:16px;display:inline-block}}

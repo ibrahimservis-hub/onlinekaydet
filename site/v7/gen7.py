@@ -12,16 +12,17 @@ def header(cur,home=False):
     sub=''.join('<a href="%s.html">%s</a>'%(a,b) for a,b in SEC)
     return ('<a class="skip" href="#icerik">İçeriğe geç</a>'
     '<div class="o7-hd%s" id="o7hd"><div class="o7w"><a href="index.html" aria-label="OnlineKaydet ana sayfa"><img src="../logo-acik-s.png" alt="OnlineKaydet" width="154" height="30"></a>'
+    '<a class="btn sm o7-try" href="%s">Ücretsiz dene</a>'
     '<nav class="o7-nav" aria-label="Ana menü">%s</nav><span class="o7-sp"></span><a class="gir" href="/giris">Giriş</a><a class="tel" href="tel:+905444444004">0544 444 40 04</a><a class="btn o sm" href="demo.html">Demo talep edin</a>'
     '<button class="o7-bg" type="button" aria-label="Menü" aria-expanded="false" aria-controls="o7mm"><svg class="m" viewBox="0 0 24 24"><path d="M3 8h18M3 16h18"/></svg><svg class="x" viewBox="0 0 24 24"><path d="M5 5l14 14M19 5L5 19"/></svg></button></div></div>'
-    '<div class="o7-mm" id="o7mm">%s<div class="sub">%s</div><div class="cta"><a class="btn" href="demo.html">Demo talep edin</a><a class="btn o" href="/giris">Müşteri girişi</a></div><a class="tl" href="tel:+905444444004">0544 444 40 04</a></div>')%(' home' if home else '',nav,mm,sub)
+    '<div class="o7-mm" id="o7mm">%s<div class="sub">%s</div><div class="cta"><a class="btn" href="demo.html">Demo talep edin</a><a class="btn o" href="/giris">Müşteri girişi</a></div><a class="tl" href="tel:+905444444004">0544 444 40 04</a></div>')%(' home' if home else '','#kayit' if home else 'index.html#kayit',nav,mm,sub)
 FOOT='''<div class="o7-ft"><div class="o7w"><div class="gr5"><div><img src="../logo-acik-s.png" alt="OnlineKaydet" width="154" height="30"><p>Teknik servisler için servis kaydı, usta takibi, tahsilat ve web sitesi platformu.</p><a class="fph" href="tel:+905444444004">0544 444 40 04</a><a class="fwa" href="https://wa.me/905444444004" rel="noopener">WhatsApp ile yazın</a></div>
 <div><h5>Ürün</h5><a href="ozellikler.html">Özellikler</a><a href="usta-uygulamasi.html">Usta uygulaması</a><a href="temalar.html">Temalar</a><a href="entegrasyonlar.html">Entegrasyonlar</a><a href="fiyatlar.html">Fiyatlar</a><a href="demo.html">Demo</a></div>
 <div><h5>Sektörler</h5>%s</div>
 <div><h5>Kaynaklar</h5><a href="blog.html">Blog</a><a href="destek.html">Destek</a><a href="komisyon-hesaplama.html">Komisyon hesaplama</a><a href="desi-hesaplama.html">Desi hesaplama</a><a href="hata-kodlari.html">Hata kodları</a></div>
 <div><h5>OnlineKaydet</h5><a href="neden-onlinekaydet.html">Neden OnlineKaydet?</a><a href="hakkimizda.html">Hakkımızda</a><a href="bayilik.html">İş ortaklığı</a><a href="iletisim.html">İletişim</a><a href="/giris">Müşteri girişi</a></div></div>
 <div class="cp"><span>© 2026 OnlineKaydet</span><a href="kvkk.html">KVKK</a><a href="gizlilik.html">Gizlilik</a><span class="sp"></span><span>onlinekaydet.com</span></div></div></div>'''%''.join('<a href="%s.html">%s</a>'%(a,b) for a,b in SEC)
-VB='<div class="vb"><a class="p1" href="tel:+905444444004" aria-label="Ara">0544 444 40 04</a><a class="p2" href="https://wa.me/905444444004?text=Merhaba%2C%20OnlineKaydet%20hakk%C4%B1nda%20bilgi%20almak%20istiyorum." rel="noopener" target="_blank" aria-label="WhatsApp">WhatsApp</a></div>'
+VB='<div class="o7vb"><a class="a1" href="tel:+905444444004"><b>Telefon</b><small>Yardım için arayın</small></a><a class="a2" href="https://wa.me/905444444004?text=Merhaba%2C%20OnlineKaydet%20hakk%C4%B1nda%20bilgi%20almak%20istiyorum." rel="noopener" target="_blank"><b>WhatsApp</b><small>Bize ulaşın</small></a><a class="a3" href="index.html#kayit"><b>Ücretsiz dene</b><small>Hızla başlayın</small></a></div>'
 def fixrel(t):
     def f(m):
         a,q,u=m.group(1),m.group(2),m.group(3)

@@ -91,7 +91,7 @@ import gen7
 doc=('<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><meta name="theme-color" content="#0a0c0f">'
 '<link rel="icon" href="../favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="../favicon-32.png"><link rel="apple-touch-icon" href="../apple-touch-icon.png">'
 '<title>Servis Takip Programı | OnlineKaydet</title><meta name="description" content="Teknik servisler için servis takip programı: servis kaydı, usta takibi, tahsilat ve hazır web sitesi. İlk ay ücretsiz.">'
-'<link rel="stylesheet" href="shell.css"><link rel="stylesheet" href="home.css"></head><body>'+gen7.header('index.html',True)+body+gen7.FOOT+gen7.VB+
+'<link rel="stylesheet" href="shell.css"><link rel="stylesheet" href="home.css"></head><body>'+gen7.header('index.html',True)+body+gen7.FOOT+gen7.VB.replace('index.html#kayit','#kayit')+
 '<script>document.documentElement.classList.add("js")</script><script src="../site.js"></script><script src="../lead.js"></script><script src="ok7.js"></script><script src="home.js"></script></body></html>')
 # gövde içindeki sıfırlama: çift id
 open('index.html','w').write(doc)

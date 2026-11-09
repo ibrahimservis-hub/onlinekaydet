@@ -528,11 +528,6 @@ body.o7in{font:400 17px/1.55 var(--f);color:var(--ink);background:var(--iv)}
 .o7in .fgrid{grid-template-columns:1fr}
 .o7in .cta2{grid-template-columns:1fr;padding:32px 24px}
 .o7in table{font-size:14px}
-.o7in .vb{display:grid;grid-template-columns:1fr 1fr;position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--g0);border-top:1px solid var(--hl);padding-bottom:env(safe-area-inset-bottom)}
-.o7in .vb a{display:flex;align-items:center;justify-content:center;min-height:52px;color:#fff;font:500 15px var(--f);background:transparent;border-radius:0;padding:0}
-.o7in .vb a+a{border-left:1px solid var(--hl);color:var(--ch)}
-.o7in .vb .ci{display:none}
-body.o7in{padding-bottom:52px}
 }
 
 .o7in .sq,.o7in .dkk{background:var(--g0)!important;color:#fff}
@@ -558,3 +553,35 @@ body.o7in{padding-bottom:52px}
 .o7in .chp a:last-child{background:var(--ink);color:var(--iv);border-color:var(--ink)}
 .o7in .ib svg,.o7in .ib svg *{stroke:var(--chd)!important}
 .o7in .tm h3,.o7in .tm b,.o7in .sw h3{font-weight:400;font-size:26px;letter-spacing:-.02em}
+
+/* sayfa başlığı animasyonu */
+.o7in .pgh{position:relative;overflow:hidden}
+.o7in .pgh:before{content:"";position:absolute;inset:0;max-width:1240px;margin:0 auto;background:repeating-linear-gradient(90deg,transparent 0 calc(25% - 1px),var(--hl) calc(25% - 1px) 25%);opacity:0;animation:o7f 1.4s var(--ease) .1s forwards;pointer-events:none}
+.o7in .pgh:after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:linear-gradient(90deg,transparent,var(--ch),transparent);transform:scaleX(0);animation:o7g 1.8s var(--ease) .5s forwards}
+.o7in .pgh .w{position:relative}
+.o7in .pgh .crumb{animation:o7u .8s var(--ease) .05s both}
+.o7in .pgh h1{animation:o7h 1.1s var(--ease) .15s both}
+.o7in .pgh p{animation:o7u .9s var(--ease) .4s both}
+.o7in .pgh .ticks{animation:o7u .9s var(--ease) .5s both}
+.o7in .pgh .acts,.o7in .pgh .ctas,.o7in .pgh .jump{animation:o7u .9s var(--ease) .6s both}
+.o7in .pgh .ticks li{animation:o7u .7s var(--ease) both}
+.o7in .pgh .ticks li:nth-child(1){animation-delay:.55s}.o7in .pgh .ticks li:nth-child(2){animation-delay:.65s}.o7in .pgh .ticks li:nth-child(3){animation-delay:.75s}.o7in .pgh .ticks li:nth-child(4){animation-delay:.85s}
+.o7in .pgh .skv{animation:o7u 1.1s var(--ease) .5s both}
+.o7in .pgh .skv .fis{border:1px solid var(--hl2);background:var(--g1);color:#d9dce2}
+.o7in .pgh .skv .fis .top,.o7in .pgh .skv .fis dt,.o7in .pgh .skv .fis dd,.o7in .pgh .skv .fis .tot{color:#d9dce2}
+.o7in .pgh .skv .fis .top{border-bottom:1px solid var(--hl2)}
+.o7in .pgh .skv .ln{animation:o7s .7s var(--ease) both}
+.o7in .pgh .skv .ln:nth-of-type(1){animation-delay:1s}.o7in .pgh .skv .ln:nth-of-type(2){animation-delay:1.25s}.o7in .pgh .skv .ln:nth-of-type(3){animation-delay:1.5s}.o7in .pgh .skv .ln:nth-of-type(4){animation-delay:1.75s}
+.o7in .pgh .skv .tot{animation:o7u .8s var(--ease) 2s both}
+.o7in .pgh .skv>svg{display:none}
+.o7in .pgh .skv .fis:after{content:"";display:block;height:1px;margin-top:14px;background:var(--ch);transform-origin:left;transform:scaleX(0);animation:o7g 1.6s var(--ease) 1.2s forwards}
+@media(min-width:1000px){.o7in .pgh .w:has(.skv){grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:56px;align-items:center}}
+@keyframes o7u{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+@keyframes o7s{from{opacity:0;transform:translateX(-14px)}to{opacity:1;transform:none}}
+@keyframes o7f{to{opacity:.45}}
+@keyframes o7g{to{transform:scaleX(1)}}
+@keyframes o7h{from{opacity:0;transform:translateY(46px);clip-path:inset(0 0 100% 0)}to{opacity:1;transform:none;clip-path:inset(-12% 0 -12% 0)}}
+@media(prefers-reduced-motion:reduce){.o7in .pgh *,.o7in .pgh:before,.o7in .pgh:after{animation:none!important;opacity:1!important;transform:none!important;clip-path:none!important}}
+.o7in .fgrid p:last-of-type{border-radius:0!important}
+.o7in .pgh .skv .fis .tot{background:var(--g2)!important;color:var(--ch)!important;border-top:1px solid var(--hl2)}
+.o7in .fis,.o7in .fis .tot{border-radius:0}
