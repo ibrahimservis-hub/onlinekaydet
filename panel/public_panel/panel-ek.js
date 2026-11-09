@@ -3165,7 +3165,7 @@
       if (!D.has_theme) { body().innerHTML = CSS + '<div class="sm-c"><h3>Önce bir tema seçin</h3><p>Sitenizin görünümünü seçtiğinizde bilgileriniz otomatik yerleşir.</p></div><div class="sm-c sm-t-gor" id="sm_s3"><div id="sm_tm"></div></div>'; D.sector = D.sector || ''; rTheme(); return; }
       var soc = function (k, l) { return '<label>' + l + '<input type="text" data-so="' + k + '" value="' + esc(P.social[k] || '') + '" placeholder="Sayfa adresi"></label>'; };
       body().innerHTML = CSS + '<div id="sm_w"><div>' +
-        '<div class="sm-c" id="sm_prog"></div><div id="sm_tabs"><button data-tb="firma" class="on">Firma bilgileri</button><button data-tb="gor">Görünüm</button><button data-tb="ic">Yazı ve resimler</button><button data-tb="say">Sayfalar</button></div>' +
+        '<div class="sm-c" id="sm_prog"></div><div id="sm_tabs"><button data-tb="gor" class="on">Tema ve görünüm</button><button data-tb="firma">Firma bilgileri</button><button data-tb="ic">Yazı ve resimler</button><button data-tb="say">Sayfalar</button></div>' +
         '<div class="sm-c sm-t-firma" id="sm_s1"><h3>Firma bilgileriniz</h3><p>Bir kez yazın; sitenizdeki tüm sayfalara kendiliğinden yerleşir.</p><div class="sm-g">' +
         '<label>Firma adı<input type="text" data-i="name" value="' + esc(INFO.name) + '"></label><label>Telefon<input type="text" data-i="phone" value="' + esc(INFO.phone) + '" placeholder="05xx xxx xx xx"></label>' + inp('WhatsApp', 'whatsapp', '05xx xxx xx xx', '(boşsa telefon kullanılır)') + inp('E-posta', 'email', 'ornek@firma.com') +
         inp('Şehir / ilçe', 'city', 'Örn. İzmir') + inp('Çalışma saatleri', 'hours', 'Hafta içi 08:30 – 19:00') + '<label style="grid-column:1/-1">Adres<input type="text" data-i="address" value="' + esc(INFO.address) + '" placeholder="Mahalle, sokak, no, ilçe / şehir"></label></div></div>' +
@@ -3187,7 +3187,7 @@
       Array.prototype.forEach.call(document.querySelectorAll('[data-f]'), function (e) { e.oninput = function () { P[e.getAttribute('data-f')] = e.value; if (/slogan|about|regions/.test(e.getAttribute('data-f'))) rProg(); }; });
       Array.prototype.forEach.call(document.querySelectorAll('[data-i]'), function (e) { e.oninput = function () { INFO[e.getAttribute('data-i')] = e.value; rProg(); }; });
       Array.prototype.forEach.call(document.querySelectorAll('[data-so]'), function (e) { e.oninput = function () { P.social[e.getAttribute('data-so')] = e.value; }; });
-      rProg(); rLogo(); rTheme(); rSlides(); rGal(); rPages(); rSecs(); tab('firma');
+      rProg(); rLogo(); rTheme(); rSlides(); rGal(); rPages(); rSecs(); tab('gor');
       rRows('sm_sv', 'services', 't', 'd', 'Hizmet adı', 'Kısa açıklama', 12, 'Hizmet ekle'); rRows('sm_fq', 'faq', 'q', 'a', 'Soru', 'Cevap', 12, 'Soru ekle');
       $('#sm_save').onclick = save;
       $('#sm_adv').onclick = function () { TAB = 'siteduz'; draw(); markActive(); }; $('#sm_dom').onclick = function () { TAB = 'domain'; draw(); markActive(); };
