@@ -419,7 +419,7 @@ def register(api_router, db, deps: dict):
         src = await source_from_sid(payload.sid)
         doc = {
             "id": new_id(),
-            "type": payload.type if payload.type in ("servis_talebi", "bilgi", "sikayet", "diger") else "servis_talebi",
+            "type": payload.type if payload.type in ("servis_talebi", "bilgi", "sikayet", "diger", "siparis") else "servis_talebi",
             "name": payload.name.strip(), "phone": clean_phone(payload.phone),
             "email": (payload.email or "").strip(), "city": (payload.city or "").strip(),
             "district": (payload.district or "").strip(), "device_type": (payload.device_type or "").strip(),
@@ -433,7 +433,7 @@ def register(api_router, db, deps: dict):
         await db.contact_messages.insert_one(doc)
         await mark_converted(payload.sid, "form")
         import notify as _n
-        await _n.push_admins_t(db, "Yeni iletişim mesajı", f"{doc.get('name', '')} · {doc.get('phone', '')}", "/admin/messages")
+        await _n.push_admins_t(db, "Yeni online mağaza siparişi" if doc["type"] == "siparis" else "Yeni iletişim mesajı", f"{doc.get('name', '')} · {doc.get('phone', '')}", "/admin/messages")
         return {"ok": True, "id": doc["id"]}
 
     @api_router.post("/public/dealer-application")
