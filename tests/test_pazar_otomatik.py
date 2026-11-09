@@ -144,6 +144,12 @@ with TestClient(s.app) as c:
         it = c.portal.call(go)["attributes"]
         assert {"attributeId": 47, "attributeValueId": 9001} in it and {"attributeId": 91, "customAttributeValue": "24 kW"} in it, it
     t("özellik eşleme: Trendyol'dan getir, elle ekle, zorunlu değil engel olmaz, ürüne özel değer, Trendyol gövdesi", attrs)
+    def paketkart():
+        r = c.post("/api/admin/firms", headers=A, json={"name": "Süreli Firma", "email": "sr@x.com", "password": "sifre12345", "package": "tam", "usage_days": 10}); assert r.status_code == 200, r.text
+        P = c.get("/api/firm/package", headers=tok(c, "sr@x.com", "sifre12345")).json()
+        assert P["unlimited"] is False and P["days_left"] in (9, 10) and P["expires_at"], P
+        Q = c.get("/api/firm/package", headers=O).json(); assert Q["unlimited"] is True and Q["days_left"] is None and Q["modules"], Q
+    t("Genel Bakış kartı verisi: paket, bitiş tarihi, kalan gün, süresiz", paketkart)
 print("\nGEÇTİ" if not bad else "\nHATA", f"{len(ok)}/{len(ok)+len(bad)}")
 for n in ok: print(" +", n)
 for n, e in bad: print(" -", n, e)

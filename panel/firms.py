@@ -227,7 +227,15 @@ def register(api_router, db, deps):
     async def firm_package(request: Request, user: dict = Depends(get_current_user)):
         f = await my_firm(request)
         mods = f.get("modules") or list(MODULES)
-        return {"package": f.get("package", ""), "modules": mods, "labels": {m: MODULES[m] for m in MODULES}, "locked": [m for m in MODULES if m not in mods], "soon": SOON}
+        exp = f.get("expires_at") or ""
+        days = None
+        if exp:
+            try:
+                days = int(-(-((datetime.fromisoformat(exp) - datetime.now(timezone.utc)).total_seconds()) // 86400))
+            except (ValueError, TypeError):
+                days = None
+        return {"package": f.get("package", ""), "modules": mods, "labels": {m: MODULES[m] for m in MODULES}, "locked": [m for m in MODULES if m not in mods], "soon": SOON,
+                "expires_at": exp, "days_left": days, "unlimited": not exp, "since": f.get("created_at", "")}
 
     async def push_settings(f):
         fdb = db.firm(f["db"])

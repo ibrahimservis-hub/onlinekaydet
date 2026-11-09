@@ -6033,3 +6033,60 @@
     if (c.role === 'admin' && !c.firm) { sessionStorage.setItem('ok_t', t); location.replace('/yonetim'); }
   } catch (e) { }
 })();
+
+/* ---------- Genel Bakış: paket içeriği + bitiş tarihi kartı (firma hesaplarında) ---------- */
+(function () {
+  if (window.__spxPaketKart) return; window.__spxPaketKart = 1;
+  var API = (window.SP_PANEL_API || location.origin + '/api'), S = { d: null, name: '', t: 0, busy: false, fail: 0 };
+  function tok() { try { return localStorage.getItem('token') || ''; } catch (e) { return ''; } }
+  function esc(x) { return String(x == null ? '' : x).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function get(p) { return fetch(API + p, { headers: { Authorization: 'Bearer ' + tok() } }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }); }
+  var st = document.createElement('style');
+  st.textContent = '#spx-paketkart{display:flex;gap:16px;flex-wrap:wrap;align-items:stretch;margin:0 0 16px;padding:16px;border:1px solid #e2e8f0;border-radius:16px;background:#fff;color:#0f172a}' +
+    '#spx-paketkart .pk-l{flex:2 1 320px;min-width:0}#spx-paketkart .pk-r{flex:1 1 260px;min-width:0;border-left:1px solid #e2e8f0;padding-left:16px}' +
+    '#spx-paketkart h3{margin:0;font-size:15px;font-weight:800}#spx-paketkart .pk-n{display:inline-block;margin-left:8px;padding:2px 10px;border-radius:99px;background:#e8f0fe;color:#1155cc;font-size:12px;font-weight:800}' +
+    '#spx-paketkart .pk-ch{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}#spx-paketkart .pk-ch span{padding:4px 10px;border-radius:99px;background:#f1f5f9;font-size:12.5px;font-weight:600;color:#334155}' +
+    '#spx-paketkart .pk-ch span.m{background:#fff;border:1px dashed #cbd5e1;color:#64748b}' +
+    '#spx-paketkart .pk-d{font-size:26px;font-weight:800;line-height:1.1;margin-top:6px}#spx-paketkart .pk-s{font-size:13px;color:#475569;margin-top:2px}' +
+    '#spx-paketkart .pk-bar{height:8px;border-radius:99px;background:#e2e8f0;margin-top:10px;overflow:hidden}#spx-paketkart .pk-bar i{display:block;height:100%;border-radius:99px;background:var(--c)}' +
+    '#spx-paketkart .pk-a{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}#spx-paketkart .pk-a a,#spx-paketkart .pk-a button{min-height:44px;padding:0 16px;border-radius:12px;border:1px solid #cbd5e1;background:#fff;color:#0f172a;font:700 14px/1 inherit;font-family:inherit;display:inline-flex;align-items:center;cursor:pointer;text-decoration:none}' +
+    '#spx-paketkart .pk-a .pri{background:var(--c);border-color:var(--c);color:#fff}' +
+    '#spx-paketkart .pk-w{margin-top:10px;padding:10px 12px;border-radius:10px;background:var(--bg);color:var(--c);font-size:13px;font-weight:700}' +
+    'html.spx-dark #spx-paketkart{background:#111a2e;border-color:#1f2d47;color:#e2e8f0}html.spx-dark #spx-paketkart .pk-r{border-color:#1f2d47}html.spx-dark #spx-paketkart .pk-ch span{background:#1b2740;color:#cbd5e1}html.spx-dark #spx-paketkart .pk-s{color:#94a3b8}html.spx-dark #spx-paketkart .pk-a a:not(.pri),html.spx-dark #spx-paketkart .pk-a button{background:#111a2e;color:#e2e8f0;border-color:#334155}' +
+    '@media(max-width:700px){#spx-paketkart .pk-r{border-left:0;padding-left:0;border-top:1px solid #e2e8f0;padding-top:14px}}';
+  document.head.appendChild(st);
+  var TR = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+  function fmt(iso) { var d = new Date(iso); return isNaN(d) ? '' : d.getDate() + ' ' + TR[d.getMonth()] + ' ' + d.getFullYear(); }
+  function html() {
+    var d = S.d, L = d.labels || {}, inc = d.modules || [], lock = d.locked || [], days = d.days_left, unl = d.unlimited;
+    var col = unl ? '#16a34a' : (days == null ? '#16a34a' : (days <= 0 ? '#dc2626' : days <= 7 ? '#dc2626' : days <= 30 ? '#d97706' : '#16a34a')), bg = col === '#dc2626' ? '#fef2f2' : (col === '#d97706' ? '#fffbeb' : '#f0fdf4');
+    var near = !unl && days != null && days <= 30;
+    var msg = 'Merhaba, ' + (S.name || 'firmamın') + ' OnlineKaydet hesabı' + (d.expires_at ? ' ' + fmt(d.expires_at) + ' tarihinde sona eriyor' : '') + '. Süremi uzatmak / paketimi yenilemek istiyorum.';
+    var chips = inc.slice(0, 10).map(function (m) { return '<span>✓ ' + esc(L[m] || m) + '</span>'; }).join('') + (inc.length > 10 ? '<span class="m">+' + (inc.length - 10) + ' özellik daha</span>' : '') + (lock.length ? '<span class="m">' + lock.length + ' özellik kilitli</span>' : '');
+    var big = unl ? 'Süresiz' : (days == null ? '—' : (days <= 0 ? 'Süre doldu' : days + ' gün kaldı'));
+    var sub = unl ? 'Kullanım süreniz sınırsız.' : 'Bitiş tarihi: <b>' + esc(fmt(d.expires_at)) + '</b>';
+    var pct = unl || days == null ? 100 : Math.max(4, Math.min(100, Math.round(days / 365 * 100)));
+    return '<div class="pk-l"><h3>Paketiniz<span class="pk-n">' + esc(d.package || 'Özel') + '</span></h3><div style="font-size:13px;color:#64748b;margin-top:4px">Hesabınızda <b>' + inc.length + '</b> özellik açık.</div><div class="pk-ch">' + chips + '</div>' +
+      '<div class="pk-a"><button type="button" data-pk="paket">Paket içeriğini gör</button></div></div>' +
+      '<div class="pk-r" style="--c:' + col + ';--bg:' + bg + '"><h3>Kullanım süreniz</h3><div class="pk-d" style="color:' + col + '">' + big + '</div><div class="pk-s">' + sub + '</div><div class="pk-bar"><i style="width:' + pct + '%"></i></div>' +
+      (near ? '<div class="pk-w">' + (days <= 0 ? 'Kullanım süreniz doldu. Hesabınızın açık kalması için bizimle iletişime geçin.' : 'Süreniz yaklaşıyor. Kesinti yaşamamak için şimdi bizimle iletişime geçin.') + '</div>' : '') +
+      '<div class="pk-a"><a class="' + (near ? 'pri' : '') + '" target="_blank" rel="noopener" href="https://wa.me/905444444004?text=' + encodeURIComponent(msg) + '">WhatsApp ile yazın</a><a href="tel:+905444444004">Bizi arayın</a></div></div>';
+  }
+  function tick() {
+    var on = !!tok() && /^\/admin\/?$/.test(location.pathname) && !document.body.classList.contains('spx-tech');
+    var dash = on && document.querySelector('[data-testid="admin-dashboard"]'), box = document.getElementById('spx-paketkart');
+    if (!dash) { if (box && !on) box.remove(); return; }
+    if (S.fail > 2) return;
+    if (!S.d && !S.busy) { S.busy = true; Promise.all([get('/firm/package'), get('/firm/me').catch(function () { return {}; })]).then(function (a) { S.d = a[0]; S.name = ((a[1] || {}).firm || {}).name || ''; S.t = Date.now(); }).catch(function () { S.fail++; }).then(function () { S.busy = false; }); }
+    else if (S.d && Date.now() - S.t > 600000 && !S.busy) { S.busy = true; get('/firm/package').then(function (d) { S.d = d; S.t = Date.now(); }).catch(function () { }).then(function () { S.busy = false; }); }
+    if (!S.d) return;
+    if (!box || !dash.contains(box)) {
+      if (box) box.remove();
+      box = document.createElement('div'); box.id = 'spx-paketkart'; box.className = 'notranslate';
+      box.onclick = function (e) { var b = e.target.closest('[data-pk]'); if (b && window.spxOpen) window.spxOpen(b.getAttribute('data-pk')); };
+      var hd = dash.firstElementChild; if (hd && hd.nextSibling) dash.insertBefore(box, hd.nextSibling); else dash.insertBefore(box, dash.firstChild);
+    }
+    var h = html(); if (box.__h !== h) { box.innerHTML = h; box.__h = h; }
+  }
+  setInterval(tick, 1000);
+})();
