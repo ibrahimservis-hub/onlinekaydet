@@ -278,6 +278,7 @@ CSS = """<style data-spx-auto>
 .spx-cta b{font-family:var(--fd);font-weight:var(--hw);font-size:clamp(20px,3vw,28px)}
 .spx-cta .row{display:flex;flex-wrap:wrap;gap:10px}
 .spx-cta .btn.o{background:transparent;color:#fff;border-color:#ffffff88}
+.spx-fab{position:fixed;left:16px;bottom:16px;z-index:60;display:inline-flex;align-items:center;gap:8px;min-height:48px;padding:0 18px;border-radius:99px;background:var(--dk,#0a1f44);color:#fff;font:700 .92rem var(--fb,inherit);text-decoration:none;box-shadow:0 6px 20px #0003}
 .spx-fl{display:flex;flex-wrap:wrap;gap:8px 18px;padding:18px 0;border-top:1px solid var(--ln);font-size:.92rem}
 .spx-fl a{color:inherit;opacity:.85}
 .spx-soc{display:flex;gap:6px;margin-left:auto}.spx-soc a{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;border:1px solid var(--ln);opacity:.9}.spx-soc a:hover{opacity:1;border-color:var(--ac,currentColor)}
@@ -510,9 +511,13 @@ def edit_texts(html, ed):
 def footer_links(ctx, idx):
     links = ['<a href="/%s">%s</a>' % (x["slug"], E(x["title"])) for x in idx if x["kind"] in ("about", "services", "gallery", "process", "faq", "regions", "contact", "custom")]
     legal = ['<a href="/%s">%s</a>' % (k, E(t)) for k, t in (ctx.get("legal") or [])]       # mağaza açıksa yasal metinler (mevzuat gereği her sayfadan erişilebilir)
+    if ctx.get("shop_on"):
+        links += ['<a href="/magaza">Mağaza</a>', '<a href="/hesabim">Hesabım / Giriş</a>']
     if not links and not legal and not social_urls(ctx):
         return ""
-    return '<div class="w spx-fl">%s%s</div>%s' % ("".join(links), social_html(ctx), ('<div class="w spx-fl spx-lg">%s</div>' % "".join(legal)) if legal else "")
+    fab = ('<a class="spx-fab" href="/magaza" aria-label="Mağaza"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
+           '<path d="M6 7h12l1 13H5L6 7z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg><span>Mağaza</span></a>') if ctx.get("shop_on") else ""
+    return fab + '<div class="w spx-fl">%s%s</div>%s' % ("".join(links), social_html(ctx), ('<div class="w spx-fl spx-lg">%s</div>' % "".join(legal)) if legal else "")
 
 
 _PH = "{{H}}"

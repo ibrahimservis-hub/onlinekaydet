@@ -583,7 +583,7 @@ def register(api_router, db, deps):
     @api_router.post("/public/shop/pay/iyzico/callback")
     async def iyzico_callback(request: Request):
         origin = site_origin(request)
-        back = lambda q: RedirectResponse(f"{origin}/?{q}#magaza", status_code=303)      # noqa: E731
+        back = lambda q: RedirectResponse(f"{origin}/magaza?{q}", status_code=303)      # noqa: E731
         form = await request.form()
         token = str(form.get("token") or "")
         o = await db.shop_orders.find_one({"iyzico_token": token}, {"_id": 0}) if token else None

@@ -41,7 +41,7 @@ FEATURES_DEFAULT = {
 
 SHOP_DEFAULT = {
     "title": "ServisPlus Mağaza",
-    "subtitle": "Cihazlarınız için güvenli alışveriş. Ödeme havale / EFT ile yapılır.",
+    "subtitle": "Güvenli alışveriş. Ödeme yöntemlerini sipariş adımında seçersiniz.",
     "slider_title": "Mağaza Ürünleri",
     "bank_accounts": [],           # [{bank, holder, iban, branch, note}]
     "payment_note": "Havale / EFT açıklamasına sipariş numaranızı yazınız. Ödemeniz kontrol edildikten sonra siparişiniz hazırlanır.",
@@ -386,6 +386,8 @@ def register(api_router, db, deps):
         for k in ("shop_enabled", "customer_portal_enabled", "language_enabled"):
             if k in payload:
                 cur[k] = bool(payload[k])
+        if payload.get("shop_enabled") and "customer_portal_enabled" not in payload:
+            cur["customer_portal_enabled"] = True            # mağaza açılınca müşteri girişi / paneli de açılır (sipariş için üyelik gerekir)
         if isinstance(payload.get("quick_request"), dict):
             q, c = payload["quick_request"], cur["quick_request"]
             for k in ("enabled", "ask_address", "mobile_menu"):

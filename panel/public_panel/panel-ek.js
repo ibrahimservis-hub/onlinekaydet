@@ -301,7 +301,7 @@
     return fetch(API + path, o).then(function (r) { return r.text().then(function (t) { var j = {}; try { j = JSON.parse(t); } catch (e) { } if (!r.ok) { var d = j && j.detail; throw new Error(typeof d === 'string' ? d : (d && d[0] && d[0].msg) || ('Hata ' + r.status)); } return j; }); });
   }
   function fail(e) { toast(e.message || 'İşlem başarısız'); }
-  var TABS = [['firmalar', 'Firmalar'], ['sitem', 'Sitem'], ['siteduz', 'Gelişmiş Düzenleme'], ['domain', 'Alan Adı & Site'], ['paket', 'Paketim'], ['mgayar', 'Mağaza Ayarları'], ['moduller', 'Aç / Kapat & Ayarlar'], ['seo', 'SEO · 301 · 404'], ['yeni', 'Yeni Sipariş'], ['pazar', 'Pazaryerleri'], ['yetki', 'Kullanıcılar & Yetkiler'], ['gsc', 'Google Search Console'], ['urunler', 'Ürün Yönetimi'], ['marka', 'Marka Ürün Aktarma'], ['m360', 'Müşteri 360'], ['kaynak', 'Kaynak & Arama Analizi'], ['ustapuan', 'Usta Puanlama'], ['ustagecmis', 'Usta İş Geçmişi'], ['cari', 'Cari & Trend'], ['tahsilat', 'Teknisyen Tahsilat'], ['atolye', 'Atölye'], ['canli', 'Canlı Ziyaretçiler'], ['wa', 'WhatsApp & Bildirim'], ['daha', 'Daha Fazlası'], ['bildirim', 'Bildirimler'], ['memnun', 'Müşteri Memnuniyeti'], ['vade', 'Usta Borç Vadesi'], ['harita', 'Günün İş Haritası'], ['onay', 'Onay Bekleyenler'], ['rapor', 'Rapor Merkezi'], ['kurulum', 'Kurulum Durumu']];
+  var TABS = [['firmalar', 'Firmalar'], ['sitem', 'Sitem'], ['siteduz', 'Gelişmiş Düzenleme'], ['domain', 'Alan Adı & Site'], ['paket', 'Paketim'], ['mgayar', 'Mağaza Ayarları'], ['moduller', 'Aç / Kapat & Ayarlar'], ['seo', 'SEO · 301 · 404'], ['yeni', 'Yeni Sipariş'], ['pazar', 'Pazaryerleri'], ['yetki', 'Kullanıcılar & Yetkiler'], ['gsc', 'Google Search Console'], ['urunler', 'Ürün Yönetimi'], ['kanal', 'Kanal & Stok'], ['urunekle', 'Yeni Ürün'], ['marka', 'Marka Ürün Aktarma'], ['m360', 'Müşteri 360'], ['kaynak', 'Kaynak & Arama Analizi'], ['ustapuan', 'Usta Puanlama'], ['ustagecmis', 'Usta İş Geçmişi'], ['cari', 'Cari & Trend'], ['tahsilat', 'Teknisyen Tahsilat'], ['atolye', 'Atölye'], ['canli', 'Canlı Ziyaretçiler'], ['wa', 'WhatsApp & Bildirim'], ['daha', 'Daha Fazlası'], ['bildirim', 'Bildirimler'], ['memnun', 'Müşteri Memnuniyeti'], ['vade', 'Usta Borç Vadesi'], ['harita', 'Günün İş Haritası'], ['onay', 'Onay Bekleyenler'], ['rapor', 'Rapor Merkezi'], ['kurulum', 'Kurulum Durumu']];
   function build() {
     ov = document.createElement('div'); ov.id = 'spx-ov';
     ov.innerHTML = '<header><button class="spx-b" id="spx-menu">☰ Menü</button><h2 id="spx-h">Site Yönetimi</h2><button class="spx-b" id="spx-x">Kapat ✕</button></header><div id="spx-tabs"></div><div id="spx-body">Yükleniyor…</div>';
@@ -314,9 +314,9 @@
   function body() { return $('#spx-body') || document.createElement('div'); }
   function draw() {
     Array.prototype.forEach.call($('#spx-tabs').children, function (b) { b.classList.toggle('on', b.getAttribute('data-t') === TAB); });
-    var hh = $('#spx-h'); if (hh) hh.textContent = ({ firmalar: 'Firmalar', sitem: 'Sitem — Web Siteniz', siteduz: 'Gelişmiş Düzenleme', domain: 'Alan Adı & Site', paket: 'Paketim', mgayar: 'Mağaza Ayarları', daha: 'Daha Fazlası', bildirim: 'Bildirimler', memnun: 'Müşteri Memnuniyeti', vade: 'Usta Borç Vadesi', harita: 'Günün İş Haritası', moduller: 'Aç/Kapat & Entegrasyonlar', seo: 'SEO · 301 · 404', yeni: 'Yeni Sipariş Gir', pazar: 'Pazaryerleri', yetki: 'Kullanıcılar & Yetkiler', gsc: 'Google Search Console', marka: 'Marka Ürün Aktarma', urunler: 'Ürün Yönetimi', m360: 'Müşteri 360', kaynak: 'Kaynak & Arama Analizi', ustapuan: 'Usta Puanlama', ustagecmis: 'Usta İş Geçmişi', cari: 'Cari & Trend', tahsilat: 'Teknisyen Tahsilat', atolye: 'Atölye (Cihaz Teslim Alma)', sohbet: 'Canlı Sohbet', canli: 'Canlı Ziyaretçiler', wa: 'WhatsApp & Bildirim Ayarları', onay: 'Onay Bekleyenler', rapor: 'Rapor Merkezi', kurulum: 'Kurulum Durumu' })[TAB];
+    var hh = $('#spx-h'); if (hh) hh.textContent = ({ firmalar: 'Firmalar', sitem: 'Sitem — Web Siteniz', siteduz: 'Gelişmiş Düzenleme', domain: 'Alan Adı & Site', paket: 'Paketim', mgayar: 'Mağaza Ayarları', daha: 'Daha Fazlası', bildirim: 'Bildirimler', memnun: 'Müşteri Memnuniyeti', vade: 'Usta Borç Vadesi', harita: 'Günün İş Haritası', moduller: 'Aç/Kapat & Entegrasyonlar', seo: 'SEO · 301 · 404', yeni: 'Yeni Sipariş Gir', pazar: 'Pazaryerleri', yetki: 'Kullanıcılar & Yetkiler', gsc: 'Google Search Console', marka: 'Marka Ürün Aktarma', urunler: 'Ürün Yönetimi', kanal: 'Kanal & Stok', urunekle: 'Ürün Ekle / Düzenle', m360: 'Müşteri 360', kaynak: 'Kaynak & Arama Analizi', ustapuan: 'Usta Puanlama', ustagecmis: 'Usta İş Geçmişi', cari: 'Cari & Trend', tahsilat: 'Teknisyen Tahsilat', atolye: 'Atölye (Cihaz Teslim Alma)', sohbet: 'Canlı Sohbet', canli: 'Canlı Ziyaretçiler', wa: 'WhatsApp & Bildirim Ayarları', onay: 'Onay Bekleyenler', rapor: 'Rapor Merkezi', kurulum: 'Kurulum Durumu' })[TAB];
     body().innerHTML = 'Yükleniyor…';
-    ({ firmalar: drawFirmalar, sitem: drawSitem, siteduz: drawSiteEd, domain: drawDomain, paket: drawPaket, mgayar: drawMgAyar, daha: drawDaha, bildirim: drawBildirim, memnun: drawMemnun, vade: drawVade, harita: drawHarita, moduller: drawMod, seo: drawSeo, yeni: drawNew, pazar: drawMkt, yetki: drawUsers, gsc: drawGsc, marka: drawBrand, urunler: drawProducts, m360: drawM360, kaynak: drawKaynak, ustapuan: drawUstaPuan, ustagecmis: drawUstaGecmis, cari: drawCari, tahsilat: drawTahsilat, atolye: drawAtolye, sohbet: drawSohbet, canli: drawCanli, wa: drawWa, onay: drawOnay, rapor: drawRapor, kurulum: drawKurulum })[TAB]();
+    ({ firmalar: drawFirmalar, sitem: drawSitem, siteduz: drawSiteEd, domain: drawDomain, paket: drawPaket, mgayar: drawMgAyar, daha: drawDaha, bildirim: drawBildirim, memnun: drawMemnun, vade: drawVade, harita: drawHarita, moduller: drawMod, seo: drawSeo, yeni: drawNew, pazar: drawMkt, yetki: drawUsers, gsc: drawGsc, marka: drawBrand, urunler: drawProducts, kanal: drawKanal, urunekle: drawUrunEkle, m360: drawM360, kaynak: drawKaynak, ustapuan: drawUstaPuan, ustagecmis: drawUstaGecmis, cari: drawCari, tahsilat: drawTahsilat, atolye: drawAtolye, sohbet: drawSohbet, canli: drawCanli, wa: drawWa, onay: drawOnay, rapor: drawRapor, kurulum: drawKurulum })[TAB]();
   }
   /* ===== Firmalar: paneli kendi verisiyle kullanan müşteri firmalar ===== */
   var FM = { sel: '', tab: 'bilgi', job: '', q: '', flt: '', newOpen: false };
@@ -1558,7 +1558,7 @@
     ['Servis', [['/admin/jobs', 'Servis Kayıtları'], ['/admin/appointments', 'Randevular'], ['/admin/quotes', 'Fiyat Teklifleri'], ['/admin/warranty', 'Garanti Talepleri'], ['/admin/customers', 'Müşteriler'], ['ek:m360', 'Müşteri 360', 'user'], ['ek:atolye', 'Atölye (Cihaz Teslim)', 'gear'], ['ek:harita', 'Günün İş Haritası', 'search'], ['/admin/parts', 'Yedek Parça'], ['/admin/diagnosis', 'Arıza Rehberi'], ['/admin/brands', 'Markalar']]],
     ['Ustalar', [['/admin/technicians', 'Teknisyenler'], ['/admin/dealers', 'Bayilik Başvuruları'], ['ek:ustapuan', 'Usta Puanlama', 'user'], ['ek:ustagecmis', 'Usta İş Geçmişi', 'user'], ['/admin/performance', 'Performans'], ['/admin/team', 'Ekip Merkezi'], ['/admin/announcements', 'Duyurular']]],
     ['Muhasebe', [['/admin/accounting', 'Muhasebe'], ['ek:tahsilat', 'Teknisyen Tahsilat', 'cart'], ['ek:cari', 'Cari & Trend', 'cart'], ['ek:vade', 'Usta Borç Vadesi', 'cart'], ['ek:memnun', 'Müşteri Memnuniyeti', 'user'], ['/admin/reports', 'Raporlar']]],
-    ['Mağaza & Satış', [['/admin/shop', 'Mağaza'], ['ek:yeni', 'Yeni Sipariş Gir', 'plus'], ['ek:mgayar', 'Mağaza Ayarları', 'gear'], ['ek:pazar', 'Pazaryerleri', 'cart'], ['ek:urunler', 'Ürün Yönetimi', 'cart'], ['ek:marka', 'Marka Ürün Aktarma', 'cart'], ['/admin/coupons', 'Kuponlar']]],
+    ['Mağaza & Satış', [['/admin/shop', 'Mağaza'], ['ek:yeni', 'Yeni Sipariş Gir', 'plus'], ['ek:mgayar', 'Mağaza Ayarları', 'gear'], ['ek:pazar', 'Pazaryerleri', 'cart'], ['ek:urunler', 'Ürün Yönetimi', 'cart'], ['ek:kanal', 'Kanal & Stok', 'cart'], ['ek:urunekle', 'Yeni Ürün', 'plus'], ['ek:marka', 'Marka Ürün Aktarma', 'cart'], ['/admin/coupons', 'Kuponlar']]],
     ['Web Sitesi', [['/admin/site-features', 'Site Özellikleri'], ['ek:sitem', 'Sitem (Web Sitesi)', 'gear'], ['ek:siteduz', 'Gelişmiş Düzenleme', 'gear'], ['ek:domain', 'Alan Adı & Site', 'gear'], ['ek:moduller', 'Aç/Kapat & Entegrasyonlar', 'gear'], ['ek:seo', 'SEO · 301 · 404', 'search'], ['/admin/site-studio', 'Site Stüdyosu'], ['/admin/media', 'Medya Kütüphanesi'], ['/admin/integration', 'Site Entegrasyonu']]],
     ['Pazarlama & İletişim', [['/admin/messages', 'İletişim Mesajları'], ['ek:sohbet', 'Canlı Sohbet', 'live'], ['/admin/reviews', 'Yorumlar'], ['ek:gsc', 'Google Search Console', 'search'], ['/admin/marketing', 'Pazarlama Merkezi'], ['ek:canli', 'Canlı Ziyaretçiler', 'search'], ['ek:wa', 'WhatsApp & Bildirim', 'gear'], ['ek:kaynak', 'Kaynak & Arama Analizi', 'search'], ['/admin/growth', 'Büyüme Merkezi'], ['/admin/visitors', 'Ziyaretçiler']]],
     ['Yönetim', [['/admin/settings', 'Ayarlar'], ['ek:yetki', 'Kullanıcılar & Yetkiler', 'user'], ['ek:firmalar', 'Firmalar', 'user'], ['/admin/security', 'Güvenlik'], ['/admin/governance', 'Yedek & Denetim'], ['ek:paket', 'Paketim', 'box'], ['/admin/account', 'Hesabım']]]
@@ -1574,7 +1574,7 @@
     '/admin/security': [['alerts', 'Güvenlik Uyarıları'], ['logins', 'Giriş Kayıtları'], ['failed', 'Hatalı Girişler'], ['devices', 'Cihazlar'], ['settings', 'Kurallar']],
     '/admin/governance': [['health', 'Sistem Sağlığı'], ['backups', 'Yedekler'], ['audit', 'Denetim Kaydı'], ['trash', 'Çöp Kutusu'], ['notify', 'Bildirim Kanalları']]
   };
-  var MPERM = { '/admin': 'dashboard', '/admin/jobs': 'jobs', '/admin/appointments': 'appointments', '/admin/quotes': 'quotes', '/admin/warranty': 'warranty', '/admin/customers': 'customers', '/admin/technicians': 'technicians', '/admin/parts': 'parts', '/admin/shop': 'shop', 'ek:yeni': 'shop', 'ek:mgayar': 'shop', 'ek:atolye': 'jobs', 'ek:ustagecmis': 'technicians', 'ek:tahsilat': 'accounting', 'ek:vade': 'accounting', 'ek:memnun': 'reports', 'ek:rapor': 'reports', 'ek:kurulum': 'settings', 'ek:harita': 'jobs', 'ek:canli': 'visitors', 'ek:wa': 'integration', 'ek:pazar': 'shop', 'ek:marka': 'shop', 'ek:urunler': 'shop', '/admin/coupons': 'coupons', '/admin/site-features': 'site_features', 'ek:moduller': 'site_features', 'ek:domain': 'site_features', 'ek:sitem': 'site_features', 'ek:siteduz': 'site_features', 'ek:seo': 'seo', 'ek:gsc': 'marketing', '/admin/site-studio': 'studio', '/admin/media': 'studio', '/admin/integration': 'integration', '/admin/messages': 'messages', '/admin/reviews': 'reviews', '/admin/dealers': 'dealers', '/admin/marketing': 'marketing', '/admin/growth': 'growth', '/admin/visitors': 'visitors', '/admin/team': 'team', '/admin/performance': 'performance', '/admin/announcements': 'announcements', '/admin/diagnosis': 'diagnosis', '/admin/brands': 'brands', '/admin/accounting': 'accounting', '/admin/reports': 'reports', '/admin/settings': 'settings' };
+  var MPERM = { '/admin': 'dashboard', '/admin/jobs': 'jobs', '/admin/appointments': 'appointments', '/admin/quotes': 'quotes', '/admin/warranty': 'warranty', '/admin/customers': 'customers', '/admin/technicians': 'technicians', '/admin/parts': 'parts', '/admin/shop': 'shop', 'ek:yeni': 'shop', 'ek:mgayar': 'shop', 'ek:atolye': 'jobs', 'ek:ustagecmis': 'technicians', 'ek:tahsilat': 'accounting', 'ek:vade': 'accounting', 'ek:memnun': 'reports', 'ek:rapor': 'reports', 'ek:kurulum': 'settings', 'ek:harita': 'jobs', 'ek:canli': 'visitors', 'ek:wa': 'integration', 'ek:pazar': 'shop', 'ek:marka': 'shop', 'ek:urunler': 'shop', 'ek:kanal': 'shop', 'ek:urunekle': 'shop', '/admin/coupons': 'coupons', '/admin/site-features': 'site_features', 'ek:moduller': 'site_features', 'ek:domain': 'site_features', 'ek:sitem': 'site_features', 'ek:siteduz': 'site_features', 'ek:seo': 'seo', 'ek:gsc': 'marketing', '/admin/site-studio': 'studio', '/admin/media': 'studio', '/admin/integration': 'integration', '/admin/messages': 'messages', '/admin/reviews': 'reviews', '/admin/dealers': 'dealers', '/admin/marketing': 'marketing', '/admin/growth': 'growth', '/admin/visitors': 'visitors', '/admin/team': 'team', '/admin/performance': 'performance', '/admin/announcements': 'announcements', '/admin/diagnosis': 'diagnosis', '/admin/brands': 'brands', '/admin/accounting': 'accounting', '/admin/reports': 'reports', '/admin/settings': 'settings' };
   /* ServisPlus'ın kendi sitesini yöneten ekranlar: müşteri firmanın panelinde görünmez (kendi sitesi: Alan Adı & Site) */
   var FIRM_HIDE = { '/admin/site-studio': 1, '/admin/media': 1, '/admin/site-features': 1, '/admin/integration': 1, 'ek:moduller': 1, 'ek:seo': 1, 'ek:gsc': 1, '/admin/visitors': 1, 'ek:canli': 1 };
   setInterval(function () { try { if (FIRM || PLAT) { var p = location.pathname.replace(/\/$/, ''); Object.keys(FIRM_HIDE).forEach(function (k) { if (k.indexOf('/') === 0 && (p === k || p.indexOf(k + '/') === 0)) location.replace('/admin?sitem=1'); }); } } catch (e) { } }, 800);
@@ -1582,7 +1582,7 @@
   function me() { try { return JSON.parse(LS.get('user', '{}')) || {}; } catch (e) { return {}; } }
   /* Menü öğesi -> paket modülü (firmanın paketinde olmayan modüller menüde gizlenir; sunucu da kapıyı ayrıca kapatır) */
   var MODKEY = { '/admin/accounting': 'muhasebe', 'ek:tahsilat': 'muhasebe', 'ek:cari': 'muhasebe', 'ek:vade': 'muhasebe', '/admin/reports': 'rapor', 'ek:rapor': 'rapor', 'ek:memnun': 'rapor',
-    '/admin/performance': 'rapor', '/admin/shop': 'magaza', 'ek:yeni': 'magaza', 'ek:mgayar': 'magaza', 'ek:pazar': 'magaza', 'ek:urunler': 'magaza', 'ek:marka': 'magaza', '/admin/parts': 'magaza',
+    '/admin/performance': 'rapor', '/admin/shop': 'magaza', 'ek:yeni': 'magaza', 'ek:mgayar': 'magaza', 'ek:pazar': 'magaza', 'ek:urunler': 'magaza', 'ek:kanal': 'magaza', 'ek:urunekle': 'magaza', 'ek:marka': 'magaza', '/admin/parts': 'magaza',
     '/admin/site-features': 'site', 'ek:moduller': 'site', 'ek:seo': 'site', 'ek:domain': 'site', 'ek:sitem': 'site', 'ek:siteduz': 'site', '/admin/site-studio': 'site', '/admin/media': 'site', '/admin/visitors': 'site', 'ek:canli': 'site',
     '/admin/marketing': 'pazarlama', '/admin/growth': 'pazarlama', '/admin/coupons': 'pazarlama', 'ek:kaynak': 'pazarlama', 'ek:gsc': 'pazarlama', 'ek:wa': 'sms',
     '/admin/quotes': 'teklif', '/admin/warranty': 'bakim', '/admin/dealers': 'bayi', 'ek:harita': 'takip', 'ek:sohbet': 'site', 'ek:atolye': 'servis' };
@@ -1603,7 +1603,7 @@
     if (r === 'owner') return true;
     if (OWNER_ONLY[k]) return false;
     if (r === 'custom') return (u.perms || []).indexOf(MPERM[k]) >= 0;
-    if (k.indexOf('ek:') === 0) return r === 'manager' || (r === 'site_editor' && k !== 'ek:yeni' && k !== 'ek:pazar' && k !== 'ek:mgayar');
+    if (k.indexOf('ek:') === 0) return r === 'manager' || (r === 'site_editor' && k !== 'ek:yeni' && k !== 'ek:pazar' && k !== 'ek:mgayar' && k !== 'ek:kanal');
     return true; /* eski roller: panelin kendi süzmesi */
   }
   function guardRoute() {
@@ -2944,7 +2944,7 @@
         '<label style="display:block;margin-top:12px">Ödeme açıklaması<textarea id="ma_pn" rows="2">' + esc(c.payment_note || '') + '</textarea></label></div>' +
         '<div class="spx-card"><b>Satış koşulları</b><label style="display:block;margin-top:6px">Teslimat ve iade metni<textarea id="ma_tm" rows="4">' + esc(c.terms || '') + '</textarea></label></div>' +
         '<div class="spx-card"><button class="spx-b p" id="ma_save">Kaydet</button></div>';
-      body().innerHTML = h;
+      body().innerHTML = h; mgExtra(c);
       var n = accs.length;
       $('#ma_more').onclick = function () { if (n >= 8) return toast('En fazla 8 hesap eklenebilir'); var d = document.createElement('div'); d.className = 'spx-g'; d.style.cssText = 'margin-top:10px;padding-top:10px;border-top:1px solid #e2e8f0'; d.innerHTML = '<label>Banka<input id="ma_b' + n + '"></label><label>Hesap sahibi<input id="ma_h' + n + '"></label><label style="grid-column:span 2">IBAN<input id="ma_i' + n + '"></label>'; $('#ma_acc').appendChild(d); n++; };
       $('#ma_save').onclick = function () {
@@ -5281,6 +5281,227 @@
   }
   setInterval(loginSignup, 1000);
 
+  /* ===== Mağaza v2: ödeme yöntemleri, yasal metinler, kanal & stok, yeni ürün ===== */
+  var MG = { mk: 'trendyol', view: 'urun', st: '', q: '', pg: 1, sel: {}, edit: '' };
+  var MGM = [['trendyol', 'Trendyol'], ['hepsiburada', 'Hepsiburada'], ['n11', 'N11']];
+  var MGST = { yayinda: ['ok', 'Yayında'], hazir: ['ok', 'Hazır'], eksik: ['wa', 'Eksik'], hata: ['er', 'Hata'], kapali: ['mu', 'Kapalı'] };
+  function mgCss() {
+    if (document.getElementById('mg-css')) return;
+    var s = document.createElement('style'); s.id = 'mg-css';
+    s.textContent = '.mg-b{display:inline-block;padding:2px 9px;border-radius:99px;font-size:12px;font-weight:600}.mg-b.ok{background:#dcfce7;color:#166534}.mg-b.wa{background:#fef3c7;color:#92400e}.mg-b.er{background:#fee2e2;color:#991b1b}.mg-b.mu{background:#e2e8f0;color:#475569}' +
+      '.mg-t{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}.mg-t button{border:1px solid #cbd5e1;background:#fff;border-radius:99px;padding:7px 14px;font-weight:600;cursor:pointer;min-height:38px}.mg-t button.on{background:#0a1f44;color:#fff;border-color:#0a1f44}' +
+      '.mg-w{background:#fffbeb;border:1px solid #fde68a;color:#92400e;border-radius:8px;padding:10px 12px;margin:8px 0;font-size:13px}.mg-row{display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid #f1f5f9}.mg-row:last-child{border:0}.mg-row>div{flex:1}' +
+      '.mg-tb td,.mg-tb th{padding:8px;text-align:left;vertical-align:middle;border-bottom:1px solid #f1f5f9}.mg-tb th{font-size:12px;color:#64748b}.mg-im{width:42px;height:42px;border-radius:6px;object-fit:cover;background:#e2e8f0;flex:none}.mg-sm{width:74px}' +
+      '.mg-ph{display:flex;gap:8px;flex-wrap:wrap}.mg-ph .t{position:relative;width:92px;height:92px;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden}.mg-ph img{width:100%;height:100%;object-fit:cover}.mg-ph button{position:absolute;top:2px;right:2px;border:0;background:rgba(15,23,42,.8);color:#fff;border-radius:6px;cursor:pointer}' +
+      '#mg-modal{position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:99999;display:grid;place-items:center;padding:16px}#mg-modal>div{background:#fff;border-radius:12px;max-width:760px;width:100%;max-height:88vh;overflow:auto;padding:18px}#mg-modal textarea{width:100%;min-height:320px;font:13px/1.5 monospace}';
+    document.head.appendChild(s);
+  }
+  function mgIn(id, l, v, t, ph, extra) { return '<label>' + l + '<input id="' + id + '" type="' + (t || 'text') + '" value="' + esc(v == null ? '' : v) + '" placeholder="' + esc(ph || '') + '" ' + (extra || '') + '></label>'; }
+  function mgBadge(s) { var m = MGST[s] || ['mu', s]; return '<span class="mg-b ' + m[0] + '">' + m[1] + '</span>'; }
+  function mgModal(html) { var o = document.getElementById('mg-modal'); if (o) o.remove(); var d = document.createElement('div'); d.id = 'mg-modal'; d.innerHTML = '<div>' + html + '</div>'; d.onclick = function (e) { if (e.target === d) d.remove(); }; document.body.appendChild(d); return d; }
+  function mgUpload(file) {
+    var fd = new FormData(); fd.append('file', file);
+    return fetch(API + '/upload', { method: 'POST', headers: { Authorization: 'Bearer ' + LS.get('token', '') }, body: fd }).then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.detail || 'Yükleme başarısız'); return j.url; }); });
+  }
+
+  /* --- Mağaza Ayarları'nın altına: ödeme, satıcı bilgisi, yasal metinler --- */
+  function mgExtra(c) {
+    mgCss();
+    var pm = c.payments || {}, lg = c.legal || {};
+    var P = [['kart', 'Kredi / banka kartı (iyzico)', 'Anahtarlar Entegrasyonlar > Ödeme bölümünde kayıtlı olmalı.', 0], ['havale', 'Havale / EFT', 'Banka hesabı eklemeniz gerekir. Süresi dolan ödenmemiş sipariş iptal olur, stok geri döner.', 0],
+      ['kapida_nakit', 'Kapıda nakit ödeme', 'Hizmet bedelini aşağıdan belirleyin (0 = ücretsiz).', 1], ['kapida_kart', 'Kapıda kartla ödeme', 'Kurye / kargo cihazıyla tahsilat. Hizmet bedeli aşağıdan.', 1]];
+    var h = '<div class="spx-card" id="mg_pay"><b>Ödeme yöntemleri</b><small style="display:block;color:#64748b">Müşterinin ödeme adımında göreceği yöntemler. En az biri açık kalmalı.</small>' +
+      P.map(function (p) { var m = pm[p[0]] || {}; return '<div class="mg-row"><label class="spx-sw"><input type="checkbox" id="mg_pm_' + p[0] + '"' + (m.enabled ? ' checked' : '') + '><i></i></label><div><b>' + p[1] + '</b><div style="color:#64748b;font-size:13px">' + p[2] + '</div></div>' +
+        (p[3] ? '<div style="max-width:140px">' + mgIn('mg_fee_' + p[0], 'Hizmet bedeli ₺', m.fee || 0, 'number', '', 'min="0"') + '</div>' : '') + '</div>'; }).join('') +
+      '<div class="spx-g" style="margin-top:10px">' + mgIn('mg_cod', 'Kapıda ödeme en fazla (₺, 0 = sınırsız)', c.cod_max_total || 0, 'number') + mgIn('mg_min', 'Minimum sipariş tutarı (₺)', c.min_order || 0, 'number') + '</div>' +
+      '<div style="margin-top:10px"><button class="spx-b p" id="mg_pay_s">Ödeme ayarlarını kaydet</button></div></div>';
+    var f = function (k, l, ph) { return mgIn('mg_lg_' + k, l, lg[k], 'text', ph); };
+    h += '<div class="spx-card" id="mg_leg"><b>Satıcı bilgileri (yasal metinlerde kullanılır)</b><small style="display:block;color:#64748b">Mesafeli satış sözleşmesi, iade ve gizlilik metinleri bu bilgilerle otomatik dolar. Eksik bilgi müşteriye boş görünür; lütfen tamamlayın.</small><div class="spx-g" style="margin-top:8px">' +
+      f('seller_title', 'Ticari unvan') + f('tax_office', 'Vergi dairesi') + f('tax_no', 'Vergi / TC no') + f('mersis', 'MERSİS no') + f('kep', 'KEP adresi') + f('email', 'E-posta') + f('phone', 'Telefon') + f('address', 'Adres') +
+      f('carrier', 'Kargo firması', 'örn. Yurtiçi Kargo') + f('delivery_days', 'Teslimat süresi', '1-3 iş günü') + f('return_address', 'İade adresi (boşsa firma adresi)') + mgIn('mg_lg_return_days', 'İade süresi (gün, en az 14)', lg.return_days || 14, 'number') +
+      '<label>İade kargo ücreti<select id="mg_lg_return_shipping"><option value="alici"' + (lg.return_shipping !== 'satici' ? ' selected' : '') + '>Alıcı öder</option><option value="satici"' + (lg.return_shipping === 'satici' ? ' selected' : '') + '>Satıcı öder</option></select></label></div>' +
+      '<div style="margin-top:10px"><button class="spx-b p" id="mg_leg_s">Satıcı bilgilerini kaydet</button></div></div>' +
+      '<div class="spx-card" id="mg_docs"><b>Yasal metinler</b><small style="display:block;color:#64748b">Mağaza açıkken sitenizin en altında (footer) otomatik görünür ve sipariş öncesi onaylatılır.</small><div class="mg-w">Bu metinler genel şablondur. Yayına almadan önce hukuki danışmanınıza onaylatmanız önerilir.</div><div id="mg_dl">Yükleniyor…</div></div>';
+    body().insertAdjacentHTML('beforeend', h);
+    $('#mg_pay_s').onclick = function () {
+      var o = {}; P.forEach(function (p) { o[p[0]] = { enabled: $('#mg_pm_' + p[0]).checked }; if (p[3]) o[p[0]].fee = parseFloat($('#mg_fee_' + p[0]).value) || 0; });
+      call('PUT', '/shop/settings', { payments: o, cod_max_total: parseFloat($('#mg_cod').value) || 0, min_order: parseFloat($('#mg_min').value) || 0 }).then(function () { toast('Ödeme ayarları kaydedildi'); }).catch(fail);
+    };
+    $('#mg_leg_s').onclick = function () {
+      var o = {}; ['seller_title', 'tax_office', 'tax_no', 'mersis', 'kep', 'email', 'phone', 'address', 'carrier', 'delivery_days', 'return_address'].forEach(function (k) { o[k] = $('#mg_lg_' + k).value; });
+      o.return_days = parseInt($('#mg_lg_return_days').value, 10) || 14; o.return_shipping = $('#mg_lg_return_shipping').value;
+      call('PUT', '/shop/settings', { legal: o }).then(function () { toast('Satıcı bilgileri kaydedildi'); mgDocs(); }).catch(fail);
+    };
+    mgDocs();
+  }
+  function mgDocs() {
+    call('GET', '/shop/legal').then(function (r) {
+      var el = $('#mg_dl'); if (!el) return;
+      el.innerHTML = (r.missing && r.missing.length ? '<div class="mg-w">Eksik satıcı bilgisi: <b>' + r.missing.map(esc).join(', ') + '</b></div>' : '') + r.docs.map(function (d) {
+        return '<div class="mg-row"><div><b>' + esc(d.title) + '</b> ' + (d.custom ? '<span class="mg-b wa">Özel metin</span>' : '<span class="mg-b ok">Otomatik</span>') + (d.checkout ? ' <span class="mg-b mu">Sipariş öncesi onay</span>' : '') + '</div><button class="spx-b" data-ld="' + d.slug + '">Düzenle</button></div>';
+      }).join('');
+      el.onclick = function (e) {
+        var b = e.target.closest('[data-ld]'); if (!b) return; var d = r.docs.filter(function (x) { return x.slug === b.getAttribute('data-ld'); })[0];
+        var m = mgModal('<b>' + esc(d.title) + '</b><div class="mg-w">HTML olarak düzenlenir. Betik (script) ve gömülü içerik kabul edilmez.</div><textarea id="mg_dt">' + esc(d.html) + '</textarea><div style="margin-top:10px;display:flex;gap:8px"><button class="spx-b p" id="mg_ds">Kaydet</button><button class="spx-b" id="mg_dr">Otomatik metne dön</button><button class="spx-b" id="mg_dx">Kapat</button></div>');
+        m.querySelector('#mg_dx').onclick = function () { m.remove(); };
+        m.querySelector('#mg_ds').onclick = function () { call('PUT', '/shop/legal/' + d.slug, { html: m.querySelector('#mg_dt').value }).then(function () { m.remove(); toast('Kaydedildi'); mgDocs(); }).catch(fail); };
+        m.querySelector('#mg_dr').onclick = function () { if (confirm('Özel metin silinip otomatik metne dönülsün mü?')) call('PUT', '/shop/legal/' + d.slug, { reset: true }).then(function () { m.remove(); toast('Otomatik metne dönüldü'); mgDocs(); }).catch(fail); };
+      };
+    }).catch(fail);
+  }
+
+  /* --- Kanal & Stok --- */
+  function drawKanal() {
+    mgCss();
+    Promise.all([call('GET', '/shop/channels'), call('GET', '/shop/low-stock')]).then(function (rs) {
+      var o = rs[0], low = rs[1];
+      var h = '<div class="mg-t">' + o.channels.map(function (c) {
+        if (!c.live) return '<button disabled style="opacity:.55">' + esc(c.name) + ' · yakında</button>';
+        return '<button data-mk="' + c.id + '" class="' + (MG.mk === c.id && MG.view !== 'sync' ? 'on' : '') + '">' + esc(c.name) + (c.connected ? '' : ' (bağlı değil)') + '</button>';
+      }).join('') + '<button data-mv="sync" class="' + (MG.view === 'sync' ? 'on' : '') + '">Gönderim kuyruğu</button><button data-mv="yeni">+ Yeni ürün</button></div>';
+      if (low.length) h += '<div class="mg-w"><b>' + low.length + ' ürünün stoğu azaldı:</b> ' + low.slice(0, 6).map(function (x) { return esc(x.name) + ' (' + x.stock + ')'; }).join(' · ') + '</div>';
+      h += '<div id="mg_main">Yükleniyor…</div>';
+      body().innerHTML = h;
+      body().onclick = function (e) {
+        var a = e.target.closest('[data-mk]'); if (a) { MG.mk = a.getAttribute('data-mk'); MG.view = 'urun'; MG.pg = 1; MG.sel = {}; return drawKanal(); }
+        a = e.target.closest('[data-mv]'); if (a) { if (a.getAttribute('data-mv') === 'yeni') { MG.edit = ''; TAB = 'urunekle'; draw(); return; } MG.view = a.getAttribute('data-mv'); return drawKanal(); }
+      };
+      if (MG.view === 'sync') mgSync(); else if (MG.view === 'map') mgMap(); else mgGrid(o);
+    }).catch(function (e) { body().innerHTML = '<div class="spx-card">Yüklenemedi: ' + esc(e.message) + '</div>'; });
+  }
+  function mgGrid(ov) {
+    var mk = MG.mk, name = (MGM.filter(function (x) { return x[0] === mk; })[0] || [0, mk])[1];
+    call('GET', '/shop/channels/' + mk + '/products?status=' + encodeURIComponent(MG.st) + '&q=' + encodeURIComponent(MG.q) + '&page=' + MG.pg + '&per=50').then(function (r) {
+      var cnt = r.counts || {};
+      var h = '<div class="spx-card"><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:end"><label style="flex:1;min-width:200px">Ara (ürün, barkod, stok kodu)<input id="mg_q" value="' + esc(MG.q) + '"></label>' +
+        '<label>Durum<select id="mg_st"><option value="">Tümü</option>' + ['yayinda', 'hazir', 'eksik', 'hata', 'kapali'].map(function (s) { return '<option value="' + s + '"' + (MG.st === s ? ' selected' : '') + '>' + MGST[s][1] + ' (' + (cnt[s] || 0) + ')</option>'; }).join('') + '</select></label>' +
+        '<button class="spx-b" id="mg_go">Ara</button><button class="spx-b" data-ma="map">Kategori / marka eşleme</button><button class="spx-b" data-ma="csv">CSV indir</button><button class="spx-b" data-ma="val">Eksikleri denetle</button>' +
+        (mk === 'trendyol' ? '<button class="spx-b" data-ma="dry">Deneme gönderimi</button><button class="spx-b p" data-ma="create">' + name + '\'ta aç</button>' : '') + '<button class="spx-b" data-ma="listed">Seçilileri “yayında” işaretle</button></div>' +
+        (mk !== 'trendyol' ? '<div class="mg-w">' + name + ' için şimdilik <b>stok ve fiyat gönderimi</b> ve CSV dışa aktarma vardır. Ürünü pazaryeri panelinde açıp burada “yayında” işaretleyin; bundan sonra stok otomatik eşitlenir.</div>' : '') +
+        '<div class="mg-w" style="background:#f1f5f9;border-color:#e2e8f0;color:#334155">Stok tek havuzdan yönetilir. Kanal stoğu = havuz stoğu − güvenlik payı. Kategori, barkod ve stok kodu tüm kanallarda aynıdır.</div></div>';
+      h += '<div class="spx-card" style="overflow:auto"><table class="mg-tb" style="width:100%"><tr><th></th><th>Ürün</th><th>Havuz stok</th><th>Raf</th><th>Bu kanalda</th><th>Kanal stoğu</th><th>Pay</th><th>Fiyat ₺</th><th>Durum</th></tr>' +
+        (r.rows.length ? r.rows.map(function (x) {
+          var on = x.status !== 'kapali';
+          return '<tr data-id="' + x.id + '"><td><input type="checkbox" class="mg_ck"' + (MG.sel[x.id] ? ' checked' : '') + '></td><td><div style="display:flex;gap:8px;align-items:center">' + (x.image ? '<img class="mg-im" loading="lazy" src="' + esc(x.image) + '">' : '<span class="mg-im"></span>') +
+            '<div><b>' + esc(x.name) + '</b><div style="font-size:12px;color:#64748b">' + esc(x.sku || 'stok kodu yok') + ' · ' + esc(x.barcode || 'barkod yok') + ' · ' + esc(x.category || 'kategorisiz') + '</div><a href="#" data-edit="' + x.id + '" style="font-size:12px">Düzenle</a></div></div></td>' +
+            '<td><input class="mg-sm mg_stk" type="number" min="0" value="' + x.pool_stock + '"> <button class="spx-b" data-ss="' + x.id + '">Kaydet</button></td><td>' + esc(x.shelf || '–') + '</td>' +
+            '<td><label class="spx-sw"><input type="checkbox" class="mg_on"' + (on ? ' checked' : '') + '><i></i></label></td><td><b>' + x.stock + '</b></td><td><input class="mg-sm mg_buf" type="number" min="0" value="' + x.buffer + '"' + (on ? '' : ' disabled') + '></td>' +
+            '<td>' + x.price + (x.price_differs ? ' <span class="mg-b wa">farklı</span>' : '') + '</td><td>' + mgBadge(x.status) + (x.issues && x.issues.length ? '<div style="font-size:12px;color:#92400e;max-width:260px">' + x.issues.map(function (i) { return esc(i.msg); }).join('<br>') + '</div>' : '') + (x.error ? '<div style="font-size:12px;color:#991b1b;max-width:260px">' + esc(x.error) + '</div>' : '') + '</td></tr>';
+        }).join('') : '<tr><td colspan="9" style="padding:20px;color:#64748b">Ürün yok. “+ Yeni ürün” ile ekleyin.</td></tr>') + '</table>' +
+        '<div style="margin-top:10px">' + r.total + ' ürün' + (r.total > r.per ? ' · <button class="spx-b" data-pg="-1">‹</button> Sayfa ' + r.page + ' <button class="spx-b" data-pg="1">›</button>' : '') + '</div></div>';
+      $('#mg_main').innerHTML = h;
+      var q = function () { MG.q = $('#mg_q').value; MG.st = $('#mg_st').value; MG.pg = 1; drawKanal(); };
+      $('#mg_go').onclick = q; $('#mg_q').onkeydown = function (e) { if (e.key === 'Enter') q(); }; $('#mg_st').onchange = q;
+      $('#mg_main').onclick = function (e) {
+        var t = e.target, tr = t.closest('tr[data-id]'), id = tr && tr.getAttribute('data-id');
+        if (t.classList.contains('mg_ck')) { if (t.checked) MG.sel[id] = 1; else delete MG.sel[id]; return; }
+        var a = t.closest('[data-edit]'); if (a) { e.preventDefault(); MG.edit = a.getAttribute('data-edit'); TAB = 'urunekle'; return draw(); }
+        a = t.closest('[data-pg]'); if (a) { MG.pg = Math.max(1, MG.pg + parseInt(a.getAttribute('data-pg'), 10)); return drawKanal(); }
+        a = t.closest('[data-ss]'); if (a) { var v = parseInt(tr.querySelector('.mg_stk').value, 10); if (isNaN(v) || v < 0) return toast('Geçerli bir stok girin'); return call('POST', '/shop/products/' + id + '/stock', { mode: 'set', qty: v, reason: 'Kanal ekranından sayım' }).then(function () { toast('Stok güncellendi; kanallara iletilecek'); drawKanal(); }).catch(fail); }
+        a = t.closest('[data-ma]'); if (a) return mgAct(a.getAttribute('data-ma'), r);
+      };
+      $('#mg_main').onchange = function (e) {
+        var t = e.target, tr = t.closest('tr[data-id]'); if (!tr) return; var id = tr.getAttribute('data-id');
+        if (t.classList.contains('mg_on')) call('PUT', '/shop/channels/' + mk + '/products/' + id, { enabled: t.checked }).then(function () { drawKanal(); }).catch(function (x) { t.checked = !t.checked; fail(x); });
+        if (t.classList.contains('mg_buf')) call('PUT', '/shop/channels/' + mk + '/products/' + id, { buffer: parseInt(t.value, 10) || 0 }).then(function () { toast('Güvenlik payı kaydedildi'); drawKanal(); }).catch(fail);
+      };
+    }).catch(function (e) { $('#mg_main').innerHTML = '<div class="spx-card">Yüklenemedi: ' + esc(e.message) + '</div>'; });
+  }
+  function mgAct(a, r) {
+    var mk = MG.mk, ids = Object.keys(MG.sel);
+    if (a === 'map') { MG.view = 'map'; return drawKanal(); }
+    if (a === 'csv') return fetch(API + '/shop/channels/' + mk + '/export.csv', { headers: { Authorization: 'Bearer ' + LS.get('token', '') } }).then(function (x) { return x.blob(); }).then(function (b) { var l = document.createElement('a'); l.href = URL.createObjectURL(b); l.download = mk + '-urunler.csv'; l.click(); });
+    if (a === 'val') return call('GET', '/shop/channels/' + mk + '/validate').then(function (v) { toast(v.ready + ' ürün hazır, ' + v.blocked + ' ürün eksik'); MG.st = v.blocked ? 'eksik' : MG.st; drawKanal(); }).catch(fail);
+    if (a === 'listed') { if (!ids.length) return toast('Önce ürün seçin'); return call('POST', '/shop/channels/' + mk + '/mark-listed', { ids: ids }).then(function (x) { MG.sel = {}; toast(x.marked + ' ürün yayında işaretlendi'); drawKanal(); }).catch(fail); }
+    if (a === 'dry' || a === 'create') {
+      var real = a === 'create';
+      if (real && !confirm('Hazır ürünler Trendyol\'da gerçekten açılacak. Önce “Deneme gönderimi” ile içeriği kontrol ettiniz mi? Devam edilsin mi?')) return;
+      return call('POST', '/shop/channels/' + mk + '/create', { dry_run: !real, ids: ids }).then(function (x) {
+        var bl = (x.blocked || []).map(function (b) { return '<li><b>' + esc(b.name) + '</b>: ' + b.issues.map(function (i) { return esc(i.msg); }).join(', ') + '</li>'; }).join('');
+        var m = mgModal('<b>' + (real ? 'Gönderildi' : 'Deneme gönderimi (hiçbir şey gönderilmedi)') + '</b><p>' + x.ready + ' ürün hazır' + (x.batch ? '. Toplu işlem kodu: <b>' + esc(x.batch) + '</b>' : '') + '.</p>' + (bl ? '<div class="mg-w"><b>Gönderilemeyen ürünler:</b><ul>' + bl + '</ul></div>' : '') +
+          (x.preview ? '<details><summary>Gidecek içerik örneği</summary><pre style="white-space:pre-wrap;font-size:12px">' + esc(JSON.stringify(x.preview[0], null, 2)) + '</pre></details>' : '') +
+          (x.batch ? '<button class="spx-b p" id="mg_bc">Sonucu kontrol et</button> ' : '') + '<button class="spx-b" id="mg_cx">Kapat</button>');
+        m.querySelector('#mg_cx').onclick = function () { m.remove(); drawKanal(); };
+        if (x.batch) m.querySelector('#mg_bc').onclick = function () { call('POST', '/shop/channels/' + mk + '/batch-check', { batch: x.batch }).then(function (z) { toast(z.checked + ' ürün kontrol edildi' + (z.failed ? ', ' + z.failed + ' hatalı' : '')); }).catch(fail); };
+      }).catch(fail);
+    }
+  }
+  function mgMap() {
+    var mk = MG.mk;
+    call('GET', '/shop/channels/' + mk + '/catmap').then(function (r) {
+      var h = '<div class="spx-card"><b>Kategori eşleme</b><small style="display:block;color:#64748b">Kendi kategoriniz tek kaynaktır. Pazaryerinin kategori kodunu (' + mk + ' satıcı panelindeki kategori no) girin. Zorunlu özellikleri her satıra <code>kod:ad</code>, seçilen değerleri <code>kod=değerkodu</code> olarak yazın.</small>' +
+        (r.categories.length ? r.categories.map(function (c) {
+          var m = c.map || {};
+          return '<div class="mg-row" data-cid="' + c.id + '" style="align-items:flex-start"><div style="max-width:200px"><b>' + esc(c.name) + '</b></div><div>' + mgIn('mc_e' + c.id, 'Pazaryeri kategori kodu', m.ext_id || '', 'text') + '</div><div><label>Zorunlu özellikler (kod:ad)<textarea rows="3" id="mc_r' + c.id + '">' + esc((m.required_attrs || []).map(function (a) { return a.id + ':' + a.name; }).join('\n')) + '</textarea></label></div><div><label>Seçilen değerler (kod=değer)<textarea rows="3" id="mc_a' + c.id + '">' + esc(Object.keys(m.attrs || {}).map(function (k) { return k + '=' + m.attrs[k]; }).join('\n')) + '</textarea></label></div><div><button class="spx-b p" data-cs="' + c.id + '">Kaydet</button></div></div>';
+        }).join('') : '<div class="mg-w">Önce “Yeni ürün” ekranından kategori ekleyin.</div>') + '</div>';
+      h += '<div class="spx-card"><b>Marka kodları</b><small style="display:block;color:#64748b">Her marka için pazaryerindeki marka numarası.</small>' + (r.brands.length ? r.brands.map(function (b) { return '<div class="mg-row"><div>' + esc(b.name) + '</div><div>' + '<input class="mg_br" data-b="' + esc(b.name) + '" value="' + esc(b.ext_id) + '" placeholder="marka no"></div></div>'; }).join('') + '<button class="spx-b p" id="mg_bs" style="margin-top:8px">Marka kodlarını kaydet</button>' : '<div style="color:#64748b">Üründe marka girilince burada listelenir.</div>') + '</div>';
+      var s = r.settings || {};
+      h += '<div class="spx-card"><b>Kanal ayarları</b><div class="spx-g" style="margin-top:8px">' + mgIn('ms_cc', mk === 'trendyol' ? 'Kargo firması kodu' : 'Kargo / şablon kodu', s.cargo_company_id || '') + mgIn('ms_sh', 'Sevkiyat şablonu', s.shipment_template || '') + '</div><button class="spx-b p" id="ms_s" style="margin-top:8px">Kaydet</button> <button class="spx-b" id="mg_back">‹ Ürünlere dön</button></div>';
+      $('#mg_main').innerHTML = h;
+      $('#mg_back').onclick = function () { MG.view = 'urun'; drawKanal(); };
+      $('#ms_s').onclick = function () { call('PUT', '/shop/channels/' + mk + '/settings', { cargo_company_id: $('#ms_cc').value, shipment_template: $('#ms_sh').value }).then(function () { toast('Kaydedildi'); }).catch(fail); };
+      if ($('#mg_bs')) $('#mg_bs').onclick = function () { var m = {}; Array.prototype.forEach.call(document.querySelectorAll('.mg_br'), function (i) { if (i.value.trim()) m[i.getAttribute('data-b')] = i.value.trim(); }); call('PUT', '/shop/channels/' + mk + '/brandmap', { map: m }).then(function () { toast('Marka kodları kaydedildi'); }).catch(fail); };
+      $('#mg_main').onclick = function (e) {
+        var b = e.target.closest('[data-cs]'); if (!b) return; var id = b.getAttribute('data-cs');
+        var req = $('#mc_r' + id).value.split('\n').map(function (l) { var p = l.split(':'); return p[0].trim() ? { id: p[0].trim(), name: (p[1] || '').trim() } : null; }).filter(Boolean);
+        var at = {}; $('#mc_a' + id).value.split('\n').forEach(function (l) { var p = l.split('='); if (p[0].trim() && (p[1] || '').trim()) at[p[0].trim()] = p[1].trim(); });
+        call('PUT', '/shop/channels/' + mk + '/catmap/' + id, { ext_id: $('#mc_e' + id).value, required_attrs: req, attrs: at }).then(function () { toast('Eşleme kaydedildi'); }).catch(fail);
+      };
+    }).catch(fail);
+  }
+  function mgSync() {
+    call('GET', '/shop/sync/queue').then(function (q) {
+      $('#mg_main').innerHTML = '<div class="spx-card"><b>Gönderim kuyruğu</b> <span class="mg-b ' + (q.pending ? 'wa' : 'ok') + '">' + q.pending + ' bekliyor</span> ' + (q.failed ? '<span class="mg-b er">' + q.failed + ' hatalı</span>' : '') +
+        '<div style="margin:8px 0"><button class="spx-b p" id="mg_run">Şimdi gönder</button></div><table class="mg-tb" style="width:100%"><tr><th>Pazaryeri</th><th>Durum</th><th>Deneme</th><th>Hata</th><th>Zaman</th></tr>' +
+        q.rows.map(function (r) { return '<tr><td>' + esc(r.market) + '</td><td>' + esc(r.status) + '</td><td>' + r.attempts + '</td><td style="color:#991b1b">' + esc(r.error) + '</td><td>' + esc((r.created_at || '').slice(0, 16).replace('T', ' ')) + '</td></tr>'; }).join('') + '</table></div>';
+      $('#mg_run').onclick = function () { this.disabled = true; call('POST', '/shop/sync/run').then(function (x) { toast(x.sent + ' gönderildi' + (x.failed ? ', ' + x.failed + ' hata' : '')); mgSync(); }).catch(fail); };
+    }).catch(fail);
+  }
+
+  /* --- Yeni ürün / ürün düzenle --- */
+  function drawUrunEkle() {
+    mgCss();
+    var id = MG.edit;
+    Promise.all([call('GET', '/shop/categories'), id ? call('GET', '/shop/products') : Promise.resolve([])]).then(function (rs) {
+      var cats = rs[0], P = id ? (rs[1].filter(function (x) { return x.id === id; })[0] || {}) : {}, IM = (P.images || []).slice(), CH = P.channels || {};
+      var catName = {}; cats.forEach(function (c) { catName[c.id] = c.name; });
+      var opt = cats.map(function (c) { var par = c.parent ? (catName[c.parent] || '') + ' ▸ ' : ''; return '<option value="' + c.id + '"' + (P.category_id === c.id ? ' selected' : '') + '>' + esc(par + c.name) + '</option>'; }).join('');
+      var kdv = P.kdv == null ? 20 : P.kdv;
+      var sec = function (n, t, inner) { return '<div class="spx-card"><b style="font-size:15px">' + n + '. ' + t + '</b><div style="margin-top:10px">' + inner + '</div></div>'; };
+      var h = '<div class="spx-card"><b style="font-size:17px">' + (id ? 'Ürünü düzenle' : 'Yeni ürün') + '</b><div style="color:#64748b">Bir kez girin; site ve pazaryerleri aynı kaydı kullanır.</div></div>' +
+        sec(1, 'Temel bilgi', '<div class="spx-g">' + mgIn('pe_name', 'Ürün başlığı', P.name, 'text', '', 'maxlength="160"') + mgIn('pe_brand', 'Marka', P.brand) + mgIn('pe_model', 'Model', P.model) +
+          '<label>Kategori<select id="pe_cat"><option value="">Seçin…</option>' + opt + '</select></label><label>Yeni kategori ekle<span style="display:flex;gap:6px"><input id="pe_newcat" placeholder="örn. Kombi"><button class="spx-b" id="pe_addcat" type="button">Ekle</button></span></label>' +
+          mgIn('pe_bar', 'Barkod (EAN/UPC)', P.barcode, 'text', '8690000000012') + mgIn('pe_sku', 'Stok kodu', P.sku) + '</div><div id="pe_tl" style="font-size:12px;color:#64748b;margin-top:4px"></div>' +
+          '<label style="display:block;margin-top:10px">Kısa açıklama<input id="pe_short" value="' + esc(P.short || '') + '" maxlength="240"></label><label style="display:block;margin-top:10px">Açıklama (en az 30 karakter)<textarea id="pe_desc" rows="6">' + esc(P.description || '') + '</textarea></label>') +
+        sec(2, 'Fiyat ve stok', '<div class="spx-g">' + mgIn('pe_price', 'Satış fiyatı ₺', P.price, 'number') + mgIn('pe_old', 'Liste (eski) fiyat ₺', P.old_price || '', 'number') + '<label>KDV<select id="pe_kdv">' + [0, 1, 10, 20].map(function (k) { return '<option' + (kdv === k ? ' selected' : '') + ' value="' + k + '">%' + k + '</option>'; }).join('') + '</select></label>' +
+          mgIn('pe_stock', 'Stok adedi', P.stock == null ? 0 : P.stock, 'number') + mgIn('pe_shelf', 'Raf / depo yeri', P.shelf, 'text', 'örn. A-3') + mgIn('pe_min', 'Düşük stok uyarısı (adet)', P.min_stock || 0, 'number') + mgIn('pe_desi', 'Desi', P.desi || '', 'number') + mgIn('pe_dd', 'Hazırlık süresi (gün)', P.delivery_days == null ? 2 : P.delivery_days, 'number') + '</div>' +
+          '<label style="display:block;margin-top:8px"><input type="checkbox" id="pe_track"' + (P.track_stock === false ? '' : ' checked') + '> Stok takibi yap (pazaryerlerine stok göndermek için gerekli)</label>') +
+        sec(3, 'Görseller', '<div class="mg-ph" id="pe_ph"></div><div style="margin-top:8px"><input type="file" id="pe_f" accept="image/*" multiple style="display:none"><button class="spx-b" id="pe_up" type="button">Resim yükle</button> <span style="color:#64748b;font-size:12px">İlk resim kapak olur. Pazaryerleri için en az 1 resim gerekir.</span></div>') +
+        sec(4, 'Satış kanalları', '<div class="mg-row"><label class="spx-sw"><input type="checkbox" id="pe_c_site"' + ((CH.site || {}).enabled === false ? '' : ' checked') + '><i></i></label><div><b>Site mağazası</b></div></div>' +
+          MGM.map(function (m) { var c = CH[m[0]] || {}; return '<div class="mg-row"><label class="spx-sw"><input type="checkbox" id="pe_c_' + m[0] + '"' + (c.enabled ? ' checked' : '') + '><i></i></label><div><b>' + m[1] + '</b></div><div style="max-width:150px">' + mgIn('pe_b_' + m[0], 'Güvenlik payı', c.buffer || 0, 'number', '', 'min="0"') + '</div></div>'; }).join('') +
+          '<div class="mg-w">Pazaryeri kategorisi, marka kodu ve zorunlu özellikler “Kanal & Stok” ekranından bir kez eşlenir. Eksik olan ne varsa orada ürün satırında yazar.</div>') +
+        '<div class="spx-card"><button class="spx-b p" id="pe_save">' + (id ? 'Değişiklikleri kaydet' : 'Ürünü kaydet') + '</button> <button class="spx-b" id="pe_cancel">Vazgeç</button></div>';
+      body().innerHTML = h;
+      var tl = function () { var n = $('#pe_name').value.length; $('#pe_tl').textContent = n + ' / 100 karakter (Trendyol sınırı 100)'; }; tl(); $('#pe_name').oninput = tl;
+      var ph = function () {
+        $('#pe_ph').innerHTML = IM.map(function (u, i) { return '<div class="t"><img src="' + esc(u) + '">' + '<button type="button" data-x="' + i + '">✕</button></div>'; }).join('') || '<span style="color:#64748b">Henüz resim yok</span>';
+        Array.prototype.forEach.call($('#pe_ph').querySelectorAll('[data-x]'), function (b) { b.onclick = function () { IM.splice(parseInt(b.getAttribute('data-x'), 10), 1); ph(); }; });
+      }; ph();
+      $('#pe_up').onclick = function () { $('#pe_f').click(); };
+      $('#pe_f').onchange = function () { var fs = Array.prototype.slice.call(this.files); toast('Yükleniyor…'); fs.reduce(function (p, f) { return p.then(function () { return mgUpload(f).then(function (u) { IM.push(u); ph(); }); }); }, Promise.resolve()).then(function () { toast('Resimler yüklendi'); }).catch(fail); };
+      $('#pe_addcat').onclick = function () { var n = $('#pe_newcat').value.trim(); if (n.length < 2) return toast('Kategori adı girin'); call('POST', '/shop/categories', { name: n }).then(function (c) { var o = document.createElement('option'); o.value = c.id; o.textContent = c.name; o.selected = true; $('#pe_cat').appendChild(o); $('#pe_newcat').value = ''; toast('Kategori eklendi'); }).catch(fail); };
+      $('#pe_cancel').onclick = function () { MG.edit = ''; TAB = 'kanal'; draw(); };
+      $('#pe_save').onclick = function () {
+        var v = function (k) { return $('#pe_' + k).value; };
+        if (!v('name').trim()) return toast('Ürün başlığı gerekli');
+        var ch = { site: { enabled: $('#pe_c_site').checked } }; MGM.forEach(function (m) { ch[m[0]] = { enabled: $('#pe_c_' + m[0]).checked, buffer: parseInt(v('b_' + m[0]), 10) || 0, price: (CH[m[0]] || {}).price || 0 }; });
+        var b = { name: v('name'), brand: v('brand'), model: v('model'), category_id: v('cat'), barcode: v('bar').trim(), sku: v('sku').trim(), short: v('short'), description: v('desc'), price: parseFloat(v('price')) || 0, old_price: parseFloat(v('old')) || 0,
+          kdv: parseInt(v('kdv'), 10), stock: parseInt(v('stock'), 10) || 0, shelf: v('shelf'), min_stock: parseInt(v('min'), 10) || 0, desi: parseFloat(v('desi')) || 0, delivery_days: parseInt(v('dd'), 10) || 0, track_stock: $('#pe_track').checked, images: IM, channels: ch };
+        this.disabled = true; var btn = this;
+        call(id ? 'PUT' : 'POST', '/shop/products' + (id ? '/' + id : ''), b).then(function () { toast('Ürün kaydedildi'); MG.edit = ''; TAB = 'kanal'; draw(); }).catch(function (e) { btn.disabled = false; fail(e); });
+      };
+    }).catch(fail);
+  }
 })();
 
 /* Admin mobil ust cubukta "ServisPlus" yazisi yerine logo (usta panelinde degil) */

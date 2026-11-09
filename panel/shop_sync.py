@@ -11,7 +11,7 @@ from datetime import datetime, timezone
 from typing import Optional
 
 import requests
-from fastapi import Depends, HTTPException
+from fastapi import Depends, HTTPException, Request
 from fastapi.responses import Response
 
 import shop_channels as ch
@@ -311,7 +311,7 @@ def register(api_router, db, deps):
         return {"ready": sum(1 for r in out if r["ready"]), "blocked": sum(1 for r in out if not r["ready"]), "rows": out}
 
     @api_router.post("/shop/channels/{mk}/create")
-    async def create_listing(mk: str, payload: dict, _: dict = adm):
+    async def create_listing(mk: str, payload: dict, request: Request, _: dict = adm):
         """Hazır ürünleri pazaryerinde açar. dry_run (varsayılan açık): hiçbir şey göndermez, gidecek içeriği ve eksikleri gösterir."""
         check_mk(mk)
         dry = payload.get("dry_run", True) is not False
@@ -327,6 +327,8 @@ def register(api_router, db, deps):
         if mk != "trendyol":
             raise HTTPException(501, "Bu pazaryerinde ürün açma, hesap doğrulaması gerektirdiği için henüz otomatik değil. Dışa aktarma dosyasını (CSV) kullanın.")
         base = {**st}
+        origin = (request.headers.get("origin") or "").rstrip("/") or ("https://" + (request.headers.get("x-forwarded-host") or request.headers.get("host") or ""))
+        base["abs_images"] = {p["id"]: [(origin + u if str(u).startswith("/") else u) for u in (p.get("images") or [])] for p, _i in ready}
         items = [trendyol_item(p, cm[p["category_id"]], bm, base) for p, _i in ready]
         res = {"dry_run": dry, "ready": len(ready), "blocked": [{"id": p["id"], "name": p["name"], "issues": i} for p, i in blocked]}
         if dry:

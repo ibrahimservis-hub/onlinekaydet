@@ -18,6 +18,7 @@ from fastapi.responses import HTMLResponse, Response
 
 import shop as shopmod
 import shop_legal
+import storefront
 import sitegen
 import tenant
 
@@ -123,7 +124,7 @@ def register(api_router, db, deps):
         logo = lg if inline else (("/api/public/site-logo?v=" + hashlib.sha1(lg.encode()).hexdigest()[:8]) if lg else "")
         feats = await db.app_settings.find_one({"_id": "site_features"}, {"_id": 0}) or {}
         legal = list(shop_legal.SLUGS) if feats.get("shop_enabled") else []
-        return {"th": th, "name": name, "tel": tel, "p": p, "sector": sector, "logo": logo, "city": prof.get("city") or "", "legal": legal,
+        return {"th": th, "name": name, "tel": tel, "p": p, "sector": sector, "logo": logo, "city": prof.get("city") or "", "legal": legal, "shop_on": bool(feats.get("shop_enabled")),
                 "img": (lambda k: imgs.get(k, "")) if inline else (lambda k: "/api/public/site-img/" + k),
                 "logo_abs": "/api/public/site-logo" if lg else ""}
 
@@ -493,6 +494,12 @@ def register(api_router, db, deps):
             return None
         if p in ("", "index"):
             h = home
+        elif p in ("magaza", "hesabim") and ctx and ctx.get("shop_on"):
+            body = storefront.shop_page() if p == "magaza" else storefront.account_page()
+            h = compose_page(await themed_home(ctx), ("Mağaza" if p == "magaza" else "Hesabım") + " · " + ctx["name"], body)
+            if not h:
+                return None
+            h = h.replace("</head>", '<meta name="robots" content="noindex,follow"></head>', 1) if p == "hesabim" else h
         elif p in shop_legal.TITLES and ctx and ctx.get("legal"):
             sc = await db.app_settings.find_one({"_id": "shop_settings"}, {"_id": 0}) or {}
             cfg = {**shopmod.SHOP_DEFAULT, **sc}
