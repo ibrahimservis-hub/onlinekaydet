@@ -200,6 +200,14 @@ def clean_product(p: dict, cur: Optional[dict] = None) -> dict:
         "cost": round(max(0.0, _f(p.get("cost", cur.get("cost", 0)))), 2),
         "delivery_days": max(0, min(30, int(_f(p.get("delivery_days", cur.get("delivery_days", 2)), 2)))),
         "warranty_months": max(0, min(120, int(_f(p.get("warranty_months", cur.get("warranty_months", 0)))))),
+        "category_ids": [str(x)[:40] for x in list(dict.fromkeys(p.get("category_ids", cur.get("category_ids", [])) or []))[:12] if x],
+        "gtin": str(p.get("gtin", cur.get("gtin", ""))).strip()[:14],
+        "seo_title": str(p.get("seo_title", cur.get("seo_title", ""))).strip()[:70],
+        "seo_desc": str(p.get("seo_desc", cur.get("seo_desc", ""))).strip()[:170],
+        "seo_keywords": str(p.get("seo_keywords", cur.get("seo_keywords", ""))).strip()[:200],
+        "tags": [str(x).strip()[:30] for x in (p.get("tags", cur.get("tags", [])) or [])[:20] if str(x).strip()],
+        "unit": str(p.get("unit", cur.get("unit", "Adet")) or "Adet").strip()[:15],
+        "supplier": str(p.get("supplier", cur.get("supplier", ""))).strip()[:80],
         "channels": shop_channels.clean_channels(p.get("channels"), cur.get("channels")),
         "market_attrs": _market_attrs(p.get("market_attrs", cur.get("market_attrs"))),
     }
@@ -463,14 +471,29 @@ def register(api_router, db, deps):
 
     async def sync_catalog_fields(doc: dict, pid: str = ""):
         """Kategori adı her zaman iç ağaçtan gelir; barkod ve stok kodu benzersizdir (pazaryerlerinde de aynı kimlik)."""
+        ids = list(doc.get("category_ids") or [])
+        if doc.get("category_id") and doc["category_id"] not in ids:
+            ids.insert(0, doc["category_id"])
+        if ids and not doc.get("category_id"):
+            doc["category_id"] = ids[0]
+        for cid in ids:
+            if not await db.shop_categories.find_one({"id": cid}, {"_id": 1}):
+                raise HTTPException(422, "Seçilen kategori bulunamadı")
+        doc["category_ids"] = ids
         if doc.get("category_id"):
             c = await db.shop_categories.find_one({"id": doc["category_id"]}, {"_id": 0, "name": 1})
-            if not c:
-                raise HTTPException(422, "Seçilen kategori bulunamadı")
-            doc["category"] = c["name"]
+            doc["category"] = c["name"]            # ana (breadcrumb) kategori adı; ürün listesinde ve pazaryerinde bu kullanılır
         for f, lbl in (("barcode", "Barkod"), ("sku", "Stok kodu")):
             if doc.get(f) and await db.shop_products.find_one({f: doc[f], "id": {"$ne": pid}}, {"_id": 1}):
                 raise HTTPException(409, f"{lbl} başka bir üründe kullanılıyor: {doc[f]}")
+
+    @api_router.get("/shop/slug-check")
+    async def slug_check(slug: str = "", id: str = "", _: dict = Depends(require_admin)):
+        base = slugify(slug)
+        if not base:
+            raise HTTPException(422, "Adres oluşturulamadı")
+        free = not await db.shop_products.find_one({"slug": base, "id": {"$ne": id}}, {"_id": 1})
+        return {"slug": base, "free": free, "suggest": base if free else await unique_slug(base, id)}
 
     @api_router.post("/shop/products")
     async def create_product(payload: dict, _: dict = Depends(require_admin)):
@@ -1060,6 +1083,62 @@ def register(api_router, db, deps):
         if upd:
             await db.customer_accounts.update_one({"id": acc["id"]}, {"$set": upd})
         return acc_public({**acc, **upd})
+
+    def clean_addr(p: dict, cur: dict = None) -> dict:
+        cur = cur or {}
+        g = lambda k, n: str(p.get(k, cur.get(k, ""))).strip()[:n]            # noqa: E731
+        a = {"title": g("title", 40) or "Adresim", "name": g("name", 120), "phone": g("phone", 30), "city": g("city", 60), "district": g("district", 60), "address": g("address", 300)}
+        if len(a["name"]) < 2:
+            raise HTTPException(422, "Alıcı adı gerekli")
+        if not valid_phone(a["phone"]):
+            raise HTTPException(422, "Lütfen geçerli bir telefon numarası girin.")
+        if not a["city"] or not a["district"]:
+            raise HTTPException(422, "İl ve ilçe gerekli")
+        if len(a["address"]) < 8:
+            raise HTTPException(422, "Açık adres gerekli")
+        return a
+
+    @api_router.get("/public/customer/addresses")
+    async def cust_addrs(request: Request):
+        acc = await current_customer(request)
+        return acc.get("addresses") or []
+
+    @api_router.post("/public/customer/addresses")
+    async def cust_addr_add(payload: dict, request: Request):
+        acc = await current_customer(request)
+        lst = list(acc.get("addresses") or [])
+        if len(lst) >= 10:
+            raise HTTPException(422, "En fazla 10 adres kaydedebilirsiniz")
+        a = {**clean_addr(payload), "id": _id(), "default": not lst or bool(payload.get("default"))}
+        if a["default"]:
+            for x in lst:
+                x["default"] = False
+        lst.append(a)
+        await db.customer_accounts.update_one({"id": acc["id"]}, {"$set": {"addresses": lst}})
+        return lst
+
+    @api_router.put("/public/customer/addresses/{aid}")
+    async def cust_addr_edit(aid: str, payload: dict, request: Request):
+        acc = await current_customer(request)
+        lst = list(acc.get("addresses") or [])
+        i = next((k for k, x in enumerate(lst) if x["id"] == aid), -1)
+        if i < 0:
+            raise HTTPException(404, "Adres bulunamadı")
+        lst[i] = {**lst[i], **clean_addr(payload, lst[i])}
+        if payload.get("default"):
+            for k, x in enumerate(lst):
+                x["default"] = k == i
+        await db.customer_accounts.update_one({"id": acc["id"]}, {"$set": {"addresses": lst}})
+        return lst
+
+    @api_router.delete("/public/customer/addresses/{aid}")
+    async def cust_addr_del(aid: str, request: Request):
+        acc = await current_customer(request)
+        lst = [x for x in (acc.get("addresses") or []) if x["id"] != aid]
+        if lst and not any(x.get("default") for x in lst):
+            lst[0]["default"] = True
+        await db.customer_accounts.update_one({"id": acc["id"]}, {"$set": {"addresses": lst}})
+        return lst
 
     @api_router.get("/public/customer/jobs")
     async def cust_jobs(request: Request):
