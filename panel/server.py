@@ -19,7 +19,7 @@ from datetime import datetime, timezone, timedelta
 from fastapi import FastAPI, APIRouter, Depends, HTTPException, Request, Response, UploadFile, File, Header, Query
 from fastapi.responses import Response as FastAPIResponse
 from pydantic import BaseModel, Field, EmailStr, field_validator
-os.environ.setdefault('MOTOR_MAX_WORKERS', '6')      # paylaşımlı hosting iş parçacığı sınırı ("can't start new thread" 500 hatası)
+os.environ.setdefault('MOTOR_MAX_WORKERS', '4')      # paylaşımlı hosting iş parçacığı sınırı ("can't start new thread" 500 hatası)
 from motor.motor_asyncio import AsyncIOMotorClient
 from starlette.middleware.cors import CORSMiddleware
 
@@ -2719,10 +2719,10 @@ async def _setup_schema():
 async def _limit_threads():
     """asyncio.to_thread havuzunu sınırla: hosting iş parçacığı kotasını aşmasın."""
     from concurrent.futures import ThreadPoolExecutor
-    asyncio.get_running_loop().set_default_executor(ThreadPoolExecutor(max_workers=8, thread_name_prefix="spx"))
+    asyncio.get_running_loop().set_default_executor(ThreadPoolExecutor(max_workers=3, thread_name_prefix="spx"))
     try:
         import anyio.to_thread
-        anyio.to_thread.current_default_thread_limiter().total_tokens = 8
+        anyio.to_thread.current_default_thread_limiter().total_tokens = 4
     except Exception:  # noqa: BLE001
         pass
 

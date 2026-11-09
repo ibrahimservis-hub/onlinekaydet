@@ -326,6 +326,7 @@ def _off(m):
 def apply_profile(raw, th, ctx):
     """Ham tema HTML'ine firma bilgilerini yerleştirir (ana sayfa). Boş bırakılan bilgi temadan da kalkar."""
     h = raw.replace("__API_URL__", "/api").replace("__PORTAL_URL__", "#")
+    h = re.sub(r"©\s*\d{4}\s[^<]*?·\s*Bu site OnlineKaydet ile yayınlanır", '<a href="https://onlinekaydet.com" target="_blank" rel="noopener" style="color:inherit">Bu site OnlineKaydet ile yayınlanır</a>', h)
     name = ctx["name"]
     if th and th.get("name") and name:
         h = h.replace(th["name"], E(name))

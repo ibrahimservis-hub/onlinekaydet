@@ -137,6 +137,7 @@ with TestClient(s.app) as c:
         for bad_ in ["Atatürk Cad", "Hafta içi 08:30", "Vergi No: [firma bilgisi]", "Acil: 7/24", "Pzt–Cmt 08:30", "Cumartesi", "cumartesi", "7/24", "0532 000"]:
             assert bad_ not in r, bad_
         r2 = pub("/iletisim").text
+        assert 'href="https://onlinekaydet.com"' in r and "© 2026" not in r and "Bu site OnlineKaydet ile yayınlanır" in r
         assert "Atatürk Cad" not in r2 and "Hafta içi 08:30" not in r2
     t("boş bırakılan adres/saat temadan kalkar", clr)
     def seo():
