@@ -267,6 +267,7 @@ def _boot():
         _done.set()
     except BaseException as exc:                 # noqa: BLE001
         _state["error"] = exc
+        _ERR["t"] = __import__("time").time()
         _progress("HATA: %s: %s" % (type(exc).__name__, str(exc)[:300].replace(os.environ.get("MONGO_URL", "\0"), "***")))
         _write_error(exc)
         _done.set()
@@ -285,19 +286,30 @@ _started = {"pid": None}
 _lock = threading.Lock()
 
 
+_ERR = {"t": 0.0, "n": 0}
+
+
 def _ensure_started():
     """Passenger uygulamayi once on yukleyip sonra catallayabilir (iplikler cocuga gecmez);
-    bu yuzden baslatma, istegi karsilayan surecte ve ilk istekte yapilir."""
+    bu yuzden baslatma, istegi karsilayan surecte ve ilk istekte yapilir.
+    Gecici hata (ornegin hesabin iplik kotasi doluyken "can't start new thread") surecin sonsuza dek
+    'Panel baslatilamadi' vermesine yol acmaz: 6 sn sonra yeniden denenir; 4 denemede de olmazsa
+    surec kapanir ve sunucu temiz bir surec baslatir."""
+    import time
     pid = os.getpid()
-    if _started["pid"] == pid:
+    if _started["pid"] == pid and (_state["error"] is None or time.time() - _ERR["t"] < 6):
         return
     with _lock:
         if _started["pid"] == pid:
-            return
+            if _state["error"] is None or time.time() - _ERR["t"] < 6:
+                return
+            if _ERR["n"] >= 4:
+                os._exit(1)
+            _ERR["n"] += 1
         _started["pid"] = pid
         _state.update(ready=False, error=None, app=None)
+        _done.clear()
         threading.Thread(target=_boot, name="panel-boot", daemon=True).start()
-
 
 
 import mimetypes as _mt
@@ -420,7 +432,7 @@ def application(environ, start_response):
         return _wrap(_state["app"](environ, start_response), _state["loop"])
     if _state["error"] is not None:
         msg = "Panel baslatilamadi. onlinekaydet_app/startup-error.log dosyasina bakin."
-        start_response("500 Internal Server Error", [("Content-Type", "text/plain; charset=utf-8")])
+        start_response("503 Service Unavailable", [("Content-Type", "text/plain; charset=utf-8"), ("Retry-After", "6")])
     else:
         msg = "Panel basliyor (ilk acilis 1-3 dakika surebilir). Birkac dakika sonra sayfayi yenileyin.\n\n--- durum (pid %s) ---\n%s" % (os.getpid(), "\n".join(_mem) or "(henuz kayit yok)")
         start_response("503 Service Unavailable", [("Content-Type", "text/plain; charset=utf-8"), ("Retry-After", "20")])
