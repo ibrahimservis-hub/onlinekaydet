@@ -13,7 +13,7 @@ def card(t):
     return (f'<article class="tk" data-s="{t["sector"]}" data-p="{int(pr)}" data-m="{int(mag)}" data-n="{html.escape((m["nm"] + " " + SN[t["sector"]] + " " + stil).lower())}">'
             f'<a class="tk-i" href="/tema-onizleme/{s}.html" target="_blank" rel="noopener" aria-label="{html.escape(m["nm"])} temasını yeni sekmede aç">{badge}'
             f'<span class="tk-d"><img src="tema/{s}-k.webp" alt="{html.escape(m["nm"])} masaüstü görünümü" loading="lazy" width="640" height="400"></span>'
-            f'<span class="tk-p"><img src="tema/{s}-m.webp" alt="{html.escape(m["nm"])} mobil görünümü" loading="lazy" width="300" height="650"></span><span class="tk-o">Temayı incele ↗</span></a>'
+            f'<span class="tk-p"><img src="tema/{s}-i.webp" alt="{html.escape(m["nm"])} mobil görünümü" loading="lazy" width="404" height="838"></span><span class="tk-o">Temayı incele ↗</span></a>'
             f'<div class="tk-f"><div><b>{html.escape(m["nm"])}</b><small>{SN[t["sector"]]} · {html.escape(stil)}</small></div><a class="tk-b" href="index.html#kayit">Teklif alın</a></div></article>')
 order = sorted(T, key=lambda t: (not t.get('premium'), 'magaza' in t['slug'], t['slug']))
 n_all, n_pr = len(T), sum(1 for t in T if t.get('premium')); n_mg = sum(1 for t in T if 'magaza' in t['slug']); n_st = n_all - n_pr
@@ -31,7 +31,7 @@ CSS = """<style>.tk-w{display:grid;grid-template-columns:260px minmax(0,1fr);gap
 .tk-g input[type=search]{width:100%;min-height:46px;border:1px solid #cfc9ba;background:#fff;padding:8px 12px;font:400 15px var(--f);border-radius:0}.tk-g input:focus-visible{outline:2px solid var(--ch)}
 .tk-gr{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:26px}.tk{background:#fbf9f4;border:1px solid #d6d0c2;transition:transform .35s var(--ease),box-shadow .35s var(--ease)}.tk:hover{transform:translateY(-5px);box-shadow:0 30px 56px -28px rgba(20,22,26,.45)}.tk[hidden]{display:none}
 .tk-i{position:relative;display:block;aspect-ratio:8/5.6;overflow:hidden;background:linear-gradient(135deg,#e9e4d8,#d9d2c1)}.tk-d{position:absolute;left:5%;top:6%;width:84%;border-radius:8px;overflow:hidden;box-shadow:0 18px 40px -16px rgba(0,0,0,.5);border:1px solid #0002}.tk-d img{display:block;width:100%;height:auto;transition:transform .8s var(--ease)}
-.tk-p{position:absolute;right:5%;bottom:-9%;width:25%;border:4px solid #14161a;border-radius:20px;overflow:hidden;box-shadow:0 20px 40px -12px rgba(0,0,0,.6);transition:transform .5s var(--ease);background:#14161a}.tk-p img{display:block;width:100%;height:auto}
+.tk-p{position:absolute;right:4%;bottom:-14%;width:23%;transition:transform .5s var(--ease);filter:drop-shadow(0 18px 22px rgba(0,0,0,.42))}.tk-p img{display:block;width:100%;height:auto}
 .tk:hover .tk-p{transform:translateY(-14px)}.tk:hover .tk-d img{transform:scale(1.03)}
 .tk-bd{position:absolute;left:12px;top:12px;z-index:3;background:#0a0c0f;color:var(--ch);font:600 11.5px var(--f);letter-spacing:.1em;text-transform:uppercase;padding:6px 11px;border-radius:99px}.tk-bd.m{color:#fff;background:#1f6f54}
 .tk-o{position:absolute;inset:0;z-index:2;display:grid;place-items:center;background:rgba(10,12,15,.55);color:#fff;font:500 17px var(--f);opacity:0;transition:opacity .3s}.tk-i:hover .tk-o,.tk-i:focus-visible .tk-o{opacity:1}
