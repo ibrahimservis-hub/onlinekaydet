@@ -14,6 +14,8 @@
     [].forEach.call(root.querySelectorAll('*'), function (n) {
       if (n.children.length === 0 && /ServisPlus/.test(n.textContent) && !n.closest('.bg-slate-950')) n.textContent = n.textContent.replace(/ServisPlus/g, 'OnlineKaydet');
     });
+    var w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT), nd;
+    while ((nd = w.nextNode())) { if (/Personel Giri/.test(nd.nodeValue)) nd.nodeValue = nd.nodeValue.replace(/Personel Giri[sş]i/, 'Üye girişi'); }
     var right = root.querySelector('.bg-slate-950');
     if (!right) return;
     [].forEach.call(right.children, function (c) { c.style.display = 'none'; });
