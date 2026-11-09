@@ -311,7 +311,7 @@
   }
   function open(tab) { if (!ov) build(); if (tab) TAB = tab; ov.classList.add('on'); draw(); markActive(); }
   function sw(id, on) { return '<label class="spx-sw"><input type="checkbox" id="' + id + '"' + (on ? ' checked' : '') + '><i></i></label>'; }
-  function body() { return $('#spx-body'); }
+  function body() { return $('#spx-body') || document.createElement('div'); }
   function draw() {
     Array.prototype.forEach.call($('#spx-tabs').children, function (b) { b.classList.toggle('on', b.getAttribute('data-t') === TAB); });
     var hh = $('#spx-h'); if (hh) hh.textContent = ({ firmalar: 'Firmalar', sitem: 'Sitem — Web Siteniz', siteduz: 'Gelişmiş Düzenleme', domain: 'Alan Adı & Site', paket: 'Paketim', mgayar: 'Mağaza Ayarları', daha: 'Daha Fazlası', bildirim: 'Bildirimler', memnun: 'Müşteri Memnuniyeti', vade: 'Usta Borç Vadesi', harita: 'Günün İş Haritası', moduller: 'Aç/Kapat & Entegrasyonlar', seo: 'SEO · 301 · 404', yeni: 'Yeni Sipariş Gir', pazar: 'Pazaryerleri', yetki: 'Kullanıcılar & Yetkiler', gsc: 'Google Search Console', marka: 'Marka Ürün Aktarma', urunler: 'Ürün Yönetimi', m360: 'Müşteri 360', kaynak: 'Kaynak & Arama Analizi', ustapuan: 'Usta Puanlama', ustagecmis: 'Usta İş Geçmişi', cari: 'Cari & Trend', tahsilat: 'Teknisyen Tahsilat', atolye: 'Atölye (Cihaz Teslim Alma)', sohbet: 'Canlı Sohbet', canli: 'Canlı Ziyaretçiler', wa: 'WhatsApp & Bildirim Ayarları', onay: 'Onay Bekleyenler', rapor: 'Rapor Merkezi', kurulum: 'Kurulum Durumu' })[TAB];

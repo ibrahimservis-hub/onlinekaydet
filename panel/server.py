@@ -19,6 +19,7 @@ from datetime import datetime, timezone, timedelta
 from fastapi import FastAPI, APIRouter, Depends, HTTPException, Request, Response, UploadFile, File, Header, Query
 from fastapi.responses import Response as FastAPIResponse
 from pydantic import BaseModel, Field, EmailStr, field_validator
+os.environ.setdefault('MOTOR_MAX_WORKERS', '6')      # paylaşımlı hosting iş parçacığı sınırı ("can't start new thread" 500 hatası)
 from motor.motor_asyncio import AsyncIOMotorClient
 from starlette.middleware.cors import CORSMiddleware
 
@@ -33,8 +34,8 @@ client = AsyncIOMotorClient(
     serverSelectionTimeoutMS=int(os.environ.get('MONGO_TIMEOUT_MS', '20000')),
     connectTimeoutMS=int(os.environ.get('MONGO_TIMEOUT_MS', '20000')),
     socketTimeoutMS=60000,
-    minPoolSize=int(os.environ.get('MONGO_MIN_POOL', '8')),   # sıcak bağlantılar: her istekte yeni TLS el sıkışması olmasın
-    maxPoolSize=int(os.environ.get('MONGO_MAX_POOL', '50')),
+    minPoolSize=int(os.environ.get('MONGO_MIN_POOL', '2')),   # sıcak bağlantılar: her istekte yeni TLS el sıkışması olmasın
+    maxPoolSize=int(os.environ.get('MONGO_MAX_POOL', '20')),
     maxIdleTimeMS=600000,
 )
 PROGRESS = lambda msg: None      # passenger_wsgi.py ilerleme gunlugu icin degistirir
@@ -2712,6 +2713,13 @@ async def _setup_schema():
         {"$set": {"logo_url": ""}}
     )
     logger.info("Brands seeded")
+
+
+@app.on_event("startup")
+async def _limit_threads():
+    """asyncio.to_thread havuzunu sınırla: hosting iş parçacığı kotasını aşmasın."""
+    from concurrent.futures import ThreadPoolExecutor
+    asyncio.get_running_loop().set_default_executor(ThreadPoolExecutor(max_workers=8, thread_name_prefix="spx"))
 
 
 @app.on_event("startup")
