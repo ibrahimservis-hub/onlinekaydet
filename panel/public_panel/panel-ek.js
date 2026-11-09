@@ -1559,6 +1559,9 @@
     '/admin/governance': [['health', 'Sistem Sağlığı'], ['backups', 'Yedekler'], ['audit', 'Denetim Kaydı'], ['trash', 'Çöp Kutusu'], ['notify', 'Bildirim Kanalları']]
   };
   var MPERM = { '/admin': 'dashboard', '/admin/jobs': 'jobs', '/admin/appointments': 'appointments', '/admin/quotes': 'quotes', '/admin/warranty': 'warranty', '/admin/customers': 'customers', '/admin/technicians': 'technicians', '/admin/parts': 'parts', '/admin/shop': 'shop', 'ek:yeni': 'shop', 'ek:mgayar': 'shop', 'ek:atolye': 'jobs', 'ek:ustagecmis': 'technicians', 'ek:tahsilat': 'accounting', 'ek:vade': 'accounting', 'ek:memnun': 'reports', 'ek:rapor': 'reports', 'ek:kurulum': 'settings', 'ek:harita': 'jobs', 'ek:canli': 'visitors', 'ek:wa': 'integration', 'ek:pazar': 'shop', 'ek:marka': 'shop', 'ek:urunler': 'shop', '/admin/coupons': 'coupons', '/admin/site-features': 'site_features', 'ek:moduller': 'site_features', 'ek:domain': 'site_features', 'ek:seo': 'seo', 'ek:gsc': 'marketing', '/admin/site-studio': 'studio', '/admin/media': 'studio', '/admin/integration': 'integration', '/admin/messages': 'messages', '/admin/reviews': 'reviews', '/admin/dealers': 'dealers', '/admin/marketing': 'marketing', '/admin/growth': 'growth', '/admin/visitors': 'visitors', '/admin/team': 'team', '/admin/performance': 'performance', '/admin/announcements': 'announcements', '/admin/diagnosis': 'diagnosis', '/admin/brands': 'brands', '/admin/accounting': 'accounting', '/admin/reports': 'reports', '/admin/settings': 'settings' };
+  /* ServisPlus'ın kendi sitesini yöneten ekranlar: müşteri firmanın panelinde görünmez (kendi sitesi: Alan Adı & Site) */
+  var FIRM_HIDE = { '/admin/site-studio': 1, '/admin/media': 1, '/admin/site-features': 1, '/admin/integration': 1, 'ek:moduller': 1, 'ek:seo': 1, 'ek:gsc': 1, '/admin/visitors': 1, 'ek:canli': 1 };
+  setInterval(function () { try { if (FIRM) { var p = location.pathname.replace(/\/$/, ''); Object.keys(FIRM_HIDE).forEach(function (k) { if (k.indexOf('/') === 0 && (p === k || p.indexOf(k + '/') === 0)) location.replace('/admin?sitem=1'); }); } } catch (e) { } }, 800);
   var OWNER_ONLY = { 'ek:yetki': 1, 'ek:firmalar': 1, '/admin/security': 1, '/admin/governance': 1, '/admin/users': 1 };
   function me() { try { return JSON.parse(LS.get('user', '{}')) || {}; } catch (e) { return {}; } }
   /* Menü öğesi -> paket modülü (firmanın paketinde olmayan modüller menüde gizlenir; sunucu da kapıyı ayrıca kapatır) */
@@ -1578,6 +1581,7 @@
     var u = me(), r = u.admin_role || 'owner';
     if (k === '/admin/account') return true;
     if (k === 'ek:paket') return !!FIRM;
+    if (FIRM && FIRM_HIDE[k]) return false;
     if (FIRM && PKGMODS && MODKEY[k] && PKGMODS.indexOf(MODKEY[k]) < 0) return false;
     if (FIRM && (k === 'ek:firmalar' || k === '/admin/governance')) return false; /* platform düzeyi: firma panelinde görünmez */
     if (r === 'owner') return true;
@@ -2876,6 +2880,8 @@
     Promise.all([call('GET', '/firm/domain'), call('GET', '/brand').catch(function () { return null; })]).then(function (a) {
       var d = a[0], br = a[1], rows = d.domains || [], hp = d.help || {}, h = '';
       var stp = function (s) { return s === 'yayinda' ? pill('yayında', '#16a34a') : s === 'kapali' ? pill('kapalı', '#64748b') : pill('DNS bekleniyor', '#f59e0b'); };
+      h += '<div class="spx-card"><b>Firma bilgileriniz</b><small style="display:block;color:#64748b;margin:4px 0 8px">Sitenizde, servis fişinde ve mesajlarda görünür.</small><div class="spx-g"><label>Firma adı<input id="fi_n"></label><label>Telefon<input id="fi_p" placeholder="05xx xxx xx xx"></label><label style="grid-column:span 2">Adres<input id="fi_a"></label></div><button class="spx-b p" id="fi_s" style="margin-top:8px">Bilgileri kaydet</button></div>';
+      h += '<div class="spx-card"><b>Sitenizin önizlemesi</b><small style="display:block;color:#64748b;margin:4px 0 8px">Seçili temanın sizin adınız ve telefonunuzla görünümü.</small><iframe id="dm_fr" style="width:100%;height:520px;border:1px solid #e2e8f0;border-radius:10px;background:#fff"></iframe></div>';
       h += '<div class="spx-card"><b>1) Sitenizin teması</b><small style="display:block;color:#64748b;margin:4px 0 8px">Alan adınıza bağlanınca ziyaretçiler bu temayı görür. Telefon ve firma adı Ayarlar bölümündeki bilgilerinizden gelir.</small>';
       if (br && br.themes) {
         var cur = (br.brand || {}).theme || '';
@@ -2899,7 +2905,11 @@
         h += '<div class="spx-card"><b>Nasıl yapılır?</b><ol style="margin:8px 0 0 18px;padding:0;font-size:13.5px;line-height:1.7;color:#334155">' + (hp.steps || []).map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ol></div>';
       }
       body().innerHTML = h;
-      var th = $('#dm_th'); if (th) th.onchange = function () { $('#dm_pv').href = th.value ? '/tema-onizleme/' + th.value + '.html' : '#'; };
+      var prev = function () { var cur = ($('#dm_th') || {}).value; var fr = $('#dm_fr'); if (!fr) return; if (!cur) { fr.srcdoc = '<p style="font:14px sans-serif;padding:20px;color:#64748b">Önizleme için yukarıdan bir tema seçin.</p>'; return; } fetch(location.origin + '/api/brand/site/' + encodeURIComponent(cur), { headers: { Authorization: 'Bearer ' + LS.get('token', '') } }).then(function (r) { return r.text(); }).then(function (t) { fr.srcdoc = t; }); };
+      call('GET', '/settings').then(function (st) { if ($('#fi_n')) { $('#fi_n').value = st.company_name || ''; $('#fi_p').value = st.company_phone || ''; $('#fi_a').value = st.company_address || ''; } }).catch(function () { });
+      $('#fi_s').onclick = function () { call('PUT', '/settings', { company_name: $('#fi_n').value.trim(), company_phone: $('#fi_p').value.trim(), company_address: $('#fi_a').value.trim() }).then(function () { toast('Bilgiler kaydedildi'); prev(); }).catch(fail); };
+      prev();
+      var th = $('#dm_th'); if (th) th.onchange = function () { prev(); $('#dm_pv').href = th.value ? '/tema-onizleme/' + th.value + '.html' : '#'; };
       var sv = $('#dm_ths'); if (sv) sv.onclick = function () { var b0 = (br.brand || {}); call('PUT', '/brand', { theme: $('#dm_th').value, dark: b0.dark, accent: b0.accent, radius: b0.radius }).then(function () { toast('Tema kaydedildi'); }).catch(fail); };
       $('#dm_add').onclick = function () { call('POST', '/firm/domain', { domain: $('#dm_in').value }).then(function () { toast('Alan adı eklendi'); drawDomain(); }).catch(fail); };
       Array.prototype.forEach.call(document.querySelectorAll('.dm-chk'), function (b) { b.onclick = function () { b.textContent = 'Kontrol ediliyor…'; call('POST', '/firm/domain/check', { domain: b.getAttribute('data-d') }).then(function (r) { toast(r.status === 'yayinda' ? 'Alan adı yayına alındı 🎉' : 'DNS henüz yönlenmemiş, biraz sonra tekrar deneyin'); drawDomain(); }).catch(function (e) { fail(e); b.textContent = 'Kontrol et'; }); }; });
