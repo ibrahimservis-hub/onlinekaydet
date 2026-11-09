@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="tr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>OnlineKaydet: defteri bırak, işi kaydet</title>
+<meta name="description" content="Servis kaydı, usta takibi, tahsilat ve hazır web siteniz tek panelde. Teknik servisler için.">
+<link rel="icon" href="favicon.ico">
+<style>
+@font-face{font-family:"Ant";src:url(fonts/antonio-latin-700-normal.woff2) format("woff2");font-weight:700;font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215}
+@font-face{font-family:"Ant";src:url(fonts/antonio-latin-ext-700-normal.woff2) format("woff2");font-weight:700;font-display:swap;unicode-range:U+0100-02AF,U+0304,U+0308,U+0329,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20CF,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:"Han";src:url(fonts/hanken-grotesk-latin-wght-normal.woff2) format("woff2");font-weight:100 900;font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215}
+@font-face{font-family:"Han";src:url(fonts/hanken-grotesk-latin-ext-wght-normal.woff2) format("woff2");font-weight:100 900;font-display:swap;unicode-range:U+0100-02AF,U+0304,U+0308,U+0329,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20CF,U+2113,U+2C60-2C7F,U+A720-A7FF}
+:root{--y:#ffd21f;--k:#0e0e0e;--w:#fffdf3;--r:#e5383b;--g:#1f9d55;--mut:#4a4630;--ease:cubic-bezier(.2,.7,.2,1);--fd:"Ant","Arial Narrow",Impact,sans-serif;--ft:"Han",system-ui,sans-serif}
+*{box-sizing:border-box;margin:0}
+html{scroll-behavior:smooth;overflow-x:clip}
+body{background:var(--w);color:var(--k);font:500 18px/1.5 var(--ft);overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:4px solid var(--k);outline-offset:3px}
+.wrap{max-width:1280px;margin:0 auto;padding:0 32px}
+.d{font-family:var(--fd);text-transform:uppercase;font-weight:700;letter-spacing:.005em}
+/* bar */
+.bar{background:var(--k);color:var(--y)}
+.bar .wrap{display:flex;align-items:center;gap:26px;height:68px}
+.bar img{height:34px;filter:none;background:var(--w);padding:4px 8px;border-radius:4px;display:block}
+.bar nav{display:flex;gap:26px;margin-left:10px}.bar nav a{color:#e9e4c4;font-weight:600;padding:10px 0}.bar nav a:hover{color:var(--y)}
+.bar .sp{flex:1}
+.bar .tel{font:700 30px/1 var(--fd);color:var(--y);letter-spacing:.02em;white-space:nowrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:50px;padding:0 24px;font:700 22px var(--fd);text-transform:uppercase;letter-spacing:.03em;background:var(--k);color:var(--y);border:3px solid var(--k);box-shadow:5px 5px 0 var(--k);transition:transform .15s var(--ease),box-shadow .15s var(--ease)}
+.btn:hover{transform:translate(3px,3px);box-shadow:2px 2px 0 var(--k)}
+.btn.y{background:var(--y);color:var(--k);border-color:var(--k)}
+.bar .btn{box-shadow:none;border-color:var(--y);min-height:44px;font-size:19px}
+.bar .btn.y{background:var(--y);color:var(--k)}
+/* hero */
+.hero{background:var(--y);position:relative;overflow:hidden;padding:56px 0 110px;border-bottom:6px solid var(--k)}
+.hero .wrap{display:grid;grid-template-columns:1.02fr 1fr;gap:40px;align-items:center}
+.hero h1{font:700 clamp(64px,9.4vw,142px)/.98 var(--fd);text-transform:uppercase;letter-spacing:-.005em}
+.hero h1 span{display:block;overflow:hidden;padding-bottom:.14em;margin-bottom:-.14em}
+.hero h1 span b{display:block;font-weight:700;animation:rise .8s var(--ease) both}
+.hero h1 span:nth-child(2) b{animation-delay:.12s;background:var(--k);color:var(--y);display:inline-block;padding:0 14px}
+.hero p{font:600 22px/1.4 var(--ft);max-width:480px;margin:26px 0 30px}
+.hero .go{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.hero .go .tel{font:700 34px var(--fd);letter-spacing:.02em}
+@keyframes rise{from{transform:translateY(105%)}to{transform:none}}
+.shot{position:relative;transform:rotate(-2.2deg);animation:settle .9s var(--ease) .2s both}
+@keyframes settle{from{opacity:0;transform:rotate(-6deg) translateY(30px)}to{opacity:1;transform:rotate(-2.2deg)}}
+.shot img{width:100%;height:auto;display:block;border:4px solid var(--k);box-shadow:14px 14px 0 var(--k);background:#fff}
+.stk{position:absolute;font:700 24px/1 var(--fd);text-transform:uppercase;padding:11px 15px;border:3px solid var(--k);box-shadow:4px 4px 0 var(--k);animation:pop .5s var(--ease) both;white-space:nowrap}
+.stk.a{left:-26px;top:22%;background:var(--w);transform:rotate(-5deg);animation-delay:1.1s}
+.stk.b{right:-20px;top:46%;background:var(--g);color:#fff;transform:rotate(4deg);animation-delay:1.6s}
+.stk.c{left:6%;bottom:-24px;background:var(--r);color:#fff;transform:rotate(-3deg);animation-delay:2.1s}
+@keyframes pop{from{opacity:0;scale:.4}to{opacity:1;scale:1}}
+/* tape */
+.tape{background:var(--k);color:var(--y);overflow:hidden;transform:rotate(-1.2deg);margin:-34px -20px 0;position:relative;z-index:3;border-top:4px solid var(--y);border-bottom:4px solid var(--y)}
+.tape div{display:flex;width:max-content;animation:run 30s linear infinite}
+.tape span{font:700 34px/1 var(--fd);text-transform:uppercase;padding:16px 28px;white-space:nowrap;letter-spacing:.02em}
+.tape span:after{content:"/";margin-left:56px;color:var(--w)}
+@keyframes run{to{transform:translateX(-50%)}}
+/* sections */
+section{padding-top:130px}
+h2{font:700 clamp(46px,6vw,92px)/1 var(--fd);text-transform:uppercase;margin-bottom:18px;letter-spacing:-.003em}
+.lead{font-size:21px;font-weight:500;max-width:620px;margin-bottom:46px;color:var(--mut)}
+/* what rows */
+.black{background:var(--k);color:var(--w);margin-top:130px;padding:110px 0}
+.black h2{color:var(--y)}
+.row4{border-top:3px solid var(--w)}
+.row4 a,.row4 div.r{display:grid;grid-template-columns:90px 1fr 1.2fr;gap:24px;align-items:baseline;padding:30px 0;border-bottom:3px solid var(--w);position:relative;transition:padding-left .3s var(--ease),color .3s}
+.row4 .n{font:700 28px var(--fd);color:var(--y)}
+.row4 h3{font:700 clamp(40px,5.4vw,78px)/1 var(--fd);text-transform:uppercase}
+.row4 p{font-size:19px;color:#d9d4b4;max-width:480px}
+.row4 .r:hover{padding-left:22px;color:var(--y)}
+/* old vs new */
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:0;border:4px solid var(--k);box-shadow:12px 12px 0 var(--k);background:#fff}
+.vs>div{padding:34px 34px 30px}
+.vs .old{border-right:4px solid var(--k);background:#efe9cf}
+.vs h3{font:700 40px var(--fd);text-transform:uppercase;margin-bottom:20px}
+.vs li{list-style:none;font-size:20px;font-weight:600;padding:12px 0;border-top:2px solid rgba(14,14,14,.18);position:relative}
+.vs li:first-of-type{border:0}
+.vs .old li span{position:relative;display:inline-block}
+.vs .old li span:after{content:"";position:absolute;left:-4px;right:-4px;top:54%;height:4px;background:var(--r);transform:scaleX(1);transform-origin:left}
+.js .vs .old li span:after{transform:scaleX(0);transition:transform .6s var(--ease)}
+.js .vs.in .old li span:after{transform:scaleX(1)}
+.js .vs.in .old li:nth-of-type(2) span:after{transition-delay:.15s}.js .vs.in .old li:nth-of-type(3) span:after{transition-delay:.3s}.js .vs.in .old li:nth-of-type(4) span:after{transition-delay:.45s}.js .vs.in .old li:nth-of-type(5) span:after{transition-delay:.6s}
+.vs .new li:before{content:"";display:inline-block;width:20px;height:11px;border-left:5px solid var(--g);border-bottom:5px solid var(--g);transform:rotate(-45deg) translateY(-4px);margin-right:14px}
+.small{margin-top:30px;font-size:15px;color:var(--mut)}
+/* sectors */
+.sec8{display:grid;grid-template-columns:repeat(4,1fr);gap:22px}
+.s{--c:#000;display:flex;flex-direction:column;justify-content:space-between;min-height:210px;padding:20px;background:#fff;border:4px solid var(--k);box-shadow:8px 8px 0 var(--c);transition:transform .18s var(--ease),box-shadow .18s var(--ease),background-color .18s}
+.s:hover,.s:focus-visible{transform:translate(6px,6px);box-shadow:2px 2px 0 var(--c);background:var(--c);color:#fff}
+.s.dk:hover{color:var(--k)}
+.s b{font:700 20px var(--fd);letter-spacing:.04em;display:inline-block;background:var(--c);color:#fff;padding:3px 9px;width:max-content;transition:background .18s,color .18s}
+.s.dk b{color:var(--k)}
+.s:hover b{background:var(--w);color:var(--k)}
+.s h3{font:700 44px/1 var(--fd);text-transform:uppercase}
+.s p{font-size:16px;margin-top:6px;opacity:.85}
+/* steps */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:30px}
+.steps div{border-top:8px solid var(--k);padding-top:16px}
+.steps b{font:700 150px/.9 var(--fd);color:var(--y);-webkit-text-stroke:4px var(--k);display:block}
+.steps h3{font:700 38px var(--fd);text-transform:uppercase;margin:10px 0 6px}
+.steps p{color:var(--mut);font-size:19px}
+/* cta */
+.cta{margin-top:130px;background:var(--y);border-top:6px solid var(--k);border-bottom:6px solid var(--k);padding:90px 0;text-align:left}
+.cta .wrap{display:flex;flex-wrap:wrap;gap:30px;align-items:flex-end}
+.cta h2{margin:0;font-size:clamp(54px,7.4vw,118px)}
+.cta .big{font:700 clamp(54px,8.6vw,138px)/.95 var(--fd);letter-spacing:.01em;display:block;background:var(--k);color:var(--y);padding:6px 22px;margin-top:14px;width:max-content;max-width:100%}
+.cta .big:hover{background:var(--w);color:var(--k)}
+.cta .btn{margin-left:auto}
+footer{background:var(--k);color:#cfc9a6;padding:36px 0;font-size:15px}
+footer .wrap{display:flex;gap:26px;flex-wrap:wrap}footer .sp{flex:1}
+footer a:hover{color:var(--y)}
+/* reveal */
+.js .rv{opacity:0;transform:translateY(26px);transition:opacity .6s var(--ease),transform .6s var(--ease)}
+.js .rv.in{opacity:1;transform:none}
+@media(max-width:1000px){.hero .wrap{grid-template-columns:1fr}.shot{margin:20px 18px 40px}.row4 a,.row4 div.r{grid-template-columns:50px 1fr}.row4 p{grid-column:2}.vs{grid-template-columns:1fr}.vs .old{border-right:0;border-bottom:4px solid var(--k)}.sec8{grid-template-columns:1fr 1fr}.steps{grid-template-columns:1fr}.bar nav{display:none}.cta .btn{margin-left:0}}
+@media(max-width:560px){.sec8{grid-template-columns:1fr}.bar .tel{font-size:22px}.bar .btn.y{display:none}.wrap{padding:0 18px}section{padding-top:90px}.stk{font-size:18px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.js .rv{opacity:1!important;transform:none!important}.js .vs .old li span:after{transform:scaleX(1)!important}.tape div{width:auto;flex-wrap:wrap}}
+</style></head>
+<body>
+<header class="bar"><div class="wrap">
+<a href="index.html"><img src="logo-renkli-s.png" alt="OnlineKaydet"></a>
+<nav aria-label="Ana menü"><a href="ozellikler.html">Özellikler</a><a href="fiyatlar.html">Fiyatlar</a><a href="sektorler.html">Sektörler</a><a href="demo.html">Demo</a></nav>
+<span class="sp"></span><a class="tel" href="tel:+905444444004">0544 444 40 04</a><a class="btn y" href="demo.html">Dene</a>
+</div></header>
+
+<main>
+<div class="hero"><div class="wrap">
+<div>
+<h1><span><b>Defteri</b></span><span><b>bırak.</b></span><span><b>İşi kaydet.</b></span></h1>
+<p>Servis kaydı, usta, tahsilat ve web siteniz tek panelde. Kurulumu biz yapıyoruz.</p>
+<div class="go"><a class="btn" href="demo.html">Ücretsiz dene</a><a class="tel" href="tel:+905444444004">0544 444 40 04</a></div>
+</div>
+<div class="shot">
+<img src="s1.png" alt="OnlineKaydet paneli, örnek verilerle" width="1184" height="698">
+<span class="stk a">Usta yolda</span><span class="stk b">Tahsil edildi</span><span class="stk c">Kayıt kapandı</span>
+</div>
+</div></div>
+
+<div class="tape" aria-hidden="true"><div>
+<span>Kombi</span><span>Klima</span><span>Beyaz eşya</span><span>Bilgisayar</span><span>Elektrik</span><span>Elektronik</span><span>Güvenlik</span><span>Tesisat</span>
+<span>Kombi</span><span>Klima</span><span>Beyaz eşya</span><span>Bilgisayar</span><span>Elektrik</span><span>Elektronik</span><span>Güvenlik</span><span>Tesisat</span>
+</div></div>
+
+<section><div class="wrap">
+<h2 class="rv">Eski düzen<br>bitti.</h2>
+<p class="lead rv">Defter, Excel ya da masaüstü program. Hangisini kullanıyorsanız aynı yerde tıkanırsınız.</p>
+<div class="vs rv" id="vs">
+<div class="old"><h3>Bugünkü düzen</h3><ul>
+<li><span>Kayıt defterde, usta telefonda</span></li>
+<li><span>Müşteri “usta nerede” diye arıyor</span></li>
+<li><span>Tahsilat akşam elle hesaplanıyor</span></li>
+<li><span>Fotoğraf ve imza WhatsApp’ta kayboluyor</span></li>
+<li><span>Web siteniz yok ya da eski</span></li></ul></div>
+<div class="new"><h3>OnlineKaydet</h3><ul>
+<li>Kayıt panelde, usta uygulamada</li>
+<li>Müşteri takip bağlantısından kendisi bakıyor</li>
+<li>Tahsilat kayıt kapanınca yazılıyor</li>
+<li>Fotoğraf ve imza kayda bağlı</li>
+<li>Hazır web siteniz kurulu geliyor</li></ul></div>
+</div>
+<p class="small">Karşılaştırma, sektörde yaygın defter, Excel ve masaüstü programlarının genel özelliklerine göredir.</p>
+</div></section>
+
+<div class="black"><div class="wrap">
+<h2 class="rv">Tek panelde</h2>
+<div class="row4 rv">
+<div class="r"><span class="n">01</span><h3>Kayıt</h3><p>Servis kaydı, randevu, servis fişi, atölyeye alma, cihaz QR etiketi.</p></div>
+<div class="r"><span class="n">02</span><h3>Usta</h3><p>Otomatik atama, yoldayım bildirimi, müşteri telefonunu gizleme, puan ve prim.</p></div>
+<div class="r"><span class="n">03</span><h3>Para</h3><p>Tahsilat, alacak, kasa, giderler, KDV raporu, e-fatura köprüsü, bayi komisyonu.</p></div>
+<div class="r"><span class="n">04</span><h3>Web sitesi</h3><p>30 tema, online randevu, canlı destek, SMS ve WhatsApp, kaynak raporu.</p></div>
+</div></div></div>
+
+<section id="sektorler"><div class="wrap">
+<h2 class="rv">Siz hangisisiniz?</h2>
+<p class="lead rv">Her sektörün kendi formu, cihaz listesi ve hazır sitesi var.</p>
+<div class="sec8 rv">
+<a class="s" href="sektor-kombi.html" style="--c:#d9480f"><b>01</b><div><h3>Kombi</h3><p>Yıllık bakım, petek</p></div></a>
+<a class="s" href="sektor-klima.html" style="--c:#1c7ed6"><b>02</b><div><h3>Klima</h3><p>Montaj, gaz, bakım</p></div></a>
+<a class="s" href="sektor-beyaz-esya.html" style="--c:#0f8b8d"><b>03</b><div><h3>Beyaz eşya</h3><p>Garanti, parça, atölye</p></div></a>
+<a class="s" href="sektor-bilgisayar.html" style="--c:#5c3fd1"><b>04</b><div><h3>Bilgisayar</h3><p>Teslim formu, veri</p></div></a>
+<a class="s dk" href="sektor-elektrik.html" style="--c:#ffb300"><b>05</b><div><h3>Elektrik</h3><p>Keşif, pano, proje</p></div></a>
+<a class="s" href="sektor-elektronik.html" style="--c:#2f9e44"><b>06</b><div><h3>Elektronik</h3><p>Cihaz kabul, test</p></div></a>
+<a class="s" href="sektor-guvenlik.html" style="--c:#343a40"><b>07</b><div><h3>Güvenlik</h3><p>Kamera, alarm, bakım</p></div></a>
+<a class="s" href="sektor-tesisat.html" style="--c:#8a5a2b"><b>08</b><div><h3>Tesisat</h3><p>Acil çağrı, keşif</p></div></a>
+</div></div></section>
+
+<section><div class="wrap">
+<h2 class="rv">Üç adım</h2>
+<div class="steps rv" style="margin-top:36px">
+<div><b>1</b><h3>Arayın</h3><p>Sektörünüzü ve usta sayınızı söyleyin.</p></div>
+<div><b>2</b><h3>Biz kuralım</h3><p>Panel, tema ve Excel kayıtlarınız hazır gelir.</p></div>
+<div><b>3</b><h3>Başlayın</h3><p>İlk kaydı birlikte açarız.</p></div></div>
+</div></section>
+
+<div class="cta"><div class="wrap">
+<div><h2>Önce arayın.</h2><a class="big" href="tel:+905444444004">0544 444 40 04</a></div>
+<a class="btn" href="demo.html">Demo iste</a></div></div>
+</main>
+<footer><div class="wrap"><span>© OnlineKaydet</span><a href="hakkimizda.html">Hakkımızda</a><a href="iletisim.html">İletişim</a><a href="kvkk.html">KVKK</a><a href="gizlilik.html">Gizlilik</a><span class="sp"></span><span>Fiyatlar yer tutucudur. Örnek veriler gerçek müşteri değildir.</span></div></footer>
+<script>
+document.documentElement.classList.add('js');
+(function(){var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.15});
+document.querySelectorAll('.rv,#vs').forEach(function(n){io.observe(n)})})();
+</script>
+</body></html>
