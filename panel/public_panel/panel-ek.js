@@ -535,11 +535,12 @@
     document.addEventListener('click', function (e) { var a = e.target.closest && e.target.closest('a[href]'); if (!a || !FIRM) return; var h = a.getAttribute('href') || ''; if (/(wa\.me|whatsapp\.com)/i.test(h)) { var n = firmWaUrl(h); if (n !== h) a.setAttribute('href', n); } }, true);
   })();
   /* firma hesabında "ServisPlus" yazısı görünmez: ekrandaki yazılar ve WhatsApp metinleri firmanın adıyla değişir */
-  function brandTxt(t) { try { return FIRM && FIRM.name && t ? String(t).replace(/ServisPlus/g, FIRM.name) : t; } catch (e) { return t; } }
+  var PLAT = /(^|\.)onlinekaydet\.com$/i.test(location.hostname);
+  function brandTxt(t) { try { if (!t) return t; if (FIRM && FIRM.name) return String(t).replace(/ServisPlus/g, FIRM.name); if (PLAT) return String(t).replace(/ServisPlus/g, 'OnlineKaydet'); return t; } catch (e) { return t; } }
   (function () {
     var T = null;
     function sweep() {
-      if (!FIRM || !document.body) return;
+      if ((!FIRM && !PLAT) || !document.body) return;
       var w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null), x, L = [];
       while ((x = w.nextNode())) { var p = x.parentNode; if (p && /^(SCRIPT|STYLE|TEXTAREA|NOSCRIPT)$/.test(p.nodeName)) continue; if (x.nodeValue.indexOf('ServisPlus') >= 0) L.push(x); }
       L.forEach(function (n) { n.nodeValue = brandTxt(n.nodeValue); });
@@ -1576,7 +1577,7 @@
   var MPERM = { '/admin': 'dashboard', '/admin/jobs': 'jobs', '/admin/appointments': 'appointments', '/admin/quotes': 'quotes', '/admin/warranty': 'warranty', '/admin/customers': 'customers', '/admin/technicians': 'technicians', '/admin/parts': 'parts', '/admin/shop': 'shop', 'ek:yeni': 'shop', 'ek:mgayar': 'shop', 'ek:atolye': 'jobs', 'ek:ustagecmis': 'technicians', 'ek:tahsilat': 'accounting', 'ek:vade': 'accounting', 'ek:memnun': 'reports', 'ek:rapor': 'reports', 'ek:kurulum': 'settings', 'ek:harita': 'jobs', 'ek:canli': 'visitors', 'ek:wa': 'integration', 'ek:pazar': 'shop', 'ek:marka': 'shop', 'ek:urunler': 'shop', '/admin/coupons': 'coupons', '/admin/site-features': 'site_features', 'ek:moduller': 'site_features', 'ek:domain': 'site_features', 'ek:sitem': 'site_features', 'ek:siteduz': 'site_features', 'ek:seo': 'seo', 'ek:gsc': 'marketing', '/admin/site-studio': 'studio', '/admin/media': 'studio', '/admin/integration': 'integration', '/admin/messages': 'messages', '/admin/reviews': 'reviews', '/admin/dealers': 'dealers', '/admin/marketing': 'marketing', '/admin/growth': 'growth', '/admin/visitors': 'visitors', '/admin/team': 'team', '/admin/performance': 'performance', '/admin/announcements': 'announcements', '/admin/diagnosis': 'diagnosis', '/admin/brands': 'brands', '/admin/accounting': 'accounting', '/admin/reports': 'reports', '/admin/settings': 'settings' };
   /* ServisPlus'ın kendi sitesini yöneten ekranlar: müşteri firmanın panelinde görünmez (kendi sitesi: Alan Adı & Site) */
   var FIRM_HIDE = { '/admin/site-studio': 1, '/admin/media': 1, '/admin/site-features': 1, '/admin/integration': 1, 'ek:moduller': 1, 'ek:seo': 1, 'ek:gsc': 1, '/admin/visitors': 1, 'ek:canli': 1 };
-  setInterval(function () { try { if (FIRM) { var p = location.pathname.replace(/\/$/, ''); Object.keys(FIRM_HIDE).forEach(function (k) { if (k.indexOf('/') === 0 && (p === k || p.indexOf(k + '/') === 0)) location.replace('/admin?sitem=1'); }); } } catch (e) { } }, 800);
+  setInterval(function () { try { if (FIRM || PLAT) { var p = location.pathname.replace(/\/$/, ''); Object.keys(FIRM_HIDE).forEach(function (k) { if (k.indexOf('/') === 0 && (p === k || p.indexOf(k + '/') === 0)) location.replace('/admin?sitem=1'); }); } } catch (e) { } }, 800);
   var OWNER_ONLY = { 'ek:yetki': 1, 'ek:firmalar': 1, '/admin/security': 1, '/admin/governance': 1, '/admin/users': 1 };
   function me() { try { return JSON.parse(LS.get('user', '{}')) || {}; } catch (e) { return {}; } }
   /* Menü öğesi -> paket modülü (firmanın paketinde olmayan modüller menüde gizlenir; sunucu da kapıyı ayrıca kapatır) */
@@ -1596,7 +1597,7 @@
     var u = me(), r = u.admin_role || 'owner';
     if (k === '/admin/account') return true;
     if (k === 'ek:paket') return !!FIRM;
-    if (FIRM && FIRM_HIDE[k]) return false;
+    if ((FIRM || PLAT) && FIRM_HIDE[k]) return false;
     if (FIRM && PKGMODS && MODKEY[k] && PKGMODS.indexOf(MODKEY[k]) < 0) return false;
     if (FIRM && (k === 'ek:firmalar' || k === '/admin/governance')) return false; /* platform düzeyi: firma panelinde görünmez */
     if (r === 'owner') return true;
