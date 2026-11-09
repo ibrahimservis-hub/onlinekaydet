@@ -232,6 +232,47 @@ def register(api_router, db, deps):
         return s
 
     # ------------------------------------------------------------------ kanal ürün ekranı (stok/fiyat/durum matrisi)
+    @api_router.get("/shop/catalog")
+    async def catalog(q: str = "", category: str = "", stock: str = "", channel: str = "", page: int = 1, per: int = 40, _: dict = adm):
+        """Tek ürün listesi: tüm kanalların (site + pazaryerleri) durumu aynı satırda."""
+        mks = [m for m, v in ch.MARKETS.items() if v.get("live")]
+        cms = {m: await catmaps(m) for m in mks}
+        bms = {m: await brandmap(m) for m in mks}
+        flt = {}
+        if q.strip():
+            rx = {"$regex": re.escape(q.strip()), "$options": "i"}
+            flt["$or"] = [{"name": rx}, {"sku": rx}, {"barcode": rx}, {"brand": rx}]
+        if category:
+            flt["$and"] = [{"$or": [{"category": category}, {"category_ids": category}, {"category_id": category}]}]
+        rows, cats, low, out = [], {}, 0, 0
+        async for p in db.shop_products.find(flt, {"_id": 0, "specs": 0, "description": 0}).sort("name", 1):
+            stk = int(p.get("stock") or 0)
+            mn = int(p.get("min_stock") or 0)
+            is_low = stk <= mn if mn else stk <= 2
+            if stk <= 0:
+                out += 1
+            elif is_low:
+                low += 1
+            if stock == "out" and stk > 0:
+                continue
+            if stock == "low" and not (stk > 0 and is_low):
+                continue
+            chs = {"site": {"on": bool(p.get("active", True)), "status": "yayinda" if p.get("active", True) else "kapali", "issues": []}}
+            for m in mks:
+                st = ch.state(p, m, cms[m].get(p.get("category_id", "")), bms[m])
+                chs[m] = {"on": st["status"] != "kapali", "status": st["status"], "issues": [i.get("msg", "") for i in st["issues"]][:4], "error": st["error"]}
+            if channel and channel != "all":
+                if channel.startswith("no_"):
+                    if chs.get(channel[3:], {}).get("on"):
+                        continue
+                elif not chs.get(channel, {}).get("on"):
+                    continue
+            cats[p.get("category", "")] = cats.get(p.get("category", ""), 0) + 1
+            rows.append({"id": p["id"], "name": p["name"], "sku": p.get("sku", ""), "barcode": p.get("barcode", ""), "brand": p.get("brand", ""), "category": p.get("category", ""),
+                         "shelf": p.get("shelf", ""), "stock": stk, "price": p.get("price", 0), "min_stock": mn, "low": is_low and stk > 0, "image": (p.get("images") or [""])[0], "ch": chs})
+        per = max(10, min(per, 200))
+        return {"total": len(rows), "low": low, "out": out, "rows": rows[(page - 1) * per: page * per], "page": page, "per": per, "markets": [{"id": m, "name": ch.MARKETS[m]["name"]} for m in mks]}
+
     @api_router.get("/shop/channels/{mk}/products")
     async def chan_products(mk: str, status: str = "", q: str = "", page: int = 1, per: int = 50, _: dict = adm):
         check_mk(mk)

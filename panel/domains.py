@@ -269,6 +269,11 @@ def register(api_router, db, deps):
         if len(digits) >= 10:
             dd = digits[-10:]
             html = html.replace("905320000000", "90" + dd).replace("0532 000 00 00", "0%s %s %s %s" % (dd[:3], dd[3:6], dd[6:8], dd[8:]))
+        try:
+            import sitegen as _sg
+            html = _sg.credit(html)
+        except Exception:          # noqa: BLE001
+            pass
         return HTMLResponse(html, headers={"Cache-Control": "no-cache"})
 
     # ------------------------------------------------------------ sahip: kurulum hazırlığı ve sistem durumu

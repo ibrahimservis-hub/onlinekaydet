@@ -522,7 +522,7 @@ def register(api_router, db, deps):
             t = re.search(r"<title>(.*?)</title>", h, flags=re.S)
             tt = (t.group(1).split(" · ")[0] if t else "").strip()
             h = sitegen.seo_inject(h, sitegen.seo_block(ctx, tt, sitegen.seo_desc(ctx, tt), "" if p in ("", "index") else p, "home" if p in ("", "index") else "page"))
-        h = sitegen.seo_finish(h, host)
+        h = sitegen.credit(sitegen.seo_finish(h, host))
         if inline:
             h = await inline_imgs(h)
         return h, "text/html"

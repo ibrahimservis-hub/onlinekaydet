@@ -210,7 +210,7 @@ def register(api_router, db, deps, app):
 
     async def firm_doc():
         d = tenant.current()
-        return (await db.main().firms.find_one({"db": d}, {"_id": 0, "name": 1, "modules": 1, "status": 1})) if d else None
+        return (await db.main().firms.find_one({"db": d}, {"_id": 0, "name": 1, "modules": 1, "status": 1, "premium_themes": 1})) if d else None
 
     async def need(module):
         """Herkese açık uçlar için paket kontrolü. Firma bağlamı yoksa (tek kiracılı kurulum) kısıt yok."""
@@ -225,15 +225,25 @@ def register(api_router, db, deps, app):
         d = await db.app_settings.find_one({"_id": "brand"}, {"_id": 0}) or {}
         return d
 
+    async def premium_ok():
+        """Premium temalar yalnızca platform sahibi onayladığı firmalarda açılır (firma bağlamı yoksa sahip: serbest)."""
+        f = await firm_doc()
+        return True if f is None else bool(f.get("premium_themes"))
+
     @api_router.get("/brand")
     async def brand_get(_: dict = Depends(require_admin)):
-        return {"brand": {**DEFAULT_BRAND, **(await brand())}, "themes": THEMES}
+        b = {**DEFAULT_BRAND, **(await brand())}
+        ok = await premium_ok()
+        return {"brand": b, "premium_ok": ok, "themes": [t for t in THEMES if ok or not t.get("premium") or t["slug"] == b.get("theme")]}
 
     @api_router.put("/brand")
     async def brand_put(payload: dict, _: dict = Depends(require_admin)):
         b = _clean_brand(payload)
         if b["theme"] and not any(t["slug"] == b["theme"] for t in THEMES):
             raise HTTPException(422, "Tema bulunamadı")
+        _th = next((t for t in THEMES if t["slug"] == b["theme"]), None)
+        if _th and _th.get("premium") and not await premium_ok() and b["theme"] != (await brand()).get("theme"):
+            raise HTTPException(403, "Premium temalar için onay gerekir. Onay için bizimle iletişime geçin.")
         await db.app_settings.update_one({"_id": "brand"}, {"$set": b}, upsert=True)
         return {"brand": b}
 

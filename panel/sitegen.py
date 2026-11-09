@@ -590,6 +590,25 @@ def seo_desc(ctx, title="", extra=""):
     return " ".join(parts)
 
 
+CREDIT_LINK = ('<a class="spx-credit" href="https://onlinekaydet.com" target="_blank" rel="noopener" '
+               'style="color:inherit!important;text-decoration:underline!important;display:inline!important;visibility:visible!important;opacity:1!important;position:static!important">'
+               'Bu site OnlineKaydet ile yayınlanır</a>')
+_CREDIT_RX = re.compile(r"(?:<a\b[^>]*>\s*)?Bu site\s+OnlineKaydet\s+ile yay[ıi]nlan[ıi]r(?:\s*</a>)?", re.I)
+
+
+def credit(h: str) -> str:
+    """'OnlineKaydet ile yayınlanır' bağlantısı her sitede, her sayfada onlinekaydet.com'a gider; müşteri silemez ya da değiştiremez.
+    Mevcut yazı (bağlantılı ya da düz) kanonik bağlantıyla değiştirilir; hiç yoksa sayfa sonuna eklenir."""
+    if not h or "</body>" not in h:
+        return h
+    h = re.sub(r'<div class="spx-credit-w"[^>]*>.*?</div>', "", h, flags=re.S)
+    h, n = _CREDIT_RX.subn(lambda m: CREDIT_LINK, h)
+    if n == 0 or "spx-credit" not in h:
+        h = h.replace("</body>", '<div class="spx-credit-w" style="text-align:center!important;padding:14px 12px!important;font-size:13px!important;color:inherit;display:block!important;visibility:visible!important;opacity:1!important">' + CREDIT_LINK + "</div></body>", 1)
+    return h
+
+
+
 def seo_finish(h, host):
     """{{H}} yer tutucusunu alan adıyla doldurur; alan adı yoksa (önizleme) o etiketleri atar."""
     if _PH not in h:

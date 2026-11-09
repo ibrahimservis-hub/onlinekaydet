@@ -95,6 +95,7 @@ class FirmUp(BaseModel):
     usage_days: Optional[int] = None        # bugünden itibaren gün; 0 = sınırsız
     package: Optional[str] = None
     modules: Optional[list] = None
+    premium_themes: Optional[bool] = None   # premium site temalarına platform sahibi onayı
 
 
 class PdfNoteIn(BaseModel):
@@ -352,6 +353,8 @@ def register(api_router, db, deps):
         if p.package is not None or p.modules is not None:
             upd["package"] = p.package if p.package is not None else f.get("package", "")
             upd["modules"] = await resolve_modules(upd["package"], p.modules)
+        if p.premium_themes is not None:
+            upd["premium_themes"] = bool(p.premium_themes)
         if p.usage_days is not None:
             upd["expires_at"] = (datetime.now(timezone.utc) + timedelta(days=min(p.usage_days, 36500))).isoformat() if p.usage_days > 0 else ""
         uset = {}

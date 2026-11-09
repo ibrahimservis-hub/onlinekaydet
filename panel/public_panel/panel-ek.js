@@ -301,7 +301,7 @@
     return fetch(API + path, o).then(function (r) { return r.text().then(function (t) { var j = {}; try { j = JSON.parse(t); } catch (e) { } if (!r.ok) { var d = j && j.detail; throw new Error(typeof d === 'string' ? d : (d && d[0] && d[0].msg) || ('Hata ' + r.status)); } return j; }); });
   }
   function fail(e) { toast(e.message || 'İşlem başarısız'); }
-  var TABS = [['firmalar', 'Firmalar'], ['sitem', 'Sitem'], ['siteduz', 'Gelişmiş Düzenleme'], ['domain', 'Alan Adı & Site'], ['paket', 'Paketim'], ['mgayar', 'Mağaza Ayarları'], ['moduller', 'Aç / Kapat & Ayarlar'], ['seo', 'SEO · 301 · 404'], ['yeni', 'Yeni Sipariş'], ['pazar', 'Pazaryerleri'], ['yetki', 'Kullanıcılar & Yetkiler'], ['gsc', 'Google Search Console'], ['urunler', 'Ürün Yönetimi'], ['kanal', 'Kanal & Stok'], ['urunekle', 'Yeni Ürün'], ['marka', 'Marka Ürün Aktarma'], ['m360', 'Müşteri 360'], ['kaynak', 'Kaynak & Arama Analizi'], ['ustapuan', 'Usta Puanlama'], ['ustagecmis', 'Usta İş Geçmişi'], ['cari', 'Cari & Trend'], ['tahsilat', 'Teknisyen Tahsilat'], ['atolye', 'Atölye'], ['canli', 'Canlı Ziyaretçiler'], ['wa', 'WhatsApp & Bildirim'], ['daha', 'Daha Fazlası'], ['bildirim', 'Bildirimler'], ['memnun', 'Müşteri Memnuniyeti'], ['vade', 'Usta Borç Vadesi'], ['harita', 'Günün İş Haritası'], ['onay', 'Onay Bekleyenler'], ['rapor', 'Rapor Merkezi'], ['kurulum', 'Kurulum Durumu']];
+  var TABS = [['firmalar', 'Firmalar'], ['sitem', 'Sitem'], ['siteduz', 'Gelişmiş Düzenleme'], ['domain', 'Alan Adı & Site'], ['paket', 'Paketim'], ['mgayar', 'Mağaza Ayarları'], ['moduller', 'Aç / Kapat & Ayarlar'], ['seo', 'SEO · 301 · 404'], ['yeni', 'Yeni Sipariş'], ['pazar', 'Pazaryerleri'], ['yetki', 'Kullanıcılar & Yetkiler'], ['gsc', 'Google Search Console'], ['urunler', 'Ürünler'], ['kanal', 'Ürünler'], ['urunekle', 'Ürün Ekle / Düzenle'], ['m360', 'Müşteri 360'], ['kaynak', 'Kaynak & Arama Analizi'], ['ustapuan', 'Usta Puanlama'], ['ustagecmis', 'Usta İş Geçmişi'], ['cari', 'Cari & Trend'], ['tahsilat', 'Teknisyen Tahsilat'], ['atolye', 'Atölye'], ['canli', 'Canlı Ziyaretçiler'], ['wa', 'WhatsApp & Bildirim'], ['daha', 'Daha Fazlası'], ['bildirim', 'Bildirimler'], ['memnun', 'Müşteri Memnuniyeti'], ['vade', 'Usta Borç Vadesi'], ['harita', 'Günün İş Haritası'], ['onay', 'Onay Bekleyenler'], ['rapor', 'Rapor Merkezi'], ['kurulum', 'Kurulum Durumu']];
   function build() {
     ov = document.createElement('div'); ov.id = 'spx-ov';
     ov.innerHTML = '<header><button class="spx-b" id="spx-menu">☰ Menü</button><h2 id="spx-h">Site Yönetimi</h2><button class="spx-b" id="spx-x">Kapat ✕</button></header><div id="spx-tabs"></div><div id="spx-body">Yükleniyor…</div>';
@@ -314,9 +314,9 @@
   function body() { return $('#spx-body') || document.createElement('div'); }
   function draw() {
     Array.prototype.forEach.call($('#spx-tabs').children, function (b) { b.classList.toggle('on', b.getAttribute('data-t') === TAB); });
-    var hh = $('#spx-h'); if (hh) hh.textContent = ({ firmalar: 'Firmalar', sitem: 'Sitem — Web Siteniz', siteduz: 'Gelişmiş Düzenleme', domain: 'Alan Adı & Site', paket: 'Paketim', mgayar: 'Mağaza Ayarları', daha: 'Daha Fazlası', bildirim: 'Bildirimler', memnun: 'Müşteri Memnuniyeti', vade: 'Usta Borç Vadesi', harita: 'Günün İş Haritası', moduller: 'Aç/Kapat & Entegrasyonlar', seo: 'SEO · 301 · 404', yeni: 'Yeni Sipariş Gir', pazar: 'Pazaryerleri', yetki: 'Kullanıcılar & Yetkiler', gsc: 'Google Search Console', marka: 'Marka Ürün Aktarma', urunler: 'Ürün Yönetimi', kanal: 'Kanal & Stok', urunekle: 'Ürün Ekle / Düzenle', m360: 'Müşteri 360', kaynak: 'Kaynak & Arama Analizi', ustapuan: 'Usta Puanlama', ustagecmis: 'Usta İş Geçmişi', cari: 'Cari & Trend', tahsilat: 'Teknisyen Tahsilat', atolye: 'Atölye (Cihaz Teslim Alma)', sohbet: 'Canlı Sohbet', canli: 'Canlı Ziyaretçiler', wa: 'WhatsApp & Bildirim Ayarları', onay: 'Onay Bekleyenler', rapor: 'Rapor Merkezi', kurulum: 'Kurulum Durumu' })[TAB];
+    var hh = $('#spx-h'); if (hh) hh.textContent = ({ firmalar: 'Firmalar', sitem: 'Sitem — Web Siteniz', siteduz: 'Gelişmiş Düzenleme', domain: 'Alan Adı & Site', paket: 'Paketim', mgayar: 'Mağaza Ayarları', daha: 'Daha Fazlası', bildirim: 'Bildirimler', memnun: 'Müşteri Memnuniyeti', vade: 'Usta Borç Vadesi', harita: 'Günün İş Haritası', moduller: 'Aç/Kapat & Entegrasyonlar', seo: 'SEO · 301 · 404', yeni: 'Yeni Sipariş Gir', pazar: 'Pazaryerleri', yetki: 'Kullanıcılar & Yetkiler', gsc: 'Google Search Console', urunler: 'Ürünler', kanal: 'Ürünler', urunekle: 'Ürün Ekle / Düzenle', m360: 'Müşteri 360', kaynak: 'Kaynak & Arama Analizi', ustapuan: 'Usta Puanlama', ustagecmis: 'Usta İş Geçmişi', cari: 'Cari & Trend', tahsilat: 'Teknisyen Tahsilat', atolye: 'Atölye (Cihaz Teslim Alma)', sohbet: 'Canlı Sohbet', canli: 'Canlı Ziyaretçiler', wa: 'WhatsApp & Bildirim Ayarları', onay: 'Onay Bekleyenler', rapor: 'Rapor Merkezi', kurulum: 'Kurulum Durumu' })[TAB];
     body().innerHTML = 'Yükleniyor…';
-    ({ firmalar: drawFirmalar, sitem: drawSitem, siteduz: drawSiteEd, domain: drawDomain, paket: drawPaket, mgayar: drawMgAyar, daha: drawDaha, bildirim: drawBildirim, memnun: drawMemnun, vade: drawVade, harita: drawHarita, moduller: drawMod, seo: drawSeo, yeni: drawNew, pazar: drawMkt, yetki: drawUsers, gsc: drawGsc, marka: drawBrand, urunler: drawProducts, kanal: drawKanal, urunekle: drawUrunEkle, m360: drawM360, kaynak: drawKaynak, ustapuan: drawUstaPuan, ustagecmis: drawUstaGecmis, cari: drawCari, tahsilat: drawTahsilat, atolye: drawAtolye, sohbet: drawSohbet, canli: drawCanli, wa: drawWa, onay: drawOnay, rapor: drawRapor, kurulum: drawKurulum })[TAB]();
+    ({ firmalar: drawFirmalar, sitem: drawSitem, siteduz: drawSiteEd, domain: drawDomain, paket: drawPaket, mgayar: drawMgAyar, daha: drawDaha, bildirim: drawBildirim, memnun: drawMemnun, vade: drawVade, harita: drawHarita, moduller: drawMod, seo: drawSeo, yeni: drawNew, pazar: drawMkt, yetki: drawUsers, gsc: drawGsc, urunler: drawUrunler, kanal: drawKanal, urunekle: drawUrunEkle, m360: drawM360, kaynak: drawKaynak, ustapuan: drawUstaPuan, ustagecmis: drawUstaGecmis, cari: drawCari, tahsilat: drawTahsilat, atolye: drawAtolye, sohbet: drawSohbet, canli: drawCanli, wa: drawWa, onay: drawOnay, rapor: drawRapor, kurulum: drawKurulum })[TAB]();
   }
   /* ===== Firmalar: paneli kendi verisiyle kullanan müşteri firmalar ===== */
   var FM = { sel: '', tab: 'bilgi', job: '', q: '', flt: '', newOpen: false };
@@ -415,9 +415,9 @@
         (se.length ? '<div class="spx-card" style="background:#fffbeb;border-color:#fde68a"><b>Firmanın kendi yaptığı değişiklikler</b><div style="font-size:13px;margin-top:4px">' + se.map(function (x) { return fmD(x.at) + ' — ' + esc((x.fields || []).join(', ')); }).join('<br>') + '</div></div>' : '') +
         '<div class="spx-card"><b>Düzenle</b><div class="spx-g" style="margin-top:8px"><label>Firma adı<input id="fe_n" value="' + esc(f.name) + '"></label><label>Yetkili<input id="fe_c" value="' + esc(f.contact_name || '') + '"></label><label>Telefon<input id="fe_t" value="' + esc(f.phone || '') + '"></label><label>Adres<input id="fe_a" value="' + esc(f.address || '') + '"></label><label>Vergi no<input id="fe_v" value="' + esc(f.tax_no || '') + '"></label><label>Vergi dairesi<input id="fe_vd" value="' + esc(f.tax_office || '') + '"></label><label>Kullanıcı adı (e-posta)<input id="fe_e" value="' + esc(f.login_email) + '"></label><label>Yeni şifre (boşsa değişmez)<input id="fe_p" placeholder="en az 8 karakter"></label>' +
         '<label>Kullanım günü (bugünden başlar, 0 = sınırsız)<input id="fe_u" type="number" min="0" placeholder="' + (f.expires_at ? 'bitiş: ' + fmD(f.expires_at) : 'sınırsız') + '"></label><label>Logo ' + (f.has_logo ? '(yüklü — değiştirmek için seçin)' : '(yok)') + '<input id="fe_l" type="file" accept="image/png,image/jpeg,image/webp"></label></div>' + (f.has_logo ? '<label style="display:block;margin:6px 0"><input type="checkbox" id="fe_lx"> Logoyu kaldır</label>' : '') +
-        '<div style="margin:10px 0"><b>Ek özellikler</b>' + fmFeat(f.features || {}, L, 'fef_') + '</div><button class="spx-b p" id="fe_go">Kaydet</button></div>';
+        '<label style="display:flex;gap:8px;align-items:center;margin:10px 0"><input type="checkbox" id="fe_pr"' + (f.premium_themes ? ' checked' : '') + '> <b>Premium site temalarına izin ver</b> <small style="color:#64748b">(onay vermeden firma premium tema seçemez)</small></label><div style="margin:10px 0"><b>Ek özellikler</b>' + fmFeat(f.features || {}, L, 'fef_') + '</div><button class="spx-b p" id="fe_go">Kaydet</button></div>';
       $('#fe_go').onclick = function () {
-        var b = { name: $('#fe_n').value, contact_name: $('#fe_c').value, phone: $('#fe_t').value, address: $('#fe_a').value, tax_no: $('#fe_v').value, tax_office: $('#fe_vd').value, email: $('#fe_e').value, features: fmFeatVals(L, 'fef_') };
+        var b = { name: $('#fe_n').value, contact_name: $('#fe_c').value, phone: $('#fe_t').value, address: $('#fe_a').value, tax_no: $('#fe_v').value, tax_office: $('#fe_vd').value, email: $('#fe_e').value, features: fmFeatVals(L, 'fef_'), premium_themes: $('#fe_pr').checked };
         if ($('#fe_p').value) b.password = $('#fe_p').value; if ($('#fe_lx') && $('#fe_lx').checked) b.logo = ''; if ($('#fe_u').value !== '') b.usage_days = parseInt($('#fe_u').value, 10);
         fmLogo('fe_l', function (lg) { if (lg) b.logo = lg; call('PUT', '/admin/firms/' + f.id, b).then(function () { toast('Kaydedildi'); drawFirmalar(); }).catch(fail); });
       };
@@ -1558,7 +1558,7 @@
     ['Servis', [['/admin/jobs', 'Servis Kayıtları'], ['/admin/appointments', 'Randevular'], ['/admin/quotes', 'Fiyat Teklifleri'], ['/admin/warranty', 'Garanti Talepleri'], ['/admin/customers', 'Müşteriler'], ['ek:m360', 'Müşteri 360', 'user'], ['ek:atolye', 'Atölye (Cihaz Teslim)', 'gear'], ['ek:harita', 'Günün İş Haritası', 'search'], ['/admin/parts', 'Yedek Parça'], ['/admin/diagnosis', 'Arıza Rehberi'], ['/admin/brands', 'Markalar']]],
     ['Ustalar', [['/admin/technicians', 'Teknisyenler'], ['/admin/dealers', 'Bayilik Başvuruları'], ['ek:ustapuan', 'Usta Puanlama', 'user'], ['ek:ustagecmis', 'Usta İş Geçmişi', 'user'], ['/admin/performance', 'Performans'], ['/admin/team', 'Ekip Merkezi'], ['/admin/announcements', 'Duyurular']]],
     ['Muhasebe', [['/admin/accounting', 'Muhasebe'], ['ek:tahsilat', 'Teknisyen Tahsilat', 'cart'], ['ek:cari', 'Cari & Trend', 'cart'], ['ek:vade', 'Usta Borç Vadesi', 'cart'], ['ek:memnun', 'Müşteri Memnuniyeti', 'user'], ['/admin/reports', 'Raporlar']]],
-    ['Mağaza & Satış', [['/admin/shop', 'Mağaza'], ['ek:yeni', 'Yeni Sipariş Gir', 'plus'], ['ek:mgayar', 'Mağaza Ayarları', 'gear'], ['ek:pazar', 'Pazaryerleri', 'cart'], ['ek:urunler', 'Ürün Yönetimi', 'cart'], ['ek:kanal', 'Kanal & Stok', 'cart'], ['ek:urunekle', 'Yeni Ürün', 'plus'], ['ek:marka', 'Marka Ürün Aktarma', 'cart'], ['/admin/coupons', 'Kuponlar']]],
+    ['Mağaza & Satış', [['/admin/shop', 'Mağaza'], ['ek:yeni', 'Yeni Sipariş Gir', 'plus'], ['ek:mgayar', 'Mağaza Ayarları', 'gear'], ['ek:pazar', 'Pazaryerleri', 'cart'], ['ek:kanal', 'Ürünler', 'cart'], ['/admin/coupons', 'Kuponlar']]],
     ['Web Sitesi', [['/admin/site-features', 'Site Özellikleri'], ['ek:sitem', 'Sitem (Web Sitesi)', 'gear'], ['ek:siteduz', 'Gelişmiş Düzenleme', 'gear'], ['ek:domain', 'Alan Adı & Site', 'gear'], ['ek:moduller', 'Aç/Kapat & Entegrasyonlar', 'gear'], ['ek:seo', 'SEO · 301 · 404', 'search'], ['/admin/site-studio', 'Site Stüdyosu'], ['/admin/media', 'Medya Kütüphanesi'], ['/admin/integration', 'Site Entegrasyonu']]],
     ['Pazarlama & İletişim', [['/admin/messages', 'İletişim Mesajları'], ['ek:sohbet', 'Canlı Sohbet', 'live'], ['/admin/reviews', 'Yorumlar'], ['ek:gsc', 'Google Search Console', 'search'], ['/admin/marketing', 'Pazarlama Merkezi'], ['ek:canli', 'Canlı Ziyaretçiler', 'search'], ['ek:wa', 'WhatsApp & Bildirim', 'gear'], ['ek:kaynak', 'Kaynak & Arama Analizi', 'search'], ['/admin/growth', 'Büyüme Merkezi'], ['/admin/visitors', 'Ziyaretçiler']]],
     ['Yönetim', [['/admin/settings', 'Ayarlar'], ['ek:yetki', 'Kullanıcılar & Yetkiler', 'user'], ['ek:firmalar', 'Firmalar', 'user'], ['/admin/security', 'Güvenlik'], ['/admin/governance', 'Yedek & Denetim'], ['ek:paket', 'Paketim', 'box'], ['/admin/account', 'Hesabım']]]
@@ -5351,24 +5351,105 @@
   }
 
   /* --- Kanal & Stok --- */
-  function drawKanal() {
-    mgCss();
-    Promise.all([call('GET', '/shop/channels'), call('GET', '/shop/low-stock')]).then(function (rs) {
-      var o = rs[0], low = rs[1];
-      var h = '<div class="mg-t">' + o.channels.map(function (c) {
-        if (!c.live) return '<button disabled style="opacity:.55">' + esc(c.name) + ' · yakında</button>';
-        return '<button data-mk="' + c.id + '" class="' + (MG.mk === c.id && MG.view !== 'sync' ? 'on' : '') + '">' + esc(c.name) + (c.connected ? '' : ' (bağlı değil)') + '</button>';
-      }).join('') + '<button data-mv="sync" class="' + (MG.view === 'sync' ? 'on' : '') + '">Gönderim kuyruğu</button><button data-mv="yeni">+ Yeni ürün</button></div>';
-      if (low.length) h += '<div class="mg-w"><b>' + low.length + ' ürünün stoğu azaldı:</b> ' + low.slice(0, 6).map(function (x) { return esc(x.name) + ' (' + x.stock + ')'; }).join(' · ') + '</div>';
-      h += '<div id="mg_main">Yükleniyor…</div>';
+  /* --- Ürünler: tek pencere (liste · stok · raf · kanallar · pazaryerine gönder) --- */
+  var UL = { q: '', cat: '', stock: '', ch: '', pg: 1, sel: {} };
+  function ulCss() {
+    if (document.getElementById('ul-css')) return; var s = document.createElement('style'); s.id = 'ul-css';
+    s.textContent = '.ul-ch{border:1px solid #cbd5e1;background:#fff;color:#64748b;border-radius:6px;padding:3px 8px;font:600 12px system-ui;cursor:pointer;margin:1px;min-height:28px}.ul-ch.yayinda{background:#dcfce7;border-color:#86efac;color:#166534}.ul-ch.hazir{background:#dbeafe;border-color:#93c5fd;color:#1e40af}.ul-ch.eksik{background:#fef3c7;border-color:#fcd34d;color:#92400e}.ul-ch.hata{background:#fee2e2;border-color:#fca5a5;color:#991b1b}' +
+      '.ul-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:end}.ul-bar label{font-size:12px;color:#475569}.ul-sel{position:sticky;bottom:0;background:#0a1f44;color:#fff;border-radius:10px;padding:10px 14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}.ul-sel .spx-b{background:#fff;color:#0a1f44}.ul-in{width:70px}.ul-sh{width:70px}' +
+      '@media(max-width:760px){.ul-hide{display:none}.mg-tb td,.mg-tb th{padding:6px 4px}}';
+    document.head.appendChild(s);
+  }
+  function drawUrunler() {
+    mgCss(); ulCss();
+    if (MG.view === 'map' || MG.view === 'sync') {
+      body().innerHTML = '<div class="spx-card"><button class="spx-b" id="ul_back">‹ Ürünlere dön</button> ' + (MG.view === 'map' ? '<select id="ul_mk">' + MGM.map(function (m) { return '<option value="' + m[0] + '"' + (MG.mk === m[0] ? ' selected' : '') + '>' + m[1] + '</option>'; }).join('') + '</select>' : '') + '</div><div id="mg_main">Yükleniyor…</div>';
+      $('#ul_back').onclick = function () { MG.view = 'urun'; drawUrunler(); };
+      if ($('#ul_mk')) $('#ul_mk').onchange = function () { MG.mk = this.value; drawUrunler(); };
+      return MG.view === 'map' ? mgMap() : mgSync();
+    }
+    var u = 'q=' + encodeURIComponent(UL.q) + '&category=' + encodeURIComponent(UL.cat) + '&stock=' + UL.stock + '&channel=' + UL.ch + '&page=' + UL.pg + '&per=40';
+    Promise.all([call('GET', '/shop/catalog?' + u), call('GET', '/shop/channels'), call('GET', '/shop/categories')]).then(function (rs) {
+      var r = rs[0], cn = rs[1].channels || [], cats = rs[2] || [], mk = r.markets, nm = { site: 'Site' };
+      mk.forEach(function (m) { nm[m.id] = m.name; });
+      var short = { site: 'Site', trendyol: 'Trendyol', hepsiburada: 'Hepsiburada', n11: 'N11' };
+      var catl = Array.isArray(cats) ? cats : (cats.items || cats.categories || []);
+      var h = '<div class="spx-card"><div class="ul-bar"><label style="flex:1;min-width:180px">Ara<input id="ul_q" value="' + esc(UL.q) + '" placeholder="Ürün adı, barkod, stok kodu, marka"></label>' +
+        '<label>Kategori<select id="ul_cat"><option value="">Tümü</option>' + catl.map(function (c) { return '<option value="' + esc(c.name) + '"' + (UL.cat === c.name ? ' selected' : '') + '>' + esc(c.name) + '</option>'; }).join('') + '</select></label>' +
+        '<label>Stok<select id="ul_stock"><option value="">Tümü</option><option value="low"' + (UL.stock === 'low' ? ' selected' : '') + '>Azalan (' + r.low + ')</option><option value="out"' + (UL.stock === 'out' ? ' selected' : '') + '>Tükenen (' + r.out + ')</option></select></label>' +
+        '<label>Kanal<select id="ul_ch"><option value="">Tümü</option>' + ['site'].concat(mk.map(function (m) { return m.id; })).map(function (k) { return '<option value="' + k + '"' + (UL.ch === k ? ' selected' : '') + '>' + short[k] + ' açık</option><option value="no_' + k + '"' + (UL.ch === 'no_' + k ? ' selected' : '') + '>' + short[k] + ' kapalı</option>'; }).join('') + '</select></label>' +
+        '<button class="spx-b p" id="ul_new" style="background:#16a34a;border-color:#16a34a">＋ Yeni ürün</button></div>' +
+        '<div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:12px;color:#475569">Pazaryerleri: ' + cn.filter(function (c) { return c.live; }).map(function (c) { return '<span class="mg-b ' + (c.connected ? 'ok' : 'mu') + '">' + esc(c.name) + (c.connected ? ' bağlı' : ' bağlı değil') + '</span>'; }).join('') +
+        '<a href="#" id="ul_conn" style="margin-left:6px">Bağlantı ayarları</a> · <a href="#" id="ul_map">Kategori / marka eşleme</a> · <a href="#" id="ul_q2">Gönderim kuyruğu</a></div></div>';
+      h += '<div class="spx-card" style="overflow:auto"><table class="mg-tb" style="width:100%"><tr><th><input type="checkbox" id="ul_all"></th><th>Ürün</th><th>Fiyat ₺</th><th>Stok</th><th class="ul-hide">Raf</th><th>Kanallar <small style="font-weight:400">(tıkla: aç/kapat)</small></th><th></th></tr>' +
+        (r.rows.length ? r.rows.map(function (x) {
+          return '<tr data-id="' + x.id + '"><td><input type="checkbox" class="ul_ck"' + (UL.sel[x.id] ? ' checked' : '') + '></td><td><div style="display:flex;gap:8px;align-items:center">' + (x.image ? '<img class="mg-im" loading="lazy" src="' + esc(x.image) + '" alt="">' : '<span class="mg-im"></span>') +
+            '<div><b>' + esc(x.name) + '</b><div style="font-size:12px;color:#64748b">' + esc([x.sku, x.barcode, x.category].filter(Boolean).join(' · ') || 'kod/barkod yok') + '</div></div></div></td>' +
+            '<td>' + x.price + '</td><td><input class="ul-in ul_stk" type="number" min="0" value="' + x.stock + '" style="' + (x.stock <= 0 ? 'border-color:#dc2626;background:#fef2f2' : x.low ? 'border-color:#f59e0b;background:#fffbeb' : '') + '"></td>' +
+            '<td class="ul-hide"><input class="ul-sh ul_sh" value="' + esc(x.shelf) + '" placeholder="Raf"></td><td>' + ['site'].concat(mk.map(function (m) { return m.id; })).map(function (k) { var c = x.ch[k]; return '<button type="button" class="ul-ch ' + (c.on ? c.status : '') + '" data-c="' + k + '" title="' + esc((c.on ? (MGST[c.status] || [0, c.status])[1] : 'Kapalı') + (c.issues && c.issues.length ? ' — ' + c.issues.join('; ') : '') + (c.error ? ' — ' + c.error : '')) + '">' + short[k] + '</button>'; }).join('') + '</td>' +
+            '<td><button class="spx-b" data-edit="' + x.id + '">Düzenle</button></td></tr>';
+        }).join('') : '<tr><td colspan="7" style="padding:24px;color:#64748b;text-align:center">Ürün bulunamadı. “＋ Yeni ürün” ile ilk ürününüzü ekleyin.</td></tr>') + '</table>' +
+        '<div style="margin-top:10px">' + r.total + ' ürün' + (r.total > r.per ? ' · <button class="spx-b" data-pg="-1">‹</button> Sayfa ' + r.page + ' <button class="spx-b" data-pg="1">›</button>' : '') + '</div></div>' +
+        '<div id="ul_selbar"></div>';
       body().innerHTML = h;
-      body().onclick = function (e) {
-        var a = e.target.closest('[data-mk]'); if (a) { MG.mk = a.getAttribute('data-mk'); MG.view = 'urun'; MG.pg = 1; MG.sel = {}; return drawKanal(); }
-        a = e.target.closest('[data-mv]'); if (a) { if (a.getAttribute('data-mv') === 'yeni') { MG.edit = ''; TAB = 'urunekle'; draw(); return; } MG.view = a.getAttribute('data-mv'); return drawKanal(); }
+      var selbar = function () {
+        var n = Object.keys(UL.sel).length; var e = $('#ul_selbar'); if (!e) return;
+        e.innerHTML = n ? '<div class="ul-sel"><b>' + n + ' ürün seçili</b><button class="spx-b" id="ul_send">Pazaryerine gönder</button><button class="spx-b" id="ul_on">Kanalı aç/kapat</button><button class="spx-b" id="ul_clr">Seçimi kaldır</button></div>' : '';
+        if (!n) return;
+        $('#ul_clr').onclick = function () { UL.sel = {}; drawUrunler(); };
+        $('#ul_send').onclick = ulSend; $('#ul_on').onclick = ulBulkCh;
       };
-      if (MG.view === 'sync') mgSync(); else if (MG.view === 'map') mgMap(); else mgGrid(o);
+      selbar();
+      var go = function () { UL.q = $('#ul_q').value; UL.cat = $('#ul_cat').value; UL.stock = $('#ul_stock').value; UL.ch = $('#ul_ch').value; UL.pg = 1; drawUrunler(); };
+      $('#ul_q').onkeydown = function (e) { if (e.key === 'Enter') go(); }; $('#ul_cat').onchange = go; $('#ul_stock').onchange = go; $('#ul_ch').onchange = go;
+      $('#ul_new').onclick = function () { MG.edit = ''; TAB = 'urunekle'; draw(); };
+      $('#ul_conn').onclick = function (e) { e.preventDefault(); TAB = 'moduller'; draw(); };
+      $('#ul_map').onclick = function (e) { e.preventDefault(); MG.view = 'map'; drawUrunler(); };
+      $('#ul_q2').onclick = function (e) { e.preventDefault(); MG.view = 'sync'; drawUrunler(); };
+      $('#ul_all').onchange = function () { var on = this.checked; Array.prototype.forEach.call(document.querySelectorAll('.ul_ck'), function (c) { c.checked = on; var id = c.closest('tr').getAttribute('data-id'); if (on) UL.sel[id] = 1; else delete UL.sel[id]; }); selbar(); };
+      body().onclick = function (e) {
+        var t = e.target, tr = t.closest('tr[data-id]'), id = tr && tr.getAttribute('data-id');
+        if (t.classList.contains('ul_ck')) { if (t.checked) UL.sel[id] = 1; else delete UL.sel[id]; return selbar(); }
+        var a = t.closest('[data-edit]'); if (a) { MG.edit = a.getAttribute('data-edit'); TAB = 'urunekle'; return draw(); }
+        a = t.closest('[data-pg]'); if (a) { UL.pg = Math.max(1, UL.pg + parseInt(a.getAttribute('data-pg'), 10)); return drawUrunler(); }
+        a = t.closest('[data-c]'); if (a) {
+          var k = a.getAttribute('data-c'), on = !(a.className.indexOf('yayinda') > -1 || a.className.indexOf('hazir') > -1 || a.className.indexOf('eksik') > -1 || a.className.indexOf('hata') > -1);
+          return (k === 'site' ? call('PUT', '/shop/products/' + id, { active: on }) : call('PUT', '/shop/channels/' + k + '/products/' + id, { enabled: on })).then(function () { toast(short[k] + (on ? ' açıldı' : ' kapatıldı')); drawUrunler(); }).catch(fail);
+        }
+      };
+      body().onchange = function (e) {
+        var t = e.target, tr = t.closest('tr[data-id]'); if (!tr) return; var id = tr.getAttribute('data-id');
+        if (t.classList.contains('ul_stk')) { var v = parseInt(t.value, 10); if (isNaN(v) || v < 0) return toast('Geçerli bir stok girin'); call('POST', '/shop/products/' + id + '/stock', { mode: 'set', qty: v, reason: 'Ürün listesinden' }).then(function () { toast('Stok güncellendi; kanallara iletilecek'); }).catch(fail); }
+        if (t.classList.contains('ul_sh')) { var q = parseInt(tr.querySelector('.ul_stk').value, 10) || 0; call('POST', '/shop/products/' + id + '/stock', { mode: 'set', qty: q, shelf: t.value, reason: 'Raf güncelleme' }).then(function () { toast('Raf kaydedildi'); }).catch(fail); }
+      };
     }).catch(function (e) { body().innerHTML = '<div class="spx-card">Yüklenemedi: ' + esc(e.message) + '</div>'; });
   }
+  function ulBulkCh() {
+    var ids = Object.keys(UL.sel);
+    var m = mgModal('<b>' + ids.length + ' ürün için kanal</b><p style="color:#475569">Hangi kanalda yayınlansın ya da kapatılsın?</p><select id="ub_k"><option value="site">Site</option><option value="trendyol">Trendyol</option><option value="hepsiburada">Hepsiburada</option><option value="n11">N11</option></select> <button class="spx-b p" id="ub_on">Aç</button> <button class="spx-b" id="ub_off">Kapat</button> <button class="spx-b" id="ub_x">Vazgeç</button>');
+    var run = function (on) { var k = m.querySelector('#ub_k').value; Promise.all(ids.map(function (id) { return k === 'site' ? call('PUT', '/shop/products/' + id, { active: on }) : call('PUT', '/shop/channels/' + k + '/products/' + id, { enabled: on }); })).then(function () { m.remove(); toast(ids.length + ' ürün güncellendi'); drawUrunler(); }).catch(fail); };
+    m.querySelector('#ub_on').onclick = function () { run(true); }; m.querySelector('#ub_off').onclick = function () { run(false); }; m.querySelector('#ub_x').onclick = function () { m.remove(); };
+  }
+  function ulSend() {
+    var ids = Object.keys(UL.sel);
+    var m = mgModal('<b>Pazaryerine gönder (' + ids.length + ' ürün)</b><p style="color:#475569">Seçili ürünler önce kontrol edilir; eksik bilgi varsa neyin eksik olduğu gösterilir. Hiçbir şey gönderilmeden önce onayınız istenir.</p>' +
+      '<div class="mg-t">' + MGM.map(function (x) { return '<button data-sm="' + x[0] + '">' + x[1] + '</button>'; }).join('') + '</div><div id="us_out"></div>');
+    m.onclick = function (e) {
+      var b = e.target.closest('[data-sm]'); if (!b) return; var mk = b.getAttribute('data-sm'), name = b.textContent, o = m.querySelector('#us_out');
+      Array.prototype.forEach.call(m.querySelectorAll('[data-sm]'), function (x) { x.classList.toggle('on', x === b); });
+      o.innerHTML = 'Kontrol ediliyor…';
+      Promise.all(ids.map(function (id) { return call('PUT', '/shop/channels/' + mk + '/products/' + id, { enabled: true }); })).then(function () { return call('POST', '/shop/channels/' + mk + '/create', { dry_run: true, ids: ids }); }).then(function (x) {
+        var bl = (x.blocked || []).map(function (z) { return '<li><b>' + esc(z.name) + '</b>: ' + z.issues.map(function (i) { return esc(i.msg); }).join(', ') + '</li>'; }).join('');
+        o.innerHTML = '<div class="mg-w" style="background:#f0fdf4;border-color:#bbf7d0;color:#166534"><b>' + x.ready + '</b> ürün ' + name + '\'a gönderilmeye hazır.</div>' + (bl ? '<div class="mg-w"><b>Eksikler (ürünü düzenleyip tamamlayın):</b><ul>' + bl + '</ul><small>Kategori eşleme eksikse “Kategori / marka eşleme” bağlantısını kullanın.</small></div>' : '') +
+          (mk === 'trendyol' ? (x.ready ? '<button class="spx-b p" id="us_go">' + x.ready + ' ürünü Trendyol\'da aç</button> ' : '') : '<div class="mg-w">' + name + ' için ürün açma henüz yok: CSV indirip satıcı panelinden yükleyin. Yükledikten sonra “yayında” işaretleyin; stok ve fiyat bundan sonra otomatik eşitlenir.</div><button class="spx-b" id="us_csv">CSV indir</button> <button class="spx-b p" id="us_ls">Yayında işaretle</button> ') + '<button class="spx-b" id="us_x">Kapat</button>';
+        o.querySelector('#us_x').onclick = function () { m.remove(); drawUrunler(); };
+        if (o.querySelector('#us_go')) o.querySelector('#us_go').onclick = function () { if (!confirm(x.ready + ' ürün Trendyol\'da gerçekten açılacak. Devam edilsin mi?')) return; this.disabled = true; call('POST', '/shop/channels/trendyol/create', { dry_run: false, ids: ids }).then(function (z) { o.innerHTML = '<div class="mg-w" style="background:#f0fdf4;border-color:#bbf7d0;color:#166534">Gönderildi' + (z.batch ? '. Toplu işlem kodu: <b>' + esc(z.batch) + '</b>' : '') + '.</div>' + (z.batch ? '<button class="spx-b p" id="us_bc">Sonucu kontrol et</button> ' : '') + '<button class="spx-b" id="us_x2">Kapat</button>'; o.querySelector('#us_x2').onclick = function () { m.remove(); drawUrunler(); }; if (z.batch) o.querySelector('#us_bc').onclick = function () { call('POST', '/shop/channels/trendyol/batch-check', { batch: z.batch }).then(function (q) { toast(q.checked + ' ürün kontrol edildi' + (q.failed ? ', ' + q.failed + ' hatalı' : '')); }).catch(fail); }; }).catch(fail); };
+        if (o.querySelector('#us_csv')) o.querySelector('#us_csv').onclick = function () { fetch(API + '/shop/channels/' + mk + '/export.csv', { headers: { Authorization: 'Bearer ' + LS.get('token', '') } }).then(function (r) { return r.blob(); }).then(function (bb) { var l = document.createElement('a'); l.href = URL.createObjectURL(bb); l.download = mk + '-urunler.csv'; l.click(); }); };
+        if (o.querySelector('#us_ls')) o.querySelector('#us_ls').onclick = function () { call('POST', '/shop/channels/' + mk + '/mark-listed', { ids: ids }).then(function (q) { toast(q.marked + ' ürün yayında işaretlendi'); m.remove(); drawUrunler(); }).catch(fail); };
+      }).catch(fail);
+    };
+  }
+  function drawKanal() { drawUrunler(); }
   function mgGrid(ov) {
     var mk = MG.mk, name = (MGM.filter(function (x) { return x[0] === mk; })[0] || [0, mk])[1];
     call('GET', '/shop/channels/' + mk + '/products?status=' + encodeURIComponent(MG.st) + '&q=' + encodeURIComponent(MG.q) + '&page=' + MG.pg + '&per=50').then(function (r) {

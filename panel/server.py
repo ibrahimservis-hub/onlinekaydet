@@ -2917,11 +2917,7 @@ siteedit.register(api_router, db, {"require_admin": require_admin, "themes": _ku
 import sahip
 sahip.register(app, api_router, db, {"require_admin": require_admin, "get_current_user": get_current_user, "create_access_token": create_access_token, "hash_password": hash_password})
 gsc_auto.register(api_router, db, {"require_admin": require_admin, "JWT_SECRET": JWT_SECRET})
-try:
-    import brand_import
-    brand_import.register(api_router, db, {"require_admin": require_admin})
-except Exception as _e:                     # marka aktarma eklentisi yüklenemezse panel yine açılır
-    logging.getLogger("brand_import").warning("brand_import yüklenemedi: %s", _e)
+# Marka ürün aktarma kapatıldı (brand_import kaydedilmez; zamanlayıcı ve uç noktalar çalışmaz).
 crm_extras.register(api_router, db, {
     "get_current_user": get_current_user,
     "require_admin": require_admin,
@@ -3397,7 +3393,8 @@ if _FE:
         p = Path(__file__).resolve().parent.parent / "themes" / "html" / (slug + ".html")
         if not _r2.fullmatch(r"[a-z0-9-]{3,60}", slug) or not p.is_file():
             return JSONResponse({"detail": "Bulunamadı"}, status_code=404)
-        return _Resp(p.read_text(encoding="utf-8"), media_type="text/html", headers={"Cache-Control": "public, max-age=3600", "X-Robots-Tag": "noindex"})
+        import sitegen as _sg2
+        return _Resp(_sg2.credit(p.read_text(encoding="utf-8")), media_type="text/html", headers={"Cache-Control": "public, max-age=3600", "X-Robots-Tag": "noindex"})
 
     @app.get("/{full_path:path}", include_in_schema=False)
     async def spa(full_path: str, request: Request):
