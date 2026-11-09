@@ -239,7 +239,7 @@ def register(api_router, db, deps, app):
 
     @api_router.get("/brand/site/{slug}")
     async def brand_site(slug: str, _: dict = Depends(require_admin)):
-        """Seçilen site temasını, firmanın müşteri portalı adresi yerleştirilmiş halde döndürür."""
+        """Seçilen site temasını, firmanın adı, telefonu ve form adresi yerleştirilmiş halde döndürür."""
         if not any(t["slug"] == slug for t in THEMES):
             raise HTTPException(404, "Tema bulunamadı")
         f = _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "..", "themes", "html", slug + ".html")
@@ -247,8 +247,16 @@ def register(api_router, db, deps, app):
             html = open(f, encoding="utf-8").read()
         except OSError:
             raise HTTPException(404, "Tema dosyası yok")
-        _, _, base = await company()
-        return HTMLResponse(html.replace("__PORTAL_URL__", f"{base}/portal/{tenant.public_token('giris')}"))
+        name, tel, base = await company()
+        th = next(t for t in THEMES if t["slug"] == slug)
+        html = html.replace("__API_URL__", f"{base}/api").replace("__PORTAL_URL__", "#")
+        if th.get("name") and name:
+            html = html.replace(th["name"], name)
+        digits = "".join(ch for ch in (tel or "") if ch.isdigit())
+        if len(digits) >= 10:
+            d = digits[-10:]
+            html = html.replace("905320000000", "90" + d).replace("0532 000 00 00", f"0{d[:3]} {d[3:6]} {d[6:8]} {d[8:]}")
+        return HTMLResponse(html)
 
     async def company():
         s = await db.app_settings.find_one({"_id": "global"}, {"_id": 0}) or {}

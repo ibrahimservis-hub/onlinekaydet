@@ -1,0 +1,782 @@
+[
+ {
+  "slug": "1-kombi",
+  "sector": "kombi",
+  "nm": "Ege Kombi",
+  "city": "İzmir",
+  "style": "Sıcak krem · araç önde",
+  "hero": "tool",
+  "nav": "classic",
+  "mbar": "fab",
+  "ft": "cols",
+  "tools": [
+   "Kombi hata kodu çözücü",
+   "Yıllık kombi bakımı hatırlatıcı"
+  ],
+  "pal": [
+   "#fbf7f0",
+   "#1f1a17",
+   "#f3ece1",
+   "#1b1411",
+   "#d9480f"
+  ],
+  "fd": "fraunces",
+  "fb": "manrope",
+  "dark": false,
+  "kb": 795
+ },
+ {
+  "slug": "2-klima",
+  "sector": "klima",
+  "nm": "Anka Klima",
+  "city": "İzmir",
+  "style": "Gökyüzü mavisi · tam fotoğraf",
+  "hero": "full",
+  "nav": "min",
+  "mbar": "dock",
+  "ft": "big",
+  "tools": [
+   "BTU hesaplayıcı",
+   "Klima elektrik gideri"
+  ],
+  "pal": [
+   "#f5f9fc",
+   "#0b2233",
+   "#e8f1f7",
+   "#082f49",
+   "#0284c7"
+  ],
+  "fd": "sora",
+  "fb": "figtree",
+  "dark": false,
+  "kb": 729
+ },
+ {
+  "slug": "3-beyaz-esya",
+  "sector": "beyaz_esya",
+  "nm": "Yıldız Beyaz Eşya",
+  "city": "Konya",
+  "style": "Altın sarısı · klasik usta",
+  "hero": "split",
+  "nav": "two",
+  "mbar": "pill",
+  "ft": "min",
+  "tools": [
+   "Tamir mi, yeni cihaz mı?",
+   "Arıza belirtisi rehberi"
+  ],
+  "pal": [
+   "#fffdf7",
+   "#1c1a14",
+   "#f6f1e3",
+   "#1f2233",
+   "#c99a14"
+  ],
+  "fd": "dmserif",
+  "fb": "figtree",
+  "dark": false,
+  "kb": 717
+ },
+ {
+  "slug": "4-teknik-cihaz",
+  "sector": "elektronik",
+  "nm": "Pınar Teknik",
+  "city": "İzmir",
+  "style": "Mühendis beyazı · rakamlar",
+  "hero": "stats",
+  "nav": "box",
+  "mbar": "offer",
+  "ft": "cen",
+  "tools": [
+   "Televizyon arıza sihirbazı",
+   "Onarım değer hesabı"
+  ],
+  "pal": [
+   "#ffffff",
+   "#0a1020",
+   "#eef2fb",
+   "#0a1228",
+   "#1e50ff"
+  ],
+  "fd": "intertight",
+  "fb": "plex",
+  "dark": false,
+  "kb": 965
+ },
+ {
+  "slug": "5-tesisat",
+  "sector": "tesisat",
+  "nm": "Çözüm Tesisat",
+  "city": "Ankara",
+  "style": "Acil hat · yeşil",
+  "hero": "sos",
+  "nav": "idx",
+  "mbar": "split",
+  "ft": "cols",
+  "tools": [
+   "Acil durum ilk müdahale",
+   "Su kaçağı testi"
+  ],
+  "pal": [
+   "#f6faf7",
+   "#0f1f17",
+   "#e5f1e9",
+   "#0c2018",
+   "#16a34a"
+  ],
+  "fd": "barlow",
+  "fb": "instrument",
+  "dark": false,
+  "kb": 685
+ },
+ {
+  "slug": "6-guvenlik",
+  "sector": "guvenlik",
+  "nm": "Kale Güvenlik",
+  "city": "Bursa",
+  "style": "Çelik lacivert · dilimli",
+  "hero": "slices",
+  "nav": "min",
+  "mbar": "tabs",
+  "ft": "cols",
+  "tools": [
+   "Kamera kayıt depolama hesabı",
+   "Güvenlik keşif sihirbazı"
+  ],
+  "pal": [
+   "#f4f6f8",
+   "#101820",
+   "#e6ebf0",
+   "#0d1b2a",
+   "#e4572e"
+  ],
+  "fd": "bricolage",
+  "fb": "plex",
+  "dark": false,
+  "kb": 775
+ },
+ {
+  "slug": "07-kombi-kizil",
+  "sector": "kombi",
+  "nm": "Sıcak Kombi",
+  "city": "Ankara",
+  "style": "Kızıl · acil hat",
+  "hero": "sos",
+  "nav": "two",
+  "mbar": "one",
+  "ft": "big",
+  "tools": [
+   "Kombi sorun sihirbazı",
+   "Kombi kapasitesi hesabı"
+  ],
+  "pal": [
+   "#fff8f5",
+   "#2a1210",
+   "#fdebe4",
+   "#2b0f0c",
+   "#d32f2f"
+  ],
+  "fd": "archivoblack",
+  "fb": "instrument",
+  "dark": false,
+  "kb": 709
+ },
+ {
+  "slug": "08-kombi-kor",
+  "sector": "kombi",
+  "nm": "Kor Kombi Servisi",
+  "city": "İstanbul",
+  "style": "Kor bakırı · editoryal",
+  "hero": "edit",
+  "nav": "center",
+  "mbar": "sheet",
+  "ft": "cen",
+  "tools": [
+   "Yıllık kombi bakımı hatırlatıcı",
+   "Kombi hata kodu çözücü"
+  ],
+  "pal": [
+   "#f7f2ea",
+   "#241a14",
+   "#ece2d3",
+   "#1e140e",
+   "#b45424"
+  ],
+  "fd": "playfair",
+  "fb": "figtree",
+  "dark": false,
+  "kb": 850
+ },
+ {
+  "slug": "09-kombi-cam",
+  "sector": "kombi",
+  "nm": "Yeşil Kombi Servisi",
+  "city": "Bursa",
+  "style": "Zümrüt cam · mozaik",
+  "hero": "mosaic",
+  "nav": "pill",
+  "mbar": "bubble",
+  "ft": "min",
+  "tools": [
+   "Kombi kapasitesi hesabı",
+   "Kombi sorun sihirbazı"
+  ],
+  "pal": [
+   "#f2f8f5",
+   "#0d2420",
+   "#dff0e9",
+   "#0b2b27",
+   "#0f766e"
+  ],
+  "fd": "outfit",
+  "fb": "instrument",
+  "dark": false,
+  "kb": 729
+ },
+ {
+  "slug": "10-klima-buz",
+  "sector": "klima",
+  "nm": "Buz Klima",
+  "city": "Ankara",
+  "style": "Buz mavisi · BTU önde",
+  "hero": "tool",
+  "nav": "box",
+  "mbar": "tabs",
+  "ft": "cols",
+  "tools": [
+   "BTU hesaplayıcı",
+   "Klima hata kodu çözücü"
+  ],
+  "pal": [
+   "#f8fcfd",
+   "#0a2530",
+   "#e3f3f6",
+   "#072b36",
+   "#0891b2"
+  ],
+  "fd": "spacegrotesk",
+  "fb": "manrope",
+  "dark": false,
+  "kb": 765
+ },
+ {
+  "slug": "11-klima-poyraz",
+  "sector": "klima",
+  "nm": "Poyraz Klima",
+  "city": "Eskişehir",
+  "style": "Poyraz grisi · kemer",
+  "hero": "arch",
+  "nav": "center",
+  "mbar": "status",
+  "ft": "cen",
+  "tools": [
+   "Montaj ön keşif",
+   "Klima bakım ve filtre hatırlatıcı"
+  ],
+  "pal": [
+   "#f6f4ef",
+   "#1a2430",
+   "#e9e5db",
+   "#18242f",
+   "#3e6288"
+  ],
+  "fd": "newsreader",
+  "fb": "instrument",
+  "dark": false,
+  "kb": 934
+ },
+ {
+  "slug": "12-klima-okyanus",
+  "sector": "klima",
+  "nm": "Okyanus Soğutma",
+  "city": "Antalya",
+  "style": "Okyanus mercanı · dilimli",
+  "hero": "slices",
+  "nav": "pill",
+  "mbar": "split",
+  "ft": "big",
+  "tools": [
+   "Klima hata kodu çözücü",
+   "Klima elektrik gideri"
+  ],
+  "pal": [
+   "#fffaf5",
+   "#05222f",
+   "#fdeee2",
+   "#04202f",
+   "#ff6b4a"
+  ],
+  "fd": "syne",
+  "fb": "plex",
+  "dark": false,
+  "kb": 780
+ },
+ {
+  "slug": "13-beyaz-kaymak",
+  "sector": "beyaz_esya",
+  "nm": "Kaymak Servis",
+  "city": "Kayseri",
+  "style": "Kaymak · servis fişi",
+  "hero": "ticket",
+  "nav": "rail",
+  "mbar": "asym",
+  "ft": "min",
+  "tools": [
+   "Arıza belirtisi rehberi",
+   "Aylık cihaz bakım listesi"
+  ],
+  "pal": [
+   "#fbf7ef",
+   "#2b2015",
+   "#f1e8d8",
+   "#2b1d12",
+   "#946033"
+  ],
+  "fd": "fraunces",
+  "fb": "figtree",
+  "dark": false,
+  "kb": 763
+ },
+ {
+  "slug": "14-beyaz-pembe",
+  "sector": "beyaz_esya",
+  "nm": "Ev Dostu Servis",
+  "city": "Gaziantep",
+  "style": "Pembe · tipografik",
+  "hero": "marquee",
+  "nav": "classic",
+  "mbar": "seg",
+  "ft": "big",
+  "tools": [
+   "Yedek parça talebi hazırlayıcı",
+   "Tamir mi, yeni cihaz mı?"
+  ],
+  "pal": [
+   "#fff6f8",
+   "#3a0f1e",
+   "#ffe3ea",
+   "#3a0f1e",
+   "#e0457b"
+  ],
+  "fd": "bricolage",
+  "fb": "outfit",
+  "dark": false,
+  "kb": 767
+ },
+ {
+  "slug": "15-beyaz-gumus",
+  "sector": "beyaz_esya",
+  "nm": "Gümüş Yedek Parça",
+  "city": "Adana",
+  "style": "Gümüş gri · parça arama",
+  "hero": "search",
+  "nav": "idx",
+  "mbar": "menu",
+  "ft": "cols",
+  "tools": [
+   "Yedek parça talebi hazırlayıcı",
+   "Arıza belirtisi rehberi"
+  ],
+  "pal": [
+   "#f4f5f7",
+   "#12161c",
+   "#e5e8ec",
+   "#141a22",
+   "#2563eb"
+  ],
+  "fd": "plex",
+  "fb": "plex",
+  "dark": false,
+  "kb": 767
+ },
+ {
+  "slug": "16-elektronik-mor",
+  "sector": "elektronik",
+  "nm": "Sinyal Elektronik",
+  "city": "Gaziantep",
+  "style": "Mor · durum paneli",
+  "hero": "console",
+  "nav": "rail",
+  "mbar": "side",
+  "ft": "big",
+  "tools": [
+   "Cihaz teslim fişi önizleme",
+   "Televizyon hata ve LED kodu çözücü"
+  ],
+  "pal": [
+   "#f7f5ff",
+   "#14102b",
+   "#ebe7fb",
+   "#120d2b",
+   "#7c3aed"
+  ],
+  "fd": "sora",
+  "fb": "intertight",
+  "dark": false,
+  "kb": 966
+ },
+ {
+  "slug": "17-elektronik-neon",
+  "sector": "elektronik",
+  "nm": "Devre Atölyesi",
+  "city": "Eskişehir",
+  "style": "Koyu · yeşil devre",
+  "hero": "tool",
+  "nav": "classic",
+  "mbar": "pill",
+  "ft": "cen",
+  "tools": [
+   "Televizyon arıza sihirbazı",
+   "Televizyon hata ve LED kodu çözücü"
+  ],
+  "pal": [
+   "#0b0f0e",
+   "#e8f1ee",
+   "#131a18",
+   "#050807",
+   "#34d399"
+  ],
+  "fd": "spacegrotesk",
+  "fb": "intertight",
+  "dark": true,
+  "kb": 955
+ },
+ {
+  "slug": "18-elektronik-turuncu",
+  "sector": "elektronik",
+  "nm": "Turuncu Parça Deposu",
+  "city": "Kayseri",
+  "style": "Turuncu · katalog",
+  "hero": "search",
+  "nav": "two",
+  "mbar": "seg",
+  "ft": "cols",
+  "tools": [
+   "Onarım değer hesabı",
+   "Cihaz teslim fişi önizleme"
+  ],
+  "pal": [
+   "#fffaf5",
+   "#1f140a",
+   "#fdeedc",
+   "#26140a",
+   "#ea580c"
+  ],
+  "fd": "archivoblack",
+  "fb": "figtree",
+  "dark": false,
+  "kb": 738
+ },
+ {
+  "slug": "19-bilgisayar-lacivert",
+  "sector": "bilgisayar",
+  "nm": "Bit Teknik",
+  "city": "İstanbul",
+  "style": "Lacivert · konsol",
+  "hero": "console",
+  "nav": "idx",
+  "mbar": "fab",
+  "ft": "big",
+  "tools": [
+   "Cihaz sağlık testi",
+   "Veri kurtarma acil rehberi"
+  ],
+  "pal": [
+   "#0a1226",
+   "#e8eefc",
+   "#111c38",
+   "#050b1a",
+   "#38bdf8"
+  ],
+  "fd": "intertight",
+  "fb": "plex",
+  "dark": true,
+  "kb": 978
+ },
+ {
+  "slug": "20-bilgisayar-cam",
+  "sector": "bilgisayar",
+  "nm": "Çözüm Bilgisayar",
+  "city": "Antalya",
+  "style": "İndigo · çapraz blok",
+  "hero": "diag",
+  "nav": "center",
+  "mbar": "status",
+  "ft": "min",
+  "tools": [
+   "Yükseltme önerisi",
+   "Bakım paketi süre hesabı"
+  ],
+  "pal": [
+   "#f8f9ff",
+   "#14163a",
+   "#e9ebff",
+   "#171a4a",
+   "#5b5bf0"
+  ],
+  "fd": "outfit",
+  "fb": "manrope",
+  "dark": false,
+  "kb": 739
+ },
+ {
+  "slug": "21-bilgisayar-grafit",
+  "sector": "bilgisayar",
+  "nm": "Grafit Parça",
+  "city": "Adana",
+  "style": "Grafit · limon yeşili",
+  "hero": "marquee",
+  "nav": "box",
+  "mbar": "asym",
+  "ft": "cen",
+  "tools": [
+   "Bakım paketi süre hesabı",
+   "Cihaz sağlık testi"
+  ],
+  "pal": [
+   "#111315",
+   "#ececec",
+   "#1a1d20",
+   "#0a0b0c",
+   "#bef264"
+  ],
+  "fd": "syne",
+  "fb": "intertight",
+  "dark": true,
+  "kb": 903
+ },
+ {
+  "slug": "22-tesisat-sari",
+  "sector": "tesisat",
+  "nm": "Sarı Tesisat",
+  "city": "Konya",
+  "style": "Sarı-siyah · çapraz",
+  "hero": "diag",
+  "nav": "classic",
+  "mbar": "menu",
+  "ft": "min",
+  "tools": [
+   "Damlayan musluk maliyeti",
+   "İş süresi planlayıcı"
+  ],
+  "pal": [
+   "#fffdf2",
+   "#1c1a0b",
+   "#fbf3c9",
+   "#1c1a0b",
+   "#f5b301"
+  ],
+  "fd": "barlow",
+  "fb": "plex",
+  "dark": false,
+  "kb": 728
+ },
+ {
+  "slug": "23-tesisat-su",
+  "sector": "tesisat",
+  "nm": "SuYolu Tesisat",
+  "city": "Kayseri",
+  "style": "Su mavisi · yuvarlak",
+  "hero": "split",
+  "nav": "pill",
+  "mbar": "dock",
+  "ft": "cols",
+  "tools": [
+   "Su kaçağı testi",
+   "Acil durum ilk müdahale"
+  ],
+  "pal": [
+   "#f3f8ff",
+   "#0b1b3a",
+   "#e0ecfb",
+   "#0b2a5b",
+   "#1d4ed8"
+  ],
+  "fd": "manrope",
+  "fb": "manrope",
+  "dark": false,
+  "kb": 637
+ },
+ {
+  "slug": "24-tesisat-bakir",
+  "sector": "tesisat",
+  "nm": "Bakır Tesisat",
+  "city": "Bursa",
+  "style": "Bakır · editoryal",
+  "hero": "edit",
+  "nav": "rail",
+  "mbar": "tabs",
+  "ft": "cen",
+  "tools": [
+   "İş süresi planlayıcı",
+   "Damlayan musluk maliyeti"
+  ],
+  "pal": [
+   "#f8f3ee",
+   "#1d2a2a",
+   "#eadfd3",
+   "#12302f",
+   "#b87333"
+  ],
+  "fd": "playfair",
+  "fb": "instrument",
+  "dark": false,
+  "kb": 793
+ },
+ {
+  "slug": "25-elektrik-volt",
+  "sector": "elektrik",
+  "nm": "Volt Elektrik",
+  "city": "İstanbul",
+  "style": "Siyah · volt sarısı",
+  "hero": "stats",
+  "nav": "idx",
+  "mbar": "bubble",
+  "ft": "big",
+  "tools": [
+   "Kablo kesiti hesabı",
+   "Aylık elektrik gideri"
+  ],
+  "pal": [
+   "#0e0e10",
+   "#f4f4f0",
+   "#18181b",
+   "#060607",
+   "#ffd400"
+  ],
+  "fd": "barlow",
+  "fb": "intertight",
+  "dark": true,
+  "kb": 903
+ },
+ {
+  "slug": "26-elektrik-kirmizi",
+  "sector": "elektrik",
+  "nm": "Alev Elektrik",
+  "city": "Eskişehir",
+  "style": "Kırmızı · servis fişi",
+  "hero": "ticket",
+  "nav": "two",
+  "mbar": "one",
+  "ft": "cols",
+  "tools": [
+   "Elektrik acil durum rehberi",
+   "Pano sigorta seçici"
+  ],
+  "pal": [
+   "#fff7f7",
+   "#260a10",
+   "#fde2e5",
+   "#3a0a14",
+   "#e11d48"
+  ],
+  "fd": "bricolage",
+  "fb": "figtree",
+  "dark": false,
+  "kb": 729
+ },
+ {
+  "slug": "27-elektrik-petrol",
+  "sector": "elektrik",
+  "nm": "Petrol Elektrik",
+  "city": "Gaziantep",
+  "style": "Petrol mavisi · tam fotoğraf",
+  "hero": "full",
+  "nav": "min",
+  "mbar": "sheet",
+  "ft": "min",
+  "tools": [
+   "Pano sigorta seçici",
+   "Kablo kesiti hesabı"
+  ],
+  "pal": [
+   "#f2f7f8",
+   "#0b2a33",
+   "#dfeaed",
+   "#0b3b47",
+   "#ff7a1a"
+  ],
+  "fd": "dmserif",
+  "fb": "instrument",
+  "dark": false,
+  "kb": 708
+ },
+ {
+  "slug": "28-guvenlik-zumrut",
+  "sector": "guvenlik",
+  "nm": "Zümrüt Güvenlik",
+  "city": "İzmir",
+  "style": "Zümrüt · kemer",
+  "hero": "arch",
+  "nav": "center",
+  "mbar": "side",
+  "ft": "min",
+  "tools": [
+   "Güvenlik açığı kontrol listesi",
+   "Alarm bölge planlayıcı"
+  ],
+  "pal": [
+   "#f4faf6",
+   "#0e2a20",
+   "#e0f0e6",
+   "#0b3d2e",
+   "#059669"
+  ],
+  "fd": "fraunces",
+  "fb": "figtree",
+  "dark": false,
+  "kb": 728
+ },
+ {
+  "slug": "29-guvenlik-gece",
+  "sector": "guvenlik",
+  "nm": "Gece Bekçisi",
+  "city": "Ankara",
+  "style": "Gece siyahı · yeşil sinyal",
+  "hero": "full",
+  "nav": "min",
+  "mbar": "pill",
+  "ft": "big",
+  "tools": [
+   "Güvenlik keşif sihirbazı",
+   "Kamera kayıt depolama hesabı"
+  ],
+  "pal": [
+   "#07090c",
+   "#e7ecf2",
+   "#10151b",
+   "#030405",
+   "#22c55e"
+  ],
+  "fd": "sora",
+  "fb": "intertight",
+  "dark": true,
+  "kb": 912
+ },
+ {
+  "slug": "30-guvenlik-bordo",
+  "sector": "guvenlik",
+  "nm": "Bordo Güvenlik",
+  "city": "Antalya",
+  "style": "Bordo · mozaik",
+  "hero": "mosaic",
+  "nav": "pill",
+  "mbar": "fab",
+  "ft": "cen",
+  "tools": [
+   "Bakım sözleşmesi seçici",
+   "Güvenlik açığı kontrol listesi"
+  ],
+  "pal": [
+   "#fbf6f3",
+   "#2a0e10",
+   "#f1e4de",
+   "#3b0d11",
+   "#9b1c24"
+  ],
+  "fd": "playfair",
+  "fb": "manrope",
+  "dark": false,
+  "kb": 807
+ }
+]

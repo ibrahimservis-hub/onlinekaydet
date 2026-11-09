@@ -11,37 +11,12 @@ def grab(name):
             d-=1
             if d==0: break
     return ast.literal_eval(src[i:j+1])
-L=grab('L'); LN=grab('NAMES')
-TH=json.load(open('/home/claude/onlinekaydet/site/themes.json',encoding='utf-8'))
+MAN=json.load(open('/home/claude/onlinekaydet/themes/g3/manifest.json',encoding='utf-8'))
 SEC={'kombi':'Kombi','klima':'Klima','beyaz_esya':'Beyaz eşya','elektronik':'Elektronik','bilgisayar':'Bilgisayar','tesisat':'Tesisat','elektrik':'Elektrik','guvenlik':'Güvenlik'}
-DESC={1:'Hero, hizmet kartları ve hızlı randevu formu. İlk ziyaretçiyi hemen aramaya ya da randevuya yönlendiren, her sektöre uyan sade düzen.',
-2:'Sayfa tepesinde tam genişlikte fotoğraf. Güven veren sahadan bir kare, üstünde telefon ve randevu düğmesi.',
-3:'Yazı ağırlıklı, editoryal bir düzen. Firmanın hikâyesini ve işine bakışını öne çıkarır.',
-4:'Marka ve model odaklı katalog görünümü. Teknik cihaz servisleri için uygun.',
-5:'Acil hat odaklı düzen. Telefon numarası ve 7/24 vurgusu ilk ekranda; arıza anında aranan servisler için.',
-6:'Hizmet ve fiyat listesi odaklı düzen. Ziyaretçi ne kadar ödeyeceğini baştan görür.',
-7:'Önce ve sonra fotoğraflarıyla işin kalitesini gösteren düzen.',
-8:'Garanti, belge ve güvence rozetleri öne çıkan düzen. Güven vermesi gereken işler için.',
-9:'Hizmet verdiğiniz bölgelerin öne çıktığı, yerel aramalara uygun düzen.',
-10:'Yedek parça vitrini olan düzen. Parça satışı yapan servisler için.'}
-def info():
-    s=open('/home/claude/onlinekaydet/site/temalar.html',encoding='utf-8').read()
-    names={}
-    for m in re.finditer(r'href="\.\./tema-onizleme/([^"]+)\.html"[^>]*>(.*?)</a>',s,re.S):
-        b=re.search(r'<b>(.*?)</b>',m.group(2))
-        names[m.group(1)]=b.group(1) if b else m.group(1)
-    return names
-NM=info()
-SUF={'kizil':'Kızıl','kor':'Kor','cam':'Cam','buz':'Buz','poyraz':'Poyraz','okyanus':'Okyanus','kaymak':'Kaymak','pembe':'Pembe','gumus':'Gümüş','mor':'Mor','neon':'Gece','turuncu':'Turuncu','lacivert':'Lacivert','grafit':'Grafit','sari':'Sarı','su':'Su','bakir':'Bakır','volt':'Volt','kirmizi':'Kırmızı','petrol':'Petrol','zumrut':'Zümrüt','gece':'Gece','bordo':'Bordo'}
-def cn(sl,lay):
-    t=sl.split('-')[-1]
-    return SUF.get(t) if re.match(r'\d\d-',sl) and t in SUF else LN[lay]
+HD={'tool':'Sayfa tepesinde sektöre özel hesaplayıcı: ziyaretçi ilk ekranda sonucunu görür.','full':'Tam genişlikte fotoğrafla açılan, güven veren sade düzen.','split':'Yazı ve fotoğraf yan yana; telefon ve randevu düğmesi hemen yanında.','stats':'Hizmet ve garanti bilgilerini rakam bloklarıyla öne çıkaran düzen.','sos':'Acil hat odaklı düzen: telefon numarası ve yanıt süresi ilk ekranda.','slices':'Fotoğrafı dilimleyen, hizmetleri yan yana gösteren dinamik düzen.','edit':'Editoryal, yazı ağırlıklı düzen; firmanın işine bakışını öne çıkarır.','mosaic':'Mozaik fotoğraf ızgarası ve hizmet kartlarıyla vitrin düzeni.','arch':'Kemer biçimli fotoğraf ve sakin, premium görünüm.','ticket':'Servis fişi görünümünde randevu ve takip hissi veren düzen.','marquee':'Büyük tipografi ve kayan hizmet bandıyla cesur düzen.','search':'Arama kutusuyla açılır: ziyaretçi marka, parça ya da arızayı yazarak başlar.','console':'Koyu konsol görünümünde durum paneli ve hızlı işlemler.','diag':'Çapraz bloklu, hareketli ve güçlü kontrastlı düzen.'}
 ITEMS=[]
-for t in TH:
-    sl=t['slug']
-    if sl not in L: continue
-    lay,font,firm=L[sl]
-    ITEMS.append(dict(slug=sl,sector=t['sector'],sname=SEC[t['sector']],dark=t['dark'],acc=t['accent'],lay=lay,layname=LN[lay],firm=firm,cname=cn(sl,lay)))
+for m in MAN:
+    ITEMS.append(dict(slug=m['slug'],sector=m['sector'],sname=SEC[m['sector']],dark=m['pal'][3],acc=m['pal'][4],hero=m['hero'],layname=m['style'],firm=m['nm'],cname=m['style'].split(' · ')[0],tools=m['tools']))
 def tfile(sl): return 'tema-%s.html'%sl
 def temalar():
     secs=[]
@@ -68,7 +43,7 @@ def detail():
         vis=('<div class="r7-dev"><div class="big"><div class="bar"><i></i><i></i><i></i></div><img src="tema/%s.webp" alt="%s teması masaüstü görünümü" width="1000" height="1172"></div>'
              '<div class="mob"><img src="tema/%s-m.webp" alt="%s teması mobil görünümü" width="300" height="650"></div></div>')%(i['slug'],i['sname'],i['slug'],i['sname'])
         body=hero([('temalar.html','Temalar'),(None,'%s · %s'%(i['sname'],i['cname']))],'%s <em>%s</em>'%(i['sname'],i['cname']),
-          '%s düzeni. %s'%(i['layname'],DESC[i['lay']]),'',['Örnek firma: %s'%i['firm'],'Mobil uyumlu','Panelden düzenlenir'],
+          '%s. %s Sektöre özel araçlar: %s.'%(i['layname'],HD[i['hero']],', '.join(i['tools'])),'',['Örnek firma: %s'%i['firm'],'Mobil uyumlu','Panelden düzenlenir'],
           [('../tema-onizleme/%s.html'%i['slug'],'Canlı önizleme',''),('index.html#kayit','Bu temayı seçin','o')])
         body=body.replace('target','target')
         body+=sec(vis+'<div class="r7-sw"><i style="background:%s"></i><i style="background:%s"></i></div><p class="r7-note">Ekran görüntüleri örnek içeriklerle hazırlanmıştır; firma adı, telefon, logo ve fotoğraflar sizin bilgilerinizle değişir.</p>'%(i['dark'],i['acc']))
