@@ -3,6 +3,8 @@
 
 Firma tam pakettedir (Kurumsal), örnek müşteri/usta/servis kaydı hazır gelir. Talep ayrıca satış listesine (leads) 'demo' olarak düşer.
 """
+import json
+import os
 import random
 import re
 import secrets
@@ -93,6 +95,13 @@ def register(api_router, db, deps):
         await fdb.app_settings.update_one({"_id": "global"}, {"$set": {
             "company_name": company, "company_phone": phone, "company_address": "Demo adres", "is_firm": True, "has_logo": False,
             "tech_visibility": {"enabled": False, "hide_from": "22:00", "show_from": "07:00", "done_days": 36500}}}, upsert=True)
+        try:
+            _th = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "themes.json"), encoding="utf-8"))
+            _pick = next((t for t in _th if t.get("sector") == key.replace("_", "-") or t.get("sector") == key), None) or (_th[0] if _th else None)
+            if _pick:
+                await fdb.app_settings.update_one({"_id": "brand"}, {"$set": {"theme": _pick["slug"], "dark": _pick.get("dark"), "accent": _pick.get("accent"), "radius": _pick.get("radius", 12)}}, upsert=True)
+        except Exception:
+            pass
         await fdb.app_settings.update_one({"_id": "firm_logo"}, {"$set": {"data": ""}}, upsert=True)
         await fdb.app_settings.update_one({"_id": "firm"}, {"$set": {"firm_id": fid, "name": company, "features": {}}}, upsert=True)
         await db.main().firms.insert_one(dict(f))
