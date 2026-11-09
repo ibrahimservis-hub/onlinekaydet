@@ -1,0 +1,123 @@
+/* ===== premium katmanı (eski sınıf sözlüğünün üstüne) ===== */
+:root{--n:#14161a;--o:#8a6d2f;--o2:#6f5724;--b:#8a6d2f;--g:#5f8f78;--p:#8a6d2f;--l:#d6d0c2}
+body.o7in{font:400 17px/1.55 var(--f);color:var(--ink);background:var(--iv)}
+.o7in .w{max-width:1240px;padding:0 40px}
+.o7in h1,.o7in h2,.o7in h3,.o7in h4{font-family:var(--f);color:var(--ink)}
+.o7in h1,.o7in h2{font-weight:300;letter-spacing:-.035em}
+.o7in h3,.o7in h4{font-weight:500;letter-spacing:-.01em}
+.o7in section{padding-top:72px;padding-bottom:0}
+.o7in .tint,.o7in .bnd:not(.sq){background:transparent}
+.o7in .skip{position:absolute;left:-999px}.o7in .skip:focus{left:16px;top:12px;z-index:99;background:var(--ch);color:var(--g0);padding:10px 16px}
+/* sayfa başlığı */
+.o7in .pgh{background:var(--g0);color:#fff;border-bottom:1px solid var(--hl)}
+.o7in .pgh .w{padding-top:64px;padding-bottom:72px;grid-template-columns:minmax(0,1fr)}
+.o7in .pgh h1{font-size:clamp(38px,5.4vw,78px);line-height:1.04;color:#fff;max-width:900px}
+.o7in .pgh p{color:#b9bec8;font-size:20px;max-width:640px;line-height:1.55;margin:22px 0 28px}
+.o7in .crumb{font-size:14px;color:var(--mutd);margin-bottom:22px;display:flex;gap:8px;align-items:center}
+.o7in .crumb a{color:var(--ch)}.o7in .crumb a:hover{color:#fff}
+.o7in .pga{display:none}
+.o7in .pgh .ticks{margin:0 0 8px}.o7in .pgh .ticks li{color:#d3d7de}
+.o7in .pgh .jump a{border:1px solid var(--hl2);background:transparent;color:#d3d7de;border-radius:0;padding:9px 16px;font-weight:500}
+.o7in .pgh .jump a:hover{border-color:var(--ch);color:var(--ch);background:transparent}
+/* düğmeler */
+.o7in .pill,.o7in .bt,.o7in a.bt{border-radius:0;background:var(--ch);color:var(--g0);border:1px solid var(--ch);font-weight:500;font-size:15px;min-height:48px;padding:0 24px;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:background-color .25s var(--ease),color .25s var(--ease)}
+.o7in .pill:hover,.o7in .bt:hover{background:transparent;color:var(--chd);border-color:var(--chd)}
+.o7in .pgh .pill:hover,.o7in .dkk .pill:hover,.o7in .cta2 .pill:hover,.o7in .dkk .bt:hover{color:var(--ch);border-color:var(--ch)}
+.o7in .pill.ol,.o7in .gh,.o7in .ol{background:transparent;color:var(--chd);border:1px solid var(--chd);border-radius:0}
+.o7in .pill.ol:hover,.o7in .gh:hover{background:var(--chd);color:#fff}
+.o7in .pill.s{min-height:42px;padding:0 18px;font-size:14px}
+/* kartlar */
+.o7in .fgrid>div,.o7in .cc,.o7in .cbig,.o7in .art,.o7in .tool,.o7in .calc,.o7in .set,.o7in .fis,.o7in .dform,.o7in .frm,.o7in .shot,.o7in .sw,.o7in .tm,.o7in .rel a,.o7in .oth a,.o7in .chp,.o7in .bl,.o7in .blg>*,.o7in .mod,.o7in .pkh{background:#fbf9f4;border:1px solid #d6d0c2;border-radius:0;box-shadow:none}
+.o7in .frm{background:#fbf9f4}
+.o7in .fgrid>div{padding:26px}
+.o7in .fgrid h3{font-size:19px;color:var(--ink)}
+.o7in .fgrid p{color:var(--mut)}
+.o7in .fgrid a{color:var(--chd);font-weight:500}
+.o7in .ib{background:none!important;color:var(--chd);border:1px solid #cfc9ba;border-radius:0;width:46px;height:46px}
+.o7in .ib svg{stroke-width:1.5}
+.o7in .sh h2,.o7in h2.sh{font-size:clamp(32px,4.2vw,56px);line-height:1.06;margin-bottom:14px}
+.o7in .sh p,.o7in .sh .lede{color:var(--mut);font-size:18px;max-width:640px}
+.o7in .sh .k,.o7in .eyebrow{font-size:14px;color:var(--chd);font-weight:500;letter-spacing:0;text-transform:none}
+/* koyu şerit / CTA */
+.o7in .cta2,.o7in .dkk{background:var(--g0);color:#fff;border-radius:0;border:1px solid var(--g0)}
+.o7in .cta2 h2,.o7in .dkk h2,.o7in .dkk h3{color:#fff;font-weight:300}
+.o7in .cta2 p,.o7in .dkk p{color:#aeb3bd}
+.o7in .cta2 .pill,.o7in .dkk .pill{background:var(--ch);color:var(--g0)}
+.o7in .cta2{padding:44px 48px}
+.o7in .ctab,.o7in .cta{background:var(--g0);color:#fff;border-radius:0}
+.o7in .ctab h2,.o7in .cta h2{color:#fff;font-weight:300}
+/* form */
+.o7in input,.o7in select,.o7in textarea{border-radius:0;border:1px solid #cfc9ba;background:#fff;font:400 16px var(--f);min-height:48px;padding:10px 14px;color:var(--ink)}
+.o7in input:focus,.o7in select:focus,.o7in textarea:focus{outline:2px solid var(--ch);outline-offset:0;border-color:var(--chd)}
+.o7in label{font:500 14px var(--f);color:#41444b}
+.o7in .dkk .frm,.o7in .dkk .dform,.o7in .cta2 .frm,.o7in .dform{background:#fbf9f4;color:var(--ink)}
+.o7in .dkk .frm label,.o7in .dform label{color:#41444b}
+/* tablo / paket */
+.o7in .pr,.o7in .fy,.o7in .cmp{border-radius:0}
+.o7in table{border-collapse:collapse}
+.o7in .cmp th,.o7in .cmp thead th{background:var(--g0);color:#fff;font-weight:500;border-radius:0}
+.o7in .cmp .hot,.o7in .cmp td.hot{background:rgba(201,174,117,.14)}
+.o7in .cmp .y,.o7in .y{color:var(--chd)}
+.o7in .cmp .y svg,.o7in .cmp td svg{fill:var(--chd)}
+.o7in .cmp svg circle,.o7in .cmp svg rect{fill:var(--chd)}
+.o7in .fp{border-radius:0;border:1px solid #d6d0c2;background:#fbf9f4}
+.o7in .fp.hot{border-color:var(--chd);background:#fbf9f4}
+.o7in .fp .ph{background:var(--g0);color:#fff;border-radius:0}
+.o7in .fp.hot:before{background:var(--chd);color:#fff;border-radius:0}
+/* SSS */
+.o7in details{border:0;border-bottom:1px solid #cfc9ba;background:transparent;border-radius:0}
+.o7in details summary{font:400 19px var(--f);color:var(--ink);padding:18px 0}
+.o7in .sss details{border-left:0;padding-left:0}
+.o7in .sss summary:after{color:var(--chd)}
+/* makale / yasal metin */
+.o7in .art,.o7in .lg{max-width:780px}
+.o7in .art{background:transparent;border:0;padding:0}
+.o7in .art h2{font-size:34px;margin:40px 0 12px}.o7in .art p,.o7in .art li{color:#34373e;line-height:1.7;font-size:18px}
+.o7in a.lnk,.o7in .art a{color:var(--chd);text-decoration:underline;text-underline-offset:3px}
+/* sprite ikon çipleri */
+.o7in .sek,.o7in .sekw a{background:#fbf9f4;border:1px solid #d6d0c2;border-radius:0;box-shadow:none}
+.o7in .sek:hover,.o7in .sekw a:hover{border-color:var(--chd)}
+/* alt çubuk (mobil) */
+.vb{display:none}
+.o7in .vb{display:none}
+/* reveal bölümler */
+.o7in .rv{will-change:auto}
+@media(max-width:1100px){.o7in .w{padding:0 28px}}
+@media(max-width:700px){
+.o7in .w{padding:0 20px}
+.o7in section{padding-top:52px}
+.o7in .pgh .w{padding-top:40px;padding-bottom:44px}
+.o7in .pgh p{font-size:17px}
+.o7in .fgrid{grid-template-columns:1fr}
+.o7in .cta2{grid-template-columns:1fr;padding:32px 24px}
+.o7in table{font-size:14px}
+.o7in .vb{display:grid;grid-template-columns:1fr 1fr;position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--g0);border-top:1px solid var(--hl);padding-bottom:env(safe-area-inset-bottom)}
+.o7in .vb a{display:flex;align-items:center;justify-content:center;min-height:52px;color:#fff;font:500 15px var(--f);background:transparent;border-radius:0;padding:0}
+.o7in .vb a+a{border-left:1px solid var(--hl);color:var(--ch)}
+.o7in .vb .ci{display:none}
+body.o7in{padding-bottom:52px}
+}
+
+.o7in .sq,.o7in .dkk{background:var(--g0)!important;color:#fff}
+.o7in .sq h2,.o7in .sq h3,.o7in .sq b,.o7in .dkk h2,.o7in .dkk h3,.o7in .cta2 h2,.o7in .cta2 h3,.o7in .pgh h2{color:#fff!important}
+.o7in .sq p,.o7in .sq li{color:#aeb3bd}
+.o7in .sq,.o7in .dkk{margin-top:72px;padding:72px 0}
+.o7in .sh h2,.o7in .sh.one h2,.o7in .sss h2{font-size:clamp(30px,3.4vw,46px);font-weight:300;line-height:1.08;letter-spacing:-.03em;color:var(--ink)}
+.o7in .sh.one h2:before{width:40px;height:1px;background:var(--chd);border-radius:0;margin-bottom:16px}
+.o7in .sq .sh.one h2:before{background:var(--ch)}
+.o7in .seq i{background:none!important;border:1px solid var(--ch);color:var(--ch);font-weight:500;font-size:16px}
+.o7in .seq time{color:var(--ch);font-weight:500;font-size:16px}
+.o7in .seq li:not(:has(i)) time{background:none!important;border:1px solid var(--ch);color:var(--ch);width:60px;height:60px;border-radius:50%;font-size:15px}
+.o7in .seq li:after{background:var(--hl2)!important;height:1px!important}
+.o7in .seq li:not(:last-child):before{background:var(--hl2)!important;width:1px!important}
+.o7in .cc{border-left:1px solid #d6d0c2}
+.o7in .cc *[class*=cz],.o7in .cc .sol{color:var(--chd)}
+.o7in .seq li:not(:last-child):before{background:var(--hl2)}
+.o7in .ticks li:before{background:none!important;border:1px solid var(--chd);color:var(--chd)}
+.o7in .sq .ticks li:before,.o7in .pgh .ticks li:before{border-color:var(--ch)}
+.o7in .ticks li svg,.o7in .ticks li i{color:var(--chd)}
+.o7in .chp span,.o7in .chp a{border-radius:0;background:#fbf9f4;border:1px solid #d6d0c2;color:var(--ink);font-weight:500}
+.o7in .chp a:hover{border-color:var(--chd);color:var(--chd)}
+.o7in .chp a:last-child{background:var(--ink);color:var(--iv);border-color:var(--ink)}
+.o7in .ib svg,.o7in .ib svg *{stroke:var(--chd)!important}
+.o7in .tm h3,.o7in .tm b,.o7in .sw h3{font-weight:400;font-size:26px;letter-spacing:-.02em}
