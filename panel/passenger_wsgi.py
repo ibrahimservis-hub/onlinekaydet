@@ -342,7 +342,7 @@ def _serve_site(environ, start_response):
 
 
 def _owner_redirect(environ, start_response):
-    """Platform sahibi (firmasiz admin) panel sayfalarina gelirse /pro paneline yolla."""
+    """Platform sahibi (firmasiz admin) panel sayfalarina gelirse /yonetim paneline yolla."""
     if environ.get("REQUEST_METHOD") != "GET":
         return None
     path = environ.get("PATH_INFO", "") or ""
@@ -358,7 +358,7 @@ def _owner_redirect(environ, start_response):
         seg = tok.split(".")[1]
         c = json.loads(base64.urlsafe_b64decode(seg + "=" * (-len(seg) % 4)))
         if c.get("role") == "admin" and not c.get("firm"):
-            start_response("302 Found", [("Location", "/pro"), ("Cache-Control", "no-store"), ("Content-Length", "0")])
+            start_response("302 Found", [("Location", "/yonetim"), ("Cache-Control", "no-store"), ("Content-Length", "0")])
             return []
     except Exception:
         return None
