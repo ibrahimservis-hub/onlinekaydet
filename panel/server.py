@@ -29,15 +29,19 @@ logger = logging.getLogger(__name__)
 
 # -------------------------- Config --------------------------
 mongo_url = os.environ['MONGO_URL']
-client = AsyncIOMotorClient(
-    mongo_url,
+_mk = dict(
     serverSelectionTimeoutMS=int(os.environ.get('MONGO_TIMEOUT_MS', '20000')),
     connectTimeoutMS=int(os.environ.get('MONGO_TIMEOUT_MS', '20000')),
     socketTimeoutMS=60000,
-    minPoolSize=int(os.environ.get('MONGO_MIN_POOL', '2')),   # sıcak bağlantılar: her istekte yeni TLS el sıkışması olmasın
-    maxPoolSize=int(os.environ.get('MONGO_MAX_POOL', '20')),
+    minPoolSize=int(os.environ.get('MONGO_MIN_POOL', '1')),   # sıcak bağlantı: her istekte yeni TLS el sıkışması olmasın
+    maxPoolSize=int(os.environ.get('MONGO_MAX_POOL', '10')),
     maxIdleTimeMS=600000,
 )
+try:
+    # "poll": sunucu başına ayrı akış/RTT izleme ipliği açılmaz (hosting iş parçacığı kotasını korur)
+    client = AsyncIOMotorClient(mongo_url, serverMonitoringMode="poll", **_mk)
+except Exception:       # noqa: BLE001  (eski pymongo)
+    client = AsyncIOMotorClient(mongo_url, **_mk)
 PROGRESS = lambda msg: None      # passenger_wsgi.py ilerleme gunlugu icin degistirir
 import tenant
 db = tenant.TenantDB(client, os.environ['DB_NAME'])    # firma hesabında istek bazlı ayrı veritabanı (tenant.py)

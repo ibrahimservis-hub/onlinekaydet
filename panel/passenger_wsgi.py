@@ -15,6 +15,11 @@ if HERE not in sys.path:
     sys.path.insert(0, HERE)
 os.chdir(HERE)
 
+# Motor, her veritabani cagrisini kendi iplik havuzunda calistirir; varsayilan cok yuksektir (cekirdek x 5) ve es zamanli
+# istekte surec basina 15+ iplik acar. Hosting hesap kotasi dolunca "can't start new thread" ve 503 olusur.
+os.environ.setdefault("MOTOR_MAX_WORKERS", "4")
+
+
 def _preload():
     """Agir kutuphaneleri surec catallanmadan ONCE yukler: sunucu ayni anda gelen istekler icin yeni kopya (cocuk surec)
     actiginda bu moduller hazir gelir, her kopya bastan yuklemez. Yalnizca kutuphane; baglanti/iplik/dongu acilmaz."""
@@ -101,6 +106,72 @@ def _watchdog():
 
 
 _pending = set()
+_ACT = {"n": 0, "last": 0.0}
+
+
+def _janitor():
+    """Hesabin iplik kotasini koru: (1) son yeniden baslatmadan ONCE acilmis eski surecleri kapat,
+    (2) bosta kalan fazla surecleri kapat (bir 'ana' surec her zaman sicak kalir). Aktif istegi olan surece dokunulmaz."""
+    import time, glob, signal
+    try:
+        import fcntl
+    except Exception:       # noqa: BLE001
+        fcntl = None
+    idle_s = float(os.environ.get("SPX_IDLE_EXIT_S", "90"))
+    lock_fh = None
+    me = os.getpid()
+    marker = os.path.join(HERE, "tmp", "restart.txt")
+    clk = os.sysconf("SC_CLK_TCK")
+    try:
+        btime = [int(l.split()[1]) for l in open("/proc/stat") if l.startswith("btime")][0]
+    except Exception:       # noqa: BLE001
+        btime = 0
+    _ACT["last"] = time.time()
+    while True:
+        time.sleep(30)
+        try:
+            # (1) eski surecler
+            if btime and os.path.isfile(marker):
+                mt = os.path.getmtime(marker)
+                cwd = os.path.realpath(HERE)
+                anc, p = {me}, me
+                for _ in range(6):
+                    try:
+                        p = int(open("/proc/%d/stat" % p).read().rsplit(")", 1)[1].split()[1])
+                    except Exception:       # noqa: BLE001
+                        break
+                    if p <= 1:
+                        break
+                    anc.add(p)
+                uid = os.getuid()
+                for d in glob.glob("/proc/[0-9]*"):
+                    try:
+                        pid = int(d.rsplit("/", 1)[1])
+                        if pid in anc:
+                            continue
+                        if ("Uid:\t%d" % uid) not in open(d + "/status").read():
+                            continue
+                        if os.path.realpath(os.readlink(d + "/cwd")) != cwd:
+                            continue
+                        st = int(open(d + "/stat").read().rsplit(")", 1)[1].split()[19])
+                        if btime + st / clk < mt - 5:
+                            os.kill(pid, signal.SIGTERM)
+                            _progress("eski surec kapatildi: %s" % pid)
+                    except Exception:       # noqa: BLE001
+                        continue
+            # (2) bosta fazla surec
+            if fcntl is not None and _ACT["n"] <= 0 and time.time() - _ACT["last"] > idle_s:
+                if lock_fh is None:
+                    try:
+                        os.makedirs(os.path.join(HERE, "tmp"), exist_ok=True)
+                        fh = open(os.path.join(HERE, "tmp", "primary.lock"), "a+")
+                        fcntl.flock(fh, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                        lock_fh = fh           # ana surec: sicak kalir
+                    except Exception:       # noqa: BLE001
+                        _progress("bosta fazla surec kapaniyor (%s)" % me)
+                        os._exit(0)
+        except Exception:       # noqa: BLE001
+            pass
 
 
 def _track_tasks():
@@ -140,10 +211,14 @@ def _drain(loop):
 
 
 def _wrap(resp, loop):
+    _ACT["n"] += 1
     try:
         for chunk in resp:
             yield chunk
     finally:
+        _ACT["n"] -= 1
+        import time as _tt
+        _ACT["last"] = _tt.time()
         close = getattr(resp, "close", None)
         if close:
             close()
@@ -264,6 +339,8 @@ def _boot():
         except Exception:       # noqa: BLE001
             pass
         _progress("HAZIR (%s sn)" % os.environ.get("SPX_BOOT_S", "?"))
+        if os.environ.get("SPX_JANITOR", "1") != "0":
+            threading.Thread(target=_janitor, name="panel-janitor", daemon=True).start()
         _done.set()
     except BaseException as exc:                 # noqa: BLE001
         _state["error"] = exc
@@ -399,6 +476,8 @@ def _custom_host(environ):
 
 
 def application(environ, start_response):
+    import time as _ta
+    _ACT["last"] = _ta.time()
     if _custom_host(environ):
         p = environ.get("PATH_INFO", "") or "/"
         if environ.get("REQUEST_METHOD") in ("GET", "HEAD") and not p.startswith(_PANEL_PATHS):
