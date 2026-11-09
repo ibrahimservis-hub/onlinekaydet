@@ -1,0 +1,14 @@
+/* ana-sayfa-kopya: tasarim ayni; okunabilirlik, dokunma alani ve kucuk eklemeler */
+:root{--chd:#775c20}
+.k-note{margin:14px 0 0;font-size:14px;letter-spacing:.01em;color:var(--mutd,#9aa0ab)}
+.k-note b{color:var(--ch,#c9ae75);font-weight:500}
+.o7-ft a,.o7-ft li a{display:inline-block;padding:5px 0;min-height:32px}
+#sss summary,#sss button,.sss summary{min-height:48px}
+.frm label i,.cta label i{color:var(--ch,#c9ae75);font-style:normal;margin-left:3px}
+input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--ch,#c9ae75);outline-offset:2px}
+.k-wa{position:fixed;right:24px;bottom:24px;z-index:60;display:none;align-items:center;gap:8px;background:#101318;color:#f3f0e8;border:1px solid #c9ae75;font:500 14px/1 var(--f,system-ui);text-decoration:none;padding:13px 20px;box-shadow:0 14px 30px -12px rgba(0,0,0,.6);transition:background .2s,color .2s}
+.k-wa:hover{background:#c9ae75;color:#14161a}
+.k-wa:focus-visible{outline:2px solid #fff;outline-offset:3px}
+@media(min-width:900px){.k-wa{display:inline-flex}}
+html{scroll-behavior:smooth}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
