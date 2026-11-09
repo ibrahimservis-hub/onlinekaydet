@@ -298,7 +298,14 @@
   function call(method, path, body) {
     var o = { method: method, headers: { Authorization: 'Bearer ' + LS.get('token', '') } };
     if (body !== undefined) { o.headers['Content-Type'] = 'application/json'; o.body = JSON.stringify(body); }
-    return fetch(API + path, o).then(function (r) { return r.text().then(function (t) { var j = {}; try { j = JSON.parse(t); } catch (e) { } if (!r.ok) { var d = j && j.detail; throw new Error(typeof d === 'string' ? d : (d && d[0] && d[0].msg) || ('Hata ' + r.status)); } return j; }); });
+    /* Sunucu açılırken/yoğunken gelen geçici 502/503/504: okuma isteklerini 3 kez, 2-4-6 sn arayla kendiliğinden yeniden dener */
+    var go = function (n) {
+      return fetch(API + path, o).then(function (r) {
+        if ((r.status === 502 || r.status === 503 || r.status === 504) && method === 'GET' && n < 3) { return new Promise(function (res) { setTimeout(res, 2000 * (n + 1)); }).then(function () { return go(n + 1); }); }
+        return r.text().then(function (t) { var j = {}; try { j = JSON.parse(t); } catch (e) { } if (!r.ok) { var d = j && j.detail; throw new Error(typeof d === 'string' ? d : (d && d[0] && d[0].msg) || (r.status >= 500 ? 'Sunucu şu an yoğun, birkaç saniye sonra tekrar deneyin (' + r.status + ')' : 'Hata ' + r.status)); } return j; });
+      });
+    };
+    return go(0);
   }
   function fail(e) { toast(e.message || 'İşlem başarısız'); }
   var TABS = [['firmalar', 'Firmalar'], ['sitem', 'Sitem'], ['siteduz', 'Gelişmiş Düzenleme'], ['domain', 'Alan Adı & Site'], ['paket', 'Paketim'], ['mgayar', 'Mağaza Ayarları'], ['moduller', 'Aç / Kapat & Ayarlar'], ['seo', 'SEO · 301 · 404'], ['yeni', 'Yeni Sipariş'], ['pazar', 'Pazaryerleri'], ['yetki', 'Kullanıcılar & Yetkiler'], ['gsc', 'Google Search Console'], ['urunler', 'Ürünler'], ['kanal', 'Ürünler'], ['urunekle', 'Ürün Ekle / Düzenle'], ['m360', 'Müşteri 360'], ['kaynak', 'Kaynak & Arama Analizi'], ['ustapuan', 'Usta Puanlama'], ['ustagecmis', 'Usta İş Geçmişi'], ['cari', 'Cari & Trend'], ['tahsilat', 'Teknisyen Tahsilat'], ['atolye', 'Atölye'], ['canli', 'Canlı Ziyaretçiler'], ['wa', 'WhatsApp & Bildirim'], ['daha', 'Daha Fazlası'], ['bildirim', 'Bildirimler'], ['memnun', 'Müşteri Memnuniyeti'], ['vade', 'Usta Borç Vadesi'], ['harita', 'Günün İş Haritası'], ['onay', 'Onay Bekleyenler'], ['rapor', 'Rapor Merkezi'], ['kurulum', 'Kurulum Durumu']];
