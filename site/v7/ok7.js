@@ -8,3 +8,4 @@ if(h){var f=function(){h.classList.toggle('sc',scrollY>40)};addEventListener('sc
 var io='IntersectionObserver' in window?new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{rootMargin:'0px 0px -8% 0px'}):null;
 d.querySelectorAll('.rv,.pr').forEach(function(el){io?io.observe(el):el.classList.add('in')});
 })();
+(function(){document.querySelectorAll('.o7-dt').forEach(function(b){b.addEventListener('click',function(e){var d=b.parentNode,o=d.classList.contains('open');document.querySelectorAll('.o7-dd.open').forEach(function(x){x.classList.remove('open')});if(!o)d.classList.add('open');b.setAttribute('aria-expanded',!o);e.stopPropagation()})});document.addEventListener('click',function(){document.querySelectorAll('.o7-dd.open').forEach(function(x){x.classList.remove('open')})})})();
