@@ -2876,7 +2876,7 @@ surum.register(api_router, db, {"require_admin": require_admin})
 import servis_ayar
 servis_ayar.setup(app, api_router, db, get_current_user, tenant)
 import sahip
-sahip.register(app, api_router, db, {"require_admin": require_admin, "get_current_user": get_current_user})
+sahip.register(app, api_router, db, {"require_admin": require_admin, "get_current_user": get_current_user, "create_access_token": create_access_token, "hash_password": hash_password})
 gsc_auto.register(api_router, db, {"require_admin": require_admin, "JWT_SECRET": JWT_SECRET})
 try:
     import brand_import

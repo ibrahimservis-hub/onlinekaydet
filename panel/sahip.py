@@ -302,6 +302,81 @@ def register(app, api_router, db, deps):
             "marketplace": {"state": st(mk_filled, bool((ig.get("marketplace") or {}).get("verified"))), "why": "Pazaryeri bilgisi girilince ürün senkronu açılır"},
         }
 
+    # ------------------------------------------------------------------ sahip müdahalesi: destek girişi, şifre, kayıt, günlük
+    @api_router.post("/admin/firms/{fid}/support-link")
+    async def support_link(fid: str, me: dict = Depends(require_admin)):
+        main_only()
+        f = await get_firm(fid)
+        code = uuid.uuid4().hex
+        await db.main().support_codes.insert_one({"code": code, "firm_id": fid, "at": _now(), "ts": datetime.now(timezone.utc).timestamp()})
+        await audit(me, "DESTEK GİRİŞİ", f["name"])
+        return {"url": "/api/admin/support-enter?c=" + code}
+
+    @api_router.get("/admin/support-enter")
+    async def support_enter(c: str = ""):
+        from fastapi.responses import RedirectResponse
+        d = await db.main().support_codes.find_one_and_delete({"code": c})
+        if not d or datetime.now(timezone.utc).timestamp() - d.get("ts", 0) > 90:
+            raise HTTPException(status_code=403, detail="Bağlantının süresi dolmuş")
+        f = await db.main().firms.find_one({"id": d["firm_id"]}, {"_id": 0})
+        if not f:
+            raise HTTPException(status_code=404, detail="Firma bulunamadı")
+        u = await db.firm(f["db"]).users.find_one({"firm_owner": True})
+        if not u:
+            raise HTTPException(status_code=404, detail="Firma yöneticisi bulunamadı")
+        token = deps["create_access_token"](u["id"], u["email"], u["role"], firm=f["db"])
+        r = RedirectResponse("/admin", status_code=302)
+        r.set_cookie(key="access_token", value=token, httponly=True, secure=False, samesite="lax", max_age=6 * 3600, path="/")
+        return r
+
+    @api_router.put("/admin/firms/{fid}/users/{uid}/password")
+    async def sub_password(fid: str, uid: str, body: dict, me: dict = Depends(require_admin)):
+        main_only()
+        pw = str(body.get("password") or "")
+        if len(pw) < 8:
+            raise HTTPException(status_code=400, detail="Şifre en az 8 karakter olmalı")
+        f = await get_firm(fid)
+        h = deps["hash_password"](pw)
+        r = await db.main().firm_users.update_one({"id": uid, "firm_id": fid}, {"$set": {"password_hash": h}})
+        if not r.matched_count:
+            raise HTTPException(status_code=404, detail="Kullanıcı bulunamadı")
+        await audit(me, "FİRMA KULLANICI ŞİFRE", f["name"])
+        return {"ok": True}
+
+    @api_router.get("/admin/firms/{fid}/staff")
+    async def firm_staff(fid: str, me: dict = Depends(require_admin)):
+        main_only()
+        f = await get_firm(fid)
+        rows = await db.firm(f["db"]).users.find({}, {"_id": 0, "password_hash": 0}).to_list(200)
+        return {"users": [{"id": u.get("id"), "name": u.get("name", ""), "email": u.get("email", ""), "role": u.get("role", ""),
+                           "owner": bool(u.get("firm_owner")), "active": u.get("is_active", True), "phone": u.get("phone", "")} for u in rows]}
+
+    @api_router.put("/admin/firms/{fid}/staff/{uid}")
+    async def firm_staff_set(fid: str, uid: str, body: dict, me: dict = Depends(require_admin)):
+        main_only()
+        f = await get_firm(fid)
+        upd = {}
+        if "active" in body:
+            upd["is_active"] = bool(body["active"])
+        if body.get("password"):
+            if len(str(body["password"])) < 8:
+                raise HTTPException(status_code=400, detail="Şifre en az 8 karakter olmalı")
+            upd["password_hash"] = deps["hash_password"](str(body["password"]))
+        if not upd:
+            raise HTTPException(status_code=400, detail="Değişiklik yok")
+        r = await db.firm(f["db"]).users.update_one({"id": uid}, {"$set": upd})
+        if not r.matched_count:
+            raise HTTPException(status_code=404, detail="Kullanıcı bulunamadı")
+        await audit(me, "FİRMA PERSONEL GÜNCELLEDİ", f["name"])
+        return {"ok": True}
+
+    @api_router.get("/admin/firms/{fid}/audit")
+    async def firm_audit(fid: str, me: dict = Depends(require_admin)):
+        main_only()
+        f = await get_firm(fid)
+        rows = await db.main().audit_log.find({"detail": {"$regex": f["name"][:30].replace("\\", "")}}, {"_id": 0}).sort("at", -1).limit(80).to_list(80)
+        return {"rows": rows}
+
     # ------------------------------------------------------------------ sahip paneli sayfası
     SP = Path(__file__).parent / "sahip" / "index.html"
 
