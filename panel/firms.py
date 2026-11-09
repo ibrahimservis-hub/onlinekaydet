@@ -27,7 +27,7 @@ SOON = {}
 # modül -> kapatıldığında engellenen API ön ekleri (servis çekirdektir, kapatılamaz)
 MODULE_PREFIX = {"muhasebe": ("finance", "cash", "accounting", "receivables", "profit", "export-xlsx"),
                  "rapor": ("rapor", "reports", "analytics", "performance"),
-                 "magaza": ("shop", "parts"), "site": ("site", "site-reviews-settings", "media", "studio", "visitors"),
+                 "magaza": ("shop", "parts"), "site": ("site", "site-reviews-settings", "media", "studio", "visitors", "brand", "firm/domain"),
                  "pazarlama": ("mkt", "growth"), "sms": ("msg-templates", "governance/notify"),
                  "bakim": ("maintenance", "warranty-claims"), "teklif": ("quotes",), "bayi": ("dealers", "partners"),
                  "qr": ("qr",), "atama": ("autoassign",), "takip": ("admin/tech-locations",),

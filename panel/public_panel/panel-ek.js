@@ -4055,6 +4055,21 @@
         self.addEventListener('error', function () { RCDOWN = Date.now(); }); self.addEventListener('timeout', function () { RCDOWN = Date.now(); });
         self.addEventListener('load', function () { if (self.status > 0) RCDOWN = 0; });
       }
+      if (q && q.m !== 'GET' && typeof arguments[0] === 'string' && /\/api\/jobs\/[^\/?#]+(\/[a-z-]+)?(\?.*)?$/.test(q.u) && !/\/(pdf|photo|upload|reassign)/.test(q.u) && document.body.classList.contains('spx-tech') &&
+        (navigator.onLine === false || (RCDOWN && Date.now() - RCDOWN < 20000))) {
+        /* Çevrimdışı işlem kuyruğu: usta sahada bağlantı koparsa durum/not güncellemesi sıraya alınır, bağlantı gelince gönderilir */
+        try {
+          var wq = JSON.parse(localStorage.getItem('spx_wq') || '[]'); wq.push({ m: q.m, u: q.u.replace(/^https?:\/\/[^\/]+/, ''), b: arguments[0], t: Date.now() }); localStorage.setItem('spx_wq', JSON.stringify(wq.slice(-100)));
+          var set2 = function (k, v) { try { Object.defineProperty(self, k, { value: v, configurable: true }); } catch (e) { } };
+          setTimeout(function () {
+            set2('readyState', 4); set2('status', 200); set2('statusText', 'OK'); set2('responseURL', q.u); set2('responseText', '{"queued":true}'); set2('response', self.responseType === 'json' ? { queued: true } : '{"queued":true}');
+            self.getAllResponseHeaders = function () { return 'content-type: application/json\r\n'; }; self.getResponseHeader = function (h) { return /content-type/i.test(h) ? 'application/json' : null; };
+            ['readystatechange', 'load', 'loadend'].forEach(function (t) { try { self.dispatchEvent(new Event(t)); } catch (e) { } });
+            try { toast('Çevrimdışısınız — işlem sıraya alındı (' + wq.length + ' bekliyor), bağlantı gelince gönderilecek'); } catch (e) { }
+          }, 0);
+          return;
+        } catch (e) { }
+      }
       if (q && q.m === 'GET' && ok(q.u) && document.body.classList.contains('spx-tech')) {
         if (navigator.onLine === false || (RCDOWN && Date.now() - RCDOWN < 20000)) {
           var c = null; try { c = JSON.parse(localStorage.getItem(key(q.u)) || 'null'); } catch (e) { }
@@ -4072,6 +4087,20 @@
       }
       return sd.apply(this, arguments);
     };
+    var WQBUSY = false;
+    function wqFlush() {
+      if (WQBUSY || navigator.onLine === false) return; var wq; try { wq = JSON.parse(localStorage.getItem('spx_wq') || '[]'); } catch (e) { wq = []; } if (!wq.length) return;
+      WQBUSY = true;
+      (function next() {
+        if (!wq.length) { WQBUSY = false; try { localStorage.removeItem('spx_wq'); toast('Bekleyen işlemler gönderildi'); } catch (e) { } return; }
+        var it = wq[0];
+        fetch(it.u, { method: it.m, headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + (LS.get('token', '') || '') }, body: it.b }).then(function (r) {
+          if (r.status === 408 || r.status === 429 || r.status >= 500) throw new Error('retry');
+          wq.shift(); localStorage.setItem('spx_wq', JSON.stringify(wq)); next();
+        }).catch(function () { WQBUSY = false; });
+      })();
+    }
+    window.addEventListener('online', function () { setTimeout(wqFlush, 800); }); setInterval(wqFlush, 30000); setTimeout(wqFlush, 6000);
     setTimeout(prune, 5000);
   })();
 

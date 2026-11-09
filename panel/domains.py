@@ -95,6 +95,12 @@ async def host_to_firm(db, host: str):
     return _cache["m"].get(host)
 
 
+def portal_chip(url: str) -> str:
+    """Tema sayfasına, müşteri portalına (servis takibi) giden küçük sabit bağlantı."""
+    return ('<a href="%s" style="position:fixed;left:14px;bottom:14px;z-index:99998;background:#0a1f44;color:#fff;font:600 13px/1 system-ui,sans-serif;'
+            'padding:11px 15px;border-radius:999px;text-decoration:none;box-shadow:0 6px 18px rgba(10,31,68,.35)">Servis takibi · Müşteri girişi</a>' % _html.escape(url, quote=True))
+
+
 def register(api_router, db, deps):
     require_admin = deps["require_admin"]
     get_current_user = deps["get_current_user"]
@@ -258,6 +264,9 @@ def register(api_router, db, deps):
         if len(digits) >= 10:
             dd = digits[-10:]
             html = html.replace("905320000000", "90" + dd).replace("0532 000 00 00", "0%s %s %s %s" % (dd[:3], dd[3:6], dd[6:8], dd[8:]))
+        fd = await db.main().firms.find_one({"db": tenant.current()}, {"_id": 0, "id": 1, "modules": 1}) or {}
+        if fd.get("id") and (fd.get("modules") is None or "portal" in (fd.get("modules") or [])):
+            html = html.replace("</body>", portal_chip("/portal/%s~giris" % fd["id"]) + "</body>", 1) if "</body>" in html else html + portal_chip("/portal/%s~giris" % fd["id"])
         return HTMLResponse(html, headers={"Cache-Control": "no-cache"})
 
     # ------------------------------------------------------------ sahip: kurulum hazırlığı ve sistem durumu

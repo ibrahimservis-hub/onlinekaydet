@@ -256,6 +256,11 @@ def register(api_router, db, deps, app):
         if len(digits) >= 10:
             d = digits[-10:]
             html = html.replace("905320000000", "90" + d).replace("0532 000 00 00", f"0{d[:3]} {d[3:6]} {d[6:8]} {d[8:]}")
+        fm = await firm_doc()
+        if (fm is None) or fm.get("modules") is None or "portal" in (fm.get("modules") or []):
+            import domains as _dom
+            purl = f"{base}/portal/{tenant.public_token('giris')}"
+            html = html.replace("</body>", _dom.portal_chip(purl) + "</body>", 1) if "</body>" in html else html + _dom.portal_chip(purl)
         return HTMLResponse(html)
 
     async def company():
@@ -267,7 +272,13 @@ def register(api_router, db, deps, app):
     # ------------------------------------------------------------ iyzico (firmanın kendi anahtarlarıyla)
     async def iy_cfg():
         d = await db.app_settings.find_one({"_id": "sp_modules"}, {"_id": 0}) or {}
-        return (d.get("config") or {}).get("iyzico", {})
+        c = dict((d.get("config") or {}).get("iyzico", {}) or {})
+        if not (c.get("api_key") and c.get("secret_key")):
+            # "Entegrasyonlar" ekranından girilen ödeme bilgisi (iyzico) de geçerli sayılır
+            ig = (await db.app_settings.find_one({"_id": "integrations"}, {"_id": 0}) or {}).get("payment") or {}
+            if ig.get("provider") == "iyzico" and ig.get("api_key") and ig.get("secret"):
+                c = {"api_key": ig["api_key"], "secret_key": ig["secret"], "sandbox": str(ig.get("sandbox", "0"))}
+        return c
 
     async def iyzico_call(path, body):
         c = await iy_cfg()

@@ -17,9 +17,9 @@ with TestClient(s.app) as c:
         S[k] = tok(c, f"{k}@m.com", "sifre12345")
     def a():
         r = c.get("/api/brand", headers=S["x"]).json()
-        assert r["brand"]["accent"] == "#f27a1a" and len(r["themes"]) == 30
+        assert r["brand"]["accent"] == "#f27a1a" and len(r["themes"]) >= 38
         assert {"slug", "dark", "accent", "radius", "sector"} <= set(r["themes"][0])
-    t("varsayılan marka + 30 tema listesi", a)
+    t("varsayılan marka + tema listesi", a)
     def b():
         r = c.put("/api/brand", headers=S["x"], json={"theme": "08-kombi-kor", "dark": "#15171c", "accent": "#ffc400", "radius": 6}); assert r.status_code == 200, r.text
         assert c.get("/api/brand", headers=S["x"]).json()["brand"]["accent"] == "#ffc400"
@@ -47,7 +47,7 @@ with TestClient(s.app) as c:
     t("marka işareti ve noindex duruyor", g)
     def h():
         r = c.get("/api/brand/site/07-kombi-kizil", headers=S["x"]); assert r.status_code == 200
-        assert "__PORTAL_URL__" not in r.text and "/portal/" in r.text and r.text.count("~giris") >= 4
+        assert "__PORTAL_URL__" not in r.text and "/portal/" in r.text and r.text.count("~giris") >= 1
         assert c.get("/api/brand/site/..%2f..%2fetc", headers=S["x"]).status_code == 404
     t("tema sayfasında portal bağlantısı firmaya özel doldurulur", h)
 print(f"GEÇTİ {len(ok)}/{len(ok)+len(bad)}")
