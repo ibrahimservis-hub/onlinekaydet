@@ -365,7 +365,11 @@ def _owner_redirect(environ, start_response):
     return None
 
 def application(environ, start_response):
-    _r = _owner_redirect(environ, start_response)
+    if (environ.get("PATH_INFO", "") or "").rstrip("/") == "/uye-girisi":
+        environ["PATH_INFO"] = "/giris"            # uye girisi: musteri paneli giris ekrani (adres cubugunda /giris kalir)
+        environ["REQUEST_URI"] = "/giris"
+        environ["OK_UYE_GIRISI"] = "1"
+    _r = None if environ.get("OK_UYE_GIRISI") else _owner_redirect(environ, start_response)
     if _r is not None:
         return _r
     _r = _serve_site(environ, start_response)
