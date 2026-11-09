@@ -301,7 +301,7 @@
     return fetch(API + path, o).then(function (r) { return r.text().then(function (t) { var j = {}; try { j = JSON.parse(t); } catch (e) { } if (!r.ok) { var d = j && j.detail; throw new Error(typeof d === 'string' ? d : (d && d[0] && d[0].msg) || ('Hata ' + r.status)); } return j; }); });
   }
   function fail(e) { toast(e.message || 'İşlem başarısız'); }
-  var TABS = [['firmalar', 'Firmalar'], ['domain', 'Alan Adı & Site'], ['moduller', 'Aç / Kapat & Ayarlar'], ['seo', 'SEO · 301 · 404'], ['yeni', 'Yeni Sipariş'], ['pazar', 'Pazaryerleri'], ['yetki', 'Kullanıcılar & Yetkiler'], ['gsc', 'Google Search Console'], ['urunler', 'Ürün Yönetimi'], ['marka', 'Marka Ürün Aktarma'], ['m360', 'Müşteri 360'], ['kaynak', 'Kaynak & Arama Analizi'], ['ustapuan', 'Usta Puanlama'], ['ustagecmis', 'Usta İş Geçmişi'], ['cari', 'Cari & Trend'], ['tahsilat', 'Teknisyen Tahsilat'], ['atolye', 'Atölye'], ['canli', 'Canlı Ziyaretçiler'], ['wa', 'WhatsApp & Bildirim'], ['daha', 'Daha Fazlası'], ['bildirim', 'Bildirimler'], ['memnun', 'Müşteri Memnuniyeti'], ['vade', 'Usta Borç Vadesi'], ['harita', 'Günün İş Haritası'], ['onay', 'Onay Bekleyenler'], ['rapor', 'Rapor Merkezi'], ['kurulum', 'Kurulum Durumu']];
+  var TABS = [['firmalar', 'Firmalar'], ['domain', 'Alan Adı & Site'], ['paket', 'Paketim'], ['moduller', 'Aç / Kapat & Ayarlar'], ['seo', 'SEO · 301 · 404'], ['yeni', 'Yeni Sipariş'], ['pazar', 'Pazaryerleri'], ['yetki', 'Kullanıcılar & Yetkiler'], ['gsc', 'Google Search Console'], ['urunler', 'Ürün Yönetimi'], ['marka', 'Marka Ürün Aktarma'], ['m360', 'Müşteri 360'], ['kaynak', 'Kaynak & Arama Analizi'], ['ustapuan', 'Usta Puanlama'], ['ustagecmis', 'Usta İş Geçmişi'], ['cari', 'Cari & Trend'], ['tahsilat', 'Teknisyen Tahsilat'], ['atolye', 'Atölye'], ['canli', 'Canlı Ziyaretçiler'], ['wa', 'WhatsApp & Bildirim'], ['daha', 'Daha Fazlası'], ['bildirim', 'Bildirimler'], ['memnun', 'Müşteri Memnuniyeti'], ['vade', 'Usta Borç Vadesi'], ['harita', 'Günün İş Haritası'], ['onay', 'Onay Bekleyenler'], ['rapor', 'Rapor Merkezi'], ['kurulum', 'Kurulum Durumu']];
   function build() {
     ov = document.createElement('div'); ov.id = 'spx-ov';
     ov.innerHTML = '<header><button class="spx-b" id="spx-menu">☰ Menü</button><h2 id="spx-h">Site Yönetimi</h2><button class="spx-b" id="spx-x">Kapat ✕</button></header><div id="spx-tabs"></div><div id="spx-body">Yükleniyor…</div>';
@@ -314,9 +314,9 @@
   function body() { return $('#spx-body'); }
   function draw() {
     Array.prototype.forEach.call($('#spx-tabs').children, function (b) { b.classList.toggle('on', b.getAttribute('data-t') === TAB); });
-    var hh = $('#spx-h'); if (hh) hh.textContent = ({ firmalar: 'Firmalar', domain: 'Alan Adı & Site', daha: 'Daha Fazlası', bildirim: 'Bildirimler', memnun: 'Müşteri Memnuniyeti', vade: 'Usta Borç Vadesi', harita: 'Günün İş Haritası', moduller: 'Aç/Kapat & Entegrasyonlar', seo: 'SEO · 301 · 404', yeni: 'Yeni Sipariş Gir', pazar: 'Pazaryerleri', yetki: 'Kullanıcılar & Yetkiler', gsc: 'Google Search Console', marka: 'Marka Ürün Aktarma', urunler: 'Ürün Yönetimi', m360: 'Müşteri 360', kaynak: 'Kaynak & Arama Analizi', ustapuan: 'Usta Puanlama', ustagecmis: 'Usta İş Geçmişi', cari: 'Cari & Trend', tahsilat: 'Teknisyen Tahsilat', atolye: 'Atölye (Cihaz Teslim Alma)', sohbet: 'Canlı Sohbet', canli: 'Canlı Ziyaretçiler', wa: 'WhatsApp & Bildirim Ayarları', onay: 'Onay Bekleyenler', rapor: 'Rapor Merkezi', kurulum: 'Kurulum Durumu' })[TAB];
+    var hh = $('#spx-h'); if (hh) hh.textContent = ({ firmalar: 'Firmalar', domain: 'Alan Adı & Site', paket: 'Paketim', daha: 'Daha Fazlası', bildirim: 'Bildirimler', memnun: 'Müşteri Memnuniyeti', vade: 'Usta Borç Vadesi', harita: 'Günün İş Haritası', moduller: 'Aç/Kapat & Entegrasyonlar', seo: 'SEO · 301 · 404', yeni: 'Yeni Sipariş Gir', pazar: 'Pazaryerleri', yetki: 'Kullanıcılar & Yetkiler', gsc: 'Google Search Console', marka: 'Marka Ürün Aktarma', urunler: 'Ürün Yönetimi', m360: 'Müşteri 360', kaynak: 'Kaynak & Arama Analizi', ustapuan: 'Usta Puanlama', ustagecmis: 'Usta İş Geçmişi', cari: 'Cari & Trend', tahsilat: 'Teknisyen Tahsilat', atolye: 'Atölye (Cihaz Teslim Alma)', sohbet: 'Canlı Sohbet', canli: 'Canlı Ziyaretçiler', wa: 'WhatsApp & Bildirim Ayarları', onay: 'Onay Bekleyenler', rapor: 'Rapor Merkezi', kurulum: 'Kurulum Durumu' })[TAB];
     body().innerHTML = 'Yükleniyor…';
-    ({ firmalar: drawFirmalar, domain: drawDomain, daha: drawDaha, bildirim: drawBildirim, memnun: drawMemnun, vade: drawVade, harita: drawHarita, moduller: drawMod, seo: drawSeo, yeni: drawNew, pazar: drawMkt, yetki: drawUsers, gsc: drawGsc, marka: drawBrand, urunler: drawProducts, m360: drawM360, kaynak: drawKaynak, ustapuan: drawUstaPuan, ustagecmis: drawUstaGecmis, cari: drawCari, tahsilat: drawTahsilat, atolye: drawAtolye, sohbet: drawSohbet, canli: drawCanli, wa: drawWa, onay: drawOnay, rapor: drawRapor, kurulum: drawKurulum })[TAB]();
+    ({ firmalar: drawFirmalar, domain: drawDomain, paket: drawPaket, daha: drawDaha, bildirim: drawBildirim, memnun: drawMemnun, vade: drawVade, harita: drawHarita, moduller: drawMod, seo: drawSeo, yeni: drawNew, pazar: drawMkt, yetki: drawUsers, gsc: drawGsc, marka: drawBrand, urunler: drawProducts, m360: drawM360, kaynak: drawKaynak, ustapuan: drawUstaPuan, ustagecmis: drawUstaGecmis, cari: drawCari, tahsilat: drawTahsilat, atolye: drawAtolye, sohbet: drawSohbet, canli: drawCanli, wa: drawWa, onay: drawOnay, rapor: drawRapor, kurulum: drawKurulum })[TAB]();
   }
   /* ===== Firmalar: paneli kendi verisiyle kullanan müşteri firmalar ===== */
   var FM = { sel: '', tab: 'bilgi', job: '', q: '', flt: '', newOpen: false };
@@ -494,6 +494,7 @@
     if (tok && FIRM === null && !FIRMBUSY) {          /* yönetici ekranında da firma hesabı mı diye bir kez sor: platform menüleri firma panelinde gizlenir */
       FIRMBUSY = true; pcall('GET', '/firm/me').then(function (r) { FIRM = (r && r.firm) ? r.firm : false; firmSave(); }).catch(function () { FIRM = false; }).then(function () { FIRMBUSY = false; });
     }
+    if (FIRM) loadPkg();
     if (FIRM) { [].forEach.call(document.querySelectorAll('aside span,aside div,aside small'), function (e) { if (e.children.length === 0 && e.textContent.trim() === 'Sahip') e.textContent = 'Yönetici'; }); var bw = document.getElementById('spx-bw'); if (bw) bw.remove(); }
     var tech = document.body.classList.contains('spx-tech');
     if (!tech || !tok) { var fb0 = document.getElementById('spx-fbar'); if (fb0) fb0.remove(); document.body.classList.remove('spx-fbar-on', 'spx-firm'); return; }
@@ -1531,7 +1532,7 @@
     ['Mağaza & Satış', [['/admin/shop', 'Mağaza'], ['ek:yeni', 'Yeni Sipariş Gir', 'plus'], ['ek:pazar', 'Pazaryerleri', 'cart'], ['ek:urunler', 'Ürün Yönetimi', 'cart'], ['ek:marka', 'Marka Ürün Aktarma', 'cart'], ['/admin/coupons', 'Kuponlar']]],
     ['Web Sitesi', [['/admin/site-features', 'Site Özellikleri'], ['ek:domain', 'Alan Adı & Site', 'gear'], ['ek:moduller', 'Aç/Kapat & Entegrasyonlar', 'gear'], ['ek:seo', 'SEO · 301 · 404', 'search'], ['/admin/site-studio', 'Site Stüdyosu'], ['/admin/media', 'Medya Kütüphanesi'], ['/admin/integration', 'Site Entegrasyonu']]],
     ['Pazarlama & İletişim', [['/admin/messages', 'İletişim Mesajları'], ['ek:sohbet', 'Canlı Sohbet', 'live'], ['/admin/reviews', 'Yorumlar'], ['ek:gsc', 'Google Search Console', 'search'], ['/admin/marketing', 'Pazarlama Merkezi'], ['ek:canli', 'Canlı Ziyaretçiler', 'search'], ['ek:wa', 'WhatsApp & Bildirim', 'gear'], ['ek:kaynak', 'Kaynak & Arama Analizi', 'search'], ['/admin/growth', 'Büyüme Merkezi'], ['/admin/visitors', 'Ziyaretçiler']]],
-    ['Yönetim', [['/admin/settings', 'Ayarlar'], ['ek:yetki', 'Kullanıcılar & Yetkiler', 'user'], ['ek:firmalar', 'Firmalar', 'user'], ['/admin/security', 'Güvenlik'], ['/admin/governance', 'Yedek & Denetim'], ['/admin/account', 'Hesabım']]]
+    ['Yönetim', [['/admin/settings', 'Ayarlar'], ['ek:yetki', 'Kullanıcılar & Yetkiler', 'user'], ['ek:firmalar', 'Firmalar', 'user'], ['/admin/security', 'Güvenlik'], ['/admin/governance', 'Yedek & Denetim'], ['ek:paket', 'Paketim', 'box'], ['/admin/account', 'Hesabım']]]
   ];
   var SUB = {
     '/admin/shop': [['orders', 'Siparişler'], ['products', 'Ürünler'], ['bank', 'Havale Bilgileri & Ayarlar']],
@@ -1547,9 +1548,24 @@
   var MPERM = { '/admin': 'dashboard', '/admin/jobs': 'jobs', '/admin/appointments': 'appointments', '/admin/quotes': 'quotes', '/admin/warranty': 'warranty', '/admin/customers': 'customers', '/admin/technicians': 'technicians', '/admin/parts': 'parts', '/admin/shop': 'shop', 'ek:yeni': 'shop', 'ek:atolye': 'jobs', 'ek:ustagecmis': 'technicians', 'ek:tahsilat': 'accounting', 'ek:vade': 'accounting', 'ek:memnun': 'reports', 'ek:rapor': 'reports', 'ek:kurulum': 'settings', 'ek:harita': 'jobs', 'ek:canli': 'visitors', 'ek:wa': 'integration', 'ek:pazar': 'shop', 'ek:marka': 'shop', 'ek:urunler': 'shop', '/admin/coupons': 'coupons', '/admin/site-features': 'site_features', 'ek:moduller': 'site_features', 'ek:domain': 'site_features', 'ek:seo': 'seo', 'ek:gsc': 'marketing', '/admin/site-studio': 'studio', '/admin/media': 'studio', '/admin/integration': 'integration', '/admin/messages': 'messages', '/admin/reviews': 'reviews', '/admin/dealers': 'dealers', '/admin/marketing': 'marketing', '/admin/growth': 'growth', '/admin/visitors': 'visitors', '/admin/team': 'team', '/admin/performance': 'performance', '/admin/announcements': 'announcements', '/admin/diagnosis': 'diagnosis', '/admin/brands': 'brands', '/admin/accounting': 'accounting', '/admin/reports': 'reports', '/admin/settings': 'settings' };
   var OWNER_ONLY = { 'ek:yetki': 1, 'ek:firmalar': 1, '/admin/security': 1, '/admin/governance': 1, '/admin/users': 1 };
   function me() { try { return JSON.parse(LS.get('user', '{}')) || {}; } catch (e) { return {}; } }
+  /* Menü öğesi -> paket modülü (firmanın paketinde olmayan modüller menüde gizlenir; sunucu da kapıyı ayrıca kapatır) */
+  var MODKEY = { '/admin/accounting': 'muhasebe', 'ek:tahsilat': 'muhasebe', 'ek:cari': 'muhasebe', 'ek:vade': 'muhasebe', '/admin/reports': 'rapor', 'ek:rapor': 'rapor', 'ek:memnun': 'rapor',
+    '/admin/performance': 'rapor', '/admin/shop': 'magaza', 'ek:yeni': 'magaza', 'ek:pazar': 'magaza', 'ek:urunler': 'magaza', 'ek:marka': 'magaza', '/admin/parts': 'magaza',
+    '/admin/site-features': 'site', 'ek:moduller': 'site', 'ek:seo': 'site', 'ek:domain': 'site', '/admin/site-studio': 'site', '/admin/media': 'site', '/admin/visitors': 'site', 'ek:canli': 'site',
+    '/admin/marketing': 'pazarlama', '/admin/growth': 'pazarlama', '/admin/coupons': 'pazarlama', 'ek:kaynak': 'pazarlama', 'ek:gsc': 'pazarlama', 'ek:wa': 'sms',
+    '/admin/quotes': 'teklif', '/admin/warranty': 'bakim', '/admin/dealers': 'bayi' };
+  var PKGMODS = null, PKGBUSY = false, PKGTOK = '';
+  function loadPkg() {
+    var tok = LS.get('token', ''); if (!tok) return;
+    if (PKGTOK !== tok) { PKGTOK = tok; PKGMODS = null; PKGBUSY = false; }
+    if (PKGMODS || PKGBUSY || !FIRM) return;
+    PKGBUSY = true; pcall('GET', '/firm/package').then(function (r) { PKGMODS = (r && r.modules) || false; }).catch(function () { PKGMODS = false; }).then(function () { PKGBUSY = false; });
+  }
   function canMenu(k) {
     var u = me(), r = u.admin_role || 'owner';
     if (k === '/admin/account') return true;
+    if (k === 'ek:paket') return !!FIRM;
+    if (FIRM && PKGMODS && MODKEY[k] && PKGMODS.indexOf(MODKEY[k]) < 0) return false;
     if (FIRM && (k === 'ek:firmalar' || k === '/admin/governance')) return false; /* platform düzeyi: firma panelinde görünmez */
     if (r === 'owner') return true;
     if (OWNER_ONLY[k]) return false;
@@ -2436,7 +2452,7 @@
   function tick() {
     var asides = document.querySelectorAll('aside nav'); if (!asides.length) return;
     Array.prototype.forEach.call(asides, function (nav) {
-      var nl = nativeLinks(nav), sig = Object.keys(nl).join('|') + (FIRM ? '~F' : '') + '#' + (me().admin_role || '') + (me().perms || []).join(','), own = nav.querySelector(':scope > [data-spx-own]');
+      var nl = nativeLinks(nav), sig = Object.keys(nl).join('|') + (FIRM ? '~F' + (PKGMODS ? PKGMODS.length : '') : '') + '#' + (me().admin_role || '') + (me().perms || []).join(','), own = nav.querySelector(':scope > [data-spx-own]');
       if (own && own.getAttribute('data-sig') === sig) { Array.prototype.forEach.call(own.querySelectorAll('a.spx-it'), function (a) { var k = a.getAttribute('data-k') || 'ek:', bd = a.querySelector('.spx-bd:not(.spx-od)'), t = k === 'ek:onay' ? (window.__onayN ? String(window.__onayN) : '') : k.indexOf('ek:') === 0 ? '' : (badgeOf(nl[k]) || (ADMB && ADMB[k] ? (k === '/admin/governance' ? '!' : String(ADMB[k])) : '')); if (t && t !== '0') { if (!bd) { bd = document.createElement('span'); bd.className = 'spx-bd'; a.appendChild(bd); } bd.textContent = t; } else if (bd) bd.remove(); var od = a.querySelector('.spx-od'), ov2 = k === '/admin/jobs' && ADMB && (ADMB.jobs_overdue > 0 || ADMB.call_overdue > 0) ? (ADMB.jobs_overdue || 0) + (ADMB.call_overdue || 0) : 0; if (ov2) { if (!od) { od = document.createElement('span'); od.className = 'spx-bd spx-od'; od.style.background = '#f59e0b'; od.style.marginLeft = '4px'; od.title = 'Randevu saati geçmiş iş'; a.appendChild(od); } od.textContent = ov2 + ' ⏰'; } else if (od) od.remove(); }); markActive(); return; }
       var sKey = nav.closest('.fixed') ? 'm' : 'd', sTop = nav.scrollTop || MSCR[sKey] || 0;
       if (own) own.remove();
@@ -2875,6 +2891,18 @@
       $('#dm_add').onclick = function () { call('POST', '/firm/domain', { domain: $('#dm_in').value }).then(function () { toast('Alan adı eklendi'); drawDomain(); }).catch(fail); };
       Array.prototype.forEach.call(document.querySelectorAll('.dm-chk'), function (b) { b.onclick = function () { b.textContent = 'Kontrol ediliyor…'; call('POST', '/firm/domain/check', { domain: b.getAttribute('data-d') }).then(function (r) { toast(r.status === 'yayinda' ? 'Alan adı yayına alındı 🎉' : 'DNS henüz yönlenmemiş, biraz sonra tekrar deneyin'); drawDomain(); }).catch(function (e) { fail(e); b.textContent = 'Kontrol et'; }); }; });
       Array.prototype.forEach.call(document.querySelectorAll('.dm-del'), function (b) { b.onclick = function () { if (!confirm('Alan adı bağlantısı kaldırılsın mı?')) return; call('DELETE', '/firm/domain/' + encodeURIComponent(b.getAttribute('data-d'))).then(function () { drawDomain(); }).catch(fail); }; });
+    }).catch(fail);
+  }
+
+  /* ===== Paketim: pakette neler var, neler kilitli ===== */
+  function drawPaket() {
+    call('GET', '/firm/package').then(function (r) {
+      var L = r.labels || {}, inc = r.modules || [], lock = r.locked || [], ph = '0544 444 40 04';
+      var row = function (m, ok) { return '<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid #e2e8f0;font-size:14px"><span style="width:20px;text-align:center;color:' + (ok ? '#16a34a' : '#94a3b8') + '">' + (ok ? '✓' : '🔒') + '</span><span style="' + (ok ? '' : 'color:#64748b') + '">' + esc(L[m] || m) + '</span></div>'; };
+      body().innerHTML = '<div class="spx-card"><b>Paketiniz</b> ' + pill(esc(r.package || 'Özel'), '#1155cc') + '<small style="display:block;color:#64748b;margin-top:6px">Aşağıdaki özellikler hesabınızda açık. Kilitli olanlar için paketinizi yükseltebilirsiniz.</small></div>' +
+        '<div class="spx-card"><b>Açık özellikler (' + inc.length + ')</b>' + inc.map(function (m) { return row(m, true); }).join('') + '</div>' +
+        (lock.length ? '<div class="spx-card"><b>Paket yükselterek açılır (' + lock.length + ')</b>' + lock.map(function (m) { return row(m, false); }).join('') +
+          '<div style="margin-top:12px"><a class="spx-b" href="tel:05444444004">Yükseltmek için arayın · ' + ph + '</a> <a class="spx-b" target="_blank" rel="noopener" href="https://wa.me/905444444004?text=' + encodeURIComponent('Merhaba, paketimi yükseltmek istiyorum.') + '">WhatsApp</a></div></div>' : '<div class="spx-card">Tüm özellikler hesabınızda açık. 🎉</div>');
     }).catch(fail);
   }
   function drawWa() {
