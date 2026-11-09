@@ -2992,6 +2992,23 @@ async def _firm_ctx(request: Request, call_next):
             tenant.reset(ft)
 
 # -------------------------- Cihaz QR etiketi sayfası (/cihaz/<jeton>) — React'ten bağımsız, her zaman çalışır
+
+async def _fbrand(h):
+    """Firma alan adı/hesabından açılan herkese açık sayfalarda ServisPlus markası yerine firmanın adı görünür."""
+    try:
+        if not tenant.current():
+            return h
+        import html as _hh
+        g = await db.app_settings.find_one({"_id": "global"}, {"_id": 0}) or {}
+        f = await db.main().firms.find_one({"db": tenant.current()}, {"_id": 0, "name": 1}) or {}
+        nm = _hh.escape(g.get("company_name") or f.get("name") or "Servis")
+        h = re.sub(r'<a href="https://servisplus\.net\.tr"><img[^>]*servisplus-logo[^>]*></a>', '<span style="font:800 18px system-ui;color:#fff">%s</span>' % nm, h)
+        h = re.sub(r"ServisPlus &middot; Türkiye(?:'|&#39;)nin Servis Ağı<br><a [^>]*>servisplus\.net\.tr</a>", nm, h)
+        h = h.replace("ServisPlus", nm)
+        return h
+    except Exception:
+        return h
+
 _CIHAZ_HTML = r"""<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><meta name="theme-color" content="#0a1f44"><title>Cihaz Bilgisi · ServisPlus</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -3077,12 +3094,12 @@ async def belge_dogrula(code: str, request: Request):
     import json as _j
     js = _belge_asset("belge.js")
     script = '<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script><script>' + js + '</script><script>(function(){var d=' + _j.dumps(d).replace("</", "<\\/") + ',logo=' + _j.dumps(_belge_asset("logo-servisplus.jpg", "b")) + ',html=window.spBelge.html("belge",d,logo),h=document.getElementById("h"),fr=document.createElement("iframe");fr.srcdoc=html;h.appendChild(fr);function fit(){var k=h.clientWidth/(210*3.7795);fr.style.transform="scale("+k+")";h.style.height=(297*3.7795*k)+"px"}fit();addEventListener("resize",fit);document.getElementById("p").onclick=function(){var w=window.open("","_blank");if(!w){try{fr.contentWindow.print()}catch(e){}return}w.document.open();w.document.write(html.replace("</body>","<script>onload=function(){setTimeout(function(){print()},500)}<\\/script></body>"));w.document.close()}})();</script>'
-    return HTMLResponse(head + ban + rows + '<div id="h"></div><button class="btn" id="p">PDF olarak kaydet / yazdır</button><div class="f">ServisPlus · Türkiye’nin Servis Ağı · servisplus.net.tr</div></div>' + script + '</body></html>', headers={"Cache-Control": "no-store"})
+    return HTMLResponse(await _fbrand(head + ban + rows + '<div id="h"></div><button class="btn" id="p">PDF olarak kaydet / yazdır</button><div class="f">ServisPlus · Türkiye’nin Servis Ağı · servisplus.net.tr</div></div>' + script + '</body></html>'), headers={"Cache-Control": "no-store"})
 
 @app.get("/cihaz/{token}", include_in_schema=False)
 async def cihaz_sayfasi(token: str):
     from fastapi.responses import HTMLResponse
-    return HTMLResponse(_CIHAZ_HTML, headers={"Cache-Control": "no-store"})
+    return HTMLResponse(await _fbrand(_CIHAZ_HTML), headers={"Cache-Control": "no-store"})
 
 # -------------------------- Müşteri takip sayfası (/takip/<jeton>) — React'ten bağımsız, giriş istemez
 _TAKIP_HTML = r"""<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#0a1f44"><title>Servis Takibi · ServisPlus</title>
@@ -3150,7 +3167,7 @@ load();setInterval(function(){if(!document.hidden&&!document.getElementById('sv'
 @app.get("/takip/{token}", include_in_schema=False)
 async def takip_sayfasi(token: str):
     from fastapi.responses import HTMLResponse
-    return HTMLResponse(_TAKIP_HTML, headers={"Cache-Control": "no-store"})
+    return HTMLResponse(await _fbrand(_TAKIP_HTML), headers={"Cache-Control": "no-store"})
 
 # -------------------------- Panel arayüzü (React derlemesi) --------------------------
 # FRONTEND_DIR (varsayılan: backend/../frontend_build ya da backend/public_panel) varsa panel arayüzünü de bu uygulama sunar;

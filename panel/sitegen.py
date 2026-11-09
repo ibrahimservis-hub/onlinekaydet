@@ -203,6 +203,7 @@ def join_blocks(pre, blocks, tail):
 
 
 CSS = """<style data-spx-auto>
+.spx-off{display:none!important}
 .spx-logo{height:42px;width:auto;max-width:200px;object-fit:contain;display:block}
 .spx-sl{position:relative;overflow:hidden;background:var(--dk,#111)}
 .spx-sl-t{position:relative;aspect-ratio:16/6;min-height:240px;max-height:620px}
@@ -281,12 +282,17 @@ def slider_html(ctx):
 
 
 # ------------------------------------------------------------------ ana sayfa
-_ADDR = re.compile(r"Atatürk Cad\. No:12(?:(?:,| /| ·) (?!Hafta)[A-ZÇĞİÖŞÜ][a-zçğıöşü]+)?")
+_ADDR = re.compile(r"(?:<br>)?Atatürk Cad\. No:12(?:(?:,| /| ·) (?!Hafta)[A-ZÇĞİÖŞÜ][a-zçğıöşü]+)?(?: · )?")
 _HOURS = re.compile(r"Hafta içi 08:30 ?[–-] ?19:00")
 
 
+def _off(m):
+    t = m.group(0)
+    return t.replace('class="', 'class="spx-off ', 1) if 'class="' in t else t[:-1] + ' class="spx-off">'
+
+
 def apply_profile(raw, th, ctx):
-    """Ham tema HTML'ine firma bilgilerini yerleştirir (ana sayfa)."""
+    """Ham tema HTML'ine firma bilgilerini yerleştirir (ana sayfa). Boş bırakılan bilgi temadan da kalkar."""
     h = raw.replace("__API_URL__", "/api").replace("__PORTAL_URL__", "#")
     name = ctx["name"]
     if th and th.get("name") and name:
@@ -295,12 +301,24 @@ def apply_profile(raw, th, ctx):
     w = phone10(ctx["p"].get("whatsapp")) or d
     if w:
         h = h.replace("wa.me/905320000000", "wa.me/90" + w)
+    else:
+        h = re.sub(r'<a\b[^>]*wa\.me/905320000000[^>]*>', _off, h)
     if d:
         h = h.replace("905320000000", "90" + d).replace("0532 000 00 00", phone_fmt(d))
-    if ctx["p"].get("address"):
-        h = _ADDR.sub(lambda m: E(ctx["p"]["address"]), h)
-    if ctx["p"].get("hours"):
-        h = _HOURS.sub(lambda m: E(ctx["p"]["hours"]), h)
+    else:
+        h = re.sub(r'<a\b[^>]*tel:\+?905320000000[^>]*>', _off, h)
+        h = re.sub(r"\s*[·•|-]?\s*0532 000 00 00", "", h)
+    h = h.replace("<br>Vergi No: [firma bilgisi]", "").replace("Vergi No: [firma bilgisi]", "")
+    adr = ctx["p"].get("address") or ""
+    h = _ADDR.sub(lambda m: (E(adr) + (" · " if m.group(0).endswith(" · ") else "")) if adr else "", h)
+    hours = ctx["p"].get("hours") or ""
+    h = re.sub(r"<div>Cumartesi 09:00 ?[–-] ?17:00</div>|<div>Acil: 7/24</div>", "", h)
+    h = re.sub(r"Pzt[–-]Cmt 08:30[–-]19:00(?: · Acil için 7/24 arayın)?", lambda m: E(hours), h)
+    if hours:
+        h = _HOURS.sub(lambda m: E(hours), h)
+    else:
+        h = re.sub(r"<div>Hafta içi 08:30 ?[–-] ?19:00</div>", "", h)
+        h = re.sub(r"(?: · )?Hafta içi 08:30 ?[–-] ?19:00", "", h)
     if ctx.get("logo"):
         img = '<img class="spx-logo" src="%s" alt="%s">' % (E(ctx["logo"]), E(name))
         h = re.sub(r'(<(?:a|div) class="lg[^"]*"[^>]*>)<span class="lm[^"]*">[^<]*</span>', lambda m: m.group(1) + img, h)
