@@ -26,7 +26,7 @@ with TestClient(s.app) as c:
         S["slug"] = r.json()["slug"]; assert S["slug"] == "hakkimizda-calisma-saatleri", S["slug"]
         r = c.post("/api/site/pages", headers=H, json={"title": "Hakkımızda Çalışma Saatleri"}); assert r.json()["slug"].endswith("-2")
         assert c.post("/api/site/pages", headers=H, json={"title": "api"}).json()["slug"] != "api"
-        d = c.get("/api/site/edit?page=" + S["slug"], headers=H).json(); assert "Hakkımızda Çalışma Saatleri" in d["html"] and len(d["pages"]) == 3
+        d = c.get("/api/site/edit?page=" + S["slug"], headers=H).json(); assert "Hakkımızda Çalışma Saatleri" in d["html"] and len([p for p in d["pages"] if not p.get("auto")]) == 3
         h = d["html"].replace("Alt başlık", "ÇOK ÖZEL ALT BAŞLIK")
         assert c.put("/api/site/edit", headers=H, json={"page": S["slug"], "html": h}).status_code == 200
     t("yeni sayfa açılır (adres benzersiz, ayrılmış adlar yok), düzenlenir", p)

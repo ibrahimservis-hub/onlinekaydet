@@ -1,0 +1,95 @@
+"""Otomatik site: profil bilgileri temaya yerleşir, iç sayfalar üretilir, slider/galeri/logo, sitemap, düzenleyici uyumu."""
+import sys, os, base64, io
+sys.path.insert(0, os.path.dirname(__file__)); import boot
+os.environ["BACKGROUND_JOBS"] = "0"
+import logging; logging.disable(logging.CRITICAL)
+from starlette.testclient import TestClient
+s = boot.server; ok, bad = [], []; S = {}
+def t(n, f):
+    try: f(); ok.append(n)
+    except Exception:
+        import traceback; bad.append((n, traceback.format_exc()[-600:]))
+def png(color):
+    from PIL import Image
+    b = io.BytesIO(); Image.new("RGB", (900, 500), color).save(b, "PNG"); return "data:image/png;base64," + base64.b64encode(b.getvalue()).decode()
+with TestClient(s.app) as c:
+    j = c.post("/api/public/demo", json={"name": "Ali Veli", "phone": "05524165755", "sector": "Kombi"}).json()
+    H = {"Authorization": "Bearer " + c.post("/api/auth/login", json={"email": j["email"], "password": j["password"]}).json()["token"]}
+    ADM = {"Authorization": "Bearer " + c.post("/api/auth/login", json={"email": "admin@servis.com", "password": "admin123"}).json()["token"]}
+    def dom():
+        fid = [f for f in c.get("/api/admin/firms", headers=ADM).json().get("firms", []) if f.get("demo")][0]
+        async def go():
+            await s.db.main().firm_domains.insert_one({"id": "d9", "domain": "otomatik-site.com", "firm_id": fid["id"], "db": s.db.firm_db_name(fid["id"]), "status": "yayinda"})
+        c.portal.call(go)
+        import domains; domains._cache["t"] = 0
+    dom()
+    def pub(p): return c.get("/api/public/hosted-site?p=" + p.replace("/", "%2F"), headers={"Host": "otomatik-site.com"})
+    def a():
+        r = c.get("/api/site/profile", headers=H); assert r.status_code == 200, r.text
+        d = r.json(); assert d["has_theme"] and d["sector"] == "kombi" and len(d["default_services"]) >= 5
+        names = [p["kind"] for p in d["pages"]]; assert "about" in names and "contact" in names and names.count("service") >= 5, names
+        assert len(d["pages"]) >= 10, len(d["pages"])
+        assert pub("/nasil-calisiyoruz").status_code == 200
+    t("profil okunur; sektör varsayılanlarıyla 10+ sayfa üretilir", a)
+    def b():
+        r = pub("/"); assert r.status_code == 200 and "905524165755" in r.text and "905320000000" not in r.text
+        assert "wa.me/905524165755" in r.text
+    t("ana sayfada telefon ve WhatsApp otomatik yerleşir", b)
+    def lg():
+        assert c.put("/api/site/logo", headers=H, json={"data": png("red")}).status_code == 200
+        r = pub("/"); assert 'class="spx-logo"' in r.text and "/api/public/site-logo?v=" in r.text
+        r = c.get("/api/public/site-logo", headers={"Host": "otomatik-site.com"}); assert r.status_code == 200 and r.headers["content-type"].startswith("image/png"), r.status_code
+    t("logo yüklenince başlıkta otomatik görünür ve adresten servis edilir", lg)
+    def pr():
+        s1 = c.post("/api/site/image", headers=H, json={"data": png("blue")}).json(); s2 = c.post("/api/site/image", headers=H, json={"data": png("green"), "kind": "gallery"}).json()
+        assert len(s1["k"]) == 16; S["k1"], S["k2"] = s1["k"], s2["k"]
+        body = {"whatsapp": "0555 111 22 33", "email": "a@b.com", "address": "Cumhuriyet Mah. 5. Sok. No:3, Bornova İzmir", "hours": "Her gün 09:00 – 20:00", "slogan": "Kombiniz bizde emin ellerde", "city": "İzmir",
+                "about": "Biz iyi servisiz.\n\nİkinci paragraf.", "services": [{"t": "Kombi bakımı", "d": "Yıllık bakım yaparız."}, {"t": "Petek temizliği", "d": "Cihazla."}],
+                "faq": [{"q": "Kaça yapıyorsunuz?", "a": "Arayın."}], "regions": "Bornova, Karşıyaka\\nBuca".replace("\\n", "\n"),
+                "social": {"instagram": "instagram.com/firma", "evil": "x"}, "slides": [{"k": S["k1"], "t": "Kış kampanyası", "d": "Bakım %20 indirimli"}, {"k": "0" * 16}], "gallery": [{"k": S["k2"]}]}
+        r = c.put("/api/site/profile", headers=H, json=body); assert r.status_code == 200, r.text
+        d = c.get("/api/site/profile", headers=H).json(); assert len(d["profile"]["slides"]) == 1 and d["profile"]["regions"] == ["Bornova", "Karşıyaka", "Buca"] and "evil" not in d["profile"]["social"]
+    t("profil kaydedilir (geçersiz resim/alan ayıklanır)", pr)
+    def home():
+        r = pub("/").text
+        assert "wa.me/905551112233" in r and "Cumhuriyet Mah. 5. Sok. No:3, Bornova İzmir" in r and "Her gün 09:00 – 20:00" in r
+        assert "Kombiniz bizde emin ellerde" in r and 'class="spx-sl"' in r and "Kış kampanyası" in r and "/api/public/site-img/" + S["k1"] in r
+        assert 'href="/hakkimizda"' in r and "instagram.com/firma" in r
+    t("slogan, adres, saat, slider ve menü bağlantıları ana sayfaya yerleşir", home)
+    def pages():
+        for p, needle in [("/hakkimizda", "Biz iyi servisiz"), ("/hizmetlerimiz", "Petek temizliği"), ("/sss", "Kaça yapıyorsunuz"), ("/iletisim", "a@b.com"), ("/galeri", "site-img/" + S["k2"]),
+                          ("/hizmet-bolgeleri", "Bornova"), ("/hizmet-kombi-bakimi", "Yıllık bakım yaparız"), ("/bolge-bornova", "Bornova bölgesinde"), ("/bolge-buca", "Buca")]:
+            r = pub(p); assert r.status_code == 200 and needle in r.text, (p, r.status_code)
+            assert 'id="mn"' in r.text and "Alt bilgi" in r.text and "Hemen arayın" in r.text, p
+        r = pub("/iletisim").text; assert "maps.google.com/maps?q=" in r and 'href="/#randevu"' in r
+    t("hakkımızda/hizmetler/SSS/iletişim/galeri/bölge/hizmet sayfaları yayınlanır (tema menüsüyle)", pages)
+    def sm():
+        r = pub("/sitemap.xml"); assert r.status_code == 200 and "application/xml" in r.headers["content-type"] and "https://otomatik-site.com/bolge-buca" in r.text and r.text.count("<loc>") >= 10
+        assert "Sitemap: https://otomatik-site.com/sitemap.xml" in pub("/robots.txt").text
+    t("sitemap.xml ve robots.txt üretilir", sm)
+    def pv():
+        r = c.get("/api/site/preview?path=/", headers=H); assert r.status_code == 200 and "data:image/jpeg;base64" in r.text and "/api/public/site-img/" not in r.text
+        r = c.get("/api/site/preview?path=/hakkimizda", headers=H); assert r.status_code == 200 and "Biz iyi servisiz" in r.text
+        assert c.get("/api/site/preview?path=/yok-boyle", headers=H).status_code == 404
+    t("panel önizlemesi görselleri gömülü verir", pv)
+    def ed():
+        d = c.get("/api/site/edit?page=hakkimizda", headers=H).json(); assert not d["custom"] and "Biz iyi servisiz" in d["html"]
+        assert any(p.get("auto") for p in d["pages"])
+        h = d["html"].replace("Biz iyi servisiz", "DEĞİŞTİ METİN")
+        assert c.put("/api/site/edit", headers=H, json={"page": "hakkimizda", "html": h}).status_code == 200
+        assert "DEĞİŞTİ METİN" in pub("/hakkimizda").text
+        d = c.get("/api/site/edit", headers=H).json(); assert not d["custom"] and "data:image/jpeg;base64" in d["html"]
+        h2 = d["html"].replace("Kış kampanyası", "Yaz kampanyası")
+        assert c.put("/api/site/edit", headers=H, json={"html": h2}).status_code == 200
+        r = pub("/").text
+        assert "Yaz kampanyası" in r and 'src="data:image/jpeg' not in r and "/api/public/site-img/" + S["k1"] in r
+        assert 'href="/sss"' in pub("/hakkimizda").text
+    t("otomatik sayfa düzenleyicide açılıp kaydedilir; görseller kaydederken kısa adrese döner", ed)
+    def rs():
+        assert c.delete("/api/site/edit?page=hakkimizda", headers=H).status_code == 200
+        assert "Biz iyi servisiz" in pub("/hakkimizda").text
+    t("sayfa sıfırlanınca otomatik haline döner", rs)
+print("OK %d/%d" % (len(ok), len(ok) + len(bad)))
+for n in ok: print("  ✔", n)
+for n, e in bad: print("  ✘", n, "\n", e)
+sys.exit(1 if bad else 0)

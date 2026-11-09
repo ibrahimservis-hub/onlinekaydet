@@ -301,7 +301,7 @@
     return fetch(API + path, o).then(function (r) { return r.text().then(function (t) { var j = {}; try { j = JSON.parse(t); } catch (e) { } if (!r.ok) { var d = j && j.detail; throw new Error(typeof d === 'string' ? d : (d && d[0] && d[0].msg) || ('Hata ' + r.status)); } return j; }); });
   }
   function fail(e) { toast(e.message || 'İşlem başarısız'); }
-  var TABS = [['firmalar', 'Firmalar'], ['siteduz', 'Site Düzenleyici'], ['domain', 'Alan Adı & Site'], ['paket', 'Paketim'], ['mgayar', 'Mağaza Ayarları'], ['moduller', 'Aç / Kapat & Ayarlar'], ['seo', 'SEO · 301 · 404'], ['yeni', 'Yeni Sipariş'], ['pazar', 'Pazaryerleri'], ['yetki', 'Kullanıcılar & Yetkiler'], ['gsc', 'Google Search Console'], ['urunler', 'Ürün Yönetimi'], ['marka', 'Marka Ürün Aktarma'], ['m360', 'Müşteri 360'], ['kaynak', 'Kaynak & Arama Analizi'], ['ustapuan', 'Usta Puanlama'], ['ustagecmis', 'Usta İş Geçmişi'], ['cari', 'Cari & Trend'], ['tahsilat', 'Teknisyen Tahsilat'], ['atolye', 'Atölye'], ['canli', 'Canlı Ziyaretçiler'], ['wa', 'WhatsApp & Bildirim'], ['daha', 'Daha Fazlası'], ['bildirim', 'Bildirimler'], ['memnun', 'Müşteri Memnuniyeti'], ['vade', 'Usta Borç Vadesi'], ['harita', 'Günün İş Haritası'], ['onay', 'Onay Bekleyenler'], ['rapor', 'Rapor Merkezi'], ['kurulum', 'Kurulum Durumu']];
+  var TABS = [['firmalar', 'Firmalar'], ['sitem', 'Sitem'], ['siteduz', 'Gelişmiş Düzenleme'], ['domain', 'Alan Adı & Site'], ['paket', 'Paketim'], ['mgayar', 'Mağaza Ayarları'], ['moduller', 'Aç / Kapat & Ayarlar'], ['seo', 'SEO · 301 · 404'], ['yeni', 'Yeni Sipariş'], ['pazar', 'Pazaryerleri'], ['yetki', 'Kullanıcılar & Yetkiler'], ['gsc', 'Google Search Console'], ['urunler', 'Ürün Yönetimi'], ['marka', 'Marka Ürün Aktarma'], ['m360', 'Müşteri 360'], ['kaynak', 'Kaynak & Arama Analizi'], ['ustapuan', 'Usta Puanlama'], ['ustagecmis', 'Usta İş Geçmişi'], ['cari', 'Cari & Trend'], ['tahsilat', 'Teknisyen Tahsilat'], ['atolye', 'Atölye'], ['canli', 'Canlı Ziyaretçiler'], ['wa', 'WhatsApp & Bildirim'], ['daha', 'Daha Fazlası'], ['bildirim', 'Bildirimler'], ['memnun', 'Müşteri Memnuniyeti'], ['vade', 'Usta Borç Vadesi'], ['harita', 'Günün İş Haritası'], ['onay', 'Onay Bekleyenler'], ['rapor', 'Rapor Merkezi'], ['kurulum', 'Kurulum Durumu']];
   function build() {
     ov = document.createElement('div'); ov.id = 'spx-ov';
     ov.innerHTML = '<header><button class="spx-b" id="spx-menu">☰ Menü</button><h2 id="spx-h">Site Yönetimi</h2><button class="spx-b" id="spx-x">Kapat ✕</button></header><div id="spx-tabs"></div><div id="spx-body">Yükleniyor…</div>';
@@ -314,9 +314,9 @@
   function body() { return $('#spx-body'); }
   function draw() {
     Array.prototype.forEach.call($('#spx-tabs').children, function (b) { b.classList.toggle('on', b.getAttribute('data-t') === TAB); });
-    var hh = $('#spx-h'); if (hh) hh.textContent = ({ firmalar: 'Firmalar', siteduz: 'Site Düzenleyici', domain: 'Alan Adı & Site', paket: 'Paketim', mgayar: 'Mağaza Ayarları', daha: 'Daha Fazlası', bildirim: 'Bildirimler', memnun: 'Müşteri Memnuniyeti', vade: 'Usta Borç Vadesi', harita: 'Günün İş Haritası', moduller: 'Aç/Kapat & Entegrasyonlar', seo: 'SEO · 301 · 404', yeni: 'Yeni Sipariş Gir', pazar: 'Pazaryerleri', yetki: 'Kullanıcılar & Yetkiler', gsc: 'Google Search Console', marka: 'Marka Ürün Aktarma', urunler: 'Ürün Yönetimi', m360: 'Müşteri 360', kaynak: 'Kaynak & Arama Analizi', ustapuan: 'Usta Puanlama', ustagecmis: 'Usta İş Geçmişi', cari: 'Cari & Trend', tahsilat: 'Teknisyen Tahsilat', atolye: 'Atölye (Cihaz Teslim Alma)', sohbet: 'Canlı Sohbet', canli: 'Canlı Ziyaretçiler', wa: 'WhatsApp & Bildirim Ayarları', onay: 'Onay Bekleyenler', rapor: 'Rapor Merkezi', kurulum: 'Kurulum Durumu' })[TAB];
+    var hh = $('#spx-h'); if (hh) hh.textContent = ({ firmalar: 'Firmalar', sitem: 'Sitem — Web Siteniz', siteduz: 'Gelişmiş Düzenleme', domain: 'Alan Adı & Site', paket: 'Paketim', mgayar: 'Mağaza Ayarları', daha: 'Daha Fazlası', bildirim: 'Bildirimler', memnun: 'Müşteri Memnuniyeti', vade: 'Usta Borç Vadesi', harita: 'Günün İş Haritası', moduller: 'Aç/Kapat & Entegrasyonlar', seo: 'SEO · 301 · 404', yeni: 'Yeni Sipariş Gir', pazar: 'Pazaryerleri', yetki: 'Kullanıcılar & Yetkiler', gsc: 'Google Search Console', marka: 'Marka Ürün Aktarma', urunler: 'Ürün Yönetimi', m360: 'Müşteri 360', kaynak: 'Kaynak & Arama Analizi', ustapuan: 'Usta Puanlama', ustagecmis: 'Usta İş Geçmişi', cari: 'Cari & Trend', tahsilat: 'Teknisyen Tahsilat', atolye: 'Atölye (Cihaz Teslim Alma)', sohbet: 'Canlı Sohbet', canli: 'Canlı Ziyaretçiler', wa: 'WhatsApp & Bildirim Ayarları', onay: 'Onay Bekleyenler', rapor: 'Rapor Merkezi', kurulum: 'Kurulum Durumu' })[TAB];
     body().innerHTML = 'Yükleniyor…';
-    ({ firmalar: drawFirmalar, siteduz: drawSiteEd, domain: drawDomain, paket: drawPaket, mgayar: drawMgAyar, daha: drawDaha, bildirim: drawBildirim, memnun: drawMemnun, vade: drawVade, harita: drawHarita, moduller: drawMod, seo: drawSeo, yeni: drawNew, pazar: drawMkt, yetki: drawUsers, gsc: drawGsc, marka: drawBrand, urunler: drawProducts, m360: drawM360, kaynak: drawKaynak, ustapuan: drawUstaPuan, ustagecmis: drawUstaGecmis, cari: drawCari, tahsilat: drawTahsilat, atolye: drawAtolye, sohbet: drawSohbet, canli: drawCanli, wa: drawWa, onay: drawOnay, rapor: drawRapor, kurulum: drawKurulum })[TAB]();
+    ({ firmalar: drawFirmalar, sitem: drawSitem, siteduz: drawSiteEd, domain: drawDomain, paket: drawPaket, mgayar: drawMgAyar, daha: drawDaha, bildirim: drawBildirim, memnun: drawMemnun, vade: drawVade, harita: drawHarita, moduller: drawMod, seo: drawSeo, yeni: drawNew, pazar: drawMkt, yetki: drawUsers, gsc: drawGsc, marka: drawBrand, urunler: drawProducts, m360: drawM360, kaynak: drawKaynak, ustapuan: drawUstaPuan, ustagecmis: drawUstaGecmis, cari: drawCari, tahsilat: drawTahsilat, atolye: drawAtolye, sohbet: drawSohbet, canli: drawCanli, wa: drawWa, onay: drawOnay, rapor: drawRapor, kurulum: drawKurulum })[TAB]();
   }
   /* ===== Firmalar: paneli kendi verisiyle kullanan müşteri firmalar ===== */
   var FM = { sel: '', tab: 'bilgi', job: '', q: '', flt: '', newOpen: false };
@@ -1543,7 +1543,7 @@
     ['Ustalar', [['/admin/technicians', 'Teknisyenler'], ['/admin/dealers', 'Bayilik Başvuruları'], ['ek:ustapuan', 'Usta Puanlama', 'user'], ['ek:ustagecmis', 'Usta İş Geçmişi', 'user'], ['/admin/performance', 'Performans'], ['/admin/team', 'Ekip Merkezi'], ['/admin/announcements', 'Duyurular']]],
     ['Muhasebe', [['/admin/accounting', 'Muhasebe'], ['ek:tahsilat', 'Teknisyen Tahsilat', 'cart'], ['ek:cari', 'Cari & Trend', 'cart'], ['ek:vade', 'Usta Borç Vadesi', 'cart'], ['ek:memnun', 'Müşteri Memnuniyeti', 'user'], ['/admin/reports', 'Raporlar']]],
     ['Mağaza & Satış', [['/admin/shop', 'Mağaza'], ['ek:yeni', 'Yeni Sipariş Gir', 'plus'], ['ek:mgayar', 'Mağaza Ayarları', 'gear'], ['ek:pazar', 'Pazaryerleri', 'cart'], ['ek:urunler', 'Ürün Yönetimi', 'cart'], ['ek:marka', 'Marka Ürün Aktarma', 'cart'], ['/admin/coupons', 'Kuponlar']]],
-    ['Web Sitesi', [['/admin/site-features', 'Site Özellikleri'], ['ek:siteduz', 'Site Düzenleyici', 'gear'], ['ek:domain', 'Alan Adı & Site', 'gear'], ['ek:moduller', 'Aç/Kapat & Entegrasyonlar', 'gear'], ['ek:seo', 'SEO · 301 · 404', 'search'], ['/admin/site-studio', 'Site Stüdyosu'], ['/admin/media', 'Medya Kütüphanesi'], ['/admin/integration', 'Site Entegrasyonu']]],
+    ['Web Sitesi', [['/admin/site-features', 'Site Özellikleri'], ['ek:sitem', 'Sitem (Web Sitesi)', 'gear'], ['ek:siteduz', 'Gelişmiş Düzenleme', 'gear'], ['ek:domain', 'Alan Adı & Site', 'gear'], ['ek:moduller', 'Aç/Kapat & Entegrasyonlar', 'gear'], ['ek:seo', 'SEO · 301 · 404', 'search'], ['/admin/site-studio', 'Site Stüdyosu'], ['/admin/media', 'Medya Kütüphanesi'], ['/admin/integration', 'Site Entegrasyonu']]],
     ['Pazarlama & İletişim', [['/admin/messages', 'İletişim Mesajları'], ['ek:sohbet', 'Canlı Sohbet', 'live'], ['/admin/reviews', 'Yorumlar'], ['ek:gsc', 'Google Search Console', 'search'], ['/admin/marketing', 'Pazarlama Merkezi'], ['ek:canli', 'Canlı Ziyaretçiler', 'search'], ['ek:wa', 'WhatsApp & Bildirim', 'gear'], ['ek:kaynak', 'Kaynak & Arama Analizi', 'search'], ['/admin/growth', 'Büyüme Merkezi'], ['/admin/visitors', 'Ziyaretçiler']]],
     ['Yönetim', [['/admin/settings', 'Ayarlar'], ['ek:yetki', 'Kullanıcılar & Yetkiler', 'user'], ['ek:firmalar', 'Firmalar', 'user'], ['/admin/security', 'Güvenlik'], ['/admin/governance', 'Yedek & Denetim'], ['ek:paket', 'Paketim', 'box'], ['/admin/account', 'Hesabım']]]
   ];
@@ -1558,7 +1558,7 @@
     '/admin/security': [['alerts', 'Güvenlik Uyarıları'], ['logins', 'Giriş Kayıtları'], ['failed', 'Hatalı Girişler'], ['devices', 'Cihazlar'], ['settings', 'Kurallar']],
     '/admin/governance': [['health', 'Sistem Sağlığı'], ['backups', 'Yedekler'], ['audit', 'Denetim Kaydı'], ['trash', 'Çöp Kutusu'], ['notify', 'Bildirim Kanalları']]
   };
-  var MPERM = { '/admin': 'dashboard', '/admin/jobs': 'jobs', '/admin/appointments': 'appointments', '/admin/quotes': 'quotes', '/admin/warranty': 'warranty', '/admin/customers': 'customers', '/admin/technicians': 'technicians', '/admin/parts': 'parts', '/admin/shop': 'shop', 'ek:yeni': 'shop', 'ek:mgayar': 'shop', 'ek:atolye': 'jobs', 'ek:ustagecmis': 'technicians', 'ek:tahsilat': 'accounting', 'ek:vade': 'accounting', 'ek:memnun': 'reports', 'ek:rapor': 'reports', 'ek:kurulum': 'settings', 'ek:harita': 'jobs', 'ek:canli': 'visitors', 'ek:wa': 'integration', 'ek:pazar': 'shop', 'ek:marka': 'shop', 'ek:urunler': 'shop', '/admin/coupons': 'coupons', '/admin/site-features': 'site_features', 'ek:moduller': 'site_features', 'ek:domain': 'site_features', 'ek:siteduz': 'site_features', 'ek:seo': 'seo', 'ek:gsc': 'marketing', '/admin/site-studio': 'studio', '/admin/media': 'studio', '/admin/integration': 'integration', '/admin/messages': 'messages', '/admin/reviews': 'reviews', '/admin/dealers': 'dealers', '/admin/marketing': 'marketing', '/admin/growth': 'growth', '/admin/visitors': 'visitors', '/admin/team': 'team', '/admin/performance': 'performance', '/admin/announcements': 'announcements', '/admin/diagnosis': 'diagnosis', '/admin/brands': 'brands', '/admin/accounting': 'accounting', '/admin/reports': 'reports', '/admin/settings': 'settings' };
+  var MPERM = { '/admin': 'dashboard', '/admin/jobs': 'jobs', '/admin/appointments': 'appointments', '/admin/quotes': 'quotes', '/admin/warranty': 'warranty', '/admin/customers': 'customers', '/admin/technicians': 'technicians', '/admin/parts': 'parts', '/admin/shop': 'shop', 'ek:yeni': 'shop', 'ek:mgayar': 'shop', 'ek:atolye': 'jobs', 'ek:ustagecmis': 'technicians', 'ek:tahsilat': 'accounting', 'ek:vade': 'accounting', 'ek:memnun': 'reports', 'ek:rapor': 'reports', 'ek:kurulum': 'settings', 'ek:harita': 'jobs', 'ek:canli': 'visitors', 'ek:wa': 'integration', 'ek:pazar': 'shop', 'ek:marka': 'shop', 'ek:urunler': 'shop', '/admin/coupons': 'coupons', '/admin/site-features': 'site_features', 'ek:moduller': 'site_features', 'ek:domain': 'site_features', 'ek:sitem': 'site_features', 'ek:siteduz': 'site_features', 'ek:seo': 'seo', 'ek:gsc': 'marketing', '/admin/site-studio': 'studio', '/admin/media': 'studio', '/admin/integration': 'integration', '/admin/messages': 'messages', '/admin/reviews': 'reviews', '/admin/dealers': 'dealers', '/admin/marketing': 'marketing', '/admin/growth': 'growth', '/admin/visitors': 'visitors', '/admin/team': 'team', '/admin/performance': 'performance', '/admin/announcements': 'announcements', '/admin/diagnosis': 'diagnosis', '/admin/brands': 'brands', '/admin/accounting': 'accounting', '/admin/reports': 'reports', '/admin/settings': 'settings' };
   /* ServisPlus'ın kendi sitesini yöneten ekranlar: müşteri firmanın panelinde görünmez (kendi sitesi: Alan Adı & Site) */
   var FIRM_HIDE = { '/admin/site-studio': 1, '/admin/media': 1, '/admin/site-features': 1, '/admin/integration': 1, 'ek:moduller': 1, 'ek:seo': 1, 'ek:gsc': 1, '/admin/visitors': 1, 'ek:canli': 1 };
   setInterval(function () { try { if (FIRM) { var p = location.pathname.replace(/\/$/, ''); Object.keys(FIRM_HIDE).forEach(function (k) { if (k.indexOf('/') === 0 && (p === k || p.indexOf(k + '/') === 0)) location.replace('/admin?sitem=1'); }); } } catch (e) { } }, 800);
@@ -1567,7 +1567,7 @@
   /* Menü öğesi -> paket modülü (firmanın paketinde olmayan modüller menüde gizlenir; sunucu da kapıyı ayrıca kapatır) */
   var MODKEY = { '/admin/accounting': 'muhasebe', 'ek:tahsilat': 'muhasebe', 'ek:cari': 'muhasebe', 'ek:vade': 'muhasebe', '/admin/reports': 'rapor', 'ek:rapor': 'rapor', 'ek:memnun': 'rapor',
     '/admin/performance': 'rapor', '/admin/shop': 'magaza', 'ek:yeni': 'magaza', 'ek:mgayar': 'magaza', 'ek:pazar': 'magaza', 'ek:urunler': 'magaza', 'ek:marka': 'magaza', '/admin/parts': 'magaza',
-    '/admin/site-features': 'site', 'ek:moduller': 'site', 'ek:seo': 'site', 'ek:domain': 'site', 'ek:siteduz': 'site', '/admin/site-studio': 'site', '/admin/media': 'site', '/admin/visitors': 'site', 'ek:canli': 'site',
+    '/admin/site-features': 'site', 'ek:moduller': 'site', 'ek:seo': 'site', 'ek:domain': 'site', 'ek:sitem': 'site', 'ek:siteduz': 'site', '/admin/site-studio': 'site', '/admin/media': 'site', '/admin/visitors': 'site', 'ek:canli': 'site',
     '/admin/marketing': 'pazarlama', '/admin/growth': 'pazarlama', '/admin/coupons': 'pazarlama', 'ek:kaynak': 'pazarlama', 'ek:gsc': 'pazarlama', 'ek:wa': 'sms',
     '/admin/quotes': 'teklif', '/admin/warranty': 'bakim', '/admin/dealers': 'bayi' };
   var PKGMODS = null, PKGBUSY = false, PKGTOK = '';
@@ -2939,6 +2939,150 @@
     }).catch(fail);
   }
   /* ===== Site Düzenleyici v2: görsel site oluşturucu (bloklar, resim, logo, sayfalar, mobil önizleme, geri al) ===== */
+  /* ===== Sitem: teknik bilgisi olmayan müşteri için basit site ekranı ===== */
+  function drawSitem() {
+    var P = {}, IM = {}, INFO = {}, DEF = {}, LOGO = '', D = {}, BR = null, CURP = '/', DEVW = 'd', TM = '';
+    var ICO = { up: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M6 10l6-6 6 6M4 20h16"/></svg>', x: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>' };
+    var CSS = '<style>#sm_w{display:grid;grid-template-columns:minmax(0,1fr) 440px;gap:20px;align-items:start}#sm_pv{position:sticky;top:8px}@media(max-width:1100px){#sm_w{grid-template-columns:1fr}#sm_pv{position:static}}' +
+      '.sm-c{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:18px 20px;margin-bottom:14px}.sm-c h3{margin:0 0 3px;font:700 16px system-ui;color:#0f172a;display:flex;align-items:center;gap:10px}.sm-c h3 i{font:700 12px system-ui;font-style:normal;background:#0f172a;color:#fff;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;flex:none}' +
+      '.sm-c>p{margin:0 0 14px 34px;color:#64748b;font-size:13.5px;line-height:1.5}.sm-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}.sm-c label{display:block;font:600 12.5px system-ui;color:#334155}.sm-c label small{font-weight:400;color:#94a3b8}' +
+      '.sm-c input[type=text],.sm-c input:not([type]),.sm-c textarea,.sm-c select{width:100%;margin-top:4px;padding:10px 12px;border:1px solid #cbd5e1;border-radius:8px;font:15px system-ui;background:#fff;box-sizing:border-box}.sm-c textarea{min-height:90px;resize:vertical}.sm-c input:focus,.sm-c textarea:focus{outline:2px solid #3b82f6;outline-offset:1px;border-color:#3b82f6}' +
+      '.sm-b{display:inline-flex;align-items:center;gap:8px;border:1px solid #cbd5e1;background:#fff;border-radius:8px;padding:10px 14px;font:600 14px system-ui;cursor:pointer;color:#0f172a;min-height:42px}.sm-b:hover{background:#f1f5f9}.sm-b.p{background:#0f172a;color:#fff;border-color:#0f172a}.sm-b.p:hover{background:#1e293b}.sm-b.d{color:#b91c1c}' +
+      '.sm-bar{position:sticky;bottom:0;z-index:5;background:#fff;border-top:1px solid #e2e8f0;padding:12px 4px;display:flex;gap:10px;align-items:center;justify-content:space-between;margin:0 -4px}.sm-bar span{color:#64748b;font-size:13px}' +
+      '.sm-pr{height:8px;border-radius:6px;background:#e2e8f0;overflow:hidden;margin:8px 0 10px}.sm-pr div{height:100%;background:#16a34a;transition:width .4s}.sm-t{display:flex;flex-wrap:wrap;gap:6px}.sm-t a{font:600 12.5px system-ui;padding:5px 11px;border-radius:99px;background:#fef3c7;color:#92400e;text-decoration:none;cursor:pointer}.sm-t a.ok{background:#dcfce7;color:#166534}' +
+      '.sm-lg{display:flex;align-items:center;gap:14px;flex-wrap:wrap}.sm-lgb{width:150px;height:76px;border:1.5px dashed #cbd5e1;border-radius:10px;display:grid;place-items:center;background:#f8fafc;color:#94a3b8;font-size:12.5px;overflow:hidden}.sm-lgb img{max-width:100%;max-height:100%}' +
+      '.sm-im{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}.sm-it{border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;background:#f8fafc;position:relative}.sm-it img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block}.sm-it .f{padding:8px}.sm-it .f input{margin:0 0 6px!important;padding:7px 9px!important;font-size:13px!important}.sm-it>button{position:absolute;top:6px;right:6px;width:28px;height:28px;border-radius:50%;border:0;background:rgba(15,23,42,.8);color:#fff;cursor:pointer;display:grid;place-items:center}' +
+      '.sm-rw{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid #f1f5f9}.sm-rw textarea{min-height:60px!important}.sm-tm{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}.sm-tc{border:2px solid #e2e8f0;border-radius:10px;overflow:hidden;cursor:pointer;background:#fff;text-align:left;padding:0}.sm-tc.on{border-color:#16a34a}.sm-tc img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;background:#e2e8f0}.sm-tc span{display:block;padding:7px 9px;font:600 12.5px system-ui;color:#0f172a}' +
+      '.sm-fr{width:100%;border:1px solid #cbd5e1;border-radius:10px;background:#fff;display:block;margin:0 auto}.sm-ph .sm-fr{width:390px;max-width:100%}.sm-ps{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}.sm-ps select{flex:1;min-width:140px;padding:8px;border:1px solid #cbd5e1;border-radius:8px;font:13px system-ui}.sm-ps .on{background:#0f172a;color:#fff}</style>';
+    function say(id, h) { var e = $('#' + id); if (e) e.innerHTML = h; }
+    function inp(label, f, ph, hint) { return '<label>' + label + (hint ? ' <small>' + hint + '</small>' : '') + '<input type="text" data-f="' + f + '" value="' + esc(P[f] || '') + '" placeholder="' + esc(ph || '') + '"></label>'; }
+    function pct() {
+      var it = [['Telefon', !!INFO.phone, 'sm_s1'], ['Adres', !!INFO.address, 'sm_s1'], ['Logo', !!LOGO, 'sm_s2'], ['Ana sayfa resmi', (P.slides || []).length > 0, 'sm_s4'], ['Hakkımızda yazısı', !!(P.about || '').trim(), 'sm_s5'], ['Hizmet bölgeleri', (P.regions || []).length > 0, 'sm_s8'], ['Çalışma saatleri', !!P.hours, 'sm_s1']];
+      var n = it.filter(function (x) { return x[1]; }).length; return { p: Math.round(n * 100 / it.length), it: it };
+    }
+    function rProg() {
+      var o = pct();
+      say('sm_prog', '<b style="font:700 15px system-ui;color:#0f172a">Siteniz %' + o.p + ' hazır</b><div class="sm-pr"><div style="width:' + o.p + '%"></div></div><div class="sm-t">' + o.it.map(function (x) { return '<a class="' + (x[1] ? 'ok' : '') + '" data-go="' + x[2] + '">' + (x[1] ? '✓ ' : '+ ') + x[0] + '</a>'; }).join('') + '</div>');
+      Array.prototype.forEach.call(document.querySelectorAll('[data-go]'), function (a) { a.onclick = function () { var t = $('#' + a.getAttribute('data-go')); if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' }); }; });
+    }
+    function rLogo() {
+      say('sm_logo', '<div class="sm-lg"><div class="sm-lgb">' + (LOGO ? '<img src="' + LOGO + '" alt="Logo">' : 'Logo yok') + '</div><div><button class="sm-b" id="sm_lgb">' + ICO.up + ' Logo seç</button> ' + (LOGO ? '<button class="sm-b d" id="sm_lgx">Kaldır</button>' : '') +
+        '<label style="margin-top:10px;display:flex;gap:8px;align-items:center;font-weight:500"><input type="checkbox" id="sm_lgo"' + (P.logo_only ? ' checked' : '') + ' style="width:auto;margin:0"> Yazıyı gösterme, yalnızca logo görünsün</label></div></div><input type="file" id="sm_lgf" accept="image/*" style="display:none">');
+      $('#sm_lgb').onclick = function () { $('#sm_lgf').click(); };
+      $('#sm_lgf').onchange = function () { var f = this.files[0]; if (f) readLogo(f); };
+      if ($('#sm_lgx')) $('#sm_lgx').onclick = function () { call('PUT', '/site/logo', { data: '' }).then(function () { LOGO = ''; rLogo(); rProg(); prev(); }).catch(fail); };
+      $('#sm_lgo').onchange = function () { P.logo_only = this.checked; };
+    }
+    function loadImg(file, max, type, q) {
+      return new Promise(function (ok, no) {
+        var fr = new FileReader(); fr.onerror = function () { no(new Error('Dosya okunamadı')); };
+        fr.onload = function () {
+          if (/svg/.test(file.type)) return ok(fr.result);
+          var im = new Image(); im.onerror = function () { no(new Error('Bu dosya resim değil')); };
+          im.onload = function () { var s = Math.min(1, max / Math.max(im.width, im.height)), c = document.createElement('canvas'); c.width = Math.round(im.width * s); c.height = Math.round(im.height * s); c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); ok(c.toDataURL(type, q)); };
+          im.src = fr.result;
+        }; fr.readAsDataURL(file);
+      });
+    }
+    function readLogo(f) {
+      loadImg(f, 520, 'image/png').then(function (u) { return call('PUT', '/site/logo', { data: u }).then(function () { LOGO = u; toast('Logo yüklendi'); rLogo(); rProg(); prev(); }); }).catch(fail);
+    }
+    function addImgs(files, key, kind, max) {
+      var left = max - (P[key] || []).length; if (left <= 0) return toast('En fazla ' + max + ' resim eklenebilir');
+      toast('Resimler yükleniyor…');
+      Array.prototype.slice.call(files, 0, left).reduce(function (pr, f) {
+        return pr.then(function () { return loadImg(f, kind === 'gallery' ? 1280 : 1920, 'image/jpeg', .85).then(function (u) { return call('POST', '/site/image', { data: u, kind: kind }); }).then(function (r) { IM[r.k] = r.data; (P[key] = P[key] || []).push(key === 'slides' ? { k: r.k, t: '', d: '' } : { k: r.k }); }); });
+      }, Promise.resolve()).then(function () { rSlides(); rGal(); rProg(); toast('Resimler eklendi — "Kaydet" ile yayınlayın'); }).catch(fail);
+    }
+    function picker(id, key, kind, max, label) { return '<button class="sm-b" id="' + id + 'b">' + ICO.up + ' ' + label + '</button><input type="file" id="' + id + 'f" accept="image/*" multiple style="display:none">'; }
+    function wirePick(id, key, kind, max) { $('#' + id + 'b').onclick = function () { $('#' + id + 'f').click(); }; $('#' + id + 'f').onchange = function () { addImgs(this.files, key, kind, max); this.value = ''; }; }
+    function rSlides() {
+      var s = P.slides || [];
+      say('sm_sl', (s.length ? '<div class="sm-im">' + s.map(function (x, i) { return '<div class="sm-it"><img src="' + (IM[x.k] || '') + '" alt=""><button data-rm="' + i + '" aria-label="Sil">' + ICO.x + '</button><div class="f"><input type="text" data-st="' + i + '" value="' + esc(x.t || '') + '" placeholder="Resmin üstündeki başlık (isteğe bağlı)"><input type="text" data-sd="' + i + '" value="' + esc(x.d || '') + '" placeholder="Altına kısa yazı (isteğe bağlı)"></div></div>'; }).join('') + '</div><div style="height:12px"></div>' : '<div style="color:#94a3b8;font-size:13.5px;margin-bottom:10px">Henüz resim eklemediniz.</div>') + picker('sm_sl', 'slides', 'slide', 8, 'Resim ekle'));
+      wirePick('sm_sl', 'slides', 'slide', 8);
+      Array.prototype.forEach.call(document.querySelectorAll('#sm_sl [data-rm]'), function (b) { b.onclick = function () { P.slides.splice(+b.getAttribute('data-rm'), 1); rSlides(); rProg(); }; });
+      Array.prototype.forEach.call(document.querySelectorAll('#sm_sl [data-st]'), function (e) { e.oninput = function () { P.slides[+e.getAttribute('data-st')].t = e.value; }; });
+      Array.prototype.forEach.call(document.querySelectorAll('#sm_sl [data-sd]'), function (e) { e.oninput = function () { P.slides[+e.getAttribute('data-sd')].d = e.value; }; });
+    }
+    function rGal() {
+      var s = P.gallery || [];
+      say('sm_gl', (s.length ? '<div class="sm-im">' + s.map(function (x, i) { return '<div class="sm-it"><img src="' + (IM[x.k] || '') + '" alt=""><button data-gx="' + i + '" aria-label="Sil">' + ICO.x + '</button></div>'; }).join('') + '</div><div style="height:12px"></div>' : '') + picker('sm_gl', 'gallery', 'gallery', 16, 'Resim ekle'));
+      wirePick('sm_gl', 'gallery', 'gallery', 16);
+      Array.prototype.forEach.call(document.querySelectorAll('#sm_gl [data-gx]'), function (b) { b.onclick = function () { P.gallery.splice(+b.getAttribute('data-gx'), 1); rGal(); }; });
+    }
+    function rRows(id, key, a, b, la, lb, max, add) {
+      var L = P[key] || [];
+      say(id, L.map(function (x, i) { return '<div class="sm-rw"><div><input type="text" data-a="' + i + '" value="' + esc(x[a] || '') + '" placeholder="' + la + '"><textarea data-b="' + i + '" placeholder="' + lb + '" style="margin-top:6px">' + esc(x[b] || '') + '</textarea></div><button class="sm-b d" data-d="' + i + '" aria-label="Sil">' + ICO.x + '</button></div>'; }).join('') + (L.length < max ? '<button class="sm-b" id="' + id + '_n">+ ' + add + '</button>' : ''));
+      var q = function (s) { return document.querySelectorAll('#' + id + ' ' + s); };
+      Array.prototype.forEach.call(q('[data-a]'), function (e) { e.oninput = function () { L[+e.getAttribute('data-a')][a] = e.value; }; });
+      Array.prototype.forEach.call(q('[data-b]'), function (e) { e.oninput = function () { L[+e.getAttribute('data-b')][b] = e.value; }; });
+      Array.prototype.forEach.call(q('[data-d]'), function (e) { e.onclick = function () { L.splice(+e.getAttribute('data-d'), 1); rRows(id, key, a, b, la, lb, max, add); }; });
+      if ($('#' + id + '_n')) $('#' + id + '_n').onclick = function () { var o = {}; o[a] = ''; o[b] = ''; L.push(o); rRows(id, key, a, b, la, lb, max, add); };
+    }
+    function rTheme() {
+      var th = (BR.themes || []).filter(function (t) { return !D.sector || t.sector === D.sector; });
+      say('sm_tm', '<div class="sm-tm">' + th.map(function (t) { return '<button class="sm-tc' + (t.slug === TM ? ' on' : '') + '" data-th="' + esc(t.slug) + '"><img src="/tema/' + esc(t.slug) + '-k.webp" alt="" loading="lazy" onerror="this.style.visibility=\'hidden\'"><span>' + esc(t.name || t.slug) + (t.slug === TM ? ' · seçili' : '') + '</span></button>'; }).join('') + '</div>');
+      Array.prototype.forEach.call(document.querySelectorAll('#sm_tm [data-th]'), function (b) { b.onclick = function () { var b0 = BR.brand || {}; call('PUT', '/brand', { theme: b.getAttribute('data-th'), dark: b0.dark, accent: b0.accent, radius: b0.radius }).then(function () { TM = b.getAttribute('data-th'); toast('Tema değişti — bilgileriniz yeni temaya yerleşti'); rTheme(); prev(); }).catch(fail); }; });
+    }
+    function prev() {
+      var fr = $('#sm_fr'); if (!fr) return;
+      fetch(location.origin + '/api/site/preview?path=' + encodeURIComponent(CURP), { headers: { Authorization: 'Bearer ' + LS.get('token', '') } }).then(function (r) { if (!r.ok) throw new Error('Önizleme alınamadı'); return r.text(); }).then(function (t) {
+        fr.setAttribute('sandbox', 'allow-scripts');
+        fr.srcdoc = t.replace(/<head([^>]*)>/i, '<head$1><base target="_blank"><script>document.addEventListener("click",function(e){var a=e.target.closest&&e.target.closest("a");if(!a)return;e.preventDefault();var h=a.getAttribute("href")||"";if(h.charAt(0)=="/"&&h.indexOf("//")!=0)parent.postMessage({spxgo:h.split("#")[0]||"/"},"*")},true);document.addEventListener("submit",function(e){e.preventDefault()},true)<\/script>');
+      }).catch(function (e) { fr.srcdoc = '<p style="font:14px sans-serif;padding:20px;color:#64748b">' + esc(e.message) + '</p>'; });
+    }
+    function save() {
+      var b = $('#sm_save'); b.disabled = true; b.textContent = 'Kaydediliyor…';
+      var out = {}; Object.keys(P).forEach(function (k) { out[k] = P[k]; }); delete out.address;
+      call('PUT', '/settings', { company_name: INFO.name, company_phone: INFO.phone, company_address: INFO.address }).then(function () { return call('PUT', '/site/profile', out); }).then(function () { toast('Kaydedildi — siteniz güncellendi'); $('#sm_st').textContent = 'Son kayıt: ' + new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }); return call('GET', '/site/profile'); }).then(function (d) { D = d; rPages(); rProg(); prev(); }).catch(fail).then(function () { b.disabled = false; b.textContent = 'Kaydet ve yayınla'; });
+    }
+    function rPages() {
+      say('sm_pg', '<div class="sm-t">' + (D.pages || []).map(function (p) { return '<a class="ok" style="background:#eef2ff;color:#3730a3" data-pg="/' + esc(p.slug) + '">' + esc(p.title) + '</a>'; }).join('') + '</div>');
+      var s = $('#sm_sel'); if (s) s.innerHTML = '<option value="/">Ana sayfa</option>' + (D.pages || []).map(function (p) { return '<option value="/' + esc(p.slug) + '"' + (('/' + p.slug) === CURP ? ' selected' : '') + '>' + esc(p.title) + '</option>'; }).join('');
+      Array.prototype.forEach.call(document.querySelectorAll('[data-pg]'), function (a) { a.onclick = function () { CURP = a.getAttribute('data-pg'); if (s) s.value = CURP; prev(); window.scrollTo(0, 0); var pv = $('#sm_pv'); if (pv) pv.scrollIntoView({ block: 'nearest' }); }; });
+    }
+    Promise.all([call('GET', '/site/profile'), call('GET', '/brand')]).then(function (a) {
+      D = a[0]; BR = a[1]; P = D.profile || {}; TM = (BR.brand || {}).theme || ''; LOGO = D.logo || ''; IM = D.imgs || {};
+      INFO = { name: D.name || '', phone: D.phone || '', address: D.address || '' };
+      if (!(P.services || []).length) P.services = (D.default_services || []).map(function (x) { return { t: x.t, d: x.d }; });
+      if (!(P.faq || []).length) P.faq = (D.default_faq || []).map(function (x) { return { q: x.q, a: x.a }; });
+      P.regions = (P.regions || []).join(', '); P.slides = P.slides || []; P.gallery = P.gallery || []; P.social = P.social || {};
+      if (!D.has_theme) { body().innerHTML = CSS + '<div class="sm-c"><h3>Önce bir tema seçin</h3><p>Sitenizin görünümünü seçtiğinizde bilgileriniz otomatik yerleşir.</p></div><div class="sm-c" id="sm_s3"><div id="sm_tm"></div></div>'; D.sector = D.sector || ''; rTheme(); return; }
+      var soc = function (k, l) { return '<label>' + l + '<input type="text" data-so="' + k + '" value="' + esc(P.social[k] || '') + '" placeholder="Sayfa adresi"></label>'; };
+      body().innerHTML = CSS + '<div id="sm_w"><div>' +
+        '<div class="sm-c" id="sm_prog"></div>' +
+        '<div class="sm-c" id="sm_s1"><h3><i>1</i>Firma bilgileriniz</h3><p>Bir kez yazın; sitenizdeki tüm sayfalara kendiliğinden yerleşir.</p><div class="sm-g">' +
+        '<label>Firma adı<input type="text" data-i="name" value="' + esc(INFO.name) + '"></label><label>Telefon<input type="text" data-i="phone" value="' + esc(INFO.phone) + '" placeholder="05xx xxx xx xx"></label>' + inp('WhatsApp', 'whatsapp', '05xx xxx xx xx', '(boşsa telefon kullanılır)') + inp('E-posta', 'email', 'ornek@firma.com') +
+        inp('Şehir / ilçe', 'city', 'Örn. İzmir') + inp('Çalışma saatleri', 'hours', 'Hafta içi 08:30 – 19:00') + '<label style="grid-column:1/-1">Adres<input type="text" data-i="address" value="' + esc(INFO.address) + '" placeholder="Mahalle, sokak, no, ilçe / şehir"></label></div></div>' +
+        '<div class="sm-c" id="sm_s2"><h3><i>2</i>Logonuz</h3><p>Seçtiğiniz anda sitenin üst kısmına ve alt kısmına yerleşir.</p><div id="sm_logo"></div></div>' +
+        '<div class="sm-c" id="sm_s3"><h3><i>3</i>Sitenizin görünümü (tema)</h3><p>Beğendiğinize tıklayın. Bilgileriniz yeni temaya otomatik geçer.</p><div id="sm_tm"></div></div>' +
+        '<div class="sm-c" id="sm_s4"><h3><i>4</i>Ana sayfadaki büyük resimler</h3><p>En fazla 8 resim; birbiri ardına kayarak gösterilir. Yatay (geniş) resimler daha iyi görünür.</p><div id="sm_sl"></div></div>' +
+        '<div class="sm-c" id="sm_s5"><h3><i>5</i>Başlık cümlesi ve hakkımızda</h3><p>Boş bırakırsanız hazır metinler kullanılır.</p><label>Ana sayfadaki büyük başlık<input type="text" data-f="slogan" value="' + esc(P.slogan || '') + '" placeholder="Örn. Kombiniz bizde emin ellerde"></label><label style="margin-top:12px">Hakkımızda yazısı<textarea data-f="about" placeholder="Firmanızı kısaca anlatın. Paragraf için bir satır boş bırakın.">' + esc(P.about || '') + '</textarea></label></div>' +
+        '<div class="sm-c" id="sm_s6"><h3><i>6</i>Hizmetleriniz</h3><p>Her hizmet için sitenizde ayrı bir sayfa açılır. Hazır örnekleri değiştirebilir, silebilir veya yenisini ekleyebilirsiniz.</p><div id="sm_sv"></div></div>' +
+        '<div class="sm-c" id="sm_s7"><h3><i>7</i>Sık sorulan sorular</h3><p>Müşterilerin en çok sorduklarını yazın.</p><div id="sm_fq"></div></div>' +
+        '<div class="sm-c" id="sm_s8"><h3><i>8</i>Hizmet verdiğiniz bölgeler</h3><p>Virgülle ayırarak yazın. Her bölge için ayrı bir sayfa açılır (örn. “Bornova kombi servisi”); arama sonuçlarında çıkmanıza yardım eder.</p><label>Bölgeler<textarea data-f="regions" placeholder="Bornova, Karşıyaka, Buca, Konak">' + esc(P.regions) + '</textarea></label></div>' +
+        '<div class="sm-c" id="sm_s9"><h3><i>9</i>Çalışma fotoğraflarınız</h3><p>Yaptığınız işlerin resimleri. “Galeri” sayfası otomatik açılır.</p><div id="sm_gl"></div></div>' +
+        '<div class="sm-c" id="sm_s10"><h3><i>10</i>Sosyal medya</h3><p>Adresi yazdıklarınız sitenin alt kısmında görünür.</p><div class="sm-g">' + soc('instagram', 'Instagram') + soc('facebook', 'Facebook') + soc('youtube', 'YouTube') + soc('tiktok', 'TikTok') + soc('x', 'X (Twitter)') + soc('linkedin', 'LinkedIn') + '</div></div>' +
+        '<div class="sm-c"><h3>Sitenizin sayfaları</h3><p>Hepsi otomatik hazırlanır; tıklayıp sağda görebilirsiniz.</p><div id="sm_pg"></div><div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap"><button class="sm-b" id="sm_adv">Gelişmiş düzenleme (sayfayı elle tasarla)</button><button class="sm-b" id="sm_dom">Alan adımı bağla</button></div>' +
+        (D.custom_home ? '<p style="margin:12px 0 0;color:#92400e;font-size:13px">Not: Ana sayfayı “Gelişmiş düzenleme” ile elle değiştirmişsiniz; ana sayfadaki logo/telefon gibi bilgiler artık otomatik güncellenmez. Gelişmiş düzenlemede “Sıfırla” derseniz otomatik düzene dönersiniz.</p>' : '') + '</div>' +
+        '<div class="sm-bar"><span id="sm_st">Değişiklikleri kaydedince site güncellenir.</span><button class="sm-b p" id="sm_save">Kaydet ve yayınla</button></div></div>' +
+        '<div id="sm_pv"><div class="sm-c" style="padding:12px"><div class="sm-ps"><select id="sm_sel"></select><button class="sm-b on" data-dv="d">Bilgisayar</button><button class="sm-b" data-dv="m">Telefon</button></div><div id="sm_ph"><iframe id="sm_fr" class="sm-fr" style="height:560px" title="Site önizleme"></iframe></div></div></div></div>';
+      Array.prototype.forEach.call(document.querySelectorAll('[data-f]'), function (e) { e.oninput = function () { P[e.getAttribute('data-f')] = e.value; if (/slogan|about|regions/.test(e.getAttribute('data-f'))) rProg(); }; });
+      Array.prototype.forEach.call(document.querySelectorAll('[data-i]'), function (e) { e.oninput = function () { INFO[e.getAttribute('data-i')] = e.value; rProg(); }; });
+      Array.prototype.forEach.call(document.querySelectorAll('[data-so]'), function (e) { e.oninput = function () { P.social[e.getAttribute('data-so')] = e.value; }; });
+      rProg(); rLogo(); rTheme(); rSlides(); rGal(); rPages();
+      rRows('sm_sv', 'services', 't', 'd', 'Hizmet adı', 'Kısa açıklama', 12, 'Hizmet ekle'); rRows('sm_fq', 'faq', 'q', 'a', 'Soru', 'Cevap', 12, 'Soru ekle');
+      $('#sm_save').onclick = save;
+      $('#sm_adv').onclick = function () { TAB = 'siteduz'; draw(); markActive(); }; $('#sm_dom').onclick = function () { TAB = 'domain'; draw(); markActive(); };
+      $('#sm_sel').onchange = function () { CURP = this.value; prev(); };
+      Array.prototype.forEach.call(document.querySelectorAll('[data-dv]'), function (b) { b.onclick = function () { DEVW = b.getAttribute('data-dv'); Array.prototype.forEach.call(document.querySelectorAll('[data-dv]'), function (x) { x.classList.toggle('on', x === b); }); $('#sm_ph').className = DEVW === 'm' ? 'sm-ph' : ''; }; });
+      if (window.__smMsg) window.removeEventListener('message', window.__smMsg);
+      window.__smMsg = function (e) { var fr = $('#sm_fr'); if (!fr || e.source !== fr.contentWindow || !e.data || !e.data.spxgo) return; CURP = e.data.spxgo; var s = $('#sm_sel'); if (s) s.value = CURP; prev(); };
+      window.addEventListener('message', window.__smMsg);
+      prev();
+    }).catch(fail);
+  }
+
   function drawSiteEd() {
     var CUR = '', DOC = null, SEL = null, DIRTY = false, HIST = [], FUT = [], PAGES = [], BR = { dark: '#0a1f44', accent: '#f27a1a' }, DEV = 'd', LAST = '';
     var PH = 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="800" height="520"><rect width="100%" height="100%" fill="#e2e8f0"/><g fill="none" stroke="#94a3b8" stroke-width="10"><rect x="300" y="170" width="200" height="170" rx="14"/><circle cx="360" cy="228" r="16"/><path d="M310 330l70-70 50 50 30-30 40 50"/></g><text x="400" y="400" font-family="Arial" font-size="26" fill="#64748b" text-anchor="middle">Resim eklemek için tıklayın</text></svg>');

@@ -5,14 +5,18 @@ yeni sayfa açar. Düzenlenmiş site, firmanın alan adından (hosted-site) yay�
 Saklama: app_settings _id "site_custom" -> {"html": "<ana sayfa>", "pages": [{"slug","title","html"}], "updated_at"}
 Ana sayfa özel HTML'i yoksa seçili temadan üretilir; "Sıfırla" özel HTML'i siler.
 """
+import base64
+import hashlib
 import html as _html
+import io
 import os
 import re
 from datetime import datetime, timezone
 
 from fastapi import Depends, HTTPException, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, Response
 
+import sitegen
 import tenant
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -84,41 +88,111 @@ def register(api_router, db, deps):
         f = await db.main().firms.find_one({"db": tenant.current()}, {"_id": 0, "id": 1, "name": 1, "phone": 1, "modules": 1}) or {}
         return (g.get("company_name") or f.get("name") or "Teknik Servis"), (g.get("company_phone") or f.get("phone") or ""), f
 
-    async def theme_html():
+    _raw_cache = {}
+
+    def raw_theme(slug):
+        if slug not in _raw_cache:
+            p = os.path.join(HERE, "..", "themes", "html", slug + ".html")
+            if not os.path.isfile(p):
+                return None
+            if len(_raw_cache) > 5:
+                _raw_cache.clear()
+            _raw_cache[slug] = open(p, encoding="utf-8").read()
+        return _raw_cache[slug]
+
+    async def build_ctx(inline=False):
+        """Tema + firma profili bağlamı. Tema seçili değilse None."""
         brand = await db.app_settings.find_one({"_id": "brand"}, {"_id": 0}) or {}
-        name, tel, _ = await identity()
-        slug = brand.get("theme") or ""
-        th = next((t for t in THEMES if t["slug"] == slug), None)
-        if not th:
+        th = next((t for t in THEMES if t["slug"] == (brand.get("theme") or "")), None)
+        if not th or raw_theme(th["slug"]) is None:
             return None
-        p = os.path.join(HERE, "..", "themes", "html", slug + ".html")
-        if not os.path.isfile(p):
-            return None
-        h = open(p, encoding="utf-8").read().replace("__API_URL__", "/api").replace("__PORTAL_URL__", "#")
-        if th.get("name") and name:
-            h = h.replace(th["name"], name)
-        d = "".join(ch for ch in (tel or "") if ch.isdigit())
-        if len(d) >= 10:
-            d = d[-10:]
-            h = h.replace("905320000000", "90" + d).replace("0532 000 00 00", "0%s %s %s %s" % (d[:3], d[3:6], d[6:8], d[8:]))
+        name, tel, _f = await identity()
+        g = await db.app_settings.find_one({"_id": "global"}, {"_id": 0}) or {}
+        prof = await db.app_settings.find_one({"_id": "site_profile"}, {"_id": 0}) or {}
+        sector = th.get("sector") or ""
+        p = sitegen.effective(prof, sector)
+        p["address"] = prof.get("address") or g.get("company_address") or ""
+        imgs = {}
+        keys = [x["k"] for x in (p.get("slides") or []) + (p.get("gallery") or [])]
+        if inline and keys:
+            async for r in db.site_images.find({"_id": {"$in": keys}}):
+                imgs[r["_id"]] = "data:%s;base64,%s" % (r.get("mime") or "image/jpeg", base64.b64encode(bytes(r["data"])).decode())
+        lg = (await db.app_settings.find_one({"_id": "firm_logo"}, {"_id": 0}) or {}).get("data") or ""
+        logo = lg if inline else (("/api/public/site-logo?v=" + hashlib.sha1(lg.encode()).hexdigest()[:8]) if lg else "")
+        return {"th": th, "name": name, "tel": tel, "p": p, "sector": sector, "logo": logo, "city": prof.get("city") or "",
+                "img": (lambda k: imgs.get(k, "")) if inline else (lambda k: "/api/public/site-img/" + k),
+                "seo_desc": "%s — %s" % (name, p["noun"] + " hizmeti. " + (("Tel: " + sitegen.phone_fmt(sitegen.phone10(tel))) if sitegen.phone10(tel) else ""))}
+
+    async def themed_home(ctx):
+        return sitegen.apply_profile(raw_theme(ctx["th"]["slug"]), ctx["th"], ctx)
+
+    async def theme_html():
+        ctx = await build_ctx(inline=True)
+        return await themed_home(ctx) if ctx else None
+
+    _PUB = re.compile(r"/api/public/site-img/([a-f0-9]{16})")
+
+    async def inline_imgs(h):
+        """Düzenleyici için: herkese açık görsel adreslerini gömülü veriye çevirir."""
+        keys = set(_PUB.findall(h))
+        m = {}
+        for k in keys:
+            r = await db.site_images.find_one({"_id": k})
+            if r:
+                m[k] = "data:%s;base64,%s" % (r.get("mime") or "image/jpeg", base64.b64encode(bytes(r["data"])).decode())
+        h = _PUB.sub(lambda x: m.get(x.group(1), x.group(0)), h)
+        if "/api/public/site-logo" in h:
+            lg = (await db.app_settings.find_one({"_id": "firm_logo"}, {"_id": 0}) or {}).get("data") or ""
+            if lg:
+                h = re.sub(r"/api/public/site-logo\?v=[a-f0-9]{8}", lambda x: lg, h)
+        return h
+
+    async def externalize_imgs(h):
+        """Kaydederken: gömülü site görsellerini ve logoyu kısa adreslere çevirir (sayfa küçük kalır)."""
+        def key_for(b64):
+            try:
+                return hashlib.sha1(base64.b64decode(b64)).hexdigest()[:16]
+            except Exception:           # noqa: BLE001
+                return ""
+        found = {}
+        for m in re.finditer(r"data:image/jpeg;base64,([A-Za-z0-9+/=]{2000,})", h):
+            k = key_for(m.group(1))
+            if k and k not in found:
+                found[k] = bool(await db.site_images.find_one({"_id": k}, {"_id": 1}))
+        h = re.sub(r"data:image/jpeg;base64,([A-Za-z0-9+/=]{2000,})", lambda m: ("/api/public/site-img/" + key_for(m.group(1))) if found.get(key_for(m.group(1))) else m.group(0), h)
+        lg = (await db.app_settings.find_one({"_id": "firm_logo"}, {"_id": 0}) or {}).get("data") or ""
+        if lg and lg in h:
+            h = h.replace(lg, "/api/public/site-logo?v=" + hashlib.sha1(lg.encode()).hexdigest()[:8])
         return h
 
     async def doc():
         return await db.app_settings.find_one({"_id": "site_custom"}, {"_id": 0}) or {}
 
     # ---------------------------------------------------------------- düzenleyici API
+    async def auto_list(d):
+        ctx = await build_ctx()
+        if not ctx:
+            return []
+        have = {p["slug"] for p in d.get("pages", [])}
+        return [{"slug": x["slug"], "title": x["title"], "auto": True} for x in sitegen.page_index(ctx) if x["slug"] not in have]
+
     @api_router.get("/site/edit")
     async def edit_get(page: str = "", _: dict = Depends(require_admin)):
         need_firm()
         d = await doc()
-        pages = [{"slug": p["slug"], "title": p.get("title", p["slug"])} for p in d.get("pages", [])]
+        pages = [{"slug": p["slug"], "title": p.get("title", p["slug"])} for p in d.get("pages", [])] + await auto_list(d)
         if page:
             p = next((x for x in d.get("pages", []) if x["slug"] == page), None)
-            if not p:
+            if p:
+                return {"html": await inline_imgs(p["html"]), "custom": True, "pages": pages, "page": page, "title": p.get("title", page)}
+            ctx = await build_ctx(inline=True)
+            home = d.get("html") or (await themed_home(ctx) if ctx else "")
+            r = sitegen.render_page(home, ctx, page) if ctx else None
+            if not r:
                 raise HTTPException(404, "Sayfa bulunamadı")
-            return {"html": p["html"], "custom": True, "pages": pages, "page": page, "title": p.get("title", page)}
+            return {"html": r[0], "custom": False, "pages": pages, "page": page, "title": r[1]}
         if d.get("html"):
-            return {"html": d["html"], "custom": True, "pages": pages, "page": ""}
+            return {"html": await inline_imgs(d["html"]), "custom": True, "pages": pages, "page": ""}
         h = await theme_html()
         if h is None:
             raise HTTPException(400, "Önce bir tema seçip kaydedin")
@@ -127,7 +201,7 @@ def register(api_router, db, deps):
     @api_router.put("/site/edit")
     async def edit_put(payload: dict, _: dict = Depends(require_admin)):
         need_firm()
-        h = clean_html(payload.get("html"))
+        h = await externalize_imgs(clean_html(payload.get("html")))
         if len(h) < 50 or len(h) > MAX_HTML:
             raise HTTPException(422, "Sayfa boyutu geçersiz (en fazla 6 MB)")
         page = str(payload.get("page") or "")
@@ -136,7 +210,12 @@ def register(api_router, db, deps):
             pages = d.get("pages", [])
             p = next((x for x in pages if x["slug"] == page), None)
             if not p:
-                raise HTTPException(404, "Sayfa bulunamadı")
+                ctx = await build_ctx()
+                au = next((x for x in sitegen.page_index(ctx) if x["slug"] == page), None) if ctx else None
+                if not au:
+                    raise HTTPException(404, "Sayfa bulunamadı")
+                p = {"slug": page, "title": au["title"], "html": h}
+                pages.append(p)
             p["html"] = h
             if payload.get("title"):
                 p["title"] = str(payload["title"]).strip()[:80]
@@ -174,7 +253,8 @@ def register(api_router, db, deps):
         name, tel, _f = await identity()
         content = clean_html(payload.get("content") or "") or ('<section style="max-width:960px;margin:0 auto;padding:56px 22px"><h1>%s</h1><p>Bu metni düzenleyin.</p></section>' % _html.escape(title))
         home = d.get("html") or await theme_html() or ""
-        full = compose_page(home, title, content) if home else None
+        _cx = await build_ctx()
+        full = (sitegen.assemble(home, _cx, title, content) if (_cx and home) else None) or (compose_page(home, title, content) if home else None)
         pages.append({"slug": slug, "title": title, "html": full or page_template(title, name, tel, brand.get("dark"), brand.get("accent"))})
         await db.app_settings.update_one({"_id": "site_custom"}, {"$set": {"pages": pages, "updated_at": _now()}}, upsert=True)
         return {"ok": True, "slug": slug, "title": title}
@@ -215,29 +295,145 @@ def register(api_router, db, deps):
         await db.app_settings.update_one({"_id": "site_custom"}, {"$set": {"pages": pages, "updated_at": _now()}}, upsert=True)
         return {"ok": True, "slug": p["slug"], "title": p["title"]}
 
-    # ---------------------------------------------------------------- yayın (domains.hosted_site çağırır)
-    async def serve(path: str):
-        """Firma bağlamı kurulmuşken, istenen yol için düzenlenmiş HTML (yoksa None)."""
+    # ---------------------------------------------------------------- firma profili (Sitem)
+    def _t(v, n):
+        return " ".join(str(v or "").split())[:n]
+
+    async def san_profile(x):
+        out = {"whatsapp": _t(x.get("whatsapp"), 20), "email": _t(x.get("email"), 80), "address": _t(x.get("address"), 200),
+               "hours": _t(x.get("hours"), 120), "slogan": _t(x.get("slogan"), 110), "city": _t(x.get("city"), 40),
+               "about": "\n".join(_t(l, 600) for l in str(x.get("about") or "").replace("\r", "").split("\n"))[:3000],
+               "logo_only": bool(x.get("logo_only"))}
+        out["services"] = [{"t": _t(s.get("t"), 60), "d": _t(s.get("d"), 400)} for s in (x.get("services") or [])[:12] if _t(s.get("t"), 60)]
+        out["faq"] = [{"q": _t(f.get("q"), 140), "a": _t(f.get("a"), 600)} for f in (x.get("faq") or [])[:12] if _t(f.get("q"), 140)]
+        rg = x.get("regions") or []
+        if isinstance(rg, str):
+            rg = re.split(r"[,\n]", rg)
+        out["regions"] = [r for r in (_t(r, 40) for r in rg) if r][:12]
+        soc = x.get("social") or {}
+        out["social"] = {k: _t(soc.get(k), 200) for k in sitegen.LINK_ICON if _t(soc.get(k), 200)}
+        want = [str(s.get("k") or "") for s in (x.get("slides") or [])[:8]] + [str(g.get("k") or "") for g in (x.get("gallery") or [])[:16]]
+        have = set()
+        async for r in db.site_images.find({"_id": {"$in": want}}, {"_id": 1}):
+            have.add(r["_id"])
+        out["slides"] = [{"k": s["k"], "t": _t(s.get("t"), 80), "d": _t(s.get("d"), 160)} for s in (x.get("slides") or [])[:8] if s.get("k") in have]
+        out["gallery"] = [{"k": g["k"]} for g in (x.get("gallery") or [])[:16] if g.get("k") in have]
+        return out
+
+    @api_router.get("/site/profile")
+    async def profile_get(_: dict = Depends(require_admin)):
+        need_firm()
+        prof = await db.app_settings.find_one({"_id": "site_profile"}, {"_id": 0}) or {}
+        ctx = await build_ctx()
+        g = await db.app_settings.find_one({"_id": "global"}, {"_id": 0}) or {}
+        lg = (await db.app_settings.find_one({"_id": "firm_logo"}, {"_id": 0}) or {}).get("data") or ""
         d = await doc()
-        if not d:
-            return None
+        sector = (ctx or {}).get("sector") or ""
+        dflt = sitegen.DEFAULTS.get(sector) or {}
+        keys = [x["k"] for x in (prof.get("slides") or []) + (prof.get("gallery") or [])]
+        imgs = {}
+        async for r in db.site_images.find({"_id": {"$in": keys}}):
+            imgs[r["_id"]] = "data:%s;base64,%s" % (r.get("mime") or "image/jpeg", base64.b64encode(bytes(r["data"])).decode())
+        idx = sitegen.page_index(ctx) if ctx else []
+        return {"profile": prof, "imgs": imgs, "has_theme": bool(ctx), "sector": sector, "logo": lg, "custom_home": bool(d.get("html")),
+                "name": (ctx or {}).get("name") or g.get("company_name") or "", "phone": g.get("company_phone") or "", "address": prof.get("address") or g.get("company_address") or "",
+                "default_services": [{"t": a, "d": b} for a, b in dflt.get("services", [])], "default_faq": [{"q": a, "a": b} for a, b in dflt.get("faq", [])],
+                "pages": [{"slug": x["slug"], "title": x["title"], "kind": x["kind"]} for x in idx],
+                "custom_pages": [{"slug": p["slug"], "title": p.get("title", p["slug"])} for p in d.get("pages", [])]}
+
+    @api_router.put("/site/profile")
+    async def profile_put(payload: dict, _: dict = Depends(require_admin)):
+        need_firm()
+        prof = await san_profile(payload)
+        await db.app_settings.update_one({"_id": "site_profile"}, {"$set": prof}, upsert=True)
+        keep = [x["k"] for x in prof["slides"] + prof["gallery"]]
+        await db.site_images.delete_many({"_id": {"$nin": keep}})
+        return {"ok": True}
+
+    @api_router.post("/site/image")
+    async def image_up(payload: dict, _: dict = Depends(require_admin)):
+        need_firm()
+        data = str(payload.get("data") or "")
+        m = re.match(r"^data:image/(png|jpeg|webp|gif);base64,([A-Za-z0-9+/=]+)$", data)
+        if not m or len(data) > 10_000_000:
+            raise HTTPException(422, "Resim dosyası olmalı (JPG, PNG, WEBP) ve çok büyük olmamalı")
+        try:
+            from PIL import Image, ImageOps
+            im = ImageOps.exif_transpose(Image.open(io.BytesIO(base64.b64decode(m.group(2)))))
+            im = im.convert("RGB")
+            side = 1920 if payload.get("kind") != "gallery" else 1280
+            im.thumbnail((side, side))
+            buf = io.BytesIO()
+            im.save(buf, "JPEG", quality=82, optimize=True, progressive=True)
+        except Exception:           # noqa: BLE001
+            raise HTTPException(422, "Resim okunamadı")
+        raw = buf.getvalue()
+        k = hashlib.sha1(raw).hexdigest()[:16]
+        await db.site_images.update_one({"_id": k}, {"$set": {"data": raw, "mime": "image/jpeg", "at": _now()}}, upsert=True)
+        return {"ok": True, "k": k, "data": "data:image/jpeg;base64," + base64.b64encode(raw).decode()}
+
+    @api_router.get("/public/site-img/{k}")
+    async def image_pub(k: str):
+        r = await db.site_images.find_one({"_id": k}) if re.fullmatch(r"[a-f0-9]{16}", k) else None
+        if not r:
+            raise HTTPException(404, "Yok")
+        return Response(bytes(r["data"]), media_type=r.get("mime") or "image/jpeg", headers={"Cache-Control": "public, max-age=31536000, immutable"})
+
+    @api_router.get("/public/site-logo")
+    async def logo_pub():
+        lg = (await db.app_settings.find_one({"_id": "firm_logo"}, {"_id": 0}) or {}).get("data") or ""
+        m = re.match(r"^data:(image/[a-z+]+);base64,(.+)$", lg, re.S)
+        if not m:
+            raise HTTPException(404, "Yok")
+        return Response(base64.b64decode(m.group(2)), media_type=m.group(1), headers={"Cache-Control": "public, max-age=86400", "Content-Security-Policy": "sandbox"})
+
+    @api_router.get("/site/preview")
+    async def preview(path: str = "/", _: dict = Depends(require_admin)):
+        """Panelde canlı önizleme: yayındakiyle aynı üretim, görseller gömülü."""
+        need_firm()
+        r = await render(path, inline=True)
+        if not r:
+            raise HTTPException(404, "Sayfa bulunamadı")
+        return HTMLResponse(r[0], headers={"Cache-Control": "no-store"})
+
+    # ---------------------------------------------------------------- yayın (domains.hosted_site çağırır)
+    async def render(path, host="", inline=False):
+        """(içerik, tür) ya da None. Özel (düzenleyici) sayfalar önce, sonra otomatik sayfalar."""
+        d = await doc()
         p = (path or "/").split("?")[0].strip("/")
         if p.endswith(".html"):
             p = p[:-5]
-        h = None
+        ctx = await build_ctx(inline=inline)
+        if p == "robots.txt" and host:
+            return "User-agent: *\nAllow: /\nSitemap: https://%s/sitemap.xml\n" % host, "text/plain"
+        if p == "sitemap.xml" and host and ctx:
+            return sitegen.sitemap(ctx, host, [x["slug"] for x in d.get("pages", []) if x["slug"] not in {i["slug"] for i in sitegen.page_index(ctx)}]), "application/xml"
+        home = d.get("html")
+        if home is None and ctx:
+            home = await themed_home(ctx)
+        if home is None:
+            return None
         if p in ("", "index"):
-            h = d.get("html")
-            if h is None:
-                return None
+            h = home
         else:
             pg = next((x for x in d.get("pages", []) if x["slug"] == p), None)
-            if not pg:
-                return None
-            h = pg["html"]
-        _n, _t, f = await identity()
+            if pg:
+                h = pg["html"]
+            else:
+                r = sitegen.render_page(home, ctx, p) if ctx else None
+                if not r:
+                    return None
+                h = r[0]
+        if inline:
+            h = await inline_imgs(h)
+        _n, _t2, f = await identity()
         if portal_chip and f.get("id") and (f.get("modules") is None or "portal" in (f.get("modules") or [])):
             chip = portal_chip("/portal/%s~giris" % f["id"])
             h = h.replace("</body>", chip + "</body>", 1) if "</body>" in h else h + chip
-        return h
+        return h, "text/html"
+
+    async def serve(path: str, host: str = ""):
+        r = await render(path, host)
+        return r
 
     api_router.site_custom_serve = serve
