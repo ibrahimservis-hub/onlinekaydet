@@ -491,6 +491,10 @@
   function firmMode() {
     var tok = LS.get('token', '');
     if (tok !== FTOK) { FTOK = tok; FIRM = null; FFRESH = false; FLOGO = ''; document.body.classList.remove('spx-firm', 'spx-fbar-on'); var fb1 = document.getElementById('spx-fbar'); if (fb1) fb1.remove(); var f0 = document.getElementById('spx-ffab'); if (f0) f0.remove(); }
+    if (tok && FIRM === null && !FIRMBUSY) {          /* yönetici ekranında da firma hesabı mı diye bir kez sor: platform menüleri firma panelinde gizlenir */
+      FIRMBUSY = true; pcall('GET', '/firm/me').then(function (r) { FIRM = (r && r.firm) ? r.firm : false; firmSave(); }).catch(function () { FIRM = false; }).then(function () { FIRMBUSY = false; });
+    }
+    if (FIRM) { [].forEach.call(document.querySelectorAll('aside span,aside div,aside small'), function (e) { if (e.children.length === 0 && e.textContent.trim() === 'Sahip') e.textContent = 'Yönetici'; }); var bw = document.getElementById('spx-bw'); if (bw) bw.remove(); }
     var tech = document.body.classList.contains('spx-tech');
     if (!tech || !tok) { var fb0 = document.getElementById('spx-fbar'); if (fb0) fb0.remove(); document.body.classList.remove('spx-fbar-on', 'spx-firm'); return; }
     if (FIRM === null) {
@@ -2432,7 +2436,7 @@
   function tick() {
     var asides = document.querySelectorAll('aside nav'); if (!asides.length) return;
     Array.prototype.forEach.call(asides, function (nav) {
-      var nl = nativeLinks(nav), sig = Object.keys(nl).join('|') + '#' + (me().admin_role || '') + (me().perms || []).join(','), own = nav.querySelector(':scope > [data-spx-own]');
+      var nl = nativeLinks(nav), sig = Object.keys(nl).join('|') + (FIRM ? '~F' : '') + '#' + (me().admin_role || '') + (me().perms || []).join(','), own = nav.querySelector(':scope > [data-spx-own]');
       if (own && own.getAttribute('data-sig') === sig) { Array.prototype.forEach.call(own.querySelectorAll('a.spx-it'), function (a) { var k = a.getAttribute('data-k') || 'ek:', bd = a.querySelector('.spx-bd:not(.spx-od)'), t = k === 'ek:onay' ? (window.__onayN ? String(window.__onayN) : '') : k.indexOf('ek:') === 0 ? '' : (badgeOf(nl[k]) || (ADMB && ADMB[k] ? (k === '/admin/governance' ? '!' : String(ADMB[k])) : '')); if (t && t !== '0') { if (!bd) { bd = document.createElement('span'); bd.className = 'spx-bd'; a.appendChild(bd); } bd.textContent = t; } else if (bd) bd.remove(); var od = a.querySelector('.spx-od'), ov2 = k === '/admin/jobs' && ADMB && (ADMB.jobs_overdue > 0 || ADMB.call_overdue > 0) ? (ADMB.jobs_overdue || 0) + (ADMB.call_overdue || 0) : 0; if (ov2) { if (!od) { od = document.createElement('span'); od.className = 'spx-bd spx-od'; od.style.background = '#f59e0b'; od.style.marginLeft = '4px'; od.title = 'Randevu saati geçmiş iş'; a.appendChild(od); } od.textContent = ov2 + ' ⏰'; } else if (od) od.remove(); }); markActive(); return; }
       var sKey = nav.closest('.fixed') ? 'm' : 'd', sTop = nav.scrollTop || MSCR[sKey] || 0;
       if (own) own.remove();

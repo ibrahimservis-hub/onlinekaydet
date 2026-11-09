@@ -146,6 +146,12 @@ def register(api_router, db, deps):
                    "started_at": when.isoformat() if st in ("basladi", "tamamlandi") else "", "completed_at": when.isoformat() if st == "tamamlandi" else "",
                    "created_at": when.isoformat(), "updated_at": when.isoformat(), "created_by": ""}
             await fdb.service_jobs.insert_one(job)
+            if st == "tamamlandi" and t:
+                tot = labor + parts
+                base = {"technician_id": t["id"], "job_id": job["id"], "date": when.isoformat(), "created_by": ""}
+                await fdb.cash_transactions.insert_one({**base, "id": str(uuid.uuid4()), "type": "gelir", "amount": tot, "description": f"Servis Geliri - {job['job_number']} - {c['name']}"})
+                await fdb.cash_transactions.insert_one({**base, "id": str(uuid.uuid4()), "type": "teknisyen_prim", "amount": round(tot * 0.7, 2), "description": f"Prim (Kasada Kalan) - {job['job_number']}"})
+                await fdb.cash_transactions.insert_one({**base, "id": str(uuid.uuid4()), "type": "teknisyen_borc", "amount": round(tot * 0.3, 2), "description": f"Firma payı - {job['job_number']}"})
 
         # satış listesine düş (sahip Talepler'de görür)
         try:

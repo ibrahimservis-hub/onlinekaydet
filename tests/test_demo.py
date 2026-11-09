@@ -20,6 +20,7 @@ with TestClient(s.app) as c:
         jobs = c.get("/api/jobs", headers=H).json(); assert len(jobs) == 7, len(jobs)
         assert {j["status"] for j in jobs} >= {"yeni", "atandi", "yolda", "basladi", "tamamlandi"}
         assert len(c.get("/api/customers", headers=H).json()) == 5 and len(c.get("/api/technicians", headers=H).json()) == 2
+        assert c.get("/api/dashboard/admin", headers=H).json()["total_revenue"] > 0
         pk = c.get("/api/firm/package", headers=H).json(); assert pk["package"] == "kurumsal" and not pk["locked"]
     t("yönetici girişi: 7 servis kaydı, 5 müşteri, 2 usta, tam paket", b)
     def d():
