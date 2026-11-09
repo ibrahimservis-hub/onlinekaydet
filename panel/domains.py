@@ -299,6 +299,28 @@ def register(api_router, db, deps):
                         "items": [{"k": k, "ok": ok} for k, ok in items], "done": sum(1 for _, ok in items if ok), "total": len(items)})
         return {"firms": out}
 
+    @api_router.post("/admin/demo-cleanup")
+    async def demo_cleanup(payload: dict, me: dict = Depends(require_admin)):
+        """Süresi dolmuş demo firmaları (ve isteğe bağlı verilen firma kimliklerini) tüm verisiyle siler. Yalnızca platform sahibi."""
+        if tenant.current():
+            raise HTTPException(403, "Yalnızca platform sahibi")
+        from datetime import datetime, timezone
+        now = datetime.now(timezone.utc).isoformat()
+        ids = set(str(x) for x in (payload.get("ids") or []))
+        removed = []
+        for f in await db.main().firms.find({}, {"_id": 0}).to_list(5000):
+            expired = f.get("demo") and (f.get("expires_at") or "9") < now and payload.get("expired", True)
+            if f["id"] in ids or expired:
+                try:
+                    await db._client.drop_database(f["db"])
+                except Exception:
+                    pass
+                await db.main().firm_logins.delete_many({"db": f["db"]})
+                await db.main().firm_domains.delete_many({"firm_id": f["id"]})
+                await db.main().firms.delete_one({"id": f["id"]})
+                removed.append(f.get("name"))
+        return {"ok": True, "removed": removed}
+
     @api_router.get("/admin/system")
     async def system_info(me: dict = Depends(require_admin)):
         if tenant.current():

@@ -45,5 +45,18 @@ with TestClient(s.app) as c:
         assert any(x.get("form") == "demo-hesabi" for x in L["leads"]), L
         subs = c.get("/api/admin/subscriptions?days=30", headers={"Authorization": "Bearer " + A}); assert subs.status_code == 200
     t("talep, satış listesine 'demo' olarak düşer", g)
+    def h():
+        A = {"Authorization": "Bearer " + c.post("/api/auth/login", json={"email": "admin@servis.com", "password": "admin123"}).json()["token"]}
+        r = c.post("/api/admin/demo-cleanup", headers=A, json={"expired": True}); assert r.status_code == 200 and r.json()["removed"] == [], r.text
+        FL = c.get("/api/admin/firms", headers=A).json(); FL = FL.get("firms", FL); fid = [x for x in FL if x.get("demo")][0]["id"]
+        r = c.post("/api/admin/demo-cleanup", headers=A, json={"ids": [fid], "expired": False}); assert len(r.json()["removed"]) == 1, r.text
+        FL = c.get("/api/admin/firms", headers=A).json(); FL = FL.get("firms", FL); assert fid not in [x["id"] for x in FL]
+        assert c.post("/api/admin/demo-cleanup", headers=S["H"], json={}).status_code == 403
+    t("demo temizliği: süresi dolmayan kalır, seçilen silinir, firma yöneticisi yapamaz", h)
+    def m():
+        r = c.get("/api/shop/settings", headers=S["H"]); assert r.status_code == 200, r.text
+        r = c.put("/api/shop/settings", headers=S["H"], json={"shipping_fee": 49.9, "free_shipping_over": 1500, "bank_accounts": [{"bank": "Ziraat", "holder": "Test", "iban": "tr12 0001 0000 0000 0000 0000 01"}]}); assert r.status_code == 200, r.text
+        j = r.json(); assert j["shipping_fee"] == 49.9 and j["bank_accounts"][0]["iban"].startswith("TR12")
+    t("mağaza ayarları kaydedilir", m)
 print(f"GEÇTİ {len(ok)}/{len(ok)+len(bad)}")
 for x in bad: print("BAŞARISIZ", x)
