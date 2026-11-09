@@ -293,9 +293,24 @@ def _dispatch(cfg, channel, to, text, subject):
     raise RuntimeError("SMS/WhatsApp sağlayıcısı seçilmemiş")
 
 
+async def _firm_brand(db, t):
+    """Firma hesabında giden mesajlarda 'ServisPlus' yerine firmanın adı yazılır (ServisPlus yalnız kendi hesabında görünür)."""
+    if not t or "ServisPlus" not in t:
+        return t
+    try:
+        if not tenant.current():
+            return t
+        g = await db.app_settings.find_one({"_id": "global"}, {"company_name": 1}) or {}
+        nm = (g.get("company_name") or "").strip() or "Servis firmamız"
+        return t.replace("ServisPlus", nm)
+    except Exception:  # noqa: BLE001
+        return t
+
+
 async def send(db, channel: str, to: str, text: str, subject: str = "", kind: str = "", ref: str = "", cfg: Optional[dict] = None, store_text: Optional[str] = None) -> dict:
     """Mesaj gönderir ve outbox'a yazar. Asla istisna fırlatmaz. store_text: kayıtta saklanacak (şifresi maskelenmiş) metin."""
     cfg = cfg or await get_settings(db)
+    text, subject, store_text = await _firm_brand(db, text), await _firm_brand(db, subject), (await _firm_brand(db, store_text) if store_text is not None else None)
     doc = {"id": str(uuid.uuid4()), "channel": channel, "to": to, "text": (store_text if store_text is not None else text)[:1500], "subject": subject, "kind": kind,
            "ref": ref, "status": "sending", "error": "", "created_at": _now()}
     try:

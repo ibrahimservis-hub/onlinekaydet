@@ -9,7 +9,7 @@ from datetime import datetime, timedelta, timezone
 
 from fastapi import Depends, HTTPException, Request
 
-WELCOME = "Merhaba {ad}, ServisPlus'a hoş geldiniz. Müsait olan temsilci en kısa sürede size yardımcı olacaktır."
+WELCOME = "Merhaba {ad}, hoş geldiniz. Müsait olan temsilci en kısa sürede size yardımcı olacaktır."
 AUTO_REPLY = WELCOME  # yonetici "Otomatik cevap" butonu ayni karsilamayi gonderir
 
 # Yonetici "Otomatik cevap gonder"e basinca secilen hazir mesajlar. {ad} musterinin adiyla degisir.

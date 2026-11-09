@@ -82,7 +82,7 @@ def _view(job, g):
         "customer": job.get("customer_name", ""), "phone": job.get("customer_phone", ""), "address": job.get("customer_address", ""),
         "device": " ".join(x for x in [job.get("device_brand_name"), job.get("device_model")] if x) or job.get("device_type", ""), "type": job.get("device_type", ""),
         "serial": job.get("device_serial", ""), "fault": job.get("fault_description", ""), "job_no": job.get("job_number", ""),
-        "company": g.get("company_name") or "ServisPlus", "cphone": g.get("company_phone") or "0544 444 4 004", "caddr": g.get("company_address") or "",
+        "company": g.get("company_name") or "Servis", "cphone": g.get("company_phone") or "0544 444 4 004", "caddr": g.get("company_address") or "",
         "terms": [t for t in (g.get("workshop_terms") or "").split("\n") if t.strip()] or DEFAULT_TERMS,
     }
 

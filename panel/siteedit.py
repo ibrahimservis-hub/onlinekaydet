@@ -174,13 +174,13 @@ def register(api_router, db, deps):
         if not ctx:
             return []
         have = {p["slug"] for p in d.get("pages", [])}
-        return [{"slug": x["slug"], "title": x["title"], "auto": True} for x in sitegen.page_index(ctx) if x["slug"] not in have]
+        return [{"slug": x["slug"], "title": x["title"], "auto": True, "kind": x["kind"]} for x in sitegen.page_index(ctx) if x["slug"] not in have]
 
     @api_router.get("/site/edit")
     async def edit_get(page: str = "", _: dict = Depends(require_admin)):
         need_firm()
         d = await doc()
-        pages = [{"slug": p["slug"], "title": p.get("title", p["slug"])} for p in d.get("pages", [])] + await auto_list(d)
+        pages = [{"slug": p["slug"], "title": p.get("title", p["slug"]), "kind": "saved"} for p in d.get("pages", [])] + await auto_list(d)
         if page:
             p = next((x for x in d.get("pages", []) if x["slug"] == page), None)
             if p:

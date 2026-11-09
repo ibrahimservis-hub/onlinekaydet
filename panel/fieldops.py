@@ -196,6 +196,7 @@ async def push_to(db, user_ids, title: str, body: str = "", url: str = "/tech"):
     try:
         if not user_ids:
             return 0
+        title, body = await notify._firm_brand(db, title), await notify._firm_brand(db, body)
         try:                                            # bildirim geçmişi (uygulamada "Bildirimler" ekranı)
             now = notify._now()
             await db.push_log.insert_many([{"id": str(uuid.uuid4()), "user_id": u, "title": title, "body": body, "url": url, "at": now} for u in set(user_ids)])

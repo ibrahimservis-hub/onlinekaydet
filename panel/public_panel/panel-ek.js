@@ -534,6 +534,21 @@
     var wo = window.open; window.open = function (u) { var a = Array.prototype.slice.call(arguments); if (FIRM && u) a[0] = firmWaUrl(u); return wo.apply(window, a); };
     document.addEventListener('click', function (e) { var a = e.target.closest && e.target.closest('a[href]'); if (!a || !FIRM) return; var h = a.getAttribute('href') || ''; if (/(wa\.me|whatsapp\.com)/i.test(h)) { var n = firmWaUrl(h); if (n !== h) a.setAttribute('href', n); } }, true);
   })();
+  /* firma hesabında "ServisPlus" yazısı görünmez: ekrandaki yazılar ve WhatsApp metinleri firmanın adıyla değişir */
+  function brandTxt(t) { try { return FIRM && FIRM.name && t ? String(t).replace(/ServisPlus/g, FIRM.name) : t; } catch (e) { return t; } }
+  (function () {
+    var T = null;
+    function sweep() {
+      if (!FIRM || !document.body) return;
+      var w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null), x, L = [];
+      while ((x = w.nextNode())) { var p = x.parentNode; if (p && /^(SCRIPT|STYLE|TEXTAREA|NOSCRIPT)$/.test(p.nodeName)) continue; if (x.nodeValue.indexOf('ServisPlus') >= 0) L.push(x); }
+      L.forEach(function (n) { n.nodeValue = brandTxt(n.nodeValue); });
+      Array.prototype.forEach.call(document.querySelectorAll('[placeholder*="ServisPlus"],[title*="ServisPlus"],[aria-label*="ServisPlus"],[alt*="ServisPlus"]'), function (e) { ['placeholder', 'title', 'aria-label', 'alt'].forEach(function (a) { var v = e.getAttribute(a); if (v && v.indexOf('ServisPlus') >= 0) e.setAttribute(a, brandTxt(v)); }); });
+      if (document.title.indexOf('ServisPlus') >= 0) document.title = brandTxt(document.title);
+    }
+    function start() { sweep(); new MutationObserver(function () { clearTimeout(T); T = setTimeout(sweep, 120); }).observe(document.body, { childList: true, subtree: true, characterData: true }); setInterval(sweep, 2500); }
+    if (document.body) start(); else document.addEventListener('DOMContentLoaded', start);
+  })();
   /* firma hesabında ServisPlus görselleri (PDF alt logosu vb.) firmanın kendi logosuna çevrilir; yoksa şeffaf piksel */
   var PIX = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGP4//8/AAX+Av4N70a4AAAAAElFTkSuQmCC';
   function firmImgUrl(u) { try { var s = String(u); if (FIRM && /(\/brand\/|logo-servisplus|servisplus\.net\.tr\/images\/logo|footer-logo)/i.test(s) && !/brand-logo/.test(s) && !/\/api\/brand(\/|$|\?)/.test(s)) return FLOGO || PIX; } catch (e) { } return u; }
@@ -1569,7 +1584,7 @@
     '/admin/performance': 'rapor', '/admin/shop': 'magaza', 'ek:yeni': 'magaza', 'ek:mgayar': 'magaza', 'ek:pazar': 'magaza', 'ek:urunler': 'magaza', 'ek:marka': 'magaza', '/admin/parts': 'magaza',
     '/admin/site-features': 'site', 'ek:moduller': 'site', 'ek:seo': 'site', 'ek:domain': 'site', 'ek:sitem': 'site', 'ek:siteduz': 'site', '/admin/site-studio': 'site', '/admin/media': 'site', '/admin/visitors': 'site', 'ek:canli': 'site',
     '/admin/marketing': 'pazarlama', '/admin/growth': 'pazarlama', '/admin/coupons': 'pazarlama', 'ek:kaynak': 'pazarlama', 'ek:gsc': 'pazarlama', 'ek:wa': 'sms',
-    '/admin/quotes': 'teklif', '/admin/warranty': 'bakim', '/admin/dealers': 'bayi' };
+    '/admin/quotes': 'teklif', '/admin/warranty': 'bakim', '/admin/dealers': 'bayi', 'ek:harita': 'takip', 'ek:sohbet': 'site', 'ek:atolye': 'servis' };
   var PKGMODS = null, PKGBUSY = false, PKGTOK = '';
   function loadPkg() {
     var tok = LS.get('token', ''); if (!tok) return;
@@ -3029,9 +3044,18 @@
       if ($('#' + id + '_n')) $('#' + id + '_n').onclick = function () { var o = {}; o[a] = ''; o[b] = ''; L.push(o); again(); };
       dnd('#' + id + ' .sm-rw', function () { return L; }, again);
     }
+    var TF = 'mine', TQ = '';
     function rTheme() {
-      var th = (BR.themes || []).filter(function (t) { return !D.sector || t.sector === D.sector; });
-      say('sm_tm', '<div class="sm-tm">' + th.map(function (t) { return '<button class="sm-tc' + (t.slug === TM ? ' on' : '') + '" data-th="' + esc(t.slug) + '"><img src="/tema/' + esc(t.slug) + '-k.webp" alt="" loading="lazy" onerror="this.style.visibility=\'hidden\'"><span>' + esc(t.name || t.slug) + (t.slug === TM ? ' · seçili' : '') + '</span></button>'; }).join('') + '</div>');
+      var all = BR.themes || [], mineN = all.filter(function (t) { return !D.sector || t.sector === D.sector; }).length, q = TQ.toLowerCase();
+      if (TF === 'mine' && !mineN) TF = 'all';
+      var th = all.filter(function (t) { return (TF === 'all' || !D.sector || t.sector === D.sector) && (!q || (t.name || t.slug).toLowerCase().indexOf(q) >= 0); });
+      th.sort(function (x, y) { return (y.slug === TM) - (x.slug === TM); });
+      var chip = function (id, lab, on) { return '<button class="sm-b' + (on ? ' on' : '') + '" data-tf="' + id + '" style="' + (on ? 'background:#0b2a4a;color:#fff;border-color:#0b2a4a' : '') + '">' + lab + '</button>'; };
+      say('sm_tm', '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px">' + (D.sector ? chip('mine', 'Sektörüme uygun (' + mineN + ')', TF === 'mine') : '') + chip('all', 'Tüm temalar (' + all.length + ')', TF === 'all') +
+        '<input type="search" id="sm_tq" placeholder="Tema ara…" value="' + esc(TQ) + '" style="flex:1;min-width:140px"></div>' +
+        '<div class="sm-tm">' + (th.map(function (t) { return '<button class="sm-tc' + (t.slug === TM ? ' on' : '') + '" data-th="' + esc(t.slug) + '"><img src="/tema/' + esc(t.slug) + '-k.webp" alt="" loading="lazy" onerror="this.style.visibility=\'hidden\'"><span>' + esc(t.name || t.slug) + (t.slug === TM ? ' · seçili' : '') + '</span></button>'; }).join('') || '<div style="color:#94a3b8;padding:10px">Aramaya uygun tema yok.</div>') + '</div>');
+      Array.prototype.forEach.call(document.querySelectorAll('#sm_tm [data-tf]'), function (e) { e.onclick = function () { TF = e.getAttribute('data-tf'); rTheme(); }; });
+      var qi = $('#sm_tq'); if (qi) qi.oninput = function () { TQ = qi.value; var pos = qi.selectionStart; rTheme(); var n = $('#sm_tq'); if (n) { n.focus(); try { n.setSelectionRange(pos, pos); } catch (x) { } } };
       Array.prototype.forEach.call(document.querySelectorAll('#sm_tm [data-th]'), function (b) { b.onclick = function () { var b0 = BR.brand || {}; call('PUT', '/brand', { theme: b.getAttribute('data-th'), dark: b0.dark, accent: b0.accent, radius: b0.radius }).then(function () { TM = b.getAttribute('data-th'); toast('Tema değişti — bilgileriniz yeni temaya yerleşti'); rTheme(); call('GET', '/site/blocks').then(function (r) { setLay(r.blocks); rSecs(); }); prev(); }).catch(fail); }; });
     }
     function fit() {
@@ -3093,6 +3117,17 @@
       call('PUT', '/settings', st).then(function () { return call('PUT', '/site/profile', out); }).then(function () { toast('Kaydedildi — siteniz güncellendi'); $('#sm_st').textContent = 'Son kayıt: ' + new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }); return Promise.all([call('GET', '/site/profile'), call('GET', '/site/blocks')]); }).then(function (a) { D = a[0]; P.extra_pages = (D.profile || {}).extra_pages || []; setLay(a[1].blocks); rPages(); rProg(); rSecs(); prev(); }).catch(fail).then(function () { b.disabled = false; b.textContent = 'Kaydet ve yayınla'; });
     }
     function setLay(bl) { LAY = bl; sync(); }
+    var MODS = { sm_s5: ['hakkimizda', 'Hakkımızda'], sm_s6: ['hizmetlerimiz', 'Hizmetlerimiz'], sm_s7: ['sss', 'Sık Sorulan Sorular'], sm_s8: ['hizmet-bolgeleri', 'Hizmet Bölgeleri'], sm_s9: ['galeri', 'Galeri'] };
+    function rMods() {
+      var hid = P.hidden_pages = P.hidden_pages || [];
+      Object.keys(MODS).forEach(function (id) {
+        var c = $('#' + id); if (!c) return; var m = MODS[id], hd = hid.indexOf(m[0]) >= 0, bar = c.querySelector('.sm-mod');
+        if (!bar) { bar = document.createElement('div'); bar.className = 'sm-mod'; bar.style.cssText = 'display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:0 0 14px;padding:9px 12px;background:#f1f5f9;border-radius:8px;font:13px system-ui;color:#334155'; var h3 = c.querySelector('h3'); c.insertBefore(bar, h3.nextSibling.nextSibling || null); }
+        bar.innerHTML = '<span>Sitede: <b>' + esc(m[1]) + '</b> sayfası</span><button class="sm-b" data-gp="' + m[0] + '" style="min-height:34px;padding:6px 10px">Sayfayı gör</button><label style="display:flex;gap:6px;align-items:center;margin:0;font-weight:600"><input type="checkbox" data-sy="' + m[0] + '"' + (hd ? '' : ' checked') + ' style="width:auto;margin:0"> Sayfa yayında</label>';
+        bar.querySelector('[data-gp]').onclick = function () { CURP = '/' + m[0]; var s2 = $('#sm_sel'); if (s2) s2.value = CURP; prev(); var pv = $('#sm_pv'); if (pv) pv.scrollIntoView({ block: 'nearest' }); };
+        bar.querySelector('[data-sy]').onchange = function () { var k = hid.indexOf(m[0]); if (this.checked && k >= 0) hid.splice(k, 1); if (!this.checked && k < 0) hid.push(m[0]); (D.pages || []).forEach(function (p) { if (p.slug === m[0]) p.hidden = !this.checked; }, this); rPages(); };
+      });
+    }
     function rPages() {
       var hid = P.hidden_pages = P.hidden_pages || [], off = P.menu_off = P.menu_off || [], ex = P.extra_pages = P.extra_pages || [];
       var pg = D.pages || [], h = pg.filter(function (p) { return p.kind !== 'custom'; }).map(function (p) {
@@ -3106,6 +3141,7 @@
         '<label style="margin-top:10px">Sayfa başlığı<input type="text" data-xt="' + i + '" value="' + esc(x.title || '') + '"></label><label style="margin-top:10px">Yazı<textarea data-xb="' + i + '" style="min-height:120px" placeholder="Sayfada görünecek yazı. Paragraf için bir satır boş bırakın.">' + esc(x.body || '') + '</textarea></label>' +
         '<div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap;align-items:center"><button class="sm-b" data-xi="' + i + '">' + ICO.up + ' ' + (x.img ? 'Resmi değiştir' : 'Resim ekle') + '</button>' + (x.img && IM[x.img] ? '<img src="' + IM[x.img] + '" alt="" style="height:44px;border-radius:6px"> <button class="sm-b d" data-xr="' + i + '">Resmi kaldır</button>' : '') + '<label style="display:flex;gap:6px;align-items:center;margin:0;font-weight:500"><input type="checkbox" data-xm="' + i + '"' + (x.menu !== false ? ' checked' : '') + ' style="width:auto;margin:0"> Menüde göster</label></div></div>'; }).join('');
       say('sm_pg', h + '<div style="margin:16px 0 4px;font:700 14px system-ui;color:#0f172a">Kendi sayfalarınız</div>' + (cx || '<div style="color:#94a3b8;font-size:13.5px;margin-bottom:8px">Henüz kendi sayfanızı eklemediniz (örn. Kampanyalar, Hakkımızda detayı).</div>') + '<button class="sm-b p" id="sm_xn">+ Yeni sayfa ekle</button><input type="file" id="sm_xf" accept="image/*" style="display:none">');
+      rMods();
       var s = $('#sm_sel'); if (s) s.innerHTML = '<option value="/">Ana sayfa</option>' + pg.filter(function (p) { return !p.hidden; }).map(function (p) { return '<option value="/' + esc(p.slug) + '"' + (('/' + p.slug) === CURP ? ' selected' : '') + '>' + esc(p.title) + '</option>'; }).join('');
       var q = function (a, f) { Array.prototype.forEach.call(document.querySelectorAll('#sm_pg [' + a + ']'), function (e) { f(e, e.getAttribute(a)); }); };
       q('data-pv', function (e, v) { e.onclick = function () { CURP = v; var s2 = $('#sm_sel'); if (s2) s2.value = v; prev(); var pv = $('#sm_pv'); if (pv) pv.scrollIntoView({ block: 'nearest' }); }; });
@@ -3134,15 +3170,16 @@
         '<label>Firma adı<input type="text" data-i="name" value="' + esc(INFO.name) + '"></label><label>Telefon<input type="text" data-i="phone" value="' + esc(INFO.phone) + '" placeholder="05xx xxx xx xx"></label>' + inp('WhatsApp', 'whatsapp', '05xx xxx xx xx', '(boşsa telefon kullanılır)') + inp('E-posta', 'email', 'ornek@firma.com') +
         inp('Şehir / ilçe', 'city', 'Örn. İzmir') + inp('Çalışma saatleri', 'hours', 'Hafta içi 08:30 – 19:00') + '<label style="grid-column:1/-1">Adres<input type="text" data-i="address" value="' + esc(INFO.address) + '" placeholder="Mahalle, sokak, no, ilçe / şehir"></label></div></div>' +
         '<div class="sm-c sm-t-firma" id="sm_s2"><h3>Logonuz</h3><p>Seçtiğiniz anda sitenin üst kısmına ve alt kısmına yerleşir.</p><div id="sm_logo"></div></div>' +
-        '<div class="sm-c" id="sm_s3"><h3>Sitenizin görünümü (tema)</h3><p>Beğendiğinize tıklayın. Bilgileriniz yeni temaya otomatik geçer.</p><div id="sm_tm"></div></div>' +
+        '<div class="sm-c sm-t-gor" id="sm_s3"><h3>Sitenizin görünümü (tema)</h3><p>Beğendiğinize tıklayın. Bilgileriniz yeni temaya otomatik geçer.</p><div id="sm_tm"></div></div>' +
         '<div class="sm-c sm-t-gor" id="sm_s3b"><h3>Ana sayfa bölümleri</h3><p>Sürükleyerek sıralayın (veya ok düğmelerini kullanın), istemediğinizi “Gizle” ile kapatın, “Yazıları düzenle” ile her bölümün yazısını değiştirin. Gizlenen bölümün menü bağlantısı da kalkar.</p><div id="sm_secs"></div></div>' +
-        '<div class="sm-c sm-t-ic" id="sm_s4"><h3>Ana sayfadaki büyük resimler</h3><p>En fazla 8 resim; birbiri ardına kayarak gösterilir. Yatay (geniş) resimler daha iyi görünür.</p><div id="sm_sl"></div></div>' +
+        '<div class="sm-c sm-t-gor" id="sm_s4"><h3>Ana sayfadaki büyük resimler</h3><p>En fazla 8 resim; birbiri ardına kayarak gösterilir. Yatay (geniş) resimler daha iyi görünür.</p><div id="sm_sl"></div></div>' +
         '<div class="sm-c sm-t-ic" id="sm_s5"><h3>Başlık cümlesi ve hakkımızda</h3><p>Boş bırakırsanız hazır metinler kullanılır.</p><label>Ana sayfadaki büyük başlık<input type="text" data-f="slogan" value="' + esc(P.slogan || '') + '" placeholder="Örn. Kombiniz bizde emin ellerde"></label><label style="margin-top:12px">Hakkımızda yazısı<textarea data-f="about" placeholder="Firmanızı kısaca anlatın. Paragraf için bir satır boş bırakın.">' + esc(P.about || '') + '</textarea></label></div>' +
         '<div class="sm-c sm-t-ic" id="sm_s6"><h3>Hizmetleriniz</h3><p>Her hizmet için sitenizde ayrı bir sayfa açılır. Hazır örnekleri değiştirebilir, silebilir veya yenisini ekleyebilirsiniz.</p><div id="sm_sv"></div></div>' +
         '<div class="sm-c sm-t-ic" id="sm_s7"><h3>Sık sorulan sorular</h3><p>Müşterilerin en çok sorduklarını yazın.</p><div id="sm_fq"></div></div>' +
         '<div class="sm-c sm-t-ic" id="sm_s8"><h3>Hizmet verdiğiniz bölgeler</h3><p>Virgülle ayırarak yazın. Her bölge için ayrı bir sayfa açılır (örn. “Bornova kombi servisi”); arama sonuçlarında çıkmanıza yardım eder.</p><label>Bölgeler<textarea data-f="regions" placeholder="Bornova, Karşıyaka, Buca, Konak">' + esc(P.regions) + '</textarea></label></div>' +
         '<div class="sm-c sm-t-ic" id="sm_s9"><h3>Çalışma fotoğraflarınız</h3><p>Yaptığınız işlerin resimleri. “Galeri” sayfası otomatik açılır.</p><div id="sm_gl"></div></div>' +
-        '<div class="sm-c sm-t-firma" id="sm_s10"><h3>Sosyal medya</h3><p>Adresi yazdıklarınız sitenin alt kısmında görünür.</p><div class="sm-g">' + soc('instagram', 'Instagram') + soc('facebook', 'Facebook') + soc('youtube', 'YouTube') + soc('tiktok', 'TikTok') + soc('x', 'X (Twitter)') + soc('linkedin', 'LinkedIn') + '</div></div>' +
+        '<div class="sm-c sm-t-firma" id="sm_s10"><h3>Sosyal medya</h3><p>Adresi yazdıklarınız sitenin alt kısmında görünür.</p><div class="sm-g">' + soc('instagram', 'Instagram') + soc('facebook', 'Facebook') + soc('youtube', 'YouTube') + soc('tiktok', 'TikTok') + soc('x', 'X (Twitter)') + soc('linkedin', 'LinkedIn') + '</div><p style="margin:14px 0 0">Sosyal medya simgeleri sitenin alt kısmında görünür ve tıklanınca sayfanıza gider.</p></div>' +
+        '<div class="sm-c sm-t-firma" id="sm_s12"><h3>Google görünümü (isteğe bağlı)</h3><p>Sitenizin arama sonuçlarında nasıl görüneceği temanıza ve sektörünüze göre otomatik yazılır; site haritası da kendiliğinden hazırlanır. İsterseniz kendi cümlenizi yazın.</p>' + inp('Google başlığı', 'seo_title', 'Boş bırakırsanız otomatik yazılır') + '<label style="margin-top:12px">Google açıklaması<textarea data-f="seo_desc" placeholder="Boş bırakırsanız otomatik yazılır" style="min-height:70px">' + esc(P.seo_desc || '') + '</textarea></label></div>' +
         '<div class="sm-c sm-t-say" id="sm_s11"><h3>Sitenizin sayfaları</h3><p>Hepsi otomatik hazırlanır. İstemediğinizi kapatın, “Menüde” ile üst menüye koyun veya çıkarın, kendi sayfanızı ekleyin.</p><div id="sm_pg"></div><div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap"><button class="sm-b" id="sm_adv">Gelişmiş düzenleme (sayfayı elle tasarla)</button><button class="sm-b" id="sm_dom">Alan adımı bağla</button></div>' +
         (D.custom_home ? '<p style="margin:12px 0 0;color:#92400e;font-size:13px">Not: Ana sayfayı “Gelişmiş düzenleme” ile elle değiştirmişsiniz; ana sayfadaki logo/telefon gibi bilgiler artık otomatik güncellenmez. Gelişmiş düzenlemede “Sıfırla” derseniz otomatik düzene dönersiniz.</p>' : '') + '</div>' +
         '<div class="sm-bar"><span id="sm_st">Değişiklikleri kaydedince site güncellenir.</span><button class="sm-b p" id="sm_save">Kaydet ve yayınla</button></div></div>' +
@@ -3156,7 +3193,10 @@
       $('#sm_adv').onclick = function () { TAB = 'siteduz'; draw(); markActive(); }; $('#sm_dom').onclick = function () { TAB = 'domain'; draw(); markActive(); };
       $('#sm_sel').onchange = function () { CURP = this.value; prev(); };
       Array.prototype.forEach.call(document.querySelectorAll('[data-dv]'), function (b) { b.onclick = function () { DEVW = b.getAttribute('data-dv'); Array.prototype.forEach.call(document.querySelectorAll('[data-dv]'), function (x) { x.classList.toggle('on', x === b); }); fit(); }; });
-      $('#sm_fs').onclick = function () { var pv = $('#sm_pv'); pv.classList.toggle('full'); this.textContent = pv.classList.contains('full') ? 'Küçült' : 'Tam ekran'; fit(); };
+      var fsT = function (on) { var pv = $('#sm_pv'); if (!pv) return; pv.classList.toggle('full', on); var b = $('#sm_fs'); b.textContent = on ? '← Geri dön' : 'Tam ekran'; b.style.cssText = on ? 'background:#0f172a;color:#fff' : ''; fit(); };
+      $('#sm_fs').onclick = function () { fsT(!$('#sm_pv').classList.contains('full')); };
+      if (window.__smEsc) document.removeEventListener('keydown', window.__smEsc);
+      window.__smEsc = function (e) { if (e.key === 'Escape' && $('#sm_pv') && $('#sm_pv').classList.contains('full')) fsT(false); }; document.addEventListener('keydown', window.__smEsc);
       Array.prototype.forEach.call(document.querySelectorAll('[data-tb]'), function (b) { b.onclick = function () { tab(b.getAttribute('data-tb')); }; });
       window.onresize = fit;
       if (window.__smMsg) window.removeEventListener('message', window.__smMsg);
@@ -3190,17 +3230,18 @@
       bosluk: ['Boşluk', '<div class="spxb" style="height:48px"></div>']
     };
     var TPL = { bos: ['Boş sayfa', ['baslik']], hakkimizda: ['Hakkımızda', ['hero', 'metinresim', 'rakam', 'cta']], hizmet: ['Hizmet sayfası', ['baslik', 'hizmetler', 'resimmetin', 'sss', 'cta']], iletisim: ['İletişim', ['baslik', 'iletisim', 'harita']], galeri: ['Galeri', ['baslik', 'galeri', 'cta']], sss: ['Sık sorulan sorular', ['baslik', 'sss', 'iletisim']] };
-    body().innerHTML = '<style>#se_w{display:flex;gap:14px;align-items:flex-start}#se_side{width:300px;flex:none;position:sticky;top:8px;max-height:calc(100vh - 150px);overflow:auto}#se_side .sc{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:12px;margin-bottom:10px}#se_side h4{margin:0 0 8px;font:700 13px system-ui;color:#0f172a}.se_bl{display:grid;grid-template-columns:1fr 1fr;gap:6px}.se_bl button,.se_ac button,.se_bt{border:1px solid #cbd5e1;background:#f8fafc;border-radius:8px;padding:8px 6px;font:600 12.5px system-ui;cursor:pointer;color:#0f172a}.se_bl button:hover,.se_ac button:hover,.se_bt:hover{background:#eff6ff;border-color:#60a5fa}.se_ac{display:grid;gap:6px}.se_ac button.d{color:#b91c1c}.se_dv button.on{background:#0f172a;color:#fff}#se_side input,#se_side select,#se_side textarea{width:100%;margin-bottom:6px}@media(max-width:1000px){#se_w{flex-direction:column}#se_side{width:100%;position:static;max-height:none}}</style>' +
-      '<div class="spx-card" style="padding:10px"><div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center"><select id="se_pg" style="min-width:170px"></select><span class="se_dv" style="display:flex;gap:4px"><button class="se_bt on" data-v="d">Masaüstü</button><button class="se_bt" data-v="t">Tablet</button><button class="se_bt" data-v="m">Mobil</button></span><button class="se_bt" id="se_un">↶ Geri al</button><button class="se_bt" id="se_re">↷ İleri al</button><button class="se_bt" id="se_lg">Logo yükle</button><span style="flex:1"></span><span id="se_st" style="font-size:13px;color:#64748b"></span><button class="se_bt" id="se_pv">Önizle</button><button class="se_bt" id="se_rs" style="color:#b91c1c">Sıfırla</button><button class="spx-b p" id="se_sv">Kaydet ve yayınla</button></div></div>' +
+    body().innerHTML = '<div id="se_root"><style>#se_root.full{position:fixed;inset:0;z-index:99990;background:#f1f5f9;padding:10px;overflow:auto}#se_root.full #se_fr{height:calc(100vh - 110px)!important}#se_root.full #se_side{max-height:calc(100vh - 100px)}#se_ov{position:fixed;inset:0;z-index:99999;background:#0f172a;display:flex;flex-direction:column}#se_ov>div{display:flex;gap:8px;align-items:center;padding:8px 12px;background:#fff}#se_ov iframe{flex:1;border:0;background:#fff;width:100%}.se_sc{display:flex;align-items:center;gap:6px;border:1px solid #e2e8f0;border-radius:8px;padding:5px 6px;margin-bottom:5px;background:#fff;font:600 12.5px system-ui}.se_sc .gr{cursor:grab;color:#94a3b8;padding:2px 3px}.se_sc .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.se_sc button{border:1px solid #cbd5e1;background:#f8fafc;border-radius:6px;padding:3px 7px;cursor:pointer;font:600 12px system-ui}#se_w{display:flex;gap:14px;align-items:flex-start}#se_side{width:300px;flex:none;position:sticky;top:8px;max-height:calc(100vh - 150px);overflow:auto}#se_side .sc{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:12px;margin-bottom:10px}#se_side h4{margin:0 0 8px;font:700 13px system-ui;color:#0f172a}.se_bl{display:grid;grid-template-columns:1fr 1fr;gap:6px}.se_bl button,.se_ac button,.se_bt{border:1px solid #cbd5e1;background:#f8fafc;border-radius:8px;padding:8px 6px;font:600 12.5px system-ui;cursor:pointer;color:#0f172a}.se_bl button:hover,.se_ac button:hover,.se_bt:hover{background:#eff6ff;border-color:#60a5fa}.se_ac{display:grid;gap:6px}.se_ac button.d{color:#b91c1c}.se_dv button.on{background:#0f172a;color:#fff}#se_side input,#se_side select,#se_side textarea{width:100%;margin-bottom:6px}@media(max-width:1000px){#se_w{flex-direction:column}#se_side{width:100%;position:static;max-height:none}}</style>' +
+      '<div class="spx-card" style="padding:10px"><div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center"><select id="se_pg" style="min-width:170px"></select><span class="se_dv" style="display:flex;gap:4px"><button class="se_bt on" data-v="d">Masaüstü</button><button class="se_bt" data-v="t">Tablet</button><button class="se_bt" data-v="m">Mobil</button></span><button class="se_bt" id="se_un">↶ Geri al</button><button class="se_bt" id="se_re">↷ İleri al</button><button class="se_bt" id="se_lg">Logo yükle</button><span style="flex:1"></span><span id="se_st" style="font-size:13px;color:#64748b"></span><button class="se_bt" id="se_pv">Önizle</button><button class="se_bt" id="se_fs">Tam ekran</button><button class="se_bt" id="se_rs" style="color:#b91c1c">Sıfırla</button><button class="spx-b p" id="se_sv">Kaydet ve yayınla</button></div></div>' +
       '<div id="se_w"><div style="flex:1;min-width:0;background:#e2e8f0;border-radius:12px;padding:10px;display:flex;justify-content:center"><iframe id="se_fr" sandbox="allow-scripts allow-same-origin" style="width:100%;height:78vh;border:0;border-radius:8px;background:#fff;transition:width .2s"></iframe></div>' +
       '<div id="se_side"><div class="sc"><h4>Seçili öğe</h4><div class="se_ac" id="se_ac"><small style="color:#64748b">Sayfada bir yazıya, resme, düğmeye veya bölüme tıklayın.</small></div></div>' +
-      '<div class="sc"><h4>Blok ekle</h4><small style="color:#64748b;display:block;margin-bottom:6px">Seçili bölümün altına eklenir; seçim yoksa sayfa sonuna.</small><div class="se_bl" id="se_bl"></div></div>' +
+      '<div class="sc"><h4>Sayfadaki bölümler</h4><small style="color:#64748b;display:block;margin-bottom:6px">Tutamaçtan sürükleyerek sıralayın.</small><div id="se_secs"></div></div><div class="sc"><h4>Blok ekle</h4><small style="color:#64748b;display:block;margin-bottom:6px">Seçili bölümün altına eklenir; seçim yoksa sayfa sonuna.</small><div class="se_bl" id="se_bl"></div></div>' +
       '<div class="sc"><h4>Sayfa ayarları</h4><input id="se_t" placeholder="Sayfa başlığı (Google\'da görünür)"><textarea id="se_d" rows="2" placeholder="Kısa açıklama (Google\'da görünür)"></textarea><input id="se_sl" placeholder="Adres (örn: hakkimizda)"><div class="se_ac"><button id="se_mn">Menüye ekle</button><button class="d" id="se_dl">Sayfayı sil</button></div></div>' +
-      '<div class="sc"><h4>Yeni sayfa tasarla</h4><input id="se_nt" placeholder="Sayfa adı (örn: Hakkımızda)"><select id="se_nk">' + Object.keys(TPL).map(function (k) { return '<option value="' + k + '">' + TPL[k][0] + '</option>'; }).join('') + '</select><button class="spx-b p" id="se_np" style="width:100%">Sayfa oluştur</button></div></div></div>';
+      '<div class="sc"><h4>Yeni sayfa tasarla</h4><input id="se_nt" placeholder="Sayfa adı (örn: Hakkımızda)"><select id="se_nk">' + Object.keys(TPL).map(function (k) { return '<option value="' + k + '">' + TPL[k][0] + '</option>'; }).join('') + '</select><button class="spx-b p" id="se_np" style="width:100%">Sayfa oluştur</button></div></div></div></div>';
     var st = function (t, c) { var e = $('#se_st'); if (e) { e.textContent = t; e.style.color = c || '#64748b'; } };
-    function dirty() { DIRTY = true; st('Kaydedilmemiş değişiklik var', '#b45309'); }
+    var RT = null;
+    function dirty() { DIRTY = true; st('Kaydedilmemiş değişiklik var', '#b45309'); clearTimeout(RT); RT = setTimeout(function () { try { rSecsEd(); } catch (x) { } }, 250); }
     function snap() { if (!DOC) return; var h = DOC.body.innerHTML; if (h === LAST) return; HIST.push(LAST); if (HIST.length > 40) HIST.shift(); FUT = []; LAST = h; }
-    function restore(h) { DOC.body.innerHTML = h; LAST = h; wire(DOC.body); SEL = null; panel(null); dirty(); }
+    function restore(h) { DOC.body.innerHTML = h; LAST = h; wire(DOC.body); SEL = null; panel(null); dirty(); rSecsEd(); }
     function undo() { if (!HIST.length) return; FUT.push(DOC.body.innerHTML); restore(HIST.pop()); }
     function redo() { if (!FUT.length) return; HIST.push(DOC.body.innerHTML); restore(FUT.pop()); }
     function pick(cb, opt) { opt = opt || {}; var i = document.createElement('input'); i.type = 'file'; i.accept = 'image/*'; i.onchange = function () { var f = i.files[0]; if (!f) return; var r = new FileReader(); r.onload = function () { if (/svg/.test(f.type)) return cb(r.result); var im = new Image(); im.onload = function () { var mx = opt.max || 1400, k = Math.min(1, mx / Math.max(im.width, im.height)), c = document.createElement('canvas'); c.width = Math.round(im.width * k); c.height = Math.round(im.height * k); c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); cb(c.toDataURL(opt.png || (f.type === 'image/png' && f.size < 400000) ? 'image/png' : 'image/jpeg', 0.82)); }; im.src = r.result; }; r.readAsDataURL(f); }; i.click(); }
@@ -3248,12 +3289,12 @@
       CUR = page || ''; st('Yükleniyor…'); HIST = []; FUT = [];
       call('GET', '/site/edit' + (CUR ? '?page=' + encodeURIComponent(CUR) : '')).then(function (r) {
         PAGES = r.pages || [];
-        var sel = $('#se_pg'); sel.innerHTML = '<option value="">Ana sayfa</option>' + PAGES.map(function (p) { return '<option value="' + esc(p.slug) + '"' + (p.slug === CUR ? ' selected' : '') + '>' + esc(p.title) + '</option>'; }).join('');
+        var sel = $('#se_pg'); sel.innerHTML = '<option value="">Ana sayfa</option>' + groupPages();
         var fr = $('#se_fr');
         fr.onload = function () {
           DOC = fr.contentDocument; if (!DOC) return;
           var s = DOC.createElement('style'); s.setAttribute('data-spx-ed', '1'); s.textContent = '[contenteditable]{outline:none;cursor:text}[contenteditable]:hover{outline:2px dashed #60a5fa;outline-offset:2px}[contenteditable]:focus{outline:2px solid #2563eb;outline-offset:2px}img:hover{outline:2px dashed #60a5fa;cursor:pointer}*{scroll-behavior:auto!important}';
-          DOC.head.appendChild(s); wire(DOC.body); LAST = DOC.body.innerHTML; meta();
+          DOC.head.appendChild(s); wire(DOC.body); LAST = DOC.body.innerHTML; meta(); rSecsEd();
           var tm = null;
           DOC.addEventListener('click', function (e) { var t = e.target; if (t.closest('a,button,form,label,summary')) e.preventDefault(); SEL = t; panel(t); if (t.tagName === 'IMG' && t.getAttribute('data-spx-ph')) pick(function (u) { snap(); t.removeAttribute('data-spx-ph'); t.setAttribute('src', u); dirty(); }); }, true);
           DOC.addEventListener('submit', function (e) { e.preventDefault(); }, true);
@@ -3264,6 +3305,43 @@
         fr.srcdoc = r.html.replace(/<head([^>]*)>/i, '<head$1><base target="_blank">'); DIRTY = false;
       }).catch(function (e) { st(e.message || 'Yüklenemedi', '#b91c1c'); fail(e); });
     }
+    function groupPages() {
+      var G = [['Ana sayfalar', ['about', 'services', 'gallery', 'process', 'faq', 'regions', 'contact']], ['Kendi sayfalarım', ['saved', 'custom']], ['Hizmet sayfaları (otomatik)', ['service']], ['Bölge sayfaları (otomatik)', ['region']]];
+      var opt = function (p) { return '<option value="' + esc(p.slug) + '"' + (p.slug === CUR ? ' selected' : '') + '>' + esc(p.title) + '</option>'; };
+      var used = {}, out = G.map(function (g) { var L = PAGES.filter(function (p) { return g[1].indexOf(p.kind) >= 0; }); L.forEach(function (p) { used[p.slug] = 1; }); return L.length ? '<optgroup label="' + g[0] + '">' + L.map(opt).join('') + '</optgroup>' : ''; }).join('');
+      var rest = PAGES.filter(function (p) { return !used[p.slug]; }); return out + (rest.length ? '<optgroup label="Diğer">' + rest.map(opt).join('') + '</optgroup>' : '');
+    }
+    var TOPN = { Menü: 1 };
+    function topBlocks() { return DOC ? Array.prototype.filter.call(DOC.body.children, function (e) { return !/^(SCRIPT|STYLE|NOSCRIPT|LINK|TEMPLATE)$/.test(e.tagName) && !(e.hasAttribute && e.hasAttribute('data-spx-ed')); }) : []; }
+    function blkName(e, i) { var n = e.getAttribute('data-nm'); if (n) return n; var h = e.querySelector('h1,h2,h3'); var t = h ? h.textContent.trim() : (e.textContent || '').trim(); return (e.tagName === 'HEADER' || e.tagName === 'NAV' ? 'Üst menü' : e.tagName === 'FOOTER' ? 'Alt bilgi' : 'Bölüm ' + (i + 1)) + (t && !n ? ' — ' + t.slice(0, 26) : ''); }
+    function rSecsEd() {
+      var box = $('#se_secs'); if (!box || !DOC) return; var L = topBlocks(), from = -1;
+      box.innerHTML = L.map(function (e, i) { return '<div class="se_sc" data-i="' + i + '"><span class="gr" title="Sürükle" draggable="true">⠿</span><span class="nm">' + esc(blkName(e, i)) + '</span><button data-u="' + i + '" aria-label="Yukarı">↑</button><button data-w="' + i + '" aria-label="Aşağı">↓</button></div>'; }).join('') || '<small style="color:#94a3b8">Bölüm bulunamadı.</small>';
+      var mv = function (a, b) { if (b < 0 || b >= L.length || a === b) return; snap(); var x = L[a], y = L[b]; if (a < b) y.parentElement.insertBefore(x, y.nextSibling); else y.parentElement.insertBefore(x, y); dirty(); rSecsEd(); x.scrollIntoView({ block: 'center' }); };
+      Array.prototype.forEach.call(box.querySelectorAll('.se_sc'), function (row) {
+        var i = +row.getAttribute('data-i');
+        row.querySelector('[data-u]').onclick = function () { mv(i, i - 1); }; row.querySelector('[data-w]').onclick = function () { mv(i, i + 1); };
+        row.querySelector('.nm').onclick = function () { L[i].scrollIntoView({ behavior: 'smooth', block: 'center' }); };
+        row.querySelector('.gr').ondragstart = function (ev) { from = i; row.style.opacity = .4; try { ev.dataTransfer.setData('text/plain', '' + i); ev.dataTransfer.setDragImage(row, 10, 10); } catch (x) { } };
+        row.ondragend = function () { row.style.opacity = 1; };
+        row.ondragover = function (ev) { if (from >= 0) { ev.preventDefault(); row.style.outline = '2px solid #3b82f6'; } };
+        row.ondragleave = function () { row.style.outline = ''; };
+        row.ondrop = function (ev) { ev.preventDefault(); row.style.outline = ''; var f = from; from = -1; if (f >= 0) mv(f, i); };
+      });
+    }
+    function openPrev() {
+      if (!DOC) return; var h = serialize(), ov = document.createElement('div'); ov.id = 'se_ov';
+      ov.innerHTML = '<div><button class="se_bt" id="se_ob">← Düzenlemeye dön</button><b style="font:600 13px system-ui;color:#334155">Önizleme (kaydedilmemiş hali)</b><span style="flex:1"></span><span class="se_dv"><button class="se_bt on" data-pv="d">Bilgisayar</button> <button class="se_bt" data-pv="m">Telefon</button></span></div><iframe sandbox="allow-scripts" title="Önizleme"></iframe>';
+      document.body.appendChild(ov); var fr = ov.querySelector('iframe'); fr.srcdoc = h;
+      var done = function () { ov.remove(); document.removeEventListener('keydown', esc2); }, esc2 = function (e) { if (e.key === 'Escape') done(); };
+      document.addEventListener('keydown', esc2); $('#se_ob').onclick = done;
+      Array.prototype.forEach.call(ov.querySelectorAll('[data-pv]'), function (b) { b.onclick = function () { var m = b.getAttribute('data-pv') === 'm'; fr.style.cssText = m ? 'flex:none;width:390px;max-width:100%;margin:0 auto;height:100%' : ''; Array.prototype.forEach.call(ov.querySelectorAll('[data-pv]'), function (x) { x.classList.toggle('on', x === b); }); }; });
+    }
+    function toggleFull(on) {
+      var r = $('#se_root'); if (!r) return; var f = on == null ? !r.classList.contains('full') : on; r.classList.toggle('full', f);
+      var b = $('#se_fs'); if (b) b.textContent = f ? '← Tam ekrandan çık' : 'Tam ekran'; if (b) b.style.cssText = f ? 'background:#0f172a;color:#fff' : '';
+    }
+    document.addEventListener('keydown', function fsEsc(e) { if (!$('#se_root')) { document.removeEventListener('keydown', fsEsc); return; } if (e.key === 'Escape' && $('#se_root').classList.contains('full') && !$('#se_ov')) toggleFull(false); });
     function serialize() { applyMeta(); var c = DOC.documentElement.cloneNode(true); Array.prototype.forEach.call(c.querySelectorAll('[data-spx-ed],base'), function (n) { n.remove(); }); Array.prototype.forEach.call(c.querySelectorAll('[contenteditable]'), function (n) { n.removeAttribute('contenteditable'); }); return '<!DOCTYPE html>\n' + c.outerHTML; }
     function setDev(v) { DEV = v; $('#se_fr').style.width = v === 'm' ? '390px' : v === 't' ? '820px' : '100%'; Array.prototype.forEach.call(document.querySelectorAll('.se_dv button'), function (b) { b.className = 'se_bt' + (b.getAttribute('data-v') === v ? ' on' : ''); }); }
     $('#se_bl').innerHTML = Object.keys(BL).map(function (k) { return '<button data-b="' + k + '">' + BL[k][0] + '</button>'; }).join('');
@@ -3280,7 +3358,7 @@
       if (CUR && ns && ns !== CUR) pre = call('PUT', '/site/pages/' + encodeURIComponent(CUR), { title: $('#se_t').value || undefined, slug: ns }).then(function (r) { CUR = r.slug; });
       pre.then(function () { return call('PUT', '/site/edit', { page: CUR, html: serialize(), title: $('#se_t').value || undefined }); }).then(function () { DIRTY = false; st('Kaydedildi ve yayında ✓', '#15803d'); toast('Site güncellendi'); }).catch(function (e) { st('Kaydedilemedi', '#b91c1c'); fail(e); });
     };
-    $('#se_pv').onclick = function () { if (!DOC) return; var w = window.open('', '_blank'); if (w) { w.document.open(); w.document.write(serialize()); w.document.close(); } };
+    $('#se_pv').onclick = openPrev; $('#se_fs').onclick = function () { toggleFull(); };
     $('#se_rs').onclick = function () { if (!confirm(CUR ? 'Bu sayfa silinsin mi?' : 'Ana sayfadaki tüm değişiklikler silinip seçili temaya dönülsün mü?')) return; call('DELETE', '/site/edit' + (CUR ? '?page=' + encodeURIComponent(CUR) : '')).then(function () { toast(CUR ? 'Sayfa silindi' : 'Temaya dönüldü'); DIRTY = false; load(''); }).catch(fail); };
     call('GET', '/brand').then(function (b) { if (b && b.brand) { BR.dark = b.brand.dark || BR.dark; BR.accent = b.brand.accent || BR.accent; } }).catch(function () { }).then(function () { load(''); });
   }
@@ -3359,8 +3437,8 @@
   var WA_TECH_TPL = 'Merhaba {usta}, size yeni bir servis kaydı atandı.\nKayıt No: {is_no}\nMüşteri: {musteri}\nAdres: {adres}\nCihaz: {cihaz}\nArıza: {ariza}\nZaman: {zaman}\nKayıt detayı: {link}\nHayırlı işler dileriz.';
   var WA_WEL_TPL = 'Merhaba {ad}, ServisPlus usta paneline hoş geldiniz.\nGiriş adresi: {link}\nKullanıcı adı: {kullanici}\nŞifre: {sifre}\nGirişten sonra şifrenizi değiştirmenizi öneririz. Hayırlı işler dileriz.';
   function waNum(p) { var d = String(p || '').replace(/\D/g, ''); if (d.indexOf('00') === 0) d = d.slice(2); if (d.length === 10) d = '90' + d; else if (d.length === 11 && d.charAt(0) === '0') d = '9' + d; return d; }
-  function waRender(t, v) { Object.keys(v).forEach(function (k) { t = t.split('{' + k + '}').join(v[k] == null ? '' : String(v[k])); }); return t.trim(); }
-  function waOpen(phone, text) { var n = waNum(phone); window.open('https://wa.me/' + (n || '') + '?text=' + encodeURIComponent(text), '_blank'); }
+  function waRender(t, v) { t = brandTxt(t); Object.keys(v).forEach(function (k) { t = t.split('{' + k + '}').join(v[k] == null ? '' : String(v[k])); }); return t.trim(); }
+  function waOpen(phone, text) { var n = waNum(phone); window.open('https://wa.me/' + (n || '') + '?text=' + encodeURIComponent(brandTxt(text)), '_blank'); }
   var WA_USTA_TPLS = [
     ['İş atandı', null],
     ['Hatırlatma', 'Merhaba {usta}, {is_no} numaralı servis kaydı için hatırlatma.\nMüşteri: {musteri}\nAdres: {adres}\nCihaz: {cihaz}\nZaman: {zaman}\nLütfen müşteriyle iletişime geçip durumu bildirin. Kayıt: {link}'],
@@ -3370,7 +3448,7 @@
     Promise.all([call('GET', '/jobs/' + jid), call('GET', '/technicians'), call('GET', '/governance/notify-settings').catch(function () { return {}; })]).then(function (a) {
       var j = a[0], t = (a[1] || []).filter(function (x) { return x.id === j.assigned_technician_id; })[0], cfg = (a[2] || {}).technician || {};
       if (!t) return toast('Önce bu kayda usta atayın');
-      var base = (cfg.base_url || 'https://bayi.servisplus.net.tr').replace(/\/$/, '');
+      var base = (cfg.base_url || (FIRM ? location.origin : 'https://bayi.servisplus.net.tr')).replace(/\/$/, '');
       var vals = { usta: (t.name || '').split(' ')[0], is_no: j.job_number || '', musteri: j.customer_name || '', adres: [j.customer_address, j.customer_district, j.customer_city].filter(Boolean).join(' '), cihaz: [j.device_brand_name, j.device_model, j.device_type].filter(Boolean).join(' '), ariza: (j.fault_description || '').slice(0, 300), zaman: j.scheduled_at ? String(j.scheduled_at).slice(0, 16).replace('T', ' ') : 'En kısa sürede', link: base + '/tech/jobs/' + jid };
       var old = document.getElementById('spx-wam'); if (old) old.remove();
       var m = document.createElement('div'); m.id = 'spx-wam'; m.className = 'notranslate';
@@ -3428,7 +3506,7 @@
     document.body.appendChild(c);
     var dtb = c.querySelector('#spx-wel-dt'); if (dtb) dtb.onclick = function () { techProfModal(tid); };
     c.querySelector('#spx-wel-x').onclick = function () { c.remove(); };
-    c.querySelector('#spx-wel-go').onclick = function () { waOpen(phone, waRender(WA_WEL_TPL, { ad: String(name || '').split(' ')[0], link: 'https://bayi.servisplus.net.tr/login', kullanici: email, sifre: pass })); };
+    c.querySelector('#spx-wel-go').onclick = function () { waOpen(phone, waRender(WA_WEL_TPL, { ad: String(name || '').split(' ')[0], link: (FIRM ? location.origin + '/login' : 'https://bayi.servisplus.net.tr/login'), kullanici: email, sifre: pass })); };
   }
   (function () {
     var sd = XMLHttpRequest.prototype.send;
@@ -3679,7 +3757,7 @@
     }).catch(fail);
   }
   /* ===== Musteri memnuniyeti / Usta borc vadesi / Gunun is haritasi ===== */
-  function waLink(ph, txt) { var n = String(ph || '').replace(/\D/g, ''); if (n.indexOf('00') === 0) n = n.slice(2); if (n.charAt(0) === '0') n = '9' + n; else if (n.length === 10) n = '90' + n; return 'https://wa.me/' + n + '?text=' + encodeURIComponent(txt || ''); }
+  function waLink(ph, txt) { var n = String(ph || '').replace(/\D/g, ''); if (n.indexOf('00') === 0) n = n.slice(2); if (n.charAt(0) === '0') n = '9' + n; else if (n.length === 10) n = '90' + n; return 'https://wa.me/' + n + '?text=' + encodeURIComponent(brandTxt(txt) || ''); }
   var MEM_D = 90;
   function drawMemnun() {
     call('GET', '/reports/satisfaction?days=' + MEM_D).then(function (r) {
