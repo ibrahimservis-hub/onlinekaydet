@@ -536,7 +536,7 @@
   })();
   /* firma hesabında ServisPlus görselleri (PDF alt logosu vb.) firmanın kendi logosuna çevrilir; yoksa şeffaf piksel */
   var PIX = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGP4//8/AAX+Av4N70a4AAAAAElFTkSuQmCC';
-  function firmImgUrl(u) { try { var s = String(u); if (FIRM && /(\/brand\/|logo-servisplus|servisplus\.net\.tr\/images\/logo|footer-logo)/i.test(s) && !/brand-logo/.test(s)) return FLOGO || PIX; } catch (e) { } return u; }
+  function firmImgUrl(u) { try { var s = String(u); if (FIRM && /(\/brand\/|logo-servisplus|servisplus\.net\.tr\/images\/logo|footer-logo)/i.test(s) && !/brand-logo/.test(s) && !/\/api\/brand(\/|$|\?)/.test(s)) return FLOGO || PIX; } catch (e) { } return u; }
   (function () {
     try {
       var d = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, 'src');
