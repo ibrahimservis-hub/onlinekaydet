@@ -50,6 +50,26 @@ def page_template(title: str, name: str, tel: str, dark: str, accent: str) -> st
     ) % {"t": e(title), "n": e(name), "d": dark or "#0a1f44", "a": accent or "#f27a1a", "th": e(telhref), "tel": e(tel or "")}
 
 
+def compose_page(home: str, title: str, content: str):
+    """Ana sayfanın <head>, üst bilgi, alt bilgi ve betikleriyle yeni sayfa kurar (tema görünümü korunur). Başarısızsa None."""
+    try:
+        hm = re.search(r"<head[^>]*>(.*?)</head>", home, re.S | re.I)
+        bm = re.search(r"<body[^>]*>", home, re.I)
+        if not (hm and bm):
+            return None
+        head = re.sub(r"<title>.*?</title>", "", hm.group(1), flags=re.S | re.I)
+        head = re.sub(r"<meta[^>]+name=[\"']description[\"'][^>]*>", "", head, flags=re.I)
+        hd = re.search(r"<header\b.*?</header>", home, re.S | re.I)
+        ft = re.findall(r"<footer\b.*?</footer>", home, re.S | re.I)
+        if not hd and not ft:
+            return None
+        scripts = "".join(re.findall(r"<script\b(?![^>]*\bsrc=[\"']?https?://(?:www\.)?(?:googletagmanager|google-analytics))[^>]*>.*?</script>", home[bm.end():], re.S | re.I))
+        return ("<!DOCTYPE html><html lang=\"tr\"><head>%s<title>%s</title></head>%s%s<main>%s</main>%s%s</body></html>"
+                % (head, _html.escape(title), bm.group(0), hd.group(0) if hd else "", content, ft[-1] if ft else "", scripts))
+    except Exception:
+        return None
+
+
 def register(api_router, db, deps):
     require_admin = deps["require_admin"]
     THEMES = deps.get("themes") or []
@@ -152,9 +172,48 @@ def register(api_router, db, deps):
             slug, n = "%s-%d" % (base, n), n + 1
         brand = await db.app_settings.find_one({"_id": "brand"}, {"_id": 0}) or {}
         name, tel, _f = await identity()
-        pages.append({"slug": slug, "title": title, "html": page_template(title, name, tel, brand.get("dark"), brand.get("accent"))})
+        content = clean_html(payload.get("content") or "") or ('<section style="max-width:960px;margin:0 auto;padding:56px 22px"><h1>%s</h1><p>Bu metni düzenleyin.</p></section>' % _html.escape(title))
+        home = d.get("html") or await theme_html() or ""
+        full = compose_page(home, title, content) if home else None
+        pages.append({"slug": slug, "title": title, "html": full or page_template(title, name, tel, brand.get("dark"), brand.get("accent"))})
         await db.app_settings.update_one({"_id": "site_custom"}, {"$set": {"pages": pages, "updated_at": _now()}}, upsert=True)
         return {"ok": True, "slug": slug, "title": title}
+
+    @api_router.put("/site/logo")
+    async def logo_put(payload: dict, _: dict = Depends(require_admin)):
+        need_firm()
+        data = str(payload.get("data") or "")
+        if data and not re.match(r"^data:image/(png|jpeg|webp|gif|svg\+xml);base64,[A-Za-z0-9+/=]+$", data):
+            raise HTTPException(422, "Logo bir resim dosyası olmalı (PNG, JPG, WEBP, SVG)")
+        if len(data) > 1_500_000:
+            raise HTTPException(422, "Logo çok büyük (en fazla ~1 MB)")
+        await db.app_settings.update_one({"_id": "firm_logo"}, {"$set": {"data": data}}, upsert=True)
+        await db.app_settings.update_one({"_id": "global"}, {"$set": {"has_logo": bool(data)}}, upsert=True)
+        return {"ok": True}
+
+    @api_router.get("/site/logo")
+    async def logo_get(_: dict = Depends(require_admin)):
+        need_firm()
+        d = await db.app_settings.find_one({"_id": "firm_logo"}, {"_id": 0}) or {}
+        return {"data": d.get("data") or ""}
+
+    @api_router.put("/site/pages/{slug}")
+    async def page_meta(slug: str, payload: dict, _: dict = Depends(require_admin)):
+        need_firm()
+        d = await doc()
+        pages = d.get("pages", [])
+        p = next((x for x in pages if x["slug"] == slug), None)
+        if not p:
+            raise HTTPException(404, "Sayfa bulunamadı")
+        if payload.get("title"):
+            p["title"] = " ".join(str(payload["title"]).split())[:80]
+        ns = str(payload.get("slug") or "").strip().lower()
+        if ns and ns != slug:
+            if not re.fullmatch(r"[a-z0-9-]{1,40}", ns) or ns in RESERVED or any(x["slug"] == ns for x in pages):
+                raise HTTPException(422, "Bu adres kullanılamaz (a-z, 0-9 ve tire; başka sayfada kullanılmamış olmalı)")
+            p["slug"] = ns
+        await db.app_settings.update_one({"_id": "site_custom"}, {"$set": {"pages": pages, "updated_at": _now()}}, upsert=True)
+        return {"ok": True, "slug": p["slug"], "title": p["title"]}
 
     # ---------------------------------------------------------------- yayın (domains.hosted_site çağırır)
     async def serve(path: str):

@@ -22,7 +22,7 @@ with TestClient(s.app) as c:
         d = c.get("/api/site/edit", headers=H).json(); assert d["custom"] and "Özel metin ABC" in d["html"] and "contenteditable" not in d["html"] and "data-spx" not in d["html"]
     t("düzenlenmiş site kaydedilir, düzenleyici izleri temizlenir", b)
     def p():
-        r = c.post("/api/site/pages", headers=H, json={"title": "Hakkımızda Çalışma Saatleri"}); assert r.status_code == 200, r.text
+        r = c.post("/api/site/pages", headers=H, json={"title": "Hakkımızda Çalışma Saatleri", "content": "<section><h2>Alt başlık</h2><p>x</p></section>"}); assert r.status_code == 200, r.text
         S["slug"] = r.json()["slug"]; assert S["slug"] == "hakkimizda-calisma-saatleri", S["slug"]
         r = c.post("/api/site/pages", headers=H, json={"title": "Hakkımızda Çalışma Saatleri"}); assert r.json()["slug"].endswith("-2")
         assert c.post("/api/site/pages", headers=H, json={"title": "api"}).json()["slug"] != "api"
@@ -44,6 +44,17 @@ with TestClient(s.app) as c:
         assert c.delete("/api/site/edit", headers=H).status_code == 200
         d = c.get("/api/site/edit", headers=H).json(); assert not d["custom"] and "Özel metin ABC" not in d["html"]
     t("sayfa silinir, ana sayfa temaya sıfırlanır", r_)
+    def lg():
+        assert c.put("/api/site/logo", headers=H, json={"data": "data:image/png;base64,iVBORw0KGgo="}).status_code == 200
+        assert c.get("/api/site/logo", headers=H).json()["data"].startswith("data:image/png")
+        assert c.put("/api/site/logo", headers=H, json={"data": "javascript:alert(1)"}).status_code == 422
+        assert c.get("/api/firm/logo", headers=H).status_code in (200, 404)
+    t("logo yüklenir, geçersiz dosya reddedilir", lg)
+    def mt():
+        S["slug"] = c.post("/api/site/pages", headers=H, json={"title": "Deneme Sayfa"}).json()["slug"]
+        assert c.put("/api/site/pages/" + S["slug"], headers=H, json={"title": "Yeni Ad", "slug": "yeni-ad"}).json()["slug"] == "yeni-ad"
+        assert c.put("/api/site/pages/yeni-ad", headers=H, json={"slug": "api"}).status_code == 422
+    t("sayfa adı/adresi değişir, ayrılmış adres reddedilir", mt)
     def g():
         assert c.put("/api/site/edit", headers=H, json={"html": "x"}).status_code == 422
         assert c.get("/api/site/edit", headers={"Authorization": "Bearer " + c.post("/api/auth/login", json={"email": "admin@servis.com", "password": "admin123"}).json()["token"]}).status_code == 403
