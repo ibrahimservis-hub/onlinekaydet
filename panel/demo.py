@@ -78,9 +78,12 @@ def register(api_router, db, deps):
         sec = sektor.SECTORS[key]
         fid = uuid.uuid4().hex[:12]
         tag = secrets.token_hex(3)
-        email = f"demo{tag}@demo.onlinekaydet.com"
+        n = await db.main().firms.count_documents({"demo": True}) + 1
+        while await db.main().firms.find_one({"login_email": f"demo{n}@demo.onlinekaydet.com"}):
+            n += 1
+        email = f"demo{n}@demo.onlinekaydet.com"
         pw = "".join(random.choice("abcdefghjkmnpqrstuvwxyz23456789") for _ in range(8))
-        company = f"{name} Servis (Demo)"
+        company = f"Demo {n}"
         mods = firms.ALL_MODS
         f = {"id": fid, "db": db.firm_db_name(fid), "name": company, "login_email": email, "contact_name": name, "phone": phone, "address": "",
              "tax_no": "", "tax_office": "", "features": {}, "status": "aktif", "created_at": _now(), "logo": "",
