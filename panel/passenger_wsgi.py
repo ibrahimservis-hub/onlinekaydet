@@ -364,7 +364,42 @@ def _owner_redirect(environ, start_response):
         return None
     return None
 
+_DOMMAP = {"t": 0.0, "m": {}}
+_PANEL_PATHS = ("/api", "/static", "/uploads", "/brand", "/fonts", "/pdfjs", "/rehber", "/giris", "/login", "/panel", "/admin", "/tech",
+                "/takip", "/cihaz", "/bakim", "/odeme", "/teklif", "/portal", "/uye-girisi", "/manifest.json", "/spx-sw.js", "/panel-ek.js",
+                "/giris-skin.js", "/belge.js", "/favicon.ico", "/apple-touch-icon.png", "/icon-192.png", "/icon-512.png", "/asset-manifest.json")
+
+
+def _custom_host(environ):
+    """Müşterinin kendi alan adından gelen istek mi? (firm_domains.json, panel tarafından yazılır)"""
+    host = (environ.get("HTTP_X_FORWARDED_HOST") or environ.get("HTTP_HOST") or "").lower().split(":")[0]
+    if not host or host == "onlinekaydet.com" or host.endswith(".onlinekaydet.com") or host in ("localhost", "127.0.0.1"):
+        return False
+    try:
+        import json, time
+        fp = os.path.join(os.path.dirname(os.path.abspath(__file__)), "firm_domains.json")
+        if time.time() - _DOMMAP["t"] > 20:
+            _DOMMAP["m"] = json.load(open(fp, encoding="utf-8")) if os.path.isfile(fp) else {}
+            _DOMMAP["t"] = time.time()
+        return host in _DOMMAP["m"]
+    except Exception:
+        return False
+
+
 def application(environ, start_response):
+    if _custom_host(environ):
+        p = environ.get("PATH_INFO", "") or "/"
+        if environ.get("REQUEST_METHOD") in ("GET", "HEAD") and not p.startswith(_PANEL_PATHS):
+            environ["PATH_INFO"] = "/api/public/hosted-site"        # firmanın temalı sitesi
+            environ["REQUEST_URI"] = "/api/public/hosted-site"
+            environ["QUERY_STRING"] = ""
+        _ensure_started()
+        if not _state["ready"] and _state["error"] is None:
+            _done.wait(25)
+        if _state["ready"]:
+            if (environ.get("PATH_INFO", "").rstrip("/") == "/uye-girisi"):
+                environ["PATH_INFO"] = "/giris"
+            return _wrap(_state["app"](environ, start_response), _state["loop"])
     if (environ.get("PATH_INFO", "") or "").rstrip("/") == "/uye-girisi":
         environ["PATH_INFO"] = "/giris"            # uye girisi: musteri paneli giris ekrani (adres cubugunda /giris kalir)
         environ["REQUEST_URI"] = "/giris"

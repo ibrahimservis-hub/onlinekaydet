@@ -2875,6 +2875,9 @@ import surum
 surum.register(api_router, db, {"require_admin": require_admin})
 import servis_ayar
 servis_ayar.setup(app, api_router, db, get_current_user, tenant)
+import domains
+import kurumsal as _kur
+domains.register(api_router, db, {"require_admin": require_admin, "get_current_user": get_current_user, "themes": _kur.THEMES})
 import sahip
 sahip.register(app, api_router, db, {"require_admin": require_admin, "get_current_user": get_current_user, "create_access_token": create_access_token, "hash_password": hash_password})
 gsc_auto.register(api_router, db, {"require_admin": require_admin, "JWT_SECRET": JWT_SECRET})
@@ -2937,6 +2940,26 @@ async def _firm_ctx(request: Request, call_next):
             return await call_next(request)
         finally:
             tenant.reset(ft)
+    if request.url.path.startswith("/api/public/"):
+        # Müşterinin kendi alan adından (Host) ya da onun sitesinden (Origin) gelen herkese açık istekler o firmaya gider.
+        try:
+            _hh = request.headers.get("x-forwarded-host") or request.headers.get("host") or ""
+            _og = request.headers.get("origin", "")
+            _hd = await domains.host_to_firm(db, _hh)
+            if not _hd and _og:
+                from urllib.parse import urlparse as _up
+                _hd = await domains.host_to_firm(db, _up(_og).hostname or "")
+        except Exception:                               # noqa: BLE001
+            _hd = None
+        if _hd:
+            _fd = await db.main().firms.find_one({"id": _hd["firm_id"]}, {"_id": 0, "db": 1, "status": 1, "expires_at": 1})
+            if not _fd or _fd.get("status") == "askida" or firms.expired(_fd):
+                return _JR({"detail": "Site geçici olarak kapalı"}, status_code=404)
+            ft = tenant.set_firm(_fd["db"])
+            try:
+                return await call_next(request)
+            finally:
+                tenant.reset(ft)
     try:
         h = request.headers.get("Authorization", "")
         tk = h[7:] if h.startswith("Bearer ") else (request.query_params.get("auth") or request.cookies.get("access_token"))
