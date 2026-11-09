@@ -1020,12 +1020,22 @@
   }
   /* --- pazaryerleri --- */
   function drawMkt() {
-    call('GET', '/admin/market/orders').then(function (os) {
-      os = Array.isArray(os) ? os : (os.items || []);
-      var ids = [['trendyol', 'Trendyol'], ['hepsiburada', 'Hepsiburada'], ['n11', 'N11']];
-      body().innerHTML = '<div class="spx-card"><b>Pazaryeri işlemleri</b><small style="display:block;color:#64748b;margin-bottom:8px">Önce “Aç/Kapat & Ayarlar” sekmesinden ilgili pazaryerinin anahtarlarını girip açın.</small>' + ids.map(function (m) { return '<div class="spx-row"><div class="t"><b>' + m[1] + '</b></div><button class="spx-b" data-m="' + m[0] + ':test">Bağlantı testi</button><button class="spx-b" data-m="' + m[0] + ':pull-orders">Siparişleri çek</button><button class="spx-b" data-m="' + m[0] + ':push-stock">Stok/fiyat gönder</button></div>'; }).join('') + '</div>' +
-        '<div class="spx-card"><b>Çekilen siparişler</b><table><tr><th>Pazaryeri</th><th>No</th><th>Müşteri</th><th>Tutar</th><th>Durum</th></tr>' + os.map(function (o) { return '<tr><td>' + esc(o.market) + '</td><td>' + esc(o.order_no || o.external_id) + '</td><td>' + esc(o.customer || (o.customer && o.customer.name) || '') + '</td><td>' + esc(o.total) + '</td><td>' + esc(o.status) + '</td></tr>'; }).join('') + '</table></div>';
-      body().onclick = function (e) { var b = e.target.closest('[data-m]'); if (!b) return; var p = b.getAttribute('data-m').split(':'); b.disabled = true; call('POST', '/admin/market/' + p[0] + '/' + p[1], {}).then(function (r) { toast(r.message || ('Tamam' + (r.count != null ? ': ' + r.count : ''))); b.disabled = false; if (p[1] === 'pull-orders') drawMkt(); }).catch(function (e) { b.disabled = false; fail(e); }); };
+    Promise.all([call('GET', '/admin/market/orders'), call('GET', '/admin/market/status')]).then(function (a) {
+      var os = Array.isArray(a[0]) ? a[0] : (a[0].items || []), st = a[1] || { markets: [] };
+      var ago = function (t) { if (!t) return 'henüz çekilmedi'; var m = Math.round((Date.now() - new Date(t).getTime()) / 60000); return m < 1 ? 'az önce' : (m < 90 ? m + ' dk önce' : Math.round(m / 60) + ' sa önce'); };
+      var chip = function (ok, t) { return '<span style="display:inline-block;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:700;margin-left:6px;background:' + (ok ? '#dcfce7;color:#166534' : '#f1f5f9;color:#475569') + '">' + t + '</span>'; };
+      body().innerHTML = '<div class="spx-card"><b>Pazaryerleri</b><small style="display:block;color:#64748b;margin-bottom:8px">Bağlı pazaryerlerinden gelen siparişler ' + (st.auto_every_min || 5) + ' dakikada bir kendiliğinden sisteme düşer (Mağaza → Siparişler); stok tek havuzdan azalır ve tüm kanallara yansır. Anahtarlarınızı “Aç/Kapat & Ayarlar” sekmesine girin.</small>' +
+        st.markets.map(function (m) {
+          return '<div class="spx-row" style="align-items:flex-start;flex-wrap:wrap"><div class="t" style="min-width:210px"><b>' + esc(m.name) + '</b>' + chip(m.connected, m.connected ? 'Bağlı' : 'Bağlı değil') + (m.verified ? '' : chip(false, 'ilk kullanımda test edin')) +
+            '<small style="display:block;color:#64748b">Son çekim: ' + ago(m.last) + (m.imported ? ' · ' + m.imported + ' yeni sipariş alındı' : '') + '</small>' + (m.error ? '<small style="display:block;color:#b91c1c">' + esc(m.error) + '</small>' : '') + '</div>' +
+            '<button class="spx-b" data-m="' + m.id + ':test">Bağlantı testi</button><button class="spx-b" data-m="' + m.id + ':pull-orders">Siparişleri şimdi çek</button><button class="spx-b" data-m="' + m.id + ':push-stock">Stok/fiyat gönder</button><button class="spx-b" data-mk="' + m.id + '">Kategori eşleme</button></div>';
+        }).join('') + '</div>' +
+        '<div class="spx-card"><b>Pazaryerlerinden gelen siparişler</b><table><tr><th>Pazaryeri</th><th>No</th><th>Müşteri</th><th>Tutar</th><th>Durum</th></tr>' + os.map(function (o) { return '<tr><td>' + esc(o.market) + '</td><td>' + esc(o.number || o.order_no || o.key || o.external_id || '') + '</td><td>' + esc(typeof o.customer === 'string' ? o.customer : ((o.customer && o.customer.name) || '')) + '</td><td>' + esc(o.total) + '</td><td>' + esc(o.status) + '</td></tr>'; }).join('') + '</table></div>';
+      body().onclick = function (e) {
+        var k = e.target.closest('[data-mk]'); if (k) { window.__spxMk(k.getAttribute('data-mk'), 'map'); return; }
+        var b = e.target.closest('[data-m]'); if (!b) return; var p = b.getAttribute('data-m').split(':'); b.disabled = true;
+        call('POST', '/admin/market/' + p[0] + '/' + p[1], {}).then(function (r) { toast(r.message || (p[1] === 'pull-orders' ? ((r.new || 0) + ' yeni, ' + (r.historical || 0) + ' geçmiş sipariş işlendi') : 'Tamam')); b.disabled = false; if (p[1] === 'pull-orders') drawMkt(); }).catch(function (e) { b.disabled = false; fail(e); });
+      };
     }).catch(function (e) { body().innerHTML = '<div class="spx-card">Yüklenemedi: ' + esc(e.message) + '</div>'; });
   }
 
@@ -4837,6 +4847,12 @@
         '#spx-stabs button i{font-style:normal;font-weight:600;font-size:11px;opacity:.7;margin-left:6px}.spx-dark #spx-stabs{background:#111c33;border-color:#1e2d4a}.spx-dark #spx-stabs button{color:#cbd5e1}.spx-dark #spx-stabs button.on{background:#2563eb;color:#fff}';
       document.head.appendChild(st);
     }
+    if (!document.getElementById('spx-mkcard')) {
+      var mc = document.createElement('div'); mc.id = 'spx-mkcard'; mc.setAttribute('data-spxt', 'pay'); mc.style.cssText = 'background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:16px;margin-top:12px';
+      mc.innerHTML = '<b style="font-size:16px">Pazaryeri ayarları</b><p style="color:#64748b;margin:4px 0 10px;font-size:13px">Her pazaryeri için anahtarlar, kategori ve marka eşleme (renk, ebat/beden gibi özellikler dahil), güvenlik payı ve sipariş akışı buradan açılır.</p><div id="spx-mkrows">Yükleniyor…</div>';
+      pg.appendChild(mc);
+      call('GET', '/admin/market/status').then(function (r) { var q = document.getElementById('spx-mkrows'); if (!q) return; q.innerHTML = r.markets.map(function (m) { return '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:8px 0;border-top:1px solid #f1f5f9"><b style="min-width:120px">' + esc(m.name) + '</b><span style="font-size:12px;color:' + (m.connected ? '#166534' : '#64748b') + '">' + (m.connected ? 'Bağlı' : 'Bağlı değil') + '</span><span style="flex:1"></span><button class="spx-b" data-sk="keys">Anahtarlar</button><button class="spx-b" data-sk="map:' + m.id + '">Kategori & marka eşleme</button><button class="spx-b" data-sk="orders">Siparişler</button></div>'; }).join(''); q.onclick = function (e) { var b = e.target.closest('[data-sk]'); if (!b) return; var v = b.getAttribute('data-sk'); if (v === 'keys') open('moduller'); else if (v === 'orders') open('pazar'); else window.__spxMk(v.split(':')[1], 'map'); }; }).catch(function () { var q = document.getElementById('spx-mkrows'); if (q) q.textContent = 'Pazaryeri bilgisi yüklenemedi.'; });
+    }
     var cur = LS.get('spx_settab', 'fis'); if (!STB.some(function (x) { return x[0] === cur; })) cur = 'fis';
     var head = pg.firstElementChild, cards = [].slice.call(pg.children).filter(function (e) { return e !== head && e.id !== 'spx-stabs'; });
     var tag = function (el, tab) { if (!el) return; el.setAttribute('data-spxt', tab + (tab === cur ? ' on' : '')); };
@@ -4856,6 +4872,7 @@
         });
         return;
       }
+      if (c.id === 'spx-mkcard') { tag(c, 'pay'); return; }
       if (c.getAttribute('data-testid') === 'ai-card') { tag(c, 'ai'); return; }
       var t = (c.textContent || '').slice(0, 140);
       if (/PDF Tasarımı|Varsayılan PDF Notu|Firma Bilgileri|Fiyat Teklifi Alt Notu/.test(t)) tag(c, 'fis');
@@ -5290,7 +5307,8 @@
 
   /* ===== Mağaza v2: ödeme yöntemleri, yasal metinler, kanal & stok, yeni ürün ===== */
   var MG = { mk: 'trendyol', view: 'urun', st: '', q: '', pg: 1, sel: {}, edit: '' };
-  var MGM = [['trendyol', 'Trendyol'], ['hepsiburada', 'Hepsiburada'], ['n11', 'N11']];
+  var MGM = [['trendyol', 'Trendyol'], ['hepsiburada', 'Hepsiburada'], ['n11', 'N11'], ['ciceksepeti', 'Çiçeksepeti'], ['pazarama', 'Pazarama'], ['pttavm', 'PttAVM']];
+  window.__spxMk = function (mk, view) { MG.mk = mk; MG.view = view || 'map'; MG.pg = 1; open('kanal'); };
   var MGST = { yayinda: ['ok', 'Yayında'], hazir: ['ok', 'Hazır'], eksik: ['wa', 'Eksik'], hata: ['er', 'Hata'], kapali: ['mu', 'Kapalı'] };
   function mgCss() {
     if (document.getElementById('mg-css')) return;
@@ -5379,7 +5397,7 @@
     Promise.all([call('GET', '/shop/catalog?' + u), call('GET', '/shop/channels'), call('GET', '/shop/categories')]).then(function (rs) {
       var r = rs[0], cn = rs[1].channels || [], cats = rs[2] || [], mk = r.markets, nm = { site: 'Site' };
       mk.forEach(function (m) { nm[m.id] = m.name; });
-      var short = { site: 'Site', trendyol: 'Trendyol', hepsiburada: 'Hepsiburada', n11: 'N11' };
+      var short = { site: 'Site', trendyol: 'Trendyol', hepsiburada: 'Hepsiburada', n11: 'N11', ciceksepeti: 'Çiçeksepeti', pazarama: 'Pazarama', pttavm: 'PttAVM' };
       var catl = Array.isArray(cats) ? cats : (cats.items || cats.categories || []);
       var h = '<div class="spx-card"><div class="ul-bar"><label style="flex:1;min-width:180px">Ara<input id="ul_q" value="' + esc(UL.q) + '" placeholder="Ürün adı, barkod, stok kodu, marka"></label>' +
         '<label>Kategori<select id="ul_cat"><option value="">Tümü</option>' + catl.map(function (c) { return '<option value="' + esc(c.name) + '"' + (UL.cat === c.name ? ' selected' : '') + '>' + esc(c.name) + '</option>'; }).join('') + '</select></label>' +
