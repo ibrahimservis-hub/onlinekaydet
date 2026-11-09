@@ -803,7 +803,7 @@
   "fd": "fraunces",
   "fb": "manrope",
   "dark": false,
-  "kb": 804
+  "kb": 817
  },
  {
   "slug": "32-magaza-klima",
@@ -829,7 +829,7 @@
   "fd": "sora",
   "fb": "figtree",
   "dark": false,
-  "kb": 735
+  "kb": 748
  },
  {
   "slug": "33-magaza-beyaz-esya",
@@ -855,7 +855,7 @@
   "fd": "dmserif",
   "fb": "figtree",
   "dark": false,
-  "kb": 723
+  "kb": 736
  },
  {
   "slug": "34-magaza-tesisat",
@@ -881,7 +881,7 @@
   "fd": "barlow",
   "fb": "instrument",
   "dark": false,
-  "kb": 693
+  "kb": 706
  },
  {
   "slug": "35-magaza-guvenlik",
@@ -907,7 +907,7 @@
   "fd": "bricolage",
   "fb": "plex",
   "dark": false,
-  "kb": 784
+  "kb": 796
  },
  {
   "slug": "36-magaza-elektrik",
@@ -933,7 +933,7 @@
   "fd": "archivoblack",
   "fb": "intertight",
   "dark": false,
-  "kb": 836
+  "kb": 848
  },
  {
   "slug": "37-magaza-elektronik",
@@ -959,7 +959,7 @@
   "fd": "intertight",
   "fb": "plex",
   "dark": true,
-  "kb": 978
+  "kb": 990
  },
  {
   "slug": "38-magaza-kombi-vaillant",
@@ -985,6 +985,6 @@
   "fd": "playfair",
   "fb": "figtree",
   "dark": false,
-  "kb": 817
+  "kb": 830
  }
 ]
