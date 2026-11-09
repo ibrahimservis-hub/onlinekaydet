@@ -32,8 +32,21 @@
       '<div style="font:400 14px/1.6 Inter,system-ui,sans-serif;color:#cdd6e4;margin-top:10px">Servis kayıtlarınızı, ustalarınızı ve müşterilerinizi telefondan da yönetin.</div></div>';
     right.appendChild(box);
   }
+
+  /* Tüm panelde kalan "ServisPlus" yazılarını OnlineKaydet yap (metin, yer tutucu, başlık). */
+  function brandText() {
+    try {
+      var w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null), n, L = [];
+      while ((n = w.nextNode())) { if (n.nodeValue.indexOf('ServisPlus') >= 0) { var p = n.parentNode && n.parentNode.nodeName; if (p !== 'SCRIPT' && p !== 'STYLE' && p !== 'TEXTAREA') L.push(n); } }
+      L.forEach(function (x) { x.nodeValue = x.nodeValue.replace(/ServisPlus/g, 'OnlineKaydet'); });
+      [].forEach.call(document.querySelectorAll('[placeholder*="ServisPlus"],[alt*="ServisPlus"],[title*="ServisPlus"]'), function (e) {
+        ['placeholder', 'alt', 'title'].forEach(function (a) { var v = e.getAttribute(a); if (v && v.indexOf('ServisPlus') >= 0) e.setAttribute(a, v.replace(/ServisPlus/g, 'OnlineKaydet')); });
+      });
+      if (document.title.indexOf('ServisPlus') >= 0) document.title = document.title.replace(/ServisPlus/g, 'OnlineKaydet');
+    } catch (e) { }
+  }
   var t = null;
-  function sched() { if (t) return; t = setTimeout(function () { t = null; try { skin(); } catch (e) { } }, 60); }
+  function sched() { if (t) return; t = setTimeout(function () { t = null; try { skin(); } catch (e) { } brandText(); }, 60); }
   new MutationObserver(sched).observe(document.documentElement, { childList: true, subtree: true });
   sched();
 })();

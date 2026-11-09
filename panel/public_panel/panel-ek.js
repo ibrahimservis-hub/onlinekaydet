@@ -5032,7 +5032,7 @@
       var j = JSON.parse(txt);
       if (!j || !j.token) return;
       var c = JSON.parse(atob(j.token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
-      if (c.role === 'admin' && !c.firm) { sessionStorage.setItem('ok_t', j.token); location.href = '/sahip'; }
+      if (c.role === 'admin' && !c.firm) { sessionStorage.setItem('ok_t', j.token); location.href = '/yonetim'; }
     } catch (e) { }
   }
   try {
@@ -5059,8 +5059,8 @@
 (function () {
   try {
     var t = localStorage.getItem('token');
-    if (!t || /^\/sahip/.test(location.pathname)) return;
+    if (!t || /^\/yonetim/.test(location.pathname)) return;
     var c = JSON.parse(atob(t.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
-    if (c.role === 'admin' && !c.firm) { sessionStorage.setItem('ok_t', t); location.replace('/sahip'); }
+    if (c.role === 'admin' && !c.firm) { sessionStorage.setItem('ok_t', t); location.replace('/yonetim'); }
   } catch (e) { }
 })();
