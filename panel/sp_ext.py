@@ -23,6 +23,7 @@ from fastapi.responses import Response, RedirectResponse, JSONResponse
 from pydantic import BaseModel
 
 import shop as shopmod
+import shop_sync
 
 log = logging.getLogger("sp_ext")
 HERE = Path(__file__).parent
@@ -473,6 +474,7 @@ def register(api_router, db, deps):
                    "line_total": line, "image": (pr.get("images") or [""])[0]}
             items.append(row)
             done.append(row)
+        await shopmod.stock_changed(db, [d["product_id"] for d in done])
         cfg_ = await shop_cfg()
         ship = 0.0 if (cfg_["free_shipping_over"] and sub >= cfg_["free_shipping_over"]) else float(cfg_["shipping_fee"] or 0)
         status = p.status if p.status in shopmod.ORDER_STATUSES else "odeme_bekliyor"
@@ -687,6 +689,7 @@ def register(api_router, db, deps):
                    "customer": (str(r.get("customerFirstName", "")) + " " + str(r.get("customerLastName", ""))).strip() or str(r.get("customerName") or ""),
                    "status": r.get("status") or r.get("packageStatus") or ""}
             await db.sp_market_orders.update_one({"market": mid, "key": key}, {"$set": doc}, upsert=True)
+            await shop_sync.apply_market_order(db, mid, key, r)       # pazaryeri siparişi tek havuzdan düşer, diğer kanallara yansır
             n += 1
         return {"ok": True, "pulled": n}
 
@@ -696,23 +699,16 @@ def register(api_router, db, deps):
 
     @api_router.post("/admin/market/{mid}/push-stock")
     async def market_push(mid: str, _: dict = adm):
+        """Tek havuzdan: yalnızca bu pazaryerinde açık ve yayında ürünlerin stok/fiyatı (kanal payı düşülerek) gönderilir."""
         check_market(mid)
-        prods = await db.shop_products.find({"active": True, "sku": {"$nin": ["", None]}}, {"_id": 0}).to_list(1000)
-        if not prods:
-            raise HTTPException(status_code=422, detail="Ürünlerde SKU / barkod girilmemiş (Mağaza > Ürünler)")
-        u = market_urls(mid, await cfg(mid))
-        stock = lambda p: int(p.get("stock", 0)) if p.get("track_stock", True) else 999
-        if mid == "trendyol":
-            body = {"items": [{"barcode": p["sku"], "quantity": stock(p), "salePrice": float(p["price"]), "listPrice": float(p.get("old_price") or p["price"])} for p in prods]}
-        elif mid == "hepsiburada":
-            body = [{"merchantSku": p["sku"], "availableStock": stock(p), "price": float(p["price"])} for p in prods]
-        else:
-            body = {"payload": {"integrator": "ServisPlus", "skus": [{"stockCode": p["sku"], "quantity": stock(p), "listPrice": float(p.get("old_price") or p["price"]),
-                                                                       "salePrice": float(p["price"]), "currencyType": "TL"} for p in prods]}}
-        code, data = await market_request(mid, "POST", u["stock"], data=json.dumps(body))
-        if code >= 300:
-            raise HTTPException(status_code=502, detail=f"{mid} yanıtı {code}: {str(data)[:200]}")
-        return {"ok": True, "sent": len(prods), "response": str(data)[:200]}
+        ids = [p["id"] async for p in db.shop_products.find({f"channels.{mid}.enabled": True, f"market_sync.{mid}.listed": True}, {"_id": 0, "id": 1})]
+        if not ids:
+            raise HTTPException(status_code=422, detail="Bu pazaryerinde yayında işaretli ürün yok (Pazaryerleri > Kanal ekranı)")
+        await shop_sync._enqueue(db, ids, markets=[mid])
+        res = await shop_sync.process_queue(db)
+        if res["failed"]:
+            raise HTTPException(status_code=502, detail="Gönderim başarısız; Pazaryerleri > Kuyruk ekranında hatayı görün")
+        return {"ok": True, "sent": len(ids), "response": "tamam"}
 
     # ------------------------------------------------------------ müşteri KVKK (verilerimi indir / hesabımı sil)
     async def cust_from_token(request: Request) -> dict:

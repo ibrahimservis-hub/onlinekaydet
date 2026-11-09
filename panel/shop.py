@@ -19,6 +19,8 @@ from fastapi import Depends, HTTPException, Request
 
 import notify
 import shop_legal
+import shop_channels
+import shop_sync
 
 CUSTOMER_TOKEN_DAYS = 30
 
@@ -188,7 +190,52 @@ def clean_product(p: dict, cur: Optional[dict] = None) -> dict:
         "featured": bool(p.get("featured", cur.get("featured", False))),
         "active": bool(p.get("active", cur.get("active", True))),
         "sort": int(_f(p.get("sort", cur.get("sort", 100)), 100)),
+        "barcode": _barcode(p.get("barcode", cur.get("barcode", ""))),
+        "category_id": str(p.get("category_id", cur.get("category_id", "")) or "")[:40],
+        "kdv": _kdv(p.get("kdv", cur.get("kdv", 20))),
+        "desi": round(max(0.0, _f(p.get("desi", cur.get("desi", 0)))), 2),
+        "weight": round(max(0.0, _f(p.get("weight", cur.get("weight", 0)))), 3),
+        "shelf": str(p.get("shelf", cur.get("shelf", ""))).strip()[:30],
+        "min_stock": max(0, int(_f(p.get("min_stock", cur.get("min_stock", 0))))),
+        "cost": round(max(0.0, _f(p.get("cost", cur.get("cost", 0)))), 2),
+        "delivery_days": max(0, min(30, int(_f(p.get("delivery_days", cur.get("delivery_days", 2)), 2)))),
+        "warranty_months": max(0, min(120, int(_f(p.get("warranty_months", cur.get("warranty_months", 0)))))),
+        "channels": shop_channels.clean_channels(p.get("channels"), cur.get("channels")),
+        "market_attrs": _market_attrs(p.get("market_attrs", cur.get("market_attrs"))),
     }
+
+
+def _barcode(v) -> str:
+    v = str(v or "").strip()
+    if v and not shop_channels.gtin_valid(v):
+        raise HTTPException(422, "Barkod geçersiz: 8, 12, 13 veya 14 haneli ve sağlama basamağı doğru (EAN/UPC) olmalı")
+    return v
+
+
+def _kdv(v) -> int:
+    try:
+        n = int(float(v))
+    except (TypeError, ValueError):
+        n = 20
+    if n not in shop_channels.KDV_RATES:
+        raise HTTPException(422, "KDV oranı %0, %1, %10 veya %20 olmalı")
+    return n
+
+
+def _market_attrs(v) -> dict:
+    out = {}
+    for mk, d in (v or {}).items():
+        if mk in shop_channels.MARKETS and isinstance(d, dict):
+            out[mk] = {str(k)[:20]: str(x)[:60] for k, x in list(d.items())[:60]}
+    return out
+
+
+async def stock_changed(db, ids):
+    """Stok/fiyat değişen ürünleri açık pazaryeri kuyruğuna alır (hata siparişi bozmaz)."""
+    try:
+        await shop_sync._enqueue(db, list(ids))
+    except Exception:                                   # noqa: BLE001
+        pass
 
 
 def public_product(d: dict) -> dict:
@@ -207,6 +254,7 @@ def register(api_router, db, deps):
     JWT_SECRET = deps["JWT_SECRET"]
     JWT_ALGORITHM = deps["JWT_ALGORITHM"]
     security = deps["security"]
+    shop_sync.register(api_router, db, deps)
 
     # ------------------------------------------------------------------ yardımcılar
     async def get_doc(key: str, default: dict) -> dict:
@@ -411,9 +459,21 @@ def register(api_router, db, deps):
             slug, n = f"{base}-{n}", n + 1
         return slug
 
+    async def sync_catalog_fields(doc: dict, pid: str = ""):
+        """Kategori adı her zaman iç ağaçtan gelir; barkod ve stok kodu benzersizdir (pazaryerlerinde de aynı kimlik)."""
+        if doc.get("category_id"):
+            c = await db.shop_categories.find_one({"id": doc["category_id"]}, {"_id": 0, "name": 1})
+            if not c:
+                raise HTTPException(422, "Seçilen kategori bulunamadı")
+            doc["category"] = c["name"]
+        for f, lbl in (("barcode", "Barkod"), ("sku", "Stok kodu")):
+            if doc.get(f) and await db.shop_products.find_one({f: doc[f], "id": {"$ne": pid}}, {"_id": 1}):
+                raise HTTPException(409, f"{lbl} başka bir üründe kullanılıyor: {doc[f]}")
+
     @api_router.post("/shop/products")
     async def create_product(payload: dict, _: dict = Depends(require_admin)):
         doc = clean_product(payload)
+        await sync_catalog_fields(doc)
         doc.update({"id": _id(), "slug": await unique_slug(slugify(payload.get("slug") or doc["name"])), "created_at": _now(), "updated_at": _now(), "sold": 0})
         await db.shop_products.insert_one(dict(doc))
         return doc
@@ -424,12 +484,14 @@ def register(api_router, db, deps):
         if not cur:
             raise HTTPException(404, "Ürün bulunamadı")
         upd = clean_product(payload, cur)
+        await sync_catalog_fields(upd, pid)
         upd["updated_at"] = _now()
         if "price" in payload and cur.get("src"):
             upd["price_manual"] = True                  # markadan çekilen ürünün fiyatı elle değişti: otomatik güncelleme ezmesin
         if payload.get("slug"):
             upd["slug"] = await unique_slug(slugify(payload["slug"]), pid)
         await db.shop_products.update_one({"id": pid}, {"$set": upd})
+        await stock_changed(db, [pid])
         return {**cur, **upd}
 
     @api_router.delete("/shop/products/{pid}")
@@ -437,6 +499,7 @@ def register(api_router, db, deps):
         r = await db.shop_products.delete_one({"id": pid})
         if not r.deleted_count:
             raise HTTPException(404, "Ürün bulunamadı")
+        await db.shop_sync_queue.delete_many({"product_id": pid, "status": "bekliyor"})
         return {"ok": True}
 
     @api_router.get("/shop/orders")
@@ -466,6 +529,7 @@ def register(api_router, db, deps):
     async def restock(order):
         for it in order.get("items", []):
             await db.shop_products.update_one({"id": it["product_id"], "track_stock": True}, {"$inc": {"stock": it["qty"], "sold": -it["qty"]}})
+        await stock_changed(db, [it["product_id"] for it in order.get("items", [])])
 
     @api_router.put("/shop/orders/{oid}")
     async def update_order(oid: str, payload: dict, _: dict = Depends(require_admin)):
@@ -482,6 +546,7 @@ def register(api_router, db, deps):
             if o["status"] == "iptal" and st != "iptal":
                 for it in o["items"]:
                     await db.shop_products.update_one({"id": it["product_id"], "track_stock": True}, {"$inc": {"stock": -it["qty"], "sold": it["qty"]}})
+                await stock_changed(db, [it["product_id"] for it in o["items"]])
             upd["status"] = st
             upd["history"] = (o.get("history") or []) + [{"status": st, "at": _now()}]
         for k, n in (("admin_note", 1000), ("tracking_no", 80), ("carrier", 60)):
@@ -856,6 +921,7 @@ def register(api_router, db, deps):
                     await db.shop_products.update_one({"id": d["product_id"], "track_stock": True}, {"$inc": {"stock": d["qty"], "sold": -d["qty"]}})
                 raise HTTPException(422, f"'{it['name']}' stoğu az önce tükendi")
             done.append(it)
+        await stock_changed(db, [d["product_id"] for d in done])
         acc = acc0
         order = {
             "id": _id(), "order_no": await next_order_no(cfg["order_prefix"] or "SP"), "status": "onaylandi" if pm_id in COD_METHODS else "odeme_bekliyor",
