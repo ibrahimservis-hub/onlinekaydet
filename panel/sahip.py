@@ -314,7 +314,6 @@ def register(app, api_router, db, deps):
 
     @api_router.get("/admin/support-enter")
     async def support_enter(c: str = ""):
-        from fastapi.responses import RedirectResponse
         d = await db.main().support_codes.find_one_and_delete({"code": c})
         if not d or datetime.now(timezone.utc).timestamp() - d.get("ts", 0) > 90:
             raise HTTPException(status_code=403, detail="Bağlantının süresi dolmuş")
@@ -325,7 +324,9 @@ def register(app, api_router, db, deps):
         if not u:
             raise HTTPException(status_code=404, detail="Firma yöneticisi bulunamadı")
         token = deps["create_access_token"](u["id"], u["email"], u["role"], firm=f["db"])
-        r = RedirectResponse("/admin", status_code=302)
+        from fastapi.responses import HTMLResponse
+        r = HTMLResponse('<!doctype html><meta charset="utf-8"><meta name="robots" content="noindex"><title>Açılıyor…</title><script>try{localStorage.setItem("token",%s);localStorage.removeItem("spx_firm")}catch(e){}location.replace("/admin")</script>' % __import__("json").dumps(token),
+                         headers={"Cache-Control": "no-store"})
         r.set_cookie(key="access_token", value=token, httponly=True, secure=False, samesite="lax", max_age=6 * 3600, path="/")
         return r
 
