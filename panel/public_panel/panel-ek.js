@@ -2943,14 +2943,15 @@
     var CUR = '', DOC = null, SEL = null, DIRTY = false;
     body().innerHTML = '<div class="spx-card"><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><select id="se_pg" style="min-width:180px"></select><button class="spx-b" id="se_np">+ Yeni sayfa</button><span style="flex:1"></span><span id="se_st" style="font-size:13px;color:#64748b"></span><button class="spx-b" id="se_pv">Önizle</button><button class="spx-b" id="se_rs" style="color:#b91c1c">Sıfırla</button><button class="spx-b p" id="se_sv">Kaydet ve yayınla</button></div>' +
       '<small style="display:block;color:#64748b;margin-top:8px">Yazıya tıklayıp doğrudan yazın. Resme, bağlantıya veya bölüme tıklayınca üstte seçenekleri çıkar. Değişiklikler "Kaydet ve yayınla" ile alan adınızda yayına girer.</small></div>' +
-      '<div style="position:relative"><div id="se_tb" style="display:none;position:absolute;z-index:5;background:#0f172a;color:#fff;border-radius:10px;padding:6px;gap:4px;flex-wrap:wrap;box-shadow:0 8px 24px rgba(0,0,0,.25);max-width:520px"></div><iframe id="se_fr" sandbox="allow-scripts allow-same-origin" style="width:100%;height:78vh;border:1px solid #cbd5e1;border-radius:10px;background:#fff"></iframe></div>';
+      '<div><div id="se_tb" style="position:sticky;top:0;z-index:5;display:flex;background:#0f172a;color:#fff;border-radius:10px;padding:6px;gap:5px;flex-wrap:wrap;align-items:center;min-height:42px;margin-bottom:8px;font:13px system-ui"><span style="opacity:.7;padding:0 6px">Bir yazıya, resme, bağlantıya veya bölüme tıklayın</span></div><iframe id="se_fr" sandbox="allow-scripts allow-same-origin" style="width:100%;height:78vh;border:1px solid #cbd5e1;border-radius:10px;background:#fff"></iframe></div>';
     var st = function (t, c) { var e = $('#se_st'); if (e) { e.textContent = t; e.style.color = c || '#64748b'; } };
     var bt = function (label, fn, danger) { var b = document.createElement('button'); b.textContent = label; b.style.cssText = 'background:' + (danger ? '#b91c1c' : '#1e293b') + ';color:#fff;border:0;border-radius:7px;padding:6px 10px;font:600 12.5px system-ui;cursor:pointer'; b.onclick = function (e) { e.stopPropagation(); fn(); }; return b; };
     function pick(cb) { var i = document.createElement('input'); i.type = 'file'; i.accept = 'image/*'; i.onchange = function () { var f = i.files[0]; if (!f) return; var r = new FileReader(); r.onload = function () { var im = new Image(); im.onload = function () { var mx = 1400, k = Math.min(1, mx / Math.max(im.width, im.height)), c = document.createElement('canvas'); c.width = Math.round(im.width * k); c.height = Math.round(im.height * k); c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); cb(c.toDataURL(f.type === 'image/png' && f.size < 300000 ? 'image/png' : 'image/jpeg', 0.8)); }; im.src = r.result; }; r.readAsDataURL(f); }; i.click(); }
     function blockOf(el) { var b = el; while (b && b.parentElement && b.parentElement !== DOC.body) b = b.parentElement; return b && b.parentElement === DOC.body ? b : null; }
     function toolbar(el) {
-      var tb = $('#se_tb'), fr = $('#se_fr'); tb.innerHTML = '';
-      if (!el || el === DOC.body || el === DOC.documentElement) { tb.style.display = 'none'; return; }
+      var tb = $('#se_tb'); tb.innerHTML = '';
+      if (!el || el === DOC.body || el === DOC.documentElement) { tb.innerHTML = '<span style="opacity:.7;padding:0 6px">Bir yazıya, resme, bağlantıya veya bölüme tıklayın</span>'; return; }
+      var nm = { IMG: 'Resim', A: 'Bağlantı', BUTTON: 'Düğme', H1: 'Başlık', H2: 'Başlık', H3: 'Başlık', P: 'Paragraf', SPAN: 'Metin', LI: 'Liste öğesi', FOOTER: 'Alt bilgi', HEADER: 'Üst bilgi', SECTION: 'Bölüm' }; var lb = document.createElement('span'); lb.textContent = 'Seçili: ' + (nm[el.tagName] || 'Öğe'); lb.style.cssText = 'padding:0 8px;font-weight:700'; tb.appendChild(lb);
       var tag = el.tagName;
       if (tag === 'IMG') { tb.appendChild(bt('Resmi değiştir', function () { pick(function (u) { el.removeAttribute('srcset'); el.setAttribute('src', u); DIRTY = true; }); })); tb.appendChild(bt('Açıklama (alt)', function () { var v = prompt('Resim açıklaması (arama motorları için):', el.getAttribute('alt') || ''); if (v !== null) { el.setAttribute('alt', v); DIRTY = true; } })); }
       var a = el.closest('a'); if (a) tb.appendChild(bt('Bağlantı', function () { var v = prompt('Bu düğme/bağlantı nereye gitsin? (örn: tel:05xx..., https://..., /sayfa-adi)', a.getAttribute('href') || ''); if (v !== null) { a.setAttribute('href', v); DIRTY = true; } }));
@@ -2964,8 +2965,6 @@
         tb.appendChild(bt('Bölümü kopyala', function () { var c = b.cloneNode(true); b.parentElement.insertBefore(c, b.nextSibling); DIRTY = true; wire(c); }));
         tb.appendChild(bt('Bölümü sil', function () { if (confirm('Bu bölüm silinsin mi?')) { b.remove(); DIRTY = true; toolbar(null); } }, true));
       }
-      var r = el.getBoundingClientRect(), fr0 = fr.getBoundingClientRect(), top = r.top + 4;
-      tb.style.display = 'flex'; tb.style.left = Math.max(0, Math.min(r.left, fr0.width - 300)) + 'px'; tb.style.top = Math.max(6, Math.min(top, fr0.height - 80)) + 'px';
     }
     var TEXTY = { SCRIPT: 1, STYLE: 1, NOSCRIPT: 1, SVG: 1, PATH: 1, IFRAME: 1, SELECT: 1, OPTION: 1, TEXTAREA: 1, INPUT: 1 };
     function wire(root) {
@@ -2987,8 +2986,7 @@
           DOC.addEventListener('click', function (e) { var t = e.target; if (t.closest('a,button,form,label')) e.preventDefault(); SEL = t; toolbar(t); }, true);
           DOC.addEventListener('submit', function (e) { e.preventDefault(); }, true);
           DOC.addEventListener('input', function () { DIRTY = true; st('Kaydedilmemiş değişiklik var', '#b45309'); }, true);
-          DOC.addEventListener('scroll', function () { $('#se_tb').style.display = 'none'; }, true);
-          st(r.custom ? 'Düzenlenmiş sürüm' : 'Tema (henüz değiştirmediniz)');
+                    st(r.custom ? 'Düzenlenmiş sürüm' : 'Tema (henüz değiştirmediniz)');
         };
         fr.srcdoc = r.html.replace(/<head([^>]*)>/i, '<head$1><base target="_blank">');
         DIRTY = false;
