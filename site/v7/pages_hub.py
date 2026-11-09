@@ -8,7 +8,7 @@ def hub_ozellikler():
     ('wallet','Kasa ve muhasebe','Tahsilat, gider ve cari takibi usta bazında.','cozum-kasa-muhasebe.html'),
     ('chart','Raporlar','Ciro, usta performansı ve açık işler.','cozum-raporlar.html'),
     ('users','Personel takibi','Rol, yetki ve günlük iş yükü.','cozum-personel-takibi.html'),
-    ('globe','Web sitesi ve temalar','30 hazır tema, randevu formu ve SEO.','cozum-web-sitesi.html'),
+    ('globe','Web sitesi ve temalar','38 hazır tema, randevu formu ve SEO.','cozum-web-sitesi.html'),
     ('bag','Yedek parça mağazası','Parçalarınızı sitede ve pazaryerinde satın.','cozum-yedek-parca-magazasi.html')]
     corp=[('bell','Bakım ve garanti','Yıllık bakım hatırlatma, garanti takibi.','cozum-bakim-garanti.html'),
     ('check','Teklif ve onay','Müşteri teklifi linkten onaylar.','cozum-teklif-onay.html'),
@@ -22,7 +22,7 @@ def hub_ozellikler():
     body=hero([(None,'Ürün')],'Servis işiniz için <em>her şey</em> bir arada','Kayıttan tahsilata, ustadan müşteriye, web sitesinden raporlara. Her modülü ayrı ayrı inceleyin; her biri sektörünüzün işleyişine göre kurulur.',
       mk_list('Bugün · servis panosu',[('SV-1043 · Ayşe Yılmaz','Kombi · Basınç düşüyor','Yolda','b'),('SV-1042 · Murat Şen','Klima · Soğutmuyor','Başladı','y'),('SV-1041 · Zeynep Aras','Çamaşır makinesi','Tamamlandı','g')],'Panel'),['İlk ay ücretsiz','Kart bilgisi istenmez'],
       [('index.html#kayit','Ücretsiz deneyin',''),('paketler-ozellikler.html','Paket paket ayrıntı','o')])
-    body+=strip([('18','modül'),('4','paket'),('8','sektör'),('30','hazır web teması')])
+    body+=strip([('18','modül'),('4','paket'),('8','sektör'),('38','hazır web teması')])
     body+=sec(head('Çekirdek modüller','Her serviste ihtiyaç duyulan dokuz modül','Başlangıç, Profesyonel ve Tam Paket içinde gelen, günlük işi yürüten modüller.')+cards(core))
     body+=sec(head('Kurumsal modüller','Büyüyen servisler için dokuz modül','Bakım gelirini yönetmek, müşteriye self-servis sunmak, bayiyle çalışmak isteyen servisler için.')+cards(corp),id='kurumsal')
     body+=split('Esneklik','Süreci siz tasarlarsınız','Her firmanın çalışma şekli farklı. Fotoğraf, imza ve form alanlarını kendi sürecinize göre açıp kapatırsınız; servis fişinin tasarımı ve metinleri size ait.',['Fotoğraf: zorunlu, isteğe bağlı ya da kapalı','Müşteri imzası ve usta imzası ayrı ayrı','Servis fişi tasarımı ve metinleri'],
@@ -100,7 +100,7 @@ ent('entegrasyon-google.html','Talepler <em>tek panelde</em> toplansın','Web si
  [('Form akışı','Her talep kaybolmadan size ulaşsın','Randevu, servis formu ve canlı destek mesajları firmanın kendi panelinde toplanır. Bir talep iki yerde kaybolmaz.',['Web sitesi formları panele düşer','Canlı destek mesajları panelde','Form altında KVKK bilgilendirmesi'],mk_kv('Randevu talebi',[('Ad','Ahmet Yıldız'),('Telefon','0532 *** ** 40'),('Sorun','Kombi çalışmıyor'),('Kaynak','Web sitesi')],'Yeni')),
   ('Google','Arama performansını panelden izleyin','Google Search Console bağlantısıyla sitenizin hangi aramalarda göründüğünü panelden takip edersiniz.',['Search Console bağlantısı','Arama performansı panelde','SEO başlık ve açıklama ayarları'],mk_bars('Arama performansı',[('Kombi servisi',70,'Liste'),('Kombi arıza',50,'Liste'),('Servis ücreti',30,'Liste')]),True)],
  [('Search Console nasıl bağlanır?','Kurulumda site sahipliğini birlikte doğrularız.'),('Canlı destek zorunlu mu?','Hayır, istediğinizde açıp kapatırsınız.')],
- [('cozum-web-sitesi.html','Web sitesi','Randevu formu'),('temalar.html','Temalar','30 hazır tema'),('entegrasyonlar.html','Tüm entegrasyonlar','Genel bakış')])
+ [('cozum-web-sitesi.html','Web sitesi','Randevu formu'),('temalar.html','Temalar','38 hazır tema'),('entegrasyonlar.html','Tüm entegrasyonlar','Genel bakış')])
 ent('entegrasyon-excel.html','Mevcut kayıtlarınızı <em>biz taşırız</em>','Defter, Excel ya da başka programdaki müşteri ve cihaz kayıtlarınızı sizin için panele aktarıyoruz. İlk günden geçmişinizle başlarsınız.',
  mk_list('Aktarım',[('Müşteriler','Excel dosyanızdan','Aktarıldı','g'),('Cihazlar','Marka ve model eşleşti','Aktarıldı','g'),('Servis geçmişi','İsteğe bağlı','Planlandı','y')]),
  [('Excel','dosyasından'),('Biz','yaparız'),('Cihaz','bazında eşleşme'),('İlk gün','geçmişle başlayın')],

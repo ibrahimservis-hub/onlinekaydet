@@ -86,13 +86,15 @@ def build(r):
     labels = {'svc': ('Hizmetler', '#hizmet'), 'proc': ('Süreç', '#surec'), 'proof': ('Yorumlar', '#yorum'), 'areas': ('Bölgeler', '#bolge'), 'price': ('Fiyatlar', '#fiyat'), 'faq': ('SSS', '#sss'), 'why': ('Neden biz', '#neden'), 'ba': ('Çalışmalarımız', '#once-sonra')}
     toolkey = tools.TOOLS[r['tools'][0]]['id']
     x.links = [('Hizmetler', '#hizmet'), (TOOL_LABEL.get(toolkey, 'Araç'), '#arac')]
+    if 'shop' in order:
+        x.links = [('Ürünler', '#urunler'), ('Hizmetler', '#hizmet')]
     for tkn in order:
         if tkn in labels and labels[tkn] not in x.links and len(x.links) < 4:
             x.links.append(labels[tkn])
     x.links.append(('Randevu', '#randevu'))
     # gövde
     parts = [navs.nav(x), navs.drawer(x), heroes.hero(x)]
-    names = {'svc': 'Hizmetler', 'proc': 'Nasıl çalışıyoruz', 'proof': 'Yorumlar', 'brands': 'Markalar', 'ba': 'Önce / Sonra', 'areas': 'Hizmet bölgeleri', 'why': 'Neden biz', 'price': 'Fiyatlar', 'faq': 'Sık sorulanlar', 'cta': 'Çağrı bandı', 'book': 'Randevu', 'info': 'İletişim', 'tool0': 'Araç', 'tool1': 'İkinci araç'}
+    names = {'svc': 'Hizmetler', 'proc': 'Nasıl çalışıyoruz', 'proof': 'Yorumlar', 'brands': 'Markalar', 'ba': 'Önce / Sonra', 'areas': 'Hizmet bölgeleri', 'why': 'Neden biz', 'price': 'Fiyatlar', 'faq': 'Sık sorulanlar', 'cta': 'Çağrı bandı', 'book': 'Randevu', 'info': 'İletişim', 'tool0': 'Araç', 'tool1': 'İkinci araç', 'shop': 'Ürünler'}
     for tkn in order:
         if tkn == 'svc': h = sections.services(x, r['svc'])
         elif tkn == 'proc': h = sections.process(x, r['proc'])
@@ -108,6 +110,7 @@ def build(r):
         elif tkn == 'info': h = sections.info(x)
         elif tkn == 'tool0': h = sections.toolsec(x, 0, r['tv0'])
         elif tkn == 'tool1': h = sections.toolsec(x, 1, r['tv1'], alt=True)
+        elif tkn == 'shop': h = sections.shop(x, r.get('shopv', 'grid'))
         else: continue
         parts.append(navs.ed(names[tkn], h))
     parts += [navs.footer(x), navs.mbar(x)]

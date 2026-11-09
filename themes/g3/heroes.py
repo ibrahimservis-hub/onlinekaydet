@@ -190,3 +190,6 @@ def hero_marquee(X):
     wd = f'<span>{X.c["label"]}</span><span>servisi</span>' * 4
     return (f'<section class="hr hr14" id="top2"><div class="mq" aria-hidden="true"><div>{wd}</div></div><div class="w"><span class="eyebrow">{X.city} · {X.c["tag"]}</span><h1 style="margin-top:16px" class="rv">{h1(X)}</h1><p class="lead rv rv2">{X.h[1]}</p>{cta(X)}'
             f'<div class="sp rv rv3">{X.ph("im", "30% center")}{X.ph("im2", "center")}{X.ph("im3", "70% center")}</div></div></section>')
+
+
+from .shop import hero_shop  # noqa: E402,F401

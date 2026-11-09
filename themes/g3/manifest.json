@@ -778,5 +778,213 @@
   "fb": "manrope",
   "dark": false,
   "kb": 807
+ },
+ {
+  "slug": "31-magaza-kombi",
+  "sector": "kombi",
+  "nm": "Kombi Parça Deposu",
+  "city": "Ankara",
+  "style": "Mağaza · kombi parçaları · ızgara",
+  "hero": "shop",
+  "nav": "classic",
+  "mbar": "cart",
+  "ft": "cols",
+  "tools": [
+   "Kombi hata kodu çözücü",
+   "Yıllık kombi bakımı hatırlatıcı"
+  ],
+  "pal": [
+   "#fbf8f3",
+   "#1d1712",
+   "#f1e9dc",
+   "#17110c",
+   "#c2410c"
+  ],
+  "fd": "fraunces",
+  "fb": "manrope",
+  "dark": false,
+  "kb": 804
+ },
+ {
+  "slug": "32-magaza-klima",
+  "sector": "klima",
+  "nm": "Serin Klima Market",
+  "city": "İzmir",
+  "style": "Mağaza · klima parçaları · büyük görsel",
+  "hero": "shop",
+  "nav": "min",
+  "mbar": "cart",
+  "ft": "big",
+  "tools": [
+   "BTU hesaplayıcı",
+   "Klima elektrik gideri"
+  ],
+  "pal": [
+   "#f4f9fc",
+   "#0a2130",
+   "#e3eff6",
+   "#08283c",
+   "#0369a1"
+  ],
+  "fd": "sora",
+  "fb": "figtree",
+  "dark": false,
+  "kb": 735
+ },
+ {
+  "slug": "33-magaza-beyaz-esya",
+  "sector": "beyaz_esya",
+  "nm": "Esya Parça Evi",
+  "city": "Konya",
+  "style": "Mağaza · beyaz eşya parçaları · liste",
+  "hero": "shop",
+  "nav": "two",
+  "mbar": "cart",
+  "ft": "min",
+  "tools": [
+   "Tamir mi, yeni cihaz mı?",
+   "Arıza belirtisi rehberi"
+  ],
+  "pal": [
+   "#fffefb",
+   "#1a1812",
+   "#f6f2e6",
+   "#1f2233",
+   "#b7791f"
+  ],
+  "fd": "dmserif",
+  "fb": "figtree",
+  "dark": false,
+  "kb": 723
+ },
+ {
+  "slug": "34-magaza-tesisat",
+  "sector": "tesisat",
+  "nm": "Armatür Tesisat Market",
+  "city": "İstanbul",
+  "style": "Mağaza · tesisat malzemeleri · yeşil",
+  "hero": "shop",
+  "nav": "idx",
+  "mbar": "cart",
+  "ft": "cols",
+  "tools": [
+   "Acil durum ilk müdahale",
+   "Su kaçağı testi"
+  ],
+  "pal": [
+   "#f5faf6",
+   "#0e1f16",
+   "#e2f0e7",
+   "#0c2018",
+   "#15803d"
+  ],
+  "fd": "barlow",
+  "fb": "instrument",
+  "dark": false,
+  "kb": 693
+ },
+ {
+  "slug": "35-magaza-guvenlik",
+  "sector": "guvenlik",
+  "nm": "Gözcü Güvenlik Market",
+  "city": "Bursa",
+  "style": "Mağaza · kamera ve alarm · çelik",
+  "hero": "shop",
+  "nav": "box",
+  "mbar": "cart",
+  "ft": "cen",
+  "tools": [
+   "Kamera kayıt depolama hesabı",
+   "Güvenlik keşif sihirbazı"
+  ],
+  "pal": [
+   "#f3f6f9",
+   "#0f1824",
+   "#e3e9f0",
+   "#0d1b2a",
+   "#dc4a1f"
+  ],
+  "fd": "bricolage",
+  "fb": "plex",
+  "dark": false,
+  "kb": 784
+ },
+ {
+  "slug": "36-magaza-elektrik",
+  "sector": "elektrik",
+  "nm": "Volt Elektrik Malzeme",
+  "city": "Eskişehir",
+  "style": "Mağaza · elektrik malzeme · sarı",
+  "hero": "shop",
+  "nav": "pill",
+  "mbar": "cart",
+  "ft": "big",
+  "tools": [
+   "Pano sigorta seçici",
+   "Kablo kesiti hesabı"
+  ],
+  "pal": [
+   "#fffdf3",
+   "#1c1a09",
+   "#f7f1cc",
+   "#161400",
+   "#ca8a04"
+  ],
+  "fd": "archivoblack",
+  "fb": "intertight",
+  "dark": false,
+  "kb": 836
+ },
+ {
+  "slug": "37-magaza-elektronik",
+  "sector": "elektronik",
+  "nm": "Devre Elektronik Parça",
+  "city": "İstanbul",
+  "style": "Mağaza · elektronik parça · koyu",
+  "hero": "shop",
+  "nav": "min",
+  "mbar": "cart",
+  "ft": "cols",
+  "tools": [
+   "Televizyon arıza sihirbazı",
+   "Onarım değer hesabı"
+  ],
+  "pal": [
+   "#0c1017",
+   "#e8edf5",
+   "#141a24",
+   "#06090e",
+   "#38bdf8"
+  ],
+  "fd": "intertight",
+  "fb": "plex",
+  "dark": true,
+  "kb": 978
+ },
+ {
+  "slug": "38-magaza-kombi-vaillant",
+  "sector": "kombi",
+  "nm": "Isı Parça Dünyası",
+  "city": "İstanbul",
+  "style": "Mağaza · ısıtma parçaları · editoryal",
+  "hero": "shop",
+  "nav": "center",
+  "mbar": "cart",
+  "ft": "cen",
+  "tools": [
+   "Kombi sorun sihirbazı",
+   "Kombi kapasitesi hesabı"
+  ],
+  "pal": [
+   "#f8f4ef",
+   "#241a14",
+   "#ece2d3",
+   "#1e140e",
+   "#0f766e"
+  ],
+  "fd": "playfair",
+  "fb": "figtree",
+  "dark": false,
+  "kb": 817
  }
 ]

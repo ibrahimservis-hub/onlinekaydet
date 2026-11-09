@@ -75,7 +75,7 @@ sol('cozum-musteri-portali.html','Müşteri servisini <em>kendisi takip etsin</e
  [('Müşteri girer','Telefon numarasını yazar.'),('SMS kodu','Kodu girerek doğrular.'),('Servislerini görür','Durum, tutar, teklif.'),('Talep açar','Yeni servis talebi oluşturur.')],
  [('Müşteri şifre mi hatırlayacak?','Hayır. Telefon numarası ve SMS koduyla giriş yapar.'),('Web sitem varsa bağlanır mı?','Evet. Tema menüsündeki “Müşteri portalı” bağlantısı firmanızın portal adresini açar.')],
  [('cozum-teklif-onay.html','Teklif ve onay','Müşteri kararı'),('cozum-web-sitesi.html','Web sitesi','Portal bağlantısı'),('cozum-sms-bildirimleri.html','SMS bildirimleri','Mesajlar')])
-sol('cozum-web-sitesi.html','Hazır temalı <em>web siteniz</em>','30 hazır temadan birini seçin; randevu formu, SEO ayarları ve müşteri portalı bağlantısıyla yayına alın. Gelen talepler doğrudan servis panelinize düşer.','Tam Pakette',
+sol('cozum-web-sitesi.html','Hazır temalı <em>web siteniz</em>','38 hazır temadan birini seçin; randevu formu, SEO ayarları ve müşteri portalı bağlantısıyla yayına alın. Gelen talepler doğrudan servis panelinize düşer.','Tam Pakette',
  '<div class="mk"><div class="bar"><i></i><i></i><i></i><b>ege-kombi.com</b></div><img src="tema/1-kombi-k.webp" alt="Kombi temasından bir ekran" style="display:block;width:100%;height:auto"></div>',
  [('30','hazır tema'),('8','sektör'),('Form','talepler panele düşer'),('SEO','başlık ve açıklama ayarı')],
  [('Tema','Sektörünüze uygun temayı seçin','Her tema kendi rengi, köşesi ve yazı tipiyle gelir. Bölümleri panelden düzenler, fotoğraf ve yazıları istediğiniz zaman değiştirirsiniz.',['30 sektöre uygun, mobil uyumlu tema','Temayı istediğiniz zaman değiştirme; yazı ve fotoğraflar yeni temaya taşınır','Medya (fotoğraf) yöneticisi'],
@@ -84,7 +84,7 @@ sol('cozum-web-sitesi.html','Hazır temalı <em>web siteniz</em>','30 hazır tem
    mk_list('Gelen talepler',[('Ahmet Yıldız · Kombi','Web sitesi formu','Yeni','b'),('Fatma Kurt · Klima','Web sitesi formu','Yeni','b'),('Selma Er · Beyaz eşya','Canlı destek','Arandı','g')]),True)],
  [('Tema seçin','8 sektörden birini seçin.'),('Bilgileri girin','Firma adı, telefon, logo.'),('Yayına alın','Randevu formuyla birlikte.'),('Talepleri alın','Talepler panele düşer.')],
  [('Alan adımı kullanabilir miyim?','Evet. Kendi alan adınızı bağlarız; yoksa kurulumda birlikte ilerleriz.'),('Temayı sonradan değiştirebilir miyim?','Evet. Yazı ve fotoğraflarınız yeni temaya taşınır.')],
- [('temalar.html','Temalar','30 temayı inceleyin'),('cozum-musteri-portali.html','Müşteri portalı','Site bağlantısı'),('cozum-yedek-parca-magazasi.html','Yedek parça mağazası','Siteden satış')])
+ [('temalar.html','Temalar','38 temayı inceleyin'),('cozum-musteri-portali.html','Müşteri portalı','Site bağlantısı'),('cozum-yedek-parca-magazasi.html','Yedek parça mağazası','Siteden satış')])
 sol('cozum-yedek-parca-magazasi.html','Yedek parçayı <em>online satın</em>','Stoktaki yedek parçaları sitenizden satışa açın, servis kayıtlarında parça olarak kullanın. Stok azalınca uyarı gelir.','Tam Pakette',
  mk_list('Yedek parçalar',[('Basınç sensörü','Stok: 14 · 650 ₺','Satışta','g'),('Genleşme tankı','Stok: 3 · 480 ₺','Azalıyor','y'),('Fan motoru','Stok: 0 · 1.250 ₺','Tükendi','r')]),
  [('Stok','takibi ve uyarı'),('Online','sipariş alma'),('3','pazaryeri bağlantısı'),('Tek','ürün listesi')],

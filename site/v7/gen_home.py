@@ -51,7 +51,7 @@ extra='''
 <section id="web"><div class="wrap">
 <div class="kick rv">Web sitesi ve entegrasyonlar</div>
 <h2 class="rv">Siteniz hazır, <em>sisteminiz</em> bağlı.</h2>
-<div class="two rv"><p class="l">30 hazır tema, sekiz sektör. Randevu formu doğrudan servis kaydına düşer.</p>
+<div class="two rv"><p class="l">38 hazır tema, sekiz sektör. Randevu formu doğrudan servis kaydına düşer.</p>
 <dl class="dl"><div><dt>Temalar</dt><dd><span>Kombi</span><span>Klima</span><span>Beyaz eşya</span><span>Elektronik</span><span>Bilgisayar</span><span>Tesisat</span><span>Elektrik</span><span>Güvenlik</span></dd></div><div><dt>Mesajlaşma</dt><dd><span>Netgsm</span><span>Verimor</span><span>İleti Merkezi</span><span>Twilio</span></dd></div><div><dt>Satış ve ödeme</dt><dd><span>Trendyol</span><span>Hepsiburada</span><span>N11</span><span>iyzico</span></dd></div><div><dt>Diğer</dt><dd><span>Google Search Console</span><span>Excel ile içe aktarma</span></dd></div></dl></div>
 <div class="lk rv"><a class="lnk" href="temalar.html">Temaları görün <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 8h12M9 3l5 5-5 5"/></svg></a><a class="lnk" href="entegrasyonlar.html">Entegrasyonlar <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 8h12M9 3l5 5-5 5"/></svg></a></div>
 </div></section>

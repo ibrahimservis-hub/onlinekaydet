@@ -26,7 +26,7 @@ art('blog-teknik-servis-musteri-bulma.html','Teknik servis müşteri bulma yolla
  ('Mevcut müşteriyi geri kazanın',['Yeni müşteri bulmak, mevcut müşteriyi tutmaktan pahalıdır. Yıllık bakım gelen müşteriyi zamanında hatırlatmak hem gelir hem sadakat getirir. Bakım tarihlerini bir yerde tutmak yeter.']),
  ('Referans ve çevre',['Memnun müşteri en ucuz reklamdır. İş bitince fişi düzgün vermek, bir sonraki arızada sizi aramasının en güçlü nedenidir. Müşteriden yorum istemeyi iş akışının parçası yapın.']),
  ('Ölçün',['Hangi kanaldan kaç talep geldiğini kaydetmezseniz bütçeyi nereye harcayacağınızı bilemezsiniz. Her talebe kaynak bilgisi ekleyin.',N('Toplu SMS ya da arama yapmadan önce müşteri izni ve ticari ileti mevzuatına uyumu kontrol edin.')])],
- [('cozum-web-sitesi.html','Web sitesi','Ürün'),('cozum-pazarlama.html','Pazarlama araçları','Ürün'),('temalar.html','Temalar','30 hazır tema')])
+ [('cozum-web-sitesi.html','Web sitesi','Ürün'),('cozum-pazarlama.html','Pazarlama araçları','Ürün'),('temalar.html','Temalar','38 hazır tema')])
 art('blog-garanti-kapsami-servis.html','Garanti kapsamında servis nasıl yürür?','Süreç','Garanti kapsamındaki arızalarda kayıt, belge ve müşteri iletişimi nasıl yönetilir.','5 dk',[
  ('Garanti süresi ve başlangıç',['Garanti süresi, kural olarak ürünün tüketiciye teslim tarihinden başlar. Servis kaydında satış ya da teslim tarihini mutlaka tutun; garanti içinde mi dışında mı olduğunu bu tarih belirler.',N('Garanti süresi ve şartları üründen ürüne değişir. Güncel mevzuat ve üretici belgesini esas alın.')]),
  ('Garanti kaydında neler olmalı',[L('Satış ya da teslim tarihi ve fatura bilgisi','Cihaz marka, model ve seri numarası','Arıza tanımı ve fotoğraf','Yapılan işlem ve değişen parça','Müşteri imzası')]),

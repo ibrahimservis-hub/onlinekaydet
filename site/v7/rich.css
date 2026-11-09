@@ -239,3 +239,4 @@ a.r7-card:hover .ic{background:var(--ink);color:var(--ch);border-color:var(--ink
 .r7-art p,.r7-art ul,.r7-art ol{font-size:17px}.r7-art h2{font-size:27px}
 .r7-faq summary{font-size:18px}
 }
+.r7-share{border:1px solid var(--line,#d9dde3);border-radius:18px;padding:clamp(20px,3vw,32px);background:var(--card,#fff);max-width:860px;margin:0 auto}.r7-share b{font-size:1.15rem}.r7-share p{color:var(--mut);margin:8px 0 18px}.r7-share .row{display:flex;gap:10px;flex-wrap:wrap}.r7-share input{flex:1 1 280px;min-height:50px;padding:0 16px;border:1px solid var(--line,#d9dde3);border-radius:12px;font:500 .95rem inherit;background:transparent;color:inherit;min-width:0}.r7-share .btn{min-height:50px}

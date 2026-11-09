@@ -218,3 +218,8 @@ def info(X):
 def toolsec(X, idx, variant, alt=False):
     th, tj, t = X.tool(idx, variant)
     return (f'<section class="sec{" alt" if alt else ""}" id="arac{"" if idx == 0 else idx}"><div class="w">{sh("Ücretsiz araç", t["title"], "")}{th}</div></section>')
+
+
+from .shop import shop as _shop, JS as _SHOPJS  # noqa: E402
+JS['SHOPJS'] = _SHOPJS
+shop = _shop
