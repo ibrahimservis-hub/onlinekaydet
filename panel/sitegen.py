@@ -5,7 +5,7 @@ yerleştirir ve temanın üst/alt bilgisiyle çok sayfalı site üretir. Veritab
 Tema yapısı (38 temada aynı): <body><input id=mn> + <div class="ed" data-nm="Menü|Mobil menü|...|Alt bilgi|Mobil bar"> blokları + <script>.
 """
 import html as _h
-import re
+import re, json
 
 _TR = str.maketrans("çğıöşüÇĞİÖŞÜ", "cgiosuCGIOSU")
 E = _h.escape
@@ -99,6 +99,37 @@ DEFAULTS = {
 }
 
 LINK_ICON = {"instagram": "Instagram", "facebook": "Facebook", "x": "X", "youtube": "YouTube", "tiktok": "TikTok", "linkedin": "LinkedIn"}
+
+
+_SVG = {
+ "instagram": '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r="1" fill="currentColor" stroke="none"/></svg>',
+ "facebook": '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M13.5 21v-7.5H16l.5-3h-3V8.6c0-.9.3-1.5 1.6-1.5H16.6V4.4c-.3 0-1.2-.1-2.3-.1-2.3 0-3.8 1.4-3.8 3.9v2.3H8v3h2.5V21z"/></svg>',
+ "x": '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M17.8 3h3l-6.6 7.5L22 21h-6.1l-4.8-6.3L5.6 21h-3l7-8L2 3h6.2l4.3 5.7zm-1 16.2h1.7L7.3 4.7H5.5z"/></svg>',
+ "youtube": '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M21.6 7.2a2.5 2.5 0 0 0-1.8-1.8C18.2 5 12 5 12 5s-6.2 0-7.8.4A2.5 2.5 0 0 0 2.4 7.2C2 8.8 2 12 2 12s0 3.2.4 4.8a2.5 2.5 0 0 0 1.8 1.8C5.8 19 12 19 12 19s6.2 0 7.8-.4a2.5 2.5 0 0 0 1.8-1.8c.4-1.6.4-4.8.4-4.8s0-3.2-.4-4.8zM10 15V9l5.2 3z"/></svg>',
+ "tiktok": '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M16.6 3c.3 2.4 1.7 3.9 4 4v3.1c-1.5.1-2.8-.4-4-1.200V15a6 6 0 1 1-6-6c.3 0 .6 0 .9.1v3.2a2.900 2.900 0 1 0 2 2.700V3z"/></svg>',
+ "linkedin": '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M4.500 8.500h3.500V20H4.500zM6.300 3a2 2 0 1 1 0 4 2 2 0 0 1 0-4zM10 8.500h3.300v1.600c.5-.9 1.700-1.900 3.500-1.900 3.600 0 4.200 2.400 4.200 5.400V20h-3.500v-5.700c0-1.400 0-3.100-1.900-3.100s-2.200 1.500-2.200 3V20H10z"/></svg>',
+ "whatsapp": '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.600 15L2 22l5.200-1.400A10 10 0 1 0 12 2zm5.200 14.200c-.2.6-1.300 1.200-1.800 1.200-.5.100-1 .2-3.300-.7-2.800-1.200-4.600-4-4.700-4.200-.1-.2-1.100-1.500-1.100-2.800s.7-2 1-2.300c.2-.3.500-.3.700-.3h.5c.2 0 .4 0 .6.500l.8 2c.1.200.1.300 0 .5l-.4.600c-.1.200-.3.300-.1.600.7 1.200 1.600 2.100 2.800 2.700.3.200.5.100.7-.1l.8-1c.2-.2.400-.2.600-.1l1.900.9c.2.100.4.200.5.300.1.200.1.800-.1 1.400z"/></svg>',
+}
+
+
+def social_urls(ctx):
+    soc = ctx["p"].get("social") or {}
+    out = []
+    for k, lab in LINK_ICON.items():
+        u = str(soc.get(k) or "").strip()
+        if u:
+            if not re.match(r"https?://", u):
+                u = "https://" + u.lstrip("/@")
+            out.append((k, lab, u))
+    return out
+
+
+def social_html(ctx):
+    items = social_urls(ctx)
+    if not items:
+        return ""
+    return '<div class="spx-soc">%s</div>' % "".join(
+        '<a href="%s" target="_blank" rel="noopener" aria-label="%s" title="%s">%s</a>' % (E(u), lab, lab, _SVG[k]) for k, lab, u in items)
 
 
 def slugify(s, n=40):
@@ -249,6 +280,7 @@ CSS = """<style data-spx-auto>
 .spx-cta .btn.o{background:transparent;color:#fff;border-color:#ffffff88}
 .spx-fl{display:flex;flex-wrap:wrap;gap:8px 18px;padding:18px 0;border-top:1px solid var(--ln);font-size:.92rem}
 .spx-fl a{color:inherit;opacity:.85}
+.spx-soc{display:flex;gap:6px;margin-left:auto}.spx-soc a{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;border:1px solid var(--ln);opacity:.9}.spx-soc a:hover{opacity:1;border-color:var(--ac,currentColor)}
 .spx-rl{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
 .spx-rl a{border:1px solid var(--ln);border-radius:999px;padding:8px 16px;color:inherit;text-decoration:none;font-size:.95rem}
 .spx-rl a:hover{border-color:var(--ac);color:var(--ac)}
@@ -354,9 +386,12 @@ def apply_profile(raw, th, ctx):
     out = out.replace("</head>", CSS + "</head>", 1)
     if ctx["p"].get("slides"):
         out = out.replace("</body>", SLIDER_JS + "</body>", 1) if "</body>" in out else out + SLIDER_JS
-    if ctx.get("seo_desc"):
-        out = _set_desc(out, ctx["seo_desc"])
-    return out
+    desc = seo_desc(ctx)
+    out = _set_desc(out, desc)
+    t = ctx["name"] + ((" · " + (ctx["city"] + " " if ctx.get("city") else "") + ctx["p"]["noun"] + " Servisi") if ctx["p"].get("noun") else "")
+    t = (ctx["p"].get("seo_title") or "").strip() or t
+    out = re.sub(r"<title>.*?</title>", lambda m: "<title>%s</title>" % E(t), out, count=1, flags=re.S)
+    return seo_inject(out, seo_block(ctx, "", desc, "", "home"))
 
 
 FIXED_TOP = ("Menü", "Mobil menü")
@@ -465,16 +500,94 @@ def edit_texts(html, ed):
 
 def footer_links(ctx, idx):
     links = ['<a href="/%s">%s</a>' % (x["slug"], E(x["title"])) for x in idx if x["kind"] in ("about", "services", "gallery", "process", "faq", "regions", "contact", "custom")]
-    soc = ctx["p"].get("social") or {}
-    for k, lab in LINK_ICON.items():
-        u = str(soc.get(k) or "").strip()
-        if u:
-            if not re.match(r"https?://", u):
-                u = "https://" + u.lstrip("/@")
-            links.append('<a href="%s" target="_blank" rel="noopener">%s</a>' % (E(u), lab))
-    if not links:
+    if not links and not social_urls(ctx):
         return ""
-    return '<div class="w spx-fl">%s</div>' % "".join(links)
+    return '<div class="w spx-fl">%s%s</div>' % ("".join(links), social_html(ctx))
+
+
+_PH = "{{H}}"
+
+
+def seo_block(ctx, title, desc, slug="", kind="home", extra_ld=None):
+    """Temaya/sektöre özgü SEO: açıklama, canonical, Open Graph, JSON-LD. Alan adı {{H}} yer tutucusuyla gelir (seo_finish doldurur)."""
+    p, name = ctx["p"], ctx["name"]
+    url = _PH + "/" + slug if slug else _PH + "/"
+    d = phone10(ctx["tel"])
+    noun = p.get("noun") or "Teknik"
+    city = (ctx.get("city") or p.get("city") or "").strip()
+    biz = {"@context": "https://schema.org", "@type": "LocalBusiness", "name": name, "url": _PH + "/", "description": desc}
+    if d:
+        biz["telephone"] = "+90" + d
+    if p.get("email"):
+        biz["email"] = p["email"]
+    if p.get("address"):
+        biz["address"] = {"@type": "PostalAddress", "streetAddress": p["address"], "addressCountry": "TR"}
+        if city:
+            biz["address"]["addressLocality"] = city
+    areas = list(p.get("regions") or []) or ([city] if city else [])
+    if areas:
+        biz["areaServed"] = [{"@type": "City" if a == city else "AdministrativeArea", "name": a} for a in areas[:12]]
+    sa = [u for _k, _l, u in social_urls(ctx)]
+    if sa:
+        biz["sameAs"] = sa
+    if p.get("hours"):
+        biz["openingHours"] = p["hours"]
+    if ctx.get("logo_abs"):
+        biz["image"] = _PH + ctx["logo_abs"]
+    biz["makesOffer"] = [{"@type": "Offer", "itemOffered": {"@type": "Service", "name": sv["t"]}} for sv in (p.get("services") or [])[:8]]
+    lds = [biz]
+    if kind != "home":
+        lds.append({"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
+            {"@type": "ListItem", "position": 1, "name": name, "item": _PH + "/"},
+            {"@type": "ListItem", "position": 2, "name": title, "item": url}]})
+    if kind == "faq":
+        lds.append({"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [
+            {"@type": "Question", "name": f["q"], "acceptedAnswer": {"@type": "Answer", "text": f["a"]}} for f in p.get("faq") or []]})
+    if kind == "service":
+        lds.append({"@context": "https://schema.org", "@type": "Service", "name": title, "description": desc,
+                    "provider": {"@type": "LocalBusiness", "name": name, "url": _PH + "/"}, "areaServed": city or "TR"})
+    for x in extra_ld or []:
+        lds.append(x)
+    ld = "".join('<script type="application/ld+json">%s</script>' % json.dumps(x, ensure_ascii=False).replace("</", "<\\/") for x in lds)
+    t = "%s · %s" % (title, name) if title else name
+    return ('<link rel="canonical" href="%s"><meta property="og:type" content="website"><meta property="og:locale" content="tr_TR">'
+            '<meta property="og:site_name" content="%s"><meta property="og:title" content="%s"><meta property="og:description" content="%s">'
+            '<meta property="og:url" content="%s"><meta name="twitter:card" content="summary"><meta name="robots" content="index,follow,max-image-preview:large">%s'
+            % (url, E(name), E(t), E(desc[:300]), url, ld))
+
+
+def seo_desc(ctx, title="", extra=""):
+    p, name = ctx["p"], ctx["name"]
+    city = (ctx.get("city") or p.get("city") or "").strip()
+    noun = p.get("noun") or "Teknik"
+    d = phone10(ctx["tel"])
+    base = (p.get("seo_desc") or "").strip() if not title else ""
+    if base:
+        return base
+    parts = []
+    if title:
+        parts.append("%s — %s" % (title, name))
+    else:
+        parts.append("%s — %s%s servisi." % (name, city + " " if city else "", noun.lower()))
+    if extra:
+        parts.append(extra)
+    parts.append("Randevu ve bilgi için arayın" + (": " + phone_fmt(d) if d else "") + ".")
+    return " ".join(parts)
+
+
+def seo_finish(h, host):
+    """{{H}} yer tutucusunu alan adıyla doldurur; alan adı yoksa (önizleme) o etiketleri atar."""
+    if _PH not in h:
+        return h
+    if host:
+        return h.replace(_PH, "https://" + host)
+    h = re.sub(r'<link rel="canonical"[^>]*\{\{H\}\}[^>]*>|<meta property="og:url"[^>]*\{\{H\}\}[^>]*>|<script type="application/ld\+json">.*?</script>', "", h, flags=re.S)
+    return h.replace(_PH, "")
+
+
+def seo_inject(h, block):
+    h = re.sub(r'<link rel="canonical"[^>]*>|<meta property="og:[^>]*>|<meta name="twitter:[^>]*>|<meta name="robots"[^>]*>|<script type="application/ld\+json">.*?</script>', "", h, flags=re.S)
+    return h.replace("</head>", block + "</head>", 1)
 
 
 def _set_desc(h, desc):
@@ -568,11 +681,11 @@ def render_page(home_html, ctx, slug):
     if not pg:
         return None
     sub, content = _page_body(ctx, pg, idx)
-    out = assemble(home_html, ctx, pg["title"], content)
+    out = assemble(home_html, ctx, pg["title"], content, pg["kind"], pg["slug"], sub if isinstance(sub, str) else "")
     return (out, pg["title"]) if out else None
 
 
-def assemble(home_html, ctx, title, content):
+def assemble(home_html, ctx, title, content, kind="page", slug="", extra=""):
     """Ana sayfanın menü + alt bilgi + mobil çubuğuyla, verilen içerikten sayfa kurar."""
     parts = split_blocks(home_html)
     if not parts:
@@ -588,11 +701,18 @@ def assemble(home_html, ctx, title, content):
     pre2 = _IMVAR.sub(lambda m: m.group(0).split(":")[0] + ":none", pre)
     out = join_blocks(pre2, out_blocks, tail)
     out = re.sub(r"<title>.*?</title>", "<title>%s · %s</title>" % (E(title), E(ctx["name"])), out, count=1, flags=re.S)
-    out = _set_desc(out, "%s — %s. %s" % (title, ctx["name"], ("Tel: " + phone_fmt(phone10(ctx["tel"]))) if phone10(ctx["tel"]) else ""))
+    desc = seo_desc(ctx, title, extra)
+    out = _set_desc(out, desc)
+    out = seo_inject(out, seo_block(ctx, title, desc, slug, {"faq": "faq", "service": "service"}.get(kind, "page")))
     return out.replace("</head>", CSS + "</head>", 1)
 
 
-def sitemap(ctx, host, extra=()):
+def sitemap(ctx, host, extra=(), lastmod=""):
     base = "https://" + host
-    urls = [base + "/"] + [base + "/" + x["slug"] for x in page_index(ctx)] + [base + "/" + s for s in extra]
-    return '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">%s</urlset>' % "".join("<url><loc>%s</loc></url>" % E(u) for u in urls)
+    lm = ("<lastmod>%s</lastmod>" % E(lastmod[:10])) if lastmod else ""
+    rows = [(base + "/", "1.0")]
+    for x in page_index(ctx):
+        rows.append((base + "/" + x["slug"], "0.8" if x["kind"] in ("about", "services", "contact", "faq") else "0.6"))
+    rows += [(base + "/" + s_, "0.6") for s_ in extra]
+    return '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">%s</urlset>' % "".join(
+        "<url><loc>%s</loc>%s<priority>%s</priority></url>" % (E(u), lm, pr) for u, pr in rows)

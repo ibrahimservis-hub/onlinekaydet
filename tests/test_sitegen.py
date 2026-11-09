@@ -139,6 +139,22 @@ with TestClient(s.app) as c:
         r2 = pub("/iletisim").text
         assert "Atatürk Cad" not in r2 and "Hafta içi 08:30" not in r2
     t("boş bırakılan adres/saat temadan kalkar", clr)
+    def seo():
+        d = c.get("/api/site/profile", headers=H).json()["profile"]
+        d["social"] = {"instagram": "instagram.com/firma", "youtube": "https://youtube.com/@firma"}
+        assert c.put("/api/site/profile", headers=H, json=d).status_code == 200
+        r = pub("/").text
+        assert 'rel="canonical" href="https://otomatik-site.com/"' in r and "application/ld+json" in r and "LocalBusiness" in r and "sameAs" in r
+        assert 'class="spx-soc"' in r and 'aria-label="Instagram"' in r and 'aria-label="YouTube"' in r
+        f = pub("/sss").text; assert "FAQPage" in f and "BreadcrumbList" in f and 'href="https://otomatik-site.com/sss"' in f
+        sv = [x for x in c.get("/api/site/profile", headers=H).json()["pages"] if x["kind"] == "service"][0]["slug"]
+        assert '"Service"' in pub("/" + sv).text
+        d["seo_title"] = "Özel Başlık"; d["seo_desc"] = "Özel açıklama metni"
+        assert c.put("/api/site/profile", headers=H, json=d).status_code == 200
+        h = pub("/").text; assert "<title>Özel Başlık</title>" in h and "Özel açıklama metni" in h
+        sm = pub("/sitemap.xml").text; assert "<priority>" in sm and "otomatik-site.com/sss" in sm
+        pv = c.get("/api/site/preview?path=/", headers=H).text; assert "{{H}}" not in pv and 'rel="canonical"' not in pv
+    t("temaya özgü SEO: canonical, OG, JSON-LD, sosyal ikonlar, sitemap", seo)
 print("OK %d/%d" % (len(ok), len(ok) + len(bad)))
 for n in ok: print("  ✔", n)
 for n, e in bad: print("  ✘", n, "\n", e)

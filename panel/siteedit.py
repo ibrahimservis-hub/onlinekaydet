@@ -121,7 +121,7 @@ def register(api_router, db, deps):
         logo = lg if inline else (("/api/public/site-logo?v=" + hashlib.sha1(lg.encode()).hexdigest()[:8]) if lg else "")
         return {"th": th, "name": name, "tel": tel, "p": p, "sector": sector, "logo": logo, "city": prof.get("city") or "",
                 "img": (lambda k: imgs.get(k, "")) if inline else (lambda k: "/api/public/site-img/" + k),
-                "seo_desc": "%s — %s" % (name, p["noun"] + " hizmeti. " + (("Tel: " + sitegen.phone_fmt(sitegen.phone10(tel))) if sitegen.phone10(tel) else ""))}
+                "logo_abs": "/api/public/site-logo" if lg else ""}
 
     async def themed_home(ctx):
         return sitegen.apply_profile(raw_theme(ctx["th"]["slug"]), ctx["th"], ctx)
@@ -303,7 +303,7 @@ def register(api_router, db, deps):
 
     async def san_profile(x):
         out = {"whatsapp": _t(x.get("whatsapp"), 20), "email": _t(x.get("email"), 80), "address": _t(x.get("address"), 200),
-               "hours": _t(x.get("hours"), 120), "slogan": _t(x.get("slogan"), 110), "city": _t(x.get("city"), 40),
+               "hours": _t(x.get("hours"), 120), "seo_title": _t(x.get("seo_title"), 70), "seo_desc": _t(x.get("seo_desc"), 300), "slogan": _t(x.get("slogan"), 110), "city": _t(x.get("city"), 40),
                "about": "\n".join(_t(l, 600) for l in str(x.get("about") or "").replace("\r", "").split("\n"))[:3000],
                "logo_only": bool(x.get("logo_only"))}
         out["services"] = [{"t": _t(s.get("t"), 60), "d": _t(s.get("d"), 400)} for s in (x.get("services") or [])[:12] if _t(s.get("t"), 60)]
@@ -475,7 +475,7 @@ def register(api_router, db, deps):
         if p == "robots.txt" and host:
             return "User-agent: *\nAllow: /\nSitemap: https://%s/sitemap.xml\n" % host, "text/plain"
         if p == "sitemap.xml" and host and ctx:
-            return sitegen.sitemap(ctx, host, [x["slug"] for x in d.get("pages", []) if x["slug"] not in {i["slug"] for i in sitegen.page_index(ctx)}]), "application/xml"
+            return sitegen.sitemap(ctx, host, [x["slug"] for x in d.get("pages", []) if x["slug"] not in {i["slug"] for i in sitegen.page_index(ctx)}], str(d.get("updated_at") or "")), "application/xml"
         home = d.get("html")
         if home is None and ctx:
             home = await themed_home(ctx)
@@ -492,6 +492,11 @@ def register(api_router, db, deps):
                 if not r:
                     return None
                 h = r[0]
+        if ctx and "rel=\"canonical\"" not in h and "<title" in h:
+            t = re.search(r"<title>(.*?)</title>", h, flags=re.S)
+            tt = (t.group(1).split(" · ")[0] if t else "").strip()
+            h = sitegen.seo_inject(h, sitegen.seo_block(ctx, tt, sitegen.seo_desc(ctx, tt), "" if p in ("", "index") else p, "home" if p in ("", "index") else "page"))
+        h = sitegen.seo_finish(h, host)
         if inline:
             h = await inline_imgs(h)
         return h, "text/html"
