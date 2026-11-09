@@ -3332,6 +3332,11 @@ if _FE:
         return _index_resp(request)
 
 @app.on_event("startup")
+async def _demo_adlari():
+    await demo.rename_old_demos(db)
+
+
+@app.on_event("startup")
 async def _pdf_yama_otomatik():
     """Servis fişi yaması (-pdf3.js) eski sürümse (işaretçi yoksa) açılışta kendiliğinden yeniler; hata olursa sessizce geçer."""
     try:

@@ -58,5 +58,13 @@ with TestClient(s.app) as c:
         r = c.put("/api/shop/settings", headers=S["H"], json={"shipping_fee": 49.9, "free_shipping_over": 1500, "bank_accounts": [{"bank": "Ziraat", "holder": "Test", "iban": "tr12 0001 0000 0000 0000 0000 01"}]}); assert r.status_code == 200, r.text
         j = r.json(); assert j["shipping_fee"] == 49.9 and j["bank_accounts"][0]["iban"].startswith("TR12")
     t("mağaza ayarları kaydedilir", m)
+    def r():
+        c.post("/api/public/demo", json={"name": "Zeynep Kaya", "phone": "05524165720", "sector": "Kombi"})
+        async def go():
+            await s.db.main().firms.update_many({"demo": True}, {"$set": {"name": "Eski Ad Servis (Demo)"}})
+            await s.demo.rename_old_demos(s.db)
+            return sorted([f["name"] async for f in s.db.main().firms.find({"demo": True})])
+        names = c.portal.call(go); assert names and all(n.startswith("Demo ") for n in names) and len(set(names)) == len(names), names
+    t("eski demo adları 'Demo N'e çevrilir", r)
 print(f"GEÇTİ {len(ok)}/{len(ok)+len(bad)}")
 for x in bad: print("BAŞARISIZ", x)

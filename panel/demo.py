@@ -48,6 +48,27 @@ def _norm_phone(s):
     return d if len(d) == 10 and d.startswith("5") else ""
 
 
+async def rename_old_demos(db):
+    """Eski adlı demo firmaları ('Ali Servis (Demo)' vb.) 'Demo N' adına çevirir; yalnızca adı bu biçimde olmayanlara dokunur."""
+    import re as _re
+    try:
+        fl = await db.main().firms.find({"demo": True}, {"_id": 0}).sort("created_at", 1).to_list(5000)
+        used = {int(m.group(1)) for f in fl for m in [_re.fullmatch(r"Demo (\d+)", f.get("name") or "")] if m}
+        n = 0
+        for f in fl:
+            if _re.fullmatch(r"Demo \d+", f.get("name") or ""):
+                continue
+            n += 1
+            while n in used:
+                n += 1
+            used.add(n)
+            await db.main().firms.update_one({"id": f["id"]}, {"$set": {"name": f"Demo {n}"}})
+            await db.firm(f["db"]).app_settings.update_one({"_id": "global"}, {"$set": {"company_name": f"Demo {n}"}})
+            await db.firm(f["db"]).app_settings.update_one({"_id": "firm"}, {"$set": {"name": f"Demo {n}"}})
+    except Exception:
+        pass
+
+
 def register(api_router, db, deps):
     hash_password = deps["hash_password"]
 
