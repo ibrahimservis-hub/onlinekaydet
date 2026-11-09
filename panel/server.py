@@ -2964,7 +2964,7 @@ async def _firm_ctx(request: Request, call_next):
     ft = None
     # Herkese açık bağlantılar: yolda <firma_id>~<jeton> varsa istek o firmanın veritabanına gider, ön ek yoldan çıkarılır.
     _m = re.search(r"/([0-9a-f]{12})~", request.url.path)
-    if _m and request.url.path.startswith(("/api/public/", "/takip/", "/cihaz/", "/bakim/", "/odeme/", "/teklif/", "/portal/")):
+    if _m and request.url.path.startswith(("/api/public/", "/takip/", "/cihaz/", "/bakim/", "/odeme/", "/teklif/", "/portal/", "/demo/")):
         _fd = await db.main().firms.find_one({"id": _m.group(1)}, {"_id": 0, "db": 1, "status": 1, "expires_at": 1})
         if not _fd or _fd.get("status") == "askida" or firms.expired(_fd):
             return _JR({"detail": "Bağlantı geçersiz"}, status_code=404)
@@ -3367,6 +3367,28 @@ if _FE:
             return _Resp(html, media_type="text/html", headers={"Cache-Control": "no-cache"})
         except Exception:                                # noqa: BLE001
             return _static_resp(request, _FE / "index.html", {"Cache-Control": "no-cache"})
+
+    @app.get("/demo/{rest:path}", include_in_schema=False)
+    async def demo_site(rest: str, request: Request):
+        """Test/örnek: /demo/<firma_id>~/magaza — firmanın yayınlanmış sitesini (mağaza dahil) platform adresinde gösterir."""
+        import re as _r3
+        if not tenant.current():
+            return JSONResponse({"detail": "Bulunamadı"}, status_code=404)
+        _f = await db.main().firms.find_one({"db": tenant.current()}, {"_id": 0, "id": 1})
+        fid = (_f or {}).get("id")
+        if not fid:
+            return JSONResponse({"detail": "Bulunamadı"}, status_code=404)
+        fn = getattr(api_router, "site_custom_serve", None)
+        r = await fn("/" + rest.strip("/"), "") if fn else None
+        if not r:
+            return JSONResponse({"detail": "Sayfa bulunamadı"}, status_code=404)
+        h = r[0]
+        if r[1].startswith("text/html"):
+            base = "/demo/" + fid + "~"
+            h = _r3.sub(r"""(["'])/(magaza|hesabim)""", lambda x: x.group(1) + base + "/" + x.group(2), h)
+            h = h.replace("fetch('/api'+p,o)", "fetch('/api'+p.replace(/([^\\/]+)$/,'" + fid + "~$1'),o)")
+            h = h.replace("<head>", "<head><meta name=robots content=noindex>", 1)
+        return _Resp(h, media_type=r[1], headers={"Cache-Control": "no-store", "X-Robots-Tag": "noindex"})
 
     @app.get("/tema-onizleme/{slug}.html", include_in_schema=False)
     async def tema_onizleme(slug: str):
