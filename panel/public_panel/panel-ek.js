@@ -997,7 +997,7 @@
   }
   function gridVals(pre) { return Array.prototype.map.call(document.querySelectorAll('#' + pre + '-grid [data-pm]:checked'), function (e) { return e.getAttribute('data-pm'); }); }
   function describe(u, mods) {
-    var r = u.admin_role || 'owner'; if (r === 'owner') return 'Sahip — her şeyi görür'; if (r === 'manager') return 'Müdür — güvenlik/yedek/kullanıcılar hariç her şey'; if (r !== 'custom') return ({ accounting: 'Muhasebe (eski rol)', operations: 'Operasyon (eski rol)', site_editor: 'Site editörü (eski rol)' })[r] || r;
+    var r = u.admin_role || 'owner'; if (r === 'owner') return 'Yönetici — her şeyi görür'; if (r === 'manager') return 'Müdür — güvenlik/yedek/kullanıcılar hariç her şey'; if (r !== 'custom') return ({ accounting: 'Muhasebe (eski rol)', operations: 'Operasyon (eski rol)', site_editor: 'Site editörü (eski rol)' })[r] || r;
     var names = (u.perms || []).map(function (k) { var m = mods.filter(function (x) { return x.key === k; })[0]; return m ? m.label.split(' · ')[0].split(' (')[0] : k; });
     return (names.length ? names.join(', ') : 'Hiçbir bölüm seçilmemiş') + (u.perms_ro ? ' — salt okunur' : '');
   }
@@ -1546,6 +1546,7 @@
   function canMenu(k) {
     var u = me(), r = u.admin_role || 'owner';
     if (k === '/admin/account') return true;
+    if (FIRM && (k === 'ek:firmalar' || k === '/admin/governance')) return false; /* platform düzeyi: firma panelinde görünmez */
     if (r === 'owner') return true;
     if (OWNER_ONLY[k]) return false;
     if (r === 'custom') return (u.perms || []).indexOf(MPERM[k]) >= 0;
@@ -1581,7 +1582,7 @@
   function admExtras() {
     var hb = document.querySelector('button[data-testid="open-sidebar"]');
     if (hb && ADMB) { var b = hb.querySelector('.spx-hb'), n = ADMB.total || 0; hb.style.position = 'relative'; if (n > 0) { if (!b) { b = document.createElement('span'); b.className = 'spx-hb'; b.style.cssText = 'position:absolute;top:2px;right:-4px;background:#ef4444;color:#fff;font-size:10px;font-weight:700;border-radius:99px;min-width:16px;height:16px;padding:0 4px;display:flex;align-items:center;justify-content:center;line-height:1'; hb.appendChild(b); } b.textContent = n > 99 ? '99+' : String(n); } else if (b) b.remove(); }
-    var mn = document.querySelector('main'), w = document.getElementById('spx-bw'), show = ADMB && ADMB.backup_stale && !/^\/tech/.test(location.pathname) && !(function () { try { return sessionStorage.getItem('spx_bw'); } catch (e) { return ''; } })();
+    var mn = document.querySelector('main'), w = document.getElementById('spx-bw'), show = ADMB && ADMB.backup_stale && !FIRM && !/^\/tech/.test(location.pathname) && !(function () { try { return sessionStorage.getItem('spx_bw'); } catch (e) { return ''; } })();
     if (show && mn && !w) { mn.insertAdjacentHTML('afterbegin', '<div id="spx-bw" style="background:#fef2f2;border:1px solid #fca5a5;color:#991b1b;border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:13px;display:flex;justify-content:space-between;gap:10px"><span><b>⚠ Otomatik yedek uyarısı:</b> son yedek beklenenden eski ya da hiç alınmamış. Yönetim → Yedekler bölümünden kontrol edin.</span><button style="border:0;background:none;font-size:16px;cursor:pointer;color:#991b1b" aria-label="Kapat">×</button></div>'); document.querySelector('#spx-bw button').onclick = function () { try { sessionStorage.setItem('spx_bw', '1'); } catch (e) { } document.getElementById('spx-bw').remove(); }; }
     else if (!show && w) w.remove();
   }
