@@ -8,5 +8,8 @@ def small(n):
 icons = re.search(r"const P=\{.*?\};", open(os.path.join(H, "icons.js")).read(), re.S).group(0) if os.path.exists(os.path.join(H, "icons.js")) else ""
 src = open(os.path.join(H, "src.html")).read().replace("/*ICONS*/", icons)
 src = src.replace('const LOGO="/*LOGO*/";', 'const LOGO_D="%s",LOGO_L="%s";' % (small("ok-logo-acik.png"), small("ok-logo-renkli.png")))
-src = src.replace('<img src="${LOGO}" alt="OnlineKaydet">', '<img src="${LOGO_D}" alt="OnlineKaydet">').replace('<div class="login"><img src="${LOGO}">', '<div class="login"><img src="${LOGO_L}">')
+src = src.replace('<img src="${LOGO}" alt="OnlineKaydet">', '<img src="${LOGO_D}" alt="OnlineKaydet">').replace('<img class="lgl" src="${LOGO}"', '<img class="lgl" src="${LOGO_D}"')
+import io as _io
+_b=_io.BytesIO(); _im=Image.open(os.path.join(A,"pro-giris.webp")).convert("RGB"); _im.save(_b,"WEBP",quality=80)
+src = src.replace("/*LOGINBG*/", "data:image/webp;base64,"+base64.b64encode(_b.getvalue()).decode())
 open(os.path.join(H, "index.html"), "w").write(src)

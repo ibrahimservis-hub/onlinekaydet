@@ -305,8 +305,13 @@ def register(app, api_router, db, deps):
     # ------------------------------------------------------------------ sahip paneli sayfası
     SP = Path(__file__).parent / "sahip" / "index.html"
 
-    @app.get("/sahip")
+    @app.get("/pro")
     async def sahip_page():
         if not SP.is_file():
-            raise HTTPException(status_code=404, detail="Sahip paneli yüklenmemiş")
-        return FileResponse(str(SP), media_type="text/html")
+            raise HTTPException(status_code=404, detail="Pro paneli yüklenmemiş")
+        return FileResponse(str(SP), media_type="text/html", headers={"Cache-Control": "no-store"})
+
+    @app.get("/sahip")
+    async def sahip_eski_adres():
+        from fastapi.responses import RedirectResponse
+        return RedirectResponse("/pro", status_code=302)

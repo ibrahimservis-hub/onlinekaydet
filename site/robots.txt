@@ -1,6 +1,9 @@
 User-agent: *
 Allow: /
 Disallow: /api/
+Disallow: /tema-onizleme/
+Disallow: /_eski_site/
+Disallow: /v7/
 Disallow: /odeme/
 Disallow: /teklif/
 Disallow: /portal/
