@@ -590,6 +590,32 @@ def seo_desc(ctx, title="", extra=""):
     return " ".join(parts)
 
 
+ACCOUNT_BAR = (
+    '<style>.spx-ab{display:inline-flex;gap:8px;align-items:center;margin-left:12px;flex:none;z-index:70}'
+    '.spx-ab a{position:relative;width:44px;height:44px;display:inline-grid;place-items:center;border-radius:50%;border:1.5px solid currentColor;color:inherit;text-decoration:none;background:transparent}'
+    '.spx-ab a:hover{opacity:.8}.spx-ab svg{width:20px;height:20px;pointer-events:none}'
+    '.spx-ab i{position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;padding:0 4px;border-radius:9px;background:var(--ac,#e11d48);color:#fff;font:700 11px/18px system-ui;text-align:center;font-style:normal}'
+    '.spx-ab b{position:absolute;bottom:2px;right:2px;width:9px;height:9px;border-radius:50%;background:#22c55e;border:2px solid #fff}'
+    '.spx-ab.fx{position:fixed;top:12px;right:12px;margin:0;background:var(--dk,#0a1f44);color:#fff;padding:6px 8px;border-radius:99px;box-shadow:0 6px 20px #0003}.spx-ab.fx a{border-color:#fff6}'
+    '@media(max-width:560px){.spx-ab{gap:6px;margin-left:8px}.spx-ab a{width:40px;height:40px}}</style>'
+    '<script>(function(){var n=0,li=0;try{n=JSON.parse(localStorage.getItem("okcart-live")||"[]").reduce(function(a,x){return a+(x.q||0)},0);li=localStorage.getItem("okc_token")?1:0}catch(e){}'
+    'var d=document.createElement("div");d.className="spx-ab";'
+    'd.innerHTML=\'<a href="/hesabim" aria-label="Hesabım / Giriş yap" title="Hesabım"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>\'+(li?"<b></b>":"")+\'</a>'
+    '<a href="/magaza#sepet" aria-label="Sepetim" title="Sepetim"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7h12l1 13H5L6 7z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg>\'+(n?"<i>"+n+"</i>":"")+\'</a>\';'
+    'var h=document.querySelector("body > header, header, .hd, #hd, nav.nv, .nav"),t=null;'
+    'if(h&&h.offsetWidth>0){var c=[h].concat([].slice.call(h.querySelectorAll("div,nav")));for(var i=0;i<c.length;i++){var s=getComputedStyle(c[i]);if(s.display.indexOf("flex")>-1&&c[i].children.length>=2&&c[i].offsetWidth>=h.offsetWidth*.6){t=c[i];break}}}'
+    'if(t){var l=t.lastElementChild;if(window.innerWidth<760&&l&&(l.tagName==="BUTTON"||/burger|menu|mn|tg/i.test(l.className+l.id))){t.insertBefore(d,l)}else{t.appendChild(d)}}'
+    'else{d.className+=" fx";document.body.appendChild(d)}})();</script>'
+)
+
+
+def account_icons(h: str) -> str:
+    """Mağaza açıkken her sayfanın üst çubuğuna Hesabım (giriş/üye ol/siparişler) ve Sepet simgeleri; mobilde de görünür."""
+    if not h or "spx-ab" in h or "</body>" not in h:
+        return h
+    return h.replace("</body>", ACCOUNT_BAR + "</body>", 1)
+
+
 CREDIT_LINK = ('<a class="spx-credit" href="https://onlinekaydet.com" target="_blank" rel="noopener" '
                'style="color:inherit!important;text-decoration:underline!important;display:inline!important;visibility:visible!important;opacity:1!important;position:static!important">'
                'Bu site OnlineKaydet ile yayınlanır</a>')
