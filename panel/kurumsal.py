@@ -256,11 +256,6 @@ def register(api_router, db, deps, app):
         if len(digits) >= 10:
             d = digits[-10:]
             html = html.replace("905320000000", "90" + d).replace("0532 000 00 00", f"0{d[:3]} {d[3:6]} {d[6:8]} {d[8:]}")
-        fm = await firm_doc()
-        if (fm is None) or fm.get("modules") is None or "portal" in (fm.get("modules") or []):
-            import domains as _dom
-            purl = f"{base}/portal/{tenant.public_token('giris')}"
-            html = html.replace("</body>", _dom.portal_chip(purl) + "</body>", 1) if "</body>" in html else html + _dom.portal_chip(purl)
         return HTMLResponse(html)
 
     async def company():

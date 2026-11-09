@@ -49,22 +49,31 @@ def _norm_phone(s):
 
 
 async def rename_old_demos(db):
-    """Eski adlı demo firmaları ('Ali Servis (Demo)' vb.) 'Demo N' adına çevirir; yalnızca adı bu biçimde olmayanlara dokunur."""
+    """Demo firmaları 'Demo 1', 'Demo 2'... adlarında tutar: biçimi bozuk veya tekrar eden adları düzeltir, firma ayarındaki adı eşitler."""
     import re as _re
     try:
         fl = await db.main().firms.find({"demo": True}, {"_id": 0}).sort("created_at", 1).to_list(5000)
-        used = {int(m.group(1)) for f in fl for m in [_re.fullmatch(r"Demo (\d+)", f.get("name") or "")] if m}
-        n = 0
+        seen, todo = set(), []
         for f in fl:
-            if _re.fullmatch(r"Demo \d+", f.get("name") or ""):
-                continue
+            m = _re.fullmatch(r"Demo (\d+)", f.get("name") or "")
+            if m and int(m.group(1)) not in seen:
+                seen.add(int(m.group(1)))
+            else:
+                todo.append(f)
+        names = {f["id"]: f.get("name") for f in fl}
+        n = 0
+        for f in todo:
             n += 1
-            while n in used:
+            while n in seen:
                 n += 1
-            used.add(n)
+            seen.add(n)
+            names[f["id"]] = f"Demo {n}"
             await db.main().firms.update_one({"id": f["id"]}, {"$set": {"name": f"Demo {n}"}})
-            await db.firm(f["db"]).app_settings.update_one({"_id": "global"}, {"$set": {"company_name": f"Demo {n}"}})
-            await db.firm(f["db"]).app_settings.update_one({"_id": "firm"}, {"$set": {"name": f"Demo {n}"}})
+        for f in fl:
+            nm = names[f["id"]]
+            fdb = db.firm(f["db"])
+            await fdb.app_settings.update_one({"_id": "global"}, {"$set": {"company_name": nm}}, upsert=True)
+            await fdb.app_settings.update_one({"_id": "firm"}, {"$set": {"name": nm}}, upsert=True)
     except Exception:
         pass
 
@@ -99,7 +108,9 @@ def register(api_router, db, deps):
         sec = sektor.SECTORS[key]
         fid = uuid.uuid4().hex[:12]
         tag = secrets.token_hex(3)
-        n = await db.main().firms.count_documents({"demo": True}) + 1
+        import re as _re2
+        _used = [int(m.group(1)) for x in await db.main().firms.find({"demo": True}, {"_id": 0, "name": 1}).to_list(5000) for m in [_re2.fullmatch(r"Demo (\d+)", x.get("name") or "")] if m]
+        n = (max(_used) if _used else 0) + 1
         while await db.main().firms.find_one({"login_email": f"demo{n}@demo.onlinekaydet.com"}):
             n += 1
         email = f"demo{n}@demo.onlinekaydet.com"

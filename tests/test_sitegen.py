@@ -89,6 +89,46 @@ with TestClient(s.app) as c:
         assert c.delete("/api/site/edit?page=hakkimizda", headers=H).status_code == 200
         assert "Biz iyi servisiz" in pub("/hakkimizda").text
     t("sayfa sıfırlanınca otomatik haline döner", rs)
+    def lay():
+        c.delete("/api/site/edit", headers=H)
+        bl = c.get("/api/site/blocks", headers=H).json()["blocks"]; names = [b["name"] for b in bl]
+        assert "Hizmetler" in names and "Slider" in names and len(names) >= 6, names
+        S["names"] = names
+        d = c.get("/api/site/profile", headers=H).json()["profile"]
+        hide = "Yorumlar" if "Yorumlar" in names else names[-1]; S["hide"] = hide
+        order = [n for n in names if n != "Slider"]; order.insert(0, "Slider")
+        d["layout"] = {"order": order, "hidden": [hide]}
+        assert c.put("/api/site/profile", headers=H, json=d).status_code == 200
+        r = pub("/").text
+        assert 'data-nm="%s"' % hide not in r and r.index('data-nm="Slider"') < r.index('data-nm="Hizmetler"')
+        assert 'data-nm="Menü"' in r and 'data-nm="Alt bilgi"' in r
+        bl2 = c.get("/api/site/blocks", headers=H).json()["blocks"]; assert bl2[0]["name"] == "Slider" and [b for b in bl2 if b["name"] == hide][0]["hidden"]
+    t("bölümler sürüklenip sıralanır, gizlenir; menü/alt bilgi sabit kalır", lay)
+    def txt():
+        tx = c.get("/api/site/block-text?name=Hizmetler", headers=H).json()["texts"]; assert len(tx) >= 3
+        i = tx[0]["i"]; old = tx[0]["text"]
+        d = c.get("/api/site/profile", headers=H).json()["profile"]
+        th = c.get("/api/brand", headers=H).json()["brand"]["theme"]
+        d["edits"] = {th: {"Hizmetler": {str(i): "ÖZEL BAŞLIK METNİ"}}}
+        assert c.put("/api/site/profile", headers=H, json=d).status_code == 200
+        assert "ÖZEL BAŞLIK METNİ" in pub("/").text
+        tx2 = c.get("/api/site/block-text?name=Hizmetler", headers=H).json()["texts"]; assert tx2[0]["text"] == "ÖZEL BAŞLIK METNİ" and tx2[0]["orig"] == old
+        d["edits"] = {}; c.put("/api/site/profile", headers=H, json=d); assert "ÖZEL BAŞLIK METNİ" not in pub("/").text
+    t("temanın herhangi bir bölümündeki metin düzenlenir ve eski haline getirilir", txt)
+    def ex():
+        d = c.get("/api/site/profile", headers=H).json()["profile"]
+        d["extra_pages"] = [{"title": "Kampanyalar", "body": "Bu ay bakım %20 indirimli.\n\nDetay için arayın.", "menu": True}]
+        d["hidden_pages"] = ["nasil-calisiyoruz"]
+        assert c.put("/api/site/profile", headers=H, json=d).status_code == 200
+        r = pub("/kampanyalar"); assert r.status_code == 200 and "%20 indirimli" in r.text
+        assert 'href="/kampanyalar"' in pub("/").text or 'href="/kampanyalar"' in pub("/hakkimizda").text
+        assert "Nasıl Çalışıyoruz" not in pub("/hakkimizda").text
+        pg = c.get("/api/site/profile", headers=H).json()["pages"]; assert any(p["slug"] == "nasil-calisiyoruz" and p["hidden"] for p in pg) and any(p["slug"] == "kampanyalar" for p in pg)
+    t("müşteri yeni sayfa ekler, otomatik sayfayı gizler", ex)
+    def nochip():
+        assert "Müşteri girişi" not in pub("/").text and "Servis takibi" not in pub("/").text
+        assert "Müşteri girişi" not in c.get("/api/site/preview?path=/", headers=H).text
+    t("sitede 'Servis takibi · Müşteri girişi' etiketi yok", nochip)
 print("OK %d/%d" % (len(ok), len(ok) + len(bad)))
 for n in ok: print("  ✔", n)
 for n, e in bad: print("  ✘", n, "\n", e)

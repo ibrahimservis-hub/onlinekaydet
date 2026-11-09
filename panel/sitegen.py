@@ -139,9 +139,11 @@ def effective(profile, sector):
     return p
 
 
-def page_index(ctx):
-    """Üretilen sayfa listesi: [{slug,title,kind,nav}]"""
+def page_index(ctx, all_=False):
+    """Üretilen sayfa listesi: [{slug,title,kind,nav}]. all_=True ise gizlenenler de gelir (yönetim ekranı için; 'hidden' alanı ile)."""
     p = ctx["p"]
+    off = set(p.get("menu_off") or [])
+    hid = set(p.get("hidden_pages") or [])
     out = [{"slug": "hakkimizda", "title": "Hakkımızda", "kind": "about", "nav": True},
            {"slug": "hizmetlerimiz", "title": "Hizmetlerimiz", "kind": "services", "nav": True}]
     if p.get("gallery"):
@@ -164,7 +166,15 @@ def page_index(ctx):
             sl += "-%d" % (i + 2)
         seen.add(sl)
         out.append({"slug": sl, "title": "%s %s Servisi" % (r, ctx["p"]["noun"]), "kind": "region", "idx": i, "nav": False})
-    return out
+    for i, x in enumerate(p.get("extra_pages") or []):
+        if x.get("slug") and x["slug"] not in seen:
+            seen.add(x["slug"])
+            out.append({"slug": x["slug"], "title": x.get("title") or x["slug"], "kind": "custom", "idx": i, "nav": bool(x.get("menu", True))})
+    for x in out:
+        if x["slug"] in off and x["kind"] != "custom":
+            x["nav"] = False
+        x["hidden"] = x["slug"] in hid
+    return out if all_ else [x for x in out if not x["hidden"]]
 
 
 # ------------------------------------------------------------------ tema yapısı
@@ -308,7 +318,7 @@ def apply_profile(raw, th, ctx):
     navs = [x for x in idx if x["nav"]]
     for b in blocks:
         if b[0] == "Menü":
-            nv = "".join('<a href="/%s">%s</a>' % (x["slug"], E(x["title"])) for x in navs[:1])
+            nv = "".join('<a href="/%s">%s</a>' % (x["slug"], E(x["title"])) for x in navs[:2])
             b[1] = b[1].replace("</nav>", nv + "</nav>", 1) if "</nav>" in b[1] else b[1]
         elif b[0] == "Mobil menü":
             nv = "".join('<a href="/%s">%s</a>' % (x["slug"], E(x["title"])) for x in navs)
@@ -321,6 +331,7 @@ def apply_profile(raw, th, ctx):
     if ctx["p"].get("slides"):
         k = next((i for i, b in enumerate(blocks) if b[0] == "Ana görsel"), 2)
         blocks.insert(k, ["Slider", slider_html(ctx)])
+    blocks = apply_layout(blocks, ctx)
     out = join_blocks(pre, blocks, tail)
     out = out.replace("</head>", CSS + "</head>", 1)
     if ctx["p"].get("slides"):
@@ -330,8 +341,112 @@ def apply_profile(raw, th, ctx):
     return out
 
 
+FIXED_TOP = ("Menü", "Mobil menü")
+FIXED_BOTTOM = ("Alt bilgi", "Mobil bar")
+_ID = re.compile(r'\bid="([^"]+)"')
+
+
+def middle_names(blocks):
+    return [b[0] for b in blocks if b[0] not in FIXED_TOP + FIXED_BOTTOM]
+
+
+def apply_layout(blocks, ctx):
+    """Müşterinin bölüm sırası, gizlediği bölümler ve metin düzenlemeleri."""
+    lay = ctx["p"].get("layout") or {}
+    order = [n for n in (lay.get("order") or []) if isinstance(n, str)]
+    hidden = set(lay.get("hidden") or [])
+    top = [b for b in blocks if b[0] in FIXED_TOP]
+    bot = [b for b in blocks if b[0] in FIXED_BOTTOM]
+    mid = [b for b in blocks if b[0] not in FIXED_TOP + FIXED_BOTTOM]
+    edits = (ctx["p"].get("edits") or {}).get(ctx["th"]["slug"], {}) if ctx.get("th") else {}
+    for b in mid:
+        if edits.get(b[0]):
+            b[1] = edit_texts(b[1], edits[b[0]])
+    pos = {n: i for i, n in enumerate(order)}
+    mid = sorted(mid, key=lambda b: pos.get(b[0], 10_000))
+    gone = [b for b in mid if b[0] in hidden]
+    mid = [b for b in mid if b[0] not in hidden]
+    if gone:
+        ids = {i for b in gone for i in _ID.findall(b[1])}
+        for t in top + bot:
+            if t[0] in ("Menü", "Mobil menü", "Alt bilgi"):
+                for i in ids:
+                    t[1] = re.sub(r'<a [^>]*href="#%s"[^>]*>(?:(?!</a>).)*</a>' % re.escape(i), "", t[1])
+                    t[1] = re.sub(r'<div><a [^>]*href="#%s"[^>]*>(?:(?!</a>).)*</a></div>' % re.escape(i), "", t[1])
+    return top + mid + bot
+
+
+_INLINE = {"em", "strong", "b", "i", "br", "span", "small", "mark", "u", "wbr"}
+_EDITABLE = ["h1", "h2", "h3", "h4", "p", "summary", "li", "blockquote", "figcaption", "dt", "dd"]
+
+
+def _is_edit(el):
+    if el.name in _EDITABLE:
+        return True
+    cls = " ".join(el.get("class") or [])
+    return (el.name == "a" and "btn" in cls) or "eyebrow" in cls or (el.name == "button" and "btn" in cls)
+
+
+def edit_nodes(soup):
+    """Düzenlenebilir metin öğeleri (içinde başka düzenlenebilir öğe olmayanlar)."""
+    out = []
+    for el in soup.find_all(True):
+        if not _is_edit(el):
+            continue
+        if any(_is_edit(c) for c in el.find_all(True)):
+            continue
+        if not _own_text(el):
+            continue
+        out.append(el)
+    return out
+
+
+def _own_text(el):
+    only_inline = all(c.name in _INLINE for c in el.find_all(True))
+    t = el.get_text() if only_inline else "".join(str(x) for x in el.find_all(string=True, recursive=False))
+    return " ".join(t.split())
+
+
+def block_texts(html, edits=None):
+    from bs4 import BeautifulSoup
+    soup = BeautifulSoup(html, "html.parser")
+    res = []
+    for i, el in enumerate(edit_nodes(soup)):
+        res.append({"i": i, "tag": el.name, "text": _own_text(el)})
+    return res
+
+
+def edit_texts(html, ed):
+    from bs4 import BeautifulSoup
+    soup = BeautifulSoup(html, "html.parser")
+    nodes = edit_nodes(soup)
+    for k, v in ed.items():
+        try:
+            el = nodes[int(k)]
+        except (ValueError, IndexError):
+            continue
+        v = str(v)
+        only_inline = all(c.name in _INLINE for c in el.find_all(True))
+        if only_inline:
+            el.clear()
+            el.append(v)
+        else:
+            first = True
+            for x in list(el.find_all(string=True, recursive=False)):
+                if not str(x).strip():
+                    continue
+                if first:
+                    x.replace_with(v)
+                    first = False
+                else:
+                    x.extract()
+            if first:
+                el.insert(0, v)
+    return str(soup)
+
+
 def footer_links(ctx, idx):
-    links = ['<a href="/%s">%s</a>' % (x["slug"], E(x["title"])) for x in idx if x["kind"] in ("about", "services", "gallery", "process", "faq", "regions", "contact")]
+    links = ['<a href="/%s">%s</a>' % (x["slug"], E(x["title"])) for x in idx if x["kind"] in ("about", "services", "gallery", "process", "faq", "regions", "contact", "custom")]
     soc = ctx["p"].get("social") or {}
     for k, lab in LINK_ICON.items():
         u = str(soc.get(k) or "").strip()
@@ -376,6 +491,10 @@ def _page_body(ctx, pg, idx):
         return "Hizmetlerimiz", '<div class="spx-g">%s</div>' % cards
     if k == "gallery":
         return "Çalışmalarımızdan", '<div class="spx-gal">%s</div>' % "".join('<img src="%s" alt="%s" loading="lazy">' % (E(ctx["img"](g["k"])), E(name)) for g in p["gallery"])
+    if k == "custom":
+        x = (p.get("extra_pages") or [])[pg["idx"]]
+        im = ('<img src="%s" alt="%s" style="width:100%%;border-radius:var(--r);margin:0 0 20px;display:block">' % (E(ctx["img"](x["img"])), E(x.get("title") or "")) if x.get("img") else "")
+        return "", im + paras(x.get("body") or "")
     if k == "process":
         steps = [("Bizi arayın", "Telefon veya WhatsApp'tan sorununuzu anlatın."), ("Randevu verelim", "Size uygun günü ve saati birlikte belirleriz."),
                  ("Tespit ve fiyat", "Sorunu yerinde bulur, yapılacak işi ve ücreti onayınıza sunarız."), ("İşlem ve teslim", "Onayınızla işi yapar, çalıştığını birlikte kontrol ederiz.")]

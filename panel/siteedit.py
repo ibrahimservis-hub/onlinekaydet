@@ -113,7 +113,7 @@ def register(api_router, db, deps):
         p = sitegen.effective(prof, sector)
         p["address"] = prof.get("address") or g.get("company_address") or ""
         imgs = {}
-        keys = [x["k"] for x in (p.get("slides") or []) + (p.get("gallery") or [])]
+        keys = [x["k"] for x in (p.get("slides") or []) + (p.get("gallery") or [])] + [e["img"] for e in (p.get("extra_pages") or []) if e.get("img")]
         if inline and keys:
             async for r in db.site_images.find({"_id": {"$in": keys}}):
                 imgs[r["_id"]] = "data:%s;base64,%s" % (r.get("mime") or "image/jpeg", base64.b64encode(bytes(r["data"])).decode())
@@ -299,6 +299,8 @@ def register(api_router, db, deps):
     def _t(v, n):
         return " ".join(str(v or "").split())[:n]
 
+    sitegen_reserved = set(RESERVED) | {"hakkimizda", "hizmetlerimiz", "galeri", "nasil-calisiyoruz", "sss", "hizmet-bolgeleri", "iletisim"}
+
     async def san_profile(x):
         out = {"whatsapp": _t(x.get("whatsapp"), 20), "email": _t(x.get("email"), 80), "address": _t(x.get("address"), 200),
                "hours": _t(x.get("hours"), 120), "slogan": _t(x.get("slogan"), 110), "city": _t(x.get("city"), 40),
@@ -312,12 +314,37 @@ def register(api_router, db, deps):
         out["regions"] = [r for r in (_t(r, 40) for r in rg) if r][:12]
         soc = x.get("social") or {}
         out["social"] = {k: _t(soc.get(k), 200) for k in sitegen.LINK_ICON if _t(soc.get(k), 200)}
-        want = [str(s.get("k") or "") for s in (x.get("slides") or [])[:8]] + [str(g.get("k") or "") for g in (x.get("gallery") or [])[:16]]
+        lay = x.get("layout") or {}
+        out["layout"] = {"order": [_t(n, 60) for n in (lay.get("order") or [])[:40] if _t(n, 60)], "hidden": [_t(n, 60) for n in (lay.get("hidden") or [])[:40] if _t(n, 60)]}
+        ed = {}
+        for th_, blks in (x.get("edits") or {}).items():
+            if not isinstance(blks, dict) or len(ed) > 5:
+                continue
+            ed[_t(th_, 60)] = {_t(bn, 60): {str(int(i)): str(v)[:600] for i, v in list(tx.items())[:80] if str(i).isdigit()} for bn, tx in list(blks.items())[:40] if isinstance(tx, dict)}
+        out["edits"] = ed
+        out["hidden_pages"] = [_t(v, 60) for v in (x.get("hidden_pages") or [])[:60]]
+        out["menu_off"] = [_t(v, 60) for v in (x.get("menu_off") or [])[:60]]
+        ex, used = [], set()
+        for e in (x.get("extra_pages") or [])[:20]:
+            tt = _t(e.get("title"), 80)
+            if not tt:
+                continue
+            sl = re.sub(r"[^a-z0-9-]", "", str(e.get("slug") or "").lower())[:40] or sitegen.slugify(tt)
+            base, n = sl, 2
+            while sl in sitegen_reserved or sl in used:
+                sl, n = "%s-%d" % (base, n), n + 1
+            used.add(sl)
+            ex.append({"slug": sl, "title": tt, "body": "\n".join(_t(l, 800) for l in str(e.get("body") or "").replace("\r", "").split("\n"))[:6000], "img": str(e.get("img") or ""), "menu": bool(e.get("menu", True))})
+        want = [str(s.get("k") or "") for s in (x.get("slides") or [])[:8]] + [str(g.get("k") or "") for g in (x.get("gallery") or [])[:16]] + [e["img"] for e in ex if e["img"]]
         have = set()
         async for r in db.site_images.find({"_id": {"$in": want}}, {"_id": 1}):
             have.add(r["_id"])
         out["slides"] = [{"k": s["k"], "t": _t(s.get("t"), 80), "d": _t(s.get("d"), 160)} for s in (x.get("slides") or [])[:8] if s.get("k") in have]
         out["gallery"] = [{"k": g["k"]} for g in (x.get("gallery") or [])[:16] if g.get("k") in have]
+        for e in ex:
+            if e["img"] not in have:
+                e["img"] = ""
+        out["extra_pages"] = ex
         return out
 
     @api_router.get("/site/profile")
@@ -330,15 +357,15 @@ def register(api_router, db, deps):
         d = await doc()
         sector = (ctx or {}).get("sector") or ""
         dflt = sitegen.DEFAULTS.get(sector) or {}
-        keys = [x["k"] for x in (prof.get("slides") or []) + (prof.get("gallery") or [])]
+        keys = [x["k"] for x in (prof.get("slides") or []) + (prof.get("gallery") or [])] + [e["img"] for e in (prof.get("extra_pages") or []) if e.get("img")]
         imgs = {}
         async for r in db.site_images.find({"_id": {"$in": keys}}):
             imgs[r["_id"]] = "data:%s;base64,%s" % (r.get("mime") or "image/jpeg", base64.b64encode(bytes(r["data"])).decode())
-        idx = sitegen.page_index(ctx) if ctx else []
+        idx = sitegen.page_index(ctx, all_=True) if ctx else []
         return {"profile": prof, "imgs": imgs, "has_theme": bool(ctx), "sector": sector, "logo": lg, "custom_home": bool(d.get("html")),
                 "name": (ctx or {}).get("name") or g.get("company_name") or "", "phone": g.get("company_phone") or "", "address": prof.get("address") or g.get("company_address") or "",
                 "default_services": [{"t": a, "d": b} for a, b in dflt.get("services", [])], "default_faq": [{"q": a, "a": b} for a, b in dflt.get("faq", [])],
-                "pages": [{"slug": x["slug"], "title": x["title"], "kind": x["kind"]} for x in idx],
+                "pages": [{"slug": x["slug"], "title": x["title"], "kind": x["kind"], "hidden": x["hidden"], "nav": x["nav"]} for x in idx],
                 "custom_pages": [{"slug": p["slug"], "title": p.get("title", p["slug"])} for p in d.get("pages", [])]}
 
     @api_router.put("/site/profile")
@@ -346,7 +373,7 @@ def register(api_router, db, deps):
         need_firm()
         prof = await san_profile(payload)
         await db.app_settings.update_one({"_id": "site_profile"}, {"$set": prof}, upsert=True)
-        keep = [x["k"] for x in prof["slides"] + prof["gallery"]]
+        keep = [x["k"] for x in prof["slides"] + prof["gallery"]] + [e["img"] for e in prof["extra_pages"] if e["img"]]
         await db.site_images.delete_many({"_id": {"$nin": keep}})
         return {"ok": True}
 
@@ -387,6 +414,47 @@ def register(api_router, db, deps):
             raise HTTPException(404, "Yok")
         return Response(base64.b64decode(m.group(2)), media_type=m.group(1), headers={"Cache-Control": "public, max-age=86400", "Content-Security-Policy": "sandbox"})
 
+    async def base_blocks(ctx, with_edits):
+        p2 = dict(ctx["p"], layout={})
+        if not with_edits:
+            p2["edits"] = {}
+        h = sitegen.apply_profile(raw_theme(ctx["th"]["slug"]), ctx["th"], dict(ctx, p=p2))
+        parts = sitegen.split_blocks(h)
+        return {b[0]: b[1] for b in (parts[1] if parts else []) if b[0] not in sitegen.FIXED_TOP + sitegen.FIXED_BOTTOM}, [b[0] for b in (parts[1] if parts else []) if b[0] not in sitegen.FIXED_TOP + sitegen.FIXED_BOTTOM]
+
+    @api_router.get("/site/blocks")
+    async def blocks_get(_: dict = Depends(require_admin)):
+        """Ana sayfadaki bölümler (sıra + gizli bilgisi). Her temada aynı yapı olduğu için tüm temalarda çalışır."""
+        need_firm()
+        ctx = await build_ctx()
+        if not ctx:
+            raise HTTPException(400, "Önce bir tema seçin")
+        blocks, names = await base_blocks(ctx, True)
+        lay = ctx["p"].get("layout") or {}
+        order = [n for n in (lay.get("order") or []) if n in blocks] + [n for n in names if n not in (lay.get("order") or [])]
+        from bs4 import BeautifulSoup
+        out = []
+        for n in order:
+            soup = BeautifulSoup(blocks[n], "html.parser")
+            hd = soup.find(["h1", "h2", "h3"])
+            out.append({"name": n, "hidden": n in (lay.get("hidden") or []), "title": " ".join(hd.get_text().split())[:70] if hd else "", "n": len(sitegen.edit_nodes(soup))})
+        return {"blocks": out}
+
+    @api_router.get("/site/block-text")
+    async def block_text(name: str, _: dict = Depends(require_admin)):
+        need_firm()
+        ctx = await build_ctx()
+        if not ctx:
+            raise HTTPException(400, "Önce bir tema seçin")
+        cur, _n = await base_blocks(ctx, True)
+        org, _n2 = await base_blocks(ctx, False)
+        if name not in cur:
+            raise HTTPException(404, "Bölüm yok")
+        a, b = sitegen.block_texts(cur[name]), sitegen.block_texts(org[name])
+        for x in a:
+            x["orig"] = b[x["i"]]["text"] if x["i"] < len(b) else x["text"]
+        return {"texts": a}
+
     @api_router.get("/site/preview")
     async def preview(path: str = "/", _: dict = Depends(require_admin)):
         """Panelde canlı önizleme: yayındakiyle aynı üretim, görseller gömülü."""
@@ -426,10 +494,6 @@ def register(api_router, db, deps):
                 h = r[0]
         if inline:
             h = await inline_imgs(h)
-        _n, _t2, f = await identity()
-        if portal_chip and f.get("id") and (f.get("modules") is None or "portal" in (f.get("modules") or [])):
-            chip = portal_chip("/portal/%s~giris" % f["id"])
-            h = h.replace("</body>", chip + "</body>", 1) if "</body>" in h else h + chip
         return h, "text/html"
 
     async def serve(path: str, host: str = ""):

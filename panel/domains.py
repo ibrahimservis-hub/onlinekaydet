@@ -269,9 +269,6 @@ def register(api_router, db, deps):
         if len(digits) >= 10:
             dd = digits[-10:]
             html = html.replace("905320000000", "90" + dd).replace("0532 000 00 00", "0%s %s %s %s" % (dd[:3], dd[3:6], dd[6:8], dd[8:]))
-        fd = await db.main().firms.find_one({"db": tenant.current()}, {"_id": 0, "id": 1, "modules": 1}) or {}
-        if fd.get("id") and (fd.get("modules") is None or "portal" in (fd.get("modules") or [])):
-            html = html.replace("</body>", portal_chip("/portal/%s~giris" % fd["id"]) + "</body>", 1) if "</body>" in html else html + portal_chip("/portal/%s~giris" % fd["id"])
         return HTMLResponse(html, headers={"Cache-Control": "no-cache"})
 
     # ------------------------------------------------------------ sahip: kurulum hazırlığı ve sistem durumu
