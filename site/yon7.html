@@ -13,7 +13,7 @@
 :root{--g0:#0a0c0f;--g1:#101318;--g2:#161a21;--hl:rgba(255,255,255,.09);--hl2:rgba(255,255,255,.16);--iv:#f3f0e8;--iv2:#e9e4d8;--ink:#14161a;--mut:#6a6d74;--mutd:#9aa0ab;--ch:#c9ae75;--chd:#8a6d2f;--ok:#7fb89a;--wa:#d9a45b;--ex:#d98080;--ease:cubic-bezier(.22,.7,.2,1);--f:"Geist",system-ui,sans-serif;--s:"Ins","Times New Roman",serif}
 *{box-sizing:border-box;margin:0}
 html{scroll-behavior:smooth;overflow-x:clip}
-body{background:var(--iv);color:var(--ink);font:400 17px/1.6 var(--f);-webkit-font-smoothing:antialiased}
+body{background:var(--iv);color:var(--ink);font:400 17px/1.5 var(--f);-webkit-font-smoothing:antialiased}
 a{color:inherit;text-decoration:none}
 :focus-visible{outline:2px solid var(--ch);outline-offset:4px;border-radius:2px}
 .wrap{max-width:1240px;margin:0 auto;padding:0 40px}
@@ -29,26 +29,26 @@ em{font:italic 400 1.08em var(--s);letter-spacing:0}
 .btn{display:inline-flex;align-items:center;gap:10px;min-height:48px;padding:0 24px;font:500 15px var(--f);border:1px solid var(--ch);color:var(--g0);background:var(--ch);transition:background-color .25s var(--ease),color .25s var(--ease),transform .25s var(--ease)}
 .btn:hover{background:transparent;color:var(--ch)}
 .btn.o{background:transparent;color:var(--ch)}.btn.o:hover{background:var(--ch);color:var(--g0)}
-.btn.dk{background:var(--ink);border-color:var(--ink);color:var(--iv)}.btn.dk:hover{background:transparent;color:var(--ink)}
+.btn.ink{background:var(--ink);border-color:var(--ink);color:var(--iv)}.btn.ink:hover{background:transparent;color:var(--ink)}
 .btn svg{width:16px;height:16px;transition:transform .25s var(--ease)}.btn:hover svg{transform:translateX(4px)}
 /* hero */
-.hero{background:var(--g0);color:#fff;padding:190px 0 0;position:relative;overflow:hidden}
+.hero{background:var(--g0);color:#fff;padding:150px 0 0;position:relative;overflow:hidden}
 .hero:before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 calc(25% - 1px),var(--hl) calc(25% - 1px) 25%);opacity:.45;pointer-events:none;max-width:1240px;margin:0 auto}
 .hero .wrap{position:relative}
-.eyebrow{font-size:14px;color:var(--ch);margin-bottom:28px;display:flex;align-items:center;gap:14px}
+.eyebrow{font-size:14px;color:var(--ch);margin-bottom:20px;display:flex;align-items:center;gap:14px}
 .eyebrow:before{content:"";width:40px;height:1px;background:var(--ch)}
-.hero h1{font:300 clamp(46px,6.5vw,98px)/1.0 var(--f);letter-spacing:-.04em;max-width:1200px}
+.hero h1{font:300 clamp(50px,7.4vw,112px)/1.0 var(--f);letter-spacing:-.04em;max-width:1000px}
 .hero h1 em{color:var(--ch)}
 .hero h1 .l{display:block;overflow:hidden;padding-bottom:.12em;margin-bottom:-.12em}
 .hero h1 .l>span{display:block;animation:up 1s var(--ease) both}
 .hero h1 .l:nth-child(2)>span{animation-delay:.12s}
 @keyframes up{from{transform:translateY(110%)}to{transform:none}}
-.hero .sub{display:flex;gap:60px;align-items:flex-end;justify-content:space-between;margin:44px 0 0;flex-wrap:wrap;animation:fade 1s var(--ease) .5s both}
+.hero .sub{display:flex;gap:48px;align-items:flex-end;justify-content:space-between;margin:30px 0 0;flex-wrap:wrap;animation:fade 1s var(--ease) .5s both}
 .hero .sub p{font-size:20px;color:#b9bec8;max-width:520px;line-height:1.55}
 .hero .acts{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
 @keyframes fade{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 /* console */
-.con{margin-top:84px;background:var(--g1);border:1px solid var(--hl2);border-bottom:0;border-radius:14px 14px 0 0;animation:fade 1.1s var(--ease) .8s both;position:relative}
+.con{margin-top:56px;background:var(--g1);border:1px solid var(--hl2);border-bottom:0;border-radius:14px 14px 0 0;animation:fade 1.1s var(--ease) .8s both;position:relative}
 .con .top{display:flex;align-items:center;gap:14px;padding:16px 22px;border-bottom:1px solid var(--hl);font-size:14px;color:var(--mutd)}
 .con .top b{color:#fff;font-weight:500}.con .top .r{margin-left:auto;display:flex;align-items:center;gap:8px}
 .dot{width:7px;height:7px;border-radius:50%;background:var(--ok);animation:pl 2.4s ease-in-out infinite}
@@ -85,28 +85,28 @@ em{font:italic 400 1.08em var(--s);letter-spacing:0}
 @keyframes evin{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:none}}
 .fd{min-height:330px;overflow:hidden}
 /* light sections */
-section{padding-top:140px}
-.kick{font-size:14px;color:var(--chd);margin-bottom:22px;display:flex;align-items:center;gap:14px}
+section{padding-top:96px}
+.kick{font-size:14px;color:var(--chd);margin-bottom:16px;display:flex;align-items:center;gap:14px}
 .kick:before{content:"";width:40px;height:1px;background:var(--chd)}
 h2{font:300 clamp(40px,5.4vw,78px)/1.04 var(--f);letter-spacing:-.035em;max-width:900px}
 h2 em{color:var(--chd)}
-.two{display:grid;grid-template-columns:5fr 7fr;gap:80px;margin-top:70px;align-items:start}
-.two p.l{font-size:20px;color:#41444b;max-width:420px}
+.two{display:grid;grid-template-columns:5fr 7fr;gap:64px;margin-top:44px;align-items:start}
+.two p.l{font-size:19px;line-height:1.5;color:#41444b;max-width:420px}
 .dl{border-top:1px solid var(--ink)}
-.dl>div{display:grid;grid-template-columns:190px 1fr;gap:30px;padding:26px 0;border-bottom:1px solid #cfc9ba}
+.dl>div{display:grid;grid-template-columns:170px 1fr;gap:24px;padding:18px 0;border-bottom:1px solid #cfc9ba}
 .dl dt{font:500 15px var(--f);color:var(--chd);padding-top:3px}
-.dl dd{font-size:19px;line-height:1.7;color:#2a2d33}
+.dl dd{font-size:18px;line-height:1.55;color:#2a2d33}
 .dl dd span{white-space:nowrap}.dl dd span:not(:last-child):after{content:"";display:inline-block;width:4px;height:4px;border-radius:50%;background:#b7ad92;margin:0 14px 3px}
 /* dark security */
-.dk{background:var(--g0);color:#fff;margin-top:150px;padding:140px 0}
+.dk{background:var(--g0);color:#fff;margin-top:96px;padding:96px 0}
 .dk h2{color:#fff;max-width:760px}.dk h2 em{color:var(--ch)}.dk .kick{color:var(--ch)}.dk .kick:before{background:var(--ch)}
-.sec{display:grid;grid-template-columns:1fr 1fr;gap:0 80px;margin-top:70px}
-.sec>div{display:grid;grid-template-columns:44px 1fr;gap:6px;padding:26px 0;border-top:1px solid var(--hl2)}
+.sec{display:grid;grid-template-columns:1fr 1fr;gap:0 64px;margin-top:44px}
+.sec>div{display:grid;grid-template-columns:44px 1fr;gap:6px;padding:20px 0;border-top:1px solid var(--hl2)}
 .sec .n{font:italic 400 22px var(--s);color:var(--ch)}
-.sec h3{font:500 20px var(--f);margin-bottom:4px}.sec p{color:#aeb3bd;font-size:16.5px;line-height:1.6}
+.sec h3{font:500 20px var(--f);margin-bottom:4px}.sec p{color:#aeb3bd;font-size:16px;line-height:1.5}
 /* sectors */
-.sx{margin-top:60px;border-top:1px solid var(--ink)}
-.sx a{display:grid;grid-template-columns:60px 1fr 1.2fr 40px;gap:20px;align-items:center;padding:30px 0;border-bottom:1px solid #cfc9ba;position:relative;transition:padding-left .4s var(--ease)}
+.sx{margin-top:40px;border-top:1px solid var(--ink)}
+.sx a{display:grid;grid-template-columns:60px 1fr 1.2fr 40px;gap:20px;align-items:center;padding:20px 0;border-bottom:1px solid #cfc9ba;position:relative;transition:padding-left .4s var(--ease)}
 .sx a:before{content:"";position:absolute;left:0;bottom:-1px;height:1px;width:0;background:var(--chd);transition:width .5s var(--ease)}
 .sx a:hover{padding-left:20px}.sx a:hover:before{width:100%}
 .sx .n{font:italic 400 20px var(--s);color:var(--chd)}
@@ -114,15 +114,15 @@ h2 em{color:var(--chd)}
 .sx p{color:var(--mut);font-size:16.5px}
 .sx svg{width:22px;height:22px;transition:transform .35s var(--ease);justify-self:end}.sx a:hover svg{transform:translateX(6px)}
 /* process */
-.pr{display:grid;grid-template-columns:repeat(3,1fr);gap:50px;margin-top:70px;position:relative}
+.pr{display:grid;grid-template-columns:repeat(3,1fr);gap:40px;margin-top:44px;position:relative}
 .pr:before{content:"";position:absolute;left:0;top:0;height:1px;width:100%;background:var(--ink);transform-origin:left;transform:scaleX(0);transition:transform 1.4s var(--ease)}
 .pr.in:before{transform:scaleX(1)}
-.pr>div{padding-top:30px}
+.pr>div{padding-top:22px}
 .pr b{font:italic 400 64px/1 var(--s);color:var(--chd);display:block;margin-bottom:14px}
 .pr h3{font:400 28px var(--f);letter-spacing:-.02em;margin-bottom:8px}
 .pr p{color:#50535a;max-width:320px}
 /* cta */
-.cta{background:var(--g0);color:#fff;margin-top:150px;padding:130px 0 110px}
+.cta{background:var(--g0);color:#fff;margin-top:96px;padding:96px 0 84px}
 .cta h2{color:#fff;max-width:900px}.cta h2 em{color:var(--ch)}
 .cta .row{display:flex;gap:30px;align-items:center;margin-top:50px;flex-wrap:wrap}
 .cta .tel{font:300 clamp(30px,3.6vw,48px) var(--f);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
@@ -134,11 +134,52 @@ footer .wrap{display:flex;gap:28px;flex-wrap:wrap}footer .sp{flex:1}footer a:hov
 @media(max-width:1060px){.cg{grid-template-columns:1fr}.cg>div+div{border-left:0;border-top:1px solid var(--hl)}.two{grid-template-columns:1fr;gap:40px}.sec{grid-template-columns:1fr}.pr{grid-template-columns:1fr}.hd nav,.hd .tel{display:none}.sx a{grid-template-columns:40px 1fr 30px}.sx p{grid-column:2/3;grid-row:2}.dl>div{grid-template-columns:1fr;gap:8px}.gh,.gr{grid-template-columns:70px 1fr}.gh{display:none}.k b{font-size:32px}}
 @media(max-width:600px){.wrap{padding:0 22px}.hero{padding-top:140px}section{padding-top:100px}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.js .rv{opacity:1!important;transform:none!important}.k path{stroke-dashoffset:0!important}.pr:before{transform:none!important}}
+
+.pkt{display:flex;margin-top:40px;border-bottom:1px solid var(--ink);gap:28px;flex-wrap:wrap}
+.pkt button{background:none;border:0;border-bottom:3px solid transparent;margin-bottom:-1px;padding:0 0 14px;cursor:pointer;text-align:left;font:inherit;color:var(--mut);transition:border-color .3s var(--ease),color .3s}
+.pkt button b{display:block;font:400 26px/1.2 var(--f);letter-spacing:-.02em;color:var(--ink)}
+.pkt button span{font-size:14px}
+.pkt button:hover{color:var(--ink)}
+.pkt button[aria-selected=true]{border-bottom-color:var(--chd);color:var(--ink)}
+.pkp{display:grid;grid-template-columns:4fr 8fr;gap:56px;padding-top:32px}
+.pkp[hidden]{display:none}
+.pkp .sum{position:sticky;top:24px;align-self:start}
+.pkp .sum h3{font:300 36px/1.1 var(--f);letter-spacing:-.03em}
+.pkp .price{font:300 54px/1.1 var(--f);letter-spacing:-.04em;margin:10px 0 12px;font-variant-numeric:tabular-nums}
+.pkp .price small{font:400 14px var(--f);letter-spacing:0;color:var(--mut);margin-left:6px}
+.pkp .sum p{color:#41444b;margin-bottom:12px;font-size:17px;line-height:1.5}
+.pkp .inc{font-weight:500;color:var(--chd)!important}
+.mod{display:grid;grid-template-columns:1fr 1.25fr;gap:28px;padding:20px 0;border-top:1px solid #cfc9ba}
+.mod:first-child{border-top:1px solid var(--ink)}
+.mod h4{font:500 20px/1.25 var(--f);margin-bottom:6px}
+.mod p{color:var(--mut);font-size:15.5px;line-height:1.5}
+.mod ul{list-style:none;padding:0}
+.mod li{position:relative;padding:5px 0 5px 20px;font-size:15.5px;line-height:1.45;border-top:1px solid rgba(20,22,26,.07)}
+.mod li:first-child{border:0;padding-top:0}
+.mod li:before{content:"";position:absolute;left:0;top:13px;width:9px;height:1px;background:var(--chd)}
+.mod li:first-child:before{top:8px}
+.ev2{margin-top:56px}.ev2 h3,.mxw h3{font:300 30px var(--f);letter-spacing:-.03em;margin-bottom:16px}
+.evg{display:grid;grid-template-columns:repeat(3,1fr);gap:0 40px;border-top:1px solid var(--ink)}
+.evg div{padding:16px 0;border-bottom:1px solid #cfc9ba}
+.evg h4{font:500 16px var(--f)}.evg p{color:var(--mut);font-size:15px;line-height:1.45}
+.mxw{margin-top:56px;overflow-x:auto}
+.mx{width:100%;border-collapse:collapse;min-width:640px;font-size:15.5px}
+.mx th,.mx td{padding:10px 14px;text-align:center;border-bottom:1px solid #d6d0c2}
+.mx th:first-child,.mx td:first-child{text-align:left;padding-left:0}
+.mx thead th{font:500 14px var(--f);color:var(--chd);border-bottom:1px solid var(--ink);position:sticky;top:0;background:var(--iv)}
+.mx tr.g th{text-align:left;font:500 13px var(--f);color:var(--chd);padding:18px 0 8px;border-bottom:1px solid var(--ink)}
+.mx td.y{color:var(--chd);font-weight:600}.mx td.n{color:#b5ad98}
+.rm{margin-top:36px;border-top:1px solid var(--ink)}
+.rm>div{display:grid;grid-template-columns:140px 1fr 1.3fr;gap:24px;align-items:baseline;padding:18px 0;border-bottom:1px solid #cfc9ba}
+.st{font:500 13px var(--f);color:var(--chd);border:1px solid var(--chd);padding:3px 10px;width:max-content}
+.rm h3{font:300 28px/1.15 var(--f);letter-spacing:-.025em}.rm p{color:var(--mut);font-size:16px;line-height:1.5}
+@media(max-width:1060px){.pkp{grid-template-columns:1fr;gap:20px}.pkp .sum{position:static}.mod{grid-template-columns:1fr;gap:10px}.evg{grid-template-columns:1fr 1fr}.rm>div{grid-template-columns:1fr;gap:6px}}
+@media(max-width:600px){.evg{grid-template-columns:1fr}.pkt{gap:16px}.pkt button b{font-size:20px}}
 </style></head>
 <body>
 <header class="hd"><div class="wrap">
 <a href="index.html"><img src="logo-acik-s.png" alt="OnlineKaydet"></a>
-<nav aria-label="Ana menü"><a href="ozellikler.html">Ürün</a><a href="#guvenlik">Güvenlik</a><a href="#sektorler">Sektörler</a><a href="fiyatlar.html">Fiyatlar</a></nav>
+<nav aria-label="Ana menü"><a href="#paketler">Paketler</a><a href="#guvenlik">Güvenlik</a><a href="#sektorler">Sektörler</a><a href="fiyatlar.html">Fiyatlar</a></nav>
 <span class="sp"></span><a class="tel" href="tel:+905444444004">0544 444 40 04</a><a class="btn o" href="demo.html">Demo talep edin</a>
 </div></header>
 
@@ -181,6 +222,28 @@ footer .wrap{display:flex;gap:28px;flex-wrap:wrap}footer .sp{flex:1}footer a:hov
 <div><dt>Finans</dt><dd><span>Tahsilat ve alacak</span><span>Kasa, banka, giderler</span><span>KDV raporu</span><span>E-fatura köprüsü</span><span>Kârlılık raporu</span><span>Bayi komisyonu</span></dd></div>
 <div><dt>Müşteri ve web</dt><dd><span>Müşteri geçmişi</span><span>SMS, WhatsApp, e-posta</span><span>Hazır web sitesi</span><span>Online randevu</span><span>Canlı destek</span><span>Kaynak raporu</span></dd></div>
 </dl></div></div></section>
+
+<section id="paketler"><div class="wrap">
+<div class="kick rv">Paketler</div>
+<h2 class="rv">Dört paket, <em>açık</em> içerik.</h2>
+<p class="lead rv">Hangi pakette hangi modül, modülün içinde hangi özellik var, satın almadan önce görün. İlk ay ücretsiz, kart bilgisi istenmez.</p>
+<div class="pkt rv" role="tablist" aria-label="Paketler"><button role="tab" type="button" id="t0" aria-controls="p0" aria-selected="false"><b>Başlangıç</b><span>990 ₺ / ay + KDV</span></button><button role="tab" type="button" id="t1" aria-controls="p1" aria-selected="true"><b>Profesyonel</b><span>1.990 ₺ / ay + KDV</span></button><button role="tab" type="button" id="t2" aria-controls="p2" aria-selected="false"><b>Tam Paket</b><span>3.490 ₺ / ay + KDV</span></button><button role="tab" type="button" id="t3" aria-controls="p3" aria-selected="false"><b>Kurumsal</b><span>5.990 ₺ / ay + KDV</span></button></div>
+<div class="pkw"><div class="pkp" role="tabpanel" id="p0" aria-labelledby="t0"><div class="sum"><h3>Başlangıç</h3><div class="price">990 ₺<small>/ ay + KDV</small></div><p>Tek başına çalışan usta ve küçük ekipler için. İşin çekirdeği: servis kaydı, usta atama, usta uygulaması ve imzalı fiş.</p><a class="btn ink" href="demo.html">Ücretsiz deneyin</a></div><div class="mods"><div class="mod"><div><h4>Servis kayıtları</h4><p>Müşteriden fişe kadar tek akış. Süreç adımlarını, fotoğraf ve imza kurallarını siz belirlersiniz.</p></div><ul><li>Müşteri, cihaz, arıza ve randevu tek formda</li><li>Marka ve model kataloğundan seçim</li><li>Akış: Yeni, Atandı, Yolda, Başladı, Tamamlandı, Faturalandı, İptal</li><li>İşlem öncesi ve sonrası fotoğraf: zorunlu, isteğe bağlı ya da kapalı</li><li>Müşteri ve usta imzası ayrı ayrı açılır, kapatılır</li><li>Parça, işçilik ve ödeme yöntemi girişi</li><li>A4 ve 80 mm PDF servis fişi, tasarımı düzenlenebilir</li><li>Fişte KVKK aydınlatma metni otomatik</li><li>Atölyeye alma ve “müşteri vazgeçti” durumları</li><li>Sektöre göre hazır kontrol listeleri</li></ul></div><div class="mod"><div><h4>Usta ve personel</h4><p>Usta sahada, siz ofiste her şeyi görürsünüz. Usta yalnızca kendine atanan işleri görür.</p></div><ul><li>Usta ekleme ve kullanıcı yönetimi</li><li>Usta uygulaması: Aktif, Tamamlanan ve Atölye listeleri</li><li>“Yola Çık” ve “Servise Başla” adımları</li><li>Telefondan fotoğraf, imza ve parça girişi</li><li>Yönetici ve usta için ayrı yetkiler</li><li>Atama ekranında ustanın günlük iş yükü</li><li>İş bitince fiş otomatik hazırlanır</li></ul></div></div></div><div class="pkp" role="tabpanel" id="p1" aria-labelledby="t1"><div class="sum"><h3>Profesyonel</h3><div class="price">1.990 ₺<small>/ ay + KDV</small></div><p>Müşteri iletişimini otomatikleştirmek, tahsilatı ve ekibin performansını takip etmek isteyen servisler için.</p><p class="inc">Başlangıç paketindeki her şey dahildir.</p><a class="btn ink" href="demo.html">Ücretsiz deneyin</a></div><div class="mods"><div class="mod"><div><h4>SMS ve mesaj şablonları</h4><p>Atama, yola çıkış, tamamlanma ve memnuniyet anketi mesajları otomatik gider. Metinleri siz yazarsınız.</p></div><ul><li>Şablonlar: usta atandı, yolda, tamamlandı, anket</li><li>Kendi SMS firmanızı bağlayın (İleti Merkezi, Verimor, Netgsm, Twilio, özel webhook)</li><li>İleti Merkezi bağlantısı bakiye sorgusuyla test edilir</li><li>Gönderilen her mesaj kayıt altında</li><li>Müşteri adı, usta, saat gibi değişkenler</li><li>Gönderim hatasında servis işlemi aksamaz</li></ul></div><div class="mod"><div><h4>Muhasebe ve kasa</h4><p>Tahsilat, gider ve alacak takibi servis kayıtlarına bağlı çalışır.</p></div><ul><li>Usta bazında kasa ve tahsilat</li><li>Nakit, kart ve havale ayrımı</li><li>Gider kayıtları ve kategoriler</li><li>Cari hesap ve alacak takibi</li><li>Kâr takibi</li><li>Excel’e aktarma</li><li>Ödeme bekleyen servislerin listesi</li><li>Faturalanmamış tamamlanan işler</li></ul></div><div class="mod"><div><h4>Raporlar</h4><p>Ciro, usta performansı ve açık işler için hazır raporlar.</p></div><ul><li>Aylık ciro ve tahsilat özeti</li><li>Usta bazında iş sayısı ve performans</li><li>Açık ve geciken işler</li><li>Servis türüne göre dağılım</li><li>Tamamlanma süreleri</li><li>Raporları dışa aktarma</li></ul></div></div></div><div class="pkp" role="tabpanel" id="p2" aria-labelledby="t2"><div class="sum"><h3>Tam Paket</h3><div class="price">3.490 ₺<small>/ ay + KDV</small></div><p>Web sitesi ve online yedek parça satışıyla yeni müşteri çekmek, büyümek isteyen servisler için.</p><p class="inc">Profesyonel paketindeki her şey dahildir.</p><a class="btn ink" href="demo.html">Ücretsiz deneyin</a></div><div class="mods"><div class="mod"><div><h4>Web sitesi</h4><p>30 hazır temadan birini seçin, randevu formu ve SEO ayarlarıyla birlikte yayınlayın.</p></div><ul><li>30 sektöre uygun, mobil uyumlu tema</li><li>Temayı istediğiniz zaman değiştirme</li><li>Yazı ve fotoğraflar yeni temaya taşınır</li><li>Randevu talebi formu: talepler panele düşer</li><li>SEO başlık ve açıklama ayarları</li><li>Medya (fotoğraf) yöneticisi</li><li>Ziyaretçi takibi</li><li>Müşteri yorumu ayarları</li></ul></div><div class="mod"><div><h4>Yedek parça mağazası</h4><p>Stoktaki yedek parçaları sitenizden satın, servis kayıtlarında parça olarak kullanın.</p></div><ul><li>Parça ve ürün listesi</li><li>Stok takibi</li><li>Servis kaydında parçayı stoktan seçme</li><li>Siteden online sipariş alma</li><li>Azalan stok uyarısı</li></ul></div><div class="mod"><div><h4>Pazarlama</h4><p>Kampanya ve büyüme araçlarıyla müşteri tabanınızı büyütün.</p></div><ul><li>Kampanya oluşturma</li><li>Müşteri listesine toplu mesaj</li><li>Büyüme önerileri ve fırsatlar</li><li>Eski müşteriyi geri kazanma</li></ul></div></div></div><div class="pkp" role="tabpanel" id="p3" aria-labelledby="t3"><div class="sum"><h3>Kurumsal</h3><div class="price">5.990 ₺<small>/ ay + KDV</small></div><p>Bakım ve garantiyi takip eden, online tahsilat alan, fatura kesen ve bayi ağıyla çalışmak isteyen büyük servisler için.</p><p class="inc">Tam Paket paketindeki her şey dahildir.</p><a class="btn ink" href="demo.html">Teklif isteyin</a></div><div class="mods"><div class="mod"><div><h4>Bakım ve garanti</h4><p>Her cihazın bakım tarihi ve garantisi takip edilir. Tarih gelince müşteri otomatik bilgilendirilir.</p></div><ul><li>Yıllık bakım hatırlatma listesi</li><li>Bakım zamanı gelen müşteriye SMS</li><li>Cihaz bazında garanti bitiş tarihi</li><li>Geciken bakım listesi</li><li>Müşteri bağlantıdan tek dokunuşla servis talebi açar</li><li>Cihaz kartı ve servis geçmişi</li><li>Garanti talepleri takibi</li></ul></div><div class="mod"><div><h4>Teklif ve onay</h4><p>Usta teklifi hazırlar, müşteri linkten onaylar ya da reddeder. Karar teklif kaydında saklanır.</p></div><ul><li>Parça ve işçilikle teklif hazırlama</li><li>Müşteriye SMS ile onay linki</li><li>Onay ve ret kaydı (tarih, saat)</li><li>Karar bildirimi yöneticiye gider</li></ul></div><div class="mod"><div><h4>Ödeme ve e-arşiv fatura</h4><p>Müşteriye ödeme linki gider, ödeme gelince servis kapanır, e-arşiv fatura hazırlanır.</p></div><ul><li>SMS ile ödeme linki</li><li>Kredi kartı ile online tahsilat</li><li>Ödeme gelince servis kaydında tahsilat işlenir</li><li>E-arşiv fatura bağlantısı (kendi entegratörünüzle)</li></ul></div><div class="mod"><div><h4>Müşteri portalı</h4><p>Müşteri telefon numarası ve SMS koduyla giriş yapar; servislerini, tutarlarını ve bekleyen tekliflerini görür.</p></div><ul><li>Servis durumu ve randevu bilgisi</li><li>Yeni servis talebi oluşturma</li><li>Servis takip bağlantısı</li><li>Teklif onayı ve ödeme</li></ul></div><div class="mod"><div><h4>Canlı takip ve çevrimdışı</h4><p>Usta konumu yönetici ekranında görünür. Usta internetsiz yerde işlemini yapar, bağlantı gelince gönderilir.</p></div><ul><li>Usta canlı konumu yönetici ekranında</li><li>Usta uygulamasında çevrimdışı işlem kuyruğu</li></ul></div><div class="mod"><div><h4>Bayi (B2B)</h4><p>Bayi kendi servis taleplerini açar ve takip eder; siz bayi bazında rapor alırsınız.</p></div><ul><li>Bayi hesapları ve kendi paneli</li><li>Bayi bazında servis talebi</li><li>Bayi bazında rapor</li></ul></div><div class="mod"><div><h4>QR etiket ve arayan numara</h4><p>Cihaza yapıştırılan QR etiketi okutulunca cihaz sayfası açılır. Arayan numara müşteri kartıyla eşleşir.</p></div><ul><li>QR cihaz etiketi yazdırma</li><li>Okutunca cihaz geçmişi</li><li>Arayan numaradan müşteri kartı</li></ul></div><div class="mod"><div><h4>Otomatik atama</h4><p>Konum, uzmanlık ve günlük iş yüküne göre usta önerilir. İsterseniz otomatik atanır.</p></div><ul><li>En yakın usta önerisi</li><li>Uzmanlığa göre eşleştirme</li><li>Günlük iş yükü dengesi</li><li>Elle değiştirme her zaman açık</li></ul></div></div></div></div>
+<div class="ev2 rv"><h3>Hangi paketi seçerseniz seçin</h3><div class="evg"><div><h4>Firmaya özel veritabanı</h4><p>Verileriniz başka firmalarla karışmaz.</p></div><div><h4>Şifreli bağlantı</h4><p>Panel ve usta uygulaması SSL ile korunur.</p></div><div><h4>Sektör şablonu</h4><p>Marka, model ve kontrol listesi hazır kurulur.</p></div><div><h4>Rol ve yetki</h4><p>Yönetici ve usta için ayrı yetkiler.</p></div><div><h4>KVKK metni</h4><p>Servis fişinde aydınlatma metni.</p></div><div><h4>Paket değişikliği</h4><p>İstediğiniz zaman üst pakete geçin, modülleri açıp kapatın.</p></div></div></div>
+<div class="mxw rv"><h3>Tüm özellikler tek tabloda</h3><table class="mx"><thead><tr><th></th><th>Başlangıç</th><th>Profesyonel</th><th>Tam Paket</th><th>Kurumsal</th></tr></thead><tbody><tr class="g"><th colspan="5">Servis yönetimi</th></tr><tr><td>Servis kaydı, cihaz kataloğu, randevu</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td></tr><tr><td>Fotoğraf ve imza ayarları</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td></tr><tr><td>PDF servis fişi (A4 / 80 mm)</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td></tr><tr><td>Sektör kontrol listeleri</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td></tr><tr><td>Usta uygulaması, rol ve yetki</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td></tr><tr class="g"><th colspan="5">İletişim</th></tr><tr><td>Otomatik SMS ve şablonlar</td><td class="n">–</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td></tr><tr><td>Kendi SMS firmanızı bağlama</td><td class="n">–</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td></tr><tr><td>Memnuniyet anketi</td><td class="n">–</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td></tr><tr class="g"><th colspan="5">Finans ve raporlar</th></tr><tr><td>Kasa ve tahsilat</td><td class="n">–</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td></tr><tr><td>Gider ve cari takip</td><td class="n">–</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td></tr><tr><td>Raporlar</td><td class="n">–</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td></tr><tr class="g"><th colspan="5">Büyüme</th></tr><tr><td>Temalı web sitesi ve SEO</td><td class="n">–</td><td class="n">–</td><td class="y">✓</td><td class="y">✓</td></tr><tr><td>Yedek parça mağazası</td><td class="n">–</td><td class="n">–</td><td class="y">✓</td><td class="y">✓</td></tr><tr><td>Pazarlama araçları</td><td class="n">–</td><td class="n">–</td><td class="y">✓</td><td class="y">✓</td></tr><tr class="g"><th colspan="5">Kurumsal modüller</th></tr><tr><td>Periyodik bakım hatırlatma, garanti takibi</td><td class="n">–</td><td class="n">–</td><td class="n">–</td><td class="y">✓</td></tr><tr><td>Teklif ve müşteri onayı</td><td class="n">–</td><td class="n">–</td><td class="n">–</td><td class="y">✓</td></tr><tr><td>Ödeme linki ve e-arşiv fatura</td><td class="n">–</td><td class="n">–</td><td class="n">–</td><td class="y">✓</td></tr><tr><td>Müşteri portalı</td><td class="n">–</td><td class="n">–</td><td class="n">–</td><td class="y">✓</td></tr><tr><td>Canlı usta takibi, çevrimdışı işlem kuyruğu</td><td class="n">–</td><td class="n">–</td><td class="n">–</td><td class="y">✓</td></tr><tr><td>Bayi (B2B) modülü</td><td class="n">–</td><td class="n">–</td><td class="n">–</td><td class="y">✓</td></tr><tr><td>QR etiket, arayan numara</td><td class="n">–</td><td class="n">–</td><td class="n">–</td><td class="y">✓</td></tr><tr><td>Otomatik usta atama</td><td class="n">–</td><td class="n">–</td><td class="n">–</td><td class="y">✓</td></tr></tbody></table></div>
+</div></section>
+
+<section id="yolharitasi"><div class="wrap">
+<div class="kick rv">Yol haritası</div>
+<h2 class="rv">Sırada <em>neler</em> var.</h2>
+<p class="lead rv">Sektördeki servis firmalarının en çok sorduğu ve sisteme eklemeyi planladığımız özellikler.</p>
+<div class="rm rv">
+<div><span class="st">Planlanıyor</span><h3>Kargo ve gönderi takibi</h3><p>Merkeze gönderilen cihazların kargo kaydı ve durumu servis kaydına bağlanır.</p></div>
+<div><span class="st">Planlanıyor</span><h3>Demirbaş ve ekipman envanteri</h3><p>Ustalara zimmetli cihaz, alet ve ölçüm ekipmanı kayıt altına alınır.</p></div>
+<div><span class="st">Planlanıyor</span><h3>Cihaz test raporu</h3><p>Elektronik ve bilgisayar servislerinde kabulde ve teslimde test sonuçları forma işlenir.</p></div>
+<div><span class="st">Planlanıyor</span><h3>WhatsApp’tan servis talebi</h3><p>Müşteri WhatsApp’a yazar, talep panelde kayıt olarak açılır.</p></div>
+<div><span class="st">Planlanıyor</span><h3>Çağrı merkezi ekranı</h3><p>Gelen çağrılar, müşteri kartı ve açık işler tek ekranda görünür.</p></div>
+</div></div></section>
 
 <div class="dk" id="guvenlik"><div class="wrap">
 <div class="kick rv">Güvenlik ve yönetişim</div>
@@ -228,6 +291,11 @@ document.documentElement.classList.add('js');
 (function(){
 var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.15});
 document.querySelectorAll('.rv,#pr').forEach(function(n){io.observe(n)});
+
+var tabs=document.querySelectorAll('[role=tab]'),pans=document.querySelectorAll('.pkp');
+function pick(n){tabs.forEach(function(t,i){t.setAttribute('aria-selected',i===n)});pans.forEach(function(p,i){p.hidden=i!==n;if(i===n){p.style.animation='none';p.offsetHeight;p.style.animation='fade .5s var(--ease) both'}})}
+tabs.forEach(function(t,i){t.addEventListener('click',function(){pick(i)});t.addEventListener('keydown',function(e){if(e.key==='ArrowRight'||e.key==='ArrowLeft'){var n=(i+(e.key==='ArrowRight'?1:tabs.length-1))%tabs.length;pick(n);tabs[n].focus()}})});
+pick(1);
 var feed=document.getElementById('feed');
 var E=[["12:41","<b>Kemal</b> yola çıktı, müşteriye takip bağlantısı gitti."],["12:46","Yeni talep: <b>Karşıyaka</b>, kombi arıza. <i>Kayıt açıldı.</i>"],["12:47","Otomatik atama: <b>Hasan</b> seçildi."],["12:58","<b>Emre</b> işe başladı, öncesi fotoğraf eklendi."],["13:09","<b>Selin</b> keşfi tamamladı, teklif hazır."],["13:15","Müşteri onayı geldi: <b>Bornova</b>, klima bakımı."],["13:22","<b>Hasan</b> kapattı. <i>1.350 ₺ tahsil edildi.</i>"],["13:30","Yıllık bakımı yaklaşan <b>9 müşteri</b> için hatırlatma gitti."]];
 var i=0;
