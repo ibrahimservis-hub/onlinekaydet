@@ -2875,6 +2875,8 @@ import surum
 surum.register(api_router, db, {"require_admin": require_admin})
 import servis_ayar
 servis_ayar.setup(app, api_router, db, get_current_user, tenant)
+import demo
+demo.register(api_router, db, {"hash_password": hash_password})
 import domains
 import kurumsal as _kur
 domains.register(api_router, db, {"require_admin": require_admin, "get_current_user": get_current_user, "themes": _kur.THEMES})
