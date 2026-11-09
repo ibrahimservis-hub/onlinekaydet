@@ -515,8 +515,8 @@ def register(api_router, db, deps):
 
     # ------------------------------------------------------------ iyzico
     async def iyzico_call(path: str, body: dict) -> dict:
-        c = await cfg("iyzico")
-        if not (c.get("api_key") and c.get("secret_key")):
+        c = await shopmod.iyzico_keys(db)
+        if not c:
             raise HTTPException(status_code=400, detail="iyzico anahtarları girilmemiş")
         base = "https://sandbox-api.iyzipay.com" if str(c.get("sandbox", "1")) not in ("0", "false", "") else "https://api.iyzipay.com"
         raw = json.dumps(body, separators=(",", ":"), ensure_ascii=False)
@@ -533,15 +533,25 @@ def register(api_router, db, deps):
         except Exception:
             raise HTTPException(status_code=502, detail="iyzico yanıtı okunamadı")
 
+    async def call_iy(path: str, body: dict) -> dict:
+        return await (shopmod.IYZICO.get("call") or iyzico_call)(path, body)      # testlerde taklit edilebilsin
+
+    def site_origin(request: Request) -> str:
+        """Ödeme dönüşü, siparişin verildiği sitenin kendi alan adına yapılır (platform adresine değil)."""
+        host = (request.headers.get("x-forwarded-host") or request.headers.get("host") or "").split(",")[0].strip()
+        host = re.sub(r"[^A-Za-z0-9.:\-]", "", host)
+        return f"https://{host}" if host else ""
+
     @api_router.post("/public/shop/pay/iyzico/init")
     async def iyzico_init(p: PayInit, request: Request):
-        d = await modules_doc()
-        if not d["flags"]["iyzico"]:
-            raise HTTPException(status_code=403, detail="Kartla ödeme kapalı")
+        if not await shopmod.iyzico_keys(db):
+            raise HTTPException(status_code=403, detail="Kartla ödeme şu an kapalı")
         o = await db.shop_orders.find_one({"order_no": clean(p.order_no, 30).upper()}, {"_id": 0})
         if not o or shopmod.phone_key(p.phone) != o.get("phone_key"):
             raise HTTPException(status_code=404, detail="Sipariş bulunamadı")
-        if o["status"] not in ("odeme_bekliyor", "odeme_bildirildi"):
+        if (o.get("payment") or {}).get("method") != "kart":
+            raise HTTPException(status_code=409, detail="Bu sipariş kartla ödeme için oluşturulmadı")
+        if o["status"] != "odeme_bekliyor":
             raise HTTPException(status_code=409, detail="Bu sipariş için ödeme beklenmiyor")
         cu = o["customer"]
         fullname = cu["name"].split()
@@ -549,15 +559,20 @@ def register(api_router, db, deps):
         basket = [{"id": ln["product_id"], "name": ln["name"][:60], "category1": "Mağaza", "itemType": "PHYSICAL", "price": f"{ln['line_total']:.2f}"} for ln in o["items"]]
         if o.get("shipping"):
             basket.append({"id": "kargo", "name": "Kargo", "category1": "Kargo", "itemType": "PHYSICAL", "price": f"{o['shipping']:.2f}"})
+        if abs(sum(float(b["price"]) for b in basket) - float(o["total"])) > 0.01:
+            raise HTTPException(status_code=409, detail="Sipariş tutarı doğrulanamadı; lütfen yeni sipariş verin")
         total = f"{o['total']:.2f}"
+        origin = site_origin(request)
+        if not origin:
+            raise HTTPException(status_code=400, detail="Site adresi belirlenemedi")
         addr = {"contactName": cu["name"], "city": cu.get("city") or "Ankara", "country": "Turkey", "address": cu.get("address") or "Adres"}
         body = {"locale": "tr", "conversationId": o["order_no"], "price": total, "paidPrice": total, "currency": "TRY", "basketId": o["order_no"], "paymentGroup": "PRODUCT",
-                "callbackUrl": f"{PANEL_URL}/api/public/shop/pay/iyzico/callback", "enabledInstallments": [1, 2, 3, 6, 9],
+                "callbackUrl": f"{origin}/api/public/shop/pay/iyzico/callback", "enabledInstallments": [1, 2, 3, 6, 9],
                 "buyer": {"id": o["id"][:20], "name": fullname[0] if fullname else "Müşteri", "surname": " ".join(fullname[1:]) or "-",
-                          "gsmNumber": "+90" + shopmod.phone_key(cu["phone"]), "email": cu.get("email") or "musteri@servisplus.net.tr", "identityNumber": "11111111111",
+                          "gsmNumber": "+90" + shopmod.phone_key(cu["phone"]), "email": cu.get("email") or "", "identityNumber": "11111111111",
                           "registrationAddress": addr["address"], "ip": ip, "city": addr["city"], "country": "Turkey"},
                 "shippingAddress": addr, "billingAddress": addr, "basketItems": basket}
-        res = await iyzico_call("/payment/iyzipos/checkoutform/initialize/auth/ecom", body)
+        res = await call_iy("/payment/iyzipos/checkoutform/initialize/auth/ecom", body)
         if res.get("status") != "success":
             raise HTTPException(status_code=502, detail=res.get("errorMessage") or "iyzico ödeme formu açılamadı")
         await db.shop_orders.update_one({"id": o["id"]}, {"$set": {"iyzico_token": res.get("token")}})
@@ -565,18 +580,40 @@ def register(api_router, db, deps):
 
     @api_router.post("/public/shop/pay/iyzico/callback")
     async def iyzico_callback(request: Request):
+        origin = site_origin(request)
+        back = lambda q: RedirectResponse(f"{origin}/?{q}#magaza", status_code=303)      # noqa: E731
         form = await request.form()
         token = str(form.get("token") or "")
         o = await db.shop_orders.find_one({"iyzico_token": token}, {"_id": 0}) if token else None
         if not o:
-            return RedirectResponse(f"{PUBLIC_SITE}/magaza/?odeme=hata", status_code=303)
-        res = await iyzico_call("/payment/iyzipos/checkoutform/auth/ecom/detail", {"locale": "tr", "conversationId": o["order_no"], "token": token})
+            return back("odeme=hata")
+        res = await call_iy("/payment/iyzipos/checkoutform/auth/ecom/detail", {"locale": "tr", "conversationId": o["order_no"], "token": token})
         ok = res.get("status") == "success" and res.get("paymentStatus") == "SUCCESS"
-        if ok and o["status"] in ("odeme_bekliyor", "odeme_bildirildi"):
-            await db.shop_orders.update_one({"id": o["id"]}, {"$set": {"status": "onaylandi", "updated_at": now_iso(),
-                                                                       "payment": {"method": "kart", "provider": "iyzico", "payment_id": res.get("paymentId"), "amount": o["total"], "at": now_iso()}},
-                                                              "$push": {"history": {"status": "onaylandi", "at": now_iso(), "by": "iyzico"}}})
-        return RedirectResponse(f"{PUBLIC_SITE}/magaza/?odeme={'ok' if ok else 'hata'}&no={o['order_no']}", status_code=303)
+        if ok:
+            try:
+                paid = round(float(res.get("paidPrice") or 0), 2)
+            except (TypeError, ValueError):
+                paid = 0.0
+            if abs(paid - float(o["total"])) > 0.01 or str(res.get("currency", "TRY")) != "TRY" or str(res.get("basketId", o["order_no"])) != o["order_no"]:
+                await db.shop_orders.update_one({"id": o["id"]}, {"$set": {"flag": "odeme_tutar_uyusmazligi", "updated_at": now_iso(),
+                    "payment": {**(o.get("payment") or {}), "status": "uyusmazlik", "provider": "iyzico", "payment_id": res.get("paymentId"), "paid": paid}}})
+                try:
+                    await shopmod.notify.notify_owner_t(db, f"DİKKAT: {o['order_no']} iyzico tutarı uyuşmuyor (sipariş {o['total']} / ödenen {paid}). Elle kontrol edin.", kind="shop_payment")
+                except Exception:                      # noqa: BLE001
+                    pass
+                return back(f"odeme=kontrol&no={o['order_no']}")
+            # tek seferlik geçiş: aynı geri dönüş iki kez gelse de sipariş bir kez onaylanır
+            r = await db.shop_orders.update_one({"id": o["id"], "status": "odeme_bekliyor"}, {"$set": {"status": "onaylandi", "updated_at": now_iso(),
+                "payment": {**(o.get("payment") or {}), "method": "kart", "status": "odendi", "provider": "iyzico", "payment_id": res.get("paymentId"), "amount": o["total"], "at": now_iso()}},
+                "$push": {"history": {"status": "onaylandi", "at": now_iso(), "by": "iyzico"}}})
+            if not r.modified_count and o["status"] == "iptal":
+                # ödeme süresi dolup stok bırakılmışken para geldi: sipariş iptal kalmaz, elle ilgilenilsin
+                await db.shop_orders.update_one({"id": o["id"]}, {"$set": {"flag": "iptal_siparise_odeme_geldi", "updated_at": now_iso()}})
+                try:
+                    await shopmod.notify.notify_owner_t(db, f"DİKKAT: {o['order_no']} iptal edilmişti ama kartla ödeme geldi. Müşteriyle görüşün veya iade edin.", kind="shop_payment")
+                except Exception:                      # noqa: BLE001
+                    pass
+        return back(f"odeme={'ok' if ok else 'hata'}&no={o['order_no']}")
 
     @api_router.post("/admin/payments/iyzico/test")
     async def iyzico_test(_: dict = adm):

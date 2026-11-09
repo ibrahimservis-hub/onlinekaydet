@@ -509,9 +509,10 @@ def edit_texts(html, ed):
 
 def footer_links(ctx, idx):
     links = ['<a href="/%s">%s</a>' % (x["slug"], E(x["title"])) for x in idx if x["kind"] in ("about", "services", "gallery", "process", "faq", "regions", "contact", "custom")]
-    if not links and not social_urls(ctx):
+    legal = ['<a href="/%s">%s</a>' % (k, E(t)) for k, t in (ctx.get("legal") or [])]       # mağaza açıksa yasal metinler (mevzuat gereği her sayfadan erişilebilir)
+    if not links and not legal and not social_urls(ctx):
         return ""
-    return '<div class="w spx-fl">%s%s</div>' % ("".join(links), social_html(ctx))
+    return '<div class="w spx-fl">%s%s</div>%s' % ("".join(links), social_html(ctx), ('<div class="w spx-fl spx-lg">%s</div>' % "".join(legal)) if legal else "")
 
 
 _PH = "{{H}}"

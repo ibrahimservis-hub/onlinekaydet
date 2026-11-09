@@ -16,6 +16,8 @@ from datetime import datetime, timezone
 from fastapi import Depends, HTTPException, Request
 from fastapi.responses import HTMLResponse, Response
 
+import shop as shopmod
+import shop_legal
 import sitegen
 import tenant
 
@@ -119,7 +121,9 @@ def register(api_router, db, deps):
                 imgs[r["_id"]] = "data:%s;base64,%s" % (r.get("mime") or "image/jpeg", base64.b64encode(bytes(r["data"])).decode())
         lg = (await db.app_settings.find_one({"_id": "firm_logo"}, {"_id": 0}) or {}).get("data") or ""
         logo = lg if inline else (("/api/public/site-logo?v=" + hashlib.sha1(lg.encode()).hexdigest()[:8]) if lg else "")
-        return {"th": th, "name": name, "tel": tel, "p": p, "sector": sector, "logo": logo, "city": prof.get("city") or "",
+        feats = await db.app_settings.find_one({"_id": "site_features"}, {"_id": 0}) or {}
+        legal = list(shop_legal.SLUGS) if feats.get("shop_enabled") else []
+        return {"th": th, "name": name, "tel": tel, "p": p, "sector": sector, "logo": logo, "city": prof.get("city") or "", "legal": legal,
                 "img": (lambda k: imgs.get(k, "")) if inline else (lambda k: "/api/public/site-img/" + k),
                 "logo_abs": "/api/public/site-logo" if lg else ""}
 
@@ -489,6 +493,13 @@ def register(api_router, db, deps):
             return None
         if p in ("", "index"):
             h = home
+        elif p in shop_legal.TITLES and ctx and ctx.get("legal"):
+            sc = await db.app_settings.find_one({"_id": "shop_settings"}, {"_id": 0}) or {}
+            cfg = {**shopmod.SHOP_DEFAULT, **sc}
+            body = shop_legal.page(p, shopmod.merge_legal(cfg.get("legal")), cfg, cfg.get("legal_docs"), str(cfg.get("updated_at") or ""))
+            h = compose_page(await themed_home(ctx), shop_legal.TITLES[p] + " · " + ctx["name"], body)
+            if not h:
+                return None
         else:
             pg = next((x for x in d.get("pages", []) if x["slug"] == p), None)
             if pg:

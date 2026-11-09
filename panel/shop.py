@@ -5,6 +5,8 @@
 - Müşteri hesabı: telefon + şifre ile basit üyelik; servis geçmişi, cihazlar, siparişler
 """
 import builtins
+import copy
+import hashlib
 import re
 import secrets
 import time
@@ -16,6 +18,7 @@ import jwt
 from fastapi import Depends, HTTPException, Request
 
 import notify
+import shop_legal
 
 CUSTOMER_TOKEN_DAYS = 30
 
@@ -45,11 +48,35 @@ SHOP_DEFAULT = {
     "terms": "Siparişiniz, ödemenin hesabımıza ulaşmasının ardından hazırlanır. Teslimat ve iade koşulları için bizimle iletişime geçebilirsiniz.",
     "contact_phone": "0544 444 4 004",
     "order_prefix": "SP",
+    "payments": {},                # bkz. PAY_DEFAULT (yöntem başına açık/kapalı, kapıda ücreti)
+    "cod_max_total": 0.0,          # kapıda ödeme için sepet üst sınırı (0 = sınırsız)
+    "min_order": 0.0,              # en az sepet tutarı (0 = yok)
+    "card_hold_minutes": 60,       # kartla ödemesi tamamlanmayan siparişin stok tutma süresi
+    "havale_hold_hours": 72,       # havalesi gelmeyen siparişin stok tutma süresi
+    "legal": {},                   # bkz. LEGAL_DEFAULT (satıcı bilgileri: yasal metinlerde kullanılır)
+    "legal_docs": {},              # {slug: {"html": özel metin}} — boşsa otomatik metin kullanılır
 }
+
+PAY_DEFAULT = {
+    "havale": {"enabled": True, "fee": 0.0},
+    "kapida_nakit": {"enabled": False, "fee": 0.0},
+    "kapida_kart": {"enabled": False, "fee": 0.0},
+    "kart": {"enabled": False, "fee": 0.0},      # iyzico ile kartla ödeme (anahtarlar girilmeden açılamaz)
+}
+PAY_LABELS = {
+    "havale": ("Havale / EFT", "Sipariş numaranızı açıklamaya yazarak ödersiniz. Ödeme hesabımıza ulaşınca siparişiniz hazırlanır."),
+    "kapida_nakit": ("Kapıda nakit ödeme", "Ürün teslim edilirken kuryeye nakit ödersiniz."),
+    "kapida_kart": ("Kapıda kredi kartı ile ödeme", "Kurye taşınabilir POS cihazıyla gelir; kartınızı teslimatta kullanırsınız."),
+    "kart": ("Kredi / banka kartı", "Güvenli ödeme sayfasında 3D Secure ile ödersiniz. Kart bilgileriniz bu sitede saklanmaz."),
+}
+COD_METHODS = ("kapida_nakit", "kapida_kart")
+LEGAL_DEFAULT = {"seller_title": "", "tax_office": "", "tax_no": "", "mersis": "", "kep": "", "address": "", "email": "", "phone": "",
+                 "return_days": 14, "delivery_days": "1-3 iş günü", "carrier": "", "return_shipping": "alici", "return_address": ""}
 
 ORDER_STATUSES = ["odeme_bekliyor", "odeme_bildirildi", "onaylandi", "hazirlaniyor", "kargoda", "teslim_edildi", "iptal"]
 
 _hits = {}
+IYZICO = {"call": None}          # testlerde iyzico çağrısı taklit edilir
 
 
 def _now() -> str:
@@ -65,6 +92,34 @@ def _f(v, d=0.0):
         return float(v)
     except (TypeError, ValueError):
         return d
+
+
+def merge_pay(raw) -> dict:
+    out = copy.deepcopy(PAY_DEFAULT)
+    for k, v in (raw or {}).items():
+        if k in out and isinstance(v, dict):
+            out[k]["enabled"] = bool(v.get("enabled", out[k]["enabled"]))
+            out[k]["fee"] = max(0.0, round(_f(v.get("fee", out[k]["fee"])), 2))
+    return out
+
+
+def merge_legal(raw) -> dict:
+    out = dict(LEGAL_DEFAULT)
+    for k, v in (raw or {}).items():
+        if k in out:
+            out[k] = v
+    return out
+
+
+async def iyzico_keys(db) -> dict:
+    """Firmanın iyzico anahtarları: Aç/Kapat → iyzico ya da Entegrasyonlar → ödeme (aynı kural kurumsal ödeme linkiyle)."""
+    d = await db.app_settings.find_one({"_id": "sp_modules"}, {"_id": 0}) or {}
+    c = dict((d.get("config") or {}).get("iyzico", {}) or {})
+    if not (c.get("api_key") and c.get("secret_key")):
+        ig = (await db.app_settings.find_one({"_id": "integrations"}, {"_id": 0}) or {}).get("payment") or {}
+        if ig.get("provider") == "iyzico" and ig.get("api_key") and ig.get("secret"):
+            c = {"api_key": ig["api_key"], "secret_key": ig["secret"], "sandbox": str(ig.get("sandbox", "0"))}
+    return c if (c.get("api_key") and c.get("secret_key")) else {}
 
 
 def phone_key(p: str) -> str:
@@ -171,7 +226,43 @@ def register(api_router, db, deps):
         return await get_doc("site_features", FEATURES_DEFAULT)
 
     async def shop_cfg():
-        return await get_doc("shop_settings", SHOP_DEFAULT)
+        d = await get_doc("shop_settings", SHOP_DEFAULT)
+        d["payments"] = merge_pay(d.get("payments"))
+        d["legal"] = merge_legal(d.get("legal"))
+        return d
+
+    async def card_ready() -> bool:
+        return bool(await iyzico_keys(db))
+
+    async def methods_public(cfg: dict) -> list:
+        """Müşteriye gösterilecek ödeme yöntemleri (kapalı olanlar ve anahtarı eksik kart hiç görünmez)."""
+        out = []
+        ready = await card_ready()
+        for k in ("kart", "kapida_nakit", "kapida_kart", "havale"):
+            m = cfg["payments"][k]
+            if not m["enabled"] or (k == "kart" and not ready):
+                continue
+            if k == "havale" and not cfg.get("bank_accounts"):
+                continue                      # IBAN girilmeden havale gösterilmez
+            lbl, desc = PAY_LABELS[k]
+            out.append({"id": k, "label": lbl, "desc": desc, "fee": m["fee"] if k in COD_METHODS else 0.0})
+        return out
+
+    async def expire_unpaid():
+        """Ödemesi gelmeyen siparişlerin stoğunu serbest bırakır (kart: dakika, havale: saat)."""
+        cfg = await shop_cfg()
+        now = datetime.now(timezone.utc)
+        lim_c = (now - timedelta(minutes=max(15, int(_f(cfg.get("card_hold_minutes"), 60))))).isoformat()
+        lim_h = (now - timedelta(hours=max(1, int(_f(cfg.get("havale_hold_hours"), 72))))).isoformat()
+        rows = await db.shop_orders.find({"status": "odeme_bekliyor", "$or": [
+            {"payment.method": "kart", "created_at": {"$lt": lim_c}},
+            {"payment.method": "havale", "created_at": {"$lt": lim_h}}]}, {"_id": 0}).to_list(200)
+        for o in rows:
+            r = await db.shop_orders.update_one({"id": o["id"], "status": "odeme_bekliyor"}, {"$set": {"status": "iptal", "updated_at": _now()},
+                "$push": {"history": {"status": "iptal", "at": _now(), "by": "sistem", "note": "ödeme süresi doldu"}}})
+            if r.modified_count:
+                await restock(o)
+        return len(rows)
 
     def cust_token(acc: dict) -> str:
         return jwt.encode({"sub": acc["id"], "typ": "customer", "exp": datetime.now(timezone.utc) + timedelta(days=CUSTOMER_TOKEN_DAYS)},
@@ -274,6 +365,30 @@ def register(api_router, db, deps):
         for k in ("shipping_fee", "free_shipping_over"):
             if k in payload:
                 cur[k] = max(0.0, round(_f(payload[k]), 2))
+        for k in ("cod_max_total", "min_order"):
+            if k in payload:
+                cur[k] = max(0.0, round(_f(payload[k]), 2))
+        if "card_hold_minutes" in payload:
+            cur["card_hold_minutes"] = int(builtins.min(1440, builtins.max(15, _f(payload["card_hold_minutes"], 60))))
+        if "havale_hold_hours" in payload:
+            cur["havale_hold_hours"] = int(builtins.min(720, builtins.max(1, _f(payload["havale_hold_hours"], 72))))
+        if isinstance(payload.get("payments"), dict):
+            pm = merge_pay({**cur.get("payments", {}), **{k: {**cur["payments"].get(k, {}), **v} for k, v in payload["payments"].items() if isinstance(v, dict)}})
+            if pm["kart"]["enabled"] and not await card_ready():
+                raise HTTPException(422, "Kartla ödemeyi açmak için önce iyzico anahtarlarını girin (Entegrasyonlar → Ödeme).")
+            if pm["havale"]["enabled"] and not (payload.get("bank_accounts") or cur.get("bank_accounts")):
+                raise HTTPException(422, "Havale / EFT için en az bir banka hesabı ekleyin.")
+            if not any(m["enabled"] for m in pm.values()):
+                raise HTTPException(422, "En az bir ödeme yöntemi açık olmalı.")
+            cur["payments"] = pm
+        if isinstance(payload.get("legal"), dict):
+            lg = merge_legal({**cur.get("legal", {}), **payload["legal"]})
+            for k in ("seller_title", "tax_office", "tax_no", "mersis", "kep", "address", "email", "phone", "carrier", "return_address", "delivery_days"):
+                lg[k] = str(lg.get(k) or "").strip()[:300]
+            lg["return_days"] = int(builtins.min(60, builtins.max(14, _f(lg.get("return_days"), 14))))
+            lg["return_shipping"] = "satici" if lg.get("return_shipping") == "satici" else "alici"
+            cur["legal"] = lg
+        cur["updated_at"] = _now()
         if isinstance(payload.get("bank_accounts"), list):
             accs = []
             for b in payload["bank_accounts"][:8]:
@@ -337,12 +452,15 @@ def register(api_router, db, deps):
 
     @api_router.get("/shop/summary")
     async def shop_summary(_: dict = Depends(require_admin)):
-        rows = await db.shop_orders.find({}, {"_id": 0, "status": 1, "total": 1}).to_list(20000)
+        await expire_unpaid()
+        rows = await db.shop_orders.find({}, {"_id": 0, "status": 1, "total": 1, "payment": 1}).to_list(20000)
         cnt = {}
         for r in rows:
             cnt[r["status"]] = cnt.get(r["status"], 0) + 1
-        paid = sum(r["total"] for r in rows if r["status"] in ("onaylandi", "hazirlaniyor", "kargoda", "teslim_edildi"))
-        return {"counts": cnt, "revenue": round(paid, 2), "waiting_payment": cnt.get("odeme_bekliyor", 0) + cnt.get("odeme_bildirildi", 0),
+        paid = sum(r["total"] for r in rows if r["status"] in ("onaylandi", "hazirlaniyor", "kargoda", "teslim_edildi")
+                   and (r.get("payment") or {}).get("status") != "kapida_tahsil")
+        cod_wait = sum(r["total"] for r in rows if (r.get("payment") or {}).get("status") == "kapida_tahsil" and r["status"] in ("onaylandi", "hazirlaniyor", "kargoda"))
+        return {"counts": cnt, "revenue": round(paid, 2), "cod_pending": round(cod_wait, 2), "waiting_payment": cnt.get("odeme_bekliyor", 0) + cnt.get("odeme_bildirildi", 0),
                 "products": await db.shop_products.count_documents({"active": True})}
 
     async def restock(order):
@@ -625,8 +743,49 @@ def register(api_router, db, deps):
     async def pub_shop_info():
         await require_shop()
         s = await shop_cfg()
+        lg = s["legal"]
         return {"title": s["title"], "subtitle": s["subtitle"], "shipping_fee": s["shipping_fee"], "free_shipping_over": s["free_shipping_over"],
-                "terms": s["terms"], "contact_phone": s["contact_phone"], "payment_note": s["payment_note"]}
+                "terms": s["terms"], "contact_phone": s["contact_phone"] or lg.get("phone", ""), "payment_note": s["payment_note"],
+                "payment_methods": await methods_public(s), "cod_max_total": s["cod_max_total"], "min_order": s["min_order"],
+                "legal_docs": [{"slug": k, "title": t, "checkout": k in shop_legal.CHECKOUT_DOCS} for k, t in shop_legal.SLUGS]}
+
+    # ------------------------------------------------------------------ yasal metinler
+    @api_router.get("/public/shop/legal/{slug}")
+    async def pub_legal(slug: str):
+        await require_shop()
+        if slug not in shop_legal.TITLES:
+            raise HTTPException(404, "Metin bulunamadı")
+        cfg = await shop_cfg()
+        return {"slug": slug, "title": shop_legal.TITLES[slug], "html": shop_legal.page(slug, cfg["legal"], cfg, cfg.get("legal_docs"), cfg.get("updated_at", ""))}
+
+    @api_router.get("/shop/legal")
+    async def admin_legal(_: dict = Depends(require_admin)):
+        cfg = await shop_cfg()
+        docs = []
+        for k, t in shop_legal.SLUGS:
+            c = (cfg.get("legal_docs") or {}).get(k) or {}
+            docs.append({"slug": k, "title": t, "custom": bool(c.get("html")), "html": shop_legal.doc_html(k, cfg["legal"], cfg, cfg.get("legal_docs")),
+                         "default_html": shop_legal.default_html(k, cfg["legal"], cfg), "checkout": k in shop_legal.CHECKOUT_DOCS})
+        return {"legal": cfg["legal"], "missing": shop_legal.missing_fields(cfg["legal"]), "docs": docs,
+                "notice": "Bu metinler genel şablondur; hukuki danışman onayı önerilir."}
+
+    @api_router.put("/shop/legal/{slug}")
+    async def admin_legal_put(slug: str, payload: dict, _: dict = Depends(require_admin)):
+        if slug not in shop_legal.TITLES:
+            raise HTTPException(404, "Metin bulunamadı")
+        cfg = await shop_cfg()
+        docs = dict(cfg.get("legal_docs") or {})
+        if payload.get("reset"):
+            docs.pop(slug, None)
+        else:
+            h = str(payload.get("html", ""))[:60000]
+            if len(re.sub(r"<[^>]+>", "", h).strip()) < 40:
+                raise HTTPException(422, "Metin çok kısa")
+            if re.search(r"<\s*(script|iframe|object|embed)|\bon\w+\s*=|javascript:", h, re.I):
+                raise HTTPException(422, "Metinde betik veya gömülü içerik olamaz")
+            docs[slug] = {"html": h, "at": _now()}
+        await db.app_settings.update_one({"_id": "shop_settings"}, {"$set": {"legal_docs": docs, "updated_at": _now()}}, upsert=True)
+        return {"ok": True}
 
     async def next_order_no(prefix):
         n = await db.shop_orders.count_documents({})
@@ -655,7 +814,16 @@ def register(api_router, db, deps):
         if len(address) < 8:
             raise HTTPException(422, "Teslimat adresi gerekli")
         if not payload.get("accept_terms"):
-            raise HTTPException(422, "Satış koşullarını kabul etmelisiniz")
+            raise HTTPException(422, "Mesafeli satış sözleşmesi ve ön bilgilendirme formunu kabul etmelisiniz")
+        await expire_unpaid()
+        cfg = await shop_cfg()
+        avail = {m["id"]: m for m in await methods_public(cfg)}
+        pm_id = str(payload.get("payment_method") or "").strip()
+        if pm_id not in avail:
+            raise HTTPException(422, "Seçtiğiniz ödeme yöntemi şu an kullanılamıyor. Lütfen başka bir yöntem seçin.")
+        email = str(cu.get("email", "")).strip()[:120]
+        if pm_id == "kart" and not re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", email):
+            raise HTTPException(422, "Kartla ödeme için geçerli bir e-posta adresi gerekli")
         items_in = payload.get("items") or []
         if not isinstance(items_in, list) or not items_in:
             raise HTTPException(422, "Sepetiniz boş")
@@ -671,9 +839,13 @@ def register(api_router, db, deps):
             subtotal += line
             items.append({"product_id": p["id"], "name": p["name"], "brand": p.get("brand", ""), "model": p.get("model", ""), "price": p["price"],
                           "qty": qty, "line_total": line, "image": (p.get("images") or [""])[0]})
-        cfg = await shop_cfg()
         shipping = 0.0 if (cfg["free_shipping_over"] and subtotal >= cfg["free_shipping_over"]) else float(cfg["shipping_fee"] or 0)
-        total = round(subtotal + shipping, 2)
+        if cfg["min_order"] and subtotal < cfg["min_order"]:
+            raise HTTPException(422, "Minimum sipariş tutarı %.2f TL" % cfg["min_order"])
+        cod_fee = float(avail[pm_id]["fee"]) if pm_id in COD_METHODS else 0.0
+        total = round(subtotal + shipping + cod_fee, 2)
+        if pm_id in COD_METHODS and cfg["cod_max_total"] and total > cfg["cod_max_total"]:
+            raise HTTPException(422, "Kapıda ödeme en fazla %.2f TL'lik siparişlerde kullanılabilir. Lütfen kart veya havale seçin." % cfg["cod_max_total"])
         # stok düş (koşullu: yarışta eksiye düşmesin)
         done = []
         for it in items:
@@ -686,20 +858,26 @@ def register(api_router, db, deps):
             done.append(it)
         acc = acc0
         order = {
-            "id": _id(), "order_no": await next_order_no(cfg["order_prefix"] or "SP"), "status": "odeme_bekliyor",
-            "customer": {"name": name, "phone": phone, "email": str(cu.get("email", "")).strip()[:120], "city": str(cu.get("city", "")).strip()[:60],
+            "id": _id(), "order_no": await next_order_no(cfg["order_prefix"] or "SP"), "status": "onaylandi" if pm_id in COD_METHODS else "odeme_bekliyor",
+            "customer": {"name": name, "phone": phone, "email": email, "city": str(cu.get("city", "")).strip()[:60],
                          "district": str(cu.get("district", "")).strip()[:60], "address": address},
-            "note": str(payload.get("note", "")).strip()[:500], "items": items, "subtotal": round(subtotal, 2), "shipping": shipping, "total": total,
-            "account_id": acc["id"] if acc else "", "phone_key": phone_key(phone), "payment": {}, "admin_note": "", "tracking_no": "", "carrier": "",
-            "history": [{"status": "odeme_bekliyor", "at": _now()}], "created_at": _now(), "updated_at": _now(),
+            "note": str(payload.get("note", "")).strip()[:500], "items": items, "subtotal": round(subtotal, 2), "shipping": shipping, "cod_fee": cod_fee, "total": total,
+            "account_id": acc["id"] if acc else "", "phone_key": phone_key(phone), "admin_note": "", "tracking_no": "", "carrier": "",
+            "payment": {"method": pm_id, "label": avail[pm_id]["label"], "status": "kapida_tahsil" if pm_id in COD_METHODS else "bekliyor", "amount": total},
+            "consent": {"terms": True, "at": _now(), "ip": client_ip(request), "docs": shop_legal.CHECKOUT_DOCS,
+                        "version": shop_legal.version(cfg["legal"], cfg, cfg.get("legal_docs"))},
+            "created_at": _now(), "updated_at": _now(),
         }
+        order["history"] = [{"status": order["status"], "at": _now(), "note": avail[pm_id]["label"]}]
         await db.shop_orders.insert_one(dict(order))
         try:
             await notify.notify_owner_t(db, f"Yeni mağaza siparişi {order['order_no']}: {name} · {total:.2f} TL", kind="shop_order")
         except Exception:      # noqa: BLE001
             pass
-        return {"ok": True, "order_no": order["order_no"], "total": total, "shipping": shipping, "subtotal": order["subtotal"],
-                "bank_accounts": cfg["bank_accounts"], "payment_note": cfg["payment_note"], "contact_phone": cfg["contact_phone"]}
+        return {"ok": True, "order_no": order["order_no"], "total": total, "shipping": shipping, "subtotal": order["subtotal"], "cod_fee": cod_fee,
+                "payment_method": pm_id, "next": "iyzico" if pm_id == "kart" else ("havale" if pm_id == "havale" else "kapida"),
+                "bank_accounts": cfg["bank_accounts"] if pm_id == "havale" else [], "payment_note": cfg["payment_note"] if pm_id == "havale" else "",
+                "contact_phone": cfg["contact_phone"]}
 
     @api_router.get("/public/shop/orders/{order_no}")
     async def pub_order(order_no: str, phone: str, request: Request):
