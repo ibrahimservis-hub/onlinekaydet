@@ -2717,7 +2717,7 @@ async def _setup_schema():
 
 @app.on_event("startup")
 async def _reap_later():
-    if os.environ.get("REAP_STALE", "1") == "0":
+    if os.environ.get("REAP_STALE", "0") != "1":
         return
     await asyncio.sleep(30)
     try:
