@@ -47,8 +47,8 @@ with TestClient(s.app) as c:
     t("marka işareti ve noindex duruyor", g)
     def h():
         r = c.get("/api/brand/site/07-kombi-kizil", headers=S["x"]); assert r.status_code == 200
-        assert "__PORTAL_URL__" not in r.text and "/portal/" in r.text and r.text.count("~giris") >= 1
+        assert "__PORTAL_URL__" not in r.text and "Müşteri girişi" not in r.text
         assert c.get("/api/brand/site/..%2f..%2fetc", headers=S["x"]).status_code == 404
-    t("tema sayfasında portal bağlantısı firmaya özel doldurulur", h)
+    t("tema sayfasında yer tutucu kalmaz, 'Müşteri girişi' etiketi eklenmez", h)
 print(f"GEÇTİ {len(ok)}/{len(ok)+len(bad)}")
 for a in bad: print("BAŞARISIZ", a)
