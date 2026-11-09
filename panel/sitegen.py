@@ -319,7 +319,7 @@ _HOURS = re.compile(r"Hafta içi 08:30 ?[–-] ?19:00")
 
 
 def _off(m):
-    t = m.group(0)
+    t = m.group(0).replace("905320000000", "")
     return t.replace('class="', 'class="spx-off ', 1) if 'class="' in t else t[:-1] + ' class="spx-off">'
 
 
@@ -341,16 +341,17 @@ def apply_profile(raw, th, ctx):
         h = re.sub(r'<a\b[^>]*tel:\+?905320000000[^>]*>', _off, h)
         h = re.sub(r"\s*[·•|-]?\s*0532 000 00 00", "", h)
     h = h.replace("<br>Vergi No: [firma bilgisi]", "").replace("Vergi No: [firma bilgisi]", "")
+    hours = ctx["p"].get("hours") or ""
+    _hv = (lambda m: E(hours)) if hours else (lambda m: "")
+    h = re.sub(r"<div>Cumartesi 09:00 ?[–-] ?17:00</div>|<div>Acil: 7/24</div>", "", h)
+    for rx in (r"Hafta içi 08:30 ?[–-] ?19:00, cumartesi 09:00 ?[–-] ?17:00\. Acil çağrılar için 7/24 arayın\.",
+               r"Hafta içi 08:30 ?[–-] ?19:00 · Cumartesi 09:00 ?[–-] ?17:00",
+               r"Pzt[–-]Cmt 08:30[–-]19:00(?: · Acil için 7/24 arayın)?",
+               r"Hafta içi 08:30 ?[–-] ?19:00"):
+        h = re.sub((r"(?: · )?" if not hours else "") + rx, _hv, h)
+    h = h.replace("Şu an arama alıyoruz · 7/24 acil hat", "Şu an arama alıyoruz")
     adr = ctx["p"].get("address") or ""
     h = _ADDR.sub(lambda m: (E(adr) + (" · " if m.group(0).endswith(" · ") else "")) if adr else "", h)
-    hours = ctx["p"].get("hours") or ""
-    h = re.sub(r"<div>Cumartesi 09:00 ?[–-] ?17:00</div>|<div>Acil: 7/24</div>", "", h)
-    h = re.sub(r"Pzt[–-]Cmt 08:30[–-]19:00(?: · Acil için 7/24 arayın)?", lambda m: E(hours), h)
-    if hours:
-        h = _HOURS.sub(lambda m: E(hours), h)
-    else:
-        h = re.sub(r"<div>Hafta içi 08:30 ?[–-] ?19:00</div>", "", h)
-        h = re.sub(r"(?: · )?Hafta içi 08:30 ?[–-] ?19:00", "", h)
     if ctx.get("logo"):
         img = '<img class="spx-logo" src="%s" alt="%s">' % (E(ctx["logo"]), E(name))
         h = re.sub(r'(<(?:a|div) class="lg[^"]*"[^>]*>)<span class="lm[^"]*">[^<]*</span>', lambda m: m.group(1) + img, h)

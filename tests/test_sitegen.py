@@ -134,7 +134,7 @@ with TestClient(s.app) as c:
         d.update({"whatsapp": "", "address": "", "hours": ""})
         assert c.put("/api/site/profile", headers=H, json=d).status_code == 200
         r = pub("/").text
-        for bad_ in ["Atatürk Cad", "Hafta içi 08:30", "Vergi No: [firma bilgisi]", "Acil: 7/24", "Pzt–Cmt 08:30"]:
+        for bad_ in ["Atatürk Cad", "Hafta içi 08:30", "Vergi No: [firma bilgisi]", "Acil: 7/24", "Pzt–Cmt 08:30", "Cumartesi", "cumartesi", "7/24", "0532 000"]:
             assert bad_ not in r, bad_
         r2 = pub("/iletisim").text
         assert "Atatürk Cad" not in r2 and "Hafta içi 08:30" not in r2
