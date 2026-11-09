@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="tr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>OnlineKaydet: servis kaydı, usta ve tahsilat tek panelde</title>
+<meta name="description" content="Servis kaydı, usta takibi, tahsilat ve hazır web siteniz tek panelde. Kombi, klima, beyaz eşya ve diğer teknik servisler için.">
+<link rel="icon" href="favicon.ico">
+<link rel="preload" href="fonts/red-hat-display-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+@font-face{font-family:"RHD";src:url(fonts/red-hat-display-latin-600-normal.woff2) format("woff2");font-weight:600;font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215}
+@font-face{font-family:"RHD";src:url(fonts/red-hat-display-latin-ext-600-normal.woff2) format("woff2");font-weight:600;font-display:swap;unicode-range:U+0100-02AF,U+0304,U+0308,U+0329,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20CF,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:"RHT";src:url(fonts/red-hat-text-latin-400-normal.woff2) format("woff2");font-weight:400;font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215}
+@font-face{font-family:"RHT";src:url(fonts/red-hat-text-latin-ext-400-normal.woff2) format("woff2");font-weight:400;font-display:swap;unicode-range:U+0100-02AF,U+0304,U+0308,U+0329,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20CF,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:"RHT";src:url(fonts/red-hat-text-latin-500-normal.woff2) format("woff2");font-weight:500;font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215}
+@font-face{font-family:"RHT";src:url(fonts/red-hat-text-latin-ext-500-normal.woff2) format("woff2");font-weight:500;font-display:swap;unicode-range:U+0100-02AF,U+0304,U+0308,U+0329,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20CF,U+2113,U+2C60-2C7F,U+A720-A7FF}
+:root{--navy:#0f1f46;--navy2:#1a2d5f;--or:#f27a1a;--or-d:#c95f0a;--ink:#14213d;--mut:#55627f;--line:#d9dde6;--bg:#f4f5f8;--card:#fff;--ok:#12713e;--okbg:#e3f4ea;--blue:#1d4ed8;--bluebg:#e6edfd;--red:#b3261e;--redbg:#fdeaea;
+--ease:cubic-bezier(.2,.7,.2,1);--fd:"RHD",system-ui,sans-serif;--ft:"RHT",system-ui,sans-serif}
+*{box-sizing:border-box;margin:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font:400 17px/1.55 var(--ft)}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:3px solid var(--or);outline-offset:3px;border-radius:4px}
+.wrap{max-width:1240px;margin:0 auto;padding:0 28px}
+/* top */
+.top{position:sticky;top:0;z-index:20;background:#fffffff2;border-bottom:1px solid var(--line);backdrop-filter:none}
+.top .wrap{display:flex;align-items:center;gap:30px;height:64px}
+.top img{height:32px;display:block}
+.top nav{display:flex;gap:26px;margin-left:12px}.top nav a{color:var(--mut);font-weight:500;padding:10px 0}
+.top nav a:hover{color:var(--navy)}
+.top .sp{flex:1}.tel{font:600 18px var(--fd);color:var(--navy);white-space:nowrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:0 22px;border-radius:8px;font:600 16px var(--fd);background:var(--or);color:#fff;border:2px solid var(--or);transition:background-color .18s var(--ease),transform .18s var(--ease)}
+.btn:hover{background:var(--or-d);border-color:var(--or-d)}.btn:active{transform:translateY(1px)}
+.btn.line{background:transparent;color:var(--navy);border-color:var(--navy)}.btn.line:hover{background:var(--navy);color:#fff}
+/* stage */
+.stage{padding:34px 0 0}
+.stagebar{display:flex;align-items:center;gap:14px;margin-bottom:14px;color:var(--mut);font-size:15px;flex-wrap:wrap}
+.live{background:var(--navy);color:#fff;font:600 14px var(--fd);padding:5px 12px;border-radius:6px;display:inline-flex;gap:8px;align-items:center}
+.live:before{content:"";width:8px;height:8px;border-radius:50%;background:var(--or);animation:pulse 1.8s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.25}}
+.stagebar .r{margin-left:auto}
+.app{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:0 1px 0 var(--line)}
+.appbar{display:flex;gap:7px;padding:12px 16px;border-bottom:1px solid var(--line);background:#eceff5;align-items:center}
+.appbar i{width:11px;height:11px;border-radius:50%;background:#c4cada}.appbar span{margin-left:12px;font-size:14px;color:var(--mut)}
+.appbody{display:grid;grid-template-columns:200px 1fr;min-height:560px}
+.side{background:var(--navy);color:#cfd6ea;padding:20px 12px;display:flex;flex-direction:column;gap:3px;font-size:15px}
+.side b{font:600 15px var(--fd);color:#fff;padding:4px 12px 14px}
+.side a{padding:10px 12px;border-radius:6px;display:block}
+.side a.on{background:var(--navy2);color:#fff;box-shadow:inset 3px 0 var(--or)}
+.main{padding:22px 24px;background:var(--bg)}
+.hello{color:var(--mut);margin-bottom:14px;font-size:15px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:14px 16px}
+.kpi b{display:block;font:600 30px/1.1 var(--fd);color:var(--navy);font-variant-numeric:tabular-nums}.kpi span{font-size:14px;color:var(--mut)}
+.cols{display:grid;grid-template-columns:1.6fr 1fr;gap:16px}
+.box{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:16px 18px}
+.box h3{font:600 17px var(--fd);margin-bottom:8px;color:var(--navy)}
+.row{display:grid;grid-template-columns:64px 1fr auto;gap:12px;align-items:center;padding:11px 0;border-top:1px solid #eef0f5;transition:background-color .6s var(--ease)}
+.row:first-of-type{border-top:0}
+.row time{font:600 16px var(--fd);font-variant-numeric:tabular-nums}
+.row p{font-weight:500;line-height:1.3}.row small{display:block;color:var(--mut);font-size:13.5px;font-weight:400}
+.chip{font:600 13px var(--fd);padding:4px 10px;border-radius:5px;white-space:nowrap;transition:background-color .4s,color .4s}
+.c-ok{background:var(--okbg);color:var(--ok)}.c-go{background:var(--bluebg);color:var(--blue)}.c-wait{background:#eceff5;color:#4a5570}.c-need{background:var(--redbg);color:var(--red)}
+.row.new{animation:slidein .7s var(--ease) both}
+.row.flash{background:#fff6ee}
+@keyframes slidein{from{opacity:0;transform:translateY(-14px)}to{opacity:1;transform:none}}
+.todo{display:grid;gap:0}.todo div{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-top:1px solid #eef0f5;font-size:15px;color:var(--mut)}
+.todo div:first-child{border-top:0}.todo b{color:var(--ink);font-weight:500;white-space:nowrap}
+.fis{margin-top:16px;border-top:2px dashed var(--line);padding-top:12px;font-size:14px;color:var(--mut)}
+.fis b{color:var(--ink);font-weight:500}
+.tip{position:absolute;right:26px;bottom:26px;background:var(--navy);color:#fff;padding:12px 16px;border-radius:8px;max-width:290px;font-size:15px;line-height:1.4;opacity:0;transform:translateY(8px);transition:opacity .5s var(--ease),transform .5s var(--ease);pointer-events:none}
+.tip.on{opacity:1;transform:none}
+.app{position:relative}
+/* sections */
+section{padding-top:130px}
+h2{font:600 clamp(30px,3.6vw,44px)/1.1 var(--fd);color:var(--navy);max-width:780px;margin-bottom:14px;letter-spacing:-.01em}
+.lead{color:var(--mut);max-width:660px;margin-bottom:38px;font-size:18px}
+/* compare */
+.cmp{background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.cmp table{width:100%;border-collapse:collapse}
+.cmp th,.cmp td{padding:15px 20px;text-align:left;border-bottom:1px solid var(--line);font-size:16px;vertical-align:middle}
+.cmp tr:last-child td{border-bottom:0}
+.cmp th{font:600 16px var(--fd);background:#eceff5}.cmp th.us{background:var(--navy);color:#fff}
+.cmp td.us{background:#fff6ee;font-weight:500;color:var(--ok)}
+.cmp td.n{color:#8c3a2c}
+.cmp tbody tr{opacity:1}
+.js .cmp tbody tr{opacity:0;transform:translateX(-12px);transition:opacity .5s var(--ease),transform .5s var(--ease)}
+.js .cmp.in tbody tr{opacity:1;transform:none}
+.js .cmp.in tbody tr:nth-child(2){transition-delay:.08s}.js .cmp.in tbody tr:nth-child(3){transition-delay:.16s}.js .cmp.in tbody tr:nth-child(4){transition-delay:.24s}.js .cmp.in tbody tr:nth-child(5){transition-delay:.32s}.js .cmp.in tbody tr:nth-child(6){transition-delay:.4s}
+.note{margin-top:14px;font-size:14px;color:var(--mut)}
+/* features */
+.feat{display:grid;grid-template-columns:repeat(4,1fr);background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.feat div{padding:26px 24px;border-right:1px solid var(--line)}.feat div:last-child{border:0}
+.feat h3{font:600 20px var(--fd);color:var(--navy);margin-bottom:12px}
+.feat ul{padding:0}.feat li{list-style:none;padding:9px 0;border-top:1px solid #eef0f5;font-size:16px}
+.feat li:first-of-type{border:0}
+/* sectors */
+.sec8{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.s{--c:#333;position:relative;display:flex;flex-direction:column;justify-content:flex-end;min-height:190px;padding:20px;border-radius:10px;background:var(--card);border:1px solid var(--line);border-top:6px solid var(--c);overflow:hidden;isolation:isolate;transition:color .35s var(--ease),transform .35s var(--ease)}
+.s:before{content:"";position:absolute;inset:0;background:var(--c);transform:translateY(100%);transition:transform .45s var(--ease);z-index:-1}
+.s:hover:before,.s:focus-visible:before{transform:none}
+.s:hover,.s:focus-visible{color:#fff;transform:translateY(-3px)}
+.s.dk:hover,.s.dk:focus-visible{color:#1c1500}
+.s h3{font:600 24px/1.1 var(--fd)}.s p{font-size:15px;margin-top:8px;color:var(--mut);transition:color .35s}
+.s:hover p,.s:focus-visible p{color:inherit}
+.s .go{margin-top:14px;font:600 15px var(--fd)}
+/* steps + cta */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-top:3px solid var(--navy)}
+.steps div{padding:26px 28px 0 0}.steps b{font:600 54px/1 var(--fd);color:var(--or);display:block;margin-bottom:12px}
+.steps h3{font:600 22px var(--fd);margin-bottom:8px;color:var(--navy)}.steps p{color:var(--mut)}
+.band{margin-top:130px;background:var(--navy);color:#fff;padding:70px 0}
+.band .wrap{display:flex;align-items:center;gap:40px;flex-wrap:wrap}
+.band h2{color:#fff;margin:0}.band .t{margin-left:auto;font:600 clamp(36px,5vw,64px)/1 var(--fd);color:var(--or);font-variant-numeric:tabular-nums}
+.band .btn.line{color:#fff;border-color:#fff}.band .btn.line:hover{background:#fff;color:var(--navy)}
+footer{padding:40px 0 60px;color:var(--mut);font-size:15px}
+footer .wrap{display:flex;gap:26px;flex-wrap:wrap}footer .sp{flex:1}
+/* reveal */
+.js .rv{opacity:0;transform:translateY(22px);transition:opacity .7s var(--ease),transform .7s var(--ease)}
+.js .rv.in{opacity:1;transform:none}
+@media(max-width:1000px){.appbody{grid-template-columns:1fr}.side{display:none}.cols{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}.feat,.sec8{grid-template-columns:repeat(2,1fr)}.feat div{border-bottom:1px solid var(--line)}.steps{grid-template-columns:1fr}.top nav{display:none}.cmp{overflow-x:auto}.cmp table{min-width:640px}.tip{display:none}}
+@media(max-width:560px){.top .tel{display:none}.sec8,.feat{grid-template-columns:1fr}section{padding-top:90px}.wrap{padding:0 18px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.js .rv,.js .cmp tbody tr{opacity:1!important;transform:none!important}.s:before{display:none}}
+</style></head>
+<body>
+<header class="top"><div class="wrap">
+<a href="index.html"><img src="logo-renkli-s.png" alt="OnlineKaydet"></a>
+<nav aria-label="Ana menü"><a href="ozellikler.html">Özellikler</a><a href="fiyatlar.html">Fiyatlar</a><a href="sektorler.html">Sektörler</a><a href="demo.html">Demo</a></nav>
+<span class="sp"></span><a class="tel" href="tel:+905444444004">0544 444 40 04</a>
+<a class="btn line" href="/giris">Giriş</a><a class="btn" href="demo.html">Ücretsiz dene</a>
+</div></header>
+
+<main>
+<div class="stage"><div class="wrap">
+<div class="stagebar"><span class="live">Canlı panel</span><span>Bu bir resim değil. Kayıtlar kendiliğinden ilerliyor; örnek verilerle çalışır.</span><span class="r">Örnek veridir</span></div>
+<div class="app" id="app">
+<div class="appbar"><i></i><i></i><i></i><span>onlinekaydet.com / panel</span></div>
+<div class="appbody">
+<aside class="side" aria-hidden="true"><b>Örnek Servis</b><a class="on">Bugün</a><a>Servis kayıtları</a><a>Takvim</a><a>Ustalar</a><a>Müşteriler</a><a>Tahsilat</a><a>Raporlar</a><a>Web sitem</a></aside>
+<div class="main">
+<p class="hello">Bugün 8 Kasım, <span id="nrand">4</span> randevunuz ve <span id="nreq">7</span> yeni talebiniz var.</p>
+<div class="kpis">
+<div class="kpi"><b id="k1">4</b><span>Bugünkü randevu</span></div>
+<div class="kpi"><b id="k2">7</b><span>Cevap bekleyen talep</span></div>
+<div class="kpi"><b id="k3">12</b><span>Açık servis kaydı</span></div>
+<div class="kpi"><b id="k4">38.450 ₺</b><span>Bu ay tahsilat</span></div></div>
+<div class="cols">
+<div class="box"><h3>Bugünün programı</h3><div id="rows">
+<div class="row"><time>09:00</time><p>Yıllık bakım, Mehmet Demir<small>Karşıyaka, Vaillant ecoTEC, Usta Emre</small></p><span class="chip c-ok">Tamamlandı</span></div>
+<div class="row"><time>11:30</time><p>Arıza, Ayşe Yılmaz<small>Bornova, Baymak Luna 3, Usta Hasan</small></p><span class="chip c-go" id="ch1">Yolda</span></div>
+<div class="row"><time>14:00</time><p>Petek temizliği, Selin Aksoy<small>Buca, 6 petek, Usta Emre</small></p><span class="chip c-wait">Bekliyor</span></div>
+<div class="row"><time>16:30</time><p>Montaj, Ali Yıldız<small>Konak, Demirdöküm Nitromix, atanmadı</small></p><span class="chip c-need" id="ch4">Usta ata</span></div></div>
+<div class="fis"><b>Servis fişi</b> <span id="fis">No 2411, Ayşe Yılmaz, kombi arıza, bekliyor</span></div></div>
+<div class="box"><h3>Dikkat gerektirenler</h3><div class="todo">
+<div>Fiyat teklifi onay bekliyor<b>3 kayıt</b></div><div>Ödemesi alınmamış servis<b id="unpaid">2 kayıt, 2.700 ₺</b></div><div>Yıllık bakımı yaklaşan müşteri<b>9 müşteri</b></div><div>Stoğu azalan yedek parça<b>4 ürün</b></div></div></div>
+</div></div></div>
+<div class="tip" id="tip" role="status" aria-live="polite"></div>
+</div></div></div>
+
+<section><div class="wrap">
+<h2 class="rv">Bugün defterde, Excel’de ya da eski bir programda mı tutuyorsunuz?</h2>
+<p class="lead rv">Çoğu servis programı masaüstüne kurulur ve servis fişinde kalır. Biz kaydı, ustayı, parayı ve web sitenizi tek yerde tutuyoruz.</p>
+<div class="cmp" id="cmp"><table>
+<thead><tr><th>Ne lazım</th><th>Defter / Excel</th><th>Masaüstü servis programı</th><th class="us">OnlineKaydet</th></tr></thead><tbody>
+<tr><td>Usta sahadan kaydı kapatır</td><td class="n">Yok</td><td class="n">Genelde yok</td><td class="us">Mobil usta uygulaması</td></tr>
+<tr><td>Müşteriye “yoldayım” bağlantısı ve iş takibi</td><td class="n">Yok</td><td class="n">Nadiren</td><td class="us">Var</td></tr>
+<tr><td>İşten önce ve sonra fotoğraf, müşteri imzası</td><td class="n">Yok</td><td class="n">Kısmen</td><td class="us">Var</td></tr>
+<tr><td>Yıllık bakım hatırlatma, tek tıkla servis kaydı</td><td class="n">Yok</td><td class="n">Yok</td><td class="us">Var</td></tr>
+<tr><td>Tahsilat, kasa, usta borcu, muhasebeciye Excel</td><td class="n">Elle</td><td class="n">Ayrı program</td><td class="us">Panelin içinde</td></tr>
+<tr><td>Hazır web siteniz ve online randevu</td><td class="n">Yok</td><td class="n">Yok</td><td class="us">30 tema, kurulumu bizden</td></tr>
+</tbody></table></div>
+<p class="note">Masaüstü program sütunu, sektörde yaygın programların genel özelliklerine göredir; tek bir firmayı göstermez.</p>
+</div></section>
+
+<section id="ozellikler"><div class="wrap">
+<h2 class="rv">Panelin içinde olanlar</h2>
+<p class="lead rv">Hepsi hazır. İhtiyacınız olan açılır, olmayan kapalı kalır.</p>
+<div class="feat rv">
+<div><h3>Servis</h3><ul><li>Servis kaydı ve randevu</li><li>Otomatik usta atama</li><li>Atölyeye alma, A4 ve termal fiş</li><li>Cihaz QR etiketi</li><li>Kontrol listeleri</li></ul></div>
+<div><h3>Usta</h3><ul><li>Müşteri telefonunu gizleme</li><li>Yoldayım bildirimi</li><li>Arıza teşhis asistanı</li><li>Puan ve prim</li><li>Ekip içi sohbet</li></ul></div>
+<div><h3>Para</h3><ul><li>Tahsilat ve alacak takibi</li><li>Kasa, banka, giderler</li><li>KDV raporu, e-fatura köprüsü</li><li>Kârlılık raporu</li><li>Bayi komisyonu</li></ul></div>
+<div><h3>Müşteri ve web</h3><ul><li>Müşteri geçmişi ve arama kayıtları</li><li>SMS, WhatsApp, e-posta</li><li>Canlı destek penceresi</li><li>Kupon ve sadakat</li><li>Reklam ve kaynak raporu</li></ul></div>
+</div></div></section>
+
+<section id="sektorler"><div class="wrap">
+<h2 class="rv">Hangi servisi işletiyorsunuz?</h2>
+<p class="lead rv">Her sektörün kendi formu, cihaz listesi ve hazır web sitesi var. Rengi bile sektörüne göre.</p>
+<div class="sec8 rv">
+<a class="s" href="sektor-kombi.html" style="--c:#d9480f"><h3>Kombi</h3><p>Yıllık bakım, petek, doğalgaz</p><span class="go">Sektör sayfası</span></a>
+<a class="s" href="sektor-klima.html" style="--c:#1c7ed6"><h3>Klima</h3><p>Montaj, gaz dolumu, bakım</p><span class="go">Sektör sayfası</span></a>
+<a class="s" href="sektor-beyaz-esya.html" style="--c:#0f8b8d"><h3>Beyaz eşya</h3><p>Garanti, yedek parça, atölye</p><span class="go">Sektör sayfası</span></a>
+<a class="s" href="sektor-bilgisayar.html" style="--c:#5c3fd1"><h3>Bilgisayar</h3><p>Teslim formu, arıza, veri</p><span class="go">Sektör sayfası</span></a>
+<a class="s dk" href="sektor-elektrik.html" style="--c:#e0a100"><h3>Elektrik</h3><p>Keşif, pano, proje</p><span class="go">Sektör sayfası</span></a>
+<a class="s" href="sektor-elektronik.html" style="--c:#2f9e44"><h3>Elektronik</h3><p>Cihaz kabul, test, parça</p><span class="go">Sektör sayfası</span></a>
+<a class="s" href="sektor-guvenlik.html" style="--c:#343a40"><h3>Güvenlik</h3><p>Kamera, alarm, bakım sözleşmesi</p><span class="go">Sektör sayfası</span></a>
+<a class="s" href="sektor-tesisat.html" style="--c:#8a5a2b"><h3>Tesisat</h3><p>Acil çağrı, keşif, tahsilat</p><span class="go">Sektör sayfası</span></a>
+</div></div></section>
+
+<section><div class="wrap">
+<h2 class="rv">Üç adımda açılır</h2>
+<div class="steps rv">
+<div><b>1</b><h3>Arayın</h3><p>Sektörünüzü ve usta sayınızı söyleyin.</p></div>
+<div><b>2</b><h3>Biz kuralım</h3><p>Panel, tema ve Excel kayıtlarınız hazır gelir.</p></div>
+<div><b>3</b><h3>Ustalar başlasın</h3><p>İlk kaydı birlikte açarız.</p></div></div>
+</div></section>
+
+<div class="band"><div class="wrap">
+<h2>Önce arayın.<br>Sektörünüzü kuralım.</h2>
+<a class="t" href="tel:+905444444004">0544 444 40 04</a>
+<a class="btn line" href="demo.html">Demo iste</a></div></div>
+</main>
+<footer><div class="wrap"><span>© OnlineKaydet</span><a href="hakkimizda.html">Hakkımızda</a><a href="iletisim.html">İletişim</a><a href="kvkk.html">KVKK</a><a href="gizlilik.html">Gizlilik</a><span class="sp"></span><span>Fiyatlar yer tutucudur. Örnek veriler gerçek müşteri değildir.</span></div></footer>
+
+<script>
+document.documentElement.classList.add('js');
+(function(){
+var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.12});
+document.querySelectorAll('.rv,#cmp').forEach(function(n){io.observe(n)});
+var rm=matchMedia('(prefers-reduced-motion:reduce)').matches;if(rm)return;
+var $=function(i){return document.getElementById(i)},tip=$('tip'),rows=$('rows'),k4=0;
+function say(t,ms){tip.textContent=t;tip.classList.add('on');setTimeout(function(){tip.classList.remove('on')},ms||3200)}
+function set(el,cls,txt){el.className='chip '+cls;el.textContent=txt}
+function addRow(){
+ var d=document.createElement('div');d.className='row new flash';
+ d.innerHTML='<time>17:45</time><p>Arıza, Cemil Kaya<small>Karşıyaka, Bosch Condens, atanmadı</small></p><span class="chip c-need">Usta ata</span>';
+ rows.appendChild(d);setTimeout(function(){d.classList.remove('flash')},1400);return d}
+function count(el,from,to,suf){var t0=performance.now();(function f(t){var p=Math.min(1,(t-t0)/900),v=Math.round(from+(to-from)*p);el.textContent=v.toLocaleString('tr-TR')+suf;if(p<1)requestAnimationFrame(f)})(t0)}
+var steps=[
+ [1500,function(){$('fis').textContent='No 2411, Ayşe Yılmaz, kombi arıza, usta yolda';say('Usta yola çıkınca müşteriye takip bağlantısı gider.')}],
+ [4800,function(){var r=addRow();$('k2').textContent='8';$('k3').textContent='13';$('nreq').textContent='8';say('Yeni talep gelince kayıt kendiliğinden açılır.')}],
+ [8200,function(){var c=rows.lastChild.querySelector('.chip');set(c,'c-go','Usta Hasan atandı');say('Otomatik atama: en yakın boş usta seçildi.')}],
+ [11600,function(){set($('ch1'),'c-ok','Tamamlandı');$('fis').textContent='No 2411, Ayşe Yılmaz, kapandı, 1.350 ₺ tahsil edildi';count($('k4'),38450,39800,' ₺');say('Usta kapatınca fiş ve tahsilat panele yazılır.',3600)}],
+ [16200,function(){var r=rows.lastChild;r.remove();$('k2').textContent='7';$('k3').textContent='12';$('nreq').textContent='7';$('fis').textContent='No 2412, Cemil Kaya, kombi arıza, bekliyor';$('k4').textContent='38.450 ₺';set($('ch1'),'c-go','Yolda');$('fis').textContent='No 2411, Ayşe Yılmaz, kombi arıza, bekliyor'}]
+];
+function run(){steps.forEach(function(s){setTimeout(s[1],s[0])});setTimeout(run,18500)}
+var seen=false,ob=new IntersectionObserver(function(e){if(e[0].isIntersecting&&!seen){seen=true;run()}},{threshold:.35});ob.observe($('app'));
+})();
+</script>
+</body></html>
