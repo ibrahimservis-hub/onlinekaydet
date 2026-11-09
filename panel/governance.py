@@ -392,6 +392,24 @@ def make_middleware(db, get_current_user):
     return middleware
 
 
+def _acct():
+    """Hesaptaki tüm süreçlerin iş parçacığı dökümü (hosting kotası teşhisi)."""
+    import os, glob
+    out, tot, me = [], 0, os.getuid()
+    for d in glob.glob("/proc/[0-9]*"):
+        try:
+            st = open(d + "/status").read()
+            if "Uid:\t%d" % me not in st:
+                continue
+            nm = st.split("Name:\t", 1)[1].split("\n", 1)[0]
+            th = int(st.split("Threads:\t", 1)[1].split("\n", 1)[0])
+            tot += th
+            out.append("%s:%s:%d" % (d.rsplit("/", 1)[1], nm, th))
+        except Exception:  # noqa: BLE001
+            pass
+    return {"total_threads": tot, "procs": out[:40]}
+
+
 async def log_error(db, request, exc, user=None, trace=True):
     try:
         doc = {"id": str(uuid.uuid4()), "at": notify._now(), "method": request.method, "path": request.url.path,
@@ -604,7 +622,7 @@ def register(api_router, db, deps):
         except Exception:                               # noqa: BLE001
             ok = False
         import threading as _th, os as _os
-        return {"ok": ok, "uptime_s": int(time.time() - STARTED), "threads": _th.active_count(), "pid": _os.getpid(), "names": sorted({t.name.split("_")[0].split("-")[0] for t in _th.enumerate()})[:12]}
+        return {"ok": ok, "uptime_s": int(time.time() - STARTED), "threads": _th.active_count(), "pid": _os.getpid(), "acct": _acct(), "names": sorted({t.name.split("_")[0].split("-")[0] for t in _th.enumerate()})[:12]}
 
     @api_router.get("/governance/roles")
     async def roles(_: dict = Depends(get_current_user)):
