@@ -3368,6 +3368,15 @@ if _FE:
         except Exception:                                # noqa: BLE001
             return _static_resp(request, _FE / "index.html", {"Cache-Control": "no-cache"})
 
+    @app.get("/tema-onizleme/{slug}.html", include_in_schema=False)
+    async def tema_onizleme(slug: str):
+        """Satış sitesindeki tema vitrini: statik dosyası olmayan temalar doğrudan tema deposundan gösterilir (yeni sekmede canlı önizleme)."""
+        import re as _r2
+        p = Path(__file__).resolve().parent.parent / "themes" / "html" / (slug + ".html")
+        if not _r2.fullmatch(r"[a-z0-9-]{3,60}", slug) or not p.is_file():
+            return JSONResponse({"detail": "Bulunamadı"}, status_code=404)
+        return _Resp(p.read_text(encoding="utf-8"), media_type="text/html", headers={"Cache-Control": "public, max-age=3600", "X-Robots-Tag": "noindex"})
+
     @app.get("/{full_path:path}", include_in_schema=False)
     async def spa(full_path: str, request: Request):
         if full_path == "api" or full_path.startswith("api/"):
