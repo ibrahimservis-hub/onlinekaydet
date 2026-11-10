@@ -120,6 +120,7 @@ def labels(key):
         "Usta Puanlama": ks + " Puanlama", "Usta İş Geçmişi": ks + " Geçmişi", "Ustadan Para Aldım": ks + ab + " Tahsilat",
         "Ustaların Borç Durumu": ks + " Hesapları", "Geciken Usta Borçları": "Geciken " + ks + " Hesapları",
     }
+    t.update(FAM_TERMS.get(FAMILY.get(key, ""), {}))
     return t
 
 
@@ -152,4 +153,59 @@ def lex(key):
     ks, kp = _sp(r["kisi"])
     isg, ipl = _sp(r["is"])
     cs, cp = _sp(r["cihaz"])
-    return {"kisi": [ks, kp], "is": [isg, ipl], "cihaz": [cs, cp], "sorun": r["sorun"], "stok": r["stok"]}
+    sorun = r["sorun"]
+    if sorun == "Şikâyet":
+        sorun = {"randevu": "Talep", "siparis": "Not", "yol": "Talep", "proje": "Talep"}.get(FAMILY.get(key, ""), sorun)
+    return {"kisi": [ks, kp], "is": [isg, ipl], "cihaz": [cs, cp], "sorun": sorun, "stok": r["stok"]}
+
+
+def brand_docs(key, sec_brands):
+    """Teknik olmayan sektörde 'Marka' listesi, o işin kendi kategorileri olur (kuaförde Vaillant değil 'Saç kesimi')."""
+    import uuid
+    if key in SADE or key not in ROWS or not sec_brands:
+        return None
+    return [{"id": uuid.uuid4().hex, "name": n, "logo_url": "", "models": []} for n in sec_brands]
+
+
+# --- iş akışı aileleri: kayıt ekranı alanları, durum adları ve gizlenecek teknik alanlar sektöre göre değişir
+FAMILY = {}
+for _k in ("kuafor", "guzellik", "tirnak_studyo", "estetik_merkezi", "spa_hamam", "dovme_studyo", "evcil_hayvan", "dis_klinigi", "psikolog", "diyetisyen",
+           "fizyoterapi", "veteriner", "aile_danisman", "optik", "spor_salonu", "yoga_dans", "yuzme_kursu"):
+    FAMILY[_k] = "randevu"
+for _k in ("eticaret", "market", "tekstil", "pastane", "cicekci", "lokanta", "catering", "mobilya", "matbaa", "kuyumcu_saat"):
+    FAMILY[_k] = "siparis"
+for _k in ("oto_cekici", "nakliye", "kurye", "transfer", "arac_kiralama", "tur_organizasyon"):
+    FAMILY[_k] = "yol"
+for _k in ("avukat", "mimar", "muhasebe", "tadilat", "peyzaj", "cam_dograma", "gunes_enerjisi", "fotografci", "dugun_salonu", "tercume", "emlakci", "dj_muzik"):
+    FAMILY[_k] = "proje"
+
+# özgün (eski) durum/alan etiketi -> aileye uygun etiket
+FAM_TERMS = {
+    "randevu": {"Yeni": "Randevu alındı", "Atandı": "Uzman atandı", "Yolda": "Geliyor", "Başladı": "İşlemde", "Tamamlandı": "Tamamlandı",
+                "İşçilik Ücreti (₺)": "Hizmet Ücreti (₺)", "Parça Toplam:": "Ürün Toplam:", "Henüz parça eklenmemiş": "Henüz ürün eklenmemiş",
+                "Markalar": "Hizmet Grupları", "Marka:": "Hizmet Grubu:", "Model:": "Hizmet:", "Marka": "Hizmet Grubu", "Model": "Hizmet",
+                "Kullanılan Yedek Parçalar": "Kullanılan Ürün ve Sarf", "Servis Bilgisi": "Hizmet Bilgisi", "Cihaz Bilgisi": "Hizmet Bilgisi"},
+    "siparis": {"Yeni": "Yeni sipariş", "Atandı": "Hazırlanıyor", "Yolda": "Kargoda", "Başladı": "Paketleniyor", "Tamamlandı": "Teslim edildi", "İptal": "İptal / İade",
+                "İşçilik Ücreti (₺)": "Kargo / Hizmet Ücreti (₺)", "Parça Toplam:": "Ürün Toplam:", "Henüz parça eklenmemiş": "Henüz ürün eklenmemiş",
+                "Markalar": "Ürün Grupları", "Marka:": "Ürün Grubu:", "Model:": "Ürün:", "Marka": "Ürün Grubu", "Model": "Ürün",
+                "Kullanılan Yedek Parçalar": "Sipariş Kalemleri", "Servis Bilgisi": "Sipariş Bilgisi", "Cihaz Bilgisi": "Sipariş Bilgisi"},
+    "yol": {"Yeni": "Çağrı alındı", "Atandı": "Araç yönlendirildi", "Yolda": "Yolda", "Başladı": "Yükleme / Taşıma", "Tamamlandı": "Teslim edildi",
+            "İşçilik Ücreti (₺)": "Hizmet Bedeli (₺)", "Parça Toplam:": "Ek Masraf Toplam:", "Henüz parça eklenmemiş": "Henüz ek masraf eklenmemiş",
+            "Markalar": "Araç ve Yük Türleri", "Marka:": "Araç / Yük:", "Model:": "Detay:", "Marka": "Araç / Yük", "Model": "Detay",
+            "Kullanılan Yedek Parçalar": "Ek Masraflar (otoyol, vinç, ambalaj)", "Servis Bilgisi": "Taşıma Bilgisi", "Cihaz Bilgisi": "Taşıma Bilgisi"},
+    "proje": {"Yeni": "Yeni talep", "Atandı": "Sorumlu atandı", "Yolda": "Görüşmede", "Başladı": "Çalışma sürüyor", "Tamamlandı": "Tamamlandı",
+              "İşçilik Ücreti (₺)": "Hizmet Bedeli (₺)", "Parça Toplam:": "Malzeme / Masraf Toplam:", "Henüz parça eklenmemiş": "Henüz malzeme / masraf eklenmemiş",
+              "Markalar": "Hizmet Türleri", "Marka:": "Hizmet Türü:", "Model:": "Konu:", "Marka": "Hizmet Türü", "Model": "Konu",
+              "Kullanılan Yedek Parçalar": "Malzeme ve Masraflar", "Servis Bilgisi": "İş Bilgisi", "Cihaz Bilgisi": "İş Bilgisi"},
+}
+# panelde hiç gösterilmeyecek teknik alanlar (menü maddesi / satır). Eşleşme tam metin.
+HIDE_ALL = ("Seri No:", "Seri No", "Tip:", "Bayilik Başvuruları", "Cihaz QR Etiketi", "Teknisyen Karnesi")
+HIDE_MENU_RX = r"(rehberi|rehber)$"
+
+
+def family(key):
+    return FAMILY.get(key, "")
+
+
+def hide(key):
+    return list(HIDE_ALL) if key in ROWS and key not in SADE else []

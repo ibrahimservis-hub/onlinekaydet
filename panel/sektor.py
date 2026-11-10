@@ -117,4 +117,4 @@ def register(api_router, db, deps):
         import sektor_mod
         import sektor_dil
         terms = sektor_dil.labels(key) or d.get("terms") or sec.get("terms") or {}
-        return {"key": key, "name": d.get("name") or sec.get("name") or "", "terms": terms, "lex": sektor_dil.lex(key), "modules": sektor_mod.modules_for(key)}
+        return {"key": key, "name": d.get("name") or sec.get("name") or "", "terms": terms, "lex": sektor_dil.lex(key), "hide": sektor_dil.hide(key), "family": sektor_dil.family(key), "modules": sektor_mod.modules_for(key)}

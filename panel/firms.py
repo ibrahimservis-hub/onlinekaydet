@@ -328,7 +328,8 @@ def register(api_router, db, deps):
                                     "name": f["contact_name"] or name, "phone": f["phone"], "role": "admin",
                                     "commission_percent": 0.0, "is_active": True, "firm_owner": True, "created_at": _now()})
         try:                                              # marka listesi (Yeni servis kaydı için hazır gelsin)
-            br = await db.main().brands.find({}, {"_id": 0}).to_list(500)
+            import sektor_dil
+            br = sektor_dil.brand_docs(p.sector or "", sektor.SECTORS.get(p.sector or "", {}).get("brands")) or await db.main().brands.find({}, {"_id": 0}).to_list(500)
             if br:
                 await fdb.brands.insert_many(br)
         except Exception:                                 # noqa: BLE001

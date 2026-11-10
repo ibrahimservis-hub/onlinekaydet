@@ -128,7 +128,8 @@ def register(api_router, db, deps):
         fdb = db.firm(f["db"])
         await fdb.users.insert_one({"id": str(uuid.uuid4()), "email": email, "password_hash": hash_password(pw), "name": name, "phone": phone,
                                     "role": "admin", "commission_percent": 0.0, "is_active": True, "firm_owner": True, "created_at": _now()})
-        brands = await db.main().brands.find({}, {"_id": 0}).to_list(500)
+        import sektor_dil
+        brands = sektor_dil.brand_docs(key, sektor.SECTORS[key].get("brands")) or await db.main().brands.find({}, {"_id": 0}).to_list(500)
         if brands:
             await fdb.brands.insert_many([dict(b) for b in brands])
         await fdb.app_settings.update_one({"_id": "global"}, {"$set": {

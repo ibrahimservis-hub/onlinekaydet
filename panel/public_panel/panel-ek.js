@@ -6373,7 +6373,7 @@
     if (S.busy || S.tok === t) return; S.busy = true;
     fetch(location.origin + '/api/sector-terms', { headers: { Authorization: 'Bearer ' + t } })
       .then(function (r) { return r.ok ? r.json() : {}; })
-      .then(function (j) { window.__spxSectorKey = (j && j.key) || ''; window.__spxMods = (j && j.modules) || []; S.lex = (j && j.lex && j.lex.kisi) ? j.lex : null; S.tok = t; S.map = (j && j.terms && Object.keys(j.terms).length) ? j.terms : null; S.keys = S.map ? Object.keys(S.map) : []; })
+      .then(function (j) { window.__spxSectorKey = (j && j.key) || ''; window.__spxMods = (j && j.modules) || []; S.lex = (j && j.lex && j.lex.kisi) ? j.lex : null; S.hide = (j && j.hide) || []; S.tok = t; S.map = (j && j.terms && Object.keys(j.terms).length) ? j.terms : null; S.keys = S.map ? Object.keys(S.map) : []; })
       .catch(function () { S.tok = t; S.map = null; })
       .then(function () { S.busy = false; });
   }
@@ -6404,7 +6404,7 @@
     var L = S.lex; if (!L) { RX = null; return; }
     var T = function (o, nounKey) { return function (m, pre, stem, pl, suf) { var kind = SUF[suf.toLowerCase()]; if (kind === undefined) return m; var n = L[nounKey]; var isPl = !!pl; var base = isPl ? n[1] : n[0]; if (isPl && n[1] === n[0]) base = n[0]; return pre + fit(stem, attach(base, kind)); }; };
     RX = [
-      [/(^|[^A-Za-zÇĞİÖŞÜçğıöşü])(yedek parça)( stok[a-zçğıöşü]*)?(?![A-Za-zÇĞİÖŞÜçğıöşü])/gi, function (m, pre, st, sk) { return pre + fit(st, sk ? L.stok : L.stok.replace(/\s*Stok\w*$/i, '')); }],
+      [/(^|[^A-Za-zÇĞİÖŞÜçğıöşü])(yedek parça)( stok[a-zçğıöşü]*|[a-zçğıöşü]{0,6})(?![A-Za-zÇĞİÖŞÜçğıöşü])/gi, function (m, pre, st, sk) { return pre + fit(st, /^ ?stok/i.test(sk || '') ? L.stok : L.stok.replace(/\s*Stok\w*$/i, '')); }],
       [/(^|[^A-Za-zÇĞİÖŞÜçğıöşü])(servis (?:kayd|kayıt)[a-zçğıöşü]*)(?![A-Za-zÇĞİÖŞÜçğıöşü])/gi, function (m, pre, st) { return pre + fit(st, /kay[ıi]tlar/i.test(st) ? L.is[1] : L.is[0]); }],
       [rx('usta|teknisyen', true), T(0, 'kisi')],
       [rx('cihaz', true), T(0, 'cihaz')],
@@ -6416,8 +6416,21 @@
     RX.forEach(function (r) { str = str.replace(r[0], r[1]); });
     return str;
   }
+  /* kayıt ekranında sektöre uymayan teknik alanları (Seri No, Tip, QR etiketi...) ve menü maddelerini gizle */
+  function hideFields() {
+    var set = {}; S.hide.forEach(function (x) { set[x] = 1; });
+    var w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null), n, hit = [];
+    while ((n = w.nextNode())) { var v = n.nodeValue; if (v && v.length < 40 && set[v.trim()]) hit.push(n); }
+    hit.forEach(function (n) {
+      var p = n.parentElement; if (!p || /^(SCRIPT|STYLE|TEXTAREA|INPUT|OPTION)$/.test(p.tagName) || p.closest('[data-nosektor]')) return;
+      var nav = p.closest('a,button,li,[role=button]');
+      var tgt = nav && nav.textContent.trim().length < 60 ? nav : ((p.parentElement && p.parentElement.children.length <= 2 && p.parentElement.textContent.length < 80) ? p.parentElement : p);
+      if (tgt && tgt !== document.body && tgt.style.display !== 'none') tgt.style.display = 'none';
+    });
+  }
   function apply() {
     if (!S.map || !document.body) return;
+    if (S.hide && S.hide.length) hideFields();
     if (S.lex && !RX) build();
     if (RX) {
       var w2 = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null), n2, l2 = [];
@@ -6428,7 +6441,7 @@
     var w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null), n, list = [];
     while ((n = w.nextNode())) { var v = n.nodeValue; if (v && v.length < 40 && S.map[v.trim()] !== undefined) list.push(n); }
     list.forEach(function (n) {
-      var p = n.parentElement; if (!p || /^(SCRIPT|STYLE|TEXTAREA|INPUT|OPTION)$/.test(p.tagName)) return;
+      var p = n.parentElement; if (!p || /^(SCRIPT|STYLE|TEXTAREA|INPUT)$/.test(p.tagName)) return;
       var raw = n.nodeValue, k = raw.trim(); n.nodeValue = raw.replace(k, S.map[k]);
     });
     [].forEach.call(document.querySelectorAll('[placeholder],[aria-label],[title]'), function (el) {
