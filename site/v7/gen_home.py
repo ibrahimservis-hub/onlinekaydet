@@ -15,8 +15,23 @@ css=css.replace('.js .rv{opacity:0;transform:translateY(22px);transition:opacity
 css=css.replace('.hero h1{font:300 clamp(50px,7.4vw,112px)/1.0 var(--f)','.hero h1{font:300 clamp(42px,6.3vw,96px)/1.02 var(--f)')
 open('home.base.css','w').write(css)
 body=src[src.index('<main>'):src.index('</main>')+7]
-body=body.replace('<h1><span class="l"><span>Servis operasyonunuzun</span></span><span class="l"><span><em>tek</em> merkezi.</span></span></h1>','<h1><span class="l"><span>Teknik servisler için</span></span><span class="l"><span><em>servis takip</em> programı</span></span></h1>')
-assert 'Teknik servisler için' in body
+body=body.replace('<h1><span class="l"><span>Servis operasyonunuzun</span></span><span class="l"><span><em>tek</em> merkezi.</span></span></h1>','<h1><span class="l"><span>Hizmet işletmeleri için</span></span><span class="l"><span><em>kayıt, takip ve satış</em> paneli</span></span></h1>')
+assert 'Hizmet işletmeleri için' in body
+
+# --- tüm sektörler için metinler ---
+body=body.replace('Teknik servis işletmeleri için','Servis, oto, kuaför, nakliye, e-ticaret ve daha fazlası için')
+body=body.replace('Kayıt, usta, tahsilat ve web siteniz tek kontrol ekranında. Kurulumu biz yapıyoruz.','Randevu, ekip, tahsilat ve web siteniz tek ekranda. Sektörünüze göre hazır gelir; kurulumu biz yapıyoruz.')
+body=body.replace('Uygulama mağazası gerekmez. Usta, tarayıcıdan kendi kullanıcı adıyla girer ve yalnızca kendine atanan işleri görür.','Uygulama mağazası gerekmez. Ekip üyesi (usta, kuaför, sürücü, kurye), tarayıcıdan kendi kullanıcı adıyla girer ve yalnızca kendine atanan işleri görür.')
+body=body.replace('Saha ekibiniz telefonundan <em>çalışır.</em>','Ekibiniz telefonundan <em>çalışır.</em>')
+body=body.replace('38 hazır tema, sekiz sektör. Randevu formu doğrudan servis kaydına düşer.','148 hazır tema, 16 sektör. Randevu formu doğrudan kayıt ekranınıza düşer.')
+body=body.replace('38 hazır tema, sekiz sektör.','148 hazır tema, 16 sektör.')
+body=body.replace('38 hazır temadan','148 hazır temadan')
+# (sektör çipleri şablonda genişletildi)
+SEKS=[('kombi','Kombi','Yıllık bakım, petek, doğalgaz'),('klima','Klima','Montaj, gaz dolumu, bakım'),('beyaz-esya','Beyaz eşya','Garanti, yedek parça, atölye'),('bilgisayar','Bilgisayar','Teslim formu, arıza, veri yedekleme'),('elektrik','Elektrik','Keşif, pano, proje'),('elektronik','Elektronik','Cihaz kabul, test, parça'),('guvenlik','Güvenlik sistemleri','Kamera, alarm, bakım sözleşmesi'),('tesisat','Tesisat','Acil çağrı, keşif, tahsilat'),
+ ('oto-servis','Oto servis','Araç kabul, iş emri, bakım hatırlatma'),('oto-cekici','Oto çekici','Çağrı, konum, varış süresi'),('kuafor','Kuaför ve berber','Randevu defteri, uzman, hizmet fişi'),('nakliye','Nakliye','Keşif, eşya listesi, ekip ve araç'),('tekstil','Tekstil','Toptan sipariş, numune, üretim'),('e-ticaret','E-ticaret','Sipariş, kargo, iade, stok'),('temizlik','Temizlik','Alan, ekip, önce / sonra'),('guzellik','Güzellik merkezi','Seans, paket, müşteri kartı')]
+a=body.index('<div class="sx rv">');b=body.index('</div></div></section>',a)
+body=body[:a]+'<div class="sx rv">\n'+'\n'.join('<a href="sektor-%s.html"><span class="n">%02d</span><h3>%s</h3><p>%s</p></a>'%(k,i+1,t,d) for i,(k,t,d) in enumerate(SEKS))+'\n'+body[b:]
+body=body.replace('Her sektörün kendi <em>düzeni</em> var.','Her işin kendi <em>düzeni</em> var.')
 # paketler: sadeleştir
 a=body.index('<section id="paketler">');b=body.index('<section id="yolharitasi">')
 old=body[a:b]
@@ -51,8 +66,8 @@ extra='''
 <section id="web"><div class="wrap">
 <div class="kick rv">Web sitesi ve entegrasyonlar</div>
 <h2 class="rv">Siteniz hazır, <em>sisteminiz</em> bağlı.</h2>
-<div class="two rv"><p class="l">38 hazır tema, sekiz sektör. Randevu formu doğrudan servis kaydına düşer.</p>
-<dl class="dl"><div><dt>Temalar</dt><dd><span>Kombi</span><span>Klima</span><span>Beyaz eşya</span><span>Elektronik</span><span>Bilgisayar</span><span>Tesisat</span><span>Elektrik</span><span>Güvenlik</span></dd></div><div><dt>Mesajlaşma</dt><dd><span>Netgsm</span><span>Verimor</span><span>İleti Merkezi</span><span>Twilio</span></dd></div><div><dt>Satış ve ödeme</dt><dd><span>Trendyol</span><span>Hepsiburada</span><span>N11</span><span>iyzico</span></dd></div><div><dt>Diğer</dt><dd><span>Google Search Console</span><span>Excel ile içe aktarma</span></dd></div></dl></div>
+<div class="two rv"><p class="l">148 hazır tema, 16 sektör. Randevu formu doğrudan kayıt ekranınıza düşer.</p>
+<dl class="dl"><div><dt>Temalar</dt><dd><span>Kombi</span><span>Klima</span><span>Beyaz eşya</span><span>Elektronik</span><span>Bilgisayar</span><span>Tesisat</span><span>Elektrik</span><span>Güvenlik</span><span>Oto servis</span><span>Oto çekici</span><span>Kuaför</span><span>Nakliye</span><span>Tekstil</span><span>E-ticaret</span><span>Temizlik</span><span>Güzellik</span></dd></div><div><dt>Mesajlaşma</dt><dd><span>Netgsm</span><span>Verimor</span><span>İleti Merkezi</span><span>Twilio</span></dd></div><div><dt>Satış ve ödeme</dt><dd><span>Trendyol</span><span>Hepsiburada</span><span>N11</span><span>iyzico</span></dd></div><div><dt>Diğer</dt><dd><span>Google Search Console</span><span>Excel ile içe aktarma</span></dd></div></dl></div>
 <div class="lk rv"><a class="lnk" href="temalar.html">Temaları görün <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 8h12M9 3l5 5-5 5"/></svg></a><a class="lnk" href="entegrasyonlar.html">Entegrasyonlar <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 8h12M9 3l5 5-5 5"/></svg></a></div>
 </div></section>
 
@@ -83,14 +98,14 @@ body=body[:i]+extra+'\n'+body[i:]
 a=body.index('<div class="cta">');b=body.index('</main>')
 cta='''<div class="cta" id="kayit"><div class="wrap cg2">
 <div><h2 class="rv">Önce <em>konuşalım.</em></h2><p class="cl rv">Formu doldurun, uzmanımız sektörünüze göre kurulumu birlikte planlasın. İlk ay ücretsiz.</p><a class="tel rv" href="tel:+905444444004">0544 444 40 04</a></div>
-<div class="frm rv"><div><label for="f1">Ad soyad</label><input id="f1" autocomplete="name"></div><div><label for="f2">Telefon</label><input id="f2" type="tel" autocomplete="tel" inputmode="tel"></div><div><label for="f3">Firma adı</label><input id="f3" autocomplete="organization"></div><div><label for="f4">Sektör</label><select id="f4"><option>Seçiniz</option><option>Kombi</option><option>Klima</option><option>Beyaz eşya</option><option>Elektronik</option><option>Bilgisayar</option><option>Tesisat</option><option>Elektrik</option><option>Güvenlik</option></select></div><a class="bt" href="#">Beni arayın</a><small>Bilgileriniz yalnızca sizinle iletişim için kullanılır (KVKK).</small></div>
+<div class="frm rv"><div><label for="f1">Ad soyad</label><input id="f1" autocomplete="name"></div><div><label for="f2">Telefon</label><input id="f2" type="tel" autocomplete="tel" inputmode="tel"></div><div><label for="f3">Firma adı</label><input id="f3" autocomplete="organization"></div><div><label for="f4">Sektör</label><select id="f4"><option>Seçiniz</option><option>Kombi</option><option>Klima</option><option>Beyaz eşya</option><option>Elektronik</option><option>Bilgisayar</option><option>Tesisat</option><option>Elektrik</option><option>Güvenlik</option><option>Oto servis</option><option>Oto çekici</option><option>Kuaför</option><option>Nakliye</option><option>Tekstil</option><option>E-ticaret</option><option>Temizlik</option><option>Güzellik merkezi</option><option>Diğer</option></select></div><a class="bt" href="#">Beni arayın</a><small>Bilgileriniz yalnızca sizinle iletişim için kullanılır (KVKK).</small></div>
 </div></div>
 '''
 body=body[:a]+cta+body[b:]
 import gen7
 doc=('<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><meta name="theme-color" content="#0a0c0f">'
 '<link rel="icon" href="../favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="../favicon-32.png"><link rel="apple-touch-icon" href="../apple-touch-icon.png">'
-'<title>Servis Takip Programı | OnlineKaydet</title><meta name="description" content="Teknik servisler için servis takip programı: servis kaydı, usta takibi, tahsilat ve hazır web sitesi. İlk ay ücretsiz.">'
+'<title>İşletme Yönetim Paneli ve Hazır Web Sitesi | OnlineKaydet</title><meta name="description" content="Teknik servis, oto servis, çekici, kuaför, nakliye, tekstil, e-ticaret ve temizlik işletmeleri için kayıt, ekip takibi, tahsilat ve hazır web sitesi. İlk ay ücretsiz.">'
 '<link rel="stylesheet" href="shell.css"><link rel="stylesheet" href="home.css"></head><body>'+gen7.header('index.html',True)+body+gen7.FOOT+gen7.VB.replace('index.html#kayit','#kayit')+
 '<script>document.documentElement.classList.add("js")</script><script src="../site.js"></script><script src="../lead.js"></script><script src="ok7.js"></script><script src="home.js"></script></body></html>')
 # gövde içindeki sıfırlama: çift id

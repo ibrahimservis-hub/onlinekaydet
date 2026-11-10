@@ -5,7 +5,7 @@ SKIP={'yeni-ana-sayfa.html','a-onizleme.html','index.html'}
 pages=[os.path.basename(f) for f in sorted(glob.glob(ROOT+'/*.html')) if os.path.basename(f) not in SKIP and not os.path.basename(f).startswith('yon')]
 names=set(pages)|{'index.html'}
 NAV=[('ozellikler.html','Ürün'),('sektorler.html','Sektörler'),('temalar.html','Temalar'),('entegrasyonlar.html','Entegrasyonlar'),('fiyatlar.html','Fiyatlar'),('destek.html','Destek')]
-SEC=[('sektor-kombi','Kombi'),('sektor-klima','Klima'),('sektor-beyaz-esya','Beyaz eşya'),('sektor-elektronik','Elektronik'),('sektor-bilgisayar','Bilgisayar'),('sektor-tesisat','Tesisat'),('sektor-elektrik','Elektrik'),('sektor-guvenlik','Güvenlik')]
+SEC=[('sektor-kombi','Kombi'),('sektor-klima','Klima'),('sektor-beyaz-esya','Beyaz eşya'),('sektor-elektronik','Elektronik'),('sektor-bilgisayar','Bilgisayar'),('sektor-tesisat','Tesisat'),('sektor-elektrik','Elektrik'),('sektor-guvenlik','Güvenlik'),('sektor-oto-servis','Oto servis'),('sektor-oto-cekici','Oto çekici'),('sektor-kuafor','Kuaför ve berber'),('sektor-nakliye','Nakliye'),('sektor-tekstil','Tekstil'),('sektor-e-ticaret','E-ticaret'),('sektor-temizlik','Temizlik'),('sektor-guzellik','Güzellik merkezi')]
 ARW='<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 8h12M9 3l5 5-5 5"/></svg>'
 ARW2='<svg class="ch" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>'
 def _cur(cur,h):
@@ -31,7 +31,7 @@ def header(cur,home=False):
     '<nav class="o7-nav" aria-label="Ana menü">%s</nav><span class="o7-sp"></span><a class="gir" href="/giris">Giriş</a><a class="tel" href="tel:+905444444004">0544 444 40 04</a><a class="btn o sm" href="demo.html">Demo talep edin</a>'
     '<button class="o7-bg" type="button" aria-label="Menü" aria-expanded="false" aria-controls="o7mm"><svg class="m" viewBox="0 0 24 24"><path d="M3 8h18M3 16h18"/></svg><svg class="x" viewBox="0 0 24 24"><path d="M5 5l14 14M19 5L5 19"/></svg></button></div></div>'
     '<div class="o7-mm" id="o7mm">%s<div class="cta"><a class="btn" href="demo.html">Demo talep edin</a><a class="btn o" href="/giris">Müşteri girişi</a></div><a class="tl" href="tel:+905444444004">0544 444 40 04</a></div>')%(' home' if home else '','#kayit' if home else 'index.html#kayit',nav,mm)
-FOOT='''<div class="o7-ft"><div class="o7w"><div class="gr5"><div><img src="../logo-acik-s.png" alt="OnlineKaydet" width="154" height="30"><p>Teknik servisler için servis kaydı, usta takibi, tahsilat ve web sitesi platformu.</p><a class="fph" href="tel:+905444444004">0544 444 40 04</a><a class="fwa" href="https://wa.me/905444444004" rel="noopener">WhatsApp ile yazın</a></div>
+FOOT='''<div class="o7-ft"><div class="o7w"><div class="gr5"><div><img src="../logo-acik-s.png" alt="OnlineKaydet" width="154" height="30"><p>Servis, oto, kuaför, nakliye ve e-ticaret işletmeleri için kayıt, ekip takibi, tahsilat ve web sitesi platformu.</p><a class="fph" href="tel:+905444444004">0544 444 40 04</a><a class="fwa" href="https://wa.me/905444444004" rel="noopener">WhatsApp ile yazın</a></div>
 <div><h5>Ürün</h5>%s</div>
 <div><h5>Sektörler</h5>%s<a href="temalar.html">Temalar</a></div>
 <div><h5>Kaynaklar</h5>%s</div>

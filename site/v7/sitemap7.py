@@ -10,7 +10,7 @@ URUN=[('ozellikler.html','Tüm özellikler','Modüllere genel bakış'),
 ('cozum-musteri-portali.html','Müşteri portalı','Müşteri kendi kaydını izler'),
 ('cozum-yedek-parca-magazasi.html','Yedek parça mağazası','Parçayı online satın'),
 ('cozum-web-sitesi.html','Web sitesi','Randevu formlu hazır site')]
-SEKTOR=[('sektor-kombi.html','Kombi'),('sektor-klima.html','Klima'),('sektor-beyaz-esya.html','Beyaz eşya'),('sektor-elektronik.html','Elektronik'),('sektor-bilgisayar.html','Bilgisayar'),('sektor-tesisat.html','Tesisat'),('sektor-elektrik.html','Elektrik'),('sektor-guvenlik.html','Güvenlik')]
+SEKTOR=[('sektor-kombi.html','Kombi'),('sektor-klima.html','Klima'),('sektor-beyaz-esya.html','Beyaz eşya'),('sektor-elektronik.html','Elektronik'),('sektor-bilgisayar.html','Bilgisayar'),('sektor-tesisat.html','Tesisat'),('sektor-elektrik.html','Elektrik'),('sektor-guvenlik.html','Güvenlik'),('sektor-oto-servis.html','Oto servis'),('sektor-oto-cekici.html','Oto çekici'),('sektor-kuafor.html','Kuaför ve berber'),('sektor-nakliye.html','Nakliye'),('sektor-tekstil.html','Tekstil'),('sektor-e-ticaret.html','E-ticaret'),('sektor-temizlik.html','Temizlik'),('sektor-guzellik.html','Güzellik merkezi')]
 ENT=[('entegrasyonlar.html','Tüm entegrasyonlar','Genel bakış'),
 ('entegrasyon-sms.html','SMS ve WhatsApp','Netgsm, Verimor, İleti Merkezi'),
 ('entegrasyon-pazaryeri.html','Pazaryerleri','Trendyol, Hepsiburada, N11'),
