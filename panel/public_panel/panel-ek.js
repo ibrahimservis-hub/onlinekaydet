@@ -6161,7 +6161,7 @@
     if (!rows.length) return;
     rows.forEach(function (r) { r.style.display = 'none'; r.setAttribute('data-spx-extra', '1'); });
     var a = document.createElement('button'); a.type = 'button'; a.textContent = 'Daha fazla ayrıntı (ödeme şekli, kişi, fiş no) ▾';
-    a.style.cssText = 'background:none;border:0;color:#1155cc;font-size:13px;font-weight:700;cursor:pointer;padding:6px 0;text-align:left';
+    a.style.cssText = 'grid-column:1/-1;width:100%;white-space:nowrap;background:none;border:0;color:#1155cc;font-size:13px;font-weight:700;cursor:pointer;padding:6px 0;text-align:left';
     a.onclick = function (e) { e.preventDefault(); var open = rows[0].style.display === 'none'; rows.forEach(function (r) { r.style.display = open ? '' : 'none'; }); a.textContent = open ? 'Ayrıntıları gizle ▴' : 'Daha fazla ayrıntı (ödeme şekli, kişi, fiş no) ▾'; };
     rows[0].parentElement.insertBefore(a, rows[0]);
   }
