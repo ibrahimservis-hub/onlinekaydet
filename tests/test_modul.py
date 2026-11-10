@@ -2,7 +2,7 @@
 import glob, os, sys
 from playwright.sync_api import sync_playwright
 H = os.path.join(os.path.dirname(__file__), '..', 'themes', 'html')
-files = sorted(glob.glob(H + '/n*.html'))
+files = sorted(glob.glob(H + '/' + os.environ.get('PAT', 'n*') + '.html'))
 bad = []
 with sync_playwright() as p:
     b = p.chromium.launch()

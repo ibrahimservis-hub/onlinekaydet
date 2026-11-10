@@ -134,6 +134,12 @@ def main():
             continue
         cur = [t for t in json.load(open(p, encoding='utf-8')) if t['sector'] not in NEW]
         json.dump(cur + themes, open(p, 'w', encoding='utf-8'), ensure_ascii=False)
+    try:
+        import patch_old
+        meta = {t['slug']: t['sector'] for t in json.load(open(os.path.join(APP, 'themes.json'), encoding='utf-8'))}
+        print(patch_old.run(gen3.OUT, meta), 'eski tema güncellendi')
+    except Exception as ex:                                                       # noqa: BLE001
+        print('eski temalar güncellenemedi:', ex)
     print(len(themes), 'tema yazıldı')
 
 

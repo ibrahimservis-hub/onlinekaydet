@@ -7,7 +7,7 @@ rd = lambda p: open(os.path.join(R, p), encoding='utf-8').read()
 files, edits = {}, []
 for f in ('sektor_ek.py', 'sektor.py', 'demo.py', 'sitegen.py', 'storefront.py'):
     files['app/' + f] = rd('panel/' + f)
-for f in ('gen3.py', 'gen4.py', 'ill/make_ill.py'):
+for f in ('gen3.py', 'gen4.py', 'patch_old.py', 'ill/make_ill.py'):
     files['themes/' + f] = rd('themes/' + f)
 for f in sorted(os.listdir(os.path.join(R, 'themes/g3'))):
     if f.endswith('.py'):
