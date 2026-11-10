@@ -28,7 +28,7 @@ def S(*pairs):
 # steps: sıralı adımlar; last = kapanış adımı; side = yan durumlar (gelmedi/iptal) ; pay = kapanıştan önce tahsilat şartı
 FAM = {
     "randevu": dict(
-        prefix="RD", noun="Randevu", plural="Randevular", staff_l="Uzman", pay=True, comm=30,
+        prefix="RD", noun="Randevu", plural="Randevu Defteri", staff_l="Uzman", pay=True, comm=30,
         steps=S(("alindi", "Randevu alındı"), ("geldi", "Geldi"), ("islemde", "İşlemde"), ("odeme", "Ödeme"), ("tamam", "Tamamlandı")),
         side=S(("gelmedi", "Gelmedi"), ("iptal", "İptal")),
         sections=[("Müşteri ve randevu", [F("customer_name", "Müşteri", req=1), F("customer_phone", "Telefon"), F("staff", "Uzman", "staff"), F("when", "Tarih ve saat", "dt", req=1),
