@@ -90,7 +90,7 @@ function setS(i){si=i;bs.forEach(function(b,j){b.classList.toggle('on',j===i)});
 var mo=$('#mo');A('[data-open]').forEach(function(b){b.addEventListener('click',function(){if(b.dataset.s)$('#hz2').textContent=b.dataset.s+' ▾';mo.classList.add('on')})});$('#mx').onclick=function(){mo.classList.remove('on')};mo.addEventListener('click',function(e){if(e.target===mo)mo.classList.remove('on')});
 })()</script>
 @@L@@</body></html>"""
-LOAD = """<script>(function(){var P=[35844833,6487888,3993320,10028673,8867400,20046793].map(function(i){return'https://images.pexels.com/photos/'+i+'/pexels-photo-'+i+'.jpeg?auto=compress&cs=tinysrgb&w=1800'});
+LOAD = """<script>(function(){var P=[3356170,6487888,3993320,10028673,8867400,20046793].map(function(i){return'https://images.pexels.com/photos/'+i+'/pexels-photo-'+i+'.jpeg?auto=compress&cs=tinysrgb&w=1800'});
 [].slice.call(document.querySelectorAll('.pp')).forEach(function(e){var u=P[+e.dataset.i%P.length];e.style.backgroundImage='url("'+u+'")';e.style.backgroundSize='cover'})})()</script>"""
 open(os.path.join(H, 'out', 'kuafor2.html'), 'w', encoding='utf-8').write(HTML.replace('@@F@@', fonts).replace('@@C@@', CSS).replace('@@L@@', LOAD))
 print('ok')
