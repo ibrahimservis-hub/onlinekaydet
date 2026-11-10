@@ -19,3 +19,15 @@ def test_labels_sector_specific():
 def test_lex_shape():
     L = d.lex('avukat')
     assert L['kisi'][0] == 'Avukat' and len(L['cihaz']) == 2
+
+
+def test_module_view():
+    lab, hid = d.module_view('kuafor')
+    assert lab['personel'] == 'Uzman / personel takibi' and 'bayi' in hid and 'qr' in hid
+    assert d.module_view('kombi') == ({}, [])          # teknik servis değişmez
+    assert d.module_view('oto_cekici')[0]['takip'] == 'Canlı araç takibi'
+    for k in d.ROWS:
+        if k in d.SADE: continue
+        l, h = d.module_view(k)
+        assert l.get('servis'), k
+        if d.family(k) in ('randevu', 'siparis', 'yol', 'proje', 'kurs'): assert 'usta' not in ' '.join(l.values()).lower(), k

@@ -209,3 +209,42 @@ def family(key):
 
 def hide(key):
     return list(HIDE_ALL) if key in ROWS and key not in SADE else []
+
+
+# ---- Paket / modül görünümü: aynı modül her sektörde kendi adıyla görünür; sektöre uymayan modül hiç gösterilmez ----
+MOD_LABELS = {
+    "randevu": {"servis": "Randevu ve işlemler", "personel": "Uzman / personel takibi", "muhasebe": "Kasa ve muhasebe", "sms": "SMS ve randevu hatırlatma",
+                "magaza": "Ürün mağazası", "bakim": "Tekrar randevu hatırlatma", "teklif": "Paket ve teklif", "atama": "Otomatik uzman atama",
+                "portal": "Müşteri randevu portalı", "odeme": "Ödeme linki (online tahsilat)", "arayan": "Arayan numara tanıma"},
+    "siparis": {"servis": "Sipariş ve teslimat", "personel": "Ekip takibi", "muhasebe": "Kasa ve muhasebe", "sms": "SMS ve sipariş bildirimi",
+                "magaza": "Online mağaza", "teklif": "Teklif ve onay", "atama": "Otomatik görev atama", "portal": "Müşteri hesabı portalı"},
+    "yol": {"servis": "Çağrı ve sevkler", "personel": "Sürücü / ekip takibi", "muhasebe": "Kasa ve muhasebe", "sms": "SMS ve çağrı bildirimi",
+            "magaza": "Ürün mağazası", "teklif": "Teklif ve onay", "atama": "Otomatik araç atama", "takip": "Canlı araç takibi", "portal": "Müşteri portalı"},
+    "proje": {"servis": "İş ve dosya takibi", "personel": "Ekip takibi", "muhasebe": "Kasa ve muhasebe", "sms": "SMS ve bilgilendirme",
+              "magaza": "Ürün mağazası", "teklif": "Teklif ve sözleşme", "atama": "Otomatik görev atama", "portal": "Müşteri portalı"},
+}
+MOD_LABELS.update({
+    "kurs": {"servis": "Kayıt ve ders takibi", "personel": "Eğitmen / personel takibi", "muhasebe": "Kasa ve muhasebe", "sms": "SMS ve veli/öğrenci bildirimi",
+             "magaza": "Ürün mağazası", "teklif": "Paket ve teklif", "atama": "Otomatik eğitmen atama", "portal": "Öğrenci / veli portalı"},
+    "atolye": {"servis": "İş emirleri", "personel": "Usta / ekip takibi", "muhasebe": "Kasa ve muhasebe", "sms": "SMS ve iş durumu bildirimi",
+               "magaza": "Ürün mağazası", "bakim": "Bakım hatırlatma ve garanti", "teklif": "Teklif ve onay", "atama": "Otomatik iş atama", "portal": "Müşteri portalı"},
+    "saha": {"servis": "Saha işleri", "personel": "Saha ekibi takibi", "muhasebe": "Kasa ve muhasebe", "sms": "SMS ve iş bildirimi",
+             "magaza": "Ürün mağazası", "bakim": "Periyodik ziyaret hatırlatma", "teklif": "Teklif ve onay", "atama": "Otomatik ekip atama", "takip": "Canlı ekip takibi", "portal": "Müşteri portalı"},
+})
+MOD_HIDE = {"kurs": ["bayi", "qr", "bakim", "takip"], "atolye": ["bayi", "qr"], "saha": ["bayi", "qr"],
+            "randevu": ["bayi", "qr", "takip"], "siparis": ["bayi", "qr", "bakim", "takip"],
+            "yol": ["bayi", "qr", "bakim"], "proje": ["bayi", "qr", "bakim", "takip"]}
+
+
+def module_view(key):
+    """(etiketler, gizlenecek modüller): teknik servis sektörlerinde değişiklik yok."""
+    f = ""
+    if key in ROWS and key not in SADE:
+        f = family(key)
+        if not f:
+            try:
+                import sektor_kayit
+                f = sektor_kayit.SECTOR_FAMILY.get(key, "")
+            except Exception:                                  # noqa: BLE001
+                f = ""
+    return (dict(MOD_LABELS.get(f, {})), list(MOD_HIDE.get(f, [])))

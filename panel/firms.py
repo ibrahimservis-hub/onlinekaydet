@@ -234,7 +234,13 @@ def register(api_router, db, deps):
                 days = int(-(-((datetime.fromisoformat(exp) - datetime.now(timezone.utc)).total_seconds()) // 86400))
             except (ValueError, TypeError):
                 days = None
-        return {"package": f.get("package", ""), "modules": mods, "labels": {m: MODULES[m] for m in MODULES}, "locked": [m for m in MODULES if m not in mods], "soon": SOON,
+        try:
+            import sektor_dil
+            sl, sh = sektor_dil.module_view(f.get("sector") or "")
+        except Exception:                                  # noqa: BLE001
+            sl, sh = {}, []
+        labels = {m: sl.get(m, MODULES[m]) for m in MODULES if m not in sh}
+        return {"package": f.get("package", ""), "modules": [m for m in mods if m not in sh], "labels": labels, "locked": [m for m in MODULES if m not in mods and m not in sh], "soon": SOON,
                 "expires_at": exp, "days_left": days, "unlimited": not exp, "since": f.get("created_at", "")}
 
     async def push_settings(f):
