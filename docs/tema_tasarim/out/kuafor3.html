@@ -191,8 +191,6 @@ footer{padding:34px var(--pad) calc(120px + env(safe-area-inset-bottom));display
 @keyframes dr{to{stroke-dashoffset:0}}
 .ok p{color:#6b5b4e;margin:8px auto 18px;max-width:300px}
 /* GRAIN + BADGE */
-body:before{content:"";position:fixed;inset:-50%;z-index:200;pointer-events:none;opacity:.07;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");animation:gr 1s steps(4) infinite}
-@keyframes gr{25%{transform:translate(-3%,2%)}50%{transform:translate(2%,-3%)}75%{transform:translate(-2%,-1%)}}
 .bdg{position:absolute;right:var(--pad);top:calc(env(safe-area-inset-top) + 86px);z-index:3;width:104px;height:104px;border-radius:50%;background:rgba(23,17,14,.45);backdrop-filter:blur(8px);border:1px solid rgba(244,236,227,.25);display:grid;place-items:center}
 .bdg svg{position:absolute;inset:0;animation:sp 16s linear infinite}
 .bdg text{font:600 10.5px Inter;letter-spacing:.22em;fill:var(--ink);text-transform:uppercase}
@@ -252,6 +250,18 @@ body:before{content:"";position:fixed;inset:-50%;z-index:200;pointer-events:none
 .gt{overflow:hidden;padding:30px 0;background:var(--bg)}
 .gt div{display:flex;width:max-content;animation:mq 34s linear infinite reverse;font:400 clamp(90px,28vw,220px)/1 Fraunces,serif;letter-spacing:-.03em;color:transparent;-webkit-text-stroke:1.2px rgba(244,236,227,.35);white-space:nowrap;gap:40px}
 .gt span:nth-child(even){-webkit-text-stroke:0;color:var(--cu);font-style:italic}
+/* v3b: sabitleme yok, her bolum akista */
+.story{height:auto;background:var(--bg2);padding:30px 0 20px}
+.ch{display:flex;flex-direction:column;margin:0 auto 44px;max-width:1200px}
+.ch .sr{flex:none;height:min(78vw,460px);position:relative;overflow:hidden}
+.ch .sr .im{position:absolute;inset:0;clip-path:inset(100% 0 0 0);transform:scale(1.06);transition:clip-path 1.2s cubic-bezier(.7,0,.2,1),transform 2.4s ease-out}
+.ch.v .sr .im{clip-path:inset(0);transform:none}
+.ch .sr:after{height:26%}
+.ch .sl{flex:none;padding:6px var(--pad) 8px}
+.ch .sl>*{opacity:0;transform:translateY(14px);transition:opacity .9s ease,transform .9s ease}
+.ch.v .sl>*{opacity:1;transform:none}.ch.v .sl>*:nth-child(2){transition-delay:.15s}.ch.v .sl>*:nth-child(3){transition-delay:.3s}.ch.v .sl>*:nth-child(4){transition-delay:.45s}
+.sc{position:relative!important;top:auto!important}
+@media(min-width:900px){.ch{flex-direction:row;align-items:center;gap:0}.ch:nth-child(even){flex-direction:row-reverse}.ch .sr{flex:0 0 56%;height:520px}.ch .sr:after{display:none}.ch .sl{padding:0 70px}}
 /* DESKTOP */
 @media(min-width:900px){
 :root{--pad:56px}
@@ -308,11 +318,7 @@ footer{padding-bottom:40px;grid-auto-flow:column;justify-content:space-between}
 <div class="sc"><div class="ph pp" data-p="3993308"></div><i>2</i><h3>Randevunuz kayıtlı</h3><p>Bir gün önce hatırlatma gider, geldiğinizde koltuğunuz hazırdır.</p></div>
 <div class="sc"><div class="ph pp" data-p="10028673"></div><i>3</i><h3>Tek fişle ödeme</h3><p>İşlem bitince nakit, kart veya havale; fiş ve kasa kaydı otomatik.</p></div></section>
 
-<section class="story" id="story"><div class="stage">
-<div class="bar" id="bar"><i><b></b></i><i><b></b></i><i><b></b></i></div><div class="dn" id="dn">Aşağı kaydırın ↓</div>
-<div class="sr"><div class="im pp on" data-p="3993462"></div><div class="im pp" data-p="10028673"></div><div class="im pp" data-p="23349912"></div></div>
-<div class="sl"><div class="tx" id="stx"><div class="num" id="sn">01 / 03</div><h2 id="st">Kesim</h2><p id="sp">Saç tipinize ve yüz hatlarınıza göre kesim. Yıkama ve fön dahil, süre baştan söylenir.</p><div class="fx" id="sf">45–60 dk · 450 – 900 ₺</div></div></div>
-</div></section>
+<section class="story" id="story"><div class="ch"><div class="sr"><div class="im pp" data-p="3993462"></div></div><div class="sl"><div class="num">01 / 03</div><h2>Kesim</h2><p>Saç tipinize ve yüz hatlarınıza göre kesim. Yıkama ve fön dahil, süre baştan söylenir.</p><div class="fx">45–60 dk · 450 – 900 ₺</div></div></div><div class="ch"><div class="sr"><div class="im pp" data-p="10028673"></div></div><div class="sl"><div class="num">02 / 03</div><h2>Renk</h2><p>Önce renk danışmanlığı, sonra uygulama. Koruyucu bakım her boyada dahil.</p><div class="fx">2–3 saat · 1.800 – 4.500 ₺</div></div></div><div class="ch"><div class="sr"><div class="im pp" data-p="23349912"></div></div><div class="sl"><div class="num">03 / 03</div><h2>Bakım</h2><p>Keratin ve yoğun onarım; saçınızın durumuna göre seans planı yazılı verilir.</p><div class="fx">90 dk · 1.500 – 3.200 ₺</div></div></div></section>
 
 <section class="rail" id="hz"><div class="hd"><div class="eb">Hizmetler</div><h2>Ne yaptırmak istersiniz?</h2><p>Kartları yana kaydırın. Bir hizmeti seçince randevu formu o hizmetle açılır.</p></div>
 <div class="tr" id="tr">
@@ -388,15 +394,11 @@ var W=['zaman','özen','renk','ilgi'],wi=0,wd=$('#wd');setInterval(function(){wd
 /* promise */
 var pr=$('#pr');pr.innerHTML=pr.textContent.split(' ').map(function(w){return'<span>'+w+'</span>'}).join(' ');var ps=A('span',pr);
 ['dinler,','rengi','kayıtlıdır,','hatırlatılır,'].forEach(function(k){ps.forEach(function(s){if(s.textContent===k)s.classList.add('hl')})});
-/* story */
-var C=[['01 / 03','Kesim','Saç tipinize ve yüz hatlarınıza göre kesim. Yıkama ve fön dahil, süre baştan söylenir.','45–60 dk · 450 – 900 ₺'],['02 / 03','Renk','Önce renk danışmanlığı, sonra uygulama. Koruyucu bakım her boyada dahil.','2–3 saat · 1.800 – 4.500 ₺'],['03 / 03','Bakım','Keratin ve yoğun onarım; saçınızın durumuna göre seans planı yazılı verilir.','90 dk · 1.500 – 3.200 ₺']];
-var st=$('#story'),ims=A('.sr .im'),bars=A('.bar i b'),cur=0;
-function setCh(k){if(k===cur)return;var tx=$('#stx');tx.classList.add('o');ims.forEach(function(e,i){e.classList.toggle('on',i===k)});setTimeout(function(){$('#sn').textContent=C[k][0];$('#st').textContent=C[k][1];$('#sp').textContent=C[k][2];$('#sf').textContent=C[k][3];tx.classList.remove('o')},260);cur=k}
-function onS(){var r=st.getBoundingClientRect(),p=Math.min(1,Math.max(0,-r.top/(r.height-innerHeight)));var kk=Math.min(2,Math.floor(p*3)),pc=Math.min(1,Math.max(0,p*3-kk));setCh(kk);ims.forEach(function(e,i){e.style.transform=i===kk?'scale('+(1.12+.08*pc)+') translateY('+(-pc*4)+'%)':''});$('#dn').classList.toggle('h',kk===2&&pc>.4);bars.forEach(function(b,i){b.style.transform='scaleX('+Math.min(1,Math.max(0,p*3-i))+')'})
-var q=pr.getBoundingClientRect(),pp=Math.min(1,Math.max(0,(innerHeight*.85-q.top)/(q.height+innerHeight*.35)));var n=Math.round(pp*ps.length);ps.forEach(function(s,i){s.classList.toggle('l',i<n)});
-var b=$('#bph'),br=b.parentNode.getBoundingClientRect();if(br.bottom>0&&br.top<innerHeight){b.style.transform='translateY('+((br.top+br.height/2-innerHeight/2)*-.12)+'px)'}}
-addEventListener('scroll',onS,{passive:true});addEventListener('resize',onS);onS();
-$('#bar').addEventListener('click',function(e){var r=this.getBoundingClientRect(),k=Math.min(2,Math.max(0,Math.floor((e.clientX-r.left)/r.width*3)));var top=st.getBoundingClientRect().top+scrollY,span=st.offsetHeight-innerHeight;scrollTo({top:top+span*(k+.5)/3,behavior:'smooth'})});
+/* scroll: yalniz soz yazisi, rAF ile */
+var ticking=false;
+function onS(){ticking=false;var q=pr.getBoundingClientRect(),pp=Math.min(1,Math.max(0,(innerHeight*.85-q.top)/(q.height+innerHeight*.35)));var n=Math.round(pp*ps.length);ps.forEach(function(s,i){s.classList.toggle('l',i<n)})}
+addEventListener('scroll',function(){if(!ticking){ticking=true;requestAnimationFrame(onS)}},{passive:true});addEventListener('resize',onS);onS();
+var ioc=new IntersectionObserver(function(es){es.forEach(function(en){if(en.isIntersecting){en.target.classList.add('v');ioc.unobserve(en.target)}})},{threshold:.2});A('.ch').forEach(function(e){ioc.observe(e)});
 /* rail counter */
 var tr=$('#tr'),cn=A('#cnt i');tr.addEventListener('scroll',function(){var k=Math.round(tr.scrollLeft/(tr.scrollWidth-tr.clientWidth)*(cn.length-1));cn.forEach(function(e,i){e.classList.toggle('on',i===k)})},{passive:true});
 /* timeline */
