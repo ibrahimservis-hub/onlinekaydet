@@ -1,4 +1,4 @@
-"""Kuaför temaları (k6–k10): panel bloklarına bölünür, firma bilgisi yerleşir, paket (sahip ekranı) modülleri belirler,
+"""Kuaför temaları (k5–k10): panel bloklarına bölünür, firma bilgisi yerleşir, paket (sahip ekranı) modülleri belirler,
 randevu gerçek API ile çalışır, başka sektörün (avukat/muhasebe) dili kuaför sitesine sızmaz."""
 import sys, os, re, json
 sys.path.insert(0, os.path.dirname(__file__)); import boot
@@ -8,13 +8,13 @@ from datetime import date, timedelta
 from starlette.testclient import TestClient
 s = boot.server; ok, bad = [], []; S = {}
 ROOT = os.path.join(os.path.dirname(__file__), "..")
-SLUGS = ["k6-butik-kuafor", "k7-kesimhane-kuafor", "k8-sakin-kuafor", "k9-kagit-kuafor", "k10-atolye-kuafor"]
+SLUGS = ["k5-atolye-kuafor", "k6-butik-kuafor", "k7-kesimhane-kuafor", "k8-sakin-kuafor", "k9-kagit-kuafor", "k10-atolye-kuafor"]
 def t(n, f):
     try: f(); ok.append(n)
     except Exception:
         import traceback; bad.append((n, traceback.format_exc()[-500:]))
 def tok(c, e, p): r = c.post("/api/auth/login", json={"email": e, "password": p}); assert r.status_code == 200, r.text; return {"Authorization": "Bearer " + r.json()["token"]}
-FOREIGN = re.compile(r"avukat|müvekkil|mükellef|mali müşavir|esas no|mahkeme|dava dosya|noter|yedek parça|arıza|kombi|klima", re.I)
+FOREIGN = re.compile(r"avukat|müvekkil|mükellef|mali müşavir|esas no|mahkeme|dava dosya|noter|yedek parça|arıza|kombi|klima|Kadıköy|Beşiktaş|Bahçelievler|Nişantaşı|Çankaya|Ankara|İzmir|İstanbul|example|@\\w+sac", re.I)
 sys.path.insert(0, os.path.join(ROOT, "panel")); import sitegen
 THEMES = {x["slug"]: x for x in json.load(open(os.path.join(ROOT, "panel", "themes.json"), encoding="utf-8"))}
 with TestClient(s.app) as c:
@@ -29,7 +29,7 @@ with TestClient(s.app) as c:
             pr = sitegen.split_blocks(raw); assert pr and len(pr[1]) >= 5, sl
             names = [b[0] for b in pr[1]]; assert len(set(names)) == len(names), (sl, names)
             assert {"Menü", "Alt bilgi", "Mobil bar", "Kampanyalar", "Ürünler"} <= set(names), (sl, names)
-    t("5 kuaför teması panel bloklarına bölünür (benzersiz adlar, sabit + modül blokları)", a)
+    t("6 kuaför teması panel bloklarına bölünür (benzersiz adlar, sabit + modül blokları)", a)
     def b():
         for sl in SLUGS:
             raw = open(os.path.join(ROOT, "themes", "html", sl + ".html"), encoding="utf-8").read()
@@ -62,7 +62,7 @@ with TestClient(s.app) as c:
         ctx = mkctx(THEMES[sl], ["servis", "site"]); ctx["p"]["edits"] = {sl: {"Hizmetler": {"0": "ÖZEL BAŞLIK XYZ"}}}
         h0 = sitegen.apply_profile(raw, THEMES[sl], mkctx(THEMES[sl], ["servis", "site"]))
         blk = [x for x in sitegen.split_blocks(h0)[1] if x[0] == "Hizmetler"][0][1]
-        assert re.search(r"<h2[^>]*>", blk), "Hizmetler bloğunda düzenlenebilir başlık olmalı"
+        assert re.search(r"<h[12][^>]*>", blk), "Hizmetler bloğunda düzenlenebilir başlık olmalı"
         ctx["p"]["layout"] = {"hidden": ["Galeri"], "order": ["Paketler", "Hizmetler"]}
         h = sitegen.apply_profile(raw, THEMES[sl], ctx); n = re.findall(r'data-nm="([^"]*)"', h)
         assert "Galeri" not in n and n.index("Paketler") < n.index("Hizmetler") and n[0] == "Menü" and n[-1] == "Mobil bar", n

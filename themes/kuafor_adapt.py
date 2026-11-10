@@ -19,6 +19,7 @@ OUT = os.path.join(HERE, "html")
 
 # slug, kaynak no, kayıtlı ad (HTML'de geçtiği biçimiyle), tema bilgileri
 THEMES = [
+    dict(n=5, slug="k5-atolye-kuafor", name="Atölye Saç", dark="#1a1310", accent="#c98a5a", soft="#241a15", radius=14),
     dict(n=6, slug="k6-butik-kuafor", name="Butik Saç", dark="#3a2328", accent="#b5476b", soft="#f4dfe0", radius=14),
     dict(n=7, slug="k7-kesimhane-kuafor", name="Kesimhane", dark="#0c0c0c", accent="#ffd60a", soft="#151515", radius=4),
     dict(n=8, slug="k8-sakin-kuafor", name="Sakin Saç", dark="#25382c", accent="#b9814f", soft="#f6f8f3", radius=99),
@@ -28,6 +29,17 @@ THEMES = [
 
 VOID = {"br", "img", "input", "meta", "link", "hr", "source", "path", "circle", "rect", "line", "polyline", "ellipse", "use", "stop", "wbr"}
 TAG = re.compile(r"<(/?)([a-zA-Z][a-zA-Z0-9]*)((?:\"[^\"]*\"|'[^']*'|[^>\"'])*)>")
+
+ADDR = "Atatürk Cad. No:12"
+CLEAN = {
+    5: [(r"Atatürk Bulvarı, Çankaya / Ankara", ADDR), (r"Çankaya'da randevuyla", "randevuyla"), (r"Çankaya · Ankara · Kadın", "Kadın"), (r"document\.title=\(h==='home'\?'':TT\[h\]\+' · '\)\+'Atölye Saç';", ""),
+        (r"scrollTo\(\{top:0,behavior:'instant'\}\);", "")],
+    6: [(r"Moda Cd\. 12, Kadıköy(?: / İstanbul)?", ADDR), (r"Moda · Kadıköy, İstanbul", "Randevuyla çalışan butik salon")],
+    7: [(r"Barbaros Blv\. 8<br>Beşiktaş / İstanbul", ADDR), (r"Beşiktaş · İstanbul · Barber ve saç", "Barber ve saç")],
+    8: [(r"Cemal Gürsel Cd\. 21, Bahçelievler / İzmir", ADDR), (r"Bahçelievler · İzmir · Saç ve bakım", "Saç ve bakım")],
+    9: [(r"Abdi İpekçi Cd\. 30(?:<br>|, )?Nişantaşı / İstanbul", ADDR), (r"Nişantaşı'nda randevuyla", "Randevuyla"), (r"Nişantaşı · İstanbul", "Randevuyla çalışır")],
+    10: [(r"Atatürk Blv\. 40, Çankaya", ADDR), (r"Atatürk Blv\. 40<br>Çankaya / Ankara", ADDR), (r'<span class="tag">Çankaya · Ankara</span>', "")],
+}
 
 NAMES = {"ana": "Ana görsel", "hizmet": "Hizmetler", "stil": "Stil seçici", "galeri": "Galeri", "ekip": "Ekip", "kadro": "Ekip", "paket": "Paketler",
          "iletisim": "İletişim", "sss": "Sık sorulanlar", "ritueller": "Hizmetler", "sec": "Ritüel sihirbazı", "hediye": "Hediye kartı",
@@ -76,12 +88,15 @@ def classify(tag, at, first_hero):
         return None
     if i in ("sh", "lb"):
         return "Mobil bar"
-    if i in ("tab", "dock", "fab", "fb"):
+    if i in ("tab", "dock", "fab", "fb", "mbar"):
         return "Mobil bar"
     if i == "mn":
         return "Mobil menü"
-    if "dl" in c:
+    if "dl" in c or "an" in c:
         return "Duyuru çubuğu"
+    if i.startswith("pg-"):
+        return {"home": "Ana sayfa", "hizmetler": "Hizmetler", "galeri": "Galeri", "uzmanlar": "Ekip", "paketler": "Paketler", "hakkimizda": "Hakkımızda",
+                "ipuclari": "İpuçları", "iletisim": "İletişim"}.get(i[3:])
     if tag == "footer":
         return "Alt bilgi"
     if tag in ("aside", "nav") or i in ("top", "bar", "mast", "lnk", "nv"):
@@ -99,8 +114,49 @@ def classify(tag, at, first_hero):
     return None
 
 
+def patch_booking(h, refresh="refreshAll"):
+    """kuafor5'in satır içi randevu betiği (ksh çekirdeğinin eski hâli) gerçek API'ye bağlanır: aynı değişiklikler ksh.CORE'da yapıldı."""
+    sys.path.insert(0, os.path.join(ROOT, "docs", "tema_tasarim", "kset"))
+    import ksh
+    core = ksh.CORE
+
+    def rep(a, b):
+        nonlocal h
+        assert a in h, a[:60]
+        h = h.replace(a, b, 1)
+    rep("HRS=[10,11,12,13,14,15,16,17,18,19];", "HRS=[600,660,720,780,840,900,960,1020,1080,1140];")
+    rep("function openDay(d){var g=d.getDay();return g>=2&&g<=6}", core[core.index("function p2("):core.index("function booked(")].strip())
+    rep("function booked(d,e,h){var x=Math.sin((d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate())*13+h*7+e.charCodeAt(0)*31)*10000;return x-Math.floor(x)<.35}",
+        "function booked(d,e,m){var h=m/60,x=Math.sin((d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate())*13+h*7+e.charCodeAt(0)*31)*10000;return x-Math.floor(x)<.35}")
+    rep("function isFree(d,e,h){var n=ist();if(key(d)===key(n)&&h*60<n.getHours()*60+n.getMinutes()+60)return false;",
+        "function isFree(d,e,h){if(LIVE){var t=L.slots[iso(d)];return!!t&&t.some(function(s){return s.m===h&&s.available})}var n=ist();if(key(d)===key(n)&&h<n.getHours()*60+n.getMinutes()+60)return false;")
+    rep("function freeT(d,e){return HRS.filter(function(h){return isFree(d,e,h)})}\nfunction fmt(h){return(h<10?'0':'')+h+':00'}" if "function freeT(d,e){return HRS.filter(function(h){return isFree(d,e,h)})}\nfunction fmt" in h else
+        "function freeT(d,e){return HRS.filter(function(h){return isFree(d,e,h)})} function fmt(h){return(h<10?'0':'')+h+':00'}",
+        core[core.index("function hrs()"):core.index("while(o.length<7")].split("function days")[0].strip() if False else
+        "function hrs(){if(!LIVE)return HRS;var u={};Object.keys(L.slots).forEach(function(k){L.slots[k].forEach(function(s){u[s.m]=1})});return Object.keys(u).map(Number).sort(function(a,b){return a-b})}\nfunction freeT(d,e){return hrs().filter(function(h){return isFree(d,e,h)})}\nfunction fmt(m){return p2(Math.floor(m/60))+':'+p2(m%60)}")
+    rep("while(out.length<7&&k<30){", "while(out.length<7&&k<40){")
+    rep("HRS.forEach(function(h){var b=document.createElement('button');b.dataset.v=fmt(h)", "hrs().forEach(function(h){var b=document.createElement('button');b.dataset.v=fmt(h)")
+    rep("function openNow(){var d=new Date(", core[core.index("function openNow(){if(LIVE)"):core.index("var d=ist(),g=d.getDay()")].strip().replace("function openNow(){", "function openNow(){", 1) + "var d=new Date(")
+    # gönderim
+    i = h.index("$('#go').onclick=function(){")
+    j = h.index("};", h.index("shs.classList.add('done')", i)) + 2
+    new = core[core.index("function fin("):core.index("var cp0=")]
+    new = new.replace("refresh()", refresh + "()")
+    new += core[core.index("var cp0="):core.index("\n", core.index("var cp0="))]
+    new = new.replace("$('#go').onclick=function(){err('');", "$('#go').onclick=function(){err('');") 
+    h = h[:i] + new + h[j:]
+    rep("function open(ds){", "function open(ds){err('');$('#go').disabled=!!(LIVE&&L.ready&&!L.enabled);if(LIVE&&L.ready&&!L.enabled){err('Online randevu şu an kapalı. Lütfen bizi arayın.')}")
+    rep("setInterval(refreshAll,60000)", "setInterval(function(){load(false);refreshAll()},60000)")
+    rep('<button class="btn go" id="go">', '<label data-mod="pazarlama" style="display:none">Kupon kodu (varsa)<input id="f-c" autocomplete="off" placeholder="KUPON"></label><div id="f-msg" role="alert" style="display:none;margin-top:12px;color:#e11d48;font-size:14px;font-weight:600"></div><button class="btn go" id="go">')
+    return h
+
+
 def build_theme(t):
     h = open(os.path.join(SRC, "kuafor%d.html" % t["n"]), encoding="utf-8").read()
+    if t["n"] == 5:
+        h = patch_booking(h)
+        h = re.sub(r'href="#/([a-z]+)"', r'href="#pg-\1"', h)
+        h = h.replace('href="#/"', 'href="#"')
     bs = h.index("<body")
     be = h.index(">", bs) + 1
     ee = h.rindex("</body>")
@@ -124,7 +180,8 @@ def build_theme(t):
                 continue
             for (a2, b2, tg, x), nm in zip(inner, names):
                 sec = raw[a2:b2]
-                sec = re.sub(r"^<(\w+)", r'<\1 data-mx', sec, count=1)
+                if t["n"] == 6:
+                    sec = re.sub(r"^<(\w+)", r'<\1 data-mx', sec, count=1)
                 blocks.append([nm or "Bölüm", sec])
             continue
         nm = classify(tag, at, False)
@@ -185,10 +242,15 @@ BRIDGE = """<style data-kbridge>
 .spx-c{max-width:760px;line-height:1.7}.spx-c h2,.spx-c h3{font-family:var(--fd)}
 .spx-fl{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;padding:18px 20px;font-size:14px}.spx-fl a{color:inherit;opacity:.8}
 """
-BRIDGE = BRIDGE + KX_CSS + "@media(max-width:900px){.spx-fab{bottom:92px!important}}</style>"
+BRIDGE = BRIDGE + KX_CSS + "@media(max-width:900px){.spx-fab{bottom:92px!important}}.pg{display:block!important;scroll-margin-top:84px}@media(max-width:900px){nav>a[href^=\"/\"]:not([href*=\"#\"]):not([class]){display:none!important}}</style>"
 
 
 def finish(html, t):
+    for rx, to in CLEAN.get(t["n"], []):
+        html = re.sub(rx, lambda m, to=to: to, html)
+    html = re.sub(r'<a[^>]*href="mailto:[^"]*\.example"[^>]*>[^<]*</a>', "", html)
+    html = re.sub(r"<h2([^>]*)>@\w+</h2>", r"<h2\1>Bizi Instagram'da izleyin</h2>", html)
+    html = re.sub(r"@(?:atolyesac|butiksac)\b", "Instagram", html)
     # telefon, saat, marka: panelin yer tutucuları
     html = re.sub(r"tel:\+?\d{10,12}", "tel:+905320000000", html)
     html = re.sub(r"0[2-3]\d{2} 000 00 00", "0532 000 00 00", html)
