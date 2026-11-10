@@ -737,8 +737,9 @@
       var e = nodes[i];
       if (e.id === 'spx-ffab' || e.closest('#spx-fm')) continue;
       if (e.tagName === 'IMG' && /logo|servisplus/i.test(e.getAttribute('src') || '') && !e.getAttribute('data-spx-fl')) {
-        if (FLOGO) { e.setAttribute('data-spx-fl', '1'); e.src = FLOGO; e.removeAttribute('srcset'); e.style.objectFit = 'contain'; }
-        else if (!FIRM.has_logo) { var sp = document.createElement('span'); sp.textContent = nm; sp.setAttribute('data-spx-fn', '1'); sp.style.cssText = 'font-weight:800;font-size:16px;color:#0f172a'; e.replaceWith(sp); }
+        /* panelin sol üst köşesi her zaman OnlineKaydet logosu (reklam); firmanın kendi logosu PDF, fiş ve sitede kullanılır */
+        e.setAttribute('data-spx-fl', '1'); e.src = '/logo-renkli-s.png'; e.removeAttribute('srcset'); e.alt = 'OnlineKaydet'; e.style.objectFit = 'contain'; e.style.maxHeight = '38px'; e.style.width = 'auto';
+        if (!e.parentNode.getAttribute('data-spx-ok') && e.parentNode.tagName !== 'A') { var ak = document.createElement('a'); ak.href = 'https://onlinekaydet.com'; ak.target = '_blank'; ak.rel = 'noopener'; ak.setAttribute('data-spx-ok', '1'); ak.style.display = 'inline-flex'; e.parentNode.insertBefore(ak, e); ak.appendChild(e); }
       } else if (e.children.length === 0 && /^servis\s*plus(\s+usta)?$/i.test((e.textContent || '').trim())) { e.textContent = nm; e.setAttribute('data-spx-fn', '1'); }
     }
     /* firma adı ekranda tek kez görünsün: ilk görünür olan kalır, tekrarları gizlenir */
