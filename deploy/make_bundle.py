@@ -5,7 +5,7 @@ import os, re, json, sys
 R = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 rd = lambda p: open(os.path.join(R, p), encoding='utf-8').read()
 files, edits = {}, []
-for f in ('sektor_ek.py', 'sektor.py', 'demo.py', 'sitegen.py', 'storefront.py', 'ilan.py', 'sektor_mod.py', 'sektor_cok.py', 'sektor_cok2.py', 'shopdetail.py', 'urunsayfa.py', 'realimg.py', 'themefix.py', 'siteedit.py', 'sahip.py', 'server.py', 'themes.json'):
+for f in ('sektor_ek.py', 'sektor.py', 'demo.py', 'sitegen.py', 'storefront.py', 'ilan.py', 'sektor_mod.py', 'sektor_dil.py', 'sektor_cok.py', 'sektor_cok2.py', 'shopdetail.py', 'urunsayfa.py', 'realimg.py', 'themefix.py', 'siteedit.py', 'sahip.py', 'server.py', 'themes.json'):
     files['app/' + f] = rd('panel/' + f)
 for f in ('gen3.py', 'gen4.py', 'patch_old.py', 'fetch_photos.py', 'ill/make_ill.py'):
     files['themes/' + f] = rd('themes/' + f)

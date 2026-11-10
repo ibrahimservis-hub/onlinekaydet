@@ -6373,12 +6373,58 @@
     if (S.busy || S.tok === t) return; S.busy = true;
     fetch(location.origin + '/api/sector-terms', { headers: { Authorization: 'Bearer ' + t } })
       .then(function (r) { return r.ok ? r.json() : {}; })
-      .then(function (j) { window.__spxSectorKey = (j && j.key) || ''; window.__spxMods = (j && j.modules) || []; S.tok = t; S.map = (j && j.terms && Object.keys(j.terms).length) ? j.terms : null; S.keys = S.map ? Object.keys(S.map) : []; })
+      .then(function (j) { window.__spxSectorKey = (j && j.key) || ''; window.__spxMods = (j && j.modules) || []; S.lex = (j && j.lex && j.lex.kisi) ? j.lex : null; S.tok = t; S.map = (j && j.terms && Object.keys(j.terms).length) ? j.terms : null; S.keys = S.map ? Object.keys(S.map) : []; })
       .catch(function () { S.tok = t; S.map = null; })
       .then(function () { S.busy = false; });
   }
+  /* kelime düzeyi: 'Yeni Teknisyen', 'Cihaz Ekle', 'ARIZA TANIMI' gibi etiket dışı metinler de sektöre uygun söylenir (ek uyumu korunur) */
+  var VOW = 'aeıioöuü', BACK = 'aıou';
+  function lastV(w) { w = w.toLowerCase(); for (var i = w.length - 1; i >= 0; i--) if (VOW.indexOf(w[i]) >= 0) return w[i]; return 'e'; }
+  function attach(base, kind) {
+    var lw = base.toLowerCase(), v = lastV(lw), bk = BACK.indexOf(v) >= 0, end = lw[lw.length - 1], vend = VOW.indexOf(end) >= 0, hard = 'çfhkpsşt'.indexOf(end) >= 0;
+    var hi = (v === 'a' || v === 'ı') ? 'ı' : (v === 'e' || v === 'i') ? 'i' : (v === 'o' || v === 'u') ? 'u' : 'ü';
+    var lo = bk ? 'a' : 'e';
+    switch (kind) {
+      case 'gen': return base + (vend ? 'n' : '') + hi + 'n';
+      case 'dat': return base + (vend ? 'y' : '') + lo;
+      case 'acc': return base + (vend ? 'y' : '') + hi;
+      case 'abl': return base + (vend ? 'n' : '') + (hard && !vend ? 't' : 'd') + lo + 'n';
+      case 'loc': return base + (hard && !vend ? 't' : 'd') + lo;
+      case 'ins': return base + (vend ? 'y' : '') + 'l' + lo;
+      default: return base;
+    }
+  }
+  var SUF = { '': '', 'nın': 'gen', 'nin': 'gen', 'ın': 'gen', 'in': 'gen', 'un': 'gen', 'ün': 'gen', 'ya': 'dat', 'ye': 'dat', 'a': 'dat', 'e': 'dat', 'yı': 'acc', 'yi': 'acc', 'ı': 'acc', 'i': 'acc', 'u': 'acc', 'ü': 'acc', 'dan': 'abl', 'den': 'abl', 'tan': 'abl', 'ten': 'abl', 'da': 'loc', 'de': 'loc', 'ta': 'loc', 'te': 'loc', 'yla': 'ins', 'yle': 'ins', 'la': 'ins', 'le': 'ins' };
+  function trUp(x) { return x.toLocaleUpperCase('tr'); }
+  function fit(orig, neu) { if (orig.length > 1 && orig === trUp(orig)) return trUp(neu); return /^[A-ZÇĞİÖŞÜ]/.test(orig) ? neu.charAt(0).toLocaleUpperCase('tr') + neu.slice(1) : neu.charAt(0).toLocaleLowerCase('tr') + neu.slice(1); }
+  var WB = '(?:^|[^A-Za-zÇĞİÖŞÜçğıöşüÂâ])';
+  function rx(stems, plural) { return new RegExp('(' + WB + ')(' + stems + ')(' + (plural ? 'lar|ler' : '') + ')?([a-zçğıöşü]{0,4})(?![A-Za-zÇĞİÖŞÜçğıöşü])', 'gi'); }
+  var RX = null;
+  function build() {
+    var L = S.lex; if (!L) { RX = null; return; }
+    var T = function (o, nounKey) { return function (m, pre, stem, pl, suf) { var kind = SUF[suf.toLowerCase()]; if (kind === undefined) return m; var n = L[nounKey]; var isPl = !!pl; var base = isPl ? n[1] : n[0]; if (isPl && n[1] === n[0]) base = n[0]; return pre + fit(stem, attach(base, kind)); }; };
+    RX = [
+      [/(^|[^A-Za-zÇĞİÖŞÜçğıöşü])(yedek parça)( stok[a-zçğıöşü]*)?(?![A-Za-zÇĞİÖŞÜçğıöşü])/gi, function (m, pre, st, sk) { return pre + fit(st, sk ? L.stok : L.stok.replace(/\s*Stok\w*$/i, '')); }],
+      [/(^|[^A-Za-zÇĞİÖŞÜçğıöşü])(servis (?:kayd|kayıt)[a-zçğıöşü]*)(?![A-Za-zÇĞİÖŞÜçğıöşü])/gi, function (m, pre, st) { return pre + fit(st, /kay[ıi]tlar/i.test(st) ? L.is[1] : L.is[0]); }],
+      [rx('usta|teknisyen', true), T(0, 'kisi')],
+      [rx('cihaz', true), T(0, 'cihaz')],
+      [new RegExp('(' + WB + ')(arıza|ariza)(lar|ler)?([a-zçğıöşü]{0,4})(?![A-Za-zÇĞİÖŞÜçğıöşü])', 'gi'), function (m, pre, stem, pl, suf) { var kind = SUF[suf.toLowerCase()]; if (kind === undefined) return m; return pre + fit(stem, attach(L.sorun + (pl ? 'lar' === pl.toLowerCase() ? (lastV(L.sorun) >= 'a' && BACK.indexOf(lastV(L.sorun)) >= 0 ? 'lar' : 'ler') : 'ler' : ''), kind)); }]
+    ];
+  }
+  function words(str) {
+    if (!RX || !str || str.length > 90 || !/usta|teknisyen|cihaz|ar[ıi]za|yedek par|servis kay/i.test(str)) return str;
+    RX.forEach(function (r) { str = str.replace(r[0], r[1]); });
+    return str;
+  }
   function apply() {
     if (!S.map || !document.body) return;
+    if (S.lex && !RX) build();
+    if (RX) {
+      var w2 = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null), n2, l2 = [];
+      while ((n2 = w2.nextNode())) { var v2 = n2.nodeValue; if (v2 && v2.length < 90 && /usta|teknisyen|cihaz|ar[ıi]za|yedek par|servis kay/i.test(v2)) l2.push(n2); }
+      l2.forEach(function (n) { var p = n.parentElement; if (!p || /^(SCRIPT|STYLE|TEXTAREA|INPUT|OPTION|TD|PRE|CODE)$/.test(p.tagName) || p.isContentEditable || p.closest('td,[data-nosektor]')) return; var o = n.nodeValue, r = words(o); if (r !== o) n.nodeValue = r; });
+      [].forEach.call(document.querySelectorAll('[placeholder],[aria-label],[title]'), function (el) { ['placeholder', 'aria-label', 'title'].forEach(function (a) { var v = el.getAttribute(a); if (v) { var r = words(v); if (r !== v) el.setAttribute(a, r); } }); });
+    }
     var w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null), n, list = [];
     while ((n = w.nextNode())) { var v = n.nodeValue; if (v && v.length < 40 && S.map[v.trim()] !== undefined) list.push(n); }
     list.forEach(function (n) {

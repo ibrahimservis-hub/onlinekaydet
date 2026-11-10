@@ -5,7 +5,7 @@ os.environ["BACKGROUND_JOBS"] = "0"
 import logging; logging.disable(logging.CRITICAL)
 from starlette.testclient import TestClient
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "panel"))
-import sektor, sektor_ek, demo
+import sektor, sektor_ek, sektor_dil, demo
 s = boot.server; ok, bad = [], []
 def t(n, f):
     try: f(); ok.append(n)
@@ -29,7 +29,7 @@ with TestClient(s.app) as c:
             assert jobs[0]["device_model"] == meta[0], (k, jobs[0]["device_model"])
             assert any(j["work_done"] == meta[1] for j in jobs), k
             tr = c.get("/api/sector-terms", headers=H).json()
-            assert tr["key"] == k and tr["terms"].get("Servis Kayıtları", "Servis Kayıtları") == sektor_ek.NEW[k]["terms"].get("Servis Kayıtları", "Servis Kayıtları"), (k, tr)
+            assert tr["key"] == k and tr["terms"].get("Servis Kayıtları", "Servis Kayıtları") == (sektor_dil.labels(k) or sektor_ek.NEW[k]["terms"]).get("Servis Kayıtları", "Servis Kayıtları") and tr["lex"].get("kisi"), (k, tr)
     t("her yeni sektörde demo açılır; örnek veri ve panel terimleri sektör dilinde", b)
     def e():
         demo._RATE.clear(); r = c.post("/api/public/demo", json={"name": "Berber Ali", "phone": "05524167001", "sector": "Berber"}); assert r.status_code == 200, r.text

@@ -97,6 +97,10 @@ async def apply(fdb, key: str) -> dict:
 # --- teknik olmayan sektörler (oto servis, çekici, kuaför, nakliye, tekstil, e-ticaret...) ---
 from sektor_ek import NEW as _NEW  # noqa: E402
 SECTORS.update({k: {kk: vv for kk, vv in v.items() if kk != "site"} for k, v in _NEW.items()})
+import sektor_dil as _dil  # noqa: E402
+for _k in _dil.ROWS:
+    if _k in SECTORS:
+        SECTORS[_k]["terms"] = _dil.labels(_k)
 TEKNIK = ("kombi", "klima", "beyaz_esya", "elektronik", "bilgisayar", "tesisat", "elektrik", "guvenlik")
 
 
@@ -111,4 +115,6 @@ def register(api_router, db, deps):
         key = d.get("key") or ""
         sec = SECTORS.get(key) or {}
         import sektor_mod
-        return {"key": key, "name": d.get("name") or sec.get("name") or "", "terms": d.get("terms") or sec.get("terms") or {}, "modules": sektor_mod.modules_for(key)}
+        import sektor_dil
+        terms = sektor_dil.labels(key) or d.get("terms") or sec.get("terms") or {}
+        return {"key": key, "name": d.get("name") or sec.get("name") or "", "terms": terms, "lex": sektor_dil.lex(key), "modules": sektor_mod.modules_for(key)}
