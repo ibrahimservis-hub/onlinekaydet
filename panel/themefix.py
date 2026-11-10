@@ -9,7 +9,7 @@ import re
 
 MARK = "<!--okfix-->"
 
-CSS = ("<style id=\"okfix\">.mb a.hl,.mb1 a.hl{min-height:0!important;align-items:center!important}"
+CSS = ("<style id=\"okfix\">select option,select optgroup{background-color:#fff!important;color:#14171c!important}select{color-scheme:light dark}.mb a.hl,.mb1 a.hl{min-height:0!important;align-items:center!important}"
        "@media(max-width:560px){.ann .w{gap:4px 10px!important;padding:6px 44px 6px 12px!important;font-size:.78rem!important}"
        ".ann .cd2 b{padding:4px 5px!important;min-width:28px!important}}</style>")
 
@@ -36,7 +36,7 @@ var ph=document.createComment('okpop'),box,ov;
 function build(){ov=document.createElement('div');ov.id='okpop';ov.setAttribute('role','dialog');ov.setAttribute('aria-modal','true');ov.setAttribute('aria-label','Randevu formu');
 box=document.createElement('div');box.className='okbox';var x=document.createElement('button');x.type='button';x.className='okx';x.setAttribute('aria-label','Kapat');x.innerHTML='&times;';
 box.appendChild(x);ov.appendChild(box);document.body.appendChild(ov);x.addEventListener('click',close);ov.addEventListener('mousedown',function(e){if(e.target===ov)close()})}
-var last;function open(e){if(e)e.preventDefault();if(!ov)build();if(!ov.classList.contains('on')){last=document.activeElement;sec.parentNode.insertBefore(ph,sec);box.appendChild(sec);ov.classList.add('on');document.documentElement.style.overflow='hidden';
+var last;function open(e){if(e)e.preventDefault();if(!ov)build();if(!ov.classList.contains('on')){last=document.activeElement;var pc=getComputedStyle(sec.parentNode),sc=getComputedStyle(sec);box.style.color=pc.color;box.style.fontFamily=pc.fontFamily;box.style.fontSize=pc.fontSize;box.style.lineHeight=pc.lineHeight;var bg=sc.backgroundColor;if(!bg||bg==='transparent'||/rgba\(.*, 0\)$/.test(bg))bg=pc.backgroundColor;if(!bg||/rgba\(.*, 0\)$/.test(bg)||bg==='transparent')bg=getComputedStyle(document.body).backgroundColor;box.style.background=bg;sec.parentNode.insertBefore(ph,sec);box.appendChild(sec);ov.classList.add('on');document.documentElement.style.overflow='hidden';
 var f=sec.querySelector('input,select,textarea');if(f)setTimeout(function(){f.focus({preventScroll:true})},60)}}
 function close(){if(!ov||!ov.classList.contains('on'))return;ov.classList.remove('on');document.documentElement.style.overflow='';if(ph.parentNode)ph.parentNode.insertBefore(sec,ph);if(last&&last.focus)last.focus()}
 document.addEventListener('keydown',function(e){if(e.key==='Escape')close()});
