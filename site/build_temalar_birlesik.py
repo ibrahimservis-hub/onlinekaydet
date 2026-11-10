@@ -52,6 +52,6 @@ s = s.replace('<div class="tk-no" id="tkno"', '<div class="tk-no" id="tkno"', 1)
 no = s.find('id="tkno"'); ne = s.find('</div>', no) + 6
 s = s[:ne] + '<button type="button" class="tk-more" id="tkmore" hidden>Daha fazla göster</button>' + s[ne:]
 css = '.tk-live{aspect-ratio:8/5;background:#fff}.tk-live iframe{position:absolute;left:0;top:0;width:1280px;height:800px;border:0;transform-origin:0 0;pointer-events:none;background:#fff}.tk-more{display:block;margin:26px auto 0;background:#0a0c0f;color:#fff;border:0;border-radius:99px;padding:14px 26px;font:500 15px var(--f);cursor:pointer;min-height:48px}.tk-more[hidden]{display:none}#tks .tk-g:last-child{max-height:420px;overflow:auto}</style>'
-s = s.replace('</style>', css, 1) if '.tk-live' not in s else s
+s = s.replace('</style>', css, 1) if '.tk-live{' not in s else s
 open(P, 'w', encoding='utf-8').write(s)
 print(len(s), s.count('class="tk"'), tot, prem, std)
