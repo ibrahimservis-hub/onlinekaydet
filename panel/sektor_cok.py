@@ -27,6 +27,7 @@ ARCHE_TERMS = {
               "Fiyat Teklifleri": "Paket Teklifleri", "Usta Puanlama": "Ekip Puanlama", "Usta İş Geçmişi": "Çekim Geçmişi", "Ustadan Para Aldım": "Ekipten Tahsilat",
               "Ustaların Borç Durumu": "Ekip Hesapları", "Geciken Usta Borçları": "Geciken Ekip Hesapları"},
 }
+ARCHE_TERMS["servis"] = {}
 ARCHE_DIRS = {"randevu": ["lux", "edit", "lux", "cine", "edit", "lux"], "kurs": ["edit", "neon", "edit", "cine", "neon", "edit"], "ilan": ["lux", "cine", "edit", "lux", "cine", "edit"],
               "menu": ["cine", "lux", "neon", "edit", "cine", "lux"], "cekim": ["cine", "lux", "cine", "edit", "lux", "neon"], "servis": ["edit", "neon", "cine", "edit", "neon", "cine"]}
 NAME_SUF = [["Merkezi", "Stüdyo", "Plus", "Atölye", "Evi", "Butik"]]
@@ -158,7 +159,7 @@ PRODUCTS = {
  "veteriner": [("VT-5001", "Kedi maması 2 kg", "Pati", "Mama", 520, 2), ("VT-5002", "Köpek maması 3 kg", "Pati", "Mama", 690, 2), ("VT-5003", "Tasma seti", "Pati", "Aksesuar", 240, 2), ("VT-5004", "Bakım şampuanı", "Pati", "Bakım", 190, 2)],
  "telefon_tamir": [("TT-6001", "Şeffaf telefon kılıfı", "Servis", "Kılıf", 180, 2), ("TT-6002", "Temperli cam", "Servis", "Koruyucu", 120, 2), ("TT-6003", "Hızlı şarj kablosu", "Servis", "Şarj", 260, 2), ("TT-6004", "Taşınabilir şarj cihazı", "Servis", "Şarj", 650, 1)],
 }
-HEAD_SUB = {"randevu": "Randevunuzu online ayırın; hatırlatma mesajı telefonunuza gelir.", "kurs": "Kaydınızı ve ders planınızı online başlatın.", "ilan": "Talebinizi iletin, danışman sizi arasın.",
+HEAD_SUB = {"servis": "Talebinizi yazın, randevu veya keşif için size dönüş yapalım.", "randevu": "Randevunuzu online ayırın; hatırlatma mesajı telefonunuza gelir.", "kurs": "Kaydınızı ve ders planınızı online başlatın.", "ilan": "Talebinizi iletin, danışman sizi arasın.",
             "menu": "Rezervasyon ve sipariş bilgilerinizi bırakın, onay mesajı gelsin.", "cekim": "Tarih ve ihtiyacınızı yazın, paket ve fiyatla dönüş yapalım."}
 CIT = ["Ankara", "İstanbul", "İzmir", "Bursa", "Antalya", "Konya"]
 SEC_COLORS = None
@@ -193,3 +194,8 @@ def theme_meta():
         names={k: list(s["names"]) for k, s in S.items()}, dirs={k: ARCHE_DIRS[s["arche"]] for k, s in S.items()},
         shop_on={k for k, s in S.items() if s["shop"]}, tools_by={k: ["gen.hazirlik", "gen.soru"] for k in S},
         sector_words={s["name"].lower().split(" &")[0]: k for k, s in S.items()})
+
+
+import sektor_cok2 as _c2
+S.update(_c2.to_spec())
+PRODUCTS.update(_c2.PRODUCTS)

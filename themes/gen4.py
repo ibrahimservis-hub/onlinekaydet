@@ -83,7 +83,7 @@ NAMES = {
 }
 SHOP_ON = set(content_ek.SHOP_SECTORS)
 NAMES.update(_M['names']); DIRS.update(_M['dirs']); TOOLS_BY.update(_M['tools_by'])
-PLAIN = {'eticaret', 'tekstil', 'kuafor', 'guzellik', 'veteriner', 'telefon_tamir'}   # parça mağazası dili yok
+PLAIN = {'eticaret', 'tekstil', 'kuafor', 'guzellik'} | set(_M['shop_on'])   # parça mağazası dili yok
 
 # Genel bileşenlerdeki teknik servis dilini sektöre çevirir (sırayla uygulanır)
 VOCAB_ALL = [('Bu sonucu ustaya iletin', 'Bu sonucu bize iletin'), (' servisi ·', ' ·'), ('Randevu, yazılı fiyat ve garantili servis.', 'Randevu ve yazılı bilgilendirme.'),

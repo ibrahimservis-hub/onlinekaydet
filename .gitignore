@@ -2,3 +2,4 @@ __pycache__/
 *.pyc
 .env
 uploads/
+themes/html/n[0-9]*.html
