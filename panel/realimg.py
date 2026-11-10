@@ -6,6 +6,7 @@ import re
 KINDS = [  # (tür, js düzenli ifadesi: küçük harfli ad + kategori)
     ("canta", r"çanta|canta|cüzdan|valiz|sırt çant"),
     ("ayakkabi", r"ayakkab|sneaker|terlik|sandalet|çizme|bot "),
+    ("kumas", r"havlu|kumaş|kumas|nevresim|çarşaf|carsaf|perde|bornoz|iplik|ev tekstili"),
     ("giyim", r"tişört|tisort|gömlek|elbise|pantolon|ceket|mont|kazak|giyim|etek|şort|hırka|sweat"),
     ("saat", r"saat|takı|kolye|yüzük|bilezik|gözlük"),
     ("mama", r"mama|kedi|köpek|kopek"),
