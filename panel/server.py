@@ -3402,7 +3402,30 @@ if _FE:
         if not _r2.fullmatch(r"[a-z0-9-]{3,60}", slug) or not p.is_file():
             return JSONResponse({"detail": "Bulunamadı"}, status_code=404)
         import sitegen as _sg2
-        return _Resp(_sg2.credit(p.read_text(encoding="utf-8")), media_type="text/html", headers={"Cache-Control": "public, max-age=3600", "X-Robots-Tag": "noindex"})
+        raw = p.read_text(encoding="utf-8")
+        try:
+            th = next((t for t in __import__("json").loads((Path(__file__).resolve().parent / "themes.json").read_text(encoding="utf-8")) if t["slug"] == slug), None)
+            h = _sg2.preview_html(raw, th, slug) if th else raw
+        except Exception:                                                     # noqa: BLE001
+            h = raw
+        return _Resp(_sg2.credit(h), media_type="text/html", headers={"Cache-Control": "public, max-age=300", "X-Robots-Tag": "noindex"})
+
+    @app.get("/tema-onizleme/{slug}/{page}.html", include_in_schema=False)
+    async def tema_onizleme_sayfa(slug: str, page: str):
+        """Temanın iç sayfaları (hizmetler, süreç, SSS, iletişim...) aynı örnek verilerle."""
+        import re as _r2
+        p = Path(__file__).resolve().parent.parent / "themes" / "html" / (slug + ".html")
+        if not _r2.fullmatch(r"[a-z0-9-]{3,60}", slug) or not _r2.fullmatch(r"[a-z0-9-]{2,60}", page) or not p.is_file():
+            return JSONResponse({"detail": "Bulunamadı"}, status_code=404)
+        import sitegen as _sg2
+        try:
+            th = next((t for t in __import__("json").loads((Path(__file__).resolve().parent / "themes.json").read_text(encoding="utf-8")) if t["slug"] == slug), None)
+            h = _sg2.preview_html(p.read_text(encoding="utf-8"), th, slug, page) if th else None
+        except Exception:                                                     # noqa: BLE001
+            h = None
+        if not h:
+            return JSONResponse({"detail": "Bulunamadı"}, status_code=404)
+        return _Resp(_sg2.credit(h), media_type="text/html", headers={"Cache-Control": "public, max-age=300", "X-Robots-Tag": "noindex"})
 
     @app.get("/{full_path:path}", include_in_schema=False)
     async def spa(full_path: str, request: Request):

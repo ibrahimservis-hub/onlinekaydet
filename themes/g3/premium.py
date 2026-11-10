@@ -40,11 +40,11 @@ def _imv(X):
 
 
 # ------------------------------------------------------------------ MENÜ
-NAVCSS = """.pnv{position:absolute;top:var(--annh,0px);left:0;right:0;z-index:50;color:#fff;transition:background .3s,backdrop-filter .3s}.pnv .in{display:flex;align-items:center;gap:30px;width:min(1240px,100% - 48px);margin-inline:auto;padding:22px 0}
+NAVCSS = """.pnv{position:absolute;top:0;left:0;right:0;z-index:50;color:#fff;transition:background .3s,backdrop-filter .3s}.pnv .in{display:flex;align-items:center;gap:30px;width:min(1240px,100% - 48px);margin-inline:auto;padding:22px 0}
 .pnv nav{display:flex;gap:30px;margin-left:auto;font:600 .88rem/1 var(--fb)}.pnv nav a{opacity:.82;position:relative;padding:6px 0}.pnv nav a:after{content:"";position:absolute;left:0;bottom:0;height:1.5px;width:0;background:var(--ac);transition:width .3s}.pnv nav a:hover{opacity:1}.pnv nav a:hover:after{width:100%}
-.pnv .bgr{display:none;margin-left:auto;color:#fff}.pnv .nv-cta{min-height:44px;padding:0 22px;font-size:.88rem}.pnv.sc{position:fixed;top:0;background:color-mix(in srgb,var(--dk) 82%,transparent);backdrop-filter:blur(16px) saturate(1.3)}.pnv.sc .in{padding:13px 0}
+.pnv .bgr{display:none;margin-left:auto;color:#fff}.pnv .nv-cta{min-height:44px;padding:0 22px;font-size:.88rem}.pnv.sc{position:fixed;background:color-mix(in srgb,var(--dk) 82%,transparent);backdrop-filter:blur(16px) saturate(1.3)}.pnv.sc .in{padding:13px 0}
 .pnv-edit{color:var(--ink);position:sticky}.pnv-edit .bgr{color:var(--ink)}.pnv-edit.sc{background:color-mix(in srgb,var(--bg) 86%,transparent)}.pnv-edit nav{margin-left:auto}
-.pnv-neon{top:calc(16px + var(--annh,0px));position:fixed;left:0;right:0;padding:0 16px}.pnv-neon .in{width:min(960px,100%);padding:10px 12px 10px 24px;border-radius:99px;background:#ffffff12;border:1px solid #ffffff26;backdrop-filter:blur(16px)}.pnv-neon.sc{background:transparent;backdrop-filter:none}.pnv-neon.sc .in{background:color-mix(in srgb,var(--dk) 78%,transparent)}
+.pnv-neon{top:16px;position:fixed;left:0;right:0;padding:0 16px}.pnv-neon .in{width:min(960px,100%);padding:10px 12px 10px 24px;border-radius:99px;background:#ffffff12;border:1px solid #ffffff26;backdrop-filter:blur(16px)}.pnv-neon.sc{background:transparent;backdrop-filter:none}.pnv-neon.sc .in{background:color-mix(in srgb,var(--dk) 78%,transparent)}
 .pnv-lux nav{letter-spacing:.16em;text-transform:uppercase;font-size:.72rem}.pnv-lux .nv-cta{border-radius:0!important;background:transparent;color:var(--ac);border:1px solid var(--ac);box-shadow:none;letter-spacing:.16em;text-transform:uppercase;font-size:.72rem}
 @media(max-width:900px){.pnv nav,.pnv .nv-cta{display:none}.pnv .bgr{display:flex}}"""
 
@@ -68,7 +68,7 @@ HBASE = """.hrp{position:relative;overflow:hidden}.hrp .cta{display:flex;flex-wr
 
 
 def _mq(X):
-    w = [X.c['label'].upper(), '15 YIL DENEYİM', 'AYNI GÜN SERVİS', 'YAZILI GARANTİ', 'ÜCRETSİZ KEŞİF', X.city.upper() + ' VE ÇEVRESİ']
+    w = [X.c['label'].upper(), 'RANDEVU İLE HİZMET', 'ŞEFFAF FİYAT', 'YAZILI GARANTİ', 'ÜCRETSİZ KEŞİF', X.city.upper() + ' VE ÇEVRESİ']
     s = ''.join(f'<span>{t}</span><span>✦</span>' for t in w)
     return f'<div class="mqb" aria-hidden="true"><div class="mqt">{s}{s}</div></div>'
 
@@ -115,7 +115,7 @@ def hero_neon(X):
 @keyframes grow{from{transform:scaleY(.1)}}@media(max-width:900px){.hn{padding-top:120px}.hn .bn{grid-template-columns:1fr 1fr}.hn .bn .pic{grid-column:span 2;grid-row:auto;min-height:220px}.hn .bars{grid-column:span 2}}""")
     bars = ''.join(f'<i style="height:{h}%;animation-delay:{i * .08:.2f}s"></i>' for i, h in enumerate((38, 52, 46, 68, 60, 82, 76, 100)))
     return (f'<section class="hr hrp hn" id="top2"><i class="blob b1"></i><i class="blob b2"></i><i class="blob b3"></i><div class="w"><div class="tx rv"><span class="eyebrow">{X.c["label"]} · {X.city}</span><h1 style="margin-top:20px">{_h1(X)}</h1><p class="lead">{X.h[1]}</p>{_btns(X)}</div>'
-            f'<div class="bn rv rv2"><div class="pic glass">{X.ph(_imv(X), "center")}<span>{X.c["tag"]}</span></div><div class="glass"><small>Çözülen talep</small><strong>{_cnt(18240)}</strong></div><div class="glass"><small>Ortalama yanıt</small><strong>{_cnt(12, " dk")}</strong></div>'
+            f'<div class="bn rv rv2"><div class="pic glass">{X.ph(_imv(X), "center")}<span>{X.c["tag"]}</span></div><div class="glass"><small>Hizmet güvencesi</small><strong>Yazılı fiyat</strong></div><div class="glass"><small>Keşif</small><strong>Ücretsiz</strong></div>'
             f'<div class="glass bars" aria-label="Aylık performans">{bars}</div></div></div></section>')
 
 

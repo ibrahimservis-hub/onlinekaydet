@@ -329,6 +329,20 @@ def _off(m):
     return t.replace('class="', 'class="spx-off ', 1) if 'class="' in t else t[:-1] + ' class="spx-off">'
 
 
+PAGE_MAP = {"hizmet": "hizmetlerimiz", "surec": "nasil-calisiyoruz", "neden": "hakkimizda", "yorum": "hakkimizda",
+            "once-sonra": "galeri", "bolge": "hizmet-bolgeleri", "sss": "sss", "iletisim": "iletisim", "hakkimizda": "hakkimizda"}
+
+
+def link_pages(h, idx, base="/", suffix=""):
+    """Menü/alt bilgideki '#hizmet' gibi sayfa içi bağlantılar, o içeriğin kendi sayfası varsa o sayfaya gider (ana sayfada aşağı kaymaz)."""
+    have = {x["slug"] for x in idx}
+    return re.sub(r'href="#([a-z-]+)"', lambda m: ('href="%s%s%s"' % (base, PAGE_MAP[m.group(1)], suffix)) if PAGE_MAP.get(m.group(1)) in have else m.group(0), h)
+
+
+def _linked(h, base="/", suffix=""):
+    return set(re.findall(r'href="%s([a-z0-9-]+)%s"' % (re.escape(base), re.escape(suffix)), h))
+
+
 def apply_profile(raw, th, ctx):
     """Ham tema HTML'ine firma bilgilerini yerleştirir (ana sayfa). Boş bırakılan bilgi temadan da kalkar."""
     h = raw.replace("__API_URL__", "/api").replace("__PORTAL_URL__", "#")
@@ -375,11 +389,15 @@ def apply_profile(raw, th, ctx):
     idx = page_index(ctx)
     navs = [x for x in idx if x["nav"]]
     for b in blocks:
+        if b[0] in ("Menü", "Mobil menü", "Alt bilgi"):
+            b[1] = link_pages(b[1], idx, ctx.get("page_base", "/"), ctx.get("page_suffix", ""))
+    pb, ps = ctx.get("page_base", "/"), ctx.get("page_suffix", "")
+    for b in blocks:
         if b[0] == "Menü":
-            nv = "".join('<a href="/%s">%s</a>' % (x["slug"], E(x["title"])) for x in navs[:2])
+            nv = "".join('<a href="%s%s%s">%s</a>' % (pb, x["slug"], ps, E(x["title"])) for x in navs[:2] if x["slug"] not in _linked(b[1], pb, ps))
             b[1] = b[1].replace("</nav>", nv + "</nav>", 1) if "</nav>" in b[1] else b[1]
         elif b[0] == "Mobil menü":
-            nv = "".join('<a href="/%s">%s</a>' % (x["slug"], E(x["title"])) for x in navs)
+            nv = "".join('<a href="%s%s%s">%s</a>' % (pb, x["slug"], ps, E(x["title"])) for x in navs if x["slug"] not in _linked(b[1], pb, ps))
             i = b[1].find('class="dl">')
             if i > 0:
                 j = b[1].find("</div>", i)
@@ -416,13 +434,49 @@ def dflt_off(html):
     return 'data-dflt="off"' in html[:300]
 
 
+SHOP_LINK = re.compile(r'<a\b[^>]*href="(?:#(?:urunler|firsat|sepet)|/magaza[^"]*|/hesabim[^"]*)"[^>]*>(?:(?!</a>).)*</a>', re.S)
+STORY_SHOP = re.compile(r'<button class="st"[^>]*data-l="#(?:firsat|urunler|sepet)"[^>]*>.*?</button>', re.S)
+
+
+SHOP_WORDS = re.compile(r"(?i)(?:sepet|kargo|iade|alışveriş|mağaza|sipariş|stoktaki|kapıda ödeme)")
+SHOP_TEXT_BLOCKS = {"Hizmetler", "Nasıl çalışıyoruz", "Sık sorulanlar", "Araç", "İkinci araç", "Neden biz", "Teklif bandı", "Çağrı bandı", "Yorumlar"}
+
+
+def shop_names(blocks, ctx):
+    """E-ticaret kapalıyken yayından kalkacak bölümler: ürün/mağaza bölümü, ürün fırsatları ve onlara bağlanan duyuru."""
+    if ctx.get("shop_on"):
+        return set()
+    gone = {b[0] for b in blocks if b[0] == "Ürünler"}
+    for b in blocks:                                  # mağaza dilinde yazılmış (sepet, kargo, iade...) bölümler de kalkar
+        if b[0] in SHOP_TEXT_BLOCKS and len(SHOP_WORDS.findall(re.sub(r"<script.*?</script>|<style.*?</style>|<[^>]+>", " ", b[1], flags=re.S))) >= 2:
+            gone.add(b[0])
+    if any(b[0] == "Fırsatlar" and ("İndirimli ürünler" in b[1] or "Fırsat ürünleri" in b[1]) for b in blocks):
+        gone |= {"Fırsatlar", "Duyuru çubuğu"}
+    return gone
+
+
+def strip_shop(b, ctx):
+    """Kalan bölümlerde mağazaya/sepete/fırsat ürünlerine giden bağlantılar, hikâyeler ve menü paneli temizlenir."""
+    h = b[1]
+    h = STORY_SHOP.sub("", h)
+    h = SHOP_LINK.sub("", h)
+    h = re.sub(r'<div class="pr"><div><small>Güncel</small>.*?</div></div>', "", h, flags=re.S) if 'class="mega"' in h else h
+    b[1] = h
+
 def apply_layout(blocks, ctx):
     """Müşterinin bölüm sırası, gizlediği bölümler ve metin düzenlemeleri."""
     lay = ctx["p"].get("layout") or {}
     order = [n for n in (lay.get("order") or []) if isinstance(n, str)]
     hidden = set(lay.get("hidden") or [])
+    shop_on = bool(ctx.get("shop_on"))
     if not lay.get("_all"):
-        hidden |= {b[0] for b in blocks if dflt_off(b[1]) and b[0] not in order}
+        hidden |= {b[0] for b in blocks if dflt_off(b[1]) and b[0] not in order and not (shop_on and b[0] == "Ürünler")}
+    off = shop_names(blocks, ctx)
+    hidden |= off
+    if off:
+        for b in blocks:
+            if b[0] not in off:
+                strip_shop(b, ctx)
     top = [b for b in blocks if b[0] in FIXED_TOP]
     bot = [b for b in blocks if b[0] in FIXED_BOTTOM]
     mid = [b for b in blocks if b[0] not in FIXED_TOP + FIXED_BOTTOM]
@@ -627,7 +681,28 @@ CREDIT_LINK = ('<a class="spx-credit" href="https://onlinekaydet.com" target="_b
 _CREDIT_RX = re.compile(r"(?:<a\b[^>]*>\s*)?Bu site\s+OnlineKaydet\s+ile yay[ıi]nlan[ıi]r(?:\s*</a>)?", re.I)
 
 
+def preview_html(raw, th, slug, page=""):
+    """Tema vitrini: örnek firma bilgisiyle ana sayfa ya da iç sayfa. Menü bağlantıları önizleme sayfalarına gider."""
+    ctx = {"th": th, "name": th.get("name") or "Örnek Firma", "tel": "05320000000", "p": effective({}, th.get("sector") or ""), "sector": th.get("sector") or "",
+           "logo": "", "city": "", "legal": [], "shop_on": True, "img": (lambda k: ""), "logo_abs": ""}
+    ctx["p"]["address"] = ""
+    h = apply_profile(raw, th, ctx)
+    if page:
+        r = render_page(h, ctx, page)
+        if not r:
+            return None
+        h = r[0]
+    base = "/tema-onizleme/%s" % slug
+    h = re.sub(r'<a\b[^>]*href="/(?:magaza|hesabim)[^"]*"[^>]*>(?:(?!</a>).)*</a>', "", h, flags=re.S)
+    h = re.sub(r'href="/#([^"]*)"', lambda m: 'href="%s.html#%s"' % (base, m.group(1)), h)
+    h = h.replace('href="/"', 'href="%s.html"' % base)
+    h = re.sub(r'href="/([a-z0-9-]+)"', lambda m: 'href="%s/%s.html"' % (base, m.group(1)), h)
+    return h
+
+
 def credit(h: str) -> str:
+    import themefix
+    h = themefix.fix(h)
     """'OnlineKaydet ile yayınlanır' bağlantısı her sitede, her sayfada onlinekaydet.com'a gider; müşteri silemez ya da değiştiremez.
     Mevcut yazı (bağlantılı ya da düz) kanonik bağlantıyla değiştirilir; hiç yoksa sayfa sonuna eklenir."""
     if not h or "</body>" not in h:
@@ -769,7 +844,8 @@ def assemble_mid(home_html, ctx, title, mids, kind="page", slug="", extra=""):
     keep = []
     for b in blocks:
         if b[0] in FIXED_NAMES:
-            keep.append([b[0], re.sub(r'href="#([^"]*)"', lambda m: 'href="/%s"' % (("#" + m.group(1)) if m.group(1) not in ("", "top") else ""), b[1])])
+            bb = link_pages(b[1], page_index(ctx))
+            keep.append([b[0], re.sub(r'href="#([^"]*)"', lambda m: 'href="/%s"' % (("#" + m.group(1)) if m.group(1) not in ("", "top") else ""), bb)])
     out_blocks = [b for b in keep if b[0] in ("Menü", "Mobil menü")] + list(mids) + [b for b in keep if b[0] in ("Alt bilgi", "Mobil bar")]
     pre2 = _IMVAR.sub(lambda m: m.group(0).split(":")[0] + ":none", pre)
     out = join_blocks(pre2, out_blocks, tail)

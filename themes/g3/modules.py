@@ -81,9 +81,8 @@ function tick(el){var end=new Date(el.getAttribute('data-end')).getTime();var ho
   else{el.innerHTML='<b>'+g+' g</b><b>'+p2(h)+' sa</b><b>'+p2(m)+' dk</b><b>'+p2(c)+' sn</b>'}return true}
  if(run())var t=setInterval(function(){if(!run())clearInterval(t)},1000)}
 $$('[data-end]').forEach(tick);
-$$('.ann .x').forEach(function(b){b.addEventListener('click',function(){var a=b.closest('.ann');a.style.display='none';annH();try{sessionStorage.setItem('annx','1')}catch(e){}})});
+$$('.ann .x').forEach(function(b){b.addEventListener('click',function(){var a=b.closest('.ann');a.style.display='none';try{sessionStorage.setItem('annx','1')}catch(e){}})});
 try{if(sessionStorage.getItem('annx'))$$('.ann').forEach(function(a){a.style.display='none'})}catch(e){}
-function annH(){var a=document.querySelector('.ann'),h=0;if(a&&a.style.display!=='none')h=a.offsetHeight;document.documentElement.style.setProperty('--annh',h+'px')}annH();window.addEventListener('resize',annH);
 /* kayarak belirme */
 var rv=$$('.rv');if('IntersectionObserver' in window&&!rm){var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.12});rv.forEach(function(e){io.observe(e)})}else rv.forEach(function(e){e.classList.add('in')});
 /* hikâyeler */

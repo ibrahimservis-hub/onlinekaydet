@@ -522,6 +522,8 @@ def register(api_router, db, deps):
             t = re.search(r"<title>(.*?)</title>", h, flags=re.S)
             tt = (t.group(1).split(" · ")[0] if t else "").strip()
             h = sitegen.seo_inject(h, sitegen.seo_block(ctx, tt, sitegen.seo_desc(ctx, tt), "" if p in ("", "index") else p, "home" if p in ("", "index") else "page"))
+        if ctx and not ctx.get("shop_on"):
+            h = sitegen.SHOP_LINK.sub("", sitegen.STORY_SHOP.sub("", h))
         if ctx and ctx.get("shop_on"):
             h = sitegen.account_icons(h)
         h = sitegen.credit(sitegen.seo_finish(h, host))

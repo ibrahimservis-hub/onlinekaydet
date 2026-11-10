@@ -21,7 +21,12 @@ def _face(key):          # yazı tipi gömülmez; Google Fonts bağlantısı ekl
     return ''
 
 
-def _img64(name):        # fotoğraf yerine çizim (SVG) gömülür
+def _img64(name):        # gerçek fotoğraf (fetch_photos.py ile indirilmiş) varsa o, yoksa çizim (SVG)
+    import os
+    for ext in ('.jpg',):
+        f = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'img', name + ext)
+        if os.path.exists(f) and os.path.exists(os.path.join(os.path.dirname(f), '.real')):
+            return _b64.b64encode(open(f, 'rb').read()).decode()
     return _b64.b64encode(make_ill.svg_for(name).encode()).decode()
 
 
