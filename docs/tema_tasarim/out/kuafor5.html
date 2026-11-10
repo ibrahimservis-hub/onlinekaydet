@@ -1,0 +1,491 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#17110e">
+<title>Atölye Saç · Çankaya, Ankara</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300;1,9..144,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#17110e;--bg2:#211813;--cream:#f4ece3;--ink:#f4ece3;--mut:#b9aa9b;--cu:#d0703e;--cu2:#f0a06a;--dk:#17110e;--line:rgba(244,236,227,.14);--lineD:rgba(23,17,14,.14);--pad:22px;--r:24px}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font:400 16px/1.6 Inter,system-ui,sans-serif;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{font-family:Fraunces,Georgia,serif;font-weight:300;letter-spacing:-.015em;line-height:1.06}
+button,input,textarea{font:inherit;color:inherit}
+button{border:0;background:none;cursor:pointer}
+a{color:inherit;text-decoration:none}
+.pp{background-size:cover;background-position:center;background-color:#2a1e17}
+.eb{font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--cu2);font-weight:600;display:flex;align-items:center;gap:10px}
+.eb:before{content:"";width:28px;height:1.5px;background:var(--cu)}
+.light .eb{color:#a8501f}.light .eb:before{background:#a8501f}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:52px;padding:0 28px;border-radius:99px;background:var(--cu);color:#fff;font-weight:600;font-size:15px;transition:background .4s,transform .3s,box-shadow .4s;box-shadow:0 12px 30px -12px rgba(208,112,62,.7)}
+.btn:hover{background:#e0804d;transform:translateY(-2px)}.btn:active{transform:scale(.97)}
+.btn.o{background:transparent;border:1.5px solid rgba(244,236,227,.45);box-shadow:none;color:inherit}
+.btn.o:hover{background:rgba(244,236,227,.12)}
+.light .btn.o{border-color:rgba(23,17,14,.35)}.light .btn.o:hover{background:rgba(23,17,14,.06)}
+.btn.sm{min-height:44px;padding:0 20px;font-size:14px}
+.rv{opacity:0;transform:translateY(16px);transition:opacity 1s ease,transform 1s ease}.rv.v{opacity:1;transform:none}
+.sec{padding:84px var(--pad);max-width:1200px;margin:auto}
+.sec h2{font-size:clamp(38px,10.5vw,72px);margin:14px 0 14px}
+.sec .lead{color:var(--mut);max-width:520px}
+.light{background:var(--cream);color:var(--dk)}.light .lead{color:#6b5b4e}
+.full{max-width:none;padding:0}.full>.in{max-width:1200px;margin:auto;padding:84px var(--pad)}
+.dark2{background:var(--bg2)}
+.pg{display:none}.pg.on{display:block;animation:pgin .7s ease}
+@keyframes pgin{from{opacity:0}to{opacity:1}}
+/* ANNOUNCE */
+.an{background:var(--cu);color:#fff;text-align:center;font-size:13px;font-weight:500;padding:9px 44px;position:relative;z-index:60}
+.an button{position:absolute;right:6px;top:0;bottom:0;width:44px;font-size:18px;color:#fff}
+/* NAV */
+#nv{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:12px var(--pad);background:rgba(23,17,14,.9);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+#nv .lg{font:400 24px Fraunces,serif;letter-spacing:-.02em}
+#nv ul{display:none;list-style:none;gap:26px;font-size:14px;font-weight:500}
+#nv ul a{padding:8px 0;border-bottom:1.5px solid transparent;transition:border-color .3s,color .3s;color:var(--mut)}
+#nv ul a:hover,#nv ul a.on{color:#fff;border-color:var(--cu)}
+#nv .r{display:flex;align-items:center;gap:10px}
+#nv .btn{min-height:44px;padding:0 18px;font-size:14px}
+#bg{width:44px;height:44px;border-radius:50%;border:1.5px solid rgba(244,236,227,.35);display:grid;place-items:center}
+#bg i{display:block;width:16px;height:1.5px;background:var(--ink);position:relative}
+#bg i:before,#bg i:after{content:"";position:absolute;left:0;width:16px;height:1.5px;background:var(--ink)}
+#bg i:before{top:-5px}#bg i:after{top:5px}
+/* MENU */
+#mn{position:fixed;inset:0;z-index:80;background:var(--bg);overflow:auto;padding:80px var(--pad) 40px;opacity:0;visibility:hidden;transition:opacity .5s ease,visibility .5s}
+#mn.on{opacity:1;visibility:visible}
+#mn .pgs a{display:block;font:300 clamp(34px,10vw,60px)/1.18 Fraunces,serif;letter-spacing:-.02em;padding:2px 0}
+#mn .pgs a.on{color:var(--cu2);font-style:italic}
+#mx{position:absolute;top:14px;right:var(--pad);width:44px;height:44px;border-radius:50%;border:1.5px solid rgba(244,236,227,.35);font-size:24px;line-height:1}
+.soc{display:flex;gap:8px;flex-wrap:wrap}
+.soc a{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 18px;border:1px solid rgba(244,236,227,.28);border-radius:99px;font-size:14px;font-weight:500;transition:background .4s,color .4s}
+.soc a:hover{background:var(--cream);color:var(--dk)}
+.soc svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8}
+#mn .soc{margin:28px 0 18px}
+#mn .mi{color:var(--mut);font-size:14px;display:grid;gap:4px}
+/* PAGE HEAD */
+.ph0{padding:64px var(--pad) 40px;max-width:1200px;margin:auto}
+.ph0 h1{font-size:clamp(44px,12vw,92px);margin:14px 0 14px}
+.ph0 p{color:var(--mut);max-width:560px}
+/* HERO */
+.hero{position:relative;height:calc(100svh - 62px);min-height:600px;overflow:hidden;display:flex;align-items:flex-end}
+.hero .ph{position:absolute;inset:0;background-position:center 28%;transform:scale(1.07);animation:slow 12s ease-out forwards}
+@keyframes slow{to{transform:scale(1)}}
+.hero:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(23,17,14,.5) 0%,rgba(23,17,14,0) 26%,rgba(23,17,14,.2) 50%,rgba(23,17,14,.95) 100%)}
+.hi{position:relative;z-index:2;width:100%;padding:0 var(--pad) 30px}
+.hi>*{opacity:0;animation:fi 1.3s ease forwards}.hi>*:nth-child(1){animation-delay:.2s}.hi>*:nth-child(2){animation-delay:.5s}.hi>*:nth-child(3){animation-delay:.8s}.hi>*:nth-child(4){animation-delay:1s}
+@keyframes fi{to{opacity:1}}
+.hi h1{font-size:clamp(46px,14vw,112px);margin:14px 0 20px}
+.hi h1 .wl{display:block;height:1.12em;position:relative}
+.hi h1 .w{position:absolute;left:0;top:0;font-style:italic;color:var(--cu2);opacity:0;transition:opacity 1.3s ease}.hi h1 .w.on{opacity:1}
+.live small{display:block;font-size:13px;color:var(--mut);margin-bottom:10px}
+.chip{display:inline-flex;align-items:center;min-height:44px;padding:0 20px;margin:0 8px 8px 0;border-radius:99px;background:rgba(244,236,227,.12);border:1px solid rgba(244,236,227,.3);backdrop-filter:blur(8px);font-weight:500;transition:.3s}
+.chip:hover{background:var(--cream);color:var(--dk)}
+.hi .acts{display:flex;gap:10px;flex-direction:column;margin-top:6px}
+.open{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--mut);margin-bottom:12px}
+.open i{width:8px;height:8px;border-radius:50%;background:#7bd88f}.open.c i{background:#e0786a}
+/* MARQUEE */
+.mq{overflow:hidden;border-block:1px solid var(--line);padding:16px 0}
+.mq div{display:flex;gap:28px;width:max-content;animation:mq 50s linear infinite;font:italic 300 26px Fraunces,serif;color:var(--mut)}
+.mq span:nth-child(even){color:var(--cu);font-style:normal;font-size:16px;align-self:center}
+@keyframes mq{to{transform:translateX(-50%)}}
+/* PROMISE */
+.promise{padding:90px var(--pad);max-width:980px;margin:auto}
+.promise p{font:300 clamp(30px,8.2vw,58px)/1.18 Fraunces,serif;letter-spacing:-.02em}
+.promise span{opacity:.2;transition:opacity .7s}.promise span.l{opacity:1}
+.promise span.hl.l{color:var(--cu2);font-style:italic}
+/* RAIL */
+.tr{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;padding:6px var(--pad) 22px;scrollbar-width:none;margin:26px calc(var(--pad)*-1) 0}
+.tr::-webkit-scrollbar{display:none}
+.sv{flex:0 0 78%;max-width:330px;scroll-snap-align:center;background:#fff;color:var(--dk);border-radius:var(--r);overflow:hidden;box-shadow:0 24px 50px -28px rgba(60,30,10,.55)}
+.sv .pw{overflow:hidden}.sv .ph1{height:280px;transition:transform 1.2s ease;position:relative}.sv:hover .ph1{transform:scale(1.04)}
+.sv em{position:absolute;left:14px;top:14px;font-style:normal;font-size:12px;font-weight:600;background:rgba(255,255,255,.92);padding:6px 12px;border-radius:99px}
+.sv .bd{padding:18px}.sv h3{font-size:26px;margin-bottom:6px}.sv p{color:#6b5b4e;font-size:15px;min-height:46px}
+.sv .rw{display:flex;align-items:center;justify-content:space-between;margin-top:14px;gap:10px}
+.sv .pr{font-weight:600;color:#a8501f}
+/* CHAPTERS */
+.ch{display:flex;flex-direction:column;margin:0 auto 44px;max-width:1200px}
+.ch .sr{height:min(78vw,460px);position:relative;overflow:hidden}
+.ch .im{position:absolute;inset:0;clip-path:inset(100% 0 0 0);transform:scale(1.06);transition:clip-path 1.2s cubic-bezier(.7,0,.2,1),transform 2.4s ease-out}
+.ch.v .im{clip-path:inset(0);transform:none}
+.ch .sl{padding:20px var(--pad) 0}
+.ch .num{font:italic 300 15px Fraunces,serif;color:var(--cu2);letter-spacing:.1em}
+.ch h3{font-size:clamp(44px,13vw,80px);margin:2px 0 10px}.ch p{color:var(--mut);max-width:440px}
+.ch .fx{display:inline-flex;margin-top:14px;padding:9px 16px;border:1px solid rgba(244,236,227,.28);border-radius:99px;font-size:14px}
+/* PRICE LIST */
+.pl{display:grid;gap:24px;margin-top:28px}
+.tabs{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none}.tabs::-webkit-scrollbar{display:none}
+.tabs button{flex:0 0 auto;min-height:44px;padding:0 20px;border-radius:99px;border:1px solid var(--lineD);font-weight:500;background:#fff;color:var(--dk);transition:.3s}
+.tabs button.on{background:var(--dk);color:#fff;border-color:var(--dk)}
+.pl .pic{position:relative;aspect-ratio:4/3;border-radius:var(--r);overflow:hidden}
+.pl .pic .ph{position:absolute;inset:0;opacity:0;transition:opacity 1s}.pl .pic .ph.on{opacity:1}
+.rows{display:none;background:#fff;color:var(--dk);border-radius:var(--r);padding:6px 20px}.rows.on{display:block;animation:fi .7s ease}
+.row{display:grid;grid-template-columns:1fr auto;gap:4px 14px;padding:18px 0;border-bottom:1px solid var(--lineD);align-items:center}.row:last-child{border:0}
+.row h4{font:400 21px Fraunces,serif}.row p{font-size:14px;color:#6b5b4e}.row .pr{grid-row:1;grid-column:2;font-weight:600;color:#a8501f;white-space:nowrap}
+.row .du{grid-column:2;font-size:13px;color:#6b5b4e;text-align:right}.row .btn{grid-column:1/-1;margin-top:8px;justify-self:start}
+/* GALLERY */
+.gf{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:24px 0}.gf::-webkit-scrollbar{display:none}
+.gf button{flex:0 0 auto;min-height:44px;padding:0 20px;border-radius:99px;border:1px solid rgba(244,236,227,.3);font-weight:500;transition:.3s}
+.gf button.on{background:var(--cream);color:var(--dk);border-color:var(--cream)}
+.gg{columns:2;column-gap:10px}
+.gg a{display:block;break-inside:avoid;margin-bottom:10px;border-radius:18px;overflow:hidden;position:relative;cursor:zoom-in}
+.gg a.h{display:none}
+.gg img{width:100%;display:block;transition:transform 1.2s ease}.gg a:hover img{transform:scale(1.04)}
+.gg a:after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(23,17,14,.5),transparent 45%);opacity:0;transition:opacity .5s}.gg a:hover:after{opacity:1}
+#lb{position:fixed;inset:0;z-index:120;background:rgba(10,6,4,.94);display:none;align-items:center;justify-content:center}
+#lb.on{display:flex;animation:fi .4s ease forwards;opacity:0}
+#lb img{max-width:94vw;max-height:80svh;border-radius:14px;object-fit:contain;transition:opacity .35s}
+#lb .x,#lb .p,#lb .n{position:absolute;width:48px;height:48px;border-radius:50%;background:rgba(244,236,227,.14);font-size:22px;display:grid;place-items:center}
+#lb .x{top:14px;right:14px}#lb .p{left:10px;top:50%}#lb .n{right:10px;top:50%}
+#lb .ct{position:absolute;bottom:22px;left:0;right:0;text-align:center;font-size:14px;color:var(--mut)}
+/* INSTAGRAM */
+.ig{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:22px}
+.ig a{aspect-ratio:1;border-radius:14px;overflow:hidden;position:relative}
+.ig a .ph{position:absolute;inset:0;transition:transform 1.2s}.ig a:hover .ph{transform:scale(1.06)}
+/* PACKAGES */
+.pk3{display:grid;gap:14px;margin-top:28px}
+.pkc{background:#fff;color:var(--dk);border-radius:var(--r);padding:26px;display:flex;flex-direction:column}
+.pkc.f{background:var(--dk);color:var(--ink);border:1px solid var(--cu)}
+.pkc h3{font-size:30px}.pkc .pr{font:300 40px Fraunces,serif;color:#a8501f;margin:10px 0 4px}.pkc.f .pr{color:var(--cu2)}
+.pkc small{color:#6b5b4e}.pkc.f small{color:var(--mut)}
+.pkc ul{list-style:none;margin:16px 0 22px;display:grid;gap:9px;font-size:15px;flex:1}
+.pkc li{display:flex;gap:10px}.pkc li:before{content:"✓";color:var(--cu);font-weight:700}
+.punch{margin-top:22px;background:var(--bg2);border-radius:var(--r);padding:24px}
+.punch h4{font:400 26px Fraunces,serif}.punch .st{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:16px 0 4px;max-width:420px}
+.punch .st button{aspect-ratio:1;border-radius:50%;border:1.5px dashed rgba(244,236,227,.4);font:italic 15px Fraunces;color:var(--mut);transition:.3s;min-height:44px}
+.punch .st button.on{background:var(--cu);border:1.5px solid var(--cu);color:#fff}.punch .st button.gift{border-color:var(--cu2)}
+.gc{display:grid;gap:22px;margin-top:26px}
+.gc .f{background:#fff;color:var(--dk);border-radius:var(--r);padding:26px;display:grid;gap:14px}
+.gc label{font-size:13px;font-weight:600;color:#6b5b4e;display:grid;gap:6px}
+.inp{min-height:50px;border-radius:14px;border:1.5px solid var(--lineD);padding:0 14px;background:#fff;color:var(--dk);font-size:16px;width:100%}
+textarea.inp{padding:12px 14px;min-height:96px;resize:vertical}
+.inp:focus{outline:2px solid var(--cu);border-color:var(--cu)}
+.amts{display:flex;gap:8px;flex-wrap:wrap}.amts button{min-height:44px;padding:0 18px;border-radius:99px;border:1.5px solid var(--lineD);font-weight:600;transition:.3s;background:#fff;color:var(--dk)}
+.amts button.on{background:var(--dk);color:#fff;border-color:var(--dk)}
+.tkt{background:linear-gradient(135deg,var(--cu),#8e3f1c);color:#fff;border-radius:var(--r);padding:28px;position:relative;overflow:hidden;min-height:220px;display:flex;flex-direction:column;justify-content:space-between}
+.tkt:before{content:"";position:absolute;right:-40px;top:-40px;width:160px;height:160px;border-radius:50%;border:1px solid rgba(255,255,255,.3)}
+.tkt h3{font-size:34px}.tkt b{font:300 46px Fraunces,serif}.tkt small{opacity:.85}
+/* EXPERTS */
+.ex{display:grid;gap:16px;margin-top:28px}
+.exc{background:var(--bg2);border-radius:var(--r);overflow:hidden;border:1px solid var(--line)}
+.exc .ph{height:320px;transition:transform 1.4s}.exc .pw{overflow:hidden}.exc:hover .ph{transform:scale(1.03)}
+.exc .bd{padding:20px 22px 24px}.exc h3{font-size:30px}.exc small{color:var(--mut)}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}.tags span{font-size:12px;border:1px solid var(--line);border-radius:99px;padding:4px 12px;color:var(--mut)}
+.slots{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.slots button{min-height:44px;padding:0 18px;border-radius:99px;border:1px solid rgba(244,236,227,.3);font-weight:500;transition:.3s}.slots button:hover{background:var(--cream);color:var(--dk)}
+/* ABOUT */
+.ab{display:grid;gap:28px;margin-top:28px}.ab .pic{border-radius:var(--r);min-height:340px}
+.val{display:grid;gap:14px;margin-top:30px}.val div{border:1px solid var(--lineD);border-radius:var(--r);padding:24px;background:rgba(255,255,255,.55)}.val h3{font-size:26px;margin-bottom:6px}.val p{color:#6b5b4e;font-size:15px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);border-block:1px solid var(--line);margin-top:30px}
+.stats div{padding:24px 6px;text-align:center;border-right:1px solid var(--line)}.stats div:last-child{border:0}
+.stats b{display:block;font:300 clamp(44px,12vw,80px)/1 Fraunces,serif;color:var(--cu2)}.stats span{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--mut)}
+.tl{display:grid;gap:24px;margin-top:26px}
+.stp{display:flex;flex-direction:column;gap:8px}
+.stp button{display:flex;gap:14px;text-align:left;padding:14px;border-radius:18px;border:1px solid var(--line);transition:.4s;min-height:64px;align-items:center}
+.stp button i{flex:0 0 36px;height:36px;border-radius:50%;display:grid;place-items:center;font:400 16px Fraunces;border:1px solid rgba(244,236,227,.3);font-style:normal;transition:.4s}
+.stp button b{display:block;font-weight:600}.stp button span{display:none;font-size:14px;color:var(--mut)}
+.stp button.on{background:var(--bg2);border-color:var(--cu)}.stp button.on i{background:var(--cu);border-color:var(--cu);color:#fff}.stp button.on span{display:block}
+.dev{background:linear-gradient(160deg,#2a1e17,#1c1410);border:1px solid var(--line);border-radius:30px;padding:24px;position:relative;min-height:310px}
+.dev small{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mut)}
+.dev .rw{display:flex;justify-content:space-between;padding:13px 0;border-bottom:1px solid var(--line);font-size:15px}.dev .rw span:first-child{color:var(--mut)}
+.dev .stt{display:inline-block;margin:16px 0 0;padding:8px 16px;border-radius:99px;background:var(--cu);font-weight:600;font-size:14px;transition:opacity .5s}
+.dev .bub{margin-top:18px;background:#e9e1d6;color:var(--dk);padding:14px 16px;border-radius:20px 20px 20px 6px;font-size:14px;max-width:290px;transition:opacity .5s}
+.dev .o{opacity:0}.dev .pb{position:absolute;left:24px;right:24px;bottom:18px;height:2px;background:var(--line)}.dev .pb i{display:block;height:100%;background:var(--cu2);width:0;transition:width 1s}
+/* TIPS + FAQ */
+.tp{display:grid;gap:14px;margin-top:26px}
+.tp details{background:#fff;color:var(--dk);border-radius:var(--r);padding:6px 22px}
+details{border-bottom:1px solid var(--lineD)}
+summary{list-style:none;cursor:pointer;min-height:64px;display:flex;align-items:center;justify-content:space-between;gap:14px;font:400 22px Fraunces,serif}
+summary::-webkit-details-marker{display:none}summary:after{content:"+";font:300 28px Inter;color:#a8501f;transition:transform .4s}
+details[open] summary:after{transform:rotate(45deg)}
+details p{color:#6b5b4e;padding:0 30px 18px 0;animation:fi .6s ease}
+.tp details small{display:block;color:#a8501f;font-size:12px;letter-spacing:.1em;text-transform:uppercase;padding-top:14px}
+.faq details{border-color:var(--line)}.faq p{color:var(--mut)}.faq summary:after{color:var(--cu2)}
+/* CONTACT */
+.ct{display:grid;gap:16px;margin-top:26px}
+.ct .box{background:#fff;color:var(--dk);border-radius:var(--r);padding:26px}
+.ct h3{font-size:27px;margin-bottom:10px}.ct .hr div{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--lineD);font-size:15px}.ct .hr div:last-child{border:0}
+.ct a.ln{display:flex;align-items:center;min-height:44px;color:#a8501f;font-weight:600}
+.map{border-radius:var(--r);min-height:300px;position:relative;overflow:hidden;background:#e7dccf}
+.map svg{position:absolute;inset:0;width:100%;height:100%}
+.map .pin{position:absolute;left:50%;top:46%;transform:translate(-50%,-100%);background:var(--cu);color:#fff;padding:10px 16px;border-radius:99px;font-weight:600;font-size:14px;box-shadow:0 12px 24px -8px rgba(0,0,0,.4);white-space:nowrap}
+.map .pin:after{content:"";position:absolute;left:50%;bottom:-6px;width:12px;height:12px;background:var(--cu);transform:translateX(-50%) rotate(45deg)}
+.fm{display:grid;gap:12px}.okm{display:none;text-align:center;padding:20px 0}.fm.done>:not(.okm){display:none}.fm.done .okm{display:block}
+/* FIN */
+.fin{padding:100px var(--pad);text-align:center;background:var(--cu);color:#fff}
+.fin .eb{justify-content:center;color:#fff}.fin .eb:before{background:#fff}
+.fin h2{font-size:clamp(44px,13vw,104px);margin:16px auto 28px;max-width:900px}.fin h2 em{color:var(--dk)}
+.fin .btn{background:var(--dk);box-shadow:none}
+/* FOOTER */
+footer{background:#0f0a08;color:#bfaea3;padding:64px var(--pad) calc(110px + env(safe-area-inset-bottom))}
+.fw{max-width:1200px;margin:auto;display:grid;gap:36px}
+.fb .fl{font:300 34px Fraunces,serif;color:#fff;display:block;margin-bottom:10px}.fb p{max-width:320px;font-size:15px}
+.fb .soc{margin-top:16px}
+footer h5{font:600 12px Inter;letter-spacing:.18em;text-transform:uppercase;color:var(--cu2);margin-bottom:10px}
+footer .col{display:flex;flex-direction:column}
+footer .col a,footer .col span{display:flex;align-items:center;min-height:36px;font-size:15px}footer .col a:hover{color:#fff}
+footer .fh div{display:flex;justify-content:space-between;font-size:14px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.08)}
+.nl{display:flex;gap:8px;margin-top:6px}.nl input{flex:1;min-height:48px;border-radius:99px;border:1px solid rgba(255,255,255,.25);background:transparent;padding:0 18px;color:#fff;font-size:15px;min-width:0}
+.nl input::placeholder{color:#8f7f74}.nl button{min-height:48px;padding:0 20px;border-radius:99px;background:var(--cu);color:#fff;font-weight:600}
+.nlok{display:none;color:var(--cu2);font-size:14px;margin-top:8px}
+.fx2{max-width:1200px;margin:44px auto 0;padding-top:22px;border-top:1px solid rgba(255,255,255,.14);display:grid;gap:8px;font-size:13px}
+.fx2 a{text-decoration:underline;text-underline-offset:3px;display:inline-flex;align-items:center;min-height:32px}
+/* BOTTOM BAR */
+.mbar{position:fixed;left:12px;right:12px;bottom:calc(env(safe-area-inset-bottom) + 12px);z-index:40;display:flex;gap:8px;padding:8px;border-radius:99px;background:rgba(23,17,14,.88);backdrop-filter:blur(16px);border:1px solid var(--line);opacity:0;visibility:hidden;transition:opacity .5s,visibility .5s;box-shadow:0 18px 40px -14px #000}
+.mbar.on{opacity:1;visibility:visible}
+.mbar a{display:grid;place-items:center;min-height:48px;padding:0 20px;border-radius:99px;border:1.5px solid rgba(244,236,227,.3);font-weight:600;font-size:14px}
+.mbar .btn{flex:1;min-height:48px;box-shadow:none}
+/* SHEET */
+#sh{position:fixed;inset:0;z-index:100;background:rgba(10,6,4,.6);backdrop-filter:blur(4px);opacity:0;visibility:hidden;transition:.4s}
+#sh.on{opacity:1;visibility:visible}
+.sheet{position:absolute;left:0;right:0;bottom:0;max-height:92svh;overflow:auto;background:var(--cream);color:var(--dk);border-radius:28px 28px 0 0;padding:10px var(--pad) calc(env(safe-area-inset-bottom) + 22px);transform:translateY(100%);transition:transform .6s cubic-bezier(.2,.8,.2,1)}
+#sh.on .sheet{transform:none}
+.grab{width:44px;height:4px;border-radius:4px;background:#d7c8b8;margin:0 auto 14px}
+.sheet h3{font-size:34px;margin-bottom:4px}.sheet .sub{color:#6b5b4e;font-size:14px}
+.sheet h4{font:600 12px Inter;letter-spacing:.14em;text-transform:uppercase;color:#a8501f;margin:18px 0 9px}
+.opts{display:flex;gap:8px;flex-wrap:wrap}
+.opts button{min-height:44px;padding:0 16px;border-radius:99px;border:1.5px solid #d7c8b8;font-weight:500;transition:.2s;background:#fff;color:var(--dk)}
+.opts button.on{background:var(--dk);color:#fff;border-color:var(--dk)}
+.opts.days button{display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.15;min-width:62px;padding:6px 10px;border-radius:16px}.opts.days small{font-size:11px;opacity:.7}
+.fld{display:grid;gap:12px}.fld label{font-size:13px;font-weight:600;color:#6b5b4e;display:grid;gap:6px}
+.sheet .go{width:100%;margin-top:20px}
+.ok{display:none;text-align:center;padding:30px 0 10px}
+.ok .tick{width:72px;height:72px;border-radius:50%;background:var(--cu);margin:0 auto 18px;display:grid;place-items:center}
+.ok .tick svg{width:34px;stroke:#fff;fill:none;stroke-width:3;stroke-dasharray:40;stroke-dashoffset:40}
+.sheet.done .ok{display:block}.sheet.done .frm{display:none}.sheet.done .ok .tick svg{animation:dr .8s .2s forwards}
+@keyframes dr{to{stroke-dashoffset:0}}
+.ok p{color:#6b5b4e;margin:8px auto 18px;max-width:300px}
+/* DESKTOP */
+@media(min-width:900px){
+:root{--pad:56px}
+#nv{padding:12px 56px}#nv ul{display:flex}#bg{display:none}
+.hero{height:calc(100svh - 70px)}.hi{max-width:1200px;margin:auto;padding-bottom:60px}.hi .acts{flex-direction:row}
+.hero:after{background:linear-gradient(90deg,rgba(23,17,14,.85),rgba(23,17,14,.05) 70%),linear-gradient(0deg,rgba(23,17,14,.7),transparent 40%)}
+.ch{flex-direction:row;align-items:center}.ch:nth-child(even){flex-direction:row-reverse}.ch .sr{flex:0 0 56%;height:520px}.ch .sl{padding:0 70px}
+.pl{grid-template-columns:1fr 1fr;align-items:start}.pl .tabs{grid-column:1/-1}.pl .pic{aspect-ratio:auto;min-height:440px;height:100%}
+.sv{flex:0 0 330px}.tr{margin-left:0;margin-right:0;padding-left:0}
+.gg{columns:4}.ig{grid-template-columns:repeat(6,1fr)}
+.pk3{grid-template-columns:repeat(3,1fr)}.gc{grid-template-columns:1fr 1fr}
+.ex{grid-template-columns:repeat(3,1fr)}
+.ab{grid-template-columns:1fr 1fr;align-items:center}.val{grid-template-columns:repeat(3,1fr)}
+.tl{grid-template-columns:1fr 1fr;gap:50px;align-items:center}
+.ct{grid-template-columns:1fr 1fr 1fr}.ct .map{grid-column:span 3}
+.fw{grid-template-columns:1.4fr 1fr 1fr 1.3fr}.fx2{grid-auto-flow:column;justify-content:space-between;align-items:center}
+footer{padding-bottom:40px}.mbar{display:none}
+.sheet{left:50%;right:auto;width:560px;margin-left:-280px;bottom:50%;transform:translateY(55%);border-radius:28px;max-height:90svh;opacity:0;transition:transform .6s cubic-bezier(.2,.8,.2,1),opacity .4s}
+#sh.on .sheet{transform:translateY(50%);opacity:1}
+}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.hi>*,.rv{opacity:1;transform:none}.hero .ph{transform:none}.promise span{opacity:1}.ch .im{clip-path:inset(0);transform:none}}
+</style>
+</head>
+<body>
+<div class="an" id="an">Bu hafta yeni müşterilere ilk boyada renk danışmanlığı ücretsiz.<button id="anx" aria-label="Duyuruyu kapat">×</button></div>
+<nav id="nv"><a class="lg" href="#/">Atölye Saç</a>
+<ul id="nl"><li><a href="#/hizmetler" data-pg="hizmetler">Hizmetler</a></li><li><a href="#/galeri" data-pg="galeri">Galeri</a></li><li><a href="#/uzmanlar" data-pg="uzmanlar">Uzmanlar</a></li><li><a href="#/paketler" data-pg="paketler">Paketler</a></li><li><a href="#/hakkimizda" data-pg="hakkimizda">Hakkımızda</a></li><li><a href="#/ipuclari" data-pg="ipuclari">İpuçları</a></li><li><a href="#/iletisim" data-pg="iletisim">İletişim</a></li></ul>
+<div class="r"><button class="btn" data-open>Randevu al</button><button id="bg" aria-label="Menüyü aç"><i></i></button></div></nav>
+
+<div id="mn" aria-hidden="true"><button id="mx" aria-label="Menüyü kapat">×</button>
+<div class="pgs"><a href="#/" data-pg="home">Ana sayfa</a><a href="#/hizmetler" data-pg="hizmetler">Hizmetler</a><a href="#/galeri" data-pg="galeri">Galeri</a><a href="#/uzmanlar" data-pg="uzmanlar">Uzmanlar</a><a href="#/paketler" data-pg="paketler">Paketler</a><a href="#/hakkimizda" data-pg="hakkimizda">Hakkımızda</a><a href="#/ipuclari" data-pg="ipuclari">İpuçları</a><a href="#/iletisim" data-pg="iletisim">İletişim</a></div>
+<div class="soc" id="soc1"></div>
+<div class="mi"><span>Atatürk Bulvarı, Çankaya / Ankara</span><span>0312 000 00 00</span><span>Salı–Cumartesi 10:00–20:00</span></div></div>
+
+<main>
+<!-- ANA SAYFA -->
+<div class="pg on" id="pg-home">
+<header class="hero"><div class="ph pp" id="hph"></div>
+<div class="hi"><div class="eb">Çankaya · Ankara · Kadın ve erkek kuaförü</div>
+<h1>Kendinizi<span class="wl"><span class="w on">güzel</span><span class="w">özel</span><span class="w">rahat</span><span class="w">iyi</span></span>hissettiğiniz salon.</h1>
+<div class="live"><div class="open" data-open-now><i></i><span></span></div><small>Bugün boş saatler · dokunun, randevu açılsın</small><button class="chip" data-open data-t="14:30">14:30</button><button class="chip" data-open data-t="16:00">16:00</button><button class="chip" data-open data-t="17:30">17:30</button></div>
+<div class="acts"><button class="btn" data-open>Randevu al</button><a class="btn o" href="#/hizmetler">Hizmetleri gör</a></div></div></header>
+<div class="mq"><div><span>Kesim</span><span>✦</span><span>Boya</span><span>✦</span><span>Balyaj</span><span>✦</span><span>Keratin bakım</span><span>✦</span><span>Gelin saçı</span><span>✦</span><span>Erkek kesim</span><span>✦</span><span>Kesim</span><span>✦</span><span>Boya</span><span>✦</span><span>Balyaj</span><span>✦</span><span>Keratin bakım</span><span>✦</span><span>Gelin saçı</span><span>✦</span><span>Erkek kesim</span><span>✦</span></div></div>
+<section class="promise"><p id="pr">Saçınız sizin hikâyenizin bir parçası. Biz acele etmeden dinler, rengi ve boyu birlikte seçer, aynaya baktığınızda gülümsemenizi bekleriz. Randevunuz kayıtlıdır, bir gün önce hatırlatılır.</p></section>
+<section class="sec light full"><div class="in"><div class="eb rv">Hizmetler</div><h2 class="rv">Size göre bir bakım.</h2><p class="lead rv">Kartları yana kaydırın. Bir hizmeti seçince randevu formu o hizmetle açılır.</p>
+<div class="tr rv">
+<div class="sv"><div class="pw"><div class="ph1 pp" data-p="3356170"><em>45–60 dk</em></div></div><div class="bd"><h3>Kesim ve fön</h3><p>Saç tipine göre kesim, yıkama ve fön.</p><div class="rw"><span class="pr">450 – 900 ₺</span><button class="btn sm" data-open data-s="Kesim ve fön">Seç</button></div></div></div>
+<div class="sv"><div class="pw"><div class="ph1 pp" data-p="10028673"><em>2–3 saat</em></div></div><div class="bd"><h3>Boya ve balyaj</h3><p>Renk danışmanlığı, koruyucu bakım dahil.</p><div class="rw"><span class="pr">1.800 – 4.500 ₺</span><button class="btn sm" data-open data-s="Tek renk boya">Seç</button></div></div></div>
+<div class="sv"><div class="pw"><div class="ph1 pp" data-p="23349912"><em>90 dk</em></div></div><div class="bd"><h3>Keratin ve bakım</h3><p>Kalıcı düzleştirme, yoğun onarım.</p><div class="rw"><span class="pr">1.500 – 3.200 ₺</span><button class="btn sm" data-open data-s="Keratin bakım">Seç</button></div></div></div>
+<div class="sv"><div class="pw"><div class="ph1 pp" data-p="20046793"><em>Deneme + gün</em></div></div><div class="bd"><h3>Gelin saçı</h3><p>Deneme randevusu ve düğün günü hizmeti.</p><div class="rw"><span class="pr">3.500 – 6.000 ₺</span><button class="btn sm" data-open data-s="Gelin saçı">Seç</button></div></div></div>
+<div class="sv"><div class="pw"><div class="ph1 pp" data-p="19664876"><em>30–40 dk</em></div></div><div class="bd"><h3>Erkek kesim ve sakal</h3><p>Makine, makas ve ustura tıraşı.</p><div class="rw"><span class="pr">350 – 600 ₺</span><button class="btn sm" data-open data-s="Erkek kesim">Seç</button></div></div></div>
+</div><div style="margin-top:6px" class="rv"><a class="btn o" href="#/hizmetler">Tüm fiyat listesi</a></div></div></section>
+<section class="dark2" style="padding:60px 0 20px">
+<div class="ch"><div class="sr"><div class="im pp" data-p="3993462"></div></div><div class="sl"><div class="num">01 / 03</div><h3>Önce sohbet</h3><p>Kahveniz gelirken ne istediğinizi, neyi sevmediğinizi anlatırsınız. Biz dinleriz.</p><div class="fx">Görüşme · ücretsiz</div></div></div>
+<div class="ch"><div class="sr"><div class="im pp" data-p="10028673"></div></div><div class="sl"><div class="num">02 / 03</div><h3>Sonra karar</h3><p>Boyu, rengi ve bakımı fotoğraflara bakarak birlikte seçeriz; süre ve fiyat baştan söylenir.</p><div class="fx">Karar sizin</div></div></div>
+<div class="ch"><div class="sr"><div class="im pp" data-p="23349912"></div></div><div class="sl"><div class="num">03 / 03</div><h3>En sonunda özen</h3><p>Ne yapıldığı anlatılır, evde nasıl bakacağınız yazılı verilir.</p><div class="fx">Kayıt müşteri kartınıza işlenir</div></div></div></section>
+<section class="sec"><div class="eb rv">Galeri</div><h2 class="rv">Salondan kareler.</h2><div class="ig rv" id="igh"></div><div class="rv" style="margin-top:20px"><a class="btn o" href="#/galeri">Tüm galeriyi aç</a></div></section>
+<section class="sec light full"><div class="in"><div class="eb rv">Paketler</div><h2 class="rv">Düzenli gelenlere özel.</h2><p class="lead rv">Kesim paketi, aylık bakım üyeliği, gelin paketi ve hediye çeki.</p><div class="rv" style="margin-top:22px"><a class="btn" href="#/paketler">Paketleri gör</a></div></div></section>
+<section class="sec"><div class="eb rv">Instagram</div><h2 class="rv">@atolyesac</h2><p class="lead rv">Günlük işlerimizi ve boş saatleri orada paylaşıyoruz.</p><div class="soc rv" style="margin-top:18px" id="soc2"></div></section>
+<section class="fin"><div class="eb rv">Randevu</div><h2 class="rv">Kendinize <em>bir saat</em> ayırın.</h2><button class="btn" data-open>Randevu al</button></section>
+</div>
+
+<!-- HİZMETLER -->
+<div class="pg" id="pg-hizmetler"><div class="ph0"><div class="eb">Hizmetler ve fiyatlar</div><h1>Size göre bir bakım.</h1><p>Süre ve fiyatı baştan söyleriz, sürpriz yok. Fiyatlar saç boyuna ve yoğunluğuna göre değişir; kesin tutar randevuda söylenir.</p></div>
+<section class="sec light full"><div class="in" style="padding-top:50px"><div class="pl"><div class="tabs" id="tabs"><button class="on">Kesim</button><button>Renk</button><button>Bakım</button><button>Gelin</button><button>Erkek</button></div>
+<div class="pic" id="pic"><div class="ph pp on" data-p="3356170"></div><div class="ph pp" data-p="10028673"></div><div class="ph pp" data-p="23349912"></div><div class="ph pp" data-p="20046793"></div><div class="ph pp" data-p="19664876"></div></div>
+<div>
+<div class="rows on"><div class="row"><h4>Kesim ve fön</h4><span class="pr">450 – 900 ₺</span><p>Saç tipine göre kesim, yıkama ve fön.</p><span class="du">45–60 dk</span><button class="btn sm" data-open data-s="Kesim ve fön">Randevu al</button></div><div class="row"><h4>Ucu alma ve şekil</h4><span class="pr">300 – 500 ₺</span><p>Uçları toplar, mevcut kesimi korur.</p><span class="du">30 dk</span><button class="btn sm" data-open data-s="Ucu alma">Randevu al</button></div><div class="row"><h4>Fön ve şekillendirme</h4><span class="pr">250 – 450 ₺</span><p>Yıkama, fön, maşa veya düzleştirici.</p><span class="du">40 dk</span><button class="btn sm" data-open data-s="Fön">Randevu al</button></div></div>
+<div class="rows"><div class="row"><h4>Tek renk boya</h4><span class="pr">1.800 – 2.800 ₺</span><p>Renk danışmanlığı ve koruyucu bakım dahil.</p><span class="du">2 saat</span><button class="btn sm" data-open data-s="Tek renk boya">Randevu al</button></div><div class="row"><h4>Balyaj ve ombre</h4><span class="pr">3.200 – 4.500 ₺</span><p>Kademeli açım, ton verme ve fön.</p><span class="du">3 saat</span><button class="btn sm" data-open data-s="Balyaj ve ombre">Randevu al</button></div><div class="row"><h4>Dip boya</h4><span class="pr">1.200 – 1.800 ₺</span><p>Sadece uzayan kökler, mevcut renge göre.</p><span class="du">90 dk</span><button class="btn sm" data-open data-s="Dip boya">Randevu al</button></div></div>
+<div class="rows"><div class="row"><h4>Keratin bakım</h4><span class="pr">1.500 – 3.200 ₺</span><p>Kalıcı düzleştirme ve yoğun onarım.</p><span class="du">90 dk</span><button class="btn sm" data-open data-s="Keratin bakım">Randevu al</button></div><div class="row"><h4>Onarıcı maske</h4><span class="pr">400 – 700 ₺</span><p>Yıpranmış saçlar için nem ve protein dengesi.</p><span class="du">30 dk</span><button class="btn sm" data-open data-s="Onarıcı maske">Randevu al</button></div></div>
+<div class="rows"><div class="row"><h4>Gelin saçı</h4><span class="pr">3.500 – 6.000 ₺</span><p>Düğün günü, salonda veya bulunduğunuz yerde.</p><span class="du">2–3 saat</span><button class="btn sm" data-open data-s="Gelin saçı">Randevu al</button></div><div class="row"><h4>Deneme randevusu</h4><span class="pr">1.200 ₺</span><p>Düğünden önce modeli birlikte seçeriz.</p><span class="du">90 dk</span><button class="btn sm" data-open data-s="Gelin deneme">Randevu al</button></div></div>
+<div class="rows"><div class="row"><h4>Erkek kesim</h4><span class="pr">350 – 500 ₺</span><p>Makine veya makas, yıkama dahil.</p><span class="du">30 dk</span><button class="btn sm" data-open data-s="Erkek kesim">Randevu al</button></div><div class="row"><h4>Sakal ve ustura</h4><span class="pr">200 – 300 ₺</span><p>Şekil, ustura tıraşı ve bakım.</p><span class="du">20 dk</span><button class="btn sm" data-open data-s="Sakal ve ustura">Randevu al</button></div></div>
+</div></div></div></section></div>
+
+<!-- GALERİ -->
+<div class="pg" id="pg-galeri"><div class="ph0"><div class="eb">Galeri</div><h1>Koltuklarımızdan kareler.</h1><p>Bir fotoğrafa dokunun, büyüsün. Yana kaydırarak diğerlerine geçin.</p>
+<div class="gf" id="gf"><button class="on" data-f="all">Tümü</button><button data-f="kesim">Kesim</button><button data-f="renk">Renk</button><button data-f="bakim">Bakım</button><button data-f="gelin">Gelin</button><button data-f="salon">Salon</button></div>
+<div class="gg" id="gg"></div></div></div>
+
+<!-- UZMANLAR -->
+<div class="pg" id="pg-uzmanlar"><div class="ph0"><div class="eb">Uzmanlar</div><h1>Sizi dinleyen uzmanı seçin.</h1><p>Her uzmanın alanı ve boş saatleri burada. Bir saate dokunun, randevu formu uzmanla birlikte açılır.</p>
+<div class="ex">
+<div class="exc"><div class="pw"><div class="ph pp" data-p="3993320"></div></div><div class="bd"><h3>Elif</h3><small>Renk uzmanı</small><div class="tags"><span>Balyaj</span><span>Tek renk boya</span><span>Bakım</span></div><div class="slots"><button data-open data-s="Tek renk boya" data-e="Elif" data-t="11:00">11:00</button><button data-open data-s="Tek renk boya" data-e="Elif" data-t="13:30">13:30</button><button data-open data-s="Tek renk boya" data-e="Elif" data-t="16:00">16:00</button></div></div></div>
+<div class="exc"><div class="pw"><div class="ph pp" data-p="19664876" style="background-position:60% 40%"></div></div><div class="bd"><h3>Murat</h3><small>Kesim uzmanı</small><div class="tags"><span>Kesim</span><span>Erkek</span><span>Sakal</span></div><div class="slots"><button data-open data-s="Erkek kesim" data-e="Murat" data-t="10:00">10:00</button><button data-open data-s="Erkek kesim" data-e="Murat" data-t="12:00">12:00</button><button data-open data-s="Erkek kesim" data-e="Murat" data-t="15:30">15:30</button></div></div></div>
+<div class="exc"><div class="pw"><div class="ph pp" data-p="6487888"></div></div><div class="bd"><h3>Selin</h3><small>Bakım ve gelin uzmanı</small><div class="tags"><span>Keratin</span><span>Onarım</span><span>Gelin saçı</span></div><div class="slots"><button data-open data-s="Keratin bakım" data-e="Selin" data-t="10:30">10:30</button><button data-open data-s="Keratin bakım" data-e="Selin" data-t="14:00">14:00</button><button data-open data-s="Keratin bakım" data-e="Selin" data-t="17:00">17:00</button></div></div></div>
+</div></div></div>
+
+<!-- PAKETLER -->
+<div class="pg" id="pg-paketler"><div class="ph0"><div class="eb">Paketler</div><h1>Düzenli gelenlere özel.</h1><p>Örnek fiyatlardır; salon kendi paketlerini panelden düzenler.</p></div>
+<section class="sec light full"><div class="in" style="padding-top:50px"><div class="pk3">
+<div class="pkc"><h3>5 kesim paketi</h3><small>Beşinci kesimde bakım hediye</small><div class="pr">2.000 ₺</div><ul><li>5 kesim ve fön</li><li>Bakım maskesi hediye</li><li>6 ay geçerli</li></ul><button class="btn" data-open data-s="Kesim ve fön">Paketi al</button></div>
+<div class="pkc f"><h3>Aylık bakım üyeliği</h3><small>Ayda bir bakım ve fön</small><div class="pr">1.600 ₺ / ay</div><ul><li>Ayda bir onarıcı bakım</li><li>Fön dahil</li><li>Öncelikli randevu</li></ul><button class="btn" data-open data-s="Onarıcı maske">Üye ol</button></div>
+<div class="pkc"><h3>Gelin paketi</h3><small>Deneme + düğün günü</small><div class="pr">7.500 ₺'den</div><ul><li>Deneme randevusu</li><li>Düğün günü saç</li><li>Yakınlarınız için 2 fön</li></ul><button class="btn" data-open data-s="Gelin deneme">Randevu al</button></div></div>
+<div class="punch"><h4>Damga kartı</h4><small style="color:var(--mut)">Dokunun, damga basılsın · beşincisi sonrası bakım hediye</small><div class="st" id="pk"><button>1</button><button>2</button><button>3</button><button>4</button><button class="gift">5</button></div></div></div></section>
+<section class="sec"><div class="eb">Hediye çeki</div><h2>Sevdiğinize bir saat hediye edin.</h2>
+<div class="gc"><div class="f" id="gcf"><div><h4 style="font:600 12px Inter;letter-spacing:.14em;text-transform:uppercase;color:#a8501f;margin-bottom:9px">Tutar</h4><div class="amts" id="amts"><button>500 ₺</button><button class="on">1.000 ₺</button><button>2.000 ₺</button></div></div><label>Kimin için<input class="inp" id="gto" placeholder="Zeynep"></label><label>Mesajınız<textarea class="inp" id="gms" placeholder="Doğum günün kutlu olsun"></textarea></label><button class="btn" id="gmk">Çeki oluştur</button></div>
+<div class="tkt"><div><small>Atölye Saç · Hediye çeki</small><h3 id="tto">Zeynep için</h3></div><div><b id="tam">1.000 ₺</b><p id="tms" style="margin-top:6px;font-size:15px">Doğum günün kutlu olsun</p><small style="display:block;margin-top:10px">Kod: <span id="tcd">ATL-2K9X</span></small></div></div></div></section></div>
+
+<!-- HAKKIMIZDA -->
+<div class="pg" id="pg-hakkimizda"><div class="ph0"><div class="eb">Hakkımızda</div><h1>Acele etmeyen bir salon.</h1><p>Atölye Saç, Çankaya'da randevuyla çalışan küçük bir salon. Her müşteriye süre ayırır, ne yapılacağını önceden konuşuruz.</p></div>
+<section class="sec" style="padding-top:20px"><div class="ab"><div class="pic pp" data-p="7195805"></div><div><div class="eb">Hikâyemiz</div><h2 style="font-size:clamp(34px,9vw,56px)">Kendimize ait bir köşe.</h2><p class="lead">Salonu, sıra beklemek zorunda kalmadan rahat edilebilecek bir yer olsun diye açtık. Koltuk sayısını bilerek az tuttuk; böylece her uzman tek müşteriyle ilgilenir.</p></div></div>
+<div class="stats"><div><b>3</b><span>Uzman</span></div><div><b>5</b><span>Hizmet</span></div><div><b>7</b><span>Gün açık takvim</span></div></div></section>
+<section class="sec light full"><div class="in"><div class="eb">Değerlerimiz</div><h2>Üç söz.</h2><div class="val"><div><h3>Acele yok</h3><p>Her randevuya süre ayrılır. Önce dinler, sonra başlarız.</p></div><div><h3>Temiz ve düzenli</h3><p>Her müşteriden sonra koltuk ve aletler temizlenir.</p></div><div><h3>Tek fişle ödeme</h3><p>Nakit, kart veya havale; fiş ve kasa kaydı otomatik.</p></div></div></div></section>
+<section class="sec"><div class="eb">Süreç</div><h2>Randevunuz kayıtlı, kimse unutmaz.</h2>
+<div class="tl"><div class="stp" id="stp"><button class="on"><i>1</i><div><b>Randevu alındı</b><span>Siz formu doldurursunuz; salonun panelinde kayıt oluşur.</span></div></button><button><i>2</i><div><b>Onaylandı</b><span>Uzman ve saat netleşir, size onay ve hatırlatma mesajı gider.</span></div></button><button><i>3</i><div><b>İşlemde</b><span>Koltuğunuz hazır; kullanılan ürün ve renk notu kaydedilir.</span></div></button><button><i>4</i><div><b>Tamamlandı</b><span>Yapılan işlem ve süre kayda geçer, bir sonraki randevu önerilir.</span></div></button><button><i>5</i><div><b>Ödendi</b><span>Nakit, kart veya havale; fiş ve kasa kaydı otomatik.</span></div></button></div>
+<div class="dev"><small>Salon paneli · Randevu defteri</small><div class="rw"><span>Müşteri</span><span>Ayşe Yılmaz</span></div><div class="rw"><span>Hizmet</span><span>Kesim ve fön</span></div><div class="rw"><span>Uzman</span><span>Elif</span></div><div class="rw"><span>Tarih</span><span>14 Kasım · 14:30</span></div><span class="stt" id="stt">Randevu alındı</span><div class="bub" id="bub">Merhaba Ayşe, randevu talebiniz alındı. Onaylandığında size yazacağız.</div><div class="pb"><i id="pbi"></i></div></div></div></section></div>
+
+<!-- İPUÇLARI -->
+<div class="pg" id="pg-ipuclari"><div class="ph0"><div class="eb">İpuçları</div><h1>Saçınız için kısa notlar.</h1><p>Uzmanlarımızın en çok sorulan sorulara yazdığı kısa cevaplar.</p></div>
+<section class="sec light full"><div class="in" style="padding-top:50px"><div class="tp">
+<details open><summary>Boyalı saç nasıl bakılır?<span></span></summary><small>3 dk okuma · Elif</small><p>Boyadan sonra ilk 48 saat saçı yıkamayın. Renk koruyucu şampuan kullanın, ılık su tercih edin ve haftada bir maske uygulayın. Maşa ve fön ısısını düşük tutmak rengin ömrünü uzatır.</p></details>
+<details><summary>Keratinden sonra ilk 72 saat<span></span></summary><small>2 dk okuma · Selin</small><p>İşlemden sonra saçı toplamayın, tokayla sıkmayın, yıkamayın. Tuzlu su ve havuzdan uzak durun. Sülfatsız şampuan kullanırsanız etki aylarca sürer.</p></details>
+<details><summary>Gelin saçı için deneme neden şart?<span></span></summary><small>3 dk okuma · Selin</small><p>Deneme, modeli, tokayı ve duvağı birlikte görmemizi sağlar. Düğün sabahı sürpriz yaşamamanız için saç boyunu ve rengi de bu randevuda netleştiririz.</p></details>
+<details><summary>Ne sıklıkla kesim yaptırmalıyım?<span></span></summary><small>2 dk okuma · Murat</small><p>Kısa saçlarda 4–6 hafta, uzun saçlarda uçları almak için 8–10 hafta idealdir. Düzenli kesim saçın daha hızlı ve sağlıklı uzamasına yardımcı olur.</p></details></div></div></section></div>
+
+<!-- İLETİŞİM -->
+<div class="pg" id="pg-iletisim"><div class="ph0"><div class="eb">İletişim</div><h1>Sizi bekliyoruz.</h1><p>Randevuyu formdan alabilir, bize yazabilir ya da arayabilirsiniz.</p>
+<div class="ct"><div class="box"><h3>Adres</h3><p>Atatürk Bulvarı, Çankaya / Ankara</p><a class="ln" href="tel:03120000000">0312 000 00 00</a><a class="ln" href="#">WhatsApp ile yazın</a><a class="ln" href="mailto:info@atolyesac.example">info@atolyesac.example</a></div>
+<div class="box"><h3>Çalışma saatleri</h3><div class="open" data-open-now style="color:#6b5b4e"><i></i><span></span></div><div class="hr"><div><span>Salı – Cumartesi</span><span>10:00 – 20:00</span></div><div><span>Pazar – Pazartesi</span><span>Kapalı</span></div></div></div>
+<div class="box"><h3>Bize yazın</h3><div class="fm" id="cf"><input class="inp" placeholder="Ad soyad"><input class="inp" type="tel" placeholder="Telefon"><textarea class="inp" placeholder="Mesajınız"></textarea><button class="btn" id="cfb">Gönder</button><div class="okm"><b>Teşekkürler.</b><p style="color:#6b5b4e">Mesajınız salonun paneline düştü, en kısa sürede dönüş yapacağız.</p></div></div></div>
+<div class="map"><svg viewBox="0 0 600 300" preserveAspectRatio="xMidYMid slice"><rect width="600" height="300" fill="#e7dccf"/><g stroke="#fff" stroke-width="14" fill="none"><path d="M-10 90 L610 150"/><path d="M200 -10 L260 310"/><path d="M-10 230 L610 200" stroke-width="9"/><path d="M420 -10 L380 310" stroke-width="9"/></g><g fill="#d6c8b8"><rect x="40" y="110" width="110" height="60" rx="6"/><rect x="290" y="40" width="90" height="70" rx="6"/><rect x="450" y="190" width="100" height="70" rx="6"/><rect x="70" y="240" width="90" height="40" rx="6"/></g></svg><div class="pin">Atölye Saç</div></div></div>
+<div class="faq" style="margin-top:56px"><div class="eb">Sık sorulanlar</div><h2 style="font-size:clamp(34px,9vw,56px);margin:14px 0 14px">Merak ettikleriniz.</h2>
+<details><summary>Randevumu nasıl iptal ederim?<span></span></summary><p>Hatırlatma mesajındaki bağlantıdan ya da bizi arayarak, randevudan bir gün önceye kadar ücretsiz iptal edebilirsiniz.</p></details>
+<details><summary>Fiyatlar kesin mi?<span></span></summary><p>Liste başlangıç aralığıdır. Saç boyu ve yoğunluğu görüldükten sonra, işleme başlamadan önce kesin tutar söylenir.</p></details>
+<details><summary>Hangi yöntemlerle ödeme alıyorsunuz?<span></span></summary><p>Nakit, kredi kartı ve havale. İşlem bitince tek fişle kapanır.</p></details>
+<details><summary>Çocuk saç kesimi yapıyor musunuz?<span></span></summary><p>Evet. Randevu formunda kesim seçip notta çocuğun yaşını yazmanız yeterli.</p></details></div></div></div>
+</main>
+
+<footer><div class="fw">
+<div class="fb"><b class="fl">Atölye Saç</b><p>Kendinizi güzel hissettiğiniz, randevulu ve sakin bir salon.</p><div class="soc" id="soc3"></div></div>
+<div class="col"><h5>Hizmetler</h5><a href="#/hizmetler">Kesim ve fön</a><a href="#/hizmetler">Boya ve balyaj</a><a href="#/hizmetler">Keratin bakım</a><a href="#/hizmetler">Gelin saçı</a><a href="#/hizmetler">Erkek kesim ve sakal</a></div>
+<div class="col"><h5>Sayfalar</h5><a href="#/">Ana sayfa</a><a href="#/galeri">Galeri</a><a href="#/uzmanlar">Uzmanlar</a><a href="#/paketler">Paketler ve hediye çeki</a><a href="#/hakkimizda">Hakkımızda</a><a href="#/ipuclari">İpuçları</a><a href="#/iletisim">İletişim</a></div>
+<div class="col"><h5>Adres ve saatler</h5><span>Atatürk Bulvarı, Çankaya / Ankara</span><a href="tel:03120000000">0312 000 00 00</a><a href="mailto:info@atolyesac.example">info@atolyesac.example</a><div class="fh" style="margin-top:8px"><div><span>Salı – Cumartesi</span><span>10:00 – 20:00</span></div><div><span>Pazar – Pazartesi</span><span>Kapalı</span></div></div>
+<h5 style="margin-top:20px">Kampanyalardan haberdar olun</h5><div class="nl" id="nlf"><input type="email" placeholder="E-posta adresiniz" aria-label="E-posta"><button id="nlb">Katıl</button></div><div class="nlok" id="nlok">Teşekkürler, kaydınız alındı.</div></div>
+</div><div class="fx2"><span>© 2026 Atölye Saç</span><span><a href="#">KVKK aydınlatma</a> · <a href="#">Gizlilik</a> · <a href="#">Çerez politikası</a></span><a href="https://onlinekaydet.com">OnlineKaydet ile yayınlanır</a></div></footer>
+
+<div class="mbar" id="mbar"><a href="tel:03120000000">Ara</a><a href="#">WhatsApp</a><button class="btn" data-open>Randevu al</button></div>
+<div id="lb"><button class="x" aria-label="Kapat">×</button><button class="p" aria-label="Önceki">‹</button><img alt="Salon fotoğrafı"><button class="n" aria-label="Sonraki">›</button><div class="ct"></div></div>
+
+<div id="sh" aria-hidden="true"><div class="sheet" id="shs"><div class="grab"></div>
+<div class="frm"><h3>Randevu al</h3><div class="sub">Salon panelindeki kayıtla aynı alanlar.</div>
+<h4>Hizmet</h4><div class="opts" id="o-s"><button>Kesim ve fön</button><button>Tek renk boya</button><button>Balyaj ve ombre</button><button>Keratin bakım</button><button>Gelin deneme</button><button>Gelin saçı</button><button>Erkek kesim</button></div>
+<h4>Uzman</h4><div class="opts" id="o-e"><button class="on">Fark etmez</button><button>Elif</button><button>Murat</button><button>Selin</button></div>
+<h4>Gün</h4><div class="opts days" id="o-d"></div>
+<h4>Saat</h4><div class="opts" id="o-t"><button>10:00</button><button>11:00</button><button>12:00</button><button>13:30</button><button>14:30</button><button>16:00</button><button>17:30</button></div>
+<h4>Bilgileriniz</h4><div class="fld"><label>Ad soyad<input class="inp" id="f-n" autocomplete="name" placeholder="Ayşe Yılmaz"></label><label>Telefon<input class="inp" id="f-p" type="tel" autocomplete="tel" placeholder="05xx xxx xx xx"></label></div>
+<button class="btn go" id="go">Randevuyu kaydet</button></div>
+<div class="ok"><div class="tick"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div><h3>Randevunuz alındı</h3><p id="okp">Salonun paneline düştü. Onaylanınca size mesaj gelecek.</p><button class="btn o" style="color:var(--dk);border-color:#d7c8b8" id="okx">Tamam</button></div>
+</div></div>
+
+<script>
+(function(){
+var $=function(s,r){return(r||document).querySelector(s)},A=function(s,r){return[].slice.call((r||document).querySelectorAll(s))};
+var PX=function(i,w){return'https://images.pexels.com/photos/'+i+'/pexels-photo-'+i+'.jpeg?auto=compress&cs=tinysrgb&w='+(w||1400)};
+function paint(root){A('[data-p]',root).forEach(function(e){if(!e.style.backgroundImage)e.style.backgroundImage='url("'+PX(e.dataset.p)+'")'})}
+paint();
+var mob=matchMedia('(max-width:899px)');
+$('#hph').style.backgroundImage='url("'+PX(mob.matches?20046793:3993320,1800)+'")';
+/* social */
+var IC={Instagram:'<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r="1" fill="currentColor"/></svg>',WhatsApp:'<svg viewBox="0 0 24 24"><path d="M4 20l1.3-4.2A8 8 0 1 1 8.3 18.8z"/><path d="M9 9c0 3 3 6 6 6l1-1.5-2-1-1 .8c-1-.4-2-1.400-2.300-2.300l.8-1-1-2z"/></svg>',Facebook:'<svg viewBox="0 0 24 24"><path d="M14 8h3V4h-3a4 4 0 0 0-4 4v3H7v4h3v6h4v-6h3l1-4h-4V8z"/></svg>',TikTok:'<svg viewBox="0 0 24 24"><path d="M14 4v10.500a3.500 3.500 0 1 1-3.500-3.500"/><path d="M14 4c.5 2.500 2 4 5 4.200"/></svg>'};
+var soc=['Instagram','WhatsApp','Facebook','TikTok'].map(function(n){return'<a href="#" aria-label="'+n+'">'+IC[n]+n+'</a>'}).join('');
+['soc1','soc2','soc3'].forEach(function(id){$('#'+id).innerHTML=soc});
+/* open now (Istanbul) */
+function openNow(){var d=new Date(new Date().toLocaleString('en-US',{timeZone:'Europe/Istanbul'})),g=d.getDay(),m=d.getHours()*60+d.getMinutes();var op=g>=2&&g<=6&&m>=600&&m<1200;var t;if(op)t="Şu an açık · 20:00'ye kadar";else t="Şu an kapalı · Salı–Cumartesi 10:00'da açılır";A('[data-open-now]').forEach(function(e){e.classList.toggle('c',!op);$('span',e).textContent=t})}openNow();
+/* reveal */
+var io=new IntersectionObserver(function(es){es.forEach(function(en){if(en.isIntersecting){en.target.classList.add('v');io.unobserve(en.target)}})},{threshold:.12});
+function watch(){A('.rv:not(.v),.ch:not(.v)').forEach(function(e){io.observe(e)})}watch();
+/* nav scroll / bar */
+var mbar=$('#mbar');addEventListener('scroll',function(){mbar.classList.toggle('on',scrollY>500)},{passive:true});
+/* announce */
+$('#anx').onclick=function(){$('#an').style.display='none'};
+/* menu */
+var mn=$('#mn');function menu(o){mn.classList.toggle('on',o);mn.setAttribute('aria-hidden',!o);document.body.style.overflow=o?'hidden':''}
+$('#bg').onclick=function(){menu(true)};$('#mx').onclick=function(){menu(false)};
+/* router */
+var PGS=['home','hizmetler','galeri','uzmanlar','paketler','hakkimizda','ipuclari','iletisim'],TT={home:'Atölye Saç · Çankaya, Ankara',hizmetler:'Hizmetler ve fiyatlar',galeri:'Galeri',uzmanlar:'Uzmanlar',paketler:'Paketler',hakkimizda:'Hakkımızda',ipuclari:'İpuçları',iletisim:'İletişim'};
+function route(){var h=location.hash.replace(/^#\/?/,'')||'home';if(PGS.indexOf(h)<0)h='home';A('.pg').forEach(function(p){p.classList.toggle('on',p.id==='pg-'+h)});A('[data-pg]').forEach(function(a){a.classList.toggle('on',a.dataset.pg===h)});document.title=(h==='home'?'':TT[h]+' · ')+'Atölye Saç';menu(false);scrollTo({top:0,behavior:'instant'});setTimeout(watch,50);paint()}
+addEventListener('hashchange',route);route();
+/* word crossfade */
+var ws=A('.hi h1 .w'),wi=0;setInterval(function(){ws[wi].classList.remove('on');wi=(wi+1)%ws.length;ws[wi].classList.add('on')},4200);
+/* promise */
+var pr=$('#pr');pr.innerHTML=pr.textContent.split(' ').map(function(w){return'<span>'+w+'</span>'}).join(' ');var ps=A('span',pr);
+['hikâyenizin','dinler,','gülümsemenizi','hatırlatılır.'].forEach(function(k){ps.forEach(function(s){if(s.textContent===k)s.classList.add('hl')})});
+var tk=false;function onS(){tk=false;var q=pr.getBoundingClientRect();if(!q.height)return;var p=Math.min(1,Math.max(0,(innerHeight*.85-q.top)/(q.height+innerHeight*.35)));var n=Math.round(p*ps.length);ps.forEach(function(s,i){s.classList.toggle('l',i<n)})}
+addEventListener('scroll',function(){if(!tk){tk=true;requestAnimationFrame(onS)}},{passive:true});onS();
+/* instagram strip + gallery */
+var G=[[3993320,'salon'],[6487888,'kesim'],[10028673,'renk'],[20046793,'gelin'],[23349912,'bakim'],[19664876,'kesim'],[3993462,'kesim'],[7195805,'salon'],[3993308,'salon'],[3356170,'kesim'],[8867400,'salon']];
+$('#igh').innerHTML=G.slice(0,6).map(function(g){return'<a href="#/galeri" aria-label="Galeriye git"><div class="ph pp" data-p="'+g[0]+'"></div></a>'}).join('');
+$('#gg').innerHTML=G.map(function(g,i){return'<a href="#" data-i="'+i+'" data-c="'+g[1]+'"><img loading="lazy" alt="Atölye Saç galeri" src="'+PX(g[0],700)+'"></a>'}).join('');
+var gs=A('#gg a'),vis=gs;A('#gf button').forEach(function(b){b.onclick=function(){A('#gf button').forEach(function(x){x.classList.toggle('on',x===b)});var f=b.dataset.f;gs.forEach(function(a){a.classList.toggle('h',f!=='all'&&a.dataset.c!==f)});vis=gs.filter(function(a){return!a.classList.contains('h')})}});
+var lb=$('#lb'),li=0,lim=$('img',lb);
+function show(i){li=(i+vis.length)%vis.length;lim.style.opacity=0;setTimeout(function(){lim.src=PX(G[+vis[li].dataset.i][0],1600);lim.style.opacity=1},150);$('.ct',lb).textContent=(li+1)+' / '+vis.length}
+$('#gg').addEventListener('click',function(e){var a=e.target.closest('a');if(!a)return;e.preventDefault();vis=gs.filter(function(x){return!x.classList.contains('h')});show(vis.indexOf(a));lb.classList.add('on');document.body.style.overflow='hidden'});
+function lbx(){lb.classList.remove('on');document.body.style.overflow=''}
+$('.x',lb).onclick=lbx;$('.p',lb).onclick=function(){show(li-1)};$('.n',lb).onclick=function(){show(li+1)};
+lb.addEventListener('click',function(e){if(e.target===lb)lbx()});
+var tx0=0;lb.addEventListener('touchstart',function(e){tx0=e.touches[0].clientX},{passive:true});lb.addEventListener('touchend',function(e){var d=e.changedTouches[0].clientX-tx0;if(Math.abs(d)>50)show(li+(d<0?1:-1))});
+document.addEventListener('keydown',function(e){if(lb.classList.contains('on')){if(e.key==='Escape')lbx();if(e.key==='ArrowRight')show(li+1);if(e.key==='ArrowLeft')show(li-1)}});
+/* price tabs */
+var tb=A('#tabs button'),rows=A('#pg-hizmetler .rows'),pics=A('#pic .ph');
+tb.forEach(function(b,i){b.onclick=function(){tb.forEach(function(x,j){x.classList.toggle('on',j===i)});rows.forEach(function(x,j){x.classList.toggle('on',j===i)});pics.forEach(function(x,j){x.classList.toggle('on',j===i)})}});
+/* punch card */
+A('#pk button').forEach(function(b,i){b.onclick=function(){var on=b.classList.contains('on');A('#pk button').forEach(function(x,j){x.classList.toggle('on',on?j<i:j<=i)})}});
+/* gift card */
+var am=A('#amts button');am.forEach(function(b){b.onclick=function(){am.forEach(function(x){x.classList.toggle('on',x===b)});$('#tam').textContent=b.textContent}});
+$('#gmk').onclick=function(){var t=$('#gto').value.trim()||'Zeynep',m=$('#gms').value.trim()||'Doğum günün kutlu olsun';$('#tto').textContent=t+' için';$('#tms').textContent=m;$('#tcd').textContent='ATL-'+Math.random().toString(36).slice(2,6).toUpperCase()}
+/* contact + newsletter */
+$('#cfb').onclick=function(){$('#cf').classList.add('done')};
+$('#nlb').onclick=function(){$('#nlf').style.display='none';$('#nlok').style.display='block'};
+/* timeline */
+var T=[['Randevu alındı','Merhaba Ayşe, randevu talebiniz alındı. Onaylandığında size yazacağız.'],['Onaylandı','Randevunuz onaylandı: 14 Kasım 14:30, Elif. Yarın size hatırlatma göndereceğiz.'],['İşlemde','Koltuğunuz hazır. Renk ve ürün notu kayda eklendi.'],['Tamamlandı','Teşekkürler Ayşe. Kayıt tamamlandı; 6 hafta sonrası için saat önerelim mi?'],['Ödendi','Ödemeniz alındı, fişiniz kayıtlıdır. İyi günler dileriz.']];
+var sb=A('#stp button'),ti=0,hold=false,tbz=0;
+function setT(k){ti=k;sb.forEach(function(b,i){b.classList.toggle('on',i===k)});var bub=$('#bub'),s=$('#stt');bub.classList.add('o');s.classList.add('o');$('#pbi').style.width=((k+1)/5*100)+'%';clearTimeout(tbz);tbz=setTimeout(function(){s.textContent=T[k][0];bub.textContent=T[k][1];bub.classList.remove('o');s.classList.remove('o')},450)}
+sb.forEach(function(b,i){b.onclick=function(){hold=true;setT(i)}});
+var seen=false;new IntersectionObserver(function(e){seen=e[0].isIntersecting},{threshold:.4}).observe($('#stp'));
+setInterval(function(){if(seen&&!hold)setT((ti+1)%5)},5200);setT(0);
+/* stats count */
+A('.stats b').forEach(function(e){var n=+e.textContent;e.dataset.n=n;var o=new IntersectionObserver(function(es){if(es[0].isIntersecting){o.disconnect();var k=0;e.textContent=0;var t=setInterval(function(){k++;e.textContent=k;if(k>=n)clearInterval(t)},260)}},{threshold:.5});o.observe(e)});
+/* booking sheet */
+var sh=$('#sh'),shs=$('#shs');
+function pick(id,val){var g=A('#'+id+' button');var f=g.filter(function(b){return(b.dataset.v||b.textContent.replace(/\s+/g,' ').trim())===val})[0];if(f)g.forEach(function(b){b.classList.toggle('on',b===f)});return !!f}
+function grp(id){A('#'+id+' button').forEach(function(b){b.addEventListener('click',function(){A('#'+id+' button').forEach(function(x){x.classList.remove('on')});b.classList.add('on')})})}
+var od=$('#o-d'),dn=['Paz','Pzt','Sal','Çar','Per','Cum','Cmt'],mo=['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'],d0=new Date();
+for(var k=0;k<7;k++){var d=new Date(d0.getTime()+k*864e5),b=document.createElement('button');b.dataset.v=d.getDate()+' '+mo[d.getMonth()];b.innerHTML='<small>'+dn[d.getDay()]+'</small><b>'+d.getDate()+'</b><small>'+mo[d.getMonth()]+'</small>';if(k===1)b.className='on';od.appendChild(b)}
+['o-s','o-e','o-d','o-t'].forEach(grp);
+function open(ds){shs.classList.remove('done');var s=ds.s||'Kesim ve fön';if(!pick('o-s',s)){var nb=document.createElement('button');nb.textContent=s;A('#o-s button').forEach(function(x){x.classList.remove('on')});nb.className='on';nb.onclick=function(){A('#o-s button').forEach(function(x){x.classList.remove('on')});nb.classList.add('on')};$('#o-s').appendChild(nb)}
+pick('o-e',ds.e||'Fark etmez');if(ds.t)pick('o-t',ds.t);else if(!$('#o-t .on'))pick('o-t','14:30');sh.classList.add('on');sh.setAttribute('aria-hidden','false');document.body.style.overflow='hidden'}
+function close(){sh.classList.remove('on');sh.setAttribute('aria-hidden','true');document.body.style.overflow=''}
+document.addEventListener('click',function(e){var o=e.target.closest('[data-open]');if(o){e.preventDefault();menu(false);open(o.dataset)}});
+sh.addEventListener('click',function(e){if(e.target===sh)close()});$('#okx').onclick=close;
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){close();menu(false)}});
+$('#go').onclick=function(){var n=$('#f-n').value.trim()||'Ayşe',s=$('#o-s .on'),d=$('#o-d .on'),t=$('#o-t .on');$('#okp').textContent=n.split(' ')[0]+', '+(s?s.textContent:'')+' için '+(d?d.dataset.v:'')+' '+(t?t.textContent:'')+' randevunuz salonun paneline düştü. Onaylanınca size mesaj gelecek.';shs.classList.add('done')};
+})();
+</script>
+</body>
+</html>
