@@ -120,7 +120,7 @@ def scenes():
     S['kuafor'] = [
         ('#3b2a2a', '#7a5a4a', floor(820, '#2a1d1d', .6) + mirror(180, 120, 520, 620) + mirror(900, 120, 520, 620) + f'<rect x="120" y="740" width="1400" height="40" rx="10" fill="#caa469"/>' + ''.join(f'<rect x="{200+i*120}" y="{660 if i%2 else 640}" width="46" height="{100 if i%2 else 120}" rx="10" fill="{c}"/>' for i, c in enumerate(('#e6b8a2', '#9db4a8', '#c97a6d', '#e8d4a8', '#8f6f61', '#d98c5f')))),
         ('#233036', '#4c6a68', scissors(800, 520, 1.5) + f'<rect x="1100" y="640" width="360" height="40" rx="8" fill="#1b2326"/>' + ''.join(f'<rect x="{1110+i*20}" y="{680}" width="8" height="{60+(i%3)*10}" fill="#1b2326"/>' for i in range(16))),
-        ('#5a4036', '#c9a37a', floor(840, '#3a2a22', .7) + '<rect x="300" y="300" width="360" height="360" rx="180" fill="#2a2e34"/><rect x="560" y="360" width="520" height="130" rx="62" fill="#2a2e34"/><rect x="1000" y="290" width="80" height="260" rx="30" fill="#2a2e34" transform="rotate(14 1040 400)"/><circle cx="480" cy="480" r="120" fill="#caa469"/>' + shadow(700, 700, 420, 20, .3)),
+        ('#5a4036', '#c9a37a', floor(840, '#3a2a22', .7) + shadow(780, 760, 520, 22, .3) + '<path d="M300 380 C300 270 420 230 560 230 L880 230 C980 230 1040 300 1040 380 C1040 470 980 520 880 520 L560 520 C420 520 300 480 300 380Z" fill="#2a2e34"/><rect x="1020" y="300" width="150" height="160" rx="26" fill="#1d2025"/><rect x="560" y="500" width="150" height="250" rx="30" fill="#2a2e34" transform="rotate(-8 635 625)"/><circle cx="560" cy="380" r="86" fill="#caa469"/><circle cx="560" cy="380" r="48" fill="#2a2e34"/>' + ''.join(f'<rect x="{1190+i*18}" y="{320+i*4}" width="10" height="120" rx="5" fill="#caa469" opacity=".8"/>' for i in range(6))),
     ]
     S['nakliye'] = [
         ('#1f3a5c', '#e8a33c', floor(790, '#20252d', .95) + '<rect y="905" width="1600" height="12" fill="#fff" opacity=".35"/>' + truck(250, 800, 1.45, '#e8a33c', '#f4f1ea')),
@@ -129,7 +129,7 @@ def scenes():
     ]
     S['tekstil'] = [
         ('#3a2c4a', '#b4658a', floor(800, '#2a2030', .8) + roll(200, 520, 560, 96, '#e0b84a', '#b8902a') + roll(260, 330, 520, 90, '#3f7d9a', '#2a5c75') + roll(840, 560, 520, 96, '#c0453a', '#8f2f27') + roll(900, 370, 480, 90, '#7a9a5a', '#58763c')),
-        ('#2b3a45', '#8aa4b3', floor(800, '#1f2a33', .7) + sewing(400, 460, 2.2, '#e6e2d8') + '<path d="M1160 700 C1250 640 1340 660 1420 700" stroke="#e0b84a" stroke-width="8" fill="none"/>'),
+        ('#2b3a45', '#8aa4b3', floor(800, '#1f2a33', .7) + sewing(380, 200, 2.0, '#e6e2d8') + '<path d="M1160 700 C1250 640 1340 660 1420 700" stroke="#e0b84a" stroke-width="8" fill="none"/>'),
         ('#2e2f3e', '#7d8fb0', '<rect x="200" y="200" width="1200" height="12" rx="6" fill="#d6dae0"/>' + ''.join(hanger(300 + i * 200, 200, c) for i, c in enumerate(('#c0453a', '#3f7d9a', '#e0b84a', '#7a9a5a', '#e8e2d4', '#8f6fb0', '#e07a5a'))) + floor(800, '#1d1f2c', .7)),
     ]
     S['eticaret'] = [
