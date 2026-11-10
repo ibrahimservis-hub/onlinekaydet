@@ -130,7 +130,7 @@ def render(home, ctx, theme_slug, page):
             ''
             '<h2 class="ok_rh">Benzer ürünler</h2><div class="ok_rg">%s</div><div id="ok_rv"></div>'
             '<div class="ok_sb"><div><small>Fiyat</small>%s</div><button type="button" data-add2>Sepete ekle</button></div><div class="ok_ty" id="ok_ty"><span>Ürün sepete eklendi</span><a href="%s?sepet=1">Sepete git</a></div></div></section></div>'
-            % (E(cartkey), E(home_href), E(wa or ""), E(cat), E(name), E(name), E(cat), E(code), E(name), stt[1], stt[0], tl(price), vh, buy, info, feats, seller,
+            % (E(cartkey), E(home_href), E(wa or ""), E(cat), E(name), E(name), E(cat), E(code), E(name), stt[1], stt[0], tl(price), vh, buy, info, feats, "",
                E(desc), rows, reviews, qa, (("%s ve üzeri siparişlerde kargo ücretsizdir." % tl(esik)) if esik else ""), relh, tl(price) if stock else "", home_href))
     js = ('<script>(function(){' + pj + 'var D=' + json.dumps(D, ensure_ascii=False) + ',I=' + str(i) + ',P=D[I],Q=1,SEL={},$=function(s,r){return(r||document).querySelector(s)},A=function(s,r){return[].slice.call((r||document).querySelectorAll(s))};'
           'var W=$(".okp"),KEY=W.dataset.cartkey,VB=["0 0 200 200","24 24 152 152","46 46 108 108","0 40 200 120"];'

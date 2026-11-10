@@ -494,9 +494,19 @@ def register(api_router, db, deps):
             return None
         if p in ("", "index"):
             h = home
-        elif p in ("magaza", "hesabim") and ctx and ctx.get("shop_on"):
-            body = storefront.shop_page() if p == "magaza" else storefront.account_page()
-            h = compose_page(await themed_home(ctx), ("Mağaza" if p == "magaza" else "Hesabım") + " · " + ctx["name"], body)
+        elif (p in ("magaza", "hesabim") or re.fullmatch(r"magaza/urun/[^/]{1,120}", p)) and ctx and ctx.get("shop_on"):
+            body = storefront.shop_page() if p.startswith("magaza") else storefront.account_page()
+            ttl = "Mağaza" if p == "magaza" else "Hesabım"
+            if p.startswith("magaza/urun/"):
+                try:
+                    from urllib.parse import unquote
+                    pr = await db.shop_products.find_one({"$or": [{"slug": unquote(p[12:])}, {"id": unquote(p[12:])}], "active": True}, {"_id": 0, "name": 1})
+                except Exception:                                             # noqa: BLE001
+                    pr = None
+                if not pr:
+                    return None
+                ttl = pr["name"]
+            h = compose_page(await themed_home(ctx), ttl + " · " + ctx["name"], body)
             if not h:
                 return None
             h = h.replace("</head>", '<meta name="robots" content="noindex,follow"></head>', 1) if p == "hesabim" else h
