@@ -189,6 +189,8 @@ FAM_TERMS = {
                 "Garanti Bitiş": "Geçerlilik", "Garanti talebi yok": "Memnuniyet talebi yok", "Garanti devam ediyor": "Geçerli", "Garanti bitti": "Süresi doldu",
                 "Garanti aktif": "Geçerli", "Servis No / Cihaz": "Randevu No / Hizmet", "Servis No": "Randevu No", "Serviste": "İşlemde",
                 "Yapılan işlem veya parça garantisi kapsamındaki müşteri taleplerini takip edin.": "Müşterilerinizin şikâyet, öneri ve memnuniyet taleplerini takip edin.",
+                "Seçilen dönemi bir önceki eşit dönemle kıyaslar: usta, kanal, marka, cihaz, şehir, yoğunluk, parça ve müşteri analizi.": "Seçilen dönemi bir önceki eşit dönemle kıyaslar: uzman, kanal, hizmet, şehir, yoğunluk, ürün ve müşteri analizi.",
+                "gösterilir. Marka sayfasında yalnız o markanın, kategori sayfasında o kategorinin yorumları çıkar. Yorum yoksa bölüm görünmez.": "gösterilir. Hizmet sayfasında yalnız o hizmetin, kategori sayfasında o kategorinin yorumları çıkar. Yorum yoksa bölüm görünmez.",
                 "Servis": "Randevu İşlemleri", "Marka / Hizmet": "Hizmet Grubu / Hizmet", "Servis No / Hizmet": "Randevu No / Hizmet", "Servis Geliri": "Hizmet Geliri",
                 "Parça cirosu": "Ürün cirosu", "En çok kullanılan parçalar": "En çok kullanılan ürünler", "Servise Alındı": "Randevuya Alındı", "Servis Puanı": "Hizmet Puanı",
                 "Servis sonrası arama": "Randevu sonrası arama", "Servis Fişi": "Randevu Fişi",

@@ -1868,9 +1868,9 @@
     if (k === '/admin/account') return true;
     if (k === 'ek:paket') return !!FIRM;
     if (k === 'ek:kayit') return !!window.__spxKayit;
-    if (k === '/admin/jobs' && window.__spxKayit && !PLAT) return false;
+    if (k === '/admin/jobs' && window.__spxKayit && (!PLAT || !!FIRM)) return false;
     var MG = { 'ek:ilan': 'ilan', 'ek:kursiyer': 'kurs', 'ek:program': 'kurs', 'ek:kaynak': 'rez', 'ek:rezervasyon': 'rez', 'ek:hasta': 'klinik' };
-    if (MG[k] && !PLAT && (window.__spxMods || []).indexOf(MG[k]) < 0) return false;
+    if (MG[k] && (!PLAT || !!FIRM) && (window.__spxMods || []).indexOf(MG[k]) < 0) return false;
     if ((FIRM || PLAT) && FIRM_HIDE[k]) return false;
     if (FIRM && PKGMODS && MODKEY[k] && PKGMODS.indexOf(MODKEY[k]) < 0) return false;
     if (FIRM && (k === 'ek:firmalar' || k === '/admin/governance')) return false; /* platform düzeyi: firma panelinde görünmez */
