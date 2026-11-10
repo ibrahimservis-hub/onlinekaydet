@@ -462,16 +462,16 @@ def register(app, api_router, db, deps):
         async for d in db.main().firm_domains.find({}, {"_id": 0}):
             doms.setdefault(d["firm_id"], []).append(d)
         man = {m["firm_id"]: m async for m in db.main().onboarding.find({}, {"_id": 0})}
-        out = []
-        for f in await db.main().firms.find({"status": {"$ne": "silindi"}}, {"_id": 0}).sort("created_at", -1).to_list(300):
+        import asyncio
+
+        async def one(f):
             fdb = db.firm(f["db"])
             try:
-                g = await fdb.app_settings.find_one({"_id": "global"}, {"_id": 0}) or {}
-                lg = await fdb.app_settings.find_one({"_id": "firm_logo"}, {"_id": 0}) or {}
-                br = await fdb.app_settings.find_one({"_id": "brand"}, {"_id": 0}) or {}
-                ig = await fdb.app_settings.find_one({"_id": "integrations"}, {"_id": 0}) or {}
-                users = await fdb.users.count_documents({})
-                jobs = await fdb.jobs.count_documents({})
+                g, lg, br, ig, users, jobs = await asyncio.gather(
+                    fdb.app_settings.find_one({"_id": "global"}, {"_id": 0}), fdb.app_settings.find_one({"_id": "firm_logo"}, {"_id": 0}),
+                    fdb.app_settings.find_one({"_id": "brand"}, {"_id": 0}), fdb.app_settings.find_one({"_id": "integrations"}, {"_id": 0}),
+                    fdb.users.count_documents({}), fdb.jobs.count_documents({}))
+                g, lg, br, ig = g or {}, lg or {}, br or {}, ig or {}
             except Exception:                                    # noqa: BLE001
                 g = lg = br = ig = {}
                 users = jobs = 0
@@ -486,9 +486,11 @@ def register(app, api_router, db, deps):
                      {"k": "kisi", "t": "Personel eklendi", "ok": users > 1, "auto": True},
                      {"k": "is", "t": "İlk servis kaydı açıldı", "ok": jobs > 0, "auto": True}]
             items += [{"k": k, "t": t, "ok": bool(done.get(k)), "auto": False} for k, t in MANUAL_STEPS]
-            out.append({"id": f["id"], "name": f.get("name", ""), "status": f.get("status", ""), "domains": [x["domain"] for x in dl],
-                        "items": items, "done": sum(1 for i in items if i["ok"]), "total": len(items), "note": m.get("note", "")})
-        return {"firms": out}
+            return {"id": f["id"], "name": f.get("name", ""), "status": f.get("status", ""), "domains": [x["domain"] for x in dl],
+                    "items": items, "done": sum(1 for i in items if i["ok"]), "total": len(items), "note": m.get("note", "")}
+        firms_l = await db.main().firms.find({"status": {"$ne": "silindi"}}, {"_id": 0}).sort("created_at", -1).to_list(300)
+        out = await asyncio.gather(*[one(f) for f in firms_l])
+        return {"firms": list(out)}
 
     @api_router.put("/admin/onboarding/{fid}")
     async def onb_set(fid: str, body: dict, me: dict = Depends(require_admin)):

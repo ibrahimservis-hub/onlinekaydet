@@ -65,7 +65,7 @@ def _now():
 
 
 def public_list():
-    return {k: {"name": v["name"], "brands": len(v["brands"]), "faults": len(v["faults"])} for k, v in SECTORS.items()}
+    return {k: {"name": v["name"], "brands": len(v["brands"]), "faults": len(v["faults"]), "group": "teknik" if k in TEKNIK else "genel"} for k, v in SECTORS.items()}
 
 
 async def apply(fdb, key: str) -> dict:
@@ -90,5 +90,24 @@ async def apply(fdb, key: str) -> dict:
             "items": [{"id": uuid.uuid4().hex[:8], "text": t, "required": r} for t, r in sec["checklist"]]})
     servis = {**sec.get("servis", {}), "pdf": {"title": sec["pdf_title"]}}
     await fdb.app_settings.update_one({"_id": "servis"}, {"$set": servis}, upsert=True)
-    await fdb.app_settings.update_one({"_id": "sector"}, {"$set": {"key": key, "name": sec["name"], "type": sec["type"], "faults": sec["faults"], "at": _now()}}, upsert=True)
+    await fdb.app_settings.update_one({"_id": "sector"}, {"$set": {"key": key, "name": sec["name"], "type": sec["type"], "faults": sec["faults"], "terms": sec.get("terms", {}), "at": _now()}}, upsert=True)
     return {"sector": key, "models": n_models, "checklist": len(sec["checklist"]), "faults": len(sec["faults"])}
+
+
+# --- teknik olmayan sektörler (oto servis, çekici, kuaför, nakliye, tekstil, e-ticaret...) ---
+from sektor_ek import NEW as _NEW  # noqa: E402
+SECTORS.update({k: {kk: vv for kk, vv in v.items() if kk != "site"} for k, v in _NEW.items()})
+TEKNIK = ("kombi", "klima", "beyaz_esya", "elektronik", "bilgisayar", "tesisat", "elektrik", "guvenlik")
+
+
+def register(api_router, db, deps):
+    """Firma panelinin sektör diline erişmesi için: GET /api/sector-terms -> {key, name, terms}."""
+    gcu = deps["get_current_user"]
+    from fastapi import Depends
+
+    @api_router.get("/sector-terms")
+    async def sector_terms(user=Depends(gcu)):
+        d = await db.app_settings.find_one({"_id": "sector"}, {"_id": 0}) or {}
+        key = d.get("key") or ""
+        sec = SECTORS.get(key) or {}
+        return {"key": key, "name": d.get("name") or sec.get("name") or "", "terms": d.get("terms") or sec.get("terms") or {}}

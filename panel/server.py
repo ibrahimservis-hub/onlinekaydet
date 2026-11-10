@@ -2913,6 +2913,8 @@ import surum
 surum.register(api_router, db, {"require_admin": require_admin})
 import servis_ayar
 servis_ayar.setup(app, api_router, db, get_current_user, tenant)
+import sektor as _sektor
+_sektor.register(api_router, db, {"get_current_user": get_current_user})
 import demo
 demo.register(api_router, db, {"hash_password": hash_password})
 import domains

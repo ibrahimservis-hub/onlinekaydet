@@ -22,6 +22,9 @@ _RATE = {}
 DEMO_DAYS = 7
 SECTOR_MAP = {"kombi": "kombi", "klima": "klima", "beyaz eşya": "beyaz_esya", "beyaz esya": "beyaz_esya", "elektronik": "elektronik",
               "bilgisayar": "bilgisayar", "tesisat": "tesisat", "elektrik": "elektrik", "güvenlik": "guvenlik", "guvenlik": "guvenlik"}
+import sektor_ek
+SECTOR_MAP.update(sektor_ek.SECTOR_WORDS)
+SECTOR_MAP.update({k: k for k in sektor_ek.NEW})
 CUSTOMERS = [("Ayşe Yıldız", "Atatürk Mah. 112. Sk. No:4/3", "Çankaya", "Ankara"), ("Mehmet Kaya", "Cumhuriyet Cd. No:27/8", "Kadıköy", "İstanbul"),
              ("Fatma Demir", "Yeni Mah. 1450 Sk. No:12", "Bornova", "İzmir"), ("Ali Çelik", "Fevzi Çakmak Cd. No:55/2", "Yenimahalle", "Ankara"),
              ("Zeynep Arslan", "Bahçelievler 7. Cd. No:9", "Nilüfer", "Bursa")]
@@ -33,6 +36,7 @@ FAULTS = {"kombi": ["Isıtmıyor, E01 hatası", "Sıcak su gelmiyor", "Petek ıs
           "tesisat": ["Musluk damlatıyor", "Gider tıkanıklığı", "Su kaçağı tespiti", "Rezervuar arızası"],
           "elektrik": ["Sigorta atıyor", "Priz çalışmıyor", "Avize montajı", "Kaçak akım rölesi"],
           "guvenlik": ["Kamera görüntü vermiyor", "Kayıt cihazı açılmıyor", "Alarm panosu arıza veriyor", "Kamera montajı"]}
+FAULTS.update(sektor_ek.DEMO_FAULTS)
 
 
 def _now():
@@ -164,13 +168,14 @@ def register(api_router, db, deps):
             await fdb.customers.insert_one(c)
             custs.append(c)
         faults = FAULTS.get(key) or ["Arıza"]
+        _mdl, _wd, _pn = sektor_ek.DEMO_META.get(key, ("Örnek model", "Arıza giderildi, test edildi.", "Yedek parça"))
         plan = [("yeni", None), ("atandi", 0), ("yolda", 0), ("basladi", 1), ("tamamlandi", 0), ("tamamlandi", 1), ("tamamlandi", 0)]
         for n, (st, ti) in enumerate(plan):
             c = custs[n % len(custs)]
             dev = None
             if br:
                 dev = {"id": str(uuid.uuid4()), "customer_id": c["id"], "brand_id": br["id"], "brand_name": br["name"], "brand_logo": br.get("logo_url", ""),
-                       "type": sec["type"], "model": "Örnek model", "serial_no": f"DM{n:04d}", "created_at": _now()}
+                       "type": sec["type"], "model": _mdl, "serial_no": f"DM{n:04d}", "created_at": _now()}
                 await fdb.devices.insert_one(dev)
             t = techs[ti] if ti is not None else None
             when = datetime.now(timezone.utc) - timedelta(days=(7 - n) if st == "tamamlandi" else 0, hours=-n)
@@ -178,11 +183,11 @@ def register(api_router, db, deps):
             job = {"id": str(uuid.uuid4()), "job_number": f"DM-{1001 + n}", "customer_id": c["id"], "customer_name": c["name"],
                    "customer_phone": c["phone"], "customer_address": f'{c["address"]} {c["district"]} {c["city"]}',
                    "device_id": dev["id"] if dev else "", "device_brand_id": br["id"] if br else "", "device_brand_name": br["name"] if br else "",
-                   "device_brand_logo": br.get("logo_url", "") if br else "", "device_model": "Örnek model", "device_type": sec["type"],
+                   "device_brand_logo": br.get("logo_url", "") if br else "", "device_model": _mdl, "device_type": sec["type"],
                    "device_serial": dev["serial_no"] if dev else "", "fault_description": faults[n % len(faults)], "scheduled_at": when.strftime("%Y-%m-%dT%H:%M"),
                    "priority": "normal", "assigned_technician_id": t["id"] if t else "", "assigned_to_fu": "",
                    "assigned_technician_name": t["name"] if t else "", "technician_commission_percent": 30.0 if t else 0.0, "status": st,
-                   "work_done": "Arıza giderildi, test edildi." if st == "tamamlandi" else "", "parts_used": ([{"name": "Yedek parça", "qty": 1, "unit_price": parts}] if parts else []),
+                   "work_done": _wd if st == "tamamlandi" else "", "parts_used": ([{"name": _pn, "qty": 1, "unit_price": parts}] if parts else []),
                    "labor_fee": labor, "parts_total": parts, "total_amount": labor + parts,
                    "technician_commission_amount": round((labor + parts) * 0.3, 2) if st == "tamamlandi" else 0.0,
                    "photos_before": [], "photos_after": [], "signature_url": "", "tech_signature_url": "", "pdf_note": "", "cancel_reason": "",
@@ -196,6 +201,20 @@ def register(api_router, db, deps):
                 await fdb.cash_transactions.insert_one({**base, "id": str(uuid.uuid4()), "type": "gelir", "amount": tot, "description": f"Servis Geliri - {job['job_number']} - {c['name']}"})
                 await fdb.cash_transactions.insert_one({**base, "id": str(uuid.uuid4()), "type": "teknisyen_prim", "amount": round(tot * 0.7, 2), "description": f"Prim (Kasada Kalan) - {job['job_number']}"})
                 await fdb.cash_transactions.insert_one({**base, "id": str(uuid.uuid4()), "type": "teknisyen_borc", "amount": round(tot * 0.3, 2), "description": f"Firma payı - {job['job_number']}"})
+
+        try:
+            _cats = {}
+            for _i, (_n, _b, _c, _pr, _old, _st) in enumerate(sektor_ek.DEMO_URUN.get(key, [])):
+                if _c not in _cats:
+                    _cid = uuid.uuid4().hex[:12]
+                    await fdb.shop_categories.insert_one({"id": _cid, "name": _c, "slug": _c.lower().replace(" & ", "-").replace(" ", "-"), "created_at": _now()})
+                    _cats[_c] = _cid
+                _slug = re.sub(r"[^a-z0-9]+", "-", _n.lower().translate(str.maketrans("çğıöşüİ", "cgiosui"))).strip("-")
+                await fdb.shop_products.insert_one({"id": uuid.uuid4().hex[:12], "slug": _slug, "name": _n, "brand": _b, "category": _c, "category_id": _cats[_c], "category_ids": [_cats[_c]],
+                                                    "price": float(_pr), "old_price": float(_old), "stock": _st, "track_stock": True, "active": True, "featured": _i < 3, "images": [], "sort": _i,
+                                                    "short": "Örnek ürün; fiyat, stok ve fotoğrafı panelden değiştirin.", "created_at": _now(), "updated_at": _now(), "sold": 0})
+        except Exception:               # noqa: BLE001
+            pass
 
         # satış listesine düş (sahip Talepler'de görür)
         try:

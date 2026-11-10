@@ -98,6 +98,11 @@ DEFAULTS = {
     },
 }
 
+import sektor_ek as _sek
+for _k, _v in _sek.NEW.items():
+    SECTORS[_k] = _v["name"].split(" &")[0]
+    DEFAULTS[_k] = {"services": list(_v["site"]["services"]), "faq": list(_v["site"]["faq"])}
+
 LINK_ICON = {"instagram": "Instagram", "facebook": "Facebook", "x": "X", "youtube": "YouTube", "tiktok": "TikTok", "linkedin": "LinkedIn"}
 
 

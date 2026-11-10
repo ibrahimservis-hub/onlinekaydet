@@ -6233,3 +6233,32 @@
   }
   setInterval(tick, 500);
 })();
+
+/* ---------- Sektör dili: teknik olmayan sektörlerde menü/başlık etiketleri (Servis Kayıtları -> İş Emirleri / Randevu Defteri / Siparişler ...) ---------- */
+(function () {
+  if (window.__spxTerms) return; window.__spxTerms = 1;
+  var S = { tok: '', map: null, busy: false, keys: [] };
+  function tok() { try { return localStorage.getItem('token') || ''; } catch (e) { return ''; } }
+  function load() {
+    var t = tok(); if (!t) { S.map = null; S.tok = ''; return; }
+    if (S.busy || S.tok === t) return; S.busy = true;
+    fetch(location.origin + '/api/sector-terms', { headers: { Authorization: 'Bearer ' + t } })
+      .then(function (r) { return r.ok ? r.json() : {}; })
+      .then(function (j) { S.tok = t; S.map = (j && j.terms && Object.keys(j.terms).length) ? j.terms : null; S.keys = S.map ? Object.keys(S.map) : []; })
+      .catch(function () { S.tok = t; S.map = null; })
+      .then(function () { S.busy = false; });
+  }
+  function apply() {
+    if (!S.map || !document.body) return;
+    var w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null), n, list = [];
+    while ((n = w.nextNode())) { var v = n.nodeValue; if (v && v.length < 40 && S.map[v.trim()] !== undefined) list.push(n); }
+    list.forEach(function (n) {
+      var p = n.parentElement; if (!p || /^(SCRIPT|STYLE|TEXTAREA|INPUT|OPTION)$/.test(p.tagName)) return;
+      var raw = n.nodeValue, k = raw.trim(); n.nodeValue = raw.replace(k, S.map[k]);
+    });
+    [].forEach.call(document.querySelectorAll('[placeholder],[aria-label],[title]'), function (el) {
+      ['placeholder', 'aria-label', 'title'].forEach(function (a) { var v = el.getAttribute(a); if (v && S.map[v.trim()] !== undefined) el.setAttribute(a, S.map[v.trim()]); });
+    });
+  }
+  setInterval(function () { try { load(); apply(); } catch (e) { } }, 600);
+})();
