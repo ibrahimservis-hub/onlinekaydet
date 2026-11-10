@@ -36,7 +36,7 @@ CSS = """<style id="okurun">
 .okp .ok_rt{display:flex;gap:14px;flex-wrap:wrap;font:600 .86rem var(--fb,inherit);color:var(--mut);margin:2px 0 10px}.okp .ok_rt a{color:var(--c);text-decoration:none}
 .okp .ok_sw{width:42px;height:42px;min-width:42px;padding:0!important;border-radius:50%!important}.okp .ok_sw.on{outline:2px solid var(--c);outline-offset:2px}
 .okp .ok_sl{margin-top:16px;border:1px solid var(--ln);border-radius:var(--r,10px);padding:14px 16px;display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap}.okp .ok_sl b{display:block;font-size:.95rem}.okp .ok_sl small{color:var(--mut)}.okp .ok_sl a{color:var(--c);font-weight:700;text-decoration:none;font-size:.88rem}
-.okp .ok_ft{margin:14px 0 0;padding:0;list-style:none;display:grid;gap:7px;font-size:.9rem}.okp .ok_ft li:before{content:"•";color:var(--c);font-weight:900;margin-right:8px}
+.okp .ok_ft{margin:14px 0 0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(2,1fr);gap:8px;font-size:.88rem}.okp .ok_ft li{border:1px solid var(--ln);border-radius:var(--r,10px);padding:9px 12px;display:grid;gap:2px;background:var(--sf,#fff)}.okp .ok_ft small{color:var(--mut);font-size:.74rem}.okp .ok_py{margin-top:14px;font-size:.88rem}.okp .ok_py div{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}.okp .ok_py span{border:1px solid var(--ln);border-radius:99px;padding:6px 12px;background:var(--sf,#fff)}
 .okp .ok_em{padding:26px;border:1px dashed var(--ln);border-radius:var(--r,10px);text-align:center;color:var(--mut)}.okp .ok_em b{display:block;color:var(--ink);margin-bottom:6px}
 .okp .ok_fm{display:grid;gap:10px;max-width:520px;margin-top:14px}.okp .ok_fm textarea{width:100%;min-height:90px;padding:12px;border:1px solid var(--ln);border-radius:var(--r,10px);background:var(--fbg,#fff);color:var(--ink);font:500 .95rem var(--fb,inherit)}.okp .ok_fm button{min-height:48px;border:0;border-radius:var(--r,10px);background:var(--c);color:var(--on-ac,#fff);font:700 .95rem var(--fb,inherit);cursor:pointer}
 .okp .ok_sb{display:none}
@@ -120,7 +120,11 @@ def render(home, ctx, theme_slug, page):
             % (("%s ve üzeri siparişlerde ücretsiz kargo" % tl(esik)) if esik else "Hızlı kargo"))
     ask = ('<p>Ürünle ilgili sorunuz mu var? <a href="https://wa.me/90%s" style="color:var(--c);font-weight:700">WhatsApp’tan yazın</a>, hızlıca dönelim.</p>' % wa) if wa else "<p>Ürünle ilgili sorularınız için bize ulaşın.</p>"
     seller = ('<div class="ok_sl"><div><small>Satıcı</small><b>%s</b></div>%s</div>' % (E(ctx.get("name") or ""), ('<a href="https://wa.me/90%s">Satıcıya yaz</a>' % wa) if wa else ""))
-    feats = "".join("<li>%s</li>" % E(x) for x in (["Marka / seri: " + brand, "Kategori: " + cat] + ["%s seçeneği mevcut" % t for t, o in var] + ["Ürün kodu: " + code]))
+    feats = "".join("<li><small>%s</small><b>%s</b></li>" % (E(a), E(b)) for a, b in ([("Marka / seri", brand), ("Kategori", cat)] + [(t, "%d seçenek" % len(o)) for t, o in var] + [("Ürün kodu", code)]))
+    pay = '<div class="ok_py"><b>Ödeme seçenekleri</b><div><span>Kredi / banka kartı</span><span>Havale / EFT</span><span>Kapıda ödeme</span></div></div>'
+    sizehint = ('<p class="ok_pn" style="margin:6px 0 0">Beden seçerken kararsız kaldıysanız ölçü bilgisi için bize yazın.</p>' if any(t == "Beden" for t, o in var) else "")
+    info += pay
+    vh += sizehint
     reviews = ('<div class="ok_em"><b>Bu ürün için henüz değerlendirme yok</b>Ürünü aldıysanız deneyiminizi bize yazın.</div>')
     qa = ('<div class="ok_em"><b>Henüz soru sorulmamış</b>Aklınızdaki soruyu yazın, satıcı size dönsün.</div>'
           '<form class="ok_fm" data-qa><textarea name="q" placeholder="Ürünle ilgili sorunuz" required></textarea><button type="submit">Soruyu gönder</button></form>')
