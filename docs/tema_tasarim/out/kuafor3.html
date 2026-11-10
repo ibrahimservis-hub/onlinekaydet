@@ -404,8 +404,9 @@ A('[data-p]').forEach(function(e){if(e.dataset.p&&!e.style.backgroundImage)e.sty
 var io=new IntersectionObserver(function(es){es.forEach(function(en){if(!en.isIntersecting)return;var e=en.target;io.unobserve(e);
 if(e.dataset.n){var n=+e.dataset.n,k=0,t=setInterval(function(){k++;e.textContent=k;if(k>=n)clearInterval(t)},260)}
 else if(e.id==='ph2'){setTimeout(function(){$('#toast').classList.add('on')},900);setTimeout(function(){$('#toast').classList.remove('on')},5200)}
-else e.classList.add('v')})},{threshold:.25});
-A('.stats b').forEach(function(e){io.observe(e)});io.observe($('#ph2'));A('#mg>div').forEach(function(e,i){e.style.transitionDelay=(i*90)+'ms';io.observe(e)});
+else if(e.id==='mg'){[].slice.call(e.children).forEach(function(c){c.classList.add('v')})}
+else e.classList.add('v')})},{threshold:.15});
+A('.stats b').forEach(function(e){io.observe(e)});io.observe($('#ph2'));A('#mg>div').forEach(function(e,i){e.style.transitionDelay=(i*90)+'ms'});io.observe($('#mg'));
 A('#pk button').forEach(function(b,i){b.onclick=function(){var on=b.classList.contains('on');A('#pk button').forEach(function(x,j){x.classList.toggle('on',on?j<i:j<=i)})}});
 document.addEventListener('mousemove',function(e){document.documentElement.style.setProperty('--gx',e.clientX+'px')},{passive:true});
 /* sheet */
