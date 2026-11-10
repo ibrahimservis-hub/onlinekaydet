@@ -35,9 +35,23 @@ def temalar():
     body+=strip([(str(N),'hazır tema'),('8','sektör + mağaza'),('10','farklı düzen'),('Her','tema mobil uyumlu')])
     body+=sec(head('Nasıl çalışır','Temayı seçin, gerisi panelden','')+cards_three(),)
     body+=sec(head('Tüm temalar','%d tema, 8 sektör ve online mağaza'%N,'Ekran görüntüsüne tıklayın, temanın ayrıntı sayfasını ve canlı önizlemesini görün.')+filt+'<div class="r7-tg" id="temalar">%s</div>'%cards,last=False,id='temalar')
+    body+=sec(yeni_bolum(),last=False)
     body+=sec(head('Sektör bazında','Kendi sektörünüzden başlayın','')+'<div class="r7-sg">%s</div>'%''.join('<a href="%s"><b>%s</b><small>%d tema</small></a>'%(sf,v,sum(1 for i in ITEMS if i['sector']==k)) for (k,v),sf in zip(SEC.items(),['sektor-kombi.html','sektor-klima.html','sektor-beyaz-esya.html','sektor-elektronik.html','sektor-bilgisayar.html','sektor-tesisat.html','sektor-elektrik.html','sektor-guvenlik.html'])))
     body+=cta('Temanızı birlikte seçelim','Sektörünüzü söyleyin, size en uygun temaları birlikte belirleyelim. İlk ay ücretsiz.')
     page('temalar.html','Servis web sitesi temaları: %d hazır tema'%N,'Kombi, klima, beyaz eşya, elektronik, bilgisayar, tesisat, elektrik ve güvenlik servisleri için %d hazır web sitesi teması; yedek parça satan firmalar için online mağaza temaları.'%N,body+js)
+
+NYENI={'oto_servis':'Oto servis','oto_cekici':'Oto çekici','kuafor':'Kuaför','nakliye':'Nakliye','tekstil':'Tekstil','eticaret':'E-ticaret','temizlik':'Temizlik','guzellik':'Güzellik merkezi'}
+def yeni_bolum():
+    th=[t for t in json.load(open('/home/claude/onlinekaydet/site/themes.json',encoding='utf-8')) if t['sector'] in NYENI]
+    css=('<style>.r7-yn{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:22px}.r7-yn a{display:grid;gap:8px;border:1px solid rgba(128,128,128,.3);border-radius:16px;padding:16px;min-height:44px;transition:transform .2s,box-shadow .2s}'
+         '.r7-yn a:hover{transform:translateY(-3px);box-shadow:0 14px 30px -20px #0006}.r7-yn .sw{display:flex;height:46px;border-radius:10px;overflow:hidden}.r7-yn .sw i{flex:1}.r7-yn .sw i+i{flex:.4}.r7-yn small{opacity:.7}'
+         '.r7-yf{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}.r7-yf button{border:1px solid rgba(128,128,128,.4);background:none;color:inherit;border-radius:99px;padding:10px 16px;min-height:44px;cursor:pointer;font:inherit}.r7-yf button.on{background:currentColor}.r7-yf button.on span{color:#fff;mix-blend-mode:difference}'
+         '@media(max-width:900px){.r7-yn{grid-template-columns:repeat(2,1fr)}}@media(max-width:520px){.r7-yn{grid-template-columns:1fr}}</style>')
+    chips='<button class="on" data-y=""><span>Tümü (%d)</span></button>'%len(th)+''.join('<button data-y="%s"><span>%s (%d)</span></button>'%(k,v,sum(1 for t in th if t['sector']==k)) for k,v in NYENI.items())
+    cards=''.join('<a href="../tema-onizleme/%s.html" target="_blank" rel="noopener" data-y="%s"><span class="sw"><i style="background:%s"></i><i style="background:%s"></i></span><b>%s</b><small>%s teması%s</small></a>'%(t['slug'],t['sector'],t['dark'],t['accent'],t['name'],NYENI[t['sector']],' · Premium' if t.get('premium') else '') for t in th)
+    js=('<script>(function(){var f=document.getElementById("yf");if(!f)return;f.addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;f.querySelectorAll("button").forEach(function(x){x.classList.toggle("on",x===b)});'
+        'var s=b.getAttribute("data-y");document.querySelectorAll("#yn a").forEach(function(a){a.style.display=(!s||a.getAttribute("data-y")===s)?"":"none"})})})();</script>')
+    return css+head('Yeni sektörler','Oto servis, kuaför, nakliye, e-ticaret ve daha fazlası','Teknik servis dışındaki işletmeler için hazırlanan %d tema. Canlı önizlemeyi yeni sekmede açın; kampanya, hikâye ve paket bölümleri her temada hazır gelir.'%len(th))+'<div class="r7-yf" id="yf">%s</div><div class="r7-yn" id="yn">%s</div>'%(chips,cards)+js
 def cards_three():
     return cards([('globe','Bir tıkla seçin','Sektörünüze uygun temayı seçin; firma adınız, telefonunuz ve logonuz yerleşir.'),('pen','Kendiniz düzenleyin','Menü, bölümler, görseller, yazılar, alt bilgi ve mobil menü panelden değişir.'),('bell','Formlar panele düşer','Randevu ve servis formundan gelen talepler doğrudan servis panelinize kaydolur.')])
 def detail():

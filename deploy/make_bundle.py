@@ -12,9 +12,13 @@ for f in ('gen3.py', 'gen4.py', 'patch_old.py', 'ill/make_ill.py'):
 for f in sorted(os.listdir(os.path.join(R, 'themes/g3'))):
     if f.endswith('.py'):
         files['themes/g3/' + f] = rd('themes/g3/' + f)
+import json as _j
+SITE_FILES = _j.load(open(os.path.join(R,'deploy','site_files.json'))) if os.path.exists(os.path.join(R,'deploy','site_files.json')) else {}
+for k, v in SITE_FILES.items():
+    files['docroot/' + k] = rd(v)
 ek = rd('panel/public_panel/panel-ek.js')
 blk = ek[ek.index('/* ---------- Sektör dili:'):]
-edits.append({'path': 'app/public_panel/panel-ek.js', 'old': "    if (h1) { strip(h1); note(); }\n  }\n  setInterval(tick, 500);\n})();", 'new': "    if (h1) { strip(h1); note(); }\n  }\n  setInterval(tick, 500);\n})();\n\n" + blk.rstrip('\n')})
-edits.append({'path': 'app/server.py', 'old': "import demo\ndemo.register(", 'new': "import sektor as _sektor\n_sektor.register(api_router, db, {\"get_current_user\": get_current_user})\nimport demo\ndemo.register("})
+if False: edits.append({'path': 'app/public_panel/panel-ek.js', 'old': "    if (h1) { strip(h1); note(); }\n  }\n  setInterval(tick, 500);\n})();", 'new': "    if (h1) { strip(h1); note(); }\n  }\n  setInterval(tick, 500);\n})();\n\n" + blk.rstrip('\n')})
+if False: edits.append({'path': 'app/server.py', 'old': "import demo\ndemo.register(", 'new': "import sektor as _sektor\n_sektor.register(api_router, db, {\"get_current_user\": get_current_user})\nimport demo\ndemo.register("})
 json.dump({'files': files, 'edits': edits}, open(os.path.join(R, 'deploy', 'bundle.json'), 'w', encoding='utf-8'), ensure_ascii=False)
 print(len(files), 'dosya', len(edits), 'düzenleme')

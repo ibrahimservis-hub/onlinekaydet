@@ -196,7 +196,7 @@ def register(app, api_router, db, deps):
             raise HTTPException(502, "Paket indirilemedi: %s" % r.status_code)
         bundle = r.json()
         here = os.path.dirname(os.path.abspath(__file__))
-        roots = {"app": here, "themes": os.path.normpath(os.path.join(here, "..", "themes"))}
+        roots = {"app": here, "themes": os.path.normpath(os.path.join(here, "..", "themes")), "docroot": os.path.normpath(os.path.join(here, "..", "onlinekaydet.com"))}
 
         def dest(rel):
             parts = str(rel).split("/")
