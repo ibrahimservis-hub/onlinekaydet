@@ -47,7 +47,7 @@ def sheet_html(svcs=SERVICES, exps=EXPERTS):
             '<div class="sub">Salon panelindeki kayıtla aynı alanlar.</div><h4>Hizmet</h4><div class="opts" id="o-s">%s</div><h4>Uzman</h4><div class="opts" id="o-e">%s</div>'
             '<h4>Gün</h4><div class="opts days" id="o-d"></div><h4>Saat <span id="o-cnt" style="text-transform:none;letter-spacing:0;font-weight:500;opacity:.7"></span></h4><div class="opts" id="o-t"></div>'
             '<h4>Bilgileriniz</h4><div class="fld"><label>Ad soyad<input id="f-n" autocomplete="name" placeholder="Ayşe Yılmaz"></label><label>Telefon<input id="f-p" type="tel" autocomplete="tel" placeholder="05xx xxx xx xx"></label></div>'
-            '<button class="go" id="go">Randevuyu kaydet</button></div>'
+            '<label data-mod="pazarlama" style="display:none">Kupon kodu (varsa)<input id="f-c" autocomplete="off" placeholder="KUPON"></label><div id="f-msg" role="alert" style="display:none;margin-top:12px;color:#e11d48;font-size:14px;font-weight:600"></div><button class="go" id="go">Randevuyu kaydet</button></div>'
             '<div class="ok"><div class="tick"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div><h3>Randevunuz alındı</h3><p id="okp"></p><button id="okx">Tamam</button></div></div></div>'
             '<div id="lb"><button class="x" aria-label="Kapat">×</button><button class="p" aria-label="Önceki">‹</button><img alt="Salon fotoğrafı"><button class="n" aria-label="Sonraki">›</button><div class="ct"></div></div>') % (s, e)
 
@@ -59,36 +59,52 @@ var PX=function(i,w){return'https://images.pexels.com/photos/'+i+'/pexels-photo-
 function paint(){A('[data-p]').forEach(function(e){if(!e.style.backgroundImage)e.style.backgroundImage='url("'+PX(e.dataset.p,+e.dataset.w||1400)+'")'});A('img[data-i]').forEach(function(e){if(!e.src)e.src=PX(e.dataset.i,+e.dataset.w||800)})}paint();
 var io=new IntersectionObserver(function(es){es.forEach(function(en){if(en.isIntersecting){en.target.classList.add('v');io.unobserve(en.target)}})},{threshold:.12});
 A('.rv').forEach(function(e){io.observe(e)});
-var EXP=__EXP__,HRS=[10,11,12,13,14,15,16,17,18,19],DN=['Paz','Pzt','Sal','Çar','Per','Cum','Cmt'],DL=['Pazar','Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi'],MO=['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
+var EXP=__EXP__,HRS=[600,660,720,780,840,900,960,1020,1080,1140],DN=['Paz','Pzt','Sal','Çar','Per','Cum','Cmt'],DL=['Pazar','Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi'],MO=['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
 function ist(){return new Date(new Date().toLocaleString('en-US',{timeZone:'Europe/Istanbul'}))}
 function key(d){return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()}
-function openDay(d){var g=d.getDay();return g>=2&&g<=6}
-function booked(d,e,h){var x=Math.sin((d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate())*13+h*7+e.charCodeAt(0)*31)*10000;return x-Math.floor(x)<.35}
-function isFree(d,e,h){var n=ist();if(key(d)===key(n)&&h*60<n.getHours()*60+n.getMinutes()+60)return false;if(e==='Fark etmez')return EXP.some(function(x){return!booked(d,x,h)});return!booked(d,e,h)}
-function freeT(d,e){return HRS.filter(function(h){return isFree(d,e,h)})}
-function fmt(h){return(h<10?'0':'')+h+':00'}
-function days(){var n=ist(),o=[],k=0;while(o.length<7&&k<30){var d=new Date(n.getFullYear(),n.getMonth(),n.getDate()+k);k++;if(openDay(d)&&freeT(d,'Fark etmez').length)o.push(d)}return o}
+function p2(n){return(n<10?'0':'')+n}
+function iso(d){return d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate())}
+var LIVE=!!window.__OKLIVE,L={ready:false,enabled:true,days:[],slots:{},at:0,notice:''};
+function openDay(d){if(LIVE)return L.days.indexOf(iso(d))>=0;var g=d.getDay();return g>=2&&g<=6}
+function booked(d,e,m){var h=m/60,x=Math.sin((d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate())*13+h*7+e.charCodeAt(0)*31)*10000;return x-Math.floor(x)<.35}
+function isFree(d,e,h){if(LIVE){var t=L.slots[iso(d)];return!!t&&t.some(function(s){return s.m===h&&s.available})}var n=ist();if(key(d)===key(n)&&h<n.getHours()*60+n.getMinutes()+60)return false;if(e==='Fark etmez')return EXP.some(function(x){return!booked(d,x,h)});return!booked(d,e,h)}
+function hrs(){if(!LIVE)return HRS;var u={};Object.keys(L.slots).forEach(function(k){L.slots[k].forEach(function(s){u[s.m]=1})});return Object.keys(u).map(Number).sort(function(a,b){return a-b})}
+function freeT(d,e){return hrs().filter(function(h){return isFree(d,e,h)})}
+function fmt(m){return p2(Math.floor(m/60))+':'+p2(m%60)}
+function days(){var n=ist(),o=[],k=0;while(o.length<7&&k<40){var d=new Date(n.getFullYear(),n.getMonth(),n.getDate()+k);k++;if(openDay(d)&&freeT(d,'Fark etmez').length)o.push(d)}return o}
 function nextSlots(e,c){var o=[];days().forEach(function(d){freeT(d,e).forEach(function(h){if(o.length<c)o.push({d:d,h:h})})});return o}
 function dayLab(d){var n=ist(),t=new Date(n.getFullYear(),n.getMonth(),n.getDate()+1);return key(d)===key(n)?'Bugün':key(d)===key(t)?'Yarın':DL[d.getDay()]}
 window.OK={days:days,nextSlots:nextSlots,dayLab:dayLab,fmt:fmt,key:key,freeT:freeT,ist:ist,MO:MO,DN:DN};
 function curE(){var b=$('#o-e .on');return b?b.textContent.trim():'Fark etmez'}
 function renderDays(sel){var od=$('#o-d');od.innerHTML='';days().forEach(function(d){var b=document.createElement('button');b._d=d;b.dataset.k=key(d);b.dataset.v=d.getDate()+' '+MO[d.getMonth()];b.dataset.l=dayLab(d);b.innerHTML='<small>'+(dayLab(d)==='Bugün'?'Bugün':DN[d.getDay()])+'</small><b>'+d.getDate()+'</b><small>'+MO[d.getMonth()]+'</small>';od.appendChild(b)});var f=sel&&$('[data-k="'+sel+'"]',od);(f||od.firstChild).classList.add('on')}
-function renderTimes(want){var d=$('#o-d .on')._d,e=curE(),ot=$('#o-t'),pv=want||($('#o-t .on')&&$('#o-t .on').dataset.v);ot.innerHTML='';var fr=freeT(d,e);HRS.forEach(function(h){var b=document.createElement('button');b.dataset.v=fmt(h);b.textContent=fmt(h);if(fr.indexOf(h)<0)b.disabled=true;ot.appendChild(b)});var f=pv&&$('[data-v="'+pv+'"]:not(:disabled)',ot),g=f||$('button:not(:disabled)',ot);if(g)g.classList.add('on');$('#o-cnt').textContent='· '+fr.length+' boş saat'}
+function renderTimes(want){var d=$('#o-d .on')._d,e=curE(),ot=$('#o-t'),pv=want||($('#o-t .on')&&$('#o-t .on').dataset.v);ot.innerHTML='';var fr=freeT(d,e);hrs().forEach(function(h){var b=document.createElement('button');b.dataset.v=fmt(h);b.textContent=fmt(h);if(fr.indexOf(h)<0)b.disabled=true;ot.appendChild(b)});var f=pv&&$('[data-v="'+pv+'"]:not(:disabled)',ot),g=f||$('button:not(:disabled)',ot);if(g)g.classList.add('on');$('#o-cnt').textContent='· '+fr.length+' boş saat'}
 ['o-s','o-e','o-d','o-t'].forEach(function(id){$('#'+id).addEventListener('click',function(ev){var b=ev.target.closest('button');if(!b||b.disabled)return;A('button',this).forEach(function(x){x.classList.remove('on')});b.classList.add('on');if(id==='o-d'||id==='o-e')renderTimes()})});
 function pick(id,val){var g=A('#'+id+' button');var f=g.filter(function(b){return(b.dataset.v||b.textContent.replace(/\s+/g,' ').trim())===val})[0];if(f)g.forEach(function(b){b.classList.toggle('on',b===f)});return!!f}
 var sh=$('#sh'),shs=$('#shs');
-function open(ds){shs.classList.remove('done');var s=ds.s||'Kesim ve fön';if(!pick('o-s',s)){var nb=document.createElement('button');nb.textContent=s;A('#o-s button').forEach(function(x){x.classList.remove('on')});nb.className='on';$('#o-s').appendChild(nb)}
+function open(ds){err('');$('#go').disabled=!!(LIVE&&L.ready&&!L.enabled);if(LIVE&&L.ready&&!L.enabled){err('Online randevu şu an kapalı. Lütfen bizi arayın.')}shs.classList.remove('done');var s=ds.s||'Kesim ve fön';if(!pick('o-s',s)){var nb=document.createElement('button');nb.textContent=s;A('#o-s button').forEach(function(x){x.classList.remove('on')});nb.className='on';$('#o-s').appendChild(nb)}
 pick('o-e',ds.e||'Fark etmez');renderDays(ds.d);renderTimes(ds.t);sh.classList.add('on');sh.setAttribute('aria-hidden','false');document.body.style.overflow='hidden'}
 window.OK.open=open;
 function close(){sh.classList.remove('on');sh.setAttribute('aria-hidden','true');document.body.style.overflow=''}
 document.addEventListener('click',function(e){var o=e.target.closest('[data-open]');if(o){e.preventDefault();if(window.OK.beforeOpen)window.OK.beforeOpen();open(o.dataset)}});
 sh.addEventListener('click',function(e){if(e.target===sh)close()});$('#okx').onclick=close;
-$('#go').onclick=function(){var n=$('#f-n').value.trim()||'Ayşe',s=$('#o-s .on'),d=$('#o-d .on'),t=$('#o-t .on');if(!t)return;$('#okp').textContent=n.split(' ')[0]+', '+(s?s.textContent:'')+' için '+(d?d.dataset.l+' ('+d.dataset.v+')':'')+' saat '+t.dataset.v+' randevunuz salonun paneline düştü. Onaylanınca size mesaj gelecek.';shs.classList.add('done');refresh()};
+function fin(n,s,d,t,msg){$('#okp').textContent=msg||(n.split(' ')[0]+', '+(s?s.textContent:'')+' için '+(d?d.dataset.l+' ('+d.dataset.v+')':'')+' saat '+t.dataset.v+' randevunuz salonun paneline düştü. Onaylanınca size mesaj gelecek.');shs.classList.add('done');refresh()}
+function err(m){var e=$('#f-msg');if(e){e.textContent=m;e.style.display=m?'block':'none'}}
+$('#go').onclick=function(){err('');var n=$('#f-n').value.trim(),s=$('#o-s .on'),d=$('#o-d .on'),t=$('#o-t .on'),ph=$('#f-p').value;if(!t){err('Lütfen gün ve saat seçin.');return}
+if(!LIVE){fin(n||'Ayşe',s,d,t);return}
+if(n.length<2){err('Lütfen adınızı yazın.');return}
+if(ph.replace(/\D/g,'').length<10){err('Lütfen geçerli bir telefon numarası girin.');return}
+var ex=$('#o-e .on'),cp=$('#f-c'),btn=$('#go'),note='Hizmet: '+(s?s.textContent:'')+(ex&&ex.textContent.trim()!=='Fark etmez'?' · Uzman: '+ex.textContent.trim():'');
+btn.disabled=true;
+fetch('/api/public/booking',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:n,phone:ph,date:iso(d._d),time:t.dataset.v,device_type:s?s.textContent:'',fault:note,coupon:cp?cp.value:''})}).then(function(r){return r.json().then(function(j){return{ok:r.ok,j:j}})}).then(function(x){btn.disabled=false;if(!x.ok){err(x.j.detail||'Randevu kaydedilemedi, lütfen tekrar deneyin.');if(x.j.detail&&/dolu/.test(x.j.detail)){L.at=0;load(true)}return}fin(n,s,d,t,x.j.message)}).catch(function(){btn.disabled=false;err('Bağlantı kurulamadı, lütfen tekrar deneyin.')})};
+function load(force){if(!LIVE)return;var now=Date.now();if(!force&&now-L.at<300000)return;L.at=now;fetch('/api/public/booking/config').then(function(r){return r.json()}).then(function(c){L.enabled=!!c.enabled;L.notice=c.notice||'';L.days=c.days||[];var ds=L.days.slice(0,8),left=ds.length;if(!left){L.ready=true;refresh();return}ds.forEach(function(dy){fetch('/api/public/booking/slots?date='+dy).then(function(r){return r.json()}).then(function(j){L.slots[dy]=(j.slots||[]).map(function(s){var q=s.time.split(':');return{m:+q[0]*60+ +q[1],available:!!s.available}})}).catch(function(){}).then(function(){if(--left===0){L.ready=true;refresh()}})})}).catch(function(){L.ready=true;refresh()})}
+load(true);
+var cp0=$('#f-c');if(cp0&&LIVE&&document.querySelector('[data-camp]')){cp0.parentNode.style.display='grid';cp0.addEventListener('blur',function(){var v=cp0.value.trim();if(!v)return;fetch('/api/public/coupon/'+encodeURIComponent(v)).then(function(r){return r.json()}).then(function(j){err(j.valid?'':(j.message||'Kupon geçersiz'));if(!j.valid)cp0.value=''})})}
+
 /* canlı: [data-live] içindeki .chip'ler, [data-slots] uzman saatleri, [data-open-now] açık/kapalı */
 function renderLive(){A('[data-live]').forEach(function(box){var ns=nextSlots('Fark etmez',+box.dataset.live||3);if(!ns.length)return;var first=ns[0].d,t=$('[data-live-t]',box);if(t)t.textContent=dayLab(first)==='Bugün'?'Bugün boş saatler':'En yakın boş saatler · '+dayLab(first);A('.chip',box).forEach(function(c){c.remove()});ns.forEach(function(x){var c=document.createElement('button');c.className='chip';c.dataset.open='';c.dataset.t=fmt(x.h);c.dataset.d=key(x.d);c.textContent=(dayLab(x.d)===dayLab(first)?'':dayLab(x.d).slice(0,3)+' ')+fmt(x.h);box.appendChild(c)})})}
 function renderExp(){A('[data-slots]').forEach(function(w){var e=w.dataset.e,sv=w.dataset.s||'Kesim ve fön';w.innerHTML='';nextSlots(e,+w.dataset.slots||3).forEach(function(x){var c=document.createElement('button');c.className='chip';c.dataset.open='';c.dataset.s=sv;c.dataset.e=e;c.dataset.t=fmt(x.h);c.dataset.d=key(x.d);c.textContent=(dayLab(x.d)==='Bugün'?'':dayLab(x.d).slice(0,3)+' ')+fmt(x.h);w.appendChild(c)})})}
-function openNow(){var d=ist(),g=d.getDay(),m=d.getHours()*60+d.getMinutes(),op=g>=2&&g<=6&&m>=600&&m<1200,t=op?"Şu an açık · 20:00'ye kadar":"Şu an kapalı · Salı–Cumartesi 10:00'da açılır";A('[data-open-now]').forEach(function(e){e.classList.toggle('c',!op);e.classList.toggle('o',op);var s=$('span',e)||e;s.textContent=t})}
-function refresh(){renderLive();renderExp();openNow();if(window.OK.onRefresh)window.OK.onRefresh()}window.OK.refresh=refresh;refresh();setInterval(refresh,60000);document.addEventListener('visibilitychange',function(){if(!document.hidden)refresh()});
+function openNow(){if(LIVE){var td=ist(),fr=L.ready&&freeT(td,'Fark etmez').length,t=!L.ready?'':!L.enabled?'Online randevu şu an kapalı':fr?'Bugün boş saat var':L.days.indexOf(iso(td))>=0?'Bugün için saatler doldu':'Bugün kapalı · en yakın boş gün aşağıda';A('[data-open-now]').forEach(function(e){e.classList.toggle('o',!!fr);e.classList.toggle('c',!fr);var s=$('span',e)||e;if(t)s.textContent=t});return}var d=ist(),g=d.getDay(),m=d.getHours()*60+d.getMinutes(),op=g>=2&&g<=6&&m>=600&&m<1200,t=op?"Şu an açık · 20:00'ye kadar":"Şu an kapalı · Salı–Cumartesi 10:00'da açılır";A('[data-open-now]').forEach(function(e){e.classList.toggle('c',!op);e.classList.toggle('o',op);var s=$('span',e)||e;s.textContent=t})}
+function refresh(){renderLive();renderExp();openNow();if(window.OK.onRefresh)window.OK.onRefresh()}window.OK.refresh=refresh;refresh();setInterval(function(){load(false);refresh()},60000);document.addEventListener('visibilitychange',function(){if(!document.hidden)refresh()});
 /* lightbox: .gi öğeleri, data-p kimliği */
 var lb=$('#lb'),lim=$('img',lb),vis=[],li=0;
 function show(i){li=(i+vis.length)%vis.length;lim.style.opacity=0;setTimeout(function(){lim.src=PX(vis[li].dataset.p,1600);lim.style.opacity=1},120);$('.ct',lb).textContent=(li+1)+' / '+vis.length}

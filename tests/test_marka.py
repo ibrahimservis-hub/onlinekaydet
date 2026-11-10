@@ -15,13 +15,14 @@ with TestClient(s.app) as c:
     for k in ("x", "y"):
         r = c.post("/api/admin/firms", headers=A, json={"name": k.upper() + " Servis", "email": f"{k}@m.com", "password": "sifre12345", "package": "kurumsal"}); assert r.status_code == 200, r.text
         S[k] = tok(c, f"{k}@m.com", "sifre12345")
+    NP = c.get("/api/brand", headers=S["x"]).json()["themes"][0]["slug"]   # onaysız firmada görünen (premium olmayan) ilk tema
     def a():
         r = c.get("/api/brand", headers=S["x"]).json()
-        assert r["brand"]["accent"] == "#f27a1a" and len(r["themes"]) >= 38
+        assert r["brand"]["accent"] == "#f27a1a" and len(r["themes"]) >= 20
         assert {"slug", "dark", "accent", "radius", "sector"} <= set(r["themes"][0])
     t("varsayılan marka + tema listesi", a)
     def b():
-        r = c.put("/api/brand", headers=S["x"], json={"theme": "08-kombi-kor", "dark": "#15171c", "accent": "#ffc400", "radius": 6}); assert r.status_code == 200, r.text
+        r = c.put("/api/brand", headers=S["x"], json={"theme": NP, "dark": "#15171c", "accent": "#ffc400", "radius": 6}); assert r.status_code == 200, r.text
         assert c.get("/api/brand", headers=S["x"]).json()["brand"]["accent"] == "#ffc400"
     t("marka kaydedilir ve geri okunur", b)
     def d():

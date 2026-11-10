@@ -21,7 +21,7 @@ MODULES = {"servis": "Servis kayıtları", "personel": "Usta / personel", "muhas
            "sms": "SMS ve mesaj şablonları", "magaza": "Yedek parça mağazası", "site": "Web sitesi", "pazarlama": "Pazarlama",
            "bakim": "Bakım hatırlatma ve garanti", "teklif": "Teklif ve onay", "bayi": "Bayi (B2B)", "qr": "QR cihaz etiketi",
            "atama": "Otomatik usta atama", "takip": "Canlı usta takibi", "odeme": "Ödeme linki (online tahsilat)",
-           "efatura": "E-arşiv fatura bağlantısı", "portal": "Müşteri portalı", "arayan": "Arayan numara tanıma"}
+           "efatura": "E-arşiv fatura bağlantısı", "portal": "Müşteri portalı", "arayan": "Arayan numara tanıma", "randevu": "Online randevu"}
 # Henüz yazılmamış modül kalmadı; yeni özellikler önce buraya "yakında" olarak eklenir.
 SOON = {}
 # modül -> kapatıldığında engellenen API ön ekleri (servis çekirdektir, kapatılamaz)
@@ -31,13 +31,13 @@ MODULE_PREFIX = {"muhasebe": ("finance", "cash", "accounting", "receivables", "p
                  "pazarlama": ("mkt", "growth"), "sms": ("msg-templates", "governance/notify"),
                  "bakim": ("maintenance", "warranty-claims"), "teklif": ("quotes",), "bayi": ("dealers", "partners"),
                  "qr": ("qr",), "atama": ("autoassign",), "takip": ("admin/tech-locations",),
-                 "odeme": ("pay",), "efatura": ("einvoice",), "portal": ("portal-admin",), "arayan": ("caller",)}
+                 "odeme": ("pay",), "efatura": ("einvoice",), "portal": ("portal-admin",), "arayan": ("caller",), "randevu": ("growth/bookings", "growth/settings")}
 ALL_MODS = ["servis", "personel", "muhasebe", "rapor", "sms", "magaza", "site", "pazarlama",
-            "bakim", "teklif", "bayi", "qr", "atama", "takip", "odeme", "efatura", "portal", "arayan"]
+            "bakim", "teklif", "bayi", "qr", "atama", "takip", "odeme", "efatura", "portal", "arayan", "randevu"]
 DEFAULT_PACKAGES = {
     "baslangic": {"name": "Başlangıç", "price": 0, "modules": ["servis", "personel"]},
     "profesyonel": {"name": "Profesyonel", "price": 0, "modules": ["servis", "personel", "muhasebe", "rapor", "sms"]},
-    "tam": {"name": "Tam Paket", "price": 0, "modules": ["servis", "personel", "muhasebe", "rapor", "sms", "magaza", "site", "pazarlama"]},
+    "tam": {"name": "Tam Paket", "price": 0, "modules": ["servis", "personel", "muhasebe", "rapor", "sms", "magaza", "site", "pazarlama", "randevu"]},
     "kurumsal": {"name": "Kurumsal", "price": 0, "modules": list(ALL_MODS)},
 }
 DEFAULT_FEATURES = {"customer_add": True}
@@ -215,8 +215,12 @@ def register(api_router, db, deps):
         if mods is None:
             return None                                   # modül tanımı olmayan eski firma: kısıt yok
         seg = path[5:] if path.startswith("/api/") else ""
+        eff = set(mods) | ({"randevu"} if "pazarlama" in mods else set())      # pazarlama paketi online randevuyu da kapsar (eski paketler bozulmaz)
+        bk = seg.startswith(("growth/bookings", "growth/settings"))
         for m, pre in MODULE_PREFIX.items():
-            if m not in mods and any(seg == p or seg.startswith(p + "/") for p in pre):
+            if m == "pazarlama" and bk and "randevu" in eff:                    # yalnız Online randevu olan firma randevu ayarlarını ve kayıtlarını yönetebilir
+                continue
+            if m not in eff and any(seg == p or seg.startswith(p + "/") for p in pre):
                 return f"“{MODULES[m]}” bu paketinizde yok. Paket yükseltmek için bizimle iletişime geçin."
         return None
 
@@ -240,6 +244,7 @@ def register(api_router, db, deps):
         except Exception:                                  # noqa: BLE001
             sl, sh = {}, []
         labels = {m: sl.get(m, MODULES[m]) for m in MODULES if m not in sh}
+        mods = list(dict.fromkeys(list(mods) + (["randevu"] if "pazarlama" in mods else [])))
         return {"package": f.get("package", ""), "modules": [m for m in mods if m not in sh], "labels": labels, "locked": [m for m in MODULES if m not in mods and m not in sh], "soon": SOON,
                 "expires_at": exp, "days_left": days, "unlimited": not exp, "since": f.get("created_at", "")}
 

@@ -125,8 +125,12 @@ def register(api_router, db, deps):
         lg = (await db.app_settings.find_one({"_id": "firm_logo"}, {"_id": 0}) or {}).get("data") or ""
         logo = lg if inline else (("/api/public/site-logo?v=" + hashlib.sha1(lg.encode()).hexdigest()[:8]) if lg else "")
         feats = await db.app_settings.find_one({"_id": "site_features"}, {"_id": 0}) or {}
-        legal = list(shop_legal.SLUGS) if feats.get("shop_enabled") else []
-        return {"th": th, "name": name, "tel": tel, "p": p, "sector": sector, "logo": logo, "city": prof.get("city") or "", "legal": legal, "shop_on": bool(feats.get("shop_enabled")),
+        fm = await db.app_settings.find_one({"_id": "firm"}, {"_id": 0, "modules": 1}) or {}
+        mods = fm.get("modules")                       # None: paket sınırı yok (eski/tek firma) -> hepsi açık
+        mods = None if mods is None else list(mods)
+        shop_ok = bool(feats.get("shop_enabled")) and (mods is None or "magaza" in mods)   # paket Mağaza'yı içermiyorsa tema bölümü de yayında olmaz
+        legal = list(shop_legal.SLUGS) if shop_ok else []
+        return {"modules": mods, "th": th, "name": name, "tel": tel, "p": p, "sector": sector, "logo": logo, "city": prof.get("city") or "", "legal": legal, "shop_on": shop_ok,
                 "img": (lambda k: imgs.get(k, "")) if inline else (lambda k: "/api/public/site-img/" + k),
                 "logo_abs": "/api/public/site-logo" if lg else ""}
 

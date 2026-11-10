@@ -470,6 +470,35 @@ def strip_shop(b, ctx):
     h = re.sub(r'<div class="pr"><div><small>Güncel</small>.*?</div></div>', "", h, flags=re.S) if 'class="mega"' in h else h
     b[1] = h
 
+_DMOD = re.compile(r'^<div class="ed"[^>]*\bdata-mod="([a-z,]+)"')
+
+
+def mod_off(blocks, ctx):
+    """Bölümün `data-mod="pazarlama"` gibi bir paket şartı varsa ve firmanın paketinde yoksa yayından kalkar (sahip ekranındaki paket belirler)."""
+    mods = ctx.get("modules")
+    if mods is None:
+        return set()
+    out = set()
+    for b in blocks:
+        m = _DMOD.match(b[1])
+        if m and not all(x in mods for x in m.group(1).split(",")):
+            out.add(b[0])
+    return out
+
+
+def strip_mod(b, ctx):
+    """Bölümün içindeki `data-mod="..."` öğeleri (kupon alanı, mağaza düğmesi...) paket kapsamıyorsa kaldırılır."""
+    mods = ctx.get("modules")
+    if mods is None or ' data-mod="' not in b[1][40:]:
+        return
+    from bs4 import BeautifulSoup
+    soup = BeautifulSoup(b[1], "html.parser")
+    for el in soup.select("[data-mod]"):
+        if el.parent is not None and el.get("data-mod") and not all(x in mods for x in el["data-mod"].split(",")):
+            el.decompose()
+    b[1] = str(soup)
+
+
 def apply_layout(blocks, ctx):
     """Müşterinin bölüm sırası, gizlediği bölümler ve metin düzenlemeleri."""
     lay = ctx["p"].get("layout") or {}
@@ -480,10 +509,14 @@ def apply_layout(blocks, ctx):
         hidden |= {b[0] for b in blocks if dflt_off(b[1]) and b[0] not in order and not (shop_on and b[0] == "Ürünler")}
     off = shop_names(blocks, ctx)
     hidden |= off
+    hidden |= mod_off(blocks, ctx)
     if off:
         for b in blocks:
             if b[0] not in off:
                 strip_shop(b, ctx)
+    for b in blocks:
+        if b[0] not in off and b[0] not in hidden:
+            strip_mod(b, ctx)
     top = [b for b in blocks if b[0] in FIXED_TOP]
     bot = [b for b in blocks if b[0] in FIXED_BOTTOM]
     mid = [b for b in blocks if b[0] not in FIXED_TOP + FIXED_BOTTOM]
