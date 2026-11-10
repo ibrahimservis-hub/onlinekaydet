@@ -23,6 +23,27 @@ upd();window.addEventListener('scroll',upd,{passive:true});window.addEventListen
 var x=ann.querySelector('.x');if(x)x.addEventListener('click',function(){setTimeout(upd,0)});
 })();</script>"""
 
+
+POP_CSS = ("<style id=\"okpop-css\">#okpop{position:fixed;inset:0;z-index:2147483000;display:none;align-items:flex-start;justify-content:center;background:rgba(10,12,16,.62);"
+           "overflow-y:auto;-webkit-overflow-scrolling:touch;padding:max(14px,env(safe-area-inset-top)) 12px 28px}#okpop.on{display:flex}"
+           "#okpop .okbox{position:relative;width:100%;max-width:760px;margin:auto;border-radius:18px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.45);animation:okin .22s ease-out}"
+           "#okpop .okbox>section{margin:0!important;min-height:0!important}#okpop .okx{position:absolute;top:10px;right:10px;z-index:5;width:44px;height:44px;border-radius:50%;border:0;"
+           "background:rgba(0,0,0,.55);color:#fff;font-size:26px;line-height:1;cursor:pointer}#okpop .okx:focus-visible{outline:3px solid #fff;outline-offset:2px}"
+           "@keyframes okin{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:none}}@media(prefers-reduced-motion:reduce){#okpop .okbox{animation:none}}</style>")
+
+POP_JS = r"""<script id="okpopjs">(function(){var sec=document.getElementById('randevu');if(!sec)return;
+var ph=document.createComment('okpop'),box,ov;
+function build(){ov=document.createElement('div');ov.id='okpop';ov.setAttribute('role','dialog');ov.setAttribute('aria-modal','true');ov.setAttribute('aria-label','Randevu formu');
+box=document.createElement('div');box.className='okbox';var x=document.createElement('button');x.type='button';x.className='okx';x.setAttribute('aria-label','Kapat');x.innerHTML='&times;';
+box.appendChild(x);ov.appendChild(box);document.body.appendChild(ov);x.addEventListener('click',close);ov.addEventListener('mousedown',function(e){if(e.target===ov)close()})}
+var last;function open(e){if(e)e.preventDefault();if(!ov)build();if(!ov.classList.contains('on')){last=document.activeElement;sec.parentNode.insertBefore(ph,sec);box.appendChild(sec);ov.classList.add('on');document.documentElement.style.overflow='hidden';
+var f=sec.querySelector('input,select,textarea');if(f)setTimeout(function(){f.focus({preventScroll:true})},60)}}
+function close(){if(!ov||!ov.classList.contains('on'))return;ov.classList.remove('on');document.documentElement.style.overflow='';if(ph.parentNode)ph.parentNode.insertBefore(sec,ph);if(last&&last.focus)last.focus()}
+document.addEventListener('keydown',function(e){if(e.key==='Escape')close()});
+document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[href="#randevu"],a[href="#teklif"],a[href="#bkf"]');if(!a||sec.contains(a)||(ov&&ov.contains(a)))return;
+if(a.getAttribute('href')!=='#randevu'&&!document.getElementById(a.getAttribute('href').slice(1)))return;open(e)},true);
+if(location.hash==='#randevu'){setTimeout(open,50)}})();</script>"""
+
 # ---- sahte rakamlar
 _CELL = re.compile(r'<div><b class="cnt"[^>]*>[^<]*</b><small>(?:Kurulum ve onarım|Ortalama varış|Müşteri puanı|İş garantisi|Çözülen talep|Ortalama yanıt|Memnuniyet)</small></div>')
 _GLASS = re.compile(r'<div class="glass"><small>(?:Çözülen talep|Ortalama yanıt)</small><strong>.*?</strong></div>', re.S)
@@ -49,6 +70,6 @@ def fix(h: str) -> str:
     if not h or MARK in h or "</body>" not in h:
         return h
     h = clean_claims(h)
-    h = h.replace("</head>", CSS + "</head>", 1) if "</head>" in h else h
+    h = h.replace("</head>", CSS + POP_CSS + "</head>", 1) if "</head>" in h else h
     i = h.rfind("</body>")
-    return h[:i] + MARK + JS + h[i:]
+    return h[:i] + MARK + JS + (POP_JS if 'id="randevu"' in h else "") + h[i:]
