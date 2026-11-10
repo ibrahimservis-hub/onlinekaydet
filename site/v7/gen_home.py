@@ -23,9 +23,9 @@ body=body.replace('Teknik servis işletmeleri için','Servis, oto, kuaför, nakl
 body=body.replace('Kayıt, usta, tahsilat ve web siteniz tek kontrol ekranında. Kurulumu biz yapıyoruz.','Defter, Excel ve WhatsApp mesajlarında kaybolan işleri tek yerde toplayın. Sektörünüze göre hazır gelir; kurulumu biz yapıyoruz.')
 body=body.replace('Uygulama mağazası gerekmez. Usta, tarayıcıdan kendi kullanıcı adıyla girer ve yalnızca kendine atanan işleri görür.','Uygulama mağazası gerekmez. Ekip üyesi (usta, kuaför, sürücü, kurye), tarayıcıdan kendi kullanıcı adıyla girer ve yalnızca kendine atanan işleri görür.')
 body=body.replace('Saha ekibiniz telefonundan <em>çalışır.</em>','Ekibiniz telefonundan <em>çalışır.</em>')
-body=body.replace('38 hazır tema, sekiz sektör. Randevu formu doğrudan servis kaydına düşer.','148 hazır tema, 16 sektör. Randevu formu doğrudan kayıt ekranınıza düşer.')
-body=body.replace('38 hazır tema, sekiz sektör.','148 hazır tema, 16 sektör.')
-body=body.replace('38 hazır temadan','148 hazır temadan')
+body=body.replace('38 hazır tema, sekiz sektör. Randevu formu doğrudan servis kaydına düşer.','520 hazır tema, 78 sektör. Randevu formu doğrudan kayıt ekranınıza düşer.')
+body=body.replace('38 hazır tema, sekiz sektör.','520 hazır tema, 78 sektör.')
+body=body.replace('38 hazır temadan','520 hazır temadan')
 # (sektör çipleri şablonda genişletildi)
 SEKS=[('kombi','Kombi','Yıllık bakım, petek, doğalgaz'),('klima','Klima','Montaj, gaz dolumu, bakım'),('beyaz-esya','Beyaz eşya','Garanti, yedek parça, atölye'),('bilgisayar','Bilgisayar','Teslim formu, arıza, veri yedekleme'),('elektrik','Elektrik','Keşif, pano, proje'),('elektronik','Elektronik','Cihaz kabul, test, parça'),('guvenlik','Güvenlik sistemleri','Kamera, alarm, bakım sözleşmesi'),('tesisat','Tesisat','Acil çağrı, keşif, tahsilat'),
  ('oto-servis','Oto servis','Araç kabul, iş emri, bakım hatırlatma'),('oto-cekici','Oto çekici','Çağrı, konum, varış süresi'),('kuafor','Kuaför ve berber','Randevu defteri, uzman, hizmet fişi'),('nakliye','Nakliye','Keşif, eşya listesi, ekip ve araç'),('tekstil','Tekstil','Toptan sipariş, numune, üretim'),('e-ticaret','E-ticaret','Sipariş, kargo, iade, stok'),('temizlik','Temizlik','Alan, ekip, önce / sonra'),('guzellik','Güzellik merkezi','Seans, paket, müşteri kartı')]
@@ -66,7 +66,7 @@ extra='''
 <section id="web"><div class="wrap">
 <div class="kick rv">Web sitesi ve entegrasyonlar</div>
 <h2 class="rv">Siteniz hazır, <em>sisteminiz</em> bağlı.</h2>
-<div class="two rv"><p class="l">148 hazır tema, 16 sektör. Randevu formu doğrudan kayıt ekranınıza düşer.</p>
+<div class="two rv"><p class="l">520 hazır tema, 78 sektör. Randevu formu doğrudan kayıt ekranınıza düşer.</p>
 <dl class="dl"><div><dt>Temalar</dt><dd><span>Kombi</span><span>Klima</span><span>Beyaz eşya</span><span>Elektronik</span><span>Bilgisayar</span><span>Tesisat</span><span>Elektrik</span><span>Güvenlik</span><span>Oto servis</span><span>Oto çekici</span><span>Kuaför</span><span>Nakliye</span><span>Tekstil</span><span>E-ticaret</span><span>Temizlik</span><span>Güzellik</span></dd></div><div><dt>Mesajlaşma</dt><dd><span>Netgsm</span><span>Verimor</span><span>İleti Merkezi</span><span>Twilio</span></dd></div><div><dt>Satış ve ödeme</dt><dd><span>Trendyol</span><span>Hepsiburada</span><span>N11</span><span>iyzico</span></dd></div><div><dt>Diğer</dt><dd><span>Google Search Console</span><span>Excel ile içe aktarma</span></dd></div></dl></div>
 <div class="lk rv"><a class="lnk" href="temalar.html">Temaları görün <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 8h12M9 3l5 5-5 5"/></svg></a><a class="lnk" href="entegrasyonlar.html">Entegrasyonlar <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 8h12M9 3l5 5-5 5"/></svg></a></div>
 </div></section>
