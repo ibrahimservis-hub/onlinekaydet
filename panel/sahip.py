@@ -178,7 +178,7 @@ def register(app, api_router, db, deps):
         if not os.path.isfile(os.path.join(gdir, "gen4.py")):
             raise HTTPException(404, "Tema üreticisi sunucuda yok")
         r = await asyncio.get_event_loop().run_in_executor(None, lambda: subprocess.run(
-            [_sys.executable, "gen4.py"], cwd=gdir, env={**os.environ, "OK_APP_DIR": here}, capture_output=True, text=True, timeout=600))
+            [_sys.executable, "gen4.py"], cwd=gdir, env={**os.environ, "OK_APP_DIR": here, "PYTHONUTF8": "1", "PYTHONIOENCODING": "utf-8"}, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=600))
         return {"ok": r.returncode == 0, "out": (r.stdout or "")[-400:], "err": (r.stderr or "")[-800:], "note": "themes.json değişti: uygulamayı yeniden başlatın"}
 
     # ------------------------------------------------------------------ dağıtım: GitHub'daki paketi sunucuya uygular

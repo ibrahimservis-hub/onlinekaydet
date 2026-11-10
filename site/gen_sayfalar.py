@@ -107,47 +107,41 @@ def p_iletisim():
         body, acts='<a class="bt" href="tel:05444444004">%s</a><a class="bt l" href="#form">Formu doldur</a>' % TEL)
 
 # ---------------- 2. TEMALAR ----------------
-TEMA = {
- '1-kombi': ('Klasik Usta', 'kombi'), '2-klima': ('Klasik Usta', 'klima'), '3-beyaz-esya': ('Klasik Usta', 'beyaz'),
- '4-teknik-cihaz': ('Klasik Usta', 'elektronik'), '5-tesisat': ('Klasik Usta', 'tesisat'), '6-guvenlik': ('Klasik Usta', 'guvenlik'),
- '07-kombi-kizil': ('Kızıl', 'kombi'), '08-kombi-kor': ('Kor', 'kombi'), '09-kombi-cam': ('Cam', 'kombi'),
- '10-klima-buz': ('Buz', 'klima'), '11-klima-poyraz': ('Poyraz', 'klima'), '12-klima-okyanus': ('Okyanus', 'klima'),
- '13-beyaz-kaymak': ('Kaymak', 'beyaz'), '14-beyaz-pembe': ('Pembe', 'beyaz'), '15-beyaz-gumus': ('Gümüş', 'beyaz'),
- '16-elektronik-mor': ('Mor', 'elektronik'), '17-elektronik-neon': ('Gece', 'elektronik'), '18-elektronik-turuncu': ('Turuncu', 'elektronik'),
- '19-bilgisayar-lacivert': ('Lacivert', 'bilgisayar'), '20-bilgisayar-cam': ('Cam', 'bilgisayar'), '21-bilgisayar-grafit': ('Grafit', 'bilgisayar'),
- '22-tesisat-sari': ('Sarı', 'tesisat'), '23-tesisat-su': ('Su', 'tesisat'), '24-tesisat-bakir': ('Bakır', 'tesisat'),
- '25-elektrik-volt': ('Volt', 'elektrik'), '26-elektrik-kirmizi': ('Kırmızı', 'elektrik'), '27-elektrik-petrol': ('Petrol', 'elektrik'),
- '28-guvenlik-zumrut': ('Zümrüt', 'guvenlik'), '29-guvenlik-gece': ('Gece', 'guvenlik'), '30-guvenlik-bordo': ('Bordo', 'guvenlik'),
-}
-SEKTOR_AD = {'kombi': 'Kombi', 'klima': 'Klima', 'beyaz': 'Beyaz eşya', 'elektronik': 'Elektronik', 'bilgisayar': 'Bilgisayar', 'tesisat': 'Tesisat', 'elektrik': 'Elektrik', 'guvenlik': 'Güvenlik'}
+SEKTOR_AD = {'kombi': 'Kombi', 'klima': 'Klima', 'beyaz_esya': 'Beyaz eşya', 'elektronik': 'Elektronik', 'bilgisayar': 'Bilgisayar', 'tesisat': 'Tesisat', 'elektrik': 'Elektrik', 'guvenlik': 'Güvenlik',
+             'oto_servis': 'Oto servis', 'oto_cekici': 'Oto çekici', 'kuafor': 'Kuaför', 'nakliye': 'Nakliye', 'tekstil': 'Tekstil', 'eticaret': 'E-ticaret', 'temizlik': 'Temizlik', 'guzellik': 'Güzellik merkezi'}
 def p_temalar():
     os.makedirs('tema-onizleme', exist_ok=True)
     src = os.path.join(os.path.dirname(D), 'themes', 'html')
     for f in os.listdir(src):
         if f.endswith('.html'):
             shutil.copy(os.path.join(src, f), os.path.join('tema-onizleme', f))
-    th = sorted(os.listdir('tema-onizleme'), key=lambda x: (int(re.match(r'\d+', x).group()), x))
-    cards, secs = [], {}
-    meta = {t['slug']: t for t in json.load(open('themes.json'))}
-    for f in th:
-        slug = f[:-5]
-        if slug not in TEMA: continue
-        nm, sk = TEMA[slug]
-        m = meta.get(slug, {})
-        dark, acc = m.get('dark', '#0f1f46'), m.get('accent', '#f27a1a')
-        secs.setdefault(sk, []).append(
-            '<a class="tm" href="tema-onizleme/%s" target="_blank" rel="noopener"><span class="sw"><i style="background:%s"></i><i style="background:%s"></i></span><b>%s</b><small>%s teması</small><span class="go">Önizle →</span></a>' % (f, dark, acc, nm, SEKTOR_AD[sk]))
+    th = json.load(open('themes.json', encoding='utf-8'))
+    secs = {}
+    for m in th:
+        secs.setdefault(m['sector'], []).append(m)
+    chips = '<button type="button" class="chip on" data-s="">Tümü <small>%d</small></button>' % len(th)
     inner = ''
-    for sk in SEKTOR_AD:
-        if sk in secs:
-            inner += '<h3 class="tg">%s</h3><div class="tmg">%s</div>' % (SEKTOR_AD[sk], ''.join(secs[sk]))
+    for sk, nm in SEKTOR_AD.items():
+        L = secs.get(sk)
+        if not L:
+            continue
+        chips += '<button type="button" class="chip" data-s="%s">%s <small>%d</small></button>' % (sk, nm, len(L))
+        cards = ''.join('<a class="tm" href="tema-onizleme/%s.html" target="_blank" rel="noopener"><span class="sw"><i style="background:%s"></i><i style="background:%s"></i></span><b>%s</b><small>%s teması%s</small><span class="go">Önizle →</span></a>'
+                        % (t['slug'], t.get('dark', '#0f1f46'), t.get('accent', '#f27a1a'), e(t.get('name') or nm), nm, ' · Premium' if t.get('premium') else '') for t in L)
+        inner += '<div class="tgrp" data-s="%s"><h3 class="tg">%s</h3><div class="tmg">%s</div></div>' % (sk, nm, cards)
     feat = ('<section><div class="w"><div class="three">%s%s%s</div></div></section>' % (
         '<div>%s<b>Bir tıkla seçin</b><p>Sektörünüze uygun temayı seçin, firma adınız, telefonunuz ve logonuz otomatik yerleşir.</p></div>' % ic('web', 'b'),
-        '<div>%s<b>Kendiniz düzenleyin</b><p>Menü, bölümler, görseller, yazılar, alt bilgi ve mobil menü panelden değişir.</p></div>' % ic('pen', 'o'),
-        '<div>%s<b>Formlar panele düşer</b><p>Randevu ve servis formundan gelen talepler doğrudan servis panelinize kaydolur.</p></div>' % ic('bell', 'g')))
-    body = feat + '<section class="tint"><div class="w"><div class="sh one"><h2>30 hazır tema, 8 sektör</h2></div>' + inner + '<p class="note2">Önizlemelerdeki görseller örnektir; yayına almadan önce kendi fotoğraflarınızı yükleyebilirsiniz.</p></div></section>' + cta()
-    return page('temalar.html', 'Hazır Servis Web Sitesi Temaları | OnlineKaydet', 'Kombi, klima, beyaz eşya, elektronik, bilgisayar, tesisat, elektrik ve güvenlik servisleri için 30 hazır web sitesi teması. Önizleyin, seçin, panelden düzenleyin.',
-        'Temalar', 'Servisinize uygun hazır web sitesi', 'Sektörünüze göre hazırlanmış 30 tema. Seçin, firma bilgilerinizi girin, siteniz randevu formuyla birlikte yayına girsin.', body)
+        '<div>%s<b>Kendiniz düzenleyin</b><p>Menü, bölümler, kampanya ve fırsat alanları, görseller, yazılar ve mobil menü panelden değişir.</p></div>' % ic('pen', 'o'),
+        '<div>%s<b>Formlar panele düşer</b><p>Randevu, teklif ve sipariş formlarından gelen talepler doğrudan panelinize kaydolur.</p></div>' % ic('bell', 'g')))
+    css = ('<style>.chips{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 18px}.chip{border:1px solid var(--l);background:#fff;border-radius:99px;padding:10px 16px;font:600 14px/1 inherit;cursor:pointer;min-height:44px}'
+           '.chip small{opacity:.6;margin-left:4px}.chip.on{background:var(--n);color:#fff;border-color:var(--n)}@media(max-width:900px){.tmg{grid-template-columns:repeat(2,1fr)}}@media(max-width:520px){.tmg{grid-template-columns:1fr}}</style>')
+    js = ('<script>(function(){var c=document.querySelectorAll(".chip"),g=document.querySelectorAll(".tgrp");c.forEach(function(b){b.addEventListener("click",function(){c.forEach(function(x){x.classList.remove("on")});b.classList.add("on");'
+          'var s=b.getAttribute("data-s");g.forEach(function(d){d.style.display=(!s||d.getAttribute("data-s")===s)?"":"none"})})});var h=location.hash.slice(1);if(h){c.forEach(function(b){if(b.getAttribute("data-s")===h)b.click()})}})();</script>')
+    body = (feat + css + '<section class="tint"><div class="w"><div class="sh one"><h2>%d hazır tema, %d sektör</h2></div><div class="chips">%s</div>%s'
+            '<p class="note2">Önizlemelerdeki görseller ve kampanya örnekleri örnektir; yayına almadan önce kendi fotoğraflarınızı, fiyat ve kampanyalarınızı girersiniz.</p></div></section>' % (len(th), len(secs), chips, inner) + js + cta())
+    return page('temalar.html', 'Hazır Web Sitesi Temaları | Servis, Oto, Kuaför, Nakliye, E-ticaret | OnlineKaydet',
+        'Teknik servis, oto servis, çekici, kuaför, nakliye, tekstil, e-ticaret, temizlik ve güzellik merkezi için hazır web sitesi temaları. Önizleyin, seçin, panelden düzenleyin.',
+        'Temalar', 'İşinize uygun hazır web sitesi', 'Sektörünüze göre hazırlanmış %d tema. Seçin, firma bilgilerinizi girin, siteniz randevu veya sipariş formuyla birlikte yayına girsin.' % len(th), body)
 
 # ---------------- 3. ENTEGRASYONLAR ----------------
 def p_entegrasyon():
