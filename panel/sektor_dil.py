@@ -181,7 +181,14 @@ for _k in ("avukat", "mimar", "muhasebe", "tadilat", "peyzaj", "cam_dograma", "g
 
 # özgün (eski) durum/alan etiketi -> aileye uygun etiket
 FAM_TERMS = {
-    "randevu": {"Yeni": "Randevu alındı", "Atandı": "Uzman atandı", "Yolda": "Geliyor", "Başladı": "İşlemde", "Tamamlandı": "Tamamlandı",
+    "randevu": {"Yeni": "Randevu alındı", "Atandı": "Uzman atandı", "Yolda": "Geldi", "Başladı": "İşlemde", "Tamamlandı": "Tamamlandı",
+                # ana sayfa, sayfa başlıkları ve tablo sütunları (panel paketindeki özgün metin -> salon dili)
+                "Saha Operasyon Merkezi": "Yönetim Merkezi", "Açık Servis": "Açık Randevu", "Servis İş Emirleri": "Randevu Defteri",
+                "Müşteri Hizmetleri": "Müşteri İlişkileri", "Stok Yönetimi": "Ürün ve Sarf Yönetimi", "Marka Kütüphanesi": "Hizmet Kütüphanesi",
+                "Yeni Marka": "Yeni Hizmet Grubu", "Yeni Parça": "Yeni Ürün", "Yedek parça yok": "Henüz ürün veya sarf kaydı yok", "Parça": "Ürün",
+                "Garanti Bitiş": "Geçerlilik", "Garanti talebi yok": "Memnuniyet talebi yok", "Garanti devam ediyor": "Geçerli", "Garanti bitti": "Süresi doldu",
+                "Garanti aktif": "Geçerli", "Servis No / Cihaz": "Randevu No / Hizmet", "Servis No": "Randevu No", "Serviste": "İşlemde",
+                "Yapılan işlem veya parça garantisi kapsamındaki müşteri taleplerini takip edin.": "Müşterilerinizin şikâyet, öneri ve memnuniyet taleplerini takip edin.",
                 "İşçilik Ücreti (₺)": "Hizmet Ücreti (₺)", "Parça Toplam:": "Ürün Toplam:", "Henüz parça eklenmemiş": "Henüz ürün eklenmemiş",
                 "Markalar": "Hizmet Grupları", "Marka:": "Hizmet Grubu:", "Model:": "Hizmet:", "Marka": "Hizmet Grubu", "Model": "Hizmet",
                 "Kullanılan Yedek Parçalar": "Kullanılan Ürün ve Sarf", "Servis Bilgisi": "Hizmet Bilgisi", "Cihaz Bilgisi": "Hizmet Bilgisi"},
@@ -207,8 +214,17 @@ def family(key):
     return FAMILY.get(key, "")
 
 
+# aile bazında ek gizlemeler: o işte karşılığı olmayan teknik servis ekranları ve kartları (eşleşme tam metin)
+HIDE_FAM = {
+    "randevu": ("Talep Rehberi", "Atölye (Hizmet Teslim)", "Atölye (Cihaz Teslim)", "Bayi Portalı", "Uzmandan Para Aldım", "Uzmanların Borç Durumu", "Geciken Uzman Borçları",
+                "Ustadan Para Aldım", "Ustaların Borç Durumu", "Geciken Usta Borçları", "Yeni Bayilik Başvurusu", "Yeni bayilik başvurusu", "Bayilik Başvuruları"),
+}
+
+
 def hide(key):
-    return list(HIDE_ALL) if key in ROWS and key not in SADE else []
+    if key not in ROWS or key in SADE:
+        return []
+    return list(HIDE_ALL) + [x for x in HIDE_FAM.get(FAMILY.get(key, ""), ()) if x not in HIDE_ALL]
 
 
 # ---- Paket / modül görünümü: aynı modül her sektörde kendi adıyla görünür; sektöre uymayan modül hiç gösterilmez ----

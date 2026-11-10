@@ -31,3 +31,19 @@ def test_module_view():
         l, h = d.module_view(k)
         assert l.get('servis'), k
         if d.family(k) in ('randevu', 'siparis', 'yol', 'proje', 'kurs'): assert 'usta' not in ' '.join(l.values()).lower(), k
+
+
+def test_randevu_family_panel_texts():
+    """Kuaför/güzellik panelinde ana sayfa, sayfa başlıkları ve tablolarda teknik servis metni kalmamalı."""
+    t = d.labels('kuafor')
+    for src in ('Saha Operasyon Merkezi', 'Servis İş Emirleri', 'Marka Kütüphanesi', 'Yeni Marka', 'Yeni Parça', 'Yedek parça yok', 'Garanti Bitiş', 'Garanti talebi yok'):
+        assert src in t, src
+    joined = ' '.join(t.values()).lower()
+    for bad in ('usta', 'garanti', 'servis', 'atölye', 'parça', 'marka', 'saha'):
+        assert bad not in joined, (bad, [v for v in t.values() if bad in v.lower()])
+    # klinik/diğer randevu işleri de 'salon' kelimesi görmesin (nötr dil)
+    assert 'salon' not in ' '.join(d.labels('dis_klinigi').values()).lower()
+    h = d.hide('kuafor')
+    for x in ('Talep Rehberi', 'Atölye (Hizmet Teslim)', 'Bayi Portalı', 'Yeni bayilik başvurusu', 'Uzmandan Para Aldım'):
+        assert x in h, x
+    assert d.hide('kombi') == [] and 'Talep Rehberi' not in d.hide('oto_servis')

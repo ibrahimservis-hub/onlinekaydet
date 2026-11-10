@@ -6566,8 +6566,9 @@
       l2.forEach(function (n) { var p = n.parentElement; if (!p || /^(SCRIPT|STYLE|TEXTAREA|INPUT|OPTION|TD|PRE|CODE)$/.test(p.tagName) || p.isContentEditable || p.closest('td,[data-nosektor]')) return; var o = n.nodeValue, r = words(o); if (r !== o) n.nodeValue = r; });
       [].forEach.call(document.querySelectorAll('[placeholder],[aria-label],[title]'), function (el) { ['placeholder', 'aria-label', 'title'].forEach(function (a) { var v = el.getAttribute(a); if (v) { var r = words(v); if (r !== v) el.setAttribute(a, r); } }); });
     }
+    if (S.lex && /\sUsta Paneli/i.test(document.title)) document.title = document.title.replace(/\s+Usta Paneli/i, ' Yönetim Paneli');
     var w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null), n, list = [];
-    while ((n = w.nextNode())) { var v = n.nodeValue; if (v && v.length < 40 && S.map[v.trim()] !== undefined) list.push(n); }
+    while ((n = w.nextNode())) { var v = n.nodeValue; if (v && v.length < 90 && S.map[v.trim()] !== undefined) list.push(n); }
     list.forEach(function (n) {
       var p = n.parentElement; if (!p || /^(SCRIPT|STYLE|TEXTAREA|INPUT)$/.test(p.tagName)) return;
       var raw = n.nodeValue, k = raw.trim(); n.nodeValue = raw.replace(k, S.map[k]);
