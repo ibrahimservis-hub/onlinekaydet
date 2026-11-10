@@ -689,13 +689,54 @@ CREDIT_LINK = ('<a class="spx-credit" href="https://onlinekaydet.com" target="_b
 _CREDIT_RX = re.compile(r"(?:<a\b[^>]*>\s*)?Bu site\s+OnlineKaydet\s+ile yay[ıi]nlan[ıi]r(?:\s*</a>)?", re.I)
 
 
+_DEMO_MOD = {
+    "ilanlar": [
+        {"id": "d1", "slug": "d1", "kind": "satilik", "kind_label": "Satılık", "title": "Merkezde 3+1 güney cepheli daire", "price": 4250000, "rooms": "3+1", "m2": 135, "neighborhood": "Fatih Mah.", "district": "Merkez", "city": "", "img_count": 0},
+        {"id": "d2", "slug": "d2", "kind": "kiralik", "kind_label": "Kiralık", "title": "Eşyalı 1+1 yeni bina", "price": 18500, "rooms": "1+1", "m2": 62, "neighborhood": "Yeni Mah.", "district": "Merkez", "city": "", "img_count": 0},
+        {"id": "d3", "slug": "d3", "kind": "satilik", "kind_label": "Satılık", "title": "Yola cepheli 2+1 ofis katı", "price": 3100000, "rooms": "2+1", "m2": 98, "neighborhood": "Çarşı", "district": "Merkez", "city": "", "img_count": 0},
+    ],
+    "kurslar": [
+        {"id": "d1", "title": "Temel eğitim programı", "price": 12500, "duration": "6 hafta", "schedule": "Hafta içi 18:00", "description": "Başlangıç seviyesi için birebir takipli program.", "has_img": False},
+        {"id": "d2", "title": "Yoğun hafta sonu grubu", "price": 9800, "duration": "8 hafta", "schedule": "Cumartesi 10:00", "description": "Hafta içi vakti olmayanlar için küçük grup.", "has_img": False},
+        {"id": "d3", "title": "Birebir özel ders", "price": 1500, "duration": "Saatlik", "schedule": "Randevuyla", "description": "Size uygun gün ve saatte.", "has_img": False},
+    ],
+    "rezervasyon": [
+        {"id": "d1", "name": "Standart seçenek", "kind": "", "capacity": 4, "price": 2500, "description": "Tarihleri seçin, talebiniz size dönüşle onaylansın.", "has_img": False},
+        {"id": "d2", "name": "Geniş seçenek", "kind": "", "capacity": 8, "price": 4200, "description": "Kalabalık grup için.", "has_img": False},
+    ],
+}
+
+
+def _preview_module(h, ctx, page):
+    """Önizlemede modül sayfaları örnek verilerle (gerçek sitede firmanın kendi kayıtları gösterilir)."""
+    try:
+        import sektor_mod, siteedit, ilan
+        if ("/" + page) not in [x for x, _ in sektor_mod.site_links(ctx.get("sector") or "")]:
+            return None
+        items = _DEMO_MOD[page]
+        if page == "ilanlar":
+            body = ilan.list_body(items).replace('href="/ilan/', 'href="#" data-d="')
+            title = "İlanlar"
+        elif page == "kurslar":
+            body, title = sektor_mod.kurslar_body(items), "Programlar"
+        else:
+            body, title = sektor_mod.rezervasyon_body(items), "Rezervasyon"
+        return siteedit.compose_page(h, title + " · " + ctx["name"], body)
+    except Exception:                                                     # noqa: BLE001
+        return None
+
+
 def preview_html(raw, th, slug, page=""):
     """Tema vitrini: örnek firma bilgisiyle ana sayfa ya da iç sayfa. Menü bağlantıları önizleme sayfalarına gider."""
     ctx = {"th": th, "name": th.get("name") or "Örnek Firma", "tel": "05320000000", "p": effective({}, th.get("sector") or ""), "sector": th.get("sector") or "",
            "logo": "", "city": "", "legal": [], "shop_on": True, "img": (lambda k: ""), "logo_abs": ""}
     ctx["p"]["address"] = ""
     h = apply_profile(raw, th, ctx)
-    if page.startswith("urun-"):
+    if page in ("ilanlar", "kurslar", "rezervasyon"):
+        h = _preview_module(h, ctx, page)
+        if not h:
+            return None
+    elif page.startswith("urun-"):
         import urunsayfa
         h = urunsayfa.page_html(h, ctx, slug, page)
         if not h:
