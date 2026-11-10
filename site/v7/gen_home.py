@@ -15,12 +15,12 @@ css=css.replace('.js .rv{opacity:0;transform:translateY(22px);transition:opacity
 css=css.replace('.hero h1{font:300 clamp(50px,7.4vw,112px)/1.0 var(--f)','.hero h1{font:300 clamp(42px,6.3vw,96px)/1.02 var(--f)')
 open('home.base.css','w').write(css)
 body=src[src.index('<main>'):src.index('</main>')+7]
-body=body.replace('<h1><span class="l"><span>Servis operasyonunuzun</span></span><span class="l"><span><em>tek</em> merkezi.</span></span></h1>','<h1><span class="l"><span>Hizmet işletmeleri için</span></span><span class="l"><span><em>kayıt, takip ve satış</em> paneli</span></span></h1>')
-assert 'Hizmet işletmeleri için' in body
+body=body.replace('<h1><span class="l"><span>Servis operasyonunuzun</span></span><span class="l"><span><em>tek</em> merkezi.</span></span></h1>','<h1><span class="l"><span>Kayıt, ekip ve tahsilat</span></span><span class="l"><span><em>tek ekranda.</em></span></span></h1>')
+assert 'Kayıt, ekip ve tahsilat' in body
 
 # --- tüm sektörler için metinler ---
 body=body.replace('Teknik servis işletmeleri için','Servis, oto, kuaför, nakliye, e-ticaret ve daha fazlası için')
-body=body.replace('Kayıt, usta, tahsilat ve web siteniz tek kontrol ekranında. Kurulumu biz yapıyoruz.','Randevu, ekip, tahsilat ve web siteniz tek ekranda. Sektörünüze göre hazır gelir; kurulumu biz yapıyoruz.')
+body=body.replace('Kayıt, usta, tahsilat ve web siteniz tek kontrol ekranında. Kurulumu biz yapıyoruz.','Defter, Excel ve WhatsApp mesajlarında kaybolan işleri tek yerde toplayın. Sektörünüze göre hazır gelir; kurulumu biz yapıyoruz.')
 body=body.replace('Uygulama mağazası gerekmez. Usta, tarayıcıdan kendi kullanıcı adıyla girer ve yalnızca kendine atanan işleri görür.','Uygulama mağazası gerekmez. Ekip üyesi (usta, kuaför, sürücü, kurye), tarayıcıdan kendi kullanıcı adıyla girer ve yalnızca kendine atanan işleri görür.')
 body=body.replace('Saha ekibiniz telefonundan <em>çalışır.</em>','Ekibiniz telefonundan <em>çalışır.</em>')
 body=body.replace('38 hazır tema, sekiz sektör. Randevu formu doğrudan servis kaydına düşer.','148 hazır tema, 16 sektör. Randevu formu doğrudan kayıt ekranınıza düşer.')
@@ -105,7 +105,7 @@ body=body[:a]+cta+body[b:]
 import gen7
 doc=('<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><meta name="theme-color" content="#0a0c0f">'
 '<link rel="icon" href="../favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="../favicon-32.png"><link rel="apple-touch-icon" href="../apple-touch-icon.png">'
-'<title>İşletme Yönetim Paneli ve Hazır Web Sitesi | OnlineKaydet</title><meta name="description" content="Teknik servis, oto servis, çekici, kuaför, nakliye, tekstil, e-ticaret ve temizlik işletmeleri için kayıt, ekip takibi, tahsilat ve hazır web sitesi. İlk ay ücretsiz.">'
+'<title>Kayıt, Ekip ve Tahsilat Tek Ekranda | OnlineKaydet</title><meta name="description" content="Teknik servis, oto servis, çekici, kuaför, nakliye, tekstil, e-ticaret ve temizlik işletmeleri için kayıt, ekip takibi, tahsilat ve hazır web sitesi. İlk ay ücretsiz.">'
 '<link rel="stylesheet" href="shell.css"><link rel="stylesheet" href="home.css"></head><body>'+gen7.header('index.html',True)+body+gen7.FOOT+gen7.VB.replace('index.html#kayit','#kayit')+
 '<script>document.documentElement.classList.add("js")</script><script src="../site.js"></script><script src="../lead.js"></script><script src="ok7.js"></script><script src="home.js"></script></body></html>')
 # gövde içindeki sıfırlama: çift id
