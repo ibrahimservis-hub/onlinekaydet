@@ -6130,7 +6130,7 @@
     'toplam gelir': 'Giren para', 'gider': 'Çıkan para', 'gelir': 'Giren para',
     'gelir-gider, kasa/banka hesapları, kasa sayımı, personel giderleri, tekrarlayan ödemeler ve kâr analizi.': 'Paranızın nerede olduğunu, ne kadar kazandığınızı ve ne harcadığınızı buradan görürsünüz.',
     'tüm gelir, gider ve tahsilat hareketleri. servis kaynaklı kayıtlar servis kaydından yönetilir.': 'Giren ve çıkan tüm paralar burada. Servis işinden gelen kayıtlar servis kaydından değiştirilir.',
-    'gider yok': 'Bu tarihlerde harcama yok'
+    'gider yok': 'Bu tarihlerde harcama yok', 'ciro': 'Satış', 'net': 'Kalan', 'giren': 'Giren para', 'çıkan': 'Çıkan para'
   };
   var MODAL = { 'manuel kasa hareketi': 'Para girdi / çıktı kaydet', 'tip *': 'Ne oldu? *', 'tutar (₺) *': 'Ne kadar? (₺) *', 'kategori': 'Ne için?', 'kategorisiz': 'Seçilmedi',
     'hesap': 'Hangi kasa / banka?', 'varsayılan hesap': 'Ana kasa', 'açıklama': 'Not (isteğe bağlı)', 'tarih (boşsa şimdi)': 'Tarih (boş bırakırsanız şimdi kaydedilir)',
@@ -6185,7 +6185,7 @@
   function btn(id, col, ic, t, s) { return '<button type="button" data-ms="' + id + '"><span style="color:' + col + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">' + IC[ic] + '</svg></span><div><b>' + t + '</b><small>' + s + '</small></div></button>'; }
   function css() {
     if (document.getElementById('spx-ms-css')) return; var st = document.createElement('style'); st.id = 'spx-ms-css';
-    st.textContent = '#spx-ms{margin:14px 0}#spx-ms .ms-h{font-size:13px;font-weight:700;color:#475569;margin:0 0 8px}#spx-ms .ms-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px}' +
+    st.textContent = '#spx-ms,#spx-ms-note{width:100%;flex:0 0 100%;box-sizing:border-box;align-self:stretch}#spx-ms{margin:14px 0}#spx-ms .ms-h{font-size:13px;font-weight:700;color:#475569;margin:0 0 8px}#spx-ms .ms-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px}' +
       '#spx-ms button{display:flex;align-items:center;gap:12px;text-align:left;background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:12px 14px;cursor:pointer;color:#0f172a;transition:border-color .15s,box-shadow .15s}' +
       '#spx-ms button:hover{border-color:#94a3b8;box-shadow:0 1px 4px rgba(15,23,42,.08)}#spx-ms button span{width:34px;height:34px;border-radius:9px;background:#f1f5f9;display:grid;place-items:center;flex:none}#spx-ms button svg{width:19px;height:19px}' +
       '#spx-ms b{display:block;font-size:14.5px;font-weight:700}#spx-ms small{display:block;font-size:12px;color:#64748b;margin-top:1px}' +
