@@ -6206,9 +6206,10 @@
       box.innerHTML = '<div class="ms-h">Ne yapmak istiyorsunuz?</div><div class="ms-g">' + btn('in', '#15803d', 'plus', 'Para girdi', 'Satış, tahsilat, başka gelir') + btn('out', '#b91c1c', 'minus', 'Para çıktı', 'Kira, maaş, alışveriş, yakıt') + btn('tech', '#1155cc', 'user', 'Ustadan para aldım', 'Ustanın borcundan düşer') + btn('move', '#1155cc', 'swap', 'Kasadan kasaya aktar', 'Nakitten bankaya gibi') + '</div>';
       box.onclick = function (e) { var b = e.target.closest('[data-ms]'); if (!b) return; var k = b.getAttribute('data-ms'); if (k === 'in') openForm('gelir'); else if (k === 'out') openForm('gider'); else if (k === 'tech') { if (window.spxOpen) window.spxOpen('tahsilat'); } else go('accounts'); };
     }
-    var anchor = h1.nextElementSibling; while (anchor && anchor.nextElementSibling && anchor.tagName !== 'P') anchor = anchor.nextElementSibling;
-    var host = (anchor && anchor.parentElement) || h1.parentElement;
-    if (!host.contains(box) || box.previousElementSibling !== anchor) { (anchor && anchor.parentElement ? anchor.parentElement : host).insertBefore(box, anchor ? anchor.nextSibling : null); }
+    var mw = (document.querySelector('main') || document.body).getBoundingClientRect().width, anchor = h1, narrow = h1.parentElement.getBoundingClientRect().width < 0.85 * mw;
+    if (narrow) { while (anchor.parentElement && anchor.parentElement.getBoundingClientRect().width < 0.85 * mw) anchor = anchor.parentElement; }
+    else { anchor = h1.nextElementSibling || h1; while (anchor.nextElementSibling && anchor.tagName !== 'P') anchor = anchor.nextElementSibling; }
+    if (box.previousElementSibling !== anchor || !anchor.parentElement.contains(box)) anchor.parentElement.insertBefore(box, anchor.nextSibling);
   }
   function note() {
     var tab = new URLSearchParams(location.search).get('tab'); var el = document.getElementById('spx-ms-note');
