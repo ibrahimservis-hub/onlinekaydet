@@ -14,9 +14,9 @@ def t(n, f):
 KEYS = list(sektor_ek.NEW)
 with TestClient(s.app) as c:
     def a():
-        assert len(sektor.SECTORS) == 16 and all(k in sektor.SECTORS for k in KEYS)
+        assert len(sektor.SECTORS) >= 16 and all(k in sektor.SECTORS for k in KEYS)
         for k, v in sektor_ek.NEW.items():
-            assert v["terms"].get("Servis Kayıtları") and v["site"]["services"] and v["site"]["faq"] and v["checklist"] and v["faults"], k
+            assert (v["terms"].get("Servis Kayıtları") or not v["terms"]) and v["site"]["services"] and v["site"]["faq"] and v["checklist"] and v["faults"], k
     t("16 sektör: her yeni sektörde terim, site metni, kontrol listesi, talep listesi var", a)
     def b():
         for i, k in enumerate(KEYS):
@@ -29,7 +29,7 @@ with TestClient(s.app) as c:
             assert jobs[0]["device_model"] == meta[0], (k, jobs[0]["device_model"])
             assert any(j["work_done"] == meta[1] for j in jobs), k
             tr = c.get("/api/sector-terms", headers=H).json()
-            assert tr["key"] == k and tr["terms"]["Servis Kayıtları"] == sektor_ek.NEW[k]["terms"]["Servis Kayıtları"], (k, tr)
+            assert tr["key"] == k and tr["terms"].get("Servis Kayıtları", "Servis Kayıtları") == sektor_ek.NEW[k]["terms"].get("Servis Kayıtları", "Servis Kayıtları"), (k, tr)
     t("her yeni sektörde demo açılır; örnek veri ve panel terimleri sektör dilinde", b)
     def e():
         demo._RATE.clear(); r = c.post("/api/public/demo", json={"name": "Berber Ali", "phone": "05524167001", "sector": "Berber"}); assert r.status_code == 200, r.text

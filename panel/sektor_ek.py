@@ -198,3 +198,7 @@ DEMO_URUN = {
     "tekstil": [("Penye tişört (12'li koli)", "Atölye", "Giyim", 1980, 2300, 40), ("Kot pantolon (10'lu)", "Atölye", "Giyim", 3200, 0, 25), ("İş ceketi (toptan)", "Atölye", "İş kıyafeti", 4100, 0, 15),
                 ("Havlu seti", "Atölye", "Ev tekstili", 760, 890, 30), ("Elbise (8'li)", "Atölye", "Giyim", 2750, 0, 18), ("Kumaş topu 40 m", "Atölye", "Kumaş", 2200, 0, 12)],
 }
+
+
+for _k, _v in _cok.demo_meta().items():
+    DEMO_META.setdefault(_k, _v)

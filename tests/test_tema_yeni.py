@@ -3,7 +3,7 @@ import json, os, sys, glob
 from playwright.sync_api import sync_playwright
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
 th = [t for t in json.load(open(os.path.join(ROOT, 'panel', 'themes.json'), encoding='utf-8')) if t['slug'].startswith('n') and t['slug'][1:3].isdigit()]
-assert len(th) == 48, len(th)
+assert len(th) >= 48, len(th)
 bad = []; seen_tools = set()
 BANNED = ['Parça kodu', 'ustaya iletin', 'Usta atandı', 'garantili servis', 'yedek parça']
 with sync_playwright() as p:

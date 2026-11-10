@@ -60,10 +60,16 @@ def _data(home):
         return None, {}
 
 
+FALLBACK_IMG = ("function okPimg(n,c){return '<svg viewBox=\"0 0 200 200\" preserveAspectRatio=\"xMidYMid slice\" style=\"width:100%;height:100%;display:block\" role=\"img\" aria-label=\"'+String(n||'Ürün').replace(/\"/g,'')+'\">"
+                "<rect width=\"200\" height=\"200\" fill=\"#e9edf3\"/><ellipse cx=\"100\" cy=\"164\" rx=\"52\" ry=\"9\" fill=\"#000\" opacity=\".12\"/>"
+                "<path d=\"M44 74 L100 50 L156 74 V140 L100 164 L44 140Z\" fill=\"#5b6fb0\"/><path d=\"M44 74 L100 98 L156 74 M100 98 V164\" fill=\"none\" stroke=\"#000\" stroke-opacity=\".18\" stroke-width=\"3\"/>"
+                "<rect x=\"62\" y=\"108\" width=\"30\" height=\"20\" rx=\"3\" fill=\"#fff\" opacity=\".8\" transform=\"rotate(14 77 118)\"/></svg>'}\n")
+
+
 def _pimg_js(home):
     a = home.find("function okPimg(")
     b = home.find("var D=window.__SHOP", a)
-    return home[a:b] if a >= 0 and b > a else ""
+    return home[a:b] if a >= 0 and b > a else FALLBACK_IMG
 
 
 SW = {"Siyah": "#15171c", "Beyaz": "#f5f5f5", "Lacivert": "#1b2a5a", "Kahverengi": "#6b4423"}

@@ -199,3 +199,16 @@ def theme_meta():
 import sektor_cok2 as _c2
 S.update(_c2.to_spec())
 PRODUCTS.update(_c2.PRODUCTS)
+
+
+_DM = {"randevu": ("Randevu görüşmesi", "Görüşme yapıldı, sonraki adım planlandı.", "Hizmet paketi"),
+       "kurs": ("Ders paketi", "Ders tamamlandı, ilerleme kaydedildi.", "Ders materyali"),
+       "ilan": ("Konut ilanı", "Yer gösterme yapıldı, geri bildirim alındı.", "Danışmanlık hizmeti"),
+       "menu": ("Sipariş", "Hazırlandı ve zamanında teslim edildi.", "Menü kalemi"),
+       "cekim": ("Çekim paketi", "Çekim tamamlandı, seçilen kareler teslim edildi.", "Baskı / albüm"),
+       "servis": ("Örnek iş", "İş tamamlandı, son kontrol yapıldı.", "Malzeme")}
+
+
+def demo_meta():
+    """Demo kayıtlarında sektöre uygun örnek metin (teknik servis dili sızmasın)."""
+    return {k: _DM.get(v.get("arche"), _DM["servis"]) for k, v in S.items()}
