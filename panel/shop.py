@@ -391,6 +391,10 @@ def register(api_router, db, deps):
     @api_router.put("/site/features")
     async def put_features(payload: dict, _: dict = Depends(require_admin)):
         cur = await features()
+        if payload.get("shop_enabled"):                      # paket kontrolü: Mağaza modülü olmayan firma mağazayı açamaz
+            fm = (await db.app_settings.find_one({"_id": "firm"}, {"_id": 0, "modules": 1})) or {}
+            if fm.get("modules") is not None and "magaza" not in fm["modules"]:
+                raise HTTPException(status_code=403, detail="“Mağaza” bu paketinizde yok. Paket yükseltmek için bizimle iletişime geçin.")
         for k in ("shop_enabled", "customer_portal_enabled", "language_enabled"):
             if k in payload:
                 cur[k] = bool(payload[k])

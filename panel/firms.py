@@ -27,7 +27,7 @@ SOON = {}
 # modül -> kapatıldığında engellenen API ön ekleri (servis çekirdektir, kapatılamaz)
 MODULE_PREFIX = {"muhasebe": ("finance", "cash", "accounting", "receivables", "profit", "export-xlsx"),
                  "rapor": ("rapor", "reports", "analytics", "performance"),
-                 "magaza": ("shop", "parts"), "site": ("site", "site-reviews-settings", "media", "studio", "visitors", "brand", "firm/domain", "site/edit", "site/pages", "site/profile", "site/image", "site/preview", "site/logo"),
+                 "magaza": ("shop", "parts", "public/shop", "public/customer"), "site": ("site", "site-reviews-settings", "media", "studio", "visitors", "brand", "firm/domain", "site/edit", "site/pages", "site/profile", "site/image", "site/preview", "site/logo"),
                  "pazarlama": ("mkt", "growth"), "sms": ("msg-templates", "governance/notify"),
                  "bakim": ("maintenance", "warranty-claims"), "teklif": ("quotes",), "bayi": ("dealers", "partners"),
                  "qr": ("qr",), "atama": ("autoassign",), "takip": ("admin/tech-locations",),
@@ -250,6 +250,17 @@ def register(api_router, db, deps):
         await fdb.app_settings.update_one({"_id": "firm"}, {"$set": {
             "firm_id": f["id"], "name": f.get("name", ""), "features": f.get("features") or {}}}, upsert=True)
 
+    async def sync_shop(f, mods, prev):
+        """Mağaza paketi açılınca site (Mağaza sayfaları) + panel (Ürünler/Siparişler) birlikte açılır; kapanınca ikisi de kapanır."""
+        if mods is None:
+            return
+        fdb = db.firm(f["db"])
+        await fdb.app_settings.update_one({"_id": "firm"}, {"$set": {"modules": list(mods)}}, upsert=True)
+        on = "magaza" in mods
+        was = prev is None or "magaza" in prev
+        if (not on) or (on != was):
+            await fdb.app_settings.update_one({"_id": "site_features"}, {"$set": {"shop_enabled": on}}, upsert=True)
+
     def feats(v):
         out = dict(DEFAULT_FEATURES)
         for k in DEFAULT_FEATURES:
@@ -335,6 +346,7 @@ def register(api_router, db, deps):
         except Exception:                                 # noqa: BLE001
             pass
         await push_settings(f)
+        await sync_shop(f, f.get("modules"), None)
         await db.main().firms.insert_one(dict(f))
         await audit(me, "FİRMA EKLEDİ", name)
         import sahip
@@ -390,7 +402,10 @@ def register(api_router, db, deps):
             await db.main().firms.update_one({"id": fid}, {"$set": upd})
         if uset:
             await fdb.users.update_many({"firm_owner": True}, {"$set": uset})
+        prev_mods = f.get("modules")
         f = await get_firm(fid)
+        if "modules" in upd:
+            await sync_shop(f, upd["modules"], prev_mods)
         _ACC.clear()
         _MOD.clear()
         await push_settings(f)
@@ -447,6 +462,8 @@ def register(api_router, db, deps):
                 if val == "askida":
                     uset["tokens_valid_after"] = int(time.time())
             await db.main().firms.update_one({"id": fid}, {"$set": upd})
+            if "modules" in upd:
+                await sync_shop(f, upd["modules"], f.get("modules"))
             if uset:
                 await db.firm(f["db"]).users.update_many({"firm_owner": True}, {"$set": uset})
             n += 1

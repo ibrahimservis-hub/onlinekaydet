@@ -308,7 +308,7 @@
     return go(0);
   }
   function fail(e) { toast(e.message || 'İşlem başarısız'); }
-  var TABS = [['firmalar', 'Firmalar'], ['ilan', 'İlanlar'], ['kursiyer', 'Kursiyerler'], ['program', 'Programlar'], ['kaynak', 'Kaynaklar'], ['rezervasyon', 'Rezervasyonlar'], ['hasta', 'Dosyalar'], ['sitem', 'Sitem'], ['siteduz', 'Gelişmiş Düzenleme'], ['domain', 'Alan Adı & Site'], ['paket', 'Paketim'], ['mgayar', 'Mağaza Ayarları'], ['moduller', 'Aç / Kapat & Ayarlar'], ['seo', 'SEO · 301 · 404'], ['yeni', 'Yeni Sipariş'], ['pazar', 'Pazaryerleri'], ['yetki', 'Kullanıcılar & Yetkiler'], ['gsc', 'Google Search Console'], ['urunler', 'Ürünler'], ['kanal', 'Ürünler'], ['urunekle', 'Ürün Ekle / Düzenle'], ['m360', 'Müşteri 360'], ['kaynak', 'Kaynak & Arama Analizi'], ['ustapuan', 'Usta Puanlama'], ['ustagecmis', 'Usta İş Geçmişi'], ['cari', 'Cari & Trend'], ['tahsilat', 'Teknisyen Tahsilat'], ['atolye', 'Atölye'], ['canli', 'Canlı Ziyaretçiler'], ['wa', 'WhatsApp & Bildirim'], ['daha', 'Daha Fazlası'], ['bildirim', 'Bildirimler'], ['memnun', 'Müşteri Memnuniyeti'], ['vade', 'Usta Borç Vadesi'], ['harita', 'Günün İş Haritası'], ['onay', 'Onay Bekleyenler'], ['rapor', 'Rapor Merkezi'], ['kurulum', 'Kurulum Durumu']];
+  var TABS = [['kayit', 'Kayıtlar'], ['firmalar', 'Firmalar'], ['ilan', 'İlanlar'], ['kursiyer', 'Kursiyerler'], ['program', 'Programlar'], ['kaynak', 'Kaynaklar'], ['rezervasyon', 'Rezervasyonlar'], ['hasta', 'Dosyalar'], ['sitem', 'Sitem'], ['siteduz', 'Gelişmiş Düzenleme'], ['domain', 'Alan Adı & Site'], ['paket', 'Paketim'], ['mgayar', 'Mağaza Ayarları'], ['moduller', 'Aç / Kapat & Ayarlar'], ['seo', 'SEO · 301 · 404'], ['yeni', 'Yeni Sipariş'], ['pazar', 'Pazaryerleri'], ['yetki', 'Kullanıcılar & Yetkiler'], ['gsc', 'Google Search Console'], ['urunler', 'Ürünler'], ['kanal', 'Ürünler'], ['urunekle', 'Ürün Ekle / Düzenle'], ['m360', 'Müşteri 360'], ['kaynak', 'Kaynak & Arama Analizi'], ['ustapuan', 'Usta Puanlama'], ['ustagecmis', 'Usta İş Geçmişi'], ['cari', 'Cari & Trend'], ['tahsilat', 'Teknisyen Tahsilat'], ['atolye', 'Atölye'], ['canli', 'Canlı Ziyaretçiler'], ['wa', 'WhatsApp & Bildirim'], ['daha', 'Daha Fazlası'], ['bildirim', 'Bildirimler'], ['memnun', 'Müşteri Memnuniyeti'], ['vade', 'Usta Borç Vadesi'], ['harita', 'Günün İş Haritası'], ['onay', 'Onay Bekleyenler'], ['rapor', 'Rapor Merkezi'], ['kurulum', 'Kurulum Durumu']];
   function build() {
     ov = document.createElement('div'); ov.id = 'spx-ov';
     ov.innerHTML = '<header><button class="spx-b" id="spx-menu">☰ Menü</button><h2 id="spx-h">Site Yönetimi</h2><button class="spx-b" id="spx-x">Kapat ✕</button></header><div id="spx-tabs"></div><div id="spx-body">Yükleniyor…</div>';
@@ -321,11 +321,136 @@
   function body() { return $('#spx-body') || document.createElement('div'); }
   function draw() {
     Array.prototype.forEach.call($('#spx-tabs').children, function (b) { b.classList.toggle('on', b.getAttribute('data-t') === TAB); });
-    var hh = $('#spx-h'); if (hh) hh.textContent = ({ ilan: 'İlanlar', kursiyer: 'Kursiyerler', program: 'Programlar', kaynak: 'Araç / Salon / Masa', rezervasyon: 'Rezervasyonlar', hasta: 'Hasta / müşteri dosyaları', firmalar: 'Firmalar', sitem: 'Sitem — Web Siteniz', siteduz: 'Gelişmiş Düzenleme', domain: 'Alan Adı & Site', paket: 'Paketim', mgayar: 'Mağaza Ayarları', daha: 'Daha Fazlası', bildirim: 'Bildirimler', memnun: 'Müşteri Memnuniyeti', vade: 'Usta Borç Vadesi', harita: 'Günün İş Haritası', moduller: 'Aç/Kapat & Entegrasyonlar', seo: 'SEO · 301 · 404', yeni: 'Yeni Sipariş Gir', pazar: 'Pazaryerleri', yetki: 'Kullanıcılar & Yetkiler', gsc: 'Google Search Console', urunler: 'Ürünler', kanal: 'Ürünler', urunekle: 'Ürün Ekle / Düzenle', m360: 'Müşteri 360', kaynak: 'Kaynak & Arama Analizi', ustapuan: 'Usta Puanlama', ustagecmis: 'Usta İş Geçmişi', cari: 'Cari & Trend', tahsilat: 'Teknisyen Tahsilat', atolye: 'Atölye (Cihaz Teslim Alma)', sohbet: 'Canlı Sohbet', canli: 'Canlı Ziyaretçiler', wa: 'WhatsApp & Bildirim Ayarları', onay: 'Onay Bekleyenler', rapor: 'Rapor Merkezi', kurulum: 'Kurulum Durumu' })[TAB];
+    var hh = $('#spx-h'); if (hh) hh.textContent = ({ kayit: (KY.sc && KY.sc.plural) || 'Kayıtlar', ilan: 'İlanlar', kursiyer: 'Kursiyerler', program: 'Programlar', kaynak: 'Araç / Salon / Masa', rezervasyon: 'Rezervasyonlar', hasta: 'Hasta / müşteri dosyaları', firmalar: 'Firmalar', sitem: 'Sitem — Web Siteniz', siteduz: 'Gelişmiş Düzenleme', domain: 'Alan Adı & Site', paket: 'Paketim', mgayar: 'Mağaza Ayarları', daha: 'Daha Fazlası', bildirim: 'Bildirimler', memnun: 'Müşteri Memnuniyeti', vade: 'Usta Borç Vadesi', harita: 'Günün İş Haritası', moduller: 'Aç/Kapat & Entegrasyonlar', seo: 'SEO · 301 · 404', yeni: 'Yeni Sipariş Gir', pazar: 'Pazaryerleri', yetki: 'Kullanıcılar & Yetkiler', gsc: 'Google Search Console', urunler: 'Ürünler', kanal: 'Ürünler', urunekle: 'Ürün Ekle / Düzenle', m360: 'Müşteri 360', kaynak: 'Kaynak & Arama Analizi', ustapuan: 'Usta Puanlama', ustagecmis: 'Usta İş Geçmişi', cari: 'Cari & Trend', tahsilat: 'Teknisyen Tahsilat', atolye: 'Atölye (Cihaz Teslim Alma)', sohbet: 'Canlı Sohbet', canli: 'Canlı Ziyaretçiler', wa: 'WhatsApp & Bildirim Ayarları', onay: 'Onay Bekleyenler', rapor: 'Rapor Merkezi', kurulum: 'Kurulum Durumu' })[TAB];
     body().innerHTML = 'Yükleniyor…';
-    ({ ilan: drawIlan, kursiyer: function () { drawMod('kursiyer'); }, program: function () { drawMod('program'); }, kaynak: function () { drawMod('kaynak'); }, rezervasyon: function () { drawMod('rezervasyon'); }, hasta: function () { drawMod('hasta'); }, firmalar: drawFirmalar, sitem: drawSitem, siteduz: drawSiteEd, domain: drawDomain, paket: drawPaket, mgayar: drawMgAyar, daha: drawDaha, bildirim: drawBildirim, memnun: drawMemnun, vade: drawVade, harita: drawHarita, moduller: drawMod, seo: drawSeo, yeni: drawNew, pazar: drawMkt, yetki: drawUsers, gsc: drawGsc, urunler: drawUrunler, kanal: drawKanal, urunekle: drawUrunEkle, m360: drawM360, kaynak: drawKaynak, ustapuan: drawUstaPuan, ustagecmis: drawUstaGecmis, cari: drawCari, tahsilat: drawTahsilat, atolye: drawAtolye, sohbet: drawSohbet, canli: drawCanli, wa: drawWa, onay: drawOnay, rapor: drawRapor, kurulum: drawKurulum })[TAB]();
+    ({ kayit: drawKayit, ilan: drawIlan, kursiyer: function () { drawMod('kursiyer'); }, program: function () { drawMod('program'); }, kaynak: function () { drawMod('kaynak'); }, rezervasyon: function () { drawMod('rezervasyon'); }, hasta: function () { drawMod('hasta'); }, firmalar: drawFirmalar, sitem: drawSitem, siteduz: drawSiteEd, domain: drawDomain, paket: drawPaket, mgayar: drawMgAyar, daha: drawDaha, bildirim: drawBildirim, memnun: drawMemnun, vade: drawVade, harita: drawHarita, moduller: drawMod, seo: drawSeo, yeni: drawNew, pazar: drawMkt, yetki: drawUsers, gsc: drawGsc, urunler: drawUrunler, kanal: drawKanal, urunekle: drawUrunEkle, m360: drawM360, kaynak: drawKaynak, ustapuan: drawUstaPuan, ustagecmis: drawUstaGecmis, cari: drawCari, tahsilat: drawTahsilat, atolye: drawAtolye, sohbet: drawSohbet, canli: drawCanli, wa: drawWa, onay: drawOnay, rapor: drawRapor, kurulum: drawKurulum })[TAB]();
   }
 
+
+  /* ===== Sektöre özel kayıt ekranı: randevu / sipariş / çağrı / dosya ... (şablon sunucudan gelir) ===== */
+  var KY = { sc: null, q: '', f: '' };
+  function kyCss() {
+    if (document.getElementById('ky-css')) return; var s = document.createElement('style'); s.id = 'ky-css';
+    s.textContent = '.ky-st{display:flex;align-items:center;background:#fff;border:1px solid #e1e6ee;border-radius:12px;padding:12px 16px;margin-bottom:14px;overflow:auto;gap:0}.ky-st>div{display:flex;align-items:center;gap:8px;color:#8a93a6;white-space:nowrap;flex:1;min-width:max-content}.ky-st>div:not(:last-child):after{content:"";flex:1;height:2px;background:#dfe4ec;margin:0 10px;min-width:18px}.ky-st i{width:26px;height:26px;border-radius:50%;border:2px solid #cfd6e2;display:grid;place-items:center;font:700 12px system-ui;font-style:normal;background:#fff;flex:none}.ky-st .ok{color:#1b6b3a}.ky-st .ok i{background:#1b8a4b;border-color:#1b8a4b;color:#fff}.ky-st .ok:after{background:#1b8a4b!important}.ky-st .now{color:#1155cc;font-weight:700}.ky-st .now i{border-color:#1155cc;color:#1155cc;box-shadow:0 0 0 4px #e0ebfd}'
+      + '.ky-g{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:14px;align-items:start}@media(max-width:980px){.ky-g{grid-template-columns:1fr}}.ky-h{font:700 .72rem system-ui;letter-spacing:.09em;text-transform:uppercase;color:#6a7488;margin:0 0 10px}'
+      + '.ky-f{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px 12px}.ky-f label,.ky-lb{display:block;font:600 .78rem system-ui;color:#6a7488;margin-bottom:3px}.ky-in{width:100%;min-height:38px;padding:7px 10px;border:1px solid #cbd5e1;border-radius:8px;font:inherit;background:#fff}'
+      + '.ky-r{display:flex;justify-content:space-between;padding:5px 0;color:#4b556a}.ky-tot{font:800 1.35rem system-ui;color:#1c2433;border-top:1px solid #e6eaf1;margin-top:6px;padding-top:10px}.ky-pay{display:flex;gap:6px;margin:8px 0}.ky-pay button{flex:1;border:1px solid #d5dbe6;border-radius:8px;background:#fff;padding:8px;font:600 .85rem system-ui;cursor:pointer}.ky-pay button.on{border-color:#1155cc;background:#e8f0fd;color:#1155cc}'
+      + '.ky-tag{display:inline-block;padding:2px 10px;border-radius:99px;font:600 .76rem system-ui;background:#eef2f9;color:#44506a}.ky-chip{border:1px solid #d5dbe6;background:#fff;border-radius:99px;padding:6px 12px;font:600 .8rem system-ui;cursor:pointer;margin:0 6px 6px 0}.ky-chip.on{background:#1155cc;border-color:#1155cc;color:#fff}.ky-go{background:#e8710a!important;border-color:#e8710a!important;color:#fff!important}';
+    document.head.appendChild(s);
+  }
+  function kyMoney(n) { return (Math.round((n || 0) * 100) / 100).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ₺'; }
+  function kyNum(v) { var x = parseFloat(String(v == null ? '' : v).replace(',', '.')); return isFinite(x) && x > 0 ? x : 0; }
+  function kySums(sc, d) {
+    var lines = [], g = 0;
+    sc.hesap.forEach(function (h) { var v = 0; (d[h.k] || []).forEach(function (r) { v += kyNum(r.qty || 1) * kyNum(r.price); }); lines.push([h.l, v]); g += v; });
+    (sc.base_lines || []).forEach(function (h) { var v = h.k === 'base' ? kyNum(d.base) : kyNum(d.km) * kyNum(d.km_rate); lines.push([h.l, v]); g += v; });
+    (sc.extra_lines || []).forEach(function (h) { var v = kyNum(d[h.k]); lines.push([h.l, v]); g += v; });
+    var disc = Math.min(kyNum(d.discount), g), total = g - disc, paid = 0; (d.payments || []).forEach(function (p) { paid += kyNum(p.amount); });
+    return { lines: lines, disc: disc, total: total, paid: paid, balance: Math.max(total - paid, 0), comm: total * kyNum(d.comm_pct) / 100 };
+  }
+  function kyStepIdx(sc, st) { for (var i = 0; i < sc.steps.length; i++) if (sc.steps[i].k === st) return i; return -1; }
+  function kyLabel(sc, st) { var a = sc.steps.concat(sc.side); for (var i = 0; i < a.length; i++) if (a[i].k === st) return a[i].l; return st || ''; }
+  function drawKayit() {
+    kyCss();
+    Promise.all([call('GET', '/admin/kayit/schema'), call('GET', '/admin/kayit?q=' + encodeURIComponent(KY.q) + '&flt=' + encodeURIComponent(KY.f))]).then(function (r) {
+      var sc = KY.sc = r[0], ls = r[1], hh = $('#spx-h'); if (hh) hh.textContent = sc.plural;
+      var chips = [['', 'Tümü']].concat(sc.steps.map(function (s) { return [s.k, s.l + (ls.counts[s.k] ? ' (' + ls.counts[s.k] + ')' : '')]; }));
+      if (sc.filters.indexOf('bugun') >= 0) chips.push(['bugun', 'Bugün']); if (sc.filters.indexOf('odemesiz') >= 0) chips.push(['odemesiz', 'Ödemesi bekleyen']);
+      var h = '<div class="spx-card"><div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between"><b style="font-size:16px">' + esc(sc.plural) + '</b><button class="spx-b p" id="ky_new">+ Yeni ' + esc(sc.title.toLowerCase()) + '</button></div></div>';
+      h += grid(ls.summary.map(function (x) { return stat(esc(x[0]), esc(x[1]), ''); }));
+      h += '<div class="spx-card"><div style="margin-bottom:8px">' + chips.map(function (c) { return '<button class="ky-chip' + (KY.f === c[0] ? ' on' : '') + '" data-kf="' + esc(c[0]) + '">' + esc(c[1]) + '</button>'; }).join('') + '</div>'
+        + '<input id="ky_q" class="ky-in" placeholder="Ara…" value="' + esc(KY.q) + '" style="margin-bottom:10px;max-width:360px">'
+        + tbl(sc.headers, ls.rows.map(function (x) { var c = x.cols.slice(); c[c.length - 1] = '<span class="ky-tag">' + esc(c[c.length - 1]) + '</span>'; return tr_(c, 'data-ko="' + x.id + '"'); })) + (ls.rows.length ? '' : '<p style="color:#64748b;padding:14px 4px">Henüz kayıt yok.</p>') + '</div>';
+      body().innerHTML = h;
+      $('#ky_new').onclick = function () { kyForm(''); };
+      var qt; $('#ky_q').oninput = function () { KY.q = this.value; clearTimeout(qt); qt = setTimeout(drawKayit, 350); };
+      Array.prototype.forEach.call(body().querySelectorAll('[data-kf]'), function (b) { b.onclick = function () { KY.f = b.getAttribute('data-kf'); drawKayit(); }; });
+      Array.prototype.forEach.call(body().querySelectorAll('[data-ko]'), function (t) { t.onclick = function () { kyForm(t.getAttribute('data-ko')); }; });
+    }).catch(function (e) { body().innerHTML = '<div class="spx-card">Yüklenemedi: ' + esc(e.message) + '</div>'; });
+  }
+  function kyIn(f, v, sc) {
+    var id = 'kf_' + f.k, val = v == null ? '' : v;
+    if (f.t === 'area') return '<textarea id="' + id + '" rows="2" class="ky-in">' + esc(val) + '</textarea>';
+    if (f.t === 'select') return '<select id="' + id + '" class="ky-in">' + f.opts.map(function (o) { return '<option value="' + esc(o[0]) + '"' + (o[0] === val ? ' selected' : '') + '>' + esc(o[1]) + '</option>'; }).join('') + '</select>';
+    if (f.t === 'staff') return '<select id="' + id + '" class="ky-in"><option value="">Seçin</option>' + (sc.staff || []).map(function (n) { return '<option' + (n === val ? ' selected' : '') + '>' + esc(n) + '</option>'; }).join('') + '</select>';
+    if (f.t === 'dt') return '<input id="' + id + '" type="datetime-local" class="ky-in" value="' + esc(val) + '">';
+    if (f.t === 'date') return '<input id="' + id + '" type="date" class="ky-in" value="' + esc(val) + '">';
+    if (f.t === 'num') return '<input id="' + id + '" type="number" min="0" step="any" class="ky-in" value="' + esc(val === 0 ? '' : val) + '">';
+    return '<input id="' + id + '" type="text" class="ky-in" maxlength="120" value="' + esc(val) + '">';
+  }
+  function kyCollect(sc, d) {
+    sc.sections.forEach(function (s) { s.fields.forEach(function (f) { var e = $('#kf_' + f.k); if (e) d[f.k] = e.value; }); });
+    sc.items.forEach(function (it) {
+      d[it.k] = Array.prototype.map.call(document.querySelectorAll('[data-ki="' + it.k + '"]'), function (tr) { var o = {}; Array.prototype.forEach.call(tr.querySelectorAll('[data-c]'), function (e) { o[e.getAttribute('data-c')] = e.value; }); return o; });
+    });
+    d.check = {}; Array.prototype.forEach.call(document.querySelectorAll('[data-kc]'), function (e) { d.check[e.getAttribute('data-kc')] = e.checked; });
+    ['notes', 'next_note', 'discount', 'comm_pct'].forEach(function (k) { var e = $('#ky_' + k); if (e) d[k] = e.value; });
+  }
+  function kyForm(id) {
+    var sc = KY.sc;
+    (id ? call('GET', '/admin/kayit/' + id) : Promise.resolve({ status: sc.steps[0].k, check: {}, payments: [], comm_pct: sc.comm })).then(function (d) {
+      sc.items.forEach(function (it) { if (!d[it.k] || !d[it.k].length) d[it.k] = id ? (d[it.k] || []) : [{ name: '', qty: 1, price: '' }]; });
+      var payM = 'Nakit';
+      function hesap() {
+        var s = kySums(sc, d), h = '<div class="spx-card"><div class="ky-h">Hesap</div>';
+        s.lines.forEach(function (l) { h += '<div class="ky-r"><span>' + esc(l[0]) + '</span><span>' + kyMoney(l[1]) + '</span></div>'; });
+        h += '<div class="ky-r"><span>İndirim</span><span><input id="ky_discount" type="number" min="0" step="any" class="ky-in" style="width:110px;min-height:30px;text-align:right" value="' + esc(kyNum(d.discount) || '') + '"></span></div>';
+        h += '<div class="ky-r ky-tot"><span>Toplam</span><span>' + kyMoney(s.total) + '</span></div>';
+        if (id) {
+          h += '<div class="ky-r"><span>Alınan</span><span>' + kyMoney(s.paid) + '</span></div><div class="ky-r"><b>Kalan</b><b>' + kyMoney(s.balance) + '</b></div>';
+          (d.payments || []).forEach(function (p) { h += '<div class="ky-r" style="font-size:12px"><span>' + esc(p.method) + ' · ' + esc((p.at || '').replace('T', ' ')) + '</span><span>' + kyMoney(p.amount) + '</span></div>'; });
+          if (s.balance > 0) h += '<div class="ky-lb" style="margin-top:8px">Ödeme al</div><input id="ky_pamt" type="number" min="0" step="any" class="ky-in" value="' + s.balance + '"><div class="ky-pay">' + ['Nakit', 'Kart', 'Havale'].map(function (m) { return '<button data-pm="' + m + '" class="' + (m === payM ? 'on' : '') + '">' + m + '</button>'; }).join('') + '</div><button class="spx-b p ky-go" id="ky_pay" style="width:100%">Ödemeyi al</button>';
+        } else h += '<p style="color:#64748b;font-size:12px;margin:8px 0 0">Kaydettikten sonra ödeme alabilirsiniz.</p>';
+        h += '</div>';
+        if (sc.comm > 0) h += '<div class="spx-card"><div class="ky-h">' + esc(sc.staff_l) + ' primi</div><div class="ky-r"><span>Oran (%)</span><span><input id="ky_comm_pct" type="number" min="0" max="100" class="ky-in" style="width:80px;min-height:30px;text-align:right" value="' + esc(d.comm_pct == null ? sc.comm : d.comm_pct) + '"></span></div><div class="ky-r"><span>Tutar</span><b>' + kyMoney(s.comm) + '</b></div></div>';
+        return h;
+      }
+      function bindHesap() {
+        var box = $('#ky_hesap'); if (!box) return;
+        ['ky_discount', 'ky_comm_pct'].forEach(function (i) { var e = $('#' + i); if (e) e.onchange = function () { d[i.slice(3)] = this.value; box.innerHTML = hesap(); bindHesap(); }; });
+        Array.prototype.forEach.call(box.querySelectorAll('[data-pm]'), function (b) { b.onclick = function () { payM = b.getAttribute('data-pm'); Array.prototype.forEach.call(box.querySelectorAll('[data-pm]'), function (x) { x.classList.toggle('on', x === b); }); }; });
+        var pb = $('#ky_pay'); if (pb) pb.onclick = function () { pb.disabled = true; call('POST', '/admin/kayit/' + id + '/odeme', { amount: $('#ky_pamt').value, method: payM }).then(function () { toast('Ödeme alındı'); kyForm(id); }).catch(function (e) { pb.disabled = false; fail(e); }); };
+      }
+      function paint() {
+        var idx = kyStepIdx(sc, d.status), side = idx < 0;
+        var h = '<div class="spx-card"><button class="spx-b" id="ky_bk">← ' + esc(sc.plural) + '</button><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center;margin-top:10px"><div><h3 style="margin:0">' + esc(id ? sc.title + ' ' + (d.no || '') : 'Yeni ' + sc.title.toLowerCase()) + '</h3>' + (side ? '<span class="ky-tag" style="margin-top:6px">' + esc(kyLabel(sc, d.status)) + '</span>' : '') + '</div><div style="display:flex;gap:6px;flex-wrap:wrap">';
+        if (id && !side && idx < sc.steps.length - 1) h += '<button class="spx-b p" id="ky_next">→ ' + esc(sc.steps[idx + 1].l) + '</button>';
+        if (id && !side && idx === sc.steps.length - 1) h += '<span class="ky-tag" style="background:#e3f4ea;color:#1b6b3a">Kapandı</span>';
+        if (id) sc.side.forEach(function (s) { if (d.status !== s.k) h += '<button class="spx-b d" data-ks="' + s.k + '">' + esc(s.l) + '</button>'; });
+        if (id && side) h += '<button class="spx-b" data-ks="' + sc.steps[0].k + '">Yeniden aç</button>';
+        h += '<button class="spx-b p" id="ky_save">Kaydet</button>' + (id ? '<button class="spx-b d" id="ky_del">Sil</button>' : '') + '</div></div></div>';
+        h += '<div class="ky-st">' + sc.steps.map(function (s, i) { return '<div class="' + (!side && i < idx ? 'ok' : (!side && i === idx ? 'now' : '')) + '"><i>' + (!side && i < idx ? '✓' : (i + 1)) + '</i><span>' + esc(s.l) + '</span></div>'; }).join('') + '</div>';
+        h += '<div class="ky-g"><div>';
+        sc.sections.forEach(function (s) { h += '<div class="spx-card"><div class="ky-h">' + esc(s.t) + '</div><div class="ky-f">' + s.fields.map(function (f) { return '<div' + (f.t === 'area' ? ' style="grid-column:1/-1"' : '') + '><label>' + esc(f.l) + (f.req ? ' *' : '') + '</label>' + kyIn(f, d[f.k], sc) + '</div>'; }).join('') + '</div></div>'; });
+        sc.items.forEach(function (it) {
+          var dl = 'ky_dl_' + it.k;
+          h += '<div class="spx-card"><div class="ky-h">' + esc(it.l) + '</div>' + ((it.sug || []).length ? '<datalist id="' + dl + '">' + it.sug.map(function (x) { return '<option value="' + esc(x) + '">'; }).join('') + '</datalist>' : '') + '<div style="overflow:auto"><table style="width:100%;border-collapse:collapse"><thead><tr><th class="ky-lb" style="text-align:left">' + esc(it.name) + '</th>' + (it.opt ? '<th class="ky-lb" style="text-align:left">' + esc(it.opt) + '</th>' : '') + (it.staff ? '<th class="ky-lb" style="text-align:left">' + esc(sc.staff_l) + '</th>' : '') + '<th class="ky-lb">Adet</th><th class="ky-lb">Fiyat (₺)</th><th></th></tr></thead><tbody>';
+          (d[it.k] || []).forEach(function (r, i) {
+            h += '<tr data-ki="' + it.k + '" data-i="' + i + '"><td style="padding:3px;min-width:160px"><input data-c="name" class="ky-in" ' + ((it.sug || []).length ? 'list="' + dl + '" ' : '') + 'value="' + esc(r.name) + '"></td>' + (it.opt ? '<td style="padding:3px"><input data-c="opt" class="ky-in" value="' + esc(r.opt) + '"></td>' : '') + (it.staff ? '<td style="padding:3px"><select data-c="staff" class="ky-in"><option value="">—</option>' + (sc.staff || []).map(function (n) { return '<option' + (n === r.staff ? ' selected' : '') + '>' + esc(n) + '</option>'; }).join('') + '</select></td>' : '')
+              + '<td style="padding:3px;width:80px"><input data-c="qty" type="number" min="0" step="any" class="ky-in" value="' + esc(r.qty == null ? 1 : r.qty) + '"></td><td style="padding:3px;width:120px"><input data-c="price" type="number" min="0" step="any" class="ky-in" value="' + esc(r.price === 0 ? '' : r.price) + '"></td><td><button class="spx-b d" data-kx="' + it.k + ':' + i + '" aria-label="Satırı sil">✕</button></td></tr>';
+          });
+          h += '</tbody></table></div><button class="spx-b" data-ka="' + it.k + '" style="margin-top:8px">+ ' + esc(it.name) + ' ekle</button></div>';
+        });
+        h += '<div class="spx-card"><div class="ky-h">' + esc(sc.check.t) + '</div>' + sc.check.opts.map(function (o) { return '<label style="display:flex;gap:8px;align-items:center;padding:4px 0"><input type="checkbox" data-kc="' + o.k + '"' + ((d.check || {})[o.k] ? ' checked' : '') + '> ' + esc(o.l) + '</label>'; }).join('')
+          + '<div class="ky-lb" style="margin-top:10px">' + esc(sc.notes_l) + '</div><textarea id="ky_notes" rows="3" class="ky-in">' + esc(d.notes) + '</textarea>' + (sc.next_l ? '<div class="ky-lb" style="margin-top:10px">' + esc(sc.next_l) + '</div><input id="ky_next_note" class="ky-in" value="' + esc(d.next_note) + '">' : '') + '</div>';
+        h += '</div><div id="ky_hesap">' + hesap() + '</div></div>';
+        body().innerHTML = h; bindHesap();
+        $('#ky_bk').onclick = drawKayit;
+        Array.prototype.forEach.call(body().querySelectorAll('[data-ka]'), function (b) { b.onclick = function () { kyCollect(sc, d); (d[b.getAttribute('data-ka')] = d[b.getAttribute('data-ka')] || []).push({ name: '', qty: 1, price: '' }); paint(); }; });
+        Array.prototype.forEach.call(body().querySelectorAll('[data-kx]'), function (b) { b.onclick = function () { kyCollect(sc, d); var p = b.getAttribute('data-kx').split(':'); d[p[0]].splice(+p[1], 1); paint(); }; });
+        body().onchange = function (e) { if (e.target.closest('[data-ki]') || /^kf_(km|km_rate|base|shipping)$/.test(e.target.id)) { kyCollect(sc, d); var box = $('#ky_hesap'); if (box) { box.innerHTML = hesap(); bindHesap(); } } };
+        function save(then) {
+          kyCollect(sc, d); var payload = {}; Object.keys(d).forEach(function (k) { payload[k] = d[k]; });
+          call(id ? 'PUT' : 'POST', '/admin/kayit' + (id ? '/' + id : ''), payload).then(function (r) { then(r); }).catch(function (e) { fail(e); });
+        }
+        $('#ky_save').onclick = function () { save(function (r) { toast('Kaydedildi'); if (id) kyForm(id); else kyForm(r.id); }); };
+        var nx = $('#ky_next'); if (nx) nx.onclick = function () { save(function () { call('POST', '/admin/kayit/' + id + '/adim', { to: sc.steps[idx + 1].k }).then(function () { toast('Adım ilerledi'); kyForm(id); }).catch(function (e) { fail(e); kyForm(id); }); }); };
+        Array.prototype.forEach.call(body().querySelectorAll('[data-ks]'), function (b) { b.onclick = function () { call('POST', '/admin/kayit/' + id + '/adim', { to: b.getAttribute('data-ks') }).then(function () { kyForm(id); }).catch(fail); }; });
+        var dl = $('#ky_del'); if (dl) dl.onclick = function () { if (!confirm('Bu kayıt silinsin mi?')) return; call('DELETE', '/admin/kayit/' + id).then(function () { toast('Silindi'); drawKayit(); }).catch(fail); };
+      }
+      paint();
+    }).catch(fail);
+  }
 
   /* ===== Sektör modülleri (kurs, rezervasyon, klinik): şema ile çalışan ortak liste + form ===== */
   var MQ = { key: '', q: '', f: '' };
@@ -1698,7 +1823,7 @@
   /* [yol | ek:anahtar, etiket] — yol panelin kendi sayfasıdır; ek: bu eklentinin sayfasıdır */
   var MENU = [
     ['', [['/admin', 'Genel Bakış'], ['ek:rapor', 'Rapor Merkezi', 'chart'], ['ek:onay', 'Onay Bekleyenler', 'user'], ['ek:kurulum', 'Kurulum Durumu', 'gear']]],
-    ['Servis', [['/admin/jobs', 'Servis Kayıtları'], ['/admin/appointments', 'Randevular'], ['/admin/quotes', 'Fiyat Teklifleri'], ['/admin/warranty', 'Garanti Talepleri'], ['/admin/customers', 'Müşteriler'], ['ek:m360', 'Müşteri 360', 'user'], ['ek:atolye', 'Atölye (Cihaz Teslim)', 'gear'], ['ek:harita', 'Günün İş Haritası', 'search'], ['/admin/parts', 'Yedek Parça'], ['/admin/diagnosis', 'Arıza Rehberi'], ['/admin/brands', 'Markalar']]],
+    ['Servis', [['ek:kayit', 'Kayıtlar', 'user'], ['/admin/jobs', 'Servis Kayıtları'], ['/admin/appointments', 'Randevular'], ['/admin/quotes', 'Fiyat Teklifleri'], ['/admin/warranty', 'Garanti Talepleri'], ['/admin/customers', 'Müşteriler'], ['ek:m360', 'Müşteri 360', 'user'], ['ek:atolye', 'Atölye (Cihaz Teslim)', 'gear'], ['ek:harita', 'Günün İş Haritası', 'search'], ['/admin/parts', 'Yedek Parça'], ['/admin/diagnosis', 'Arıza Rehberi'], ['/admin/brands', 'Markalar']]],
     ['Ustalar', [['/admin/technicians', 'Teknisyenler'], ['/admin/dealers', 'Bayilik Başvuruları'], ['ek:ustapuan', 'Usta Puanlama', 'user'], ['ek:ustagecmis', 'Usta İş Geçmişi', 'user'], ['/admin/performance', 'Performans'], ['/admin/team', 'Ekip Merkezi'], ['/admin/announcements', 'Duyurular']]],
     ['Muhasebe', [['/admin/accounting', 'Para Durumu'], ['ek:tahsilat', 'Ustadan Para Aldım', 'cart'], ['ek:cari', 'Ustaların Borç Durumu', 'cart'], ['ek:vade', 'Geciken Usta Borçları', 'cart'], ['ek:memnun', 'Müşteri Memnuniyeti', 'user'], ['/admin/reports', 'Raporlar']]],
     ['Mağaza & Satış', [['/admin/shop', 'Mağaza'], ['ek:yeni', 'Yeni Sipariş Gir', 'plus'], ['ek:mgayar', 'Mağaza Ayarları', 'gear'], ['ek:pazar', 'Pazaryerleri', 'cart'], ['ek:kanal', 'Ürünler', 'cart'], ['/admin/coupons', 'Kuponlar']]],
@@ -1741,6 +1866,8 @@
     var u = me(), r = u.admin_role || 'owner';
     if (k === '/admin/account') return true;
     if (k === 'ek:paket') return !!FIRM;
+    if (k === 'ek:kayit') return !!window.__spxKayit;
+    if (k === '/admin/jobs' && window.__spxKayit && !PLAT) return false;
     var MG = { 'ek:ilan': 'ilan', 'ek:kursiyer': 'kurs', 'ek:program': 'kurs', 'ek:kaynak': 'rez', 'ek:rezervasyon': 'rez', 'ek:hasta': 'klinik' };
     if (MG[k] && !PLAT && (window.__spxMods || []).indexOf(MG[k]) < 0) return false;
     if ((FIRM || PLAT) && FIRM_HIDE[k]) return false;
@@ -2631,7 +2758,7 @@
   function tick() {
     var asides = document.querySelectorAll('aside nav'); if (!asides.length) return;
     Array.prototype.forEach.call(asides, function (nav) {
-      var nl = nativeLinks(nav), sig = Object.keys(nl).join('|') + (FIRM ? '~F' + (PKGMODS ? PKGMODS.length : '') : '') + '#' + (me().admin_role || '') + (me().perms || []).join(',') + '@' + (window.__spxSectorKey || '') + (window.__spxMods || []).join(''), own = nav.querySelector(':scope > [data-spx-own]');
+      var nl = nativeLinks(nav), sig = Object.keys(nl).join('|') + (FIRM ? '~F' + (PKGMODS ? PKGMODS.length : '') : '') + '#' + (me().admin_role || '') + (me().perms || []).join(',') + '@' + (window.__spxSectorKey || '') + (window.__spxKayit ? 'K' : '') + (window.__spxMods || []).join(''), own = nav.querySelector(':scope > [data-spx-own]');
       if (own && own.getAttribute('data-sig') === sig) { Array.prototype.forEach.call(own.querySelectorAll('a.spx-it'), function (a) { var k = a.getAttribute('data-k') || 'ek:', bd = a.querySelector('.spx-bd:not(.spx-od)'), t = k === 'ek:onay' ? (window.__onayN ? String(window.__onayN) : '') : k.indexOf('ek:') === 0 ? '' : (badgeOf(nl[k]) || (ADMB && ADMB[k] ? (k === '/admin/governance' ? '!' : String(ADMB[k])) : '')); if (t && t !== '0') { if (!bd) { bd = document.createElement('span'); bd.className = 'spx-bd'; a.appendChild(bd); } bd.textContent = t; } else if (bd) bd.remove(); var od = a.querySelector('.spx-od'), ov2 = k === '/admin/jobs' && ADMB && (ADMB.jobs_overdue > 0 || ADMB.call_overdue > 0) ? (ADMB.jobs_overdue || 0) + (ADMB.call_overdue || 0) : 0; if (ov2) { if (!od) { od = document.createElement('span'); od.className = 'spx-bd spx-od'; od.style.background = '#f59e0b'; od.style.marginLeft = '4px'; od.title = 'Randevu saati geçmiş iş'; a.appendChild(od); } od.textContent = ov2 + ' ⏰'; } else if (od) od.remove(); }); markActive(); return; }
       var sKey = nav.closest('.fixed') ? 'm' : 'd', sTop = nav.scrollTop || MSCR[sKey] || 0;
       if (own) own.remove();
@@ -6373,7 +6500,7 @@
     if (S.busy || S.tok === t) return; S.busy = true;
     fetch(location.origin + '/api/sector-terms', { headers: { Authorization: 'Bearer ' + t } })
       .then(function (r) { return r.ok ? r.json() : {}; })
-      .then(function (j) { window.__spxSectorKey = (j && j.key) || ''; window.__spxMods = (j && j.modules) || []; S.lex = (j && j.lex && j.lex.kisi) ? j.lex : null; S.hide = (j && j.hide) || []; S.tok = t; S.map = (j && j.terms && Object.keys(j.terms).length) ? j.terms : null; S.keys = S.map ? Object.keys(S.map) : []; })
+      .then(function (j) { window.__spxSectorKey = (j && j.key) || ''; window.__spxMods = (j && j.modules) || []; window.__spxKayit = !!(j && j.kayit); S.lex = (j && j.lex && j.lex.kisi) ? j.lex : null; S.hide = (j && j.hide) || []; S.tok = t; S.map = (j && j.terms && Object.keys(j.terms).length) ? j.terms : null; S.keys = S.map ? Object.keys(S.map) : []; })
       .catch(function () { S.tok = t; S.map = null; })
       .then(function () { S.busy = false; });
   }
@@ -6449,11 +6576,11 @@
     });
   }
   /* titreme olmasın: son terimler cihazda saklanır, ilk çizimde hazır olur; DOM değişince hemen (bir sonraki karede) uygulanır */
-  try { var c = JSON.parse(localStorage.getItem('spx_sd') || 'null'); if (c && c.t && c.t === tok() && c.map) { S.tok = c.t; S.map = c.map; S.lex = c.lex || null; S.keys = Object.keys(c.map); window.__spxSectorKey = c.key || ''; } } catch (e) { }
+  try { var c = JSON.parse(localStorage.getItem('spx_sd') || 'null'); if (c && c.t && c.t === tok() && c.map) { S.tok = c.t; S.map = c.map; S.lex = c.lex || null; S.hide = c.hide || []; S.keys = Object.keys(c.map); window.__spxSectorKey = c.key || ''; window.__spxKayit = !!c.kayit; } } catch (e) { }
   var raf = 0, inApply = false, mo = null;
   function run() { raf = 0; if (inApply) return; inApply = true; try { if (mo) mo.disconnect(); apply(); } catch (e) { } inApply = false; arm(); }
   function arm() { if (!mo) mo = new MutationObserver(function () { if (!raf) raf = requestAnimationFrame(run); }); if (document.body) mo.observe(document.body, { childList: true, subtree: true, characterData: true }); }
-  function save() { try { if (S.tok && S.map) localStorage.setItem('spx_sd', JSON.stringify({ t: S.tok, map: S.map, lex: S.lex, key: window.__spxSectorKey || '' })); else if (!tok()) localStorage.removeItem('spx_sd'); } catch (e) { } }
+  function save() { try { if (S.tok && S.map) localStorage.setItem('spx_sd', JSON.stringify({ t: S.tok, map: S.map, lex: S.lex, hide: S.hide, kayit: !!window.__spxKayit, key: window.__spxSectorKey || '' })); else if (!tok()) localStorage.removeItem('spx_sd'); } catch (e) { } }
   setInterval(function () { try { load(); save(); run(); } catch (e) { } }, 600);
   if (document.body) arm(); else document.addEventListener('DOMContentLoaded', function () { arm(); run(); });
 })();
