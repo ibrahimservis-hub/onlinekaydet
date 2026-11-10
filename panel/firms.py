@@ -399,6 +399,61 @@ def register(api_router, db, deps):
         f.pop("db", None)
         return f
 
+    @api_router.post("/admin/bulk")
+    async def bulk_action(body: dict, me: dict = Depends(require_admin)):
+        """Birden çok firmaya aynı anda: paket, modül aç/kapat, süre uzat, askıya al / aç."""
+        need_main()
+        ids = [str(x) for x in (body.get("ids") or [])][:500]
+        act, val = body.get("action"), body.get("value")
+        if not ids:
+            raise HTTPException(status_code=400, detail="Firma seçin")
+        if act not in ("package", "module_on", "module_off", "extend", "status"):
+            raise HTTPException(status_code=400, detail="Geçersiz işlem")
+        if act in ("module_on", "module_off") and val not in MODULES:
+            raise HTTPException(status_code=400, detail="Geçersiz modül")
+        if act == "status" and val not in ("aktif", "askida"):
+            raise HTTPException(status_code=400, detail="Geçersiz durum")
+        try:
+            days = int(val) if act == "extend" else 0
+        except (TypeError, ValueError):
+            raise HTTPException(status_code=400, detail="Gün sayı olmalı")
+        if act == "extend" and not 0 < days <= 3650:
+            raise HTTPException(status_code=400, detail="Gün 1-3650 arası olmalı")
+        n, skipped, now = 0, 0, datetime.now(timezone.utc)
+        for fid in ids:
+            f = await db.main().firms.find_one({"id": fid}, {"_id": 0})
+            if not f:
+                skipped += 1
+                continue
+            upd, uset = {}, {}
+            if act == "package":
+                upd["package"] = str(val)
+                upd["modules"] = await resolve_modules(str(val), None)
+            elif act in ("module_on", "module_off"):
+                m = set(f.get("modules") or [])
+                (m.add if act == "module_on" else m.discard)(val)
+                m.add("servis")
+                upd["modules"] = clean_modules(list(m))
+            elif act == "extend":
+                cur = f.get("expires_at") or ""
+                base = datetime.fromisoformat(cur) if cur and cur > now.isoformat() else now
+                upd["expires_at"] = (base + timedelta(days=days)).isoformat()
+                upd["status"] = "aktif"
+                uset["is_active"] = True
+            else:
+                upd["status"] = val
+                uset["is_active"] = val == "aktif"
+                if val == "askida":
+                    uset["tokens_valid_after"] = int(time.time())
+            await db.main().firms.update_one({"id": fid}, {"$set": upd})
+            if uset:
+                await db.firm(f["db"]).users.update_many({"firm_owner": True}, {"$set": uset})
+            n += 1
+        _ACC.clear()
+        _MOD.clear()
+        await audit(me, "TOPLU İŞLEM", f"{act}={val} · {n} firma")
+        return {"ok": True, "updated": n, "skipped": skipped}
+
     @api_router.get("/admin/firms/{fid}/jobs")
     async def firm_jobs(fid: str, status: Optional[str] = None, limit: int = 100, me: dict = Depends(require_admin)):
         need_main()

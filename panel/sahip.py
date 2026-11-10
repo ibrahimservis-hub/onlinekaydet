@@ -378,6 +378,156 @@ def register(app, api_router, db, deps):
         rows = await db.main().audit_log.find({"detail": {"$regex": f["name"][:30].replace("\\", "")}}, {"_id": 0}).sort("at", -1).limit(80).to_list(80)
         return {"rows": rows}
 
+    # ------------------------------------------------------------------ sahip: firma verisine doğrudan müdahale (oturum + not)
+    @api_router.post("/admin/firms/{fid}/session")
+    async def firm_session(fid: str, me: dict = Depends(require_admin)):
+        """Sahip ekranının firma sekmeleri, firmanın kendi uçlarını firma yöneticisi jetonuyla çağırır (tek kaynak, aynı kurallar)."""
+        main_only()
+        f = await get_firm(fid)
+        u = await db.firm(f["db"]).users.find_one({"firm_owner": True})
+        if not u:
+            raise HTTPException(status_code=404, detail="Firma yöneticisi bulunamadı")
+        token = deps["create_access_token"](u["id"], u["email"], u["role"], firm=f["db"])
+        await audit(me, "SAHİP OTURUMU", f["name"])
+        return {"token": token, "firm": f["name"]}
+
+    @api_router.post("/admin/firms/{fid}/note")
+    async def firm_note(fid: str, body: dict, me: dict = Depends(require_admin)):
+        main_only()
+        f = await get_firm(fid)
+        await audit(me, "SAHİP İŞLEMİ: " + str(body.get("action") or "")[:50], f["name"] + ": " + str(body.get("detail") or "")[:200])
+        return {"ok": True}
+
+    # ------------------------------------------------------------------ satış hattı
+    STAGES = ["aday", "demo", "kurulum", "odeme"]
+
+    @api_router.get("/admin/pipeline")
+    async def pipe_list(me: dict = Depends(require_admin)):
+        main_only()
+        cards = await db.main().sales_pipeline.find({}, {"_id": 0}).sort("updated_at", -1).to_list(1000)
+        act = [{"id": f["id"], "name": f.get("name", ""), "package": f.get("package", "")}
+               for f in await db.main().firms.find({"status": "aktif"}, {"_id": 0, "id": 1, "name": 1, "package": 1}).to_list(500)]
+        return {"stages": STAGES, "cards": cards, "active": act}
+
+    @api_router.post("/admin/pipeline")
+    async def pipe_add(body: dict, me: dict = Depends(require_admin)):
+        main_only()
+        name = str(body.get("name") or "").strip()[:80]
+        if not name:
+            raise HTTPException(status_code=400, detail="Firma / kişi adı yazın")
+        st = body.get("stage") if body.get("stage") in STAGES else "aday"
+        doc = {"id": uuid.uuid4().hex[:12], "name": name, "city": str(body.get("city") or "")[:40], "phone": str(body.get("phone") or "")[:20],
+               "source": str(body.get("source") or "")[:40], "amount": float(body.get("amount") or 0), "stage": st, "notes": [],
+               "created_at": _now(), "updated_at": _now()}
+        if body.get("note"):
+            doc["notes"].append({"at": _now(), "text": str(body["note"])[:500]})
+        await db.main().sales_pipeline.insert_one(dict(doc))
+        return doc
+
+    @api_router.put("/admin/pipeline/{cid}")
+    async def pipe_set(cid: str, body: dict, me: dict = Depends(require_admin)):
+        main_only()
+        upd = {}
+        for k, n in (("name", 80), ("city", 40), ("phone", 20), ("source", 40)):
+            if k in body:
+                upd[k] = str(body[k] or "").strip()[:n]
+        if "amount" in body:
+            upd["amount"] = float(body["amount"] or 0)
+        if "stage" in body:
+            if body["stage"] not in STAGES:
+                raise HTTPException(status_code=400, detail="Geçersiz adım")
+            upd["stage"] = body["stage"]
+        upd["updated_at"] = _now()
+        ops = {"$set": upd}
+        if body.get("add_note"):
+            ops["$push"] = {"notes": {"at": _now(), "text": str(body["add_note"])[:500]}}
+        r = await db.main().sales_pipeline.update_one({"id": cid}, ops)
+        if not r.matched_count:
+            raise HTTPException(status_code=404, detail="Kart bulunamadı")
+        return await db.main().sales_pipeline.find_one({"id": cid}, {"_id": 0})
+
+    @api_router.delete("/admin/pipeline/{cid}")
+    async def pipe_del(cid: str, me: dict = Depends(require_admin)):
+        main_only()
+        await db.main().sales_pipeline.delete_one({"id": cid})
+        return {"ok": True}
+
+    # ------------------------------------------------------------------ kurulum adımları (otomatik + elle işaretlenen)
+    MANUAL_STEPS = [("urun", "Ürün ve stok aktarıldı"), ("odeme", "İlk ödeme alındı"), ("egitim", "Eğitim yapıldı ve teslim edildi")]
+
+    @api_router.get("/admin/onboarding")
+    async def onb_list(me: dict = Depends(require_admin)):
+        main_only()
+        doms = {}
+        async for d in db.main().firm_domains.find({}, {"_id": 0}):
+            doms.setdefault(d["firm_id"], []).append(d)
+        man = {m["firm_id"]: m async for m in db.main().onboarding.find({}, {"_id": 0})}
+        out = []
+        for f in await db.main().firms.find({"status": {"$ne": "silindi"}}, {"_id": 0}).sort("created_at", -1).to_list(300):
+            fdb = db.firm(f["db"])
+            try:
+                g = await fdb.app_settings.find_one({"_id": "global"}, {"_id": 0}) or {}
+                lg = await fdb.app_settings.find_one({"_id": "firm_logo"}, {"_id": 0}) or {}
+                br = await fdb.app_settings.find_one({"_id": "brand"}, {"_id": 0}) or {}
+                ig = await fdb.app_settings.find_one({"_id": "integrations"}, {"_id": 0}) or {}
+                users = await fdb.users.count_documents({})
+                jobs = await fdb.jobs.count_documents({})
+            except Exception:                                    # noqa: BLE001
+                g = lg = br = ig = {}
+                users = jobs = 0
+            dl = doms.get(f["id"], [])
+            m = man.get(f["id"], {})
+            done = m.get("done") or {}
+            items = [{"k": "tel", "t": "Firma telefonu girildi", "ok": bool(g.get("company_phone")), "auto": True},
+                     {"k": "logo", "t": "Logo yüklendi", "ok": bool(lg.get("data")), "auto": True},
+                     {"k": "tema", "t": "Site teması seçildi", "ok": bool(br.get("theme")), "auto": True},
+                     {"k": "alan", "t": "Alan adı bağlandı", "ok": any(x["status"] == "yayinda" for x in dl), "auto": True},
+                     {"k": "sms", "t": "SMS bağlantısı doğrulandı", "ok": bool(ig.get("sms_verified")), "auto": True},
+                     {"k": "kisi", "t": "Personel eklendi", "ok": users > 1, "auto": True},
+                     {"k": "is", "t": "İlk servis kaydı açıldı", "ok": jobs > 0, "auto": True}]
+            items += [{"k": k, "t": t, "ok": bool(done.get(k)), "auto": False} for k, t in MANUAL_STEPS]
+            out.append({"id": f["id"], "name": f.get("name", ""), "status": f.get("status", ""), "domains": [x["domain"] for x in dl],
+                        "items": items, "done": sum(1 for i in items if i["ok"]), "total": len(items), "note": m.get("note", "")})
+        return {"firms": out}
+
+    @api_router.put("/admin/onboarding/{fid}")
+    async def onb_set(fid: str, body: dict, me: dict = Depends(require_admin)):
+        main_only()
+        await get_firm(fid)
+        upd = {}
+        if body.get("key") in [k for k, _ in MANUAL_STEPS]:
+            upd["done." + body["key"]] = bool(body.get("ok"))
+        if "note" in body:
+            upd["note"] = str(body.get("note") or "")[:1000]
+        if not upd:
+            raise HTTPException(status_code=400, detail="Değişiklik yok")
+        await db.main().onboarding.update_one({"firm_id": fid}, {"$set": upd}, upsert=True)
+        return {"ok": True}
+
+    # ------------------------------------------------------------------ toplu SMS / duyuru
+    @api_router.post("/admin/bulk-sms")
+    async def bulk_sms(body: dict, me: dict = Depends(require_admin)):
+        main_only()
+        text = str(body.get("text") or "").strip()
+        ids = [str(x) for x in (body.get("ids") or [])][:500]
+        if not text or not ids:
+            raise HTTPException(status_code=400, detail="Mesaj ve en az bir firma gerekli")
+        cfg = await notify.get_settings(db.main())
+        if cfg.get("provider") == "none":
+            raise HTTPException(status_code=400, detail="Platform SMS ayarı kapalı (Sistem Durumu / Bildirim ayarlarından açın)")
+        sent = skipped = 0
+        for fid in ids:
+            f = await db.main().firms.find_one({"id": fid}, {"_id": 0})
+            if not f or not notify.norm_msisdn(f.get("phone", "")):
+                skipped += 1
+                continue
+            ad = (f.get("contact_name") or f.get("name", "")).split(" ")[0]
+            r = await notify.send(db.main(), "sms", f["phone"], notify.render(text, {"ad": ad, "firma": f.get("name", "")}), kind="owner_bulk", ref=fid, cfg=cfg)
+            sent += 1 if r.get("status") != "failed" else 0
+            skipped += 1 if r.get("status") == "failed" else 0
+        await audit(me, "TOPLU SMS", f"{sent} gönderildi, {skipped} atlandı")
+        return {"sent": sent, "skipped": skipped}
+
     # ------------------------------------------------------------------ sahip paneli sayfası
     SP = Path(__file__).parent / "sahip" / "index.html"
 
