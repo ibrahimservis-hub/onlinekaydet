@@ -103,6 +103,13 @@ VOCAB = {
 }
 
 
+COK_VOCAB = [('ustamız aynı gün', 'ekibimiz aynı gün'), ('WhatsApp: fotoğraf ve model bilgisi gönderin', 'WhatsApp: talebinizi yazabilirsiniz'),
+             ('kayıtlarınız servis fişinde toplanır', 'kayıtlarınız size iletilir'), ('Her işin numarası, servis fişi ve fotoğrafları kayıtlıdır.', 'Her talebin numarası ve kaydı tutulur.'),
+             ('Takılan parça ve işçilik için yazılı garanti.', 'Kapsam ve ücret için yazılı bilgilendirme.'), ('Garantili', 'Kayıtlı')]
+COK_NOTECH = [('Fiyat ve süre cihazı görüldükten sonra yazılı söylenir.', 'Fiyat ve süre görüşmeden sonra yazılı söylenir.'), ('Cihaz ve arıza alınır.', 'Talebiniz alınır.'),
+              ('Su teması ve kart arızaları', 'Özel durumlar')]
+
+
 def recipes():
     out = []
     n = 0
@@ -142,7 +149,8 @@ def main():
     R = recipes(); themes = []
     for r in R:
         html, x = gen3.build(r)
-        for a, b in VOCAB_ALL + VOCAB.get(r['sector'], []):
+        _ex = COK_VOCAB + (COK_NOTECH if r['sector'] not in ('telefon_tamir', 'oto_servis', 'oto_cekici') else []) if True else []
+        for a, b in VOCAB_ALL + VOCAB.get(r['sector'], []) + _ex:
             html = html.replace(a, b)
         html = _fonts_link(html.replace('data:image/jpeg;base64,', 'data:image/svg+xml;base64,'))
         open(os.path.join(gen3.OUT, r['slug'] + '.html'), 'w', encoding='utf-8').write(html)
