@@ -6435,5 +6435,12 @@
       ['placeholder', 'aria-label', 'title'].forEach(function (a) { var v = el.getAttribute(a); if (v && S.map[v.trim()] !== undefined) el.setAttribute(a, S.map[v.trim()]); });
     });
   }
-  setInterval(function () { try { load(); apply(); } catch (e) { } }, 600);
+  /* titreme olmasın: son terimler cihazda saklanır, ilk çizimde hazır olur; DOM değişince hemen (bir sonraki karede) uygulanır */
+  try { var c = JSON.parse(localStorage.getItem('spx_sd') || 'null'); if (c && c.t && c.t === tok() && c.map) { S.tok = c.t; S.map = c.map; S.lex = c.lex || null; S.keys = Object.keys(c.map); window.__spxSectorKey = c.key || ''; } } catch (e) { }
+  var raf = 0, inApply = false, mo = null;
+  function run() { raf = 0; if (inApply) return; inApply = true; try { if (mo) mo.disconnect(); apply(); } catch (e) { } inApply = false; arm(); }
+  function arm() { if (!mo) mo = new MutationObserver(function () { if (!raf) raf = requestAnimationFrame(run); }); if (document.body) mo.observe(document.body, { childList: true, subtree: true, characterData: true }); }
+  function save() { try { if (S.tok && S.map) localStorage.setItem('spx_sd', JSON.stringify({ t: S.tok, map: S.map, lex: S.lex, key: window.__spxSectorKey || '' })); else if (!tok()) localStorage.removeItem('spx_sd'); } catch (e) { } }
+  setInterval(function () { try { load(); save(); run(); } catch (e) { } }, 600);
+  if (document.body) arm(); else document.addEventListener('DOMContentLoaded', function () { arm(); run(); });
 })();
