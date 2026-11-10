@@ -112,3 +112,5 @@ body{padding-bottom:calc(56px + env(safe-area-inset-bottom))}
 .o7-mm details.g[open] summary:after{transform:rotate(45deg)}
 .o7-mm details.g a{display:block;padding:11px 0 11px 4px;font-size:17px;color:#aeb3bd;border-top:1px solid rgba(255,255,255,.05)}
 .o7-mm details.g a:hover{color:#fff}.o7-mm details.g[open]{padding-bottom:10px}
+
+/*mm-fix*/.o7-mm details.g summary{color:#fff!important}.o7-mm details.g summary:after{color:var(--ch,#c4a96b)}
