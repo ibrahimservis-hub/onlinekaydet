@@ -20,6 +20,7 @@ import shop as shopmod
 import shop_legal
 import storefront
 import ilan
+import sektor_mod
 import sitegen
 import tenant
 
@@ -511,7 +512,13 @@ def register(api_router, db, deps):
             if not h:
                 return None
             h = h.replace("</head>", '<meta name="robots" content="noindex,follow"></head>', 1) if p == "hesabim" else h
-        elif (p == "ilanlar" or p.startswith("ilan/")) and ctx and (ctx.get("sector") in ilan.ILAN_SECTORS or await db.listings.count_documents({}) > 0):
+        elif p in ("kurslar", "rezervasyon") and ctx and (("/" + p) in [h for h, _ in sektor_mod.site_links(ctx.get("sector") or "")] or await getattr(db, "programs" if p == "kurslar" else "resources").count_documents({}) > 0):
+            items = await sektor_mod.public_items(db, "programs" if p == "kurslar" else "resources")
+            body = sektor_mod.kurslar_body(items) if p == "kurslar" else sektor_mod.rezervasyon_body(items)
+            h = compose_page(await themed_home(ctx), ("Programlar" if p == "kurslar" else "Rezervasyon") + " · " + ctx["name"], body)
+            if not h:
+                return None
+        elif (p == "ilanlar" or p.startswith("ilan/")) and ctx and (ctx.get("sector") in sektor_mod.SECTOR_MODULES["ilan"] or await db.listings.count_documents({}) > 0):
             if p == "ilanlar":
                 rows = await db.listings.find({"status": {"$in": ["yayinda", "satildi"]}}, {"_id": 0, "images": 0}).sort([("featured", -1), ("created_at", -1)]).to_list(300)
                 for r in rows:

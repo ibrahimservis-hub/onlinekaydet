@@ -2873,6 +2873,8 @@ livechat.register(api_router, db, {"get_current_user": get_current_user})
 fieldops.register(api_router, db, {"require_admin": require_admin, "get_current_user": get_current_user})
 import ilan
 ilan.register(api_router, db, {"require_admin": require_admin})
+import sektor_mod
+sektor_mod.register(api_router, db, {"require_admin": require_admin})
 governance.HOOKS.append(fieldops.call_hook)
 finance_plus.register(api_router, db, {"require_admin": require_admin, "get_current_user": get_current_user})
 async def _tech_hidden():
