@@ -13,6 +13,19 @@ PHOTOS = {  # sektör: [pexels foto id, ...] (ilk 3 kullanılır)
  'eticaret':   [7857532, 7857542, 7289727, 7289725],
  'temizlik':   [6195273, 6197111],
  'guzellik':   [15866050],
+ 'surucu_kursu': [9518026, 9518031],
+ 'src_kursu': [9518026, 9518031],
+ 'psikolog': [7579312, 7176027],
+ 'diyetisyen': [15319038, 15319035, 15319040],
+ 'dis_klinigi': [3845737, 3845683, 3845745, 3845767, 5355715, 6812572],
+ 'avukat': [5668802, 5668791, 5669619],
+ 'muhasebe': [33175649, 8296974, 6863329, 8296970],
+ 'spor_salonu': [4853325],
+ 'lokanta': [4916299, 7129403],
+ 'fotografci': [17057198, 9551823, 3775270],
+ 'emlakci': [8815915, 7642008, 8112187, 8482876, 7641904, 7415097],
+ 'oto_yikama': [6873020, 20051469],
+ 'telefon_tamir': [6754839, 13625784],
 }
 def get(pid):
     u = 'https://images.pexels.com/photos/%d/pexels-photo-%d.jpeg?auto=compress&cs=tinysrgb&w=1600' % (pid, pid)
