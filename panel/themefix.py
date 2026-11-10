@@ -70,6 +70,11 @@ def fix(h: str) -> str:
     if not h or MARK in h or "</body>" not in h:
         return h
     h = clean_claims(h)
+    try:
+        import shopdetail
+        h = shopdetail.apply(h)
+    except Exception:                                                     # noqa: BLE001
+        pass
     h = h.replace("</head>", CSS + POP_CSS + "</head>", 1) if "</head>" in h else h
     i = h.rfind("</body>")
     return h[:i] + MARK + JS + (POP_JS if 'id="randevu"' in h else "") + h[i:]
