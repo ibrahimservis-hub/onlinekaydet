@@ -13,6 +13,12 @@ sys.path.insert(0, os.path.join(HERE, 'ill'))
 import make_ill
 from g3 import base as _base
 import base64 as _b64
+try:   # sunucuda internet varsa gerçek fotoğrafları otomatik indir
+    import os as _os, fetch_photos as _fp
+    if not _os.path.exists(_os.path.join(_fp.OUT, '.real')):
+        _fp.main()
+except Exception as _e:
+    print('foto indirme atlandı:', _e)
 _FONTS = set()
 
 
