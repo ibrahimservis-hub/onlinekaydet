@@ -28,6 +28,7 @@ CSS = """
 .ann .cd2 b{background:#ffffff1f;border-radius:6px;padding:5px 7px;min-width:34px;text-align:center}
 .ann .x{position:absolute;right:max(10px,calc((100vw - var(--wmax,1180px))/2));top:50%;transform:translateY(-50%);width:44px;height:44px;display:grid;place-items:center;background:none;border:0;color:#fff;cursor:pointer;opacity:.7}
 .ann .x:hover{opacity:1}
+@media(max-width:560px){.ann .w{gap:4px 10px;padding:6px 44px 6px 12px;font-size:.78rem}.ann .cd2 b{padding:4px 5px;min-width:28px}}
 .stq{padding:clamp(18px,3vw,30px) 0 0}.stq .row{display:flex;gap:clamp(14px,2.4vw,26px);overflow-x:auto;padding:6px 2px 12px;scrollbar-width:none;-webkit-overflow-scrolling:touch}.stq .row::-webkit-scrollbar{display:none}
 .stq button.st{flex:none;display:grid;justify-items:center;gap:8px;background:none;border:0;cursor:pointer;color:var(--ink);font:600 .78rem/1.2 var(--fb);width:78px}
 .stq .ring{width:68px;height:68px;border-radius:50%;padding:3px;background:conic-gradient(var(--ac),color-mix(in srgb,var(--ac) 30%,var(--dk)),var(--ac));display:grid;place-items:center;transition:transform .2s}
@@ -80,8 +81,9 @@ function tick(el){var end=new Date(el.getAttribute('data-end')).getTime();var ho
   else{el.innerHTML='<b>'+g+' g</b><b>'+p2(h)+' sa</b><b>'+p2(m)+' dk</b><b>'+p2(c)+' sn</b>'}return true}
  if(run())var t=setInterval(function(){if(!run())clearInterval(t)},1000)}
 $$('[data-end]').forEach(tick);
-$$('.ann .x').forEach(function(b){b.addEventListener('click',function(){var a=b.closest('.ann');a.style.display='none';try{sessionStorage.setItem('annx','1')}catch(e){}})});
+$$('.ann .x').forEach(function(b){b.addEventListener('click',function(){var a=b.closest('.ann');a.style.display='none';annH();try{sessionStorage.setItem('annx','1')}catch(e){}})});
 try{if(sessionStorage.getItem('annx'))$$('.ann').forEach(function(a){a.style.display='none'})}catch(e){}
+function annH(){var a=document.querySelector('.ann'),h=0;if(a&&a.style.display!=='none')h=a.offsetHeight;document.documentElement.style.setProperty('--annh',h+'px')}annH();window.addEventListener('resize',annH);
 /* kayarak belirme */
 var rv=$$('.rv');if('IntersectionObserver' in window&&!rm){var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.12});rv.forEach(function(e){io.observe(e)})}else rv.forEach(function(e){e.classList.add('in')});
 /* hikâyeler */

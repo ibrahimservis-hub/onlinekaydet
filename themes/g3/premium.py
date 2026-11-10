@@ -21,6 +21,8 @@ def _btns(X, second='tel'):
 
 
 def _cnt(to, sf='', d=0):
+    if isinstance(to, str):
+        return f'<b>{to}</b>'
     return f'<b class="cnt" data-to="{to}" data-sf="{sf}" data-d="{d}">{_fmt(to, sf, d)}</b>'
 
 
@@ -29,7 +31,8 @@ def _fmt(to, sf, d):
     return s + sf
 
 
-STATS = [(12400, '+', 0, 'Kurulum ve onarım'), (38, ' dk', 0, 'Ortalama varış'), (4.9, '', 1, 'Müşteri puanı'), (2, ' yıl', 0, 'İş garantisi')]
+# Kanıtlanamayan sayı yazılmaz: güven maddeleri söz verilen hizmetlerdir (sayaç yok).
+STATS = [('Ücretsiz', '', 0, 'Keşif ve ön bilgi'), ('Yazılı', '', 0, 'Fiyat, işe başlamadan önce'), ('İmzalı', '', 0, 'Servis fişi, SMS ile'), ('Garantili', '', 0, 'Yapılan işe belge')]
 
 
 def _imv(X):
@@ -37,11 +40,11 @@ def _imv(X):
 
 
 # ------------------------------------------------------------------ MENÜ
-NAVCSS = """.pnv{position:absolute;top:0;left:0;right:0;z-index:50;color:#fff;transition:background .3s,backdrop-filter .3s}.pnv .in{display:flex;align-items:center;gap:30px;width:min(1240px,100% - 48px);margin-inline:auto;padding:22px 0}
+NAVCSS = """.pnv{position:absolute;top:var(--annh,0px);left:0;right:0;z-index:50;color:#fff;transition:background .3s,backdrop-filter .3s}.pnv .in{display:flex;align-items:center;gap:30px;width:min(1240px,100% - 48px);margin-inline:auto;padding:22px 0}
 .pnv nav{display:flex;gap:30px;margin-left:auto;font:600 .88rem/1 var(--fb)}.pnv nav a{opacity:.82;position:relative;padding:6px 0}.pnv nav a:after{content:"";position:absolute;left:0;bottom:0;height:1.5px;width:0;background:var(--ac);transition:width .3s}.pnv nav a:hover{opacity:1}.pnv nav a:hover:after{width:100%}
-.pnv .bgr{display:none;margin-left:auto;color:#fff}.pnv .nv-cta{min-height:44px;padding:0 22px;font-size:.88rem}.pnv.sc{position:fixed;background:color-mix(in srgb,var(--dk) 82%,transparent);backdrop-filter:blur(16px) saturate(1.3)}.pnv.sc .in{padding:13px 0}
+.pnv .bgr{display:none;margin-left:auto;color:#fff}.pnv .nv-cta{min-height:44px;padding:0 22px;font-size:.88rem}.pnv.sc{position:fixed;top:0;background:color-mix(in srgb,var(--dk) 82%,transparent);backdrop-filter:blur(16px) saturate(1.3)}.pnv.sc .in{padding:13px 0}
 .pnv-edit{color:var(--ink);position:sticky}.pnv-edit .bgr{color:var(--ink)}.pnv-edit.sc{background:color-mix(in srgb,var(--bg) 86%,transparent)}.pnv-edit nav{margin-left:auto}
-.pnv-neon{top:16px;position:fixed;left:0;right:0;padding:0 16px}.pnv-neon .in{width:min(960px,100%);padding:10px 12px 10px 24px;border-radius:99px;background:#ffffff12;border:1px solid #ffffff26;backdrop-filter:blur(16px)}.pnv-neon.sc{background:transparent;backdrop-filter:none}.pnv-neon.sc .in{background:color-mix(in srgb,var(--dk) 78%,transparent)}
+.pnv-neon{top:calc(16px + var(--annh,0px));position:fixed;left:0;right:0;padding:0 16px}.pnv-neon .in{width:min(960px,100%);padding:10px 12px 10px 24px;border-radius:99px;background:#ffffff12;border:1px solid #ffffff26;backdrop-filter:blur(16px)}.pnv-neon.sc{background:transparent;backdrop-filter:none}.pnv-neon.sc .in{background:color-mix(in srgb,var(--dk) 78%,transparent)}
 .pnv-lux nav{letter-spacing:.16em;text-transform:uppercase;font-size:.72rem}.pnv-lux .nv-cta{border-radius:0!important;background:transparent;color:var(--ac);border:1px solid var(--ac);box-shadow:none;letter-spacing:.16em;text-transform:uppercase;font-size:.72rem}
 @media(max-width:900px){.pnv nav,.pnv .nv-cta{display:none}.pnv .bgr{display:flex}}"""
 
@@ -80,8 +83,8 @@ def hero_cine(X):
 .hc .pcd div{display:flex;justify-content:space-between;padding:12px 0;border-top:1px solid #ffffff26;font-size:.92rem}.hc .pcd i{font-style:normal;color:var(--ac);font-weight:700}
 .hc .mqb{position:relative;border-top:1px solid #ffffff26;padding:20px 0;font:700 clamp(1.1rem,2.4vw,1.9rem)/1 var(--fd);opacity:.55;letter-spacing:-.01em}
 @media(max-width:900px){.hc .g{grid-template-columns:1fr;padding:120px 0 40px}.hc .pcd{justify-self:stretch;max-width:none}}""")
-    card = (f'<aside class="pcd glass rv rv2"><small>Canlı durum</small><h3>Bugün 6 ekip sahada</h3><div><span>Ortalama varış</span><i>{_cnt(38, " dk")}</i></div>'
-            f'<div><span>Memnuniyet</span><i>{_cnt(4.9, " / 5", 1)}</i></div><div><span>Yazılı garanti</span><i>{_cnt(2, " yıl")}</i></div></aside>')
+    card = ('<aside class="pcd glass rv rv2"><small>Hizmet güvencesi</small><h3>Randevu ile yerinde hizmet</h3><div><span>Keşif</span><i>Ücretsiz</i></div>'
+            '<div><span>Fiyat</span><i>Yazılı</i></div><div><span>Yapılan iş</span><i>Garantili</i></div></aside>')
     return (f'<section class="hr hrp hc" id="top2"><div class="bgp">{X.ph(_imv(X), "center 40%")}</div><div class="w g"><div class="rv"><span class="eyebrow">{X.c["label"]} · {X.city}</span><h1>{_h1(X)}</h1>'
             f'<p class="lead">{X.h[1]}</p>{_btns(X)}</div>{card}</div>{_mq(X)}</section>')
 
@@ -97,7 +100,7 @@ def hero_edit(X):
 @media(max-width:900px){.he .g{grid-template-columns:1fr}.he .vis{height:420px;order:-1}.he .stt{grid-template-columns:1fr 1fr}.he .stt div:nth-child(2){border:0}}""")
     st = ''.join(f'<div>{_cnt(a, b, d)}<small>{t}</small></div>' for a, b, d, t in STATS)
     return (f'<section class="hr hrp he" id="top2"><div class="w"><div class="g"><div class="rv"><span class="eyebrow">{X.c["label"]} · {X.city}</span><h1>{_h1(X)}</h1><p class="lead">{X.h[1]}</p>{_btns(X)}</div>'
-            f'<div class="vis rv rv2"><div class="a">{X.ph(_imv(X), "center")}</div><div class="b">{X.ph("im2", "center")}</div><div class="st">15 yıl<small>Sahada deneyim</small></div></div></div><div class="stt">{st}</div></div></section>')
+            f'<div class="vis rv rv2"><div class="a">{X.ph(_imv(X), "center")}</div><div class="b">{X.ph("im2", "center")}</div><div class="st">Yerinde<small>Keşif ve hizmet</small></div></div></div><div class="stt">{st}</div></div></section>')
 
 
 def hero_neon(X):
@@ -123,7 +126,7 @@ def hero_lux(X):
 .hl h1{font-weight:300;font-size:clamp(2.6rem,6.4vw,5.8rem);line-height:1.02;letter-spacing:-.02em;color:#efe7d6;max-width:12ch;margin-top:22px}.hl h1 em{color:var(--ac)}.hl .ln{width:0;height:1px;background:var(--ac);margin:34px 0 0;animation:ln 1.2s .5s ease forwards}@keyframes ln{to{width:96px}}
 .hl .lead{color:#b9b09c}.hl .btn{border-radius:0;letter-spacing:.16em;text-transform:uppercase;font-size:.74rem}.hl .btn.o{color:var(--ac);border-color:var(--ac)}.hl .vt{position:absolute;right:28px;top:50%;transform:rotate(90deg);transform-origin:right top;font:600 .66rem/1 var(--fb);letter-spacing:.4em;text-transform:uppercase;color:var(--ac);z-index:2}
 @media(max-width:900px){.hl .im{width:100%;opacity:.35}.hl .im:after{background:linear-gradient(0deg,var(--dk),transparent)}.hl .vt{display:none}}""")
-    return (f'<section class="hr hrp hl" id="top2"><div class="im">{X.ph(_imv(X), "center")}</div><div class="w g"><div class="rv"><div class="k">{X.c["label"]} · {X.city} · 15 yıllık deneyim</div><h1>{_h1(X)}</h1><div class="ln"></div>'
+    return (f'<section class="hr hrp hl" id="top2"><div class="im">{X.ph(_imv(X), "center")}</div><div class="w g"><div class="rv"><div class="k">{X.c["label"]} · {X.city} · Randevu ile yerinde hizmet</div><h1>{_h1(X)}</h1><div class="ln"></div>'
             f'<p class="lead" style="margin-top:26px">{X.h[1]}</p>{_btns(X)}</div></div><div class="vt">Kaydırın ↓</div></section>')
 
 
