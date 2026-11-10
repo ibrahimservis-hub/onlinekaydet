@@ -687,7 +687,12 @@ def preview_html(raw, th, slug, page=""):
            "logo": "", "city": "", "legal": [], "shop_on": True, "img": (lambda k: ""), "logo_abs": ""}
     ctx["p"]["address"] = ""
     h = apply_profile(raw, th, ctx)
-    if page:
+    if page.startswith("urun-"):
+        import urunsayfa
+        h = urunsayfa.page_html(h, ctx, slug, page)
+        if not h:
+            return None
+    elif page:
         r = render_page(h, ctx, page)
         if not r:
             return None
