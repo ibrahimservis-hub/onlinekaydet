@@ -189,6 +189,12 @@ FAM_TERMS = {
                 "Garanti Bitiş": "Geçerlilik", "Garanti talebi yok": "Memnuniyet talebi yok", "Garanti devam ediyor": "Geçerli", "Garanti bitti": "Süresi doldu",
                 "Garanti aktif": "Geçerli", "Servis No / Cihaz": "Randevu No / Hizmet", "Servis No": "Randevu No", "Serviste": "İşlemde",
                 "Yapılan işlem veya parça garantisi kapsamındaki müşteri taleplerini takip edin.": "Müşterilerinizin şikâyet, öneri ve memnuniyet taleplerini takip edin.",
+                "Servis": "Randevu İşlemleri", "Marka / Hizmet": "Hizmet Grubu / Hizmet", "Servis No / Hizmet": "Randevu No / Hizmet", "Servis Geliri": "Hizmet Geliri",
+                "Parça cirosu": "Ürün cirosu", "En çok kullanılan parçalar": "En çok kullanılan ürünler", "Servise Alındı": "Randevuya Alındı", "Servis Puanı": "Hizmet Puanı",
+                "Servis sonrası arama": "Randevu sonrası arama", "Servis Fişi": "Randevu Fişi",
+                "Tüm PDF servis fişlerinde otomatik gösterilecek bilgiler.": "Tüm PDF randevu fişlerinde otomatik gösterilecek bilgiler.",
+                "Ustalarla destek sohbeti, eğitim ve sertifika takibi, bayi/iş ortağı portalı ve komisyonlar.": "Uzmanlarla destek sohbeti, eğitim ve sertifika takibi, kontrol listeleri ve komisyonlar.",
+                "Sitedeki iletişim ve servis talep formundan gelen mesajlar. Müşteri hangi kanaldan geldiyse burada görünür.": "Sitedeki iletişim ve randevu formundan gelen mesajlar. Müşteri hangi kanaldan geldiyse burada görünür.",
                 "İşçilik Ücreti (₺)": "Hizmet Ücreti (₺)", "Parça Toplam:": "Ürün Toplam:", "Henüz parça eklenmemiş": "Henüz ürün eklenmemiş",
                 "Markalar": "Hizmet Grupları", "Marka:": "Hizmet Grubu:", "Model:": "Hizmet:", "Marka": "Hizmet Grubu", "Model": "Hizmet",
                 "Kullanılan Yedek Parçalar": "Kullanılan Ürün ve Sarf", "Servis Bilgisi": "Hizmet Bilgisi", "Cihaz Bilgisi": "Hizmet Bilgisi"},
@@ -219,6 +225,16 @@ HIDE_FAM = {
     "randevu": ("Talep Rehberi", "Atölye (Hizmet Teslim)", "Atölye (Cihaz Teslim)", "Bayi Portalı", "Uzmandan Para Aldım", "Uzmanların Borç Durumu", "Geciken Uzman Borçları",
                 "Ustadan Para Aldım", "Ustaların Borç Durumu", "Geciken Usta Borçları", "Yeni Bayilik Başvurusu", "Yeni bayilik başvurusu", "Bayilik Başvuruları"),
 }
+
+
+# değişken sayı içeren metinler için düzenli ifade eşlemesi: [desen, karşılık] (tüm metin eşleşir)
+FAM_RX = {
+    "randevu": [["^Servis (?=₺)", "Hizmet "], ["^(\\d+) değerlendirilen servis$", "$1 değerlendirilen randevu"]],
+}
+
+
+def rx(key):
+    return [list(x) for x in FAM_RX.get(FAMILY.get(key, ""), ())] if key in ROWS and key not in SADE else []
 
 
 def hide(key):

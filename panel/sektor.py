@@ -121,4 +121,4 @@ def register(api_router, db, deps):
         if _kt:
             terms = dict(terms)
             terms["Kayıtlar"] = "Randevu Defteri" if sektor_dil.family(key) == "randevu" else _kt["plural"]
-        return {"key": key, "name": d.get("name") or sec.get("name") or "", "terms": terms, "lex": sektor_dil.lex(key), "hide": sektor_dil.hide(key), "family": sektor_dil.family(key), "kayit": bool(__import__("sektor_kayit").template(key)), "modules": sektor_mod.modules_for(key)}
+        return {"key": key, "name": d.get("name") or sec.get("name") or "", "terms": terms, "lex": sektor_dil.lex(key), "hide": sektor_dil.hide(key), "rx": sektor_dil.rx(key), "family": sektor_dil.family(key), "kayit": bool(__import__("sektor_kayit").template(key)), "modules": sektor_mod.modules_for(key)}

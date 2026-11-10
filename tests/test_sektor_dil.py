@@ -47,3 +47,15 @@ def test_randevu_family_panel_texts():
     for x in ('Talep Rehberi', 'Atölye (Hizmet Teslim)', 'Bayi Portalı', 'Yeni bayilik başvurusu', 'Uzmandan Para Aldım'):
         assert x in h, x
     assert d.hide('kombi') == [] and 'Talep Rehberi' not in d.hide('oto_servis')
+
+
+def test_randevu_no_chained_labels():
+    """Bir etiketin karşılığı başka bir etiketin anahtarı olmamalı (zincirleme çeviri 'Online Online' gibi çift ad üretir)."""
+    for k in ('kuafor', 'guzellik', 'tirnak_studyo', 'spa_hamam', 'dis_klinigi'):
+        t = d.labels(k)
+        for src, dst in t.items():
+            assert dst not in t or dst == src, (k, src, dst)
+    r = d.rx('kuafor')
+    import re
+    assert re.sub(r[0][0], r[0][1], 'Servis ₺3.600,00 • Diğer ₺0,00') == 'Hizmet ₺3.600,00 • Diğer ₺0,00'
+    assert re.sub(r[1][0], r[1][1].replace('$1', r'\1'), '2 değerlendirilen servis') == '2 değerlendirilen randevu'

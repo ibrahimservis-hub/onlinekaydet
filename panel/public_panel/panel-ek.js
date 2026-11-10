@@ -6501,7 +6501,7 @@
     if (S.busy || S.tok === t) return; S.busy = true;
     fetch(location.origin + '/api/sector-terms', { headers: { Authorization: 'Bearer ' + t } })
       .then(function (r) { return r.ok ? r.json() : {}; })
-      .then(function (j) { window.__spxSectorKey = (j && j.key) || ''; window.__spxMods = (j && j.modules) || []; window.__spxKayit = !!(j && j.kayit); S.lex = (j && j.lex && j.lex.kisi) ? j.lex : null; S.hide = (j && j.hide) || []; S.tok = t; S.map = (j && j.terms && Object.keys(j.terms).length) ? j.terms : null; S.keys = S.map ? Object.keys(S.map) : []; })
+      .then(function (j) { window.__spxSectorKey = (j && j.key) || ''; window.__spxMods = (j && j.modules) || []; window.__spxKayit = !!(j && j.kayit); S.lex = (j && j.lex && j.lex.kisi) ? j.lex : null; S.hide = (j && j.hide) || []; S.rx = (j && j.rx) || []; S.tok = t; S.map = (j && j.terms && Object.keys(j.terms).length) ? j.terms : null; S.keys = S.map ? Object.keys(S.map) : []; })
       .catch(function () { S.tok = t; S.map = null; })
       .then(function () { S.busy = false; });
   }
@@ -6566,9 +6566,14 @@
       l2.forEach(function (n) { var p = n.parentElement; if (!p || /^(SCRIPT|STYLE|TEXTAREA|INPUT|OPTION|TD|PRE|CODE)$/.test(p.tagName) || p.isContentEditable || p.closest('td,[data-nosektor]')) return; var o = n.nodeValue, r = words(o); if (r !== o) n.nodeValue = r; });
       [].forEach.call(document.querySelectorAll('[placeholder],[aria-label],[title]'), function (el) { ['placeholder', 'aria-label', 'title'].forEach(function (a) { var v = el.getAttribute(a); if (v) { var r = words(v); if (r !== v) el.setAttribute(a, r); } }); });
     }
+    if (S.rx && S.rx.length) {
+      var wr = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null), nr, lr = [];
+      while ((nr = wr.nextNode())) { var vr = nr.nodeValue; if (vr && vr.length < 90 && vr.trim()) lr.push(nr); }
+      lr.forEach(function (n) { var p = n.parentElement; if (!p || /^(SCRIPT|STYLE|TEXTAREA|INPUT)$/.test(p.tagName) || p.closest('[data-nosektor]')) return; var raw = n.nodeValue, t = raw.trim(), out = t; S.rx.forEach(function (r) { try { out = out.replace(new RegExp(r[0]), r[1]); } catch (e) { } }); if (out !== t) n.nodeValue = raw.replace(t, out); });
+    }
     if (S.lex && /\sUsta Paneli/i.test(document.title)) document.title = document.title.replace(/\s+Usta Paneli/i, ' Yönetim Paneli');
     var w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null), n, list = [];
-    while ((n = w.nextNode())) { var v = n.nodeValue; if (v && v.length < 90 && S.map[v.trim()] !== undefined) list.push(n); }
+    while ((n = w.nextNode())) { var v = n.nodeValue; if (v && v.length < 140 && S.map[v.trim()] !== undefined) list.push(n); }
     list.forEach(function (n) {
       var p = n.parentElement; if (!p || /^(SCRIPT|STYLE|TEXTAREA|INPUT)$/.test(p.tagName)) return;
       var raw = n.nodeValue, k = raw.trim(); n.nodeValue = raw.replace(k, S.map[k]);
@@ -6578,11 +6583,11 @@
     });
   }
   /* titreme olmasın: son terimler cihazda saklanır, ilk çizimde hazır olur; DOM değişince hemen (bir sonraki karede) uygulanır */
-  try { var c = JSON.parse(localStorage.getItem('spx_sd') || 'null'); if (c && c.t && c.t === tok() && c.map) { S.tok = c.t; S.map = c.map; S.lex = c.lex || null; S.hide = c.hide || []; S.keys = Object.keys(c.map); window.__spxSectorKey = c.key || ''; window.__spxKayit = !!c.kayit; } } catch (e) { }
+  try { var c = JSON.parse(localStorage.getItem('spx_sd') || 'null'); if (c && c.t && c.t === tok() && c.map) { S.map = c.map; S.lex = c.lex || null; S.hide = c.hide || []; S.rx = c.rx || []; S.keys = Object.keys(c.map); window.__spxSectorKey = c.key || ''; window.__spxKayit = !!c.kayit; } } catch (e) { }
   var raf = 0, inApply = false, mo = null;
   function run() { raf = 0; if (inApply) return; inApply = true; try { if (mo) mo.disconnect(); apply(); } catch (e) { } inApply = false; arm(); }
   function arm() { if (!mo) mo = new MutationObserver(function () { if (!raf) raf = requestAnimationFrame(run); }); if (document.body) mo.observe(document.body, { childList: true, subtree: true, characterData: true }); }
-  function save() { try { if (S.tok && S.map) localStorage.setItem('spx_sd', JSON.stringify({ t: S.tok, map: S.map, lex: S.lex, hide: S.hide, kayit: !!window.__spxKayit, key: window.__spxSectorKey || '' })); else if (!tok()) localStorage.removeItem('spx_sd'); } catch (e) { } }
+  function save() { try { if (S.tok && S.map) localStorage.setItem('spx_sd', JSON.stringify({ t: S.tok, map: S.map, lex: S.lex, hide: S.hide, rx: S.rx || [], kayit: !!window.__spxKayit, key: window.__spxSectorKey || '' })); else if (!tok()) localStorage.removeItem('spx_sd'); } catch (e) { } }
   setInterval(function () { try { load(); save(); run(); } catch (e) { } }, 600);
   if (document.body) arm(); else document.addEventListener('DOMContentLoaded', function () { arm(); run(); });
 })();
