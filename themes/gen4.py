@@ -8,6 +8,39 @@ import gen3
 from g3 import content, content_ek, tools, tools_ek, shop, recipes_p
 from g3.recipes import mk
 
+APP = os.environ.get('OK_APP_DIR') or os.path.join(HERE, '..', 'panel')        # themes.json'ın bulunduğu uygulama klasörü
+sys.path.insert(0, os.path.join(HERE, 'ill'))
+import make_ill
+from g3 import base as _base
+import base64 as _b64
+_FONTS = set()
+
+
+def _face(key):          # yazı tipi gömülmez; Google Fonts bağlantısı eklenir (tema dosyası ~10 kat küçülür)
+    _FONTS.add(key)
+    return ''
+
+
+def _img64(name):        # fotoğraf yerine çizim (SVG) gömülür
+    return _b64.b64encode(make_ill.svg_for(name).encode()).decode()
+
+
+gen3.face = _face
+gen3.img64 = _img64
+
+
+def _fonts_link(html):
+    fams = []
+    for k in sorted(set(re.findall(r"'F-([a-z0-9-]+)'", html))):
+        fam, wt, st, _ = _base.FAM[k]
+        w = wt.replace(' ', '..') if ' ' in wt else wt
+        spec = fam.replace(' ', '+') + (':ital,wght@1,' + w if st == 'italic' else ':wght@' + w)
+        fams.append('family=' + spec)
+        html = html.replace("'F-%s'" % k, "'%s'" % fam)
+    link = '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?%s&display=swap">' % '&'.join(fams) if fams else ''
+    return html.replace('<style>', link + '<style>', 1)
+
+
 content.SEC.update(content_ek.SEC)
 tools.TOOLS.update(tools_ek.TOOLS)
 shop.PRODUCTS.update(content_ek.PRODUCTS)
@@ -92,10 +125,13 @@ def main():
         html, x = gen3.build(r)
         for a, b in VOCAB_ALL + VOCAB.get(r['sector'], []):
             html = html.replace(a, b)
+        html = _fonts_link(html.replace('data:image/jpeg;base64,', 'data:image/svg+xml;base64,'))
         open(os.path.join(gen3.OUT, r['slug'] + '.html'), 'w', encoding='utf-8').write(html)
         themes.append(dict(slug=r['slug'], sector=r['sector'], dark=r['pal'][3], accent=r['pal'][4], soft=r['pal'][2], radius=r['r'], name=r['nm'], premium=True))
         print(f"{r['slug']:28s} {len(html) // 1024:5d} KB  {r['style']}")
-    for p in (os.path.join(HERE, '..', 'panel', 'themes.json'), os.path.join(HERE, '..', 'site', 'themes.json')):
+    for p in (os.path.join(APP, 'themes.json'), os.path.join(HERE, '..', 'site', 'themes.json')):
+        if not os.path.isfile(p):
+            continue
         cur = [t for t in json.load(open(p, encoding='utf-8')) if t['sector'] not in NEW]
         json.dump(cur + themes, open(p, 'w', encoding='utf-8'), ensure_ascii=False)
     print(len(themes), 'tema yazıldı')

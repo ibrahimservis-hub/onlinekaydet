@@ -1,7 +1,7 @@
 """Teknik olmayan sektörlerin tema içeriği (content.SEC biçimi). Metinler örnektir; firma panelinden kendi bilgileriyle değiştirilir.
 Kural: kanıtlanamayan sayı, ödül, sertifika veya müşteri sayısı yazılmaz."""
 import sys, os
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'panel'))
+sys.path.insert(0, os.environ.get('OK_APP_DIR') or os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'panel'))
 import sektor_ek
 
 

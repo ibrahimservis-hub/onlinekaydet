@@ -10,6 +10,9 @@ from fastapi import Depends, HTTPException, Request
 from fastapi.responses import FileResponse
 
 import notify
+import os
+import asyncio
+import json
 import sektor
 import servis_ayar
 import tenant
@@ -164,6 +167,80 @@ def register(app, api_router, db, deps):
             sent += r.get("status") == "sent"
             skipped += r.get("status") != "sent"
         return {"sent": sent, "skipped": skipped}
+
+    # ------------------------------------------------------------------ tema üretimi (yeni sektör temaları sunucuda üretilir)
+    @api_router.post("/admin/themes/generate")
+    async def themes_generate(me: dict = Depends(require_admin)):
+        main_only()
+        import subprocess, sys as _sys
+        here = os.path.dirname(os.path.abspath(__file__))
+        gdir = os.path.join(here, "..", "themes")
+        if not os.path.isfile(os.path.join(gdir, "gen4.py")):
+            raise HTTPException(404, "Tema üreticisi sunucuda yok")
+        r = await asyncio.get_event_loop().run_in_executor(None, lambda: subprocess.run(
+            [_sys.executable, "gen4.py"], cwd=gdir, env={**os.environ, "OK_APP_DIR": here}, capture_output=True, text=True, timeout=600))
+        return {"ok": r.returncode == 0, "out": (r.stdout or "")[-400:], "err": (r.stderr or "")[-800:], "note": "themes.json değişti: uygulamayı yeniden başlatın"}
+
+    # ------------------------------------------------------------------ dağıtım: GitHub'daki paketi sunucuya uygular
+    @api_router.post("/admin/deploy")
+    async def deploy(payload: dict, me: dict = Depends(require_admin)):
+        """payload: {url: raw.githubusercontent.com paket adresi, restart: bool}. Paket: {"files": {yol: metin}, "edits": [{path, old, new}]}.
+        Yollar 'app/' (uygulama klasörü) ve 'themes/' ile başlar. Python dosyaları yazılmadan önce derleme denemesinden geçer; eski dosya .bak-deploy olarak saklanır."""
+        main_only()
+        from urllib.parse import urlparse
+        u = urlparse(str(payload.get("url") or ""))
+        if u.scheme != "https" or u.hostname != "raw.githubusercontent.com":
+            raise HTTPException(422, "Yalnızca raw.githubusercontent.com adresi")
+        r = await asyncio.get_event_loop().run_in_executor(None, lambda: requests.get(str(payload["url"]), timeout=90))
+        if r.status_code != 200:
+            raise HTTPException(502, "Paket indirilemedi: %s" % r.status_code)
+        bundle = r.json()
+        here = os.path.dirname(os.path.abspath(__file__))
+        roots = {"app": here, "themes": os.path.normpath(os.path.join(here, "..", "themes"))}
+
+        def dest(rel):
+            parts = str(rel).split("/")
+            if parts[0] not in roots or ".." in parts or not parts[-1] or not parts[-1].endswith((".py", ".js", ".html", ".json", ".css", ".txt", ".svg")):
+                raise HTTPException(422, "İzin verilmeyen yol: %s" % rel)
+            root = roots[parts[0]]
+            path = os.path.normpath(os.path.join(root, *parts[1:]))
+            if not path.startswith(root + os.sep):
+                raise HTTPException(422, "İzin verilmeyen yol: %s" % rel)
+            return path
+
+        plan = []
+        for rel, content in (bundle.get("files") or {}).items():
+            plan.append((dest(rel), str(content), rel))
+        for e in bundle.get("edits") or []:
+            path = dest(e["path"])
+            cur = open(path, encoding="utf-8").read() if os.path.isfile(path) else ""
+            for pp, cc, _ in plan:
+                if pp == path:
+                    cur = cc
+            if cur.count(e["old"]) != 1:
+                raise HTTPException(409, "Değişiklik uygulanamadı (eşleşme %d): %s" % (cur.count(e["old"]), e["path"]))
+            plan = [x for x in plan if x[0] != path] + [(path, cur.replace(e["old"], e["new"], 1), e["path"])]
+        for path, content, rel in plan:
+            if path.endswith(".py"):
+                try:
+                    compile(content, path, "exec")
+                except SyntaxError as ex:
+                    raise HTTPException(422, "Söz dizimi hatası %s: %s" % (rel, ex))
+            if path.endswith(".json"):
+                json.loads(content)
+        done = []
+        for path, content, rel in plan:
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            if os.path.isfile(path):
+                import shutil
+                shutil.copyfile(path, path + ".bak-deploy")
+            open(path, "w", encoding="utf-8").write(content)
+            done.append(rel)
+        if payload.get("restart"):
+            tdir = os.path.join(here, "tmp")
+            os.makedirs(tdir, exist_ok=True)
+            open(os.path.join(tdir, "restart.txt"), "w").write(_now())
+        return {"ok": True, "written": done, "restart": bool(payload.get("restart"))}
 
     # ------------------------------------------------------------------ genel bakış
     @api_router.get("/admin/overview")

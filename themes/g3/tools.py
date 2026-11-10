@@ -2,7 +2,7 @@
 Veri: hesaplar tarayıcıda yapılır; 'ustaya gönder' /api/public/contact ucuna gider (firmanın Mesajlar kutusu)."""
 import json, os, html
 HERE = os.path.dirname(os.path.abspath(__file__))
-KB = json.load(open(os.path.join(HERE, '..', '..', 'panel', 'kb_codes.json'), encoding='utf-8'))
+KB = json.load(open(os.path.join(os.environ.get('OK_APP_DIR') or os.path.join(HERE, '..', '..', 'panel'), 'kb_codes.json'), encoding='utf-8'))
 
 
 def N(k, l, v, mn=0, mx=100000, st='any', u=''): return dict(t='num', k=k, l=l, v=v, mn=mn, mx=mx, st=st, u=u)

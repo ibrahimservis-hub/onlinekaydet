@@ -5,7 +5,7 @@ Yer tutucular: demo telefon 0532 000 00 00 / 905320000000, demo firma adı, __AP
 import json, os, sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-from g3 import base, tools, navs, heroes, sections, content, premium
+from g3 import base, tools, navs, heroes, sections, content, premium, modules
 from g3.recipes import R
 from g3.base import ic, lum, mix, face, stack, img64
 
@@ -121,6 +121,8 @@ def build(r):
     parts += [navs.footer(x), navs.mbar(x)]
     if r.get('premium'):
         parts = [p.replace('Randevu al', 'Teklif alın') for p in parts]
+    if os.environ.get('OK_MODULES','1')=='1':
+        parts = modules.apply(x, parts)
     # paylaşılan JS adları
     x.js('DRW')
     # yazı tipleri
@@ -145,7 +147,7 @@ def build(r):
         x.bodycls.append('pm pm-' + r.get('dir', 'x'))
         x.js('PM')
     css = faces + root + base.CORE + skin + ''.join(x._css.values())
-    js = tools.RUNTIME + (f"var KB={tools.kb_json(x.kb)};" if x.kb else '') + ''.join(x.tool_js) + ''.join(sections.JS[n] for n in x._js if n != 'PM') + (premium.MOTION_JS if 'PM' in x._js else '')
+    js = tools.RUNTIME + (f"var KB={tools.kb_json(x.kb)};" if x.kb else '') + ''.join(x.tool_js) + ''.join(sections.JS[n] for n in x._js if n != 'PM') + (premium.MOTION_JS if 'PM' in x._js else '') + (modules.JS if os.environ.get('OK_MODULES','1')=='1' else '')
     body_cls = ' '.join(x.bodycls)
     desc = f'{x.nm} — {x.city} {x.c["tag"]}. Randevu, yazılı fiyat ve garantili servis.'
     html = (f'<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>{x.nm} · {x.c["label"]} servisi · {x.city}</title>'

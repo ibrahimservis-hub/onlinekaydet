@@ -2,7 +2,6 @@
 """Yeni sektörler için özel çizim görseller (SVG -> JPG, 1600x1000). Fotoğraf değil, tutarlı bir düz-çizim dili.
 Çalıştır: python3 make_ill.py  -> ../img/<anahtar>.jpg, <anahtar>2.jpg, <anahtar>3.jpg"""
 import os, subprocess, random
-from PIL import Image
 HERE = os.path.dirname(os.path.abspath(__file__)); OUT = os.path.join(HERE, '..', 'img')
 W, H = 1600, 1000
 
@@ -150,6 +149,7 @@ def scenes():
     return S
 
 def render(name, idx, c1, c2, body):
+    from PIL import Image
     f = os.path.join(HERE, f'_{name}{idx}.svg'); open(f, 'w').write(svg(body, c1, c2))
     png = f.replace('.svg', '.png'); subprocess.run(['rsvg-convert', '-w', str(W), '-h', str(H), '-o', png, f], check=True)
     im = Image.open(png).convert('RGB')
@@ -158,6 +158,14 @@ def render(name, idx, c1, c2, body):
     a = np.asarray(im).astype('int16'); rng = np.random.default_rng(idx + len(name)); a += rng.integers(-5, 6, a.shape[:2])[..., None]
     Image.fromarray(a.clip(0, 255).astype('uint8')).resize((1280, 800)).save(os.path.join(OUT, f'{name}{"" if idx == 1 else idx}.jpg'), quality=82, optimize=True)
     os.remove(f); os.remove(png)
+
+def svg_for(name):
+    """'oto_servis' / 'oto_servis2' -> SVG metni (PIL gerektirmez; sunucuda tema üretiminde kullanılır)."""
+    import re as _r
+    m = _r.match(r'^(.*?)([23]?)$', name); key, n = m.group(1), int(m.group(2) or 1)
+    c1, c2, body = scenes()[key][n - 1]
+    return svg(body, c1, c2)
+
 
 if __name__ == '__main__':
     for name, lst in scenes().items():
