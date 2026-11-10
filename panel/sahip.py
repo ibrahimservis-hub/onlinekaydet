@@ -375,7 +375,7 @@ def register(app, api_router, db, deps):
     async def firm_audit(fid: str, me: dict = Depends(require_admin)):
         main_only()
         f = await get_firm(fid)
-        rows = await db.main().audit_log.find({"detail": {"$regex": f["name"][:30].replace("\\", "")}}, {"_id": 0}).sort("at", -1).limit(80).to_list(80)
+        rows = await db.main().audit_log.find({"detail": {"$regex": __import__("re").escape(f["name"][:30])}}, {"_id": 0}).sort("at", -1).limit(80).to_list(80)
         return {"rows": rows}
 
     # ------------------------------------------------------------------ sahip: firma verisine doğrudan müdahale (oturum + not)
