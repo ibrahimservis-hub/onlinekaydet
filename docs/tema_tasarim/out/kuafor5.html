@@ -252,6 +252,7 @@ footer .fh div{display:flex;justify-content:space-between;font-size:14px;padding
 .opts{display:flex;gap:8px;flex-wrap:wrap}
 .opts button{min-height:44px;padding:0 16px;border-radius:99px;border:1.5px solid #d7c8b8;font-weight:500;transition:.2s;background:#fff;color:var(--dk)}
 .opts button.on{background:var(--dk);color:#fff;border-color:var(--dk)}
+.opts button:disabled{opacity:.35;text-decoration:line-through;cursor:not-allowed;background:#f1e8de}
 .opts.days button{display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.15;min-width:62px;padding:6px 10px;border-radius:16px}.opts.days small{font-size:11px;opacity:.7}
 .fld{display:grid;gap:12px}.fld label{font-size:13px;font-weight:600;color:#6b5b4e;display:grid;gap:6px}
 .sheet .go{width:100%;margin-top:20px}
@@ -405,7 +406,7 @@ footer{padding-bottom:40px}.mbar{display:none}
 <h4>Hizmet</h4><div class="opts" id="o-s"><button>Kesim ve fön</button><button>Tek renk boya</button><button>Balyaj ve ombre</button><button>Keratin bakım</button><button>Gelin deneme</button><button>Gelin saçı</button><button>Erkek kesim</button></div>
 <h4>Uzman</h4><div class="opts" id="o-e"><button class="on">Fark etmez</button><button>Elif</button><button>Murat</button><button>Selin</button></div>
 <h4>Gün</h4><div class="opts days" id="o-d"></div>
-<h4>Saat</h4><div class="opts" id="o-t"><button>10:00</button><button>11:00</button><button>12:00</button><button>13:30</button><button>14:30</button><button>16:00</button><button>17:30</button></div>
+<h4>Saat <span id="o-cnt" style="text-transform:none;letter-spacing:0;font-weight:500;color:#6b5b4e"></span></h4><div class="opts" id="o-t"></div>
 <h4>Bilgileriniz</h4><div class="fld"><label>Ad soyad<input class="inp" id="f-n" autocomplete="name" placeholder="Ayşe Yılmaz"></label><label>Telefon<input class="inp" id="f-p" type="tel" autocomplete="tel" placeholder="05xx xxx xx xx"></label></div>
 <button class="btn go" id="go">Randevuyu kaydet</button></div>
 <div class="ok"><div class="tick"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div><h3>Randevunuz alındı</h3><p id="okp">Salonun paneline düştü. Onaylanınca size mesaj gelecek.</p><button class="btn o" style="color:var(--dk);border-color:#d7c8b8" id="okx">Tamam</button></div>
@@ -481,20 +482,33 @@ var seen=false;new IntersectionObserver(function(e){seen=e[0].isIntersecting},{t
 setInterval(function(){if(seen&&!hold)setT((ti+1)%5)},5200);setT(0);
 /* stats count */
 A('.stats b').forEach(function(e){var n=+e.textContent;e.dataset.n=n;var o=new IntersectionObserver(function(es){if(es[0].isIntersecting){o.disconnect();var k=0;e.textContent=0;var t=setInterval(function(){k++;e.textContent=k;if(k>=n)clearInterval(t)},260)}},{threshold:.5});o.observe(e)});
-/* booking sheet */
-var sh=$('#sh'),shs=$('#shs');
-function pick(id,val){var g=A('#'+id+' button');var f=g.filter(function(b){return(b.dataset.v||b.textContent.replace(/\s+/g,' ').trim())===val})[0];if(f)g.forEach(function(b){b.classList.toggle('on',b===f)});return !!f}
-function grp(id){A('#'+id+' button').forEach(function(b){b.addEventListener('click',function(){A('#'+id+' button').forEach(function(x){x.classList.remove('on')});b.classList.add('on')})})}
-var od=$('#o-d'),dn=['Paz','Pzt','Sal','Çar','Per','Cum','Cmt'],mo=['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'],d0=new Date();
-for(var k=0;k<7;k++){var d=new Date(d0.getTime()+k*864e5),b=document.createElement('button');b.dataset.v=d.getDate()+' '+mo[d.getMonth()];b.innerHTML='<small>'+dn[d.getDay()]+'</small><b>'+d.getDate()+'</b><small>'+mo[d.getMonth()]+'</small>';if(k===1)b.className='on';od.appendChild(b)}
-['o-s','o-e','o-d','o-t'].forEach(grp);
-function open(ds){shs.classList.remove('done');var s=ds.s||'Kesim ve fön';if(!pick('o-s',s)){var nb=document.createElement('button');nb.textContent=s;A('#o-s button').forEach(function(x){x.classList.remove('on')});nb.className='on';nb.onclick=function(){A('#o-s button').forEach(function(x){x.classList.remove('on')});nb.classList.add('on')};$('#o-s').appendChild(nb)}
-pick('o-e',ds.e||'Fark etmez');if(ds.t)pick('o-t',ds.t);else if(!$('#o-t .on'))pick('o-t','14:30');sh.classList.add('on');sh.setAttribute('aria-hidden','false');document.body.style.overflow='hidden'}
+/* booking sheet: tarihler bugünden itibaren otomatik, kapalı günler atlanır, geçmiş/dolu saatler kapalı */
+var sh=$('#sh'),shs=$('#shs'),DN=['Paz','Pzt','Sal','Çar','Per','Cum','Cmt'],DL=['Pazar','Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi'],MO=['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'],EXP=['Elif','Murat','Selin'],HRS=[10,11,12,13,14,15,16,17,18,19];
+function ist(){return new Date(new Date().toLocaleString('en-US',{timeZone:'Europe/Istanbul'}))}
+function key(d){return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()}
+function openDay(d){var g=d.getDay();return g>=2&&g<=6}
+function booked(d,e,h){var x=Math.sin((d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate())*13+h*7+e.charCodeAt(0)*31)*10000;return x-Math.floor(x)<.35}
+function isFree(d,e,h){var n=ist();if(key(d)===key(n)&&h*60<n.getHours()*60+n.getMinutes()+60)return false;if(e==='Fark etmez')return EXP.some(function(x){return!booked(d,x,h)});return!booked(d,e,h)}
+function freeT(d,e){return HRS.filter(function(h){return isFree(d,e,h)})}
+function fmt(h){return(h<10?'0':'')+h+':00'}
+function days(){var n=ist(),out=[],k=0;while(out.length<7&&k<30){var d=new Date(n.getFullYear(),n.getMonth(),n.getDate()+k);k++;if(openDay(d)&&freeT(d,'Fark etmez').length)out.push(d)}return out}
+function nextSlots(e,c){var o=[];days().forEach(function(d){freeT(d,e).forEach(function(h){if(o.length<c)o.push({d:d,h:h})})});return o}
+function dayLab(d){var n=ist(),t=new Date(n.getFullYear(),n.getMonth(),n.getDate()+1);return key(d)===key(n)?'Bugün':key(d)===key(t)?'Yarın':DL[d.getDay()]}
+function curE(){var b=$('#o-e .on');return b?b.textContent.trim():'Fark etmez'}
+function renderDays(sel){var od=$('#o-d');od.innerHTML='';days().forEach(function(d){var b=document.createElement('button');b._d=d;b.dataset.k=key(d);b.dataset.v=d.getDate()+' '+MO[d.getMonth()];b.dataset.l=dayLab(d);b.innerHTML='<small>'+(dayLab(d)==='Bugün'?'Bugün':DN[d.getDay()])+'</small><b>'+d.getDate()+'</b><small>'+MO[d.getMonth()]+'</small>';od.appendChild(b)});var f=sel&&$('[data-k="'+sel+'"]',od);(f||od.firstChild).classList.add('on')}
+function renderTimes(want){var d=$('#o-d .on')._d,e=curE(),ot=$('#o-t'),pv=want||($('#o-t .on')&&$('#o-t .on').dataset.v);ot.innerHTML='';var fr=freeT(d,e);HRS.forEach(function(h){var b=document.createElement('button');b.dataset.v=fmt(h);b.textContent=fmt(h);if(fr.indexOf(h)<0)b.disabled=true;ot.appendChild(b)});var f=pv&&$('[data-v="'+pv+'"]:not(:disabled)',ot);(f||$('button:not(:disabled)',ot)||{classList:{add:function(){}}}).classList.add('on');$('#o-cnt').textContent='· '+fr.length+' boş saat'}
+['o-s','o-e','o-d','o-t'].forEach(function(id){$('#'+id).addEventListener('click',function(ev){var b=ev.target.closest('button');if(!b||b.disabled)return;A('button',this).forEach(function(x){x.classList.remove('on')});b.classList.add('on');if(id==='o-d'||id==='o-e')renderTimes()})});
+function pick(id,val){var g=A('#'+id+' button');var f=g.filter(function(b){return(b.dataset.v||b.textContent.replace(/\s+/g,' ').trim())===val})[0];if(f)g.forEach(function(b){b.classList.toggle('on',b===f)});return!!f}
+function open(ds){shs.classList.remove('done');var s=ds.s||'Kesim ve fön';if(!pick('o-s',s)){var nb=document.createElement('button');nb.textContent=s;A('#o-s button').forEach(function(x){x.classList.remove('on')});nb.className='on';$('#o-s').appendChild(nb)}
+pick('o-e',ds.e||'Fark etmez');renderDays(ds.d);renderTimes(ds.t);sh.classList.add('on');sh.setAttribute('aria-hidden','false');document.body.style.overflow='hidden'}
 function close(){sh.classList.remove('on');sh.setAttribute('aria-hidden','true');document.body.style.overflow=''}
+function renderLive(){var ns=nextSlots('Fark etmez',3),box=$('.live');if(!box||!ns.length)return;var first=ns[0].d,small=$('small',box);small.textContent=(dayLab(first)==='Bugün'?'Bugün boş saatler':'En yakın boş saatler · '+dayLab(first))+' · dokunun, randevu açılsın';A('.chip',box).forEach(function(c){c.remove()});ns.forEach(function(x){var c=document.createElement('button');c.className='chip';c.dataset.open='';c.dataset.t=fmt(x.h);c.dataset.d=key(x.d);c.textContent=(dayLab(x.d)==='Bugün'||dayLab(x.d)===dayLab(first)?'':dayLab(x.d)+' ')+fmt(x.h);box.appendChild(c)})}
+function renderExp(){A('#pg-uzmanlar .slots').forEach(function(w){var f=$('button',w);if(!f)return;var e=f.dataset.e,sv=f.dataset.s;w.innerHTML='';nextSlots(e,3).forEach(function(x){var c=document.createElement('button');c.dataset.open='';c.dataset.s=sv;c.dataset.e=e;c.dataset.t=fmt(x.h);c.dataset.d=key(x.d);c.textContent=(dayLab(x.d)==='Bugün'?'':dayLab(x.d).slice(0,3)+' ')+fmt(x.h);w.appendChild(c)})})}
+function refreshAll(){renderLive();renderExp();openNow()}refreshAll();setInterval(refreshAll,60000);document.addEventListener('visibilitychange',function(){if(!document.hidden)refreshAll()});
 document.addEventListener('click',function(e){var o=e.target.closest('[data-open]');if(o){e.preventDefault();menu(false);open(o.dataset)}});
 sh.addEventListener('click',function(e){if(e.target===sh)close()});$('#okx').onclick=close;
 document.addEventListener('keydown',function(e){if(e.key==='Escape'){close();menu(false)}});
-$('#go').onclick=function(){var n=$('#f-n').value.trim()||'Ayşe',s=$('#o-s .on'),d=$('#o-d .on'),t=$('#o-t .on');$('#okp').textContent=n.split(' ')[0]+', '+(s?s.textContent:'')+' için '+(d?d.dataset.v:'')+' '+(t?t.textContent:'')+' randevunuz salonun paneline düştü. Onaylanınca size mesaj gelecek.';shs.classList.add('done')};
+$('#go').onclick=function(){var n=$('#f-n').value.trim()||'Ayşe',s=$('#o-s .on'),d=$('#o-d .on'),t=$('#o-t .on');if(!t){return}$('#okp').textContent=n.split(' ')[0]+', '+(s?s.textContent:'')+' için '+(d?d.dataset.l+' ('+d.dataset.v+')':'')+' saat '+t.dataset.v+' randevunuz salonun paneline düştü. Onaylanınca size mesaj gelecek.';shs.classList.add('done');renderLive();renderExp()};
 })();
 </script>
 </body>
