@@ -1574,7 +1574,7 @@
     ['', [['/admin', 'Genel Bakış'], ['ek:rapor', 'Rapor Merkezi', 'chart'], ['ek:onay', 'Onay Bekleyenler', 'user'], ['ek:kurulum', 'Kurulum Durumu', 'gear']]],
     ['Servis', [['/admin/jobs', 'Servis Kayıtları'], ['/admin/appointments', 'Randevular'], ['/admin/quotes', 'Fiyat Teklifleri'], ['/admin/warranty', 'Garanti Talepleri'], ['/admin/customers', 'Müşteriler'], ['ek:m360', 'Müşteri 360', 'user'], ['ek:atolye', 'Atölye (Cihaz Teslim)', 'gear'], ['ek:harita', 'Günün İş Haritası', 'search'], ['/admin/parts', 'Yedek Parça'], ['/admin/diagnosis', 'Arıza Rehberi'], ['/admin/brands', 'Markalar']]],
     ['Ustalar', [['/admin/technicians', 'Teknisyenler'], ['/admin/dealers', 'Bayilik Başvuruları'], ['ek:ustapuan', 'Usta Puanlama', 'user'], ['ek:ustagecmis', 'Usta İş Geçmişi', 'user'], ['/admin/performance', 'Performans'], ['/admin/team', 'Ekip Merkezi'], ['/admin/announcements', 'Duyurular']]],
-    ['Muhasebe', [['/admin/accounting', 'Muhasebe'], ['ek:tahsilat', 'Teknisyen Tahsilat', 'cart'], ['ek:cari', 'Cari & Trend', 'cart'], ['ek:vade', 'Usta Borç Vadesi', 'cart'], ['ek:memnun', 'Müşteri Memnuniyeti', 'user'], ['/admin/reports', 'Raporlar']]],
+    ['Muhasebe', [['/admin/accounting', 'Para Durumu'], ['ek:tahsilat', 'Ustadan Para Aldım', 'cart'], ['ek:cari', 'Ustaların Borç Durumu', 'cart'], ['ek:vade', 'Geciken Usta Borçları', 'cart'], ['ek:memnun', 'Müşteri Memnuniyeti', 'user'], ['/admin/reports', 'Raporlar']]],
     ['Mağaza & Satış', [['/admin/shop', 'Mağaza'], ['ek:yeni', 'Yeni Sipariş Gir', 'plus'], ['ek:mgayar', 'Mağaza Ayarları', 'gear'], ['ek:pazar', 'Pazaryerleri', 'cart'], ['ek:kanal', 'Ürünler', 'cart'], ['/admin/coupons', 'Kuponlar']]],
     ['Web Sitesi', [['/admin/site-features', 'Site Özellikleri'], ['ek:sitem', 'Sitem (Web Sitesi)', 'gear'], ['ek:siteduz', 'Gelişmiş Düzenleme', 'gear'], ['ek:domain', 'Alan Adı & Site', 'gear'], ['ek:moduller', 'Aç/Kapat & Entegrasyonlar', 'gear'], ['ek:seo', 'SEO · 301 · 404', 'search'], ['/admin/site-studio', 'Site Stüdyosu'], ['/admin/media', 'Medya Kütüphanesi'], ['/admin/integration', 'Site Entegrasyonu']]],
     ['Pazarlama & İletişim', [['/admin/messages', 'İletişim Mesajları'], ['ek:sohbet', 'Canlı Sohbet', 'live'], ['/admin/reviews', 'Yorumlar'], ['ek:gsc', 'Google Search Console', 'search'], ['/admin/marketing', 'Pazarlama Merkezi'], ['ek:canli', 'Canlı Ziyaretçiler', 'search'], ['ek:wa', 'WhatsApp & Bildirim', 'gear'], ['ek:kaynak', 'Kaynak & Arama Analizi', 'search'], ['/admin/growth', 'Büyüme Merkezi'], ['/admin/visitors', 'Ziyaretçiler']]],
@@ -1586,7 +1586,7 @@
     '/admin/marketing': [['ch', 'Kanal Panosu'], ['camp', 'Kampanyalar & Harcama'], ['calls', 'Aramalar'], ['gsc', 'Search Console'], ['pages', 'Sayfalar & İlçe Üretici'], ['audit', 'Site Denetimi'], ['rep', 'Yorumlar & Profil'], ['conn', 'Bağlantılar & Ayarlar']],
     '/admin/visitors': [['overview', 'Genel Bakış'], ['live', 'Canlı'], ['channels', 'Kanal Performansı'], ['content', 'Sayfalar & Kaynaklar'], ['sessions', 'Son Oturumlar']],
     '/admin/team': [['chat', 'Destek Sohbeti'], ['training', 'Eğitim & Sertifika'], ['checklists', 'Kontrol Listeleri'], ['dealers', 'Bayi Portalı']],
-    '/admin/accounting': [['overview', 'Genel Bakış'], ['ledger', 'Hareketler & Usta Bakiyeleri'], ['accounts', 'Kasa & Hesaplar'], ['staff', 'Personel'], ['recurring', 'Tekrarlayan & Kategoriler'], ['tax', 'KDV & Fatura'], ['budget', 'Bütçe & Hedef'], ['receivables', 'Alacaklar'], ['import', 'Banka Ekstresi']],
+    '/admin/accounting': [['overview', 'Para Durumu'], ['ledger', 'Gelir ve Gider Kayıtları'], ['accounts', 'Kasa ve Bankalarım'], ['staff', 'Çalışanlar ve Maaşlar'], ['recurring', 'Her Ay Tekrarlayan Ödemeler'], ['tax', 'Vergi (KDV) ve Fatura'], ['budget', 'Aylık Hedef'], ['receivables', 'Bana Borçlu Olanlar'], ['import', 'Banka Ekstresi Yükle']],
     '/admin/reports': [['general', 'Genel Raporlar'], ['profit', 'İş Bazında Kâr']],
     '/admin/security': [['alerts', 'Güvenlik Uyarıları'], ['logins', 'Giriş Kayıtları'], ['failed', 'Hatalı Girişler'], ['devices', 'Cihazlar'], ['settings', 'Kurallar']],
     '/admin/governance': [['health', 'Sistem Sağlığı'], ['backups', 'Yedekler'], ['audit', 'Denetim Kaydı'], ['trash', 'Çöp Kutusu'], ['notify', 'Bildirim Kanalları']]
@@ -6114,4 +6114,121 @@
     var h = html(); if (box.__h !== h) { box.innerHTML = h; box.__h = h; }
   }
   setInterval(tick, 1000);
+})();
+
+/* ===== spx-muhasebe-sade: Muhasebe ekranını herkesin anlayacağı dile çevirir (panelin kendi tasarımı içinde) ===== */
+(function () {
+  'use strict';
+  var MAP = {
+    'toplam ciro': 'Toplam satış', 'usta payı (prim)': 'Ustalara verilen pay', 'giderler': 'Harcamalar', 'net kâr': 'Elinizde kalan',
+    'kasadaki toplam para': 'Kasada şu an var', 'ustalardan alacak': 'Ustalardan alacağınız', 'teknisyenlerden alacak': 'Ustalardan alacağınız',
+    'dönem tahsilat (nakit)': 'Bu dönem alınan nakit', 'brüt kâr': 'Harcamadan önce kalan',
+    'günlük nakit akışı': 'Günlük para girişi ve çıkışı', 'son 12 ay: ciro, gider, net': 'Son 12 ay: satış, harcama, kalan',
+    'gider dağılımı': 'Harcamalar nereye gitti', 'gelir kaynakları & en büyük giderler': 'Paranız nereden geldi, en büyük harcamalar',
+    'gelir / gider ekle': 'Para girdi / çıktı kaydet', 'teknisyen bakiyeleri (borç)': 'Ustaların bana borcu', 'tahsilat al': 'Ustadan para aldım',
+    'toplam tahsilat borcu': 'Toplam borcu', 'şirkete ödenen': 'Bana ödediği', 'toplam prim': 'Hak ettiği pay', 'teknisyen': 'Usta',
+    'toplam gelir': 'Giren para', 'gider': 'Çıkan para', 'gelir': 'Giren para',
+    'gelir-gider, kasa/banka hesapları, kasa sayımı, personel giderleri, tekrarlayan ödemeler ve kâr analizi.': 'Paranızın nerede olduğunu, ne kadar kazandığınızı ve ne harcadığınızı buradan görürsünüz.',
+    'tüm gelir, gider ve tahsilat hareketleri. servis kaynaklı kayıtlar servis kaydından yönetilir.': 'Giren ve çıkan tüm paralar burada. Servis işinden gelen kayıtlar servis kaydından değiştirilir.',
+    'gider yok': 'Bu tarihlerde harcama yok'
+  };
+  var MODAL = { 'manuel kasa hareketi': 'Para girdi / çıktı kaydet', 'tip *': 'Ne oldu? *', 'tutar (₺) *': 'Ne kadar? (₺) *', 'kategori': 'Ne için?', 'kategorisiz': 'Seçilmedi',
+    'hesap': 'Hangi kasa / banka?', 'varsayılan hesap': 'Ana kasa', 'açıklama': 'Not (isteğe bağlı)', 'tarih (boşsa şimdi)': 'Tarih (boş bırakırsanız şimdi kaydedilir)',
+    'gider': 'Para çıktı (gider)', 'gelir': 'Para girdi (gelir)', 'kaydet': 'Kaydet', 'iptal': 'Vazgeç' };
+  var EXTRA = ['ödeme şekli', 'kişi / firma', 'fiş / fatura no'];
+  function low(t) { return String(t).replace(/\s+/g, ' ').trim().toLocaleLowerCase('tr'); }
+  function onPage() { return /^\/admin\/accounting\/?$/.test(location.pathname) && !!localStorage.getItem('token'); }
+  function walk(root, map, skip) {
+    var w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null), n, list = [];
+    while ((n = w.nextNode())) list.push(n);
+    list.forEach(function (t) {
+      var p = t.parentElement; if (!p || /^(SCRIPT|STYLE|INPUT|TEXTAREA|OPTION)$/.test(p.tagName)) return;
+      if (skip && skip(p)) return;
+      var raw = t.nodeValue, k = low(raw); if (!k) return;
+      var m = k.match(/^tüm hareketler \((\d+)\)$/); var to = m ? 'Tüm kayıtlar (' + m[1] + ')' : map[k];
+      if (to && raw.trim() !== to) t.nodeValue = raw.replace(raw.trim(), to);
+    });
+  }
+  function modalEl() { var b = document.querySelector('[data-testid="tx-type-select"]'); var m = b; while (m && !(m.matches && (m.matches('[role="dialog"]') || /fixed/.test(m.className || '')))) m = m.parentElement; return m || (b && b.closest('form')) || null; }
+  function simplifyModal() {
+    var m = modalEl(); if (!m) { return; }
+    walk(m, MODAL);
+    if (m.__spx) return; m.__spx = 1;
+    var rows = [];
+    Array.prototype.forEach.call(m.querySelectorAll('label'), function (l) {
+      if (EXTRA.indexOf(low(l.textContent)) >= 0) { var r = l.parentElement; if (r && r !== m && r.querySelectorAll('label').length === 1) rows.push(r); }
+    });
+    if (!rows.length) return;
+    rows.forEach(function (r) { r.style.display = 'none'; r.setAttribute('data-spx-extra', '1'); });
+    var a = document.createElement('button'); a.type = 'button'; a.textContent = 'Daha fazla ayrıntı (ödeme şekli, kişi, fiş no) ▾';
+    a.style.cssText = 'background:none;border:0;color:#1155cc;font-size:13px;font-weight:700;cursor:pointer;padding:6px 0;text-align:left';
+    a.onclick = function (e) { e.preventDefault(); var open = rows[0].style.display === 'none'; rows.forEach(function (r) { r.style.display = open ? '' : 'none'; }); a.textContent = open ? 'Ayrıntıları gizle ▴' : 'Daha fazla ayrıntı (ödeme şekli, kişi, fiş no) ▾'; };
+    rows[0].parentElement.insertBefore(a, rows[0]);
+  }
+  function go(tab) { var u = '/admin/accounting' + (tab ? '?tab=' + tab : ''); try { history.pushState({}, '', u); window.dispatchEvent(new PopStateEvent('popstate', { state: {} })); } catch (e) { location.href = u; } }
+  function pickType(word, tries) {
+    tries = tries || 0; if (tries > 25) return;
+    var b = document.querySelector('[data-testid="tx-type-select"]');
+    if (!b) return setTimeout(function () { pickType(word, tries + 1); }, 150);
+    b.click();
+    setTimeout(function () {
+      var o = Array.prototype.find.call(document.querySelectorAll('[role="option"]'), function (x) { var k = low(x.textContent); return k === word || k.indexOf(word === 'gelir' ? 'para girdi' : 'para çıktı') === 0; });
+      if (o) o.click(); else { var esc = new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }); document.activeElement && document.activeElement.dispatchEvent(esc); }
+    }, 200);
+  }
+  function openForm(type) {
+    function click(n) { var nb = document.querySelector('[data-testid="new-tx-button"]'); if (nb) { nb.click(); pickType(type, 0); } else if (n < 40) setTimeout(function () { click(n + 1); }, 150); }
+    var tab = new URLSearchParams(location.search).get('tab');
+    if (tab !== 'ledger') { go('ledger'); setTimeout(function () { click(0); }, 400); } else click(0);
+  }
+  var IC = { plus: '<path d="M12 5v14M5 12h14"/>', minus: '<path d="M5 12h14"/>', user: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6M17 8l2 2 3-4"/>', swap: '<path d="M4 8h14l-3-3M20 16H6l3 3"/>' };
+  function btn(id, col, ic, t, s) { return '<button type="button" data-ms="' + id + '"><span style="color:' + col + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">' + IC[ic] + '</svg></span><div><b>' + t + '</b><small>' + s + '</small></div></button>'; }
+  function css() {
+    if (document.getElementById('spx-ms-css')) return; var st = document.createElement('style'); st.id = 'spx-ms-css';
+    st.textContent = '#spx-ms{margin:14px 0}#spx-ms .ms-h{font-size:13px;font-weight:700;color:#475569;margin:0 0 8px}#spx-ms .ms-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px}' +
+      '#spx-ms button{display:flex;align-items:center;gap:12px;text-align:left;background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:12px 14px;cursor:pointer;color:#0f172a;transition:border-color .15s,box-shadow .15s}' +
+      '#spx-ms button:hover{border-color:#94a3b8;box-shadow:0 1px 4px rgba(15,23,42,.08)}#spx-ms button span{width:34px;height:34px;border-radius:9px;background:#f1f5f9;display:grid;place-items:center;flex:none}#spx-ms button svg{width:19px;height:19px}' +
+      '#spx-ms b{display:block;font-size:14.5px;font-weight:700}#spx-ms small{display:block;font-size:12px;color:#64748b;margin-top:1px}' +
+      '#spx-ms-note{margin:0 0 14px;padding:10px 14px;border:1px solid #e2e8f0;border-left:3px solid #1155cc;border-radius:8px;background:#fff;font-size:14px;color:#334155}#spx-ms-note b{color:#0f172a}';
+    document.head.appendChild(st);
+  }
+  function num(t) { var m = String(t).match(/₺\s*(-?[\d.]+(?:,\d+)?)/); return m ? parseFloat(m[1].replace(/\./g, '').replace(',', '.')) : null; }
+  function cardVal(label) {
+    var w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null), n;
+    while ((n = w.nextNode())) { if (low(n.nodeValue) === low(label)) { var c = n.parentElement; for (var i = 0; i < 4 && c; i++, c = c.parentElement) { var v = num(c.textContent.replace(n.nodeValue, '')); if (v !== null) return v; } } }
+    return null;
+  }
+  function tl(v) { return v.toLocaleString('tr-TR', { maximumFractionDigits: 2 }) + ' ₺'; }
+  function strip(h1) {
+    css(); var box = document.getElementById('spx-ms');
+    if (!box) {
+      box = document.createElement('div'); box.id = 'spx-ms'; box.className = 'notranslate';
+      box.innerHTML = '<div class="ms-h">Ne yapmak istiyorsunuz?</div><div class="ms-g">' + btn('in', '#15803d', 'plus', 'Para girdi', 'Satış, tahsilat, başka gelir') + btn('out', '#b91c1c', 'minus', 'Para çıktı', 'Kira, maaş, alışveriş, yakıt') + btn('tech', '#1155cc', 'user', 'Ustadan para aldım', 'Ustanın borcundan düşer') + btn('move', '#1155cc', 'swap', 'Kasadan kasaya aktar', 'Nakitten bankaya gibi') + '</div>';
+      box.onclick = function (e) { var b = e.target.closest('[data-ms]'); if (!b) return; var k = b.getAttribute('data-ms'); if (k === 'in') openForm('gelir'); else if (k === 'out') openForm('gider'); else if (k === 'tech') { if (window.spxOpen) window.spxOpen('tahsilat'); } else go('accounts'); };
+    }
+    var anchor = h1.nextElementSibling; while (anchor && anchor.nextElementSibling && anchor.tagName !== 'P') anchor = anchor.nextElementSibling;
+    var host = (anchor && anchor.parentElement) || h1.parentElement;
+    if (!host.contains(box) || box.previousElementSibling !== anchor) { (anchor && anchor.parentElement ? anchor.parentElement : host).insertBefore(box, anchor ? anchor.nextSibling : null); }
+  }
+  function note() {
+    var tab = new URLSearchParams(location.search).get('tab'); var el = document.getElementById('spx-ms-note');
+    if (tab && tab !== 'overview') { if (el) el.remove(); return; }
+    var sat = cardVal('Toplam satış'), har = cardVal('Harcamalar'), kal = cardVal('Elinizde kalan');
+    if (sat === null || har === null || kal === null) { if (el) el.remove(); return; }
+    var h = (sat === 0 && har === 0) ? 'Bu tarihlerde henüz kayıt yok. Başlamak için yukarıdan <b>Para girdi</b> veya <b>Para çıktı</b>ya basın.' :
+      'Bu tarihlerde <b>' + tl(sat) + '</b> satış yaptınız, <b>' + tl(har) + '</b> harcadınız. ' + (kal >= 0 ? 'Elinizde <b style="color:#15803d">' + tl(kal) + '</b> kaldı.' : 'Harcamanız satıştan <b style="color:#b91c1c">' + tl(-kal) + '</b> fazla.');
+    if (!el) { el = document.createElement('div'); el.id = 'spx-ms-note'; el.className = 'notranslate'; var b = document.getElementById('spx-ms'); if (!b) return; b.parentElement.insertBefore(el, b.nextSibling); }
+    if (el.__h !== h) { el.innerHTML = h; el.__h = h; }
+  }
+  function tick() {
+    var box = document.getElementById('spx-ms'), nt = document.getElementById('spx-ms-note');
+    if (!onPage()) { if (box) box.remove(); if (nt) nt.remove(); return; }
+    var main = document.querySelector('main') || document.body;
+    var inModal = modalEl();
+    walk(main, MAP, function (p) { return !!(inModal && inModal.contains(p)) || !!p.closest('#spx-ms,#spx-ms-note,nav,aside,[data-spx-own]'); });
+    simplifyModal();
+    var h1 = Array.prototype.find.call(main.querySelectorAll('h1'), function (x) { return low(x.textContent) === 'muhasebe'; });
+    if (h1) { strip(h1); note(); }
+  }
+  setInterval(tick, 500);
 })();
