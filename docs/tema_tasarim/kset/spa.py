@@ -12,11 +12,11 @@ a{color:inherit;text-decoration:none}button{font:inherit;color:inherit;cursor:po
 .eb{font:500 13px 'Jost';letter-spacing:.28em;text-transform:uppercase;color:var(--ac)}
 .chip{display:inline-flex;align-items:center;min-height:44px;padding:0 18px;margin:0 6px 6px 0;border-radius:99px;background:rgba(255,255,255,.7);border:1px solid var(--line);font-weight:500;transition:.3s}.chip:hover{background:var(--ink);color:#fff}
 /* ortalı logo menü */
-#nv{position:absolute;top:0;left:0;right:0;z-index:50;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:14px 20px;color:#fff}
-#nv .lg{font:italic 400 30px 'Cormorant';text-align:center;letter-spacing:.02em}
+#nv{position:absolute;top:0;left:0;right:0;z-index:50;display:grid;grid-template-columns:44px 1fr auto;gap:6px;align-items:center;padding:14px 20px;color:#fff}
+#nv .lg{font:italic 400 26px 'Cormorant';text-align:center;letter-spacing:.02em;white-space:nowrap}
 #nv ul{display:none;list-style:none;gap:26px;font-size:14px;letter-spacing:.1em;text-transform:uppercase}
 #nv .r{display:flex;justify-content:flex-end;gap:8px;align-items:center}
-#nv .btn{min-height:44px;padding:0 20px;background:#fff;color:var(--ink);font-size:14px}
+#nv .btn{min-height:44px;padding:0 16px;background:#fff;color:var(--ink);font-size:14px;white-space:nowrap}
 #bg{width:44px;height:44px;border-radius:50%;border:1px solid rgba(255,255,255,.6);color:#fff;display:grid;place-items:center;justify-self:start}#bg i,#bg i:before,#bg i:after{display:block;width:16px;height:1.5px;background:#fff;position:relative;content:""}#bg i:before{position:absolute;top:-5px}#bg i:after{position:absolute;top:5px}
 #mn{position:fixed;inset:0;z-index:90;background:var(--ink);color:#f1efe6;padding:90px 28px 30px;overflow:auto;opacity:0;visibility:hidden;transition:.5s;text-align:center}#mn.on{opacity:1;visibility:visible}
 #mn a.l{display:block;font:italic 400 clamp(38px,11vw,64px)/1.25 'Cormorant'}#mn .s{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:26px}#mn .s a{border:1px solid rgba(255,255,255,.35);border-radius:99px;min-height:44px;display:flex;align-items:center;padding:0 18px;font-size:14px}
@@ -57,7 +57,7 @@ footer .fl{font:italic 400 44px 'Cormorant';color:#fff}footer nav{display:flex;f
 footer .s{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}footer .s a{border:1px solid rgba(255,255,255,.3);border-radius:99px;min-height:44px;display:flex;align-items:center;padding:0 18px;font-size:14px}
 footer small{display:block;margin-top:26px;font-size:13px}footer small a{text-decoration:underline}
 @media(min-width:900px){
-#nv{padding:22px 48px}#nv ul{display:flex}#bg{display:none}#nv .lg{font-size:38px}
+#nv{padding:22px 48px;grid-template-columns:1fr auto 1fr}#nv ul{display:flex}#bg{display:none}#nv .lg{font-size:38px}
 .hc{padding:0 48px 60px}.hero{align-items:flex-end}.book{grid-template-columns:1fr auto;align-items:center;max-width:820px;border-radius:99px;padding:14px 14px 14px 30px}
 section{padding:110px 48px}.rt .it{grid-template-columns:1fr 1fr;align-items:center;gap:60px}.rt .it:nth-child(even) .ph{order:2}.rt .ph{aspect-ratio:1}
 .sl{aspect-ratio:16/9;max-height:600px}.tm{grid-template-columns:repeat(3,1fr)}.gift{grid-template-columns:1.2fr 1fr;align-items:center;padding:60px}

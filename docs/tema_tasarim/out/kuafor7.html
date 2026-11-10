@@ -1,7 +1,7 @@
 <!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0c0c0c"><title>Kesimhane · Beşiktaş, İstanbul</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet"><style>
 :root{--bg:#0c0c0c;--ink:#f5f5f0;--mut:#9a9a92;--ac:#ffd60a;--line:rgba(255,255,255,.16);--sbg:#151515;--sink:#f5f5f0;--sac:#ffd60a;--sline:rgba(255,255,255,.22);--sfont:'Anton',sans-serif;--sbody:'Barlow',sans-serif;--sr:4px;--shw:400}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--ink);font:400 17px/1.55 'Barlow',sans-serif;overflow-x:hidden;padding-bottom:78px}
+html,body{overflow-x:clip}body{background:var(--bg);color:var(--ink);font:400 17px/1.55 'Barlow',sans-serif;padding-bottom:78px}
 h1,h2,h3{font-family:'Anton',sans-serif;font-weight:400;text-transform:uppercase;letter-spacing:.01em;line-height:.95}
 a{color:inherit;text-decoration:none}button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
 .pp{background-size:cover;background-position:center;background-color:#222}
@@ -16,8 +16,8 @@ a{color:inherit;text-decoration:none}button{font:inherit;color:inherit;cursor:po
 #mx{position:absolute;top:12px;right:18px;min-height:44px;padding:0 14px;border:2px solid #0c0c0c;font:700 16px 'Barlow Condensed';letter-spacing:.1em;text-transform:uppercase}
 #mn .s{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}#mn .s a{border:2px solid #0c0c0c;min-height:44px;display:flex;align-items:center;padding:0 16px;font:700 16px 'Barlow Condensed';letter-spacing:.08em;text-transform:uppercase}
 /* hero */
-.hero{display:grid;border-bottom:2px solid var(--ac)}
-.hero .tx{padding:34px 18px 26px}.hero h1{font-size:clamp(66px,22vw,190px);margin:14px 0 18px}.hero h1 span{display:block}.hero h1 .y{color:var(--ac)}.hero h1 .wl{display:block;height:.95em;position:relative;overflow:hidden}.hero h1 .w{position:absolute;left:0;top:100%;color:var(--ac);transition:top .6s cubic-bezier(.7,0,.2,1)}.hero h1 .w.on{top:0}.hero h1 .w.out{top:-100%}
+.hero{display:grid;border-bottom:2px solid var(--ac);overflow:hidden}.hero .tx{min-width:0}
+.hero .tx{padding:34px 18px 26px}.hero h1{font-size:clamp(60px,19vw,190px);margin:14px 0 18px}.hero h1 span{display:block}.hero h1 .y{color:var(--ac)}.hero h1 .wl{display:block;height:.95em;position:relative;overflow:hidden}.hero h1 .w{position:absolute;left:0;top:100%;color:var(--ac);transition:top .6s cubic-bezier(.7,0,.2,1)}.hero h1 .w.on{top:0}.hero h1 .w.out{top:-100%}
 .hero .ph{min-height:56vw;position:relative;filter:grayscale(1) contrast(1.1);background-position:center 25%}.hero .ph:after{content:"";position:absolute;inset:0;background:var(--ac);mix-blend-mode:multiply;opacity:.55}
 .queue{margin-top:18px;border:2px solid var(--line);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px}.queue b{font:400 40px 'Anton';color:var(--ac);line-height:1}.queue small{font:600 14px 'Barlow Condensed';letter-spacing:.14em;text-transform:uppercase;color:var(--mut);display:block}
 .open{display:inline-flex;align-items:center;gap:8px;font:600 15px 'Barlow Condensed';letter-spacing:.14em;text-transform:uppercase;color:var(--mut)}.open:before{content:"";width:9px;height:9px;background:#e0584a}.open.o:before{background:#5bd37a}
