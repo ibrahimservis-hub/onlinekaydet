@@ -169,6 +169,6 @@ def page_html(home, ctx, theme_slug, page):
         return None
     m = re.search(r'aria-label="([^"]+)" role="img"|<h1>(.*?)</h1>', r)
     title = re.search(r"<h1>(.*?)</h1>", r)
-    title = title.group(1) if title else "Ürün"
+    title = __import__("html").unescape(title.group(1)) if title else "Ürün"
     out = sitegen.assemble_mid(home, ctx, title, [["İçerik", r]], "page", page, "")
     return out
