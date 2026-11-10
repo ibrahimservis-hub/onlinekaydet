@@ -73,6 +73,8 @@ def fix(h: str) -> str:
     try:
         import shopdetail
         h = shopdetail.apply(h)
+        import realimg
+        h = realimg.apply(h)
     except Exception:                                                     # noqa: BLE001
         pass
     h = h.replace("</head>", CSS + POP_CSS + "</head>", 1) if "</head>" in h else h

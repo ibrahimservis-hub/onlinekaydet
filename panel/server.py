@@ -3398,6 +3398,15 @@ if _FE:
             h = h.replace("<head>", "<head><meta name=robots content=noindex>", 1)
         return _Resp(h, media_type=r[1], headers={"Cache-Control": "no-store", "X-Robots-Tag": "noindex"})
 
+    @app.get("/tema-urun/{name}.jpg", include_in_schema=False)
+    async def tema_urun_gorsel(name: str):
+        """Tema örnek ürünlerinin gerçek fotoğrafları (themes/img/p)."""
+        import re as _r3
+        p = Path(__file__).resolve().parent.parent / "themes" / "img" / "p" / (name + ".jpg")
+        if not _r3.fullmatch(r"[a-z]{3,12}[1-3]", name) or not p.is_file():
+            return JSONResponse({"detail": "Bulunamadı"}, status_code=404)
+        return _Resp(p.read_bytes(), media_type="image/jpeg", headers={"Cache-Control": "public, max-age=604800"})
+
     @app.get("/tema-onizleme/{slug}.html", include_in_schema=False)
     async def tema_onizleme(slug: str):
         """Satış sitesindeki tema vitrini: statik dosyası olmayan temalar doğrudan tema deposundan gösterilir (yeni sekmede canlı önizleme)."""

@@ -140,7 +140,7 @@ def render(home, ctx, theme_slug, page):
                E(desc), rows, reviews, qa, (("%s ve üzeri siparişlerde kargo ücretsizdir." % tl(esik)) if esik else ""), relh, tl(price) if stock else "", home_href))
     js = ('<script>(function(){' + pj + 'var D=' + json.dumps(D, ensure_ascii=False) + ',I=' + str(i) + ',P=D[I],Q=1,SEL={},$=function(s,r){return(r||document).querySelector(s)},A=function(s,r){return[].slice.call((r||document).querySelectorAll(s))};'
           'var W=$(".okp"),KEY=W.dataset.cartkey,VB=["0 0 200 200","24 24 152 152","46 46 108 108","0 40 200 120"];'
-          'function pic(vb){var s=okPimg(P[1],P[3]);return s.replace(/viewBox="[^"]*"/,\'viewBox="\'+vb+\'"\')}'
+          'function pic(vb){var s=(window.okReal&&window.okReal(P[1],P[3],VB.indexOf(vb)))||okPimg(P[1],P[3]);return s.replace(/viewBox="[^"]*"/,\'viewBox="\'+vb+\'"\')}'
           'function show(n){$("#ok_mi").innerHTML=pic(VB[n]);A("#ok_tl button").forEach(function(b,k){b.classList.toggle("on",k===n)})}'
           '$("#ok_tl").innerHTML=VB.map(function(v,k){return \'<button type="button" data-k="\'+k+\'" aria-label="Görsel \'+(k+1)+\'">\'+pic(v)+"</button>"}).join("");A("#ok_tl button").forEach(function(b){b.onclick=function(){show(+b.dataset.k)}});show(0);'
           'A("[data-r]").forEach(function(e){var x=D[+e.dataset.r];e.innerHTML=okPimg(x[1],x[3])});'
