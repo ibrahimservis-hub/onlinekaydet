@@ -71,6 +71,14 @@ extra='''
 <div class="lk rv"><a class="lnk" href="temalar.html">Temaları görün <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 8h12M9 3l5 5-5 5"/></svg></a><a class="lnk" href="entegrasyonlar.html">Entegrasyonlar <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 8h12M9 3l5 5-5 5"/></svg></a></div>
 </div></section>
 
+<section id="eticaret"><div class="wrap">
+<div class="kick rv">E-ticaret</div>
+<h2 class="rv">Mağazanız da <em>aynı panelde.</em></h2>
+<div class="two rv"><p class="l">Ürün, stok, sipariş ve müşteri hesabı tek yerde. Mağaza siteniz hazır temayla açılır.</p>
+<dl class="dl"><div><dt>Mağaza</dt><dd><span>Ürün ve stok</span><span>Sipariş takibi</span><span>Müşteri hesabı</span><span>Ödeme yöntemleri</span></dd></div><div><dt>Tema modülleri</dt><dd><span>Hikâyeler</span><span>Mega menü</span><span>Fırsat ürünleri</span><span>Kampanya sayacı</span><span>Hazır paketler</span></dd></div><div><dt>Bağlantılar</dt><dd><span>Trendyol</span><span>Hepsiburada</span><span>iyzico</span><span>Excel ile ürün aktarımı</span></dd></div><div><dt>Kurulum</dt><dd><span>Hazır e-ticaret temaları</span><span>Kurulumu biz yaparız</span><span>İlk ay ücretsiz</span></dd></div></dl></div>
+<div class="lk rv"><a class="lnk" href="sektor-e-ticaret.html">E-ticaret çözümü <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 8h12M9 3l5 5-5 5"/></svg></a><a class="lnk" href="temalar.html">E-ticaret temaları <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 8h12M9 3l5 5-5 5"/></svg></a></div>
+</div></section>
+
 <section id="kaynaklar"><div class="wrap">
 <div class="kick rv">Kaynaklar</div>
 <h2 class="rv">Ücretsiz <em>rehberler</em> ve araçlar.</h2>
