@@ -152,7 +152,7 @@ def main():
         _ex = COK_VOCAB + (COK_NOTECH if r['sector'] not in ('telefon_tamir', 'oto_servis', 'oto_cekici') else []) if True else []
         for a, b in VOCAB_ALL + VOCAB.get(r['sector'], []) + _ex:
             html = html.replace(a, b)
-        html = _fonts_link(html.replace('data:image/jpeg;base64,', 'data:image/svg+xml;base64,'))
+        html = _fonts_link(re.sub(r'data:image/jpeg;base64,(?!/9j/)', 'data:image/svg+xml;base64,', html))
         open(os.path.join(gen3.OUT, r['slug'] + '.html'), 'w', encoding='utf-8').write(html)
         themes.append(dict(slug=r['slug'], sector=r['sector'], dark=r['pal'][3], accent=r['pal'][4], soft=r['pal'][2], radius=r['r'], name=r['nm'], premium=True))
         print(f"{r['slug']:28s} {len(html) // 1024:5d} KB  {r['style']}")
