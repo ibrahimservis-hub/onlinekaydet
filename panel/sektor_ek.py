@@ -158,10 +158,15 @@ NEW = {
     },
 }
 
+import sektor_cok as _cok
+NEW.update(_cok.panel_new())
+
 # Giriş formunda sektör seçimi için (yazılış -> anahtar)
 SECTOR_WORDS = {"oto servis": "oto_servis", "oto tamir": "oto_servis", "oto çekici": "oto_cekici", "çekici": "oto_cekici", "yol yardım": "oto_cekici",
                 "kuaför": "kuafor", "berber": "kuafor", "nakliye": "nakliye", "nakliyat": "nakliye", "tekstil": "tekstil", "konfeksiyon": "tekstil",
                 "e-ticaret": "eticaret", "eticaret": "eticaret", "mağaza": "eticaret", "temizlik": "temizlik", "güzellik": "guzellik", "estetik": "guzellik"}
+
+SECTOR_WORDS.update(_cok.theme_meta()['sector_words'])
 
 # Örnek veri (demo firma): sektör -> (müşteri tipi, talepler)
 DEMO_FAULTS = {k: v["faults"][:4] for k, v in NEW.items()}

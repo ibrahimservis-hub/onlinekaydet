@@ -5,7 +5,7 @@ gen3'ün bileşenlerini kullanır; yalnızca yeni sektörlerin temalarını yaza
 import json, os, re, sys
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 import gen3
-from g3 import content, content_ek, tools, tools_ek, shop, recipes_p
+from g3 import content, content_ek, tools, tools_ek, tools_cok, shop, recipes_p
 from g3.recipes import mk
 
 APP = os.environ.get('OK_APP_DIR') or os.path.join(HERE, '..', 'panel')        # themes.json'ın bulunduğu uygulama klasörü
@@ -33,7 +33,11 @@ def _img64(name):        # gerçek fotoğraf (fetch_photos.py ile indirilmiş) v
         f = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'img', name + ext)
         if os.path.exists(f) and os.path.exists(os.path.join(os.path.dirname(f), '.real')):
             return _b64.b64encode(open(f, 'rb').read()).decode()
-    return _b64.b64encode(make_ill.svg_for(name).encode()).decode()
+    try:
+        return _b64.b64encode(make_ill.svg_for(name).encode()).decode()
+    except Exception:         # yeni sektörler için fotoğraf inene kadar nötr zemin
+        svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 800"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d9dee5"/><stop offset="1" stop-color="#aeb8c4"/></linearGradient></defs><rect width="1280" height="800" fill="url(#g)"/></svg>'
+        return _b64.b64encode(svg.encode()).decode()
 
 
 gen3.face = _face
@@ -54,11 +58,14 @@ def _fonts_link(html):
 
 content.SEC.update(content_ek.SEC)
 tools.TOOLS.update(tools_ek.TOOLS)
+tools.TOOLS.update(tools_cok.TOOLS)
 shop.PRODUCTS.update(content_ek.PRODUCTS)
-gen3.TOOL_LABEL.update({'bakim': 'Bakım takvimi', 'kontrol': 'Acil mi?', 'varis': 'Varış süresi', 'acil': 'Yolda kaldım', 'sure': 'Süre hesabı', 'rehber': 'Bakım rehberi', 'hacim': 'Taşıma hesabı',
+gen3.TOOL_LABEL.update({'hazirlik': 'Randevuya hazırlık', 'soru': 'Hangi hizmet?', 'bakim': 'Bakım takvimi', 'kontrol': 'Acil mi?', 'varis': 'Varış süresi', 'acil': 'Yolda kaldım', 'sure': 'Süre hesabı', 'rehber': 'Bakım rehberi', 'hacim': 'Taşıma hesabı',
                         'liste': 'Hazırlık listesi', 'metraj': 'Kumaş metrajı', 'surec': 'Sipariş süreci', 'kargo': 'Kargo eşiği', 'iade': 'İade rehberi', 'paket': 'Seans takibi', 'cilt': 'Cilt rehberi'})
 
 NEW = list(content_ek.SEC)
+import sektor_cok as _cok
+_M = _cok.theme_meta()
 TOOLS_BY = {'oto_servis': ['oto.bakim', 'oto.kontrol'], 'oto_cekici': ['cek.varis', 'cek.acil'], 'kuafor': ['kuf.sure', 'kuf.rehber'], 'nakliye': ['nak.hacim', 'nak.liste'],
             'tekstil': ['tek.metraj', 'tek.surec'], 'eticaret': ['eti.kargo', 'eti.iade'], 'temizlik': ['tem.sure', 'tem.liste'], 'guzellik': ['guz.paket', 'guz.cilt']}
 DIRS = {'oto_servis': ['neon', 'cine', 'neon', 'edit', 'cine', 'neon'], 'oto_cekici': ['cine', 'neon', 'cine', 'neon', 'edit', 'cine'], 'kuafor': ['lux', 'edit', 'lux', 'cine', 'edit', 'lux'],
@@ -75,7 +82,8 @@ NAMES = {
  'guzellik': ['Nilüfer Güzellik', 'Işıl Güzellik Salonu', 'Rüya Bakım Merkezi', 'Ten Estetik Salonu', 'Çiçek Güzellik', 'Sevgi Bakım'],
 }
 SHOP_ON = set(content_ek.SHOP_SECTORS)
-PLAIN = {'eticaret', 'tekstil', 'kuafor', 'guzellik'}   # parça mağazası dili yok
+NAMES.update(_M['names']); DIRS.update(_M['dirs']); TOOLS_BY.update(_M['tools_by'])
+PLAIN = {'eticaret', 'tekstil', 'kuafor', 'guzellik', 'veteriner', 'telefon_tamir'}   # parça mağazası dili yok
 
 # Genel bileşenlerdeki teknik servis dilini sektöre çevirir (sırayla uygulanır)
 VOCAB_ALL = [('Bu sonucu ustaya iletin', 'Bu sonucu bize iletin'), (' servisi ·', ' ·'), ('Randevu, yazılı fiyat ve garantili servis.', 'Randevu ve yazılı bilgilendirme.'),

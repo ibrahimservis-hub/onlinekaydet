@@ -108,3 +108,8 @@ PRODUCTS = {
               ('GZ-4004', 'El kremi', 'Atölye', 'Bakım', 190, 2), ('GZ-4005', 'Tırnak bakım seti', 'Atölye', 'Bakım', 260, 1), ('GZ-4006', 'Masaj yağı', 'Atölye', 'Masaj', 350, 2)],
 }
 SHOP_SECTORS = ('eticaret', 'tekstil', 'kuafor', 'guzellik')
+
+import sektor_cok as _cok
+SEC.update(_cok.content_sec(_faq))
+PRODUCTS.update(_cok.PRODUCTS)
+SHOP_SECTORS = SHOP_SECTORS + tuple(_cok.theme_meta()['shop_on'])
