@@ -19,6 +19,7 @@ from fastapi.responses import HTMLResponse, Response
 import shop as shopmod
 import shop_legal
 import storefront
+import ilan
 import sitegen
 import tenant
 
@@ -510,6 +511,23 @@ def register(api_router, db, deps):
             if not h:
                 return None
             h = h.replace("</head>", '<meta name="robots" content="noindex,follow"></head>', 1) if p == "hesabim" else h
+        elif (p == "ilanlar" or p.startswith("ilan/")) and ctx and (ctx.get("sector") in ilan.ILAN_SECTORS or await db.listings.count_documents({}) > 0):
+            if p == "ilanlar":
+                rows = await db.listings.find({"status": {"$in": ["yayinda", "satildi"]}}, {"_id": 0, "images": 0}).sort([("featured", -1), ("created_at", -1)]).to_list(300)
+                for r in rows:
+                    r["img_count"] = len((await db.listings.find_one({"id": r["id"]}, {"_id": 0, "images": 1}) or {}).get("images") or [])
+                items = [ilan.public_item(r) for r in rows]
+                kind = ""
+                body, ttl = ilan.list_body(items, kind), "İlanlar"
+            else:
+                slug = p[5:]
+                dd = await db.listings.find_one({"slug": slug, "status": {"$in": ["yayinda", "satildi"]}}, {"_id": 0})
+                if not dd:
+                    return None
+                body, ttl = ilan.detail_body(dd, sitegen.phone10(ctx.get("tel")), sitegen.phone10((ctx.get("p") or {}).get("whatsapp"))), dd["title"]
+            h = compose_page(await themed_home(ctx), ttl + " · " + ctx["name"], body)
+            if not h:
+                return None
         elif p in shop_legal.TITLES and ctx and ctx.get("legal"):
             sc = await db.app_settings.find_one({"_id": "shop_settings"}, {"_id": 0}) or {}
             cfg = {**shopmod.SHOP_DEFAULT, **sc}

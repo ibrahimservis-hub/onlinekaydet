@@ -308,7 +308,7 @@
     return go(0);
   }
   function fail(e) { toast(e.message || 'İşlem başarısız'); }
-  var TABS = [['firmalar', 'Firmalar'], ['sitem', 'Sitem'], ['siteduz', 'Gelişmiş Düzenleme'], ['domain', 'Alan Adı & Site'], ['paket', 'Paketim'], ['mgayar', 'Mağaza Ayarları'], ['moduller', 'Aç / Kapat & Ayarlar'], ['seo', 'SEO · 301 · 404'], ['yeni', 'Yeni Sipariş'], ['pazar', 'Pazaryerleri'], ['yetki', 'Kullanıcılar & Yetkiler'], ['gsc', 'Google Search Console'], ['urunler', 'Ürünler'], ['kanal', 'Ürünler'], ['urunekle', 'Ürün Ekle / Düzenle'], ['m360', 'Müşteri 360'], ['kaynak', 'Kaynak & Arama Analizi'], ['ustapuan', 'Usta Puanlama'], ['ustagecmis', 'Usta İş Geçmişi'], ['cari', 'Cari & Trend'], ['tahsilat', 'Teknisyen Tahsilat'], ['atolye', 'Atölye'], ['canli', 'Canlı Ziyaretçiler'], ['wa', 'WhatsApp & Bildirim'], ['daha', 'Daha Fazlası'], ['bildirim', 'Bildirimler'], ['memnun', 'Müşteri Memnuniyeti'], ['vade', 'Usta Borç Vadesi'], ['harita', 'Günün İş Haritası'], ['onay', 'Onay Bekleyenler'], ['rapor', 'Rapor Merkezi'], ['kurulum', 'Kurulum Durumu']];
+  var TABS = [['firmalar', 'Firmalar'], ['ilan', 'İlanlar'], ['sitem', 'Sitem'], ['siteduz', 'Gelişmiş Düzenleme'], ['domain', 'Alan Adı & Site'], ['paket', 'Paketim'], ['mgayar', 'Mağaza Ayarları'], ['moduller', 'Aç / Kapat & Ayarlar'], ['seo', 'SEO · 301 · 404'], ['yeni', 'Yeni Sipariş'], ['pazar', 'Pazaryerleri'], ['yetki', 'Kullanıcılar & Yetkiler'], ['gsc', 'Google Search Console'], ['urunler', 'Ürünler'], ['kanal', 'Ürünler'], ['urunekle', 'Ürün Ekle / Düzenle'], ['m360', 'Müşteri 360'], ['kaynak', 'Kaynak & Arama Analizi'], ['ustapuan', 'Usta Puanlama'], ['ustagecmis', 'Usta İş Geçmişi'], ['cari', 'Cari & Trend'], ['tahsilat', 'Teknisyen Tahsilat'], ['atolye', 'Atölye'], ['canli', 'Canlı Ziyaretçiler'], ['wa', 'WhatsApp & Bildirim'], ['daha', 'Daha Fazlası'], ['bildirim', 'Bildirimler'], ['memnun', 'Müşteri Memnuniyeti'], ['vade', 'Usta Borç Vadesi'], ['harita', 'Günün İş Haritası'], ['onay', 'Onay Bekleyenler'], ['rapor', 'Rapor Merkezi'], ['kurulum', 'Kurulum Durumu']];
   function build() {
     ov = document.createElement('div'); ov.id = 'spx-ov';
     ov.innerHTML = '<header><button class="spx-b" id="spx-menu">☰ Menü</button><h2 id="spx-h">Site Yönetimi</h2><button class="spx-b" id="spx-x">Kapat ✕</button></header><div id="spx-tabs"></div><div id="spx-body">Yükleniyor…</div>';
@@ -321,9 +321,62 @@
   function body() { return $('#spx-body') || document.createElement('div'); }
   function draw() {
     Array.prototype.forEach.call($('#spx-tabs').children, function (b) { b.classList.toggle('on', b.getAttribute('data-t') === TAB); });
-    var hh = $('#spx-h'); if (hh) hh.textContent = ({ firmalar: 'Firmalar', sitem: 'Sitem — Web Siteniz', siteduz: 'Gelişmiş Düzenleme', domain: 'Alan Adı & Site', paket: 'Paketim', mgayar: 'Mağaza Ayarları', daha: 'Daha Fazlası', bildirim: 'Bildirimler', memnun: 'Müşteri Memnuniyeti', vade: 'Usta Borç Vadesi', harita: 'Günün İş Haritası', moduller: 'Aç/Kapat & Entegrasyonlar', seo: 'SEO · 301 · 404', yeni: 'Yeni Sipariş Gir', pazar: 'Pazaryerleri', yetki: 'Kullanıcılar & Yetkiler', gsc: 'Google Search Console', urunler: 'Ürünler', kanal: 'Ürünler', urunekle: 'Ürün Ekle / Düzenle', m360: 'Müşteri 360', kaynak: 'Kaynak & Arama Analizi', ustapuan: 'Usta Puanlama', ustagecmis: 'Usta İş Geçmişi', cari: 'Cari & Trend', tahsilat: 'Teknisyen Tahsilat', atolye: 'Atölye (Cihaz Teslim Alma)', sohbet: 'Canlı Sohbet', canli: 'Canlı Ziyaretçiler', wa: 'WhatsApp & Bildirim Ayarları', onay: 'Onay Bekleyenler', rapor: 'Rapor Merkezi', kurulum: 'Kurulum Durumu' })[TAB];
+    var hh = $('#spx-h'); if (hh) hh.textContent = ({ ilan: 'İlanlar', firmalar: 'Firmalar', sitem: 'Sitem — Web Siteniz', siteduz: 'Gelişmiş Düzenleme', domain: 'Alan Adı & Site', paket: 'Paketim', mgayar: 'Mağaza Ayarları', daha: 'Daha Fazlası', bildirim: 'Bildirimler', memnun: 'Müşteri Memnuniyeti', vade: 'Usta Borç Vadesi', harita: 'Günün İş Haritası', moduller: 'Aç/Kapat & Entegrasyonlar', seo: 'SEO · 301 · 404', yeni: 'Yeni Sipariş Gir', pazar: 'Pazaryerleri', yetki: 'Kullanıcılar & Yetkiler', gsc: 'Google Search Console', urunler: 'Ürünler', kanal: 'Ürünler', urunekle: 'Ürün Ekle / Düzenle', m360: 'Müşteri 360', kaynak: 'Kaynak & Arama Analizi', ustapuan: 'Usta Puanlama', ustagecmis: 'Usta İş Geçmişi', cari: 'Cari & Trend', tahsilat: 'Teknisyen Tahsilat', atolye: 'Atölye (Cihaz Teslim Alma)', sohbet: 'Canlı Sohbet', canli: 'Canlı Ziyaretçiler', wa: 'WhatsApp & Bildirim Ayarları', onay: 'Onay Bekleyenler', rapor: 'Rapor Merkezi', kurulum: 'Kurulum Durumu' })[TAB];
     body().innerHTML = 'Yükleniyor…';
-    ({ firmalar: drawFirmalar, sitem: drawSitem, siteduz: drawSiteEd, domain: drawDomain, paket: drawPaket, mgayar: drawMgAyar, daha: drawDaha, bildirim: drawBildirim, memnun: drawMemnun, vade: drawVade, harita: drawHarita, moduller: drawMod, seo: drawSeo, yeni: drawNew, pazar: drawMkt, yetki: drawUsers, gsc: drawGsc, urunler: drawUrunler, kanal: drawKanal, urunekle: drawUrunEkle, m360: drawM360, kaynak: drawKaynak, ustapuan: drawUstaPuan, ustagecmis: drawUstaGecmis, cari: drawCari, tahsilat: drawTahsilat, atolye: drawAtolye, sohbet: drawSohbet, canli: drawCanli, wa: drawWa, onay: drawOnay, rapor: drawRapor, kurulum: drawKurulum })[TAB]();
+    ({ ilan: drawIlan, firmalar: drawFirmalar, sitem: drawSitem, siteduz: drawSiteEd, domain: drawDomain, paket: drawPaket, mgayar: drawMgAyar, daha: drawDaha, bildirim: drawBildirim, memnun: drawMemnun, vade: drawVade, harita: drawHarita, moduller: drawMod, seo: drawSeo, yeni: drawNew, pazar: drawMkt, yetki: drawUsers, gsc: drawGsc, urunler: drawUrunler, kanal: drawKanal, urunekle: drawUrunEkle, m360: drawM360, kaynak: drawKaynak, ustapuan: drawUstaPuan, ustagecmis: drawUstaGecmis, cari: drawCari, tahsilat: drawTahsilat, atolye: drawAtolye, sohbet: drawSohbet, canli: drawCanli, wa: drawWa, onay: drawOnay, rapor: drawRapor, kurulum: drawKurulum })[TAB]();
+  }
+
+  /* ===== İlanlar (emlak, araç kiralama, tur/transfer): liste + ekle/düzenle ===== */
+  var ILK = { satilik: 'Satılık', kiralik: 'Kiralık', devren: 'Devren', gunluk: 'Günlük kiralık' }, ILST = { yayinda: 'Yayında', taslak: 'Taslak', satildi: 'Satıldı' };
+  var ILC = ['Daire', 'Villa', 'Müstakil ev', 'Arsa', 'İş yeri', 'Dükkan', 'Ofis', 'Bina', 'Araç', 'Tur', 'Diğer'];
+  function ilImg(file) {
+    return new Promise(function (res, rej) {
+      var fr = new FileReader(); fr.onerror = function () { rej(new Error('Resim okunamadı')); };
+      fr.onload = function () { var im = new Image(); im.onerror = function () { rej(new Error('Resim açılamadı')); }; im.onload = function () {
+        var w = im.width, h = im.height, m = 1280, k = Math.min(1, m / Math.max(w, h)), c = document.createElement('canvas'); c.width = Math.round(w * k); c.height = Math.round(h * k);
+        c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); var q = .8, u = c.toDataURL('image/jpeg', q); while (u.length > 800000 && q > .35) { q -= .1; u = c.toDataURL('image/jpeg', q); } res(u); }; im.src = fr.result; };
+      fr.readAsDataURL(file);
+    });
+  }
+  function drawIlan() {
+    call('GET', '/admin/listings').then(function (rs) {
+      var rows = rs.map(function (x) { return [esc(x.title) + '<br><small style="color:#64748b">' + esc(ILK[x.kind] || '') + ' · ' + esc(x.category || '') + (x.district ? ' · ' + esc(x.district) : '') + '</small>', x.price ? Number(x.price).toLocaleString('tr-TR') + ' ₺' : '—', '<span class="spx-pill">' + esc(ILST[x.status] || x.status) + '</span>', (x.img_count || 0) + ' resim', '<button class="spx-b" data-ie="' + x.id + '">Düzenle</button> <button class="spx-b" data-id="' + x.id + '" style="color:#b91c1c">Sil</button>']; });
+      body().innerHTML = '<div class="spx-card"><div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between"><div><b>İlanlarınız</b><br><small style="color:#64748b">Yayındaki ilanlar sitenizde /ilanlar adresinde görünür.</small></div><button class="spx-b p" id="il_new">+ Yeni ilan</button></div></div>' +
+        (rs.length ? '<div class="spx-card">' + tbl(['İlan', 'Fiyat', 'Durum', 'Resim', ''], rows.map(function (r) { return tr_(r); })) + '</div>' : '<div class="spx-card" style="text-align:center;color:#64748b">Henüz ilan yok. “Yeni ilan” ile ilk ilanınızı ekleyin.</div>');
+      $('#il_new').onclick = function () { ilanForm(''); };
+      Array.prototype.forEach.call(body().querySelectorAll('[data-ie]'), function (b) { b.onclick = function () { ilanForm(b.getAttribute('data-ie')); }; });
+      Array.prototype.forEach.call(body().querySelectorAll('[data-id]'), function (b) { b.onclick = function () { if (!confirm('Bu ilan silinsin mi?')) return; call('DELETE', '/admin/listings/' + b.getAttribute('data-id')).then(function () { toast('İlan silindi'); drawIlan(); }).catch(fail); }; });
+    }).catch(function (e) { body().innerHTML = '<div class="spx-card">Yüklenemedi: ' + esc(e.message) + '</div>'; });
+  }
+  function ilanForm(id) {
+    (id ? call('GET', '/admin/listings/' + id) : Promise.resolve({ kind: 'satilik', category: 'Daire', status: 'yayinda', images: [], features: [] })).then(function (d) {
+      var imgs = (d.images || []).slice(), op = function (arr, cur) { return arr.map(function (x) { var v = Array.isArray(x) ? x[0] : x, l = Array.isArray(x) ? x[1] : x; return '<option value="' + esc(v) + '"' + (v === cur ? ' selected' : '') + '>' + esc(l) + '</option>'; }).join(''); };
+      var f = function (k, l, t, ph) { return '<div style="flex:1;min-width:140px"><label style="font:700 .8rem system-ui">' + l + '</label><input id="il_' + k + '" type="' + (t || 'text') + '" value="' + esc(d[k] == null ? '' : d[k]) + '" placeholder="' + esc(ph || '') + '" style="width:100%;min-height:42px;padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px"></div>'; };
+      function paint() {
+        body().innerHTML = '<div class="spx-card"><button class="spx-b" id="il_bk">← İlanlara dön</button><h3 style="margin:12px 0">' + (id ? 'İlanı düzenle' : 'Yeni ilan') + '</h3>' +
+          '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px">' + f('title', 'Başlık *', 'text', 'Örn. Merkezde 3+1 satılık daire') + '</div>' +
+          '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px"><div style="flex:1;min-width:140px"><label style="font:700 .8rem system-ui">Tür</label><select id="il_kind" style="width:100%;min-height:42px">' + op(Object.keys(ILK).map(function (k) { return [k, ILK[k]]; }), d.kind) + '</select></div>' +
+          '<div style="flex:1;min-width:140px"><label style="font:700 .8rem system-ui">Kategori</label><select id="il_category" style="width:100%;min-height:42px">' + op(ILC, d.category) + '</select></div>' + f('price', 'Fiyat (₺)', 'number') + '</div>' +
+          '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px">' + f('city', 'İl') + f('district', 'İlçe') + f('neighborhood', 'Mahalle') + '</div>' +
+          '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px">' + f('rooms', 'Oda', 'text', '3+1') + f('m2', 'Brüt m²', 'number') + f('floor', 'Kat') + f('age', 'Bina yaşı') + f('heating', 'Isıtma') + '</div>' +
+          '<div style="margin-bottom:10px"><label style="font:700 .8rem system-ui">Özellikler (virgülle ayırın)</label><input id="il_features" value="' + esc((d.features || []).join(', ')) + '" placeholder="Asansör, Otopark, Balkon" style="width:100%;min-height:42px;padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px"></div>' +
+          '<div style="margin-bottom:10px"><label style="font:700 .8rem system-ui">Açıklama</label><textarea id="il_description" rows="5" style="width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:8px">' + esc(d.description || '') + '</textarea></div>' +
+          '<div style="margin-bottom:10px"><label style="font:700 .8rem system-ui">Fotoğraflar (en fazla 8)</label><div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0">' + imgs.map(function (u, i) { return '<div style="position:relative"><img src="' + esc(u) + '" alt="" style="width:92px;height:70px;object-fit:cover;border-radius:8px"><button data-ix="' + i + '" aria-label="Sil" style="position:absolute;right:2px;top:2px;border:0;border-radius:50%;width:26px;height:26px;background:#fff;cursor:pointer">×</button></div>'; }).join('') + '</div>' + (imgs.length < 8 ? '<input type="file" id="il_files" accept="image/*" multiple>' : '') + '</div>' +
+          '<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><div style="min-width:160px"><label style="font:700 .8rem system-ui">Durum</label><select id="il_status" style="width:100%;min-height:42px">' + op(Object.keys(ILST).map(function (k) { return [k, ILST[k]]; }), d.status) + '</select></div>' +
+          '<label style="display:flex;gap:8px;align-items:center;margin-top:18px"><input type="checkbox" id="il_featured"' + (d.featured ? ' checked' : '') + '> Öne çıkar</label><button class="spx-b p" id="il_save" style="margin-top:18px">Kaydet</button></div></div>';
+        $('#il_bk').onclick = drawIlan;
+        Array.prototype.forEach.call(body().querySelectorAll('[data-ix]'), function (b) { b.onclick = function () { keep(); imgs.splice(+b.getAttribute('data-ix'), 1); paint(); }; });
+        var fl = $('#il_files'); if (fl) fl.onchange = function () { keep(); var fs = Array.prototype.slice.call(fl.files, 0, 8 - imgs.length); Promise.all(fs.map(ilImg)).then(function (us) { imgs = imgs.concat(us); paint(); }).catch(fail); };
+        $('#il_save').onclick = function () {
+          keep(); var b = $('#il_save'); b.disabled = true;
+          call(id ? 'PUT' : 'POST', '/admin/listings' + (id ? '/' + id : ''), { title: d.title, kind: d.kind, category: d.category, price: d.price, city: d.city, district: d.district, neighborhood: d.neighborhood, rooms: d.rooms, m2: d.m2, floor: d.floor, age: d.age, heating: d.heating, features: d.features, description: d.description, images: imgs, status: d.status, featured: d.featured })
+            .then(function () { toast('İlan kaydedildi'); drawIlan(); }).catch(function (e) { b.disabled = false; fail(e); });
+        };
+      }
+      function keep() { ['title', 'price', 'city', 'district', 'neighborhood', 'rooms', 'm2', 'floor', 'age', 'heating', 'description'].forEach(function (k) { var e = $('#il_' + k); if (e) d[k] = e.value; }); ['kind', 'category', 'status'].forEach(function (k) { var e = $('#il_' + k); if (e) d[k] = e.value; });
+        var ft = $('#il_features'); if (ft) d.features = ft.value.split(',').map(function (x) { return x.trim(); }).filter(Boolean); var fe = $('#il_featured'); if (fe) d.featured = fe.checked; }
+      paint();
+    }).catch(fail);
   }
   /* ===== Firmalar: paneli kendi verisiyle kullanan müşteri firmalar ===== */
   var FM = { sel: '', tab: 'bilgi', job: '', q: '', flt: '', newOpen: false };
@@ -1576,7 +1629,7 @@
     ['Ustalar', [['/admin/technicians', 'Teknisyenler'], ['/admin/dealers', 'Bayilik Başvuruları'], ['ek:ustapuan', 'Usta Puanlama', 'user'], ['ek:ustagecmis', 'Usta İş Geçmişi', 'user'], ['/admin/performance', 'Performans'], ['/admin/team', 'Ekip Merkezi'], ['/admin/announcements', 'Duyurular']]],
     ['Muhasebe', [['/admin/accounting', 'Para Durumu'], ['ek:tahsilat', 'Ustadan Para Aldım', 'cart'], ['ek:cari', 'Ustaların Borç Durumu', 'cart'], ['ek:vade', 'Geciken Usta Borçları', 'cart'], ['ek:memnun', 'Müşteri Memnuniyeti', 'user'], ['/admin/reports', 'Raporlar']]],
     ['Mağaza & Satış', [['/admin/shop', 'Mağaza'], ['ek:yeni', 'Yeni Sipariş Gir', 'plus'], ['ek:mgayar', 'Mağaza Ayarları', 'gear'], ['ek:pazar', 'Pazaryerleri', 'cart'], ['ek:kanal', 'Ürünler', 'cart'], ['/admin/coupons', 'Kuponlar']]],
-    ['Web Sitesi', [['/admin/site-features', 'Site Özellikleri'], ['ek:sitem', 'Sitem (Web Sitesi)', 'gear'], ['ek:siteduz', 'Gelişmiş Düzenleme', 'gear'], ['ek:domain', 'Alan Adı & Site', 'gear'], ['ek:moduller', 'Aç/Kapat & Entegrasyonlar', 'gear'], ['ek:seo', 'SEO · 301 · 404', 'search'], ['/admin/site-studio', 'Site Stüdyosu'], ['/admin/media', 'Medya Kütüphanesi'], ['/admin/integration', 'Site Entegrasyonu']]],
+    ['Web Sitesi', [['/admin/site-features', 'Site Özellikleri'], ['ek:sitem', 'Sitem (Web Sitesi)', 'gear'], ['ek:siteduz', 'Gelişmiş Düzenleme', 'gear'], ['ek:ilan', 'İlanlar', 'shop'], ['ek:domain', 'Alan Adı & Site', 'gear'], ['ek:moduller', 'Aç/Kapat & Entegrasyonlar', 'gear'], ['ek:seo', 'SEO · 301 · 404', 'search'], ['/admin/site-studio', 'Site Stüdyosu'], ['/admin/media', 'Medya Kütüphanesi'], ['/admin/integration', 'Site Entegrasyonu']]],
     ['Pazarlama & İletişim', [['/admin/messages', 'İletişim Mesajları'], ['ek:sohbet', 'Canlı Sohbet', 'live'], ['/admin/reviews', 'Yorumlar'], ['ek:gsc', 'Google Search Console', 'search'], ['/admin/marketing', 'Pazarlama Merkezi'], ['ek:canli', 'Canlı Ziyaretçiler', 'search'], ['ek:wa', 'WhatsApp & Bildirim', 'gear'], ['ek:kaynak', 'Kaynak & Arama Analizi', 'search'], ['/admin/growth', 'Büyüme Merkezi'], ['/admin/visitors', 'Ziyaretçiler']]],
     ['Yönetim', [['/admin/settings', 'Ayarlar'], ['ek:yetki', 'Kullanıcılar & Yetkiler', 'user'], ['ek:firmalar', 'Firmalar', 'user'], ['/admin/security', 'Güvenlik'], ['/admin/governance', 'Yedek & Denetim'], ['ek:paket', 'Paketim', 'box'], ['/admin/account', 'Hesabım']]]
   ];
@@ -1614,6 +1667,7 @@
     var u = me(), r = u.admin_role || 'owner';
     if (k === '/admin/account') return true;
     if (k === 'ek:paket') return !!FIRM;
+    if (k === 'ek:ilan' && !PLAT && ['emlakci', 'arac_kiralama', 'transfer', 'tur_organizasyon'].indexOf(window.__spxSectorKey || '') < 0) return false;
     if ((FIRM || PLAT) && FIRM_HIDE[k]) return false;
     if (FIRM && PKGMODS && MODKEY[k] && PKGMODS.indexOf(MODKEY[k]) < 0) return false;
     if (FIRM && (k === 'ek:firmalar' || k === '/admin/governance')) return false; /* platform düzeyi: firma panelinde görünmez */
@@ -2502,7 +2556,7 @@
   function tick() {
     var asides = document.querySelectorAll('aside nav'); if (!asides.length) return;
     Array.prototype.forEach.call(asides, function (nav) {
-      var nl = nativeLinks(nav), sig = Object.keys(nl).join('|') + (FIRM ? '~F' + (PKGMODS ? PKGMODS.length : '') : '') + '#' + (me().admin_role || '') + (me().perms || []).join(','), own = nav.querySelector(':scope > [data-spx-own]');
+      var nl = nativeLinks(nav), sig = Object.keys(nl).join('|') + (FIRM ? '~F' + (PKGMODS ? PKGMODS.length : '') : '') + '#' + (me().admin_role || '') + (me().perms || []).join(',') + '@' + (window.__spxSectorKey || ''), own = nav.querySelector(':scope > [data-spx-own]');
       if (own && own.getAttribute('data-sig') === sig) { Array.prototype.forEach.call(own.querySelectorAll('a.spx-it'), function (a) { var k = a.getAttribute('data-k') || 'ek:', bd = a.querySelector('.spx-bd:not(.spx-od)'), t = k === 'ek:onay' ? (window.__onayN ? String(window.__onayN) : '') : k.indexOf('ek:') === 0 ? '' : (badgeOf(nl[k]) || (ADMB && ADMB[k] ? (k === '/admin/governance' ? '!' : String(ADMB[k])) : '')); if (t && t !== '0') { if (!bd) { bd = document.createElement('span'); bd.className = 'spx-bd'; a.appendChild(bd); } bd.textContent = t; } else if (bd) bd.remove(); var od = a.querySelector('.spx-od'), ov2 = k === '/admin/jobs' && ADMB && (ADMB.jobs_overdue > 0 || ADMB.call_overdue > 0) ? (ADMB.jobs_overdue || 0) + (ADMB.call_overdue || 0) : 0; if (ov2) { if (!od) { od = document.createElement('span'); od.className = 'spx-bd spx-od'; od.style.background = '#f59e0b'; od.style.marginLeft = '4px'; od.title = 'Randevu saati geçmiş iş'; a.appendChild(od); } od.textContent = ov2 + ' ⏰'; } else if (od) od.remove(); }); markActive(); return; }
       var sKey = nav.closest('.fixed') ? 'm' : 'd', sTop = nav.scrollTop || MSCR[sKey] || 0;
       if (own) own.remove();
@@ -6244,7 +6298,7 @@
     if (S.busy || S.tok === t) return; S.busy = true;
     fetch(location.origin + '/api/sector-terms', { headers: { Authorization: 'Bearer ' + t } })
       .then(function (r) { return r.ok ? r.json() : {}; })
-      .then(function (j) { S.tok = t; S.map = (j && j.terms && Object.keys(j.terms).length) ? j.terms : null; S.keys = S.map ? Object.keys(S.map) : []; })
+      .then(function (j) { window.__spxSectorKey = (j && j.key) || ''; S.tok = t; S.map = (j && j.terms && Object.keys(j.terms).length) ? j.terms : null; S.keys = S.map ? Object.keys(S.map) : []; })
       .catch(function () { S.tok = t; S.map = null; })
       .then(function () { S.busy = false; });
   }

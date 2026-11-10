@@ -329,6 +329,7 @@ def _off(m):
     return t.replace('class="', 'class="spx-off ', 1) if 'class="' in t else t[:-1] + ' class="spx-off">'
 
 
+ILAN_SECTORS = {"emlakci", "arac_kiralama", "transfer", "tur_organizasyon"}
 PAGE_MAP = {"hizmet": "hizmetlerimiz", "surec": "nasil-calisiyoruz", "neden": "hakkimizda", "yorum": "hakkimizda",
             "once-sonra": "galeri", "bolge": "hizmet-bolgeleri", "sss": "sss", "iletisim": "iletisim", "hakkimizda": "hakkimizda"}
 
@@ -395,9 +396,13 @@ def apply_profile(raw, th, ctx):
     for b in blocks:
         if b[0] == "Menü":
             nv = "".join('<a href="%s%s%s">%s</a>' % (pb, x["slug"], ps, E(x["title"])) for x in navs[:2] if x["slug"] not in _linked(b[1], pb, ps))
+            if ctx.get("sector") in ILAN_SECTORS and "/ilanlar" not in b[1]:
+                nv += '<a href="%silanlar%s">İlanlar</a>' % (pb, ps)
             b[1] = b[1].replace("</nav>", nv + "</nav>", 1) if "</nav>" in b[1] else b[1]
         elif b[0] == "Mobil menü":
             nv = "".join('<a href="%s%s%s">%s</a>' % (pb, x["slug"], ps, E(x["title"])) for x in navs if x["slug"] not in _linked(b[1], pb, ps))
+            if ctx.get("sector") in ILAN_SECTORS and "/ilanlar" not in b[1]:
+                nv += '<a href="%silanlar%s">İlanlar</a>' % (pb, ps)
             i = b[1].find('class="dl">')
             if i > 0:
                 j = b[1].find("</div>", i)
@@ -570,6 +575,8 @@ def edit_texts(html, ed):
 def footer_links(ctx, idx):
     links = ['<a href="/%s">%s</a>' % (x["slug"], E(x["title"])) for x in idx if x["kind"] in ("about", "services", "gallery", "process", "faq", "regions", "contact", "custom")]
     legal = ['<a href="/%s">%s</a>' % (k, E(t)) for k, t in (ctx.get("legal") or [])]       # mağaza açıksa yasal metinler (mevzuat gereği her sayfadan erişilebilir)
+    if ctx.get("sector") in ILAN_SECTORS:
+        links.append('<a href="/ilanlar">İlanlar</a>')
     if ctx.get("shop_on"):
         links += ['<a href="/magaza">Mağaza</a>', '<a href="/hesabim">Hesabım / Giriş</a>']
     if not links and not legal and not social_urls(ctx):
