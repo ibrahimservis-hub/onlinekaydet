@@ -184,6 +184,68 @@ footer{padding:34px var(--pad) calc(120px + env(safe-area-inset-bottom));display
 .sheet.done .ok .tick svg{animation:dr .6s .2s forwards}
 @keyframes dr{to{stroke-dashoffset:0}}
 .ok p{color:#6b5b4e;margin:8px auto 18px;max-width:300px}
+/* GRAIN + BADGE */
+body:before{content:"";position:fixed;inset:-50%;z-index:200;pointer-events:none;opacity:.07;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");animation:gr 1s steps(4) infinite}
+@keyframes gr{25%{transform:translate(-3%,2%)}50%{transform:translate(2%,-3%)}75%{transform:translate(-2%,-1%)}}
+.bdg{position:absolute;right:var(--pad);top:calc(env(safe-area-inset-top) + 86px);z-index:3;width:104px;height:104px;border-radius:50%;background:rgba(23,17,14,.45);backdrop-filter:blur(8px);border:1px solid rgba(244,236,227,.25);display:grid;place-items:center}
+.bdg svg{position:absolute;inset:0;animation:sp 16s linear infinite}
+.bdg text{font:600 10.5px Inter;letter-spacing:.22em;fill:var(--ink);text-transform:uppercase}
+.bdg b{font:italic 400 30px Fraunces,serif;color:var(--cu2)}
+@keyframes sp{to{transform:rotate(360deg)}}
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);border-block:1px solid rgba(244,236,227,.12);margin:0 var(--pad)}
+.stats div{padding:26px 6px;text-align:center;border-right:1px solid rgba(244,236,227,.12)}.stats div:last-child{border:0}
+.stats b{display:block;font:400 clamp(44px,12vw,84px)/1 Fraunces,serif;color:var(--cu2)}
+.stats span{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--mut)}
+/* STACK */
+.stk{padding:30px var(--pad) 40px;max-width:900px;margin:auto}
+.stk .hd{padding:70px 0 26px}.stk h2{font-size:clamp(40px,11vw,72px);margin-top:12px}
+.sc{position:sticky;height:360px;border-radius:30px;overflow:hidden;margin-bottom:18px;display:flex;flex-direction:column;justify-content:flex-end;padding:26px;box-shadow:0 -14px 40px -16px rgba(0,0,0,.7)}
+.sc:nth-child(2){top:84px}.sc:nth-child(3){top:104px}.sc:nth-child(4){top:124px}
+.sc .ph{position:absolute;inset:0;transition:transform 1s}.sc:hover .ph{transform:scale(1.05)}
+.sc:after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(23,17,14,.92) 8%,rgba(23,17,14,.1) 70%)}
+.sc>*:not(.ph){position:relative;z-index:2}
+.sc i{position:absolute!important;right:22px;top:6px;font:italic 400 110px/1 Fraunces,serif;color:rgba(244,236,227,.22);z-index:2}
+.sc h3{font-size:clamp(32px,9vw,46px);margin-bottom:8px}.sc p{color:#e3d6c8;max-width:420px}
+/* MOSAIC */
+.mos{padding:70px var(--pad);max-width:1200px;margin:auto}
+.mos h2{font-size:clamp(38px,10.5vw,72px);margin:12px 0 26px}
+.mg{display:grid;grid-template-columns:repeat(2,1fr);grid-auto-rows:150px;gap:10px}
+.mg div{border-radius:20px;overflow:hidden;position:relative;clip-path:inset(0 0 100% 0);transition:clip-path .9s cubic-bezier(.7,0,.2,1)}
+.mg div.v{clip-path:inset(0)}
+.mg div .ph{position:absolute;inset:0;transition:transform 1s}.mg div:hover .ph{transform:scale(1.06)}
+.mg .t{grid-row:span 2}.mg .w2{grid-column:span 2}
+/* CUSTOMER CARD */
+.cm{padding:84px var(--pad);background:var(--cream);color:var(--dk)}
+.cm .in{max-width:1100px;margin:auto;display:grid;gap:34px}
+.cm h2{font-size:clamp(38px,10.5vw,72px);margin:12px 0 14px}
+.cm .eb{color:#a8501f}.cm .eb:before{background:#a8501f}
+.cm p.l{color:#6b5b4e;max-width:440px}
+.cm ul{list-style:none;margin-top:18px;display:grid;gap:10px}
+.cm li{display:flex;gap:12px;align-items:center;font-weight:500}
+.cm li:before{content:"";flex:0 0 22px;height:22px;border-radius:50%;background:#a8501f url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M6 12.5l4 4 8-9' stroke='white' stroke-width='3' fill='none'/></svg>") center/14px no-repeat}
+.ph2{width:min(310px,100%);margin:0 auto;background:#17110e;border-radius:42px;padding:12px;box-shadow:0 40px 70px -30px rgba(60,30,10,.6);position:relative}
+.ph2 .sc2{background:var(--bg2);color:var(--ink);border-radius:32px;padding:20px 18px 18px;min-height:520px;overflow:hidden;position:relative}
+.ph2 .nt{width:90px;height:22px;background:#17110e;border-radius:0 0 16px 16px;margin:-20px auto 14px}
+.ph2 h4{font:400 24px Fraunces,serif}.ph2 small{color:var(--mut);font-size:12px}
+.ph2 .ph3{display:flex;gap:8px;margin:14px 0}
+.ph2 .ph3 div{flex:1;height:96px;border-radius:14px;position:relative;background-size:cover}
+.ph2 .ph3 em{position:absolute;left:6px;bottom:6px;font:600 10px Inter;font-style:normal;background:rgba(23,17,14,.7);padding:3px 8px;border-radius:99px}
+.ph2 .hv div{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(244,236,227,.1);font-size:13px}.ph2 .hv span:last-child{color:var(--mut)}
+.ph2 .nb{margin-top:12px;padding:12px;border-radius:14px;background:rgba(208,112,62,.16);border:1px solid rgba(208,112,62,.4);font-size:13px}
+.ph2 .toast{position:absolute;left:12px;right:12px;top:10px;background:#f4ece3;color:var(--dk);border-radius:18px;padding:12px 14px;font-size:13px;box-shadow:0 14px 30px -10px #000;transform:translateY(-130%);transition:transform .6s cubic-bezier(.2,.9,.3,1.2);z-index:3}
+.ph2 .toast.on{transform:none}
+.ph2 .toast b{display:block;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#a8501f}
+.pk{margin-top:6px;background:#17110e;color:var(--ink);border-radius:26px;padding:20px;max-width:360px}
+.pk h4{font:400 24px Fraunces,serif;margin-bottom:2px}.pk small{color:var(--mut)}
+.pk .st{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:16px 0 8px}
+.pk .st button{aspect-ratio:1;border-radius:50%;border:1.5px dashed rgba(244,236,227,.4);font:italic 15px Fraunces;color:var(--mut);transition:.3s;min-height:44px}
+.pk .st button.on{background:var(--cu);border:1.5px solid var(--cu);color:#fff;transform:scale(1.06)}
+.pk .st button.gift{border-color:var(--cu2);color:var(--cu2)}
+/* GIANT TYPE */
+.gt{overflow:hidden;padding:30px 0;background:var(--bg)}
+.gt div{display:flex;width:max-content;animation:mq 34s linear infinite reverse;font:400 clamp(90px,28vw,220px)/1 Fraunces,serif;letter-spacing:-.03em;color:transparent;-webkit-text-stroke:1.2px rgba(244,236,227,.35);white-space:nowrap;gap:40px}
+.gt span:nth-child(even){-webkit-text-stroke:0;color:var(--cu);font-style:italic}
 /* DESKTOP */
 @media(min-width:900px){
 :root{--pad:56px}
@@ -197,6 +259,10 @@ footer{padding:34px var(--pad) calc(120px + env(safe-area-inset-bottom));display
 .sl{padding:0 70px}
 .bar{top:auto;bottom:40px;left:calc(56% + 70px);right:70px}
 .sv{flex:0 0 340px}.c{flex:0 0 340px}
+.mg{grid-template-columns:repeat(4,1fr);grid-auto-rows:210px}
+.cm .in{grid-template-columns:1fr auto;align-items:center;gap:60px}
+.cm .cols{display:flex;gap:30px;align-items:flex-start}
+.bdg{width:140px;height:140px;top:130px}
 .tr,.ex{padding-left:max(var(--pad),calc((100vw - 1200px)/2 + var(--pad)))}
 .tl .g{grid-template-columns:1fr 1fr;gap:50px;align-items:center}
 .mbar{display:none}
@@ -221,12 +287,20 @@ footer{padding-bottom:40px;grid-auto-flow:column;justify-content:space-between}
 <div class="live"><small><i></i>Bugün boş saatler · dokunun, randevu açılsın</small><button class="chip" data-open data-t="14:30">14:30</button><button class="chip" data-open data-t="16:00">16:00</button><button class="chip" data-open data-t="17:30">17:30</button></div>
 <div class="acts"><button class="btn" data-open>Randevu al →</button><a class="btn o" href="#hz">Hizmetleri gör</a></div>
 </div>
+<div class="bdg"><svg viewBox="0 0 100 100"><defs><path id="cp" d="M50,50 m-38,0 a38,38 0 1,1 76,0 a38,38 0 1,1 -76,0"/></defs><text><textPath href="#cp">Randevulu salon ✦ Çankaya ✦ </textPath></text></svg><b>A</b></div>
 <div class="cue">Kaydırın</div>
 </header>
 
 <div class="mq"><div><span>Kesim</span><span>✦</span><span>Boya</span><span>✦</span><span>Balyaj</span><span>✦</span><span>Keratin bakım</span><span>✦</span><span>Gelin saçı</span><span>✦</span><span>Erkek kesim</span><span>✦</span><span>Kesim</span><span>✦</span><span>Boya</span><span>✦</span><span>Balyaj</span><span>✦</span><span>Keratin bakım</span><span>✦</span><span>Gelin saçı</span><span>✦</span><span>Erkek kesim</span><span>✦</span></div></div>
 
 <section class="promise"><p id="pr">Salonumuzda acele yok. Önce saçınızı dinler, sonra rengi ve boyu birlikte seçeriz. Randevunuz kayıtlıdır, bir gün önce hatırlatılır, işlem bitince ödemeniz tek fişle kapanır.</p></section>
+
+<div class="stats"><div><b data-n="3">0</b><span>Uzman</span></div><div><b data-n="5">0</b><span>Hizmet</span></div><div><b data-n="7">0</b><span>Gün açık takvim</span></div></div>
+
+<section class="stk"><div class="hd"><div class="eb">Söz</div><h2>Salonda üç söz.</h2></div>
+<div class="sc"><div class="ph pp" data-p="8867400"></div><i>1</i><h3>Acele yok</h3><p>Her randevuya süre ayrılır. Önce dinler, sonra başlarız.</p></div>
+<div class="sc"><div class="ph pp" data-p="3993308"></div><i>2</i><h3>Randevunuz kayıtlı</h3><p>Bir gün önce hatırlatma gider, geldiğinizde koltuğunuz hazırdır.</p></div>
+<div class="sc"><div class="ph pp" data-p="10028673"></div><i>3</i><h3>Tek fişle ödeme</h3><p>İşlem bitince nakit, kart veya havale; fiş ve kasa kaydı otomatik.</p></div></section>
 
 <section class="story" id="story"><div class="stage">
 <div class="bar"><i><b></b></i><i><b></b></i><i><b></b></i></div>
@@ -244,6 +318,16 @@ footer{padding-bottom:40px;grid-auto-flow:column;justify-content:space-between}
 </div><div class="cnt" id="cnt"><i class="on"></i><i></i><i></i><i></i><i></i></div></section>
 
 <section class="band"><div class="ph pp" id="bph" data-p="7195805"></div><p>Sıra beklemezsiniz. <em>Koltuğunuz</em> saatinde hazırdır.</p></section>
+
+<section class="mos"><div class="eb">Salon</div><h2>Koltuklarımızdan kareler.</h2>
+<div class="mg" id="mg"><div class="t"><div class="ph pp" data-p="3993320"></div></div><div><div class="ph pp" data-p="6487888"></div></div><div><div class="ph pp" data-p="23349912"></div></div><div class="w2"><div class="ph pp" data-p="7195805"></div></div><div class="t"><div class="ph pp" data-p="19664876"></div></div><div><div class="ph pp" data-p="3993462"></div></div><div><div class="ph pp" data-p="20046793"></div></div></div></section>
+
+<section class="cm"><div class="in"><div><div class="eb">Müşteri kartınız</div><h2>Geçmişiniz salonda kayıtlı.</h2><p class="l">Son renginiz, kullanılan ürün ve uzmanın notu bir sonraki randevuya hazır gelir. Hatırlatma telefonunuza düşer.</p>
+<ul><li>Önceki randevular ve yapılan işlemler</li><li>Renk formülü ve uzman notu</li><li>Önce ve sonra fotoğrafları</li><li>Bir gün önce hatırlatma mesajı</li></ul>
+<div class="pk"><h4>5 kesim paketi</h4><small>Dokunun, damga basılsın · beşincisi sonrası bakım hediye</small><div class="st" id="pk"><button>1</button><button>2</button><button>3</button><button>4</button><button class="gift">5</button></div></div></div>
+<div class="ph2" id="ph2"><div class="sc2"><div class="toast" id="toast"><b>Hatırlatma</b>Yarın 14:30 · Elif ile kesim ve fön</div><div class="nt"></div><small>Müşteri kartı</small><h4>Ayşe Yılmaz</h4><div class="ph3"><div class="pp" data-p="3993462" style="background-position:50% 30%"><em>Önce</em></div><div class="pp" data-p="20046793" style="background-position:50% 30%"><em>Sonra</em></div></div><div class="hv"><div><span>Kesim ve fön</span><span>14 Kas</span></div><div><span>Boya · 7.1 küllü kumral</span><span>2 Eyl</span></div><div><span>Keratin bakım</span><span>18 Tem</span></div></div><div class="nb">Uzman notu: Uçlar yıpranmış, bir sonraki boyada koruyucu bakım ekle.</div></div></div></div></section>
+
+<div class="gt"><div><span>Atölye</span><span>Saç</span><span>Atölye</span><span>Saç</span><span>Atölye</span><span>Saç</span></div></div>
 
 <section class="tl" id="sure"><div class="eb">Süreç</div><h2>Randevunuz bir kez kaydedilir, herkes görür.</h2>
 <div class="g"><div class="stp" id="stp">
@@ -315,6 +399,15 @@ function setT(k){ti=k;sb.forEach(function(b,i){b.classList.toggle('on',i===k)});
 sb.forEach(function(b,i){b.onclick=function(){hold=true;setT(i)}});
 var seen=false;new IntersectionObserver(function(e){seen=e[0].isIntersecting},{threshold:.4}).observe($('#stp'));
 setInterval(function(){if(seen&&!hold)setT((ti+1)%5)},3200);setT(0);
+/* count, mosaic, phone, punch card */
+A('[data-p]').forEach(function(e){if(e.dataset.p&&!e.style.backgroundImage)e.style.backgroundImage='url("'+PX(e.dataset.p)+'")'});
+var io=new IntersectionObserver(function(es){es.forEach(function(en){if(!en.isIntersecting)return;var e=en.target;io.unobserve(e);
+if(e.dataset.n){var n=+e.dataset.n,k=0,t=setInterval(function(){k++;e.textContent=k;if(k>=n)clearInterval(t)},260)}
+else if(e.id==='ph2'){setTimeout(function(){$('#toast').classList.add('on')},900);setTimeout(function(){$('#toast').classList.remove('on')},5200)}
+else e.classList.add('v')})},{threshold:.25});
+A('.stats b').forEach(function(e){io.observe(e)});io.observe($('#ph2'));A('#mg>div').forEach(function(e,i){e.style.transitionDelay=(i*90)+'ms';io.observe(e)});
+A('#pk button').forEach(function(b,i){b.onclick=function(){var on=b.classList.contains('on');A('#pk button').forEach(function(x,j){x.classList.toggle('on',on?j<i:j<=i)})}});
+document.addEventListener('mousemove',function(e){document.documentElement.style.setProperty('--gx',e.clientX+'px')},{passive:true});
 /* sheet */
 var sh=$('#sh'),shs=$('#shs');
 function pick(id,val){var g=A('#'+id+' button');var f=g.filter(function(b){return(b.dataset.v||b.textContent.replace(/\s+/g,' ').trim())===val})[0];if(f){g.forEach(function(b){b.classList.toggle('on',b===f)})}}
