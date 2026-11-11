@@ -118,7 +118,7 @@ def register(api_router, db, deps):
         p = sitegen.effective(prof, sector)
         p["address"] = prof.get("address") or g.get("company_address") or ""
         imgs = {}
-        keys = [x["k"] for x in (p.get("slides") or []) + (p.get("gallery") or [])] + [e["img"] for e in (p.get("extra_pages") or []) if e.get("img")]
+        keys = [x["k"] for x in (p.get("slides") or []) + (p.get("gallery") or [])] + [e["img"] for e in (p.get("extra_pages") or []) if e.get("img")] + [v for blks in (p.get("imgedits") or {}).values() for tx in blks.values() for v in tx.values()]
         if inline and keys:
             async for r in db.site_images.find({"_id": {"$in": keys}}):
                 imgs[r["_id"]] = "data:%s;base64,%s" % (r.get("mime") or "image/jpeg", base64.b64encode(bytes(r["data"])).decode())
@@ -337,6 +337,12 @@ def register(api_router, db, deps):
                 continue
             ed[_t(th_, 60)] = {_t(bn, 60): {str(int(i)): str(v)[:600] for i, v in list(tx.items())[:80] if str(i).isdigit()} for bn, tx in list(blks.items())[:40] if isinstance(tx, dict)}
         out["edits"] = ed
+        ie = {}
+        for th_, blks in (x.get("imgedits") or {}).items():
+            if not isinstance(blks, dict) or len(ie) > 5:
+                continue
+            ie[_t(th_, 60)] = {_t(bn, 60): {str(int(i)): str(v) for i, v in list(tx.items())[:80] if str(i).isdigit() and re.fullmatch(r"[a-f0-9]{16}", str(v))} for bn, tx in list(blks.items())[:40] if isinstance(tx, dict)}
+        out["imgedits"] = ie
         out["hidden_pages"] = [_t(v, 60) for v in (x.get("hidden_pages") or [])[:60]]
         out["menu_off"] = [_t(v, 60) for v in (x.get("menu_off") or [])[:60]]
         ex, used = [], set()
@@ -350,10 +356,13 @@ def register(api_router, db, deps):
                 sl, n = "%s-%d" % (base, n), n + 1
             used.add(sl)
             ex.append({"slug": sl, "title": tt, "body": "\n".join(_t(l, 800) for l in str(e.get("body") or "").replace("\r", "").split("\n"))[:6000], "img": str(e.get("img") or ""), "menu": bool(e.get("menu", True))})
-        want = [str(s.get("k") or "") for s in (x.get("slides") or [])[:8]] + [str(g.get("k") or "") for g in (x.get("gallery") or [])[:16]] + [e["img"] for e in ex if e["img"]]
+        want = [v for blks in ie.values() for tx in blks.values() for v in tx.values()] + [str(s.get("k") or "") for s in (x.get("slides") or [])[:8]] + [str(g.get("k") or "") for g in (x.get("gallery") or [])[:16]] + [e["img"] for e in ex if e["img"]]
         have = set()
         async for r in db.site_images.find({"_id": {"$in": want}}, {"_id": 1}):
             have.add(r["_id"])
+        for blks in ie.values():
+            for bn in list(blks):
+                blks[bn] = {i: v for i, v in blks[bn].items() if v in have}
         out["slides"] = [{"k": s["k"], "t": _t(s.get("t"), 80), "d": _t(s.get("d"), 160)} for s in (x.get("slides") or [])[:8] if s.get("k") in have]
         out["gallery"] = [{"k": g["k"]} for g in (x.get("gallery") or [])[:16] if g.get("k") in have]
         for e in ex:
@@ -386,9 +395,11 @@ def register(api_router, db, deps):
     @api_router.put("/site/profile")
     async def profile_put(payload: dict, _: dict = Depends(require_admin)):
         need_firm()
+        if "imgedits" not in payload:          # eski panel bu alanı bilmez: mevcut resim değişikliklerini silmesin
+            payload = dict(payload, imgedits=((await db.app_settings.find_one({"_id": "site_profile"}, {"_id": 0})) or {}).get("imgedits") or {})
         prof = await san_profile(payload)
         await db.app_settings.update_one({"_id": "site_profile"}, {"$set": prof}, upsert=True)
-        keep = [x["k"] for x in prof["slides"] + prof["gallery"]] + [e["img"] for e in prof["extra_pages"] if e["img"]]
+        keep = [x["k"] for x in prof["slides"] + prof["gallery"]] + [e["img"] for e in prof["extra_pages"] if e["img"]] + [v for blks in prof["imgedits"].values() for tx in blks.values() for v in tx.values()]
         await db.site_images.delete_many({"_id": {"$nin": keep}})
         return {"ok": True}
 
@@ -429,13 +440,15 @@ def register(api_router, db, deps):
             raise HTTPException(404, "Yok")
         return Response(base64.b64decode(m.group(2)), media_type=m.group(1), headers={"Cache-Control": "public, max-age=86400", "Content-Security-Policy": "sandbox"})
 
-    async def base_blocks(ctx, with_edits):
+    async def base_blocks(ctx, with_edits, footer=False):
         p2 = dict(ctx["p"], layout={"_all": True})
         if not with_edits:
             p2["edits"] = {}
+        p2["imgedits"] = {}                 # resim sırası her zaman özgün temaya göre sayılır
         h = sitegen.apply_profile(raw_theme(ctx["th"]["slug"]), ctx["th"], dict(ctx, p=p2))
         parts = sitegen.split_blocks(h)
-        return {b[0]: b[1] for b in (parts[1] if parts else []) if b[0] not in sitegen.FIXED_TOP + sitegen.FIXED_BOTTOM}, [b[0] for b in (parts[1] if parts else []) if b[0] not in sitegen.FIXED_TOP + sitegen.FIXED_BOTTOM]
+        return ({b[0]: b[1] for b in (parts[1] if parts else []) if b[0] not in sitegen.FIXED_TOP + sitegen.FIXED_BOTTOM or (footer and b[0] == "Alt bilgi")},
+                [b[0] for b in (parts[1] if parts else []) if b[0] not in sitegen.FIXED_TOP + sitegen.FIXED_BOTTOM])
 
     @api_router.get("/site/blocks")
     async def blocks_get(_: dict = Depends(require_admin)):
@@ -445,6 +458,7 @@ def register(api_router, db, deps):
         if not ctx:
             raise HTTPException(400, "Önce bir tema seçin")
         blocks, names = await base_blocks(ctx, True)
+        org_, _nn = await base_blocks(ctx, False)
         lay = ctx["p"].get("layout") or {}
         order = [n for n in (lay.get("order") or []) if n in blocks] + [n for n in names if n not in (lay.get("order") or [])]
         from bs4 import BeautifulSoup
@@ -452,7 +466,7 @@ def register(api_router, db, deps):
         for n in order:
             soup = BeautifulSoup(blocks[n], "html.parser")
             hd = soup.find(["h1", "h2", "h3"])
-            out.append({"name": n, "hidden": n in (lay.get("hidden") or []) or (sitegen.dflt_off(blocks[n]) and n not in (lay.get("order") or [])), "title": " ".join(hd.get_text().split())[:70] if hd else "", "n": len(sitegen.edit_nodes(soup))})
+            out.append({"name": n, "hidden": n in (lay.get("hidden") or []) or (sitegen.dflt_off(blocks[n]) and n not in (lay.get("order") or [])), "title": " ".join(hd.get_text().split())[:70] if hd else "", "n": len(sitegen.edit_nodes(soup)), "ni": len(sitegen.block_images(org_[n])) if n in org_ else 0})
         return {"blocks": out}
 
     @api_router.get("/site/block-text")
@@ -461,14 +475,27 @@ def register(api_router, db, deps):
         ctx = await build_ctx()
         if not ctx:
             raise HTTPException(400, "Önce bir tema seçin")
-        cur, _n = await base_blocks(ctx, True)
-        org, _n2 = await base_blocks(ctx, False)
+        cur, _n = await base_blocks(ctx, True, True)
+        org, _n2 = await base_blocks(ctx, False, True)
         if name not in cur:
             raise HTTPException(404, "Bölüm yok")
         a, b = sitegen.block_texts(cur[name]), sitegen.block_texts(org[name])
         for x in a:
             x["orig"] = b[x["i"]]["text"] if x["i"] < len(b) else x["text"]
         return {"texts": a}
+
+    @api_router.get("/site/block-images")
+    async def block_images(name: str, _: dict = Depends(require_admin)):
+        """Bölümdeki değiştirilebilir resimler: özgün stok resim + (varsa) yüklenen resim."""
+        need_firm()
+        ctx = await build_ctx()
+        if not ctx:
+            raise HTTPException(400, "Önce bir tema seçin")
+        org, _n = await base_blocks(ctx, False, True)
+        if name not in org:
+            raise HTTPException(404, "Bölüm yok")
+        cur = ((ctx["p"].get("imgedits") or {}).get(ctx["th"]["slug"], {}) or {}).get(name, {})
+        return {"images": [dict(x, thumb="https://images.pexels.com/photos/%s/pexels-photo-%s.jpeg?auto=compress&cs=tinysrgb&w=400" % (x["pid"], x["pid"]), k=cur.get(str(x["i"]), "")) for x in sitegen.block_images(org[name])]}
 
     @api_router.get("/site/preview")
     async def preview(path: str = "/", _: dict = Depends(require_admin)):

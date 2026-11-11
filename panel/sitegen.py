@@ -416,6 +416,9 @@ def apply_profile(raw, th, ctx):
         blocks.insert(k, ["Slider", slider_html(ctx)])
     blocks = apply_layout(blocks, ctx)
     out = join_blocks(pre, blocks, tail)
+    if ctx.get("_oki"):
+        out = _PXD.sub(lambda m: m.group(1) + "if(window.__OKI&&window.__OKI[i])return window.__OKI[i];" + m.group(2), out)
+        out = out.replace("</body>", oki_script(ctx["_oki"]) + "</body>", 1) if "</body>" in out else out + oki_script(ctx["_oki"])
     out = out.replace("</head>", CSS + "</head>", 1)
     if ctx["p"].get("slides"):
         out = out.replace("</body>", SLIDER_JS + "</body>", 1) if "</body>" in out else out + SLIDER_JS
@@ -521,9 +524,12 @@ def apply_layout(blocks, ctx):
     bot = [b for b in blocks if b[0] in FIXED_BOTTOM]
     mid = [b for b in blocks if b[0] not in FIXED_TOP + FIXED_BOTTOM]
     edits = (ctx["p"].get("edits") or {}).get(ctx["th"]["slug"], {}) if ctx.get("th") else {}
-    for b in mid:
+    iedits = (ctx["p"].get("imgedits") or {}).get(ctx["th"]["slug"], {}) if ctx.get("th") else {}
+    for b in mid + [x for x in bot if x[0] == "Alt bilgi"]:
         if edits.get(b[0]):
             b[1] = edit_texts(b[1], edits[b[0]])
+        if iedits.get(b[0]):
+            b[1] = edit_imgs(b[1], iedits[b[0]], ctx["img"], ctx.setdefault("_oki", {}))
     pos = {n: i for i, n in enumerate(order)}
     mid = sorted(mid, key=lambda b: pos.get(b[0], 10_000))
     gone = [b for b in mid if b[0] in hidden]
@@ -536,6 +542,69 @@ def apply_layout(blocks, ctx):
                     t[1] = re.sub(r'<a [^>]*href="#%s"[^>]*>(?:(?!</a>).)*</a>' % re.escape(i), "", t[1])
                     t[1] = re.sub(r'<div><a [^>]*href="#%s"[^>]*>(?:(?!</a>).)*</a></div>' % re.escape(i), "", t[1])
     return top + mid + bot
+
+
+def img_nodes(soup):
+    """Temadaki değiştirilebilir resimler: <img data-i=ID> ve arka planı data-p=ID olan öğeler (belge sırasıyla)."""
+    out = []
+    for el in soup.find_all(True):
+        if el.name == "img" and str(el.get("data-i") or "").isdigit():
+            out.append(el)
+        elif str(el.get("data-p") or "").isdigit():
+            if any(c.name == "img" and c.get("data-i") == el.get("data-p") for c in el.find_all("img")):
+                continue                            # <a data-p=X><img data-i=X>: tek resim sayılır (görünen <img>)
+            out.append(el)
+    return out
+
+
+def block_images(html):
+    from bs4 import BeautifulSoup
+    soup = BeautifulSoup(html, "html.parser")
+    return [{"i": i, "pid": str(el.get("data-i") or el.get("data-p")), "tag": el.name} for i, el in enumerate(img_nodes(soup))]
+
+
+def edit_imgs(html, ed, url_of, reg=None):
+    """ed: {sıra: yüklenen resim anahtarı}. Resim, lightbox ve tema betiği yeni adresi kullansın diye data-i/data-p 'u<anahtar>' olur."""
+    from bs4 import BeautifulSoup
+    soup = BeautifulSoup(html, "html.parser")
+    nodes = img_nodes(soup)
+    done = False
+    for k, v in ed.items():
+        try:
+            el = nodes[int(k)]
+        except (ValueError, IndexError):
+            continue
+        url = url_of(str(v))
+        if not url:
+            continue
+        uid = "u" + str(v)
+        if el.name == "img" and el.get("data-i"):
+            old_id = el.get("data-i")
+            el["src"] = url
+            el["data-i"] = uid
+            par = el.parent
+            while par is not None and par.name not in ("body", "[document]"):      # lightbox'ın okuduğu üst öğe
+                if par.get("data-p") == old_id:
+                    par["data-p"] = uid
+                    break
+                par = par.parent
+        else:
+            st = str(el.get("style") or "").strip().rstrip(";")
+            el["style"] = (st + ";" if st else "") + 'background-image:url("%s")' % url.replace('"', "%22")
+            el["data-p"] = uid
+        if reg is not None:
+            reg[uid] = url
+        done = True
+    return str(soup) if done else html
+
+
+def oki_script(reg):
+    import json as _j
+    return "<script>window.__OKI=%s</script>" % _j.dumps(reg).replace("</", "<\\/")
+
+
+_PXD = re.compile(r"(PX=function\(i,w\)\{)(return'https://images\.pexels\.com)")
+
 
 
 _INLINE = {"em", "strong", "b", "i", "br", "span", "small", "mark", "u", "wbr"}
