@@ -1,0 +1,471 @@
+# -*- coding: utf-8 -*-
+"""Yeni yönetim paneli (randevuyla çalışan işler): takvim, kasa, ekip, müşteri ve raporlar.
+
+Eski panelin uçlarına ve ekranlarına dokunmaz. Randevular siteyle aynı `bookings` koleksiyonunda durur; böylece siteden
+alınan randevu bu takvime düşer, panelden girilen randevu da sitedeki boş saat hesabına girer.
+Kasa (`yp_cash`), ekip (`yp_staff`) ve hizmet listesi (`yp_services`) bu panelin kendi koleksiyonlarıdır.
+Ödeme alındığında kasa satırı aynı istekte yazılır: randevu ile kasa birbirinden kopamaz."""
+import re
+import time
+import uuid
+from datetime import datetime, timedelta, timezone
+
+from fastapi import Depends, HTTPException
+
+try:
+    from zoneinfo import ZoneInfo
+    TR = ZoneInfo("Europe/Istanbul")
+except Exception:                                                  # noqa: BLE001
+    TR = timezone(timedelta(hours=3))
+
+COLORS = ["#1155cc", "#0f766e", "#9a3412", "#6d28d9", "#be185d", "#3f6212", "#0e7490", "#7c2d12"]
+STAGES = ("bekliyor", "geldi", "islemde", "tamamlandi", "gelmedi", "iptal")
+OPEN = ("bekliyor", "geldi", "islemde")
+METHODS = ("Nakit", "Kart", "Havale")
+SOURCES = ("telefon", "salon", "site", "instagram", "whatsapp")
+SEED = {
+    "kuafor": [("Saç kesimi", 30, 450), ("Fön", 30, 250), ("Boya", 90, 1400), ("Röfle", 120, 2200), ("Keratin bakım", 90, 1800), ("Saç + sakal", 45, 400), ("Gelin saçı", 120, 3500)],
+    "guzellik": [("Cilt bakımı", 60, 1200), ("Kaş alımı", 15, 200), ("Lazer epilasyon", 45, 1500), ("Manikür", 40, 450), ("Pedikür", 45, 500)],
+    "tirnak_studyo": [("Manikür", 40, 450), ("Pedikür", 45, 500), ("Kalıcı oje", 45, 600), ("Protez tırnak", 90, 1200)],
+    "spa_hamam": [("Klasik masaj", 60, 1500), ("Hamam + kese", 45, 900), ("Aromaterapi masajı", 60, 1800)],
+}
+
+
+def _now():
+    return datetime.now(TR).replace(tzinfo=None)
+
+
+def _t(v, n):
+    return " ".join(str(v or "").split())[:n]
+
+
+def _num(v):
+    try:
+        x = float(str(v).replace(",", ".")) if v not in (None, "") else 0.0
+    except ValueError:
+        x = 0.0
+    return round(max(0.0, min(x, 10 ** 8)), 2)
+
+
+def _day(v):
+    v = str(v or "")
+    if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", v):
+        raise HTTPException(422, "Tarih geçersiz")
+    return v
+
+
+def _tm(v):
+    v = str(v or "")
+    if not re.fullmatch(r"([01]\d|2[0-3]):[0-5]\d", v):
+        raise HTTPException(422, "Saat geçersiz")
+    return v
+
+
+def _min(t):
+    return int(t[:2]) * 60 + int(t[3:5])
+
+
+def _phone(v):
+    d = re.sub(r"\D", "", str(v or ""))[-10:]
+    return d if len(d) == 10 else ""
+
+
+def terms(key):
+    """Bu işte kişiye ve yere ne denir (uzman / terapist / hekim ...)."""
+    try:
+        import sektor_dil
+        r = sektor_dil.ROWS.get(key) or {}
+    except Exception:                                              # noqa: BLE001
+        r = {}
+    a, _, b = (r.get("kisi") or "Uzman/Uzmanlar").partition("/")
+    return {"kisi": a, "kisiler": b or a, "yer": (r.get("yer") or "Koltuk Takibi").replace(" Takibi", "")}
+
+
+def view(b):
+    """bookings kaydı -> panel randevusu (eski panelden/siteden gelen kayıtlar da okunur)."""
+    st = b.get("stage")
+    if not st:
+        st = {"bekliyor": "talep", "onaylandi": "bekliyor", "tamamlandi": "tamamlandi"}.get(b.get("status"), "iptal")
+    items = b.get("items") or []
+    total = round(max(sum(_num(i.get("price")) for i in items) - _num(b.get("discount")), 0), 2)
+    paid = round(sum(_num(p.get("amount")) for p in b.get("payments") or []), 2)
+    return {"id": b["id"], "no": b.get("no", ""), "name": b.get("name", ""), "phone": b.get("phone", ""), "date": b.get("date", ""), "time": b.get("time", ""),
+            "dur": int(b.get("dur") or 30), "stage": st, "staff_id": b.get("staff_id", ""), "items": items, "discount": _num(b.get("discount")),
+            "total": total, "paid": paid, "balance": round(max(total - paid, 0), 2), "payments": b.get("payments") or [], "note": b.get("note") or b.get("fault") or "",
+            "want": b.get("device_type", ""), "source": b.get("source") or ("site" if not b.get("yp") else "telefon"), "coupon": b.get("coupon", "")}
+
+
+def register(api_router, db, deps):
+    adm = deps["require_admin"]
+
+    async def sector():
+        d = await db.app_settings.find_one({"_id": "sector"}, {"_id": 0}) or {}
+        return d.get("key") or ""
+
+    async def staff_all():
+        rows = await db.yp_staff.find({}, {"_id": 0}).sort("order", 1).to_list(200)
+        if rows or await db.app_settings.find_one({"_id": "yp_seed"}):
+            return rows
+        us = await db.users.find({"role": "technician", "is_active": {"$ne": False}}, {"_id": 0, "id": 1, "name": 1, "commission_percent": 1}).to_list(100)
+        rows = [{"id": u["id"], "name": u.get("name", ""), "title": "", "commission": float(u.get("commission_percent") or 0), "salary": 0.0, "off": [],
+                 "color": COLORS[i % len(COLORS)], "active": True, "order": i} for i, u in enumerate(us) if u.get("name")]
+        if rows:
+            await db.yp_staff.insert_many([dict(r) for r in rows])
+        key = await sector()
+        if not await db.yp_services.count_documents({}):
+            sv = [{"id": uuid.uuid4().hex[:12], "name": n, "dur": d, "price": float(p), "active": True, "order": i} for i, (n, d, p) in enumerate(SEED.get(key, []))]
+            if sv:
+                await db.yp_services.insert_many([dict(s) for s in sv])
+        await db.app_settings.update_one({"_id": "yp_seed"}, {"$set": {"at": time.time()}}, upsert=True)
+        return rows
+
+    async def cfg():
+        try:
+            import growth
+            return (await growth.get_cfg(db)).get("booking") or {}
+        except Exception:                                          # noqa: BLE001
+            return {}
+
+    @api_router.get("/yp/boot")
+    async def boot(user: dict = Depends(adm)):
+        st = await staff_all()
+        key = await sector()
+        g = await db.app_settings.find_one({"_id": "global"}, {"_id": 0}) or {}
+        B = await cfg()
+        sv = await db.yp_services.find({}, {"_id": 0}).sort("order", 1).to_list(500)
+        return {"firm": g.get("company_name") or "", "sector": key, "terms": terms(key), "user": user.get("name") or user.get("email") or "", "staff": st, "services": sv,
+                "hours": {"start": B.get("start") or "09:00", "end": B.get("end") or "19:00", "closed": B.get("closed_weekdays") or [], "online": bool(B.get("enabled")),
+                          "slot": int(B.get("slot_minutes") or 30)},
+                "today": _now().date().isoformat(), "now": _now().strftime("%H:%M")}
+
+    # ------------------------------------------------------------------ ekip
+    def clean_staff(p, old=None):
+        o = dict(old or {})
+        if "name" in p or not old:
+            o["name"] = _t(p.get("name"), 60)
+            if len(o["name"]) < 2:
+                raise HTTPException(422, "Ad yazın")
+        for k, n in (("title", 60),):
+            if k in p:
+                o[k] = _t(p.get(k), n)
+        if "commission" in p:
+            o["commission"] = min(_num(p.get("commission")), 100.0)
+        if "salary" in p:
+            o["salary"] = _num(p.get("salary"))
+        if "off" in p:
+            o["off"] = sorted({int(x) for x in (p.get("off") or []) if str(x).isdigit() and 0 <= int(x) <= 6})
+        if "active" in p:
+            o["active"] = bool(p.get("active"))
+        if p.get("color") in COLORS:
+            o["color"] = p["color"]
+        return o
+
+    @api_router.post("/yp/staff")
+    async def staff_add(payload: dict, _: dict = Depends(adm)):
+        n = await db.yp_staff.count_documents({})
+        d = {"id": uuid.uuid4().hex[:12], "title": "", "commission": 30.0, "salary": 0.0, "off": [], "color": COLORS[n % len(COLORS)], "active": True, "order": n}
+        d = clean_staff(payload, d)
+        await db.yp_staff.insert_one(dict(d))
+        await db.app_settings.update_one({"_id": "yp_seed"}, {"$set": {"at": time.time()}}, upsert=True)
+        return d
+
+    @api_router.put("/yp/staff/{sid}")
+    async def staff_put(sid: str, payload: dict, _: dict = Depends(adm)):
+        old = await db.yp_staff.find_one({"id": sid}, {"_id": 0})
+        if not old:
+            raise HTTPException(404, "Kişi bulunamadı")
+        d = clean_staff(payload, old)
+        await db.yp_staff.update_one({"id": sid}, {"$set": d})
+        return d
+
+    # ------------------------------------------------------------------ hizmetler
+    def clean_service(p):
+        n = _t(p.get("name"), 60)
+        if len(n) < 2:
+            raise HTTPException(422, "Hizmet adı yazın")
+        return {"name": n, "dur": max(5, min(int(_num(p.get("dur")) or 30), 600)), "price": _num(p.get("price")), "active": bool(p.get("active", True))}
+
+    @api_router.post("/yp/services")
+    async def service_add(payload: dict, _: dict = Depends(adm)):
+        d = clean_service(payload)
+        d.update({"id": uuid.uuid4().hex[:12], "order": await db.yp_services.count_documents({})})
+        await db.yp_services.insert_one(dict(d))
+        return d
+
+    @api_router.put("/yp/services/{sid}")
+    async def service_put(sid: str, payload: dict, _: dict = Depends(adm)):
+        d = clean_service(payload)
+        r = await db.yp_services.update_one({"id": sid}, {"$set": d})
+        if not r.matched_count:
+            raise HTTPException(404, "Hizmet bulunamadı")
+        return dict(d, id=sid)
+
+    @api_router.delete("/yp/services/{sid}")
+    async def service_del(sid: str, _: dict = Depends(adm)):
+        await db.yp_services.delete_one({"id": sid})
+        return {"ok": True}
+
+    # ------------------------------------------------------------------ randevular
+    async def clean_appt(p, old=None):
+        o = {}
+        name = _t(p.get("name", (old or {}).get("name")), 80)
+        if len(name) < 2:
+            raise HTTPException(422, "Müşteri adını yazın")
+        o["name"] = name
+        o["phone"] = _phone(p.get("phone")) if "phone" in p else (old or {}).get("phone", "")
+        o["date"], o["time"] = _day(p.get("date", (old or {}).get("date"))), _tm(p.get("time", (old or {}).get("time")))
+        sid = str(p.get("staff_id", (old or {}).get("staff_id")) or "")
+        if not sid or not await db.yp_staff.find_one({"id": sid}):
+            raise HTTPException(422, "Randevuyu kimin yapacağını seçin")
+        o["staff_id"] = sid
+        items = p.get("items") if "items" in p else (old or {}).get("items") or []
+        o["items"] = [{"name": _t(i.get("name"), 60), "price": _num(i.get("price")), "dur": int(_num(i.get("dur")) or 0)} for i in (items or [])[:20] if _t(i.get("name"), 60)]
+        if not o["items"]:
+            raise HTTPException(422, "En az bir hizmet seçin")
+        o["dur"] = max(10, min(int(_num(p.get("dur")) or sum(i["dur"] for i in o["items"]) or (old or {}).get("dur") or 30), 720))
+        o["discount"] = min(_num(p.get("discount", (old or {}).get("discount"))), sum(i["price"] for i in o["items"]))
+        o["note"] = _t(p.get("note", (old or {}).get("note") or (old or {}).get("fault")), 600)
+        src = p.get("source", (old or {}).get("source"))
+        o["source"] = src if src in SOURCES else ("site" if old and not old.get("yp") else "telefon")
+        return o
+
+    async def clash(o, skip=""):
+        a0 = _min(o["time"])
+        a1 = a0 + o["dur"]
+        for b in await db.bookings.find({"date": o["date"], "staff_id": o["staff_id"], "status": "onaylandi"}, {"_id": 0}).to_list(500):
+            if b["id"] == skip or b.get("stage") not in OPEN:
+                continue
+            b0 = _min(b["time"])
+            if a0 < b0 + int(b.get("dur") or 30) and b0 < a1:
+                return b
+        return None
+
+    async def next_no():
+        d = await db.app_settings.find_one_and_update({"_id": "yp_no"}, {"$inc": {"n": 1}}, upsert=True, return_document=True)
+        return "RD-%d" % (1000 + int((d or {}).get("n") or 1))
+
+    async def remember(o):
+        if o.get("phone"):
+            await db.yp_customers.update_one({"phone": o["phone"]}, {"$set": {"name": o["name"]}, "$setOnInsert": {"note": "", "created_at": time.time()}}, upsert=True)
+
+    @api_router.get("/yp/appts")
+    async def appts(a: str, b: str = "", _: dict = Depends(adm)):
+        a = _day(a)
+        b = _day(b) if b else a
+        rows = await db.bookings.find({"date": {"$gte": a, "$lte": b}}, {"_id": 0}).sort([("date", 1), ("time", 1)]).to_list(5000)
+        return {"rows": [view(r) for r in rows if r.get("date") and re.fullmatch(r"\d\d:\d\d", str(r.get("time") or ""))]}
+
+    @api_router.get("/yp/requests")
+    async def requests_(_: dict = Depends(adm)):
+        rows = await db.bookings.find({"status": "bekliyor", "date": {"$gte": _now().date().isoformat()}}, {"_id": 0}).sort([("date", 1), ("time", 1)]).to_list(200)
+        return {"rows": [view(r) for r in rows]}
+
+    @api_router.post("/yp/appts")
+    async def appt_add(payload: dict, user: dict = Depends(adm)):
+        o = await clean_appt(payload)
+        c = await clash(o)
+        if c and not payload.get("force"):
+            raise HTTPException(409, "Bu saatte %s için başka randevu var (%s %s)" % ("seçilen kişi", c.get("time"), c.get("name")))
+        o.update({"id": uuid.uuid4().hex, "no": await next_no(), "yp": True, "status": "onaylandi", "stage": "bekliyor", "payments": [], "job_id": "",
+                  "created_at": _now().isoformat(timespec="seconds"), "created_by": user.get("name", "")})
+        await db.bookings.insert_one(dict(o))
+        await remember(o)
+        return view(o)
+
+    @api_router.put("/yp/appts/{aid}")
+    async def appt_put(aid: str, payload: dict, _: dict = Depends(adm)):
+        old = await db.bookings.find_one({"id": aid}, {"_id": 0})
+        if not old:
+            raise HTTPException(404, "Randevu bulunamadı")
+        o = await clean_appt(payload, old)
+        paid = sum(_num(p.get("amount")) for p in old.get("payments") or [])
+        if paid > sum(i["price"] for i in o["items"]) - o["discount"] + 0.001:
+            raise HTTPException(422, "Alınan ödeme (%.2f ₺) yeni tutardan fazla olamaz" % paid)
+        c = await clash(o, aid)
+        if c and not payload.get("force"):
+            raise HTTPException(409, "Bu saatte başka randevu var (%s %s)" % (c.get("time"), c.get("name")))
+        if old.get("status") == "bekliyor" or not old.get("stage"):            # siteden gelen talep onaylanıyor
+            o.update({"status": "onaylandi", "stage": "bekliyor", "yp": True})
+            if not old.get("no"):
+                o["no"] = await next_no()
+        await db.bookings.update_one({"id": aid}, {"$set": o})
+        await remember(o)
+        return view({**old, **o})
+
+    @api_router.post("/yp/appts/{aid}/stage")
+    async def appt_stage(aid: str, payload: dict, _: dict = Depends(adm)):
+        to = payload.get("to")
+        if to not in STAGES:
+            raise HTTPException(422, "Geçersiz durum")
+        old = await db.bookings.find_one({"id": aid}, {"_id": 0})
+        if not old:
+            raise HTTPException(404, "Randevu bulunamadı")
+        v = view(old)
+        if to in ("gelmedi", "iptal") and v["paid"] > 0:
+            raise HTTPException(422, "Bu randevudan ödeme alınmış; önce kasadan ödemeyi silin")
+        if to in OPEN + ("tamamlandi",) and not old.get("staff_id"):
+            raise HTTPException(422, "Önce randevuyu açıp kimin yapacağını ve hizmeti seçin")
+        st = "onaylandi" if to in OPEN else ("tamamlandi" if to == "tamamlandi" else "iptal")
+        await db.bookings.update_one({"id": aid}, {"$set": {"stage": to, "status": st, "yp": True}})
+        return view({**old, "stage": to, "status": st})
+
+    @api_router.post("/yp/appts/{aid}/pay")
+    async def appt_pay(aid: str, payload: dict, user: dict = Depends(adm)):
+        old = await db.bookings.find_one({"id": aid}, {"_id": 0})
+        if not old or not old.get("staff_id"):
+            raise HTTPException(404, "Randevu bulunamadı")
+        v = view(old)
+        amt = _num(payload.get("amount"))
+        if amt <= 0:
+            raise HTTPException(422, "Tutar yazın")
+        if amt > v["balance"] + 0.001:
+            raise HTTPException(422, "Tutar kalan borçtan fazla (%.2f ₺)" % v["balance"])
+        m = payload.get("method") if payload.get("method") in METHODS else "Nakit"
+        pid = uuid.uuid4().hex[:12]
+        at = _now().isoformat(timespec="minutes")
+        pay = {"id": pid, "amount": amt, "method": m, "at": at}
+        full = amt >= v["balance"] - 0.001
+        st = {"stage": "tamamlandi", "status": "tamamlandi"} if full and v["stage"] in OPEN else {}
+        await db.bookings.update_one({"id": aid}, {"$push": {"payments": pay}, "$set": st} if st else {"$push": {"payments": pay}})
+        await db.yp_cash.insert_one({"id": pid, "type": "in", "amount": amt, "method": m, "at": at, "desc": "%s · %s" % (old.get("name", ""), " + ".join(i["name"] for i in v["items"])),
+                                     "kind": "randevu", "ref": aid, "ref_no": old.get("no", ""), "staff_id": old.get("staff_id", ""), "by": user.get("name", "")})
+        return view({**old, **st, "payments": (old.get("payments") or []) + [pay]})
+
+    # ------------------------------------------------------------------ kasa
+    @api_router.get("/yp/cash")
+    async def cash(a: str, b: str = "", _: dict = Depends(adm)):
+        a = _day(a)
+        b = _day(b) if b else a
+        rows = await db.yp_cash.find({"at": {"$gte": a, "$lte": b + "T99"}}, {"_id": 0}).sort("at", -1).to_list(20000)
+        open_ = [view(x) for x in await db.bookings.find({"yp": True, "status": {"$in": ["onaylandi", "tamamlandi"]}, "date": {"$lte": b}}, {"_id": 0}).to_list(20000)]
+        due = [x for x in open_ if x["balance"] > 0 and x["stage"] in ("islemde", "tamamlandi")]
+        return {"rows": rows, "in": round(sum(r["amount"] for r in rows if r["type"] == "in"), 2), "out": round(sum(r["amount"] for r in rows if r["type"] == "out"), 2),
+                "due": round(sum(x["balance"] for x in due), 2), "due_n": len(due)}
+
+    @api_router.post("/yp/cash")
+    async def cash_add(payload: dict, user: dict = Depends(adm)):
+        amt = _num(payload.get("amount"))
+        if amt <= 0:
+            raise HTTPException(422, "Tutar yazın")
+        desc = _t(payload.get("desc"), 120)
+        if len(desc) < 2:
+            raise HTTPException(422, "Ne için olduğunu yazın")
+        d = {"id": uuid.uuid4().hex[:12], "type": "out" if payload.get("type") == "out" else "in", "amount": amt, "method": payload.get("method") if payload.get("method") in METHODS else "Nakit",
+             "at": _now().isoformat(timespec="minutes"), "desc": desc, "kind": "elle", "ref": "", "ref_no": "", "staff_id": "", "by": user.get("name", "")}
+        if payload.get("staff_id") and d["type"] == "out":                      # maaş / prim / avans ödemesi
+            d["staff_id"], d["kind"] = str(payload["staff_id"])[:40], "personel"
+        await db.yp_cash.insert_one(dict(d))
+        return d
+
+    @api_router.delete("/yp/cash/{cid}")
+    async def cash_del(cid: str, _: dict = Depends(adm)):
+        c = await db.yp_cash.find_one({"id": cid}, {"_id": 0})
+        if not c:
+            raise HTTPException(404, "Kayıt bulunamadı")
+        if c.get("kind") == "randevu":                                           # ödeme randevudan da düşer
+            b = await db.bookings.find_one({"id": c.get("ref")}, {"_id": 0})
+            if b:
+                await db.bookings.update_one({"id": b["id"]}, {"$pull": {"payments": {"id": cid}}})
+        await db.yp_cash.delete_one({"id": cid})
+        return {"ok": True}
+
+    # ------------------------------------------------------------------ ekip özeti (prim)
+    @api_router.get("/yp/team")
+    async def team(a: str, b: str, _: dict = Depends(adm)):
+        a, b = _day(a), _day(b)
+        st = await staff_all()
+        done = [view(x) for x in await db.bookings.find({"date": {"$gte": a, "$lte": b}, "stage": "tamamlandi"}, {"_id": 0}).to_list(20000)]
+        paid = await db.yp_cash.find({"kind": "personel", "at": {"$gte": a, "$lte": b + "T99"}}, {"_id": 0}).to_list(5000)
+        today = _now().date().isoformat()
+        tod = await db.bookings.find({"date": today, "status": {"$in": ["onaylandi", "tamamlandi"]}}, {"_id": 0, "staff_id": 1}).to_list(2000)
+        out = []
+        for s in st:
+            mine = [x for x in done if x["staff_id"] == s["id"]]
+            rev = round(sum(x["total"] for x in mine), 2)
+            prim = round(rev * float(s.get("commission") or 0) / 100, 2)
+            got = round(sum(p["amount"] for p in paid if p.get("staff_id") == s["id"]), 2)
+            out.append({**s, "n": len(mine), "revenue": rev, "prim": prim, "paid_out": got, "payable": round(float(s.get("salary") or 0) + prim - got, 2),
+                        "today": sum(1 for x in tod if x.get("staff_id") == s["id"])})
+        return {"rows": out}
+
+    # ------------------------------------------------------------------ müşteriler
+    @api_router.get("/yp/customers")
+    async def customers(q: str = "", _: dict = Depends(adm)):
+        cs = {c["phone"]: c for c in await db.yp_customers.find({}, {"_id": 0}).to_list(50000)}
+        agg = {}
+        for x in await db.bookings.find({"phone": {"$nin": ["", None]}}, {"_id": 0}).to_list(100000):
+            v = view(x)
+            g = agg.setdefault(v["phone"], {"phone": v["phone"], "name": v["name"], "n": 0, "spent": 0.0, "last": "", "noshow": 0})
+            if v["stage"] == "tamamlandi":
+                g["n"] += 1
+                g["spent"] = round(g["spent"] + v["paid"], 2)
+                g["last"] = max(g["last"], v["date"])
+            if v["stage"] == "gelmedi":
+                g["noshow"] += 1
+            g["name"] = v["name"] or g["name"]
+        for ph, c in cs.items():
+            g = agg.setdefault(ph, {"phone": ph, "name": c.get("name", ""), "n": 0, "spent": 0.0, "last": "", "noshow": 0})
+            g["note"] = c.get("note", "")
+            g["name"] = c.get("name") or g["name"]
+        rows = list(agg.values())
+        q = q.strip().lower()
+        if q:
+            rows = [r for r in rows if q in r["name"].lower() or q in r["phone"]]
+        rows.sort(key=lambda r: (r["last"], r["name"]), reverse=True)
+        return {"rows": rows[:1000], "total": len(rows)}
+
+    @api_router.get("/yp/customers/{phone}")
+    async def customer(phone: str, _: dict = Depends(adm)):
+        ph = _phone(phone)
+        c = await db.yp_customers.find_one({"phone": ph}, {"_id": 0}) or {"phone": ph, "name": "", "note": ""}
+        hist = [view(x) for x in await db.bookings.find({"phone": ph}, {"_id": 0}).sort([("date", -1), ("time", -1)]).to_list(500)]
+        if not c.get("name") and hist:
+            c["name"] = hist[0]["name"]
+        return {"customer": c, "history": hist}
+
+    @api_router.put("/yp/customers/{phone}")
+    async def customer_put(phone: str, payload: dict, _: dict = Depends(adm)):
+        ph = _phone(phone)
+        if not ph:
+            raise HTTPException(422, "Telefon geçersiz")
+        d = {"note": "\n".join(_t(l, 300) for l in str(payload.get("note") or "").split("\n"))[:2000]}
+        if _t(payload.get("name"), 80):
+            d["name"] = _t(payload.get("name"), 80)
+        await db.yp_customers.update_one({"phone": ph}, {"$set": d, "$setOnInsert": {"created_at": time.time()}}, upsert=True)
+        return {"ok": True}
+
+    # ------------------------------------------------------------------ rapor
+    @api_router.get("/yp/report")
+    async def report(a: str, b: str, _: dict = Depends(adm)):
+        a, b = _day(a), _day(b)
+        st = {s["id"]: s for s in await staff_all()}
+        allb = [view(x) for x in await db.bookings.find({"date": {"$lte": b}}, {"_id": 0}).to_list(100000)]
+        rng = [x for x in allb if a <= x["date"] <= b and x["stage"] != "talep"]
+        cash_ = await db.yp_cash.find({"at": {"$gte": a, "$lte": b + "T99"}}, {"_id": 0}).to_list(50000)
+        first = {}
+        for x in sorted(allb, key=lambda r: r["date"]):
+            if x["phone"] and x["stage"] not in ("iptal", "talep"):
+                first.setdefault(x["phone"], x["date"])
+        seen = {x["phone"] for x in rng if x["phone"] and x["stage"] == "tamamlandi"}
+        back = sum(1 for p in seen if first.get(p, a) < a)
+        days = {}
+        for c in cash_:
+            if c["type"] == "in":
+                days[c["at"][:10]] = round(days.get(c["at"][:10], 0) + c["amount"], 2)
+        svc, src, per = {}, {}, {}
+        for x in rng:
+            if x["stage"] in ("iptal", "gelmedi"):
+                continue
+            src[x["source"]] = src.get(x["source"], 0) + 1
+            if x["stage"] == "tamamlandi":
+                for i in x["items"]:
+                    g = svc.setdefault(i["name"], [0, 0.0])
+                    g[0] += 1
+                    g[1] = round(g[1] + i["price"], 2)
+                per[x["staff_id"]] = round(per.get(x["staff_id"], 0) + x["total"], 2)
+        return {"in": round(sum(c["amount"] for c in cash_ if c["type"] == "in"), 2), "out": round(sum(c["amount"] for c in cash_ if c["type"] == "out"), 2),
+                "appts": sum(1 for x in rng if x["stage"] not in ("iptal",)), "noshow": sum(1 for x in rng if x["stage"] == "gelmedi"),
+                "new": sum(1 for p, d in first.items() if a <= d <= b), "back": back, "seen": len(seen),
+                "days": sorted(days.items()), "services": sorted(([k, v[0], v[1]] for k, v in svc.items()), key=lambda r: -r[1])[:8],
+                "sources": sorted(src.items(), key=lambda r: -r[1]),
+                "staff": sorted(([st.get(k, {}).get("name", "—"), v, st.get(k, {}).get("color", "#1155cc")] for k, v in per.items()), key=lambda r: -r[1])}

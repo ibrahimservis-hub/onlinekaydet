@@ -2877,6 +2877,19 @@ import sektor_mod
 sektor_mod.register(api_router, db, {"require_admin": require_admin})
 import sektor_kayit
 sektor_kayit.register(api_router, db, {"require_admin": require_admin})
+import yp  # yeni yönetim paneli (ayrı uçlar: /api/yp/*)
+yp.register(api_router, db, {"require_admin": require_admin})
+
+@app.get("/salon", include_in_schema=False)
+async def yp_sayfa():
+    """Yeni yönetim paneli (randevuyla çalışan işler). Eski /admin ekranından ayrıdır."""
+    from fastapi.responses import HTMLResponse
+    return HTMLResponse((Path(__file__).resolve().parent / "yp_ui.html").read_text(encoding="utf-8"), headers={"Cache-Control": "no-cache", "X-Robots-Tag": "noindex"})
+
+@app.get("/salon/logo.png", include_in_schema=False)
+async def yp_logo():
+    from fastapi.responses import Response as _R
+    return _R((Path(__file__).resolve().parent / "yp_logo.png").read_bytes(), media_type="image/png", headers={"Cache-Control": "public, max-age=86400"})
 governance.HOOKS.append(fieldops.call_hook)
 finance_plus.register(api_router, db, {"require_admin": require_admin, "get_current_user": get_current_user})
 async def _tech_hidden():

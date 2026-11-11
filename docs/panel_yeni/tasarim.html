@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Yeni panel tasarımı</title>
+<style>
+:root{--ink:#0b1730;--ink2:#14244a;--blue:#1155cc;--blue-s:#e8effc;--paper:#f5f4ef;--card:#fff;--line:#e6e3da;--tx:#141a24;--mut:#667085;--ok:#16794a;--ok-s:#e3f4ea;--warn:#a45a06;--warn-s:#fdf1dc;--bad:#b42318;--bad-s:#fde8e5;--r:10px}
+*{box-sizing:border-box;margin:0}
+body{font-family:Inter,system-ui,sans-serif;color:var(--tx);background:var(--paper);font-size:14px;line-height:1.45;-webkit-font-smoothing:antialiased}
+.num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+svg.i{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.app{display:grid;grid-template-columns:216px 1fr;min-height:100vh}
+.rail{background:var(--ink);color:#c9d3e6;display:flex;flex-direction:column;padding:18px 12px}
+.rail .logo{padding:4px 8px 18px}
+.rail .logo img{height:26px;display:block}
+.rail a{display:flex;align-items:center;gap:11px;padding:10px 10px;border-radius:8px;color:#c9d3e6;text-decoration:none;font-weight:500;font-size:14.5px;margin-bottom:2px}
+.rail a.on{background:#fff;color:var(--ink);font-weight:650}
+.rail a .bd{margin-left:auto;background:#f4b740;color:#3a2700;font-size:11.5px;font-weight:700;border-radius:20px;padding:1px 7px}
+.rail .sep{height:1px;background:#22345c;margin:10px 8px}
+.rail .firm{margin-top:auto;border-top:1px solid #22345c;padding:14px 8px 2px;font-size:12.5px;color:#8fa0c2}
+.rail .firm b{display:block;color:#fff;font-size:14px;font-weight:600}
+main{padding:26px 32px 40px;min-width:0}
+.top{display:flex;align-items:flex-end;gap:16px;margin-bottom:22px}
+.top h1{font-size:25px;font-weight:700;letter-spacing:-.02em}
+.top p{color:var(--mut);margin-top:2px}
+.top .sp{flex:1}
+.btn{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 16px;border-radius:8px;border:1px solid var(--line);background:#fff;font:inherit;font-weight:600;color:var(--tx)}
+.btn.p{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn.s{height:32px;padding:0 11px;font-size:13px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r)}
+.card h2{font-size:15px;font-weight:650;padding:15px 18px 0}
+.card .hd{display:flex;align-items:center;padding:15px 18px 10px}.card .hd h2{padding:0}.card .hd .sp{flex:1}.card .hd a{color:var(--blue);font-weight:600;font-size:13px;text-decoration:none}
+.figs{display:grid;grid-template-columns:1.25fr 1fr 1fr 1fr;border:1px solid var(--line);border-radius:var(--r);background:#fff;margin-bottom:18px}
+.fig{padding:16px 20px;border-left:1px solid var(--line)}.fig:first-child{border-left:0}
+.fig small{color:var(--mut);font-size:12.5px;font-weight:500}
+.fig b{display:block;font-size:27px;font-weight:700;letter-spacing:-.02em;margin-top:2px}
+.fig span{font-size:12.5px;color:var(--mut)}.fig span i{font-style:normal;color:var(--ok);font-weight:600}
+.cols{display:grid;grid-template-columns:1fr 340px;gap:18px;align-items:start}
+.row{display:grid;align-items:center;padding:11px 18px;border-top:1px solid var(--line);gap:12px}
+.row .t{font-weight:650;font-size:15px}
+.row .m{color:var(--mut);font-size:13px}
+.tag{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;padding:3px 9px;border-radius:20px;white-space:nowrap}
+.tag:before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.tag.w{background:#eef0f4;color:#475467}.tag.g{background:var(--ok-s);color:var(--ok)}.tag.b{background:var(--blue-s);color:var(--blue)}.tag.y{background:var(--warn-s);color:var(--warn)}.tag.r{background:var(--bad-s);color:var(--bad)}
+.av{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:700;color:#fff;flex:none}
+.bar{height:8px;border-radius:8px;background:#eceae3;overflow:hidden}.bar i{display:block;height:100%;background:var(--blue);border-radius:8px}
+.note{font-size:12.5px;color:var(--mut)}
+table{width:100%;border-collapse:collapse}
+th{font-size:12px;font-weight:600;color:var(--mut);text-align:left;padding:9px 18px;border-top:1px solid var(--line);background:#faf9f6}
+td{padding:12px 18px;border-top:1px solid var(--line);vertical-align:middle}
+td.r,th.r{text-align:right}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;background:#fff;overflow:hidden}.seg span{padding:8px 14px;font-weight:600;font-size:13.5px;color:var(--mut)}.seg span.on{background:var(--ink);color:#fff}
+/* takvim */
+.cal{display:grid;grid-template-columns:58px repeat(4,1fr)}
+.cal .ch{padding:12px 12px;border-left:1px solid var(--line);display:flex;align-items:center;gap:9px;font-weight:650}
+.cal .ch small{display:block;font-weight:500;color:var(--mut);font-size:12px}
+.cal .hours div{height:56px;font-size:12px;color:var(--mut);text-align:right;padding:0 8px;transform:translateY(-8px)}
+.cal .col{position:relative;border-left:1px solid var(--line);background:repeating-linear-gradient(#fff 0 55px,var(--line) 55px 56px)}
+.ev{position:absolute;left:5px;right:5px;border-radius:7px;padding:4px 9px;font-size:12.5px;line-height:1.3;overflow:hidden;border-left:3px solid}
+.ev b{display:block;font-size:13px}
+.ev.r{background:var(--bad-s);border-color:var(--bad)}.ev.w{background:#f1f2f5;border-color:#98a2b3}.ev.b{background:var(--blue-s);border-color:var(--blue)}.ev.g{background:var(--ok-s);border-color:var(--ok)}.ev.y{background:var(--warn-s);border-color:#d98a12}.ev.x{background:repeating-linear-gradient(135deg,#f3f1ea 0 6px,#ebe8df 6px 12px);border-color:#c9c4b6;color:#7a7566}
+.now{position:absolute;left:0;right:0;height:2px;background:var(--bad);z-index:2}.now:before{content:"";position:absolute;left:-4px;top:-3px;width:8px;height:8px;border-radius:50%;background:var(--bad)}
+/* site */
+.tog{width:36px;height:20px;border-radius:20px;background:#d0d5dd;position:relative;flex:none}.tog:after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff}.tog.on{background:var(--blue)}.tog.on:after{left:18px}
+.phone{width:286px;border:9px solid #10151f;border-radius:34px;overflow:hidden;background:#fff;margin:0 auto}.phone img{display:block;width:100%}
+.chart{display:flex;align-items:flex-end;gap:10px;height:170px;padding:0 18px}
+.chart div{flex:1;background:var(--blue);border-radius:4px 4px 0 0;position:relative}.chart div.l{background:#c9d8f5}
+.chart div span{position:absolute;bottom:-22px;left:0;right:0;text-align:center;font-size:11.5px;color:var(--mut)}
+.chart div em{position:absolute;top:-19px;left:0;right:0;text-align:center;font-size:11.5px;font-style:normal;font-weight:600}
+.scr{display:none}.scr.on{display:block}
+/* mobil */
+body.mob .app{display:block}body.mob .rail{display:none}body.mob main{padding:16px 16px 96px}
+body.mob .top h1{font-size:21px}body.mob .figs{grid-template-columns:1fr 1fr}body.mob .fig{padding:13px 14px;border-top:1px solid var(--line)}body.mob .fig:nth-child(-n+2){border-top:0}body.mob .fig:nth-child(3){border-left:0}body.mob .fig b{font-size:22px}
+body.mob .cols{grid-template-columns:1fr}
+.mhd{display:none}body.mob .mhd{display:flex;align-items:center;padding:12px 16px;background:var(--ink)}body.mob .mhd img{height:22px}
+.mbar{display:none}body.mob .mbar{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);padding:8px 6px 14px}
+.mbar a{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:600;color:var(--mut);text-decoration:none}.mbar a.on{color:var(--blue)}
+.mbar a.plus span{width:46px;height:46px;border-radius:50%;background:var(--blue);color:#fff;display:grid;place-items:center;margin-top:-22px;box-shadow:0 4px 12px rgba(17,85,204,.35)}
+</style></head><body>
+<div class="mhd"><img src="ok-logo-acik.png" alt="OnlineKaydet"></div>
+<div class="app">
+<aside class="rail">
+  <div class="logo"><img src="ok-logo-acik.png" alt="OnlineKaydet"></div>
+  <div id="nav"></div>
+  <div class="firm"><b>Atölye Saç</b>Kuaför · Elif Aydın</div>
+</aside>
+<main>
+
+<!-- BUGÜN -->
+<section class="scr" id="bugun">
+  <div class="top"><div><h1>Bugün</h1><p>11 Kasım Çarşamba · salon 09:00 – 19:00 açık</p></div><div class="sp"></div><button class="btn dk">Para girdi / çıktı</button><button class="btn p"><svg class="i"><use href="#plus"/></svg>Yeni randevu</button></div>
+  <div class="figs">
+    <div class="fig"><small>Bugün kasaya giren</small><b class="num">₺4.250</b><span>6 ödeme · <i>dünden ₺600 fazla</i></span></div>
+    <div class="fig"><small>Randevu</small><b class="num">11</b><span>6 tamamlandı · 5 sırada</span></div>
+    <div class="fig"><small>Boş saat</small><b class="num">4</b><span>en yakını 15:30, Murat</span></div>
+    <div class="fig"><small>Onay bekleyen</small><b class="num">2</b><span>siteden gelen talep</span></div>
+  </div>
+  <div class="cols">
+    <div class="card"><div class="hd"><h2>Sıradaki randevular</h2><div class="sp"></div><a>Takvimi aç</a></div><div id="sira"></div></div>
+    <div style="display:grid;gap:18px">
+      <div class="card"><div class="hd"><h2>Siteden gelen talepler</h2></div><div id="talep"></div></div>
+      <div class="card dk"><div class="hd"><h2>Ekip doluluğu</h2></div><div id="dolu" style="padding:0 18px 16px;display:grid;gap:12px"></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- TAKVİM -->
+<section class="scr" id="takvim">
+  <div class="top"><div><h1>Takvim</h1><p>11 Kasım Çarşamba</p></div><div class="sp"></div><button class="btn">‹</button><button class="btn">Bugün</button><button class="btn">›</button><div class="seg"><span class="on">Gün</span><span>Hafta</span><span>Liste</span></div><button class="btn p"><svg class="i"><use href="#plus"/></svg>Yeni randevu</button></div>
+  <div class="card" style="overflow:hidden"><div class="cal" id="cal"></div></div>
+  <p class="note" style="margin-top:10px">Boş bir saate tıklayınca randevu açılır. Randevuyu sürükleyip başka saate ya da başka uzmana taşıyabilirsiniz. Siteden alınan randevular aynı takvime düşer.</p>
+</section>
+
+<!-- KASA -->
+<section class="scr" id="kasa">
+  <div class="top"><div><h1>Kasa</h1><p>Tamamlanan her randevu ve mağaza siparişi buraya kendiliğinden yazılır.</p></div><div class="sp"></div><div class="seg"><span class="on">Bugün</span><span>Bu hafta</span><span>Bu ay</span></div><button class="btn">Para çıktı</button><button class="btn p">Para girdi</button></div>
+  <div class="figs">
+    <div class="fig"><small>Giren</small><b class="num" style="color:var(--ok)">₺4.250</b><span>6 randevu · 1 ürün satışı</span></div>
+    <div class="fig"><small>Çıkan</small><b class="num">₺1.180</b><span>2 gider</span></div>
+    <div class="fig"><small>Elde kalan</small><b class="num">₺3.070</b><span>bugün</span></div>
+    <div class="fig"><small>Tahsil edilmemiş</small><b class="num" style="color:var(--warn)">₺650</b><span>1 randevu ödeme bekliyor</span></div>
+  </div>
+  <div class="cols">
+    <div class="card"><div class="hd"><h2>Hareketler</h2><div class="sp"></div><a>Excel indir</a></div><table id="hareket"></table></div>
+    <div style="display:grid;gap:18px">
+      <div class="card"><div class="hd"><h2>Ödeme şekli</h2></div><div id="odeme" style="padding:0 18px 16px;display:grid;gap:12px"></div></div>
+      <div class="card"><div class="hd"><h2>Kasalar</h2></div>
+        <div class="row" style="grid-template-columns:1fr auto"><div><div class="t" style="font-size:14px">Nakit kasa</div></div><b class="num">₺6.420</b></div>
+        <div class="row" style="grid-template-columns:1fr auto"><div><div class="t" style="font-size:14px">Banka · POS</div></div><b class="num">₺18.910</b></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- EKİP -->
+<section class="scr" id="ekip">
+  <div class="top"><div><h1>Ekip</h1><p>Kasım ayı · prim, tamamlanan hizmetlerden kendiliğinden hesaplanır.</p></div><div class="sp"></div><div class="seg"><span class="on">Bu ay</span><span>Geçen ay</span></div><button class="btn p"><svg class="i"><use href="#plus"/></svg>Kişi ekle</button></div>
+  <div class="card"><table id="ekipt"></table></div>
+  <div class="cols" style="grid-template-columns:1fr 1fr;margin-top:18px">
+    <div class="card"><div class="hd"><h2>Bu haftaki çalışma saatleri</h2><div class="sp"></div><a>Düzenle</a></div><table id="vardiya"></table></div>
+    <div class="card"><div class="hd"><h2>Ödenecek maaş ve prim</h2></div><table id="maas"></table></div>
+  </div>
+</section>
+
+<!-- RAPORLAR -->
+<section class="scr" id="rapor">
+  <div class="top"><div><h1>Raporlar</h1><p>1 – 11 Kasım 2026</p></div><div class="sp"></div><div class="seg"><span>Hafta</span><span class="on">Ay</span><span>Yıl</span></div><button class="btn">Excel indir</button></div>
+  <div class="figs">
+    <div class="fig"><small>Ciro</small><b class="num">₺48.900</b><span><i>geçen aya göre %12 fazla</i></span></div>
+    <div class="fig"><small>Randevu</small><b class="num">126</b><span>7'si gelmedi</span></div>
+    <div class="fig"><small>Yeni müşteri</small><b class="num">31</b><span>19'u siteden</span></div>
+    <div class="fig"><small>Tekrar gelen</small><b class="num">%64</b><span>son 90 gün</span></div>
+  </div>
+  <div class="cols" style="grid-template-columns:1.4fr 1fr">
+    <div class="card"><div class="hd"><h2>Günlük ciro</h2></div><div class="chart" id="chart" style="margin:22px 0 36px"></div></div>
+    <div class="card"><div class="hd"><h2>En çok yapılan hizmetler</h2></div><div id="hizmet" style="padding:0 18px 16px;display:grid;gap:13px"></div></div>
+  </div>
+  <div class="cols" style="grid-template-columns:1fr 1fr;margin-top:18px">
+    <div class="card"><div class="hd"><h2>Randevu nereden geldi</h2></div><div id="kanal" style="padding:0 18px 16px;display:grid;gap:13px"></div></div>
+    <div class="card"><div class="hd"><h2>Uzman bazında ciro</h2></div><div id="uciro" style="padding:0 18px 16px;display:grid;gap:13px"></div></div>
+  </div>
+</section>
+
+<!-- WEB SİTEM -->
+<section class="scr" id="site">
+  <div class="top"><div><h1>Web Sitem</h1><p>atolyesac.com · tema: Butik Saç · son yayın bugün 10:42</p></div><div class="sp"></div><button class="btn">Tema değiştir</button><button class="btn">Siteyi aç</button><button class="btn p">Yayınla</button></div>
+  <div class="cols" style="grid-template-columns:1fr 380px">
+    <div class="card"><div class="hd"><h2>Sayfadaki bölümler</h2><div class="sp"></div><span class="note">Sürükleyip sırayı değiştirin · tıklayıp içeriği düzenleyin</span></div><div id="bolum"></div></div>
+    <div class="card" style="padding:18px"><div style="display:flex;justify-content:center;margin-bottom:14px"><div class="seg"><span class="on">Telefon</span><span>Bilgisayar</span></div></div><div class="phone"><img src="site-m.png" alt=""></div></div>
+  </div>
+</section>
+
+</main></div>
+<nav class="mbar"><a class="on"><svg class="i"><use href="#home"/></svg>Bugün</a><a><svg class="i"><use href="#i-cal"/></svg>Takvim</a><a class="plus"><span><svg class="i"><use href="#plus"/></svg></span>Randevu</a><a><svg class="i"><use href="#wallet"/></svg>Kasa</a><a><svg class="i"><use href="#more"/></svg>Diğer</a></nav>
+
+<svg width="0" height="0" style="position:absolute"><defs>
+<symbol id="home" viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v8a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></symbol>
+<symbol id="i-cal" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></symbol>
+<symbol id="users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14.3c2.1.7 3.5 2.6 3.5 5.7"/></symbol>
+<symbol id="wallet" viewBox="0 0 24 24"><path d="M4 7h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h11"/><path d="M16 13.5h2"/></symbol>
+<symbol id="team" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-3.9 3.1-6.5 7-6.5s7 2.6 7 6.5"/></symbol>
+<symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M21 20H3"/></symbol>
+<symbol id="web" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M3 9h18M9 22h6M12 18v4"/></symbol>
+<symbol id="bag" viewBox="0 0 24 24"><path d="M5 8h14l-1 12H6zM9 8V6a3 3 0 0 1 6 0v2"/></symbol>
+<symbol id="gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/></symbol>
+<symbol id="plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="more" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+<symbol id="grip" viewBox="0 0 24 24"><path d="M9 6h.01M15 6h.01M9 12h.01M15 12h.01M9 18h.01M15 18h.01" stroke-width="2.6"/></symbol>
+</defs></svg>
+
+<script>
+var q=new URLSearchParams(location.search),S=q.get('s')||'bugun';if(q.get('m'))document.body.classList.add('mob');
+var NAV=[['bugun','Bugün','home'],['takvim','Takvim','i-cal'],['musteri','Müşteriler','users'],['kasa','Kasa','wallet'],['ekip','Ekip','team'],['rapor','Raporlar','i-chart'],0,['site','Web Sitem','web'],['magaza','Mağaza','bag'],['ayar','Ayarlar','gear']];
+document.getElementById('nav').innerHTML=NAV.map(function(n){return n?'<a class="'+(n[0]===S?'on':'')+'"><svg class="i"><use href="#'+n[2]+'"/></svg>'+n[1]+(n[0]==='bugun'&&S!=='bugun'?'':'')+(n[0]==='takvim'?'<span class="bd">2</span>':'')+'</a>':'<div class="sep"></div>';}).join('');
+document.getElementById(S).classList.add('on');
+var U={E:['Elif','#1155cc'],H:['Hasan','#0f766e'],M:['Murat','#9a3412'],Z:['Zeynep','#6d28d9']};
+function av(k){return '<span class="av" style="background:'+U[k][1]+'">'+U[k][0][0]+'</span>';}
+var TG={w:'Bekliyor',b:'İşlemde',g:'Tamamlandı',y:'Ödeme bekliyor',r:'Gelmedi',k:'Geldi'};
+function tag(c){return '<span class="tag '+(c==='k'?'b':c)+'">'+TG[c]+'</span>';}
+var mob=document.body.classList.contains('mob');
+/* bugün */
+var SIRA=[['13:30','Ayşe Korkmaz','Boya + fön','E','b','₺1.450',''],['14:00','Selin Aksoy','Saç kesimi','H','k','₺450','Başlat'],['14:30','Derya Uçar','Röfle','Z','y','₺650','Ödeme al'],['15:00','Merve Tunç','Gelin saçı provası','E','w','₺900',''],['16:00','Büşra Kılıç','Keratin bakım','Z','w','₺1.200',''],['16:30','Emre Şahin','Saç + sakal','M','w','₺400','']];
+document.getElementById('sira').innerHTML=SIRA.map(function(r){
+  return mob?'<div class="row" style="grid-template-columns:48px 1fr auto"><div class="t num">'+r[0]+'</div><div><div style="font-weight:600">'+r[1]+'</div><div class="m">'+r[2]+' · '+U[r[3]][0]+'</div></div>'+tag(r[4])+'</div>'
+  :'<div class="row" style="grid-template-columns:56px 1.3fr 1fr 110px 130px 70px 96px"><div class="t num">'+r[0]+'</div><div><div style="font-weight:600">'+r[1]+'</div><div class="m">'+r[2]+'</div></div><div style="display:flex;align-items:center;gap:8px">'+av(r[3])+U[r[3]][0]+'</div><div>'+tag(r[4])+'</div><div></div><div class="num" style="font-weight:600;text-align:right">'+r[5]+'</div><div style="text-align:right">'+(r[6]?'<button class="btn s'+(r[6]==='Ödeme al'?' p':'')+'">'+r[6]+'</button>':'')+'</div></div>';}).join('');
+document.getElementById('talep').innerHTML=[['Nil Yıldız','Yarın 11:00 · Saç kesimi + fön · Hasan'],['Ceren Polat','Cuma 17:30 · Boya · fark etmez']].map(function(t){return '<div class="row" style="grid-template-columns:1fr"><div><div style="font-weight:600">'+t[0]+'</div><div class="m">'+t[1]+'</div><div style="display:flex;gap:8px;margin-top:9px"><button class="btn s p">Onayla</button><button class="btn s">Saat öner</button><button class="btn s">Reddet</button></div></div></div>';}).join('');
+function bars(id,rows){document.getElementById(id).innerHTML=rows.map(function(d){return '<div><div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-weight:600">'+d[0]+'</span><span class="num note">'+d[2]+'</span></div><div class="bar"><i style="width:'+d[1]+'%'+(d[3]?';background:'+d[3]:'')+'"></i></div></div>';}).join('');}
+bars('dolu',[['Elif',90,'7 / 8 saat dolu'],['Hasan',75,'6 / 8 saat'],['Zeynep',62,'5 / 8 saat'],['Murat',38,'3 / 8 saat']]);
+if(mob){var d=document.querySelector('#bugun .dk');if(d)d.style.display='none';document.querySelector('#bugun .card.dk').style.display='none';document.querySelector('#bugun .top .btn.p').style.display='none';}
+/* takvim */
+(function(){var h='<div style="padding:12px 8px"></div>';['E','H','M','Z'].forEach(function(k,i){h+='<div class="ch">'+av(k)+'<div>'+U[k][0]+'<small>'+['7 randevu','6 randevu','3 randevu','5 randevu'][i]+'</small></div></div>';});
+ h+='<div class="hours" style="border-top:1px solid var(--line);padding-top:0">';for(var t=9;t<19;t++)h+='<div class="num"><span style="position:relative;top:8px">'+(t<10?'0':'')+t+':00</span></div>';h+='</div>';
+ var EV={E:[[9,60,'g','Hülya Demir','Fön'],[10,150,'g','Pınar Öz','Boya + kesim'],[13.5,90,'b','Ayşe Korkmaz','Boya + fön'],[15,60,'w','Merve Tunç','Gelin saçı provası'],[17,90,'w','Sibel Acar','Boya']],
+ H:[[9.5,30,'g','Kaan Er','Saç kesimi'],[10.5,60,'g','Gül Sarı','Kesim + fön'],[12.5,60,'x','Öğle arası',''],[14,45,'b','Selin Aksoy','Saç kesimi'],[15.5,60,'w','Nur Kaya','Fön'],[17.5,45,'w','Ozan Ak','Saç kesimi']],
+ M:[[9,45,'g','Ali Vural','Saç + sakal'],[12,60,'x','Öğle arası',''],[13,30,'r','Tolga Bal','Sakal · gelmedi'],[16.5,45,'w','Emre Şahin','Saç + sakal']],
+ Z:[[10,120,'g','Esra Ateş','Röfle'],[12.5,60,'x','Öğle arası',''],[14.5,60,'y','Derya Uçar','Röfle · ödeme bekliyor'],[16,90,'w','Büşra Kılıç','Keratin bakım']]};
+ ['E','H','M','Z'].forEach(function(k){h+='<div class="col" style="height:560px;border-top:1px solid var(--line)">'+(k==='E'?'':'')+EV[k].map(function(e){var m=Math.round((e[0]%1)*60),tt=(Math.floor(e[0])<10?'0':'')+Math.floor(e[0])+':'+(m<10?'0':'')+m;return '<div class="ev '+e[2]+'" style="top:'+((e[0]-9)*56+2)+'px;height:'+(e[1]/60*56-4)+'px"><b>'+e[3]+'</b>'+(e[1]>30?(e[4]?tt+' · '+e[4]:''):'')+'</div>';}).join('')+'<div class="now" style="top:'+((14.35-9)*56)+'px'+(k==='E'?'':';')+'"></div></div>';});
+ document.getElementById('cal').innerHTML=h;})();
+/* kasa */
+document.getElementById('hareket').innerHTML='<tr><th>Saat</th><th>Açıklama</th><th>Kaynak</th><th>Ödeme</th><th class="r">Tutar</th></tr>'+[['13:10','Pınar Öz · Boya + kesim','Randevu RD-1048 · Elif','Kart','+₺1.650',1],['12:40','Şampuan 500 ml × 2','Mağaza siparişi #214','Havale','+₺560',1],['12:05','Esra Ateş · Röfle','Randevu RD-1046 · Zeynep','Kart','+₺950',1],['11:30','Boya ve oksidan alımı','Elle girildi · gider','Nakit','−₺880',0],['11:20','Gül Sarı · Kesim + fön','Randevu RD-1045 · Hasan','Nakit','+₺550',1],['10:00','Kaan Er · Saç kesimi','Randevu RD-1044 · Hasan','Nakit','+₺250',1],['09:50','Ali Vural · Saç + sakal','Randevu RD-1043 · Murat','Kart','+₺290',1],['09:15','Elektrik faturası','Her ay tekrarlayan','Banka','−₺300',0]].map(function(r){return '<tr><td class="num note">'+r[0]+'</td><td style="font-weight:600">'+r[1]+'</td><td class="note">'+r[2]+'</td><td>'+r[3]+'</td><td class="r num" style="font-weight:650;color:'+(r[5]?'var(--ok)':'var(--tx)')+'">'+r[4]+'</td></tr>';}).join('');
+bars('odeme',[['Kart',68,'₺2.890'],['Nakit',19,'₺800'],['Havale',13,'₺560']]);
+/* ekip */
+document.getElementById('ekipt').innerHTML='<tr><th>Kişi</th><th>Görev</th><th class="r">Randevu</th><th class="r">Ciro</th><th class="r">Prim oranı</th><th class="r">Hak edilen prim</th><th>Bugün</th><th></th></tr>'+[['E','Elif Aydın','Salon sahibi · Saç uzmanı',42,'₺19.400','—','—','g','Çalışıyor'],['H','Hasan Demir','Saç uzmanı',38,'₺12.650','%30','₺3.795','g','Çalışıyor'],['Z','Zeynep Arslan','Renk uzmanı',29,'₺11.900','%35','₺4.165','g','Çalışıyor'],['M','Murat Kaya','Berber',17,'₺4.950','%30','₺1.485','y','15:30\'da çıkıyor']].map(function(r){return '<tr><td><div style="display:flex;align-items:center;gap:10px">'+av(r[0])+'<b style="font-weight:600">'+r[1]+'</b></div></td><td class="note">'+r[2]+'</td><td class="r num">'+r[3]+'</td><td class="r num" style="font-weight:600">'+r[4]+'</td><td class="r num">'+r[5]+'</td><td class="r num" style="font-weight:600">'+r[6]+'</td><td><span class="tag '+r[7]+'">'+r[8]+'</span></td><td class="r"><button class="btn s">Aç</button></td></tr>';}).join('');
+document.getElementById('vardiya').innerHTML='<tr><th>Kişi</th><th>Pzt</th><th>Sal</th><th>Çar</th><th>Per</th><th>Cum</th><th>Cmt</th></tr>'+[['Elif','09–19','09–19','09–19','09–19','09–19','10–18'],['Hasan','09–18','İzin','09–18','09–18','10–19','10–18'],['Zeynep','10–19','10–19','10–19','İzin','10–19','10–18'],['Murat','09–17','09–17','09–15:30','09–17','09–17','İzin']].map(function(r){return '<tr>'+r.map(function(c,i){return '<td class="'+(i?'num':'')+'" style="'+(i?'font-size:13px;':'font-weight:600;')+(c==='İzin'?'color:var(--warn);font-weight:600':'')+'">'+c+'</td>';}).join('')+'</tr>';}).join('');
+document.getElementById('maas').innerHTML='<tr><th>Kişi</th><th class="r">Maaş</th><th class="r">Prim</th><th class="r">Avans</th><th class="r">Ödenecek</th></tr>'+[['Hasan Demir','₺28.000','₺3.795','−₺2.000','₺29.795'],['Zeynep Arslan','₺28.000','₺4.165','—','₺32.165'],['Murat Kaya','₺26.000','₺1.485','—','₺27.485']].map(function(r){return '<tr><td style="font-weight:600">'+r[0]+'</td><td class="r num">'+r[1]+'</td><td class="r num">'+r[2]+'</td><td class="r num">'+r[3]+'</td><td class="r num" style="font-weight:650">'+r[4]+'</td></tr>';}).join('');
+/* rapor */
+document.getElementById('chart').innerHTML=[3.9,4.6,5.2,0,4.1,4.8,6.3,5.9,0,4.4,4.25].map(function(v,i){return '<div class="'+(i===10?'':'l')+'" style="height:'+(v/6.3*100)+'%">'+(v?'<em class="num">'+String(v).replace('.',',')+'</em>':'')+'<span>'+(i+1)+'</span></div>';}).join('');
+bars('hizmet',[['Saç kesimi',100,'41 · ₺14.350'],['Boya',78,'32 · ₺17.600'],['Fön',54,'22 · ₺4.400'],['Röfle',34,'14 · ₺9.100'],['Saç + sakal',27,'11 · ₺3.450']]);
+bars('kanal',[['Web sitesi',52,'66 randevu'],['Telefon',27,'34'],['Salona gelen',14,'17'],['Instagram',7,'9']]);
+bars('uciro',[['Elif',100,'₺19.400',U.E[1]],['Hasan',65,'₺12.650',U.H[1]],['Zeynep',61,'₺11.900',U.Z[1]],['Murat',26,'₺4.950',U.M[1]]]);
+/* site */
+document.getElementById('bolum').innerHTML=[['Menü','Logo, sayfa bağlantıları, Randevu al düğmesi',1,1],['Vitrin','Başlık, fotoğraf, çalışma saati',1],['Hizmetler ve fiyatlar','Hizmetler sayfasındaki 14 hizmetten gelir',1],['Ekip','Ekip sayfasındaki 4 kişiden gelir',1],['Galeri','18 fotoğraf',1],['Kampanyalar','Kupon ve paketlerden gelir · 2 etkin',1],['Ürünler','Mağazadaki 23 üründen gelir',0],['Yorumlar','Onayladığınız 31 yorum',1],['İletişim ve harita','Adres, telefon, WhatsApp',1],['Alt bilgi','Sabit · OnlineKaydet imzası değiştirilemez',1,1]].map(function(b){return '<div class="row" style="grid-template-columns:22px 1fr auto auto"><svg class="i" style="color:'+(b[3]?'#d6d2c6':'#98a2b3')+'"><use href="#grip"/></svg><div><div style="font-weight:600'+(b[2]?'':';color:var(--mut)')+'">'+b[0]+'</div><div class="m">'+b[1]+'</div></div><button class="btn s">Düzenle</button><span class="tog'+(b[2]?' on':'')+'"'+(b[3]?' style="opacity:.45"':'')+'></span></div>';}).join('');
+</script>
+</body></html>
