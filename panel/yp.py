@@ -389,30 +389,82 @@ def register(api_router, db, deps):
         return {"rows": out}
 
     # ------------------------------------------------------------------ müşteriler
-    @api_router.get("/yp/customers")
-    async def customers(q: str = "", _: dict = Depends(adm)):
+    async def cust_all():
+        """Müşteri başına toplanmış özet (randevulardan kendiliğinden birikir)."""
+        today = _now().date().isoformat()
         cs = {c["phone"]: c for c in await db.yp_customers.find({}, {"_id": 0}).to_list(50000)}
         agg = {}
         for x in await db.bookings.find({"phone": {"$nin": ["", None]}}, {"_id": 0}).to_list(100000):
             v = view(x)
-            g = agg.setdefault(v["phone"], {"phone": v["phone"], "name": v["name"], "n": 0, "spent": 0.0, "last": "", "noshow": 0})
-            if v["stage"] == "tamamlandi":
+            g = agg.setdefault(v["phone"], {"phone": v["phone"], "name": v["name"], "n": 0, "spent": 0.0, "last": "", "first": "", "next": "", "noshow": 0,
+                                            "cancel": 0, "balance": 0.0, "note": "", "svc": {}, "staff": {}})
+            st = v["stage"]
+            if st == "tamamlandi":
                 g["n"] += 1
                 g["spent"] = round(g["spent"] + v["paid"], 2)
+                g["balance"] = round(g["balance"] + v["balance"], 2)
                 g["last"] = max(g["last"], v["date"])
-            if v["stage"] == "gelmedi":
+                g["first"] = min(g["first"] or v["date"], v["date"])
+                for i in v["items"]:
+                    g["svc"][i.get("name", "")] = g["svc"].get(i.get("name", ""), 0) + 1
+            if st not in ("iptal", "talep") and v["staff_id"]:
+                g["staff"][v["staff_id"]] = g["staff"].get(v["staff_id"], 0) + 1
+            if st in ("talep", "bekliyor", "geldi", "islemde") and v["date"] >= today:
+                g["next"] = min(g["next"] or v["date"], v["date"])
+            if st == "gelmedi":
                 g["noshow"] += 1
+            if st == "iptal":
+                g["cancel"] += 1
             g["name"] = v["name"] or g["name"]
         for ph, c in cs.items():
-            g = agg.setdefault(ph, {"phone": ph, "name": c.get("name", ""), "n": 0, "spent": 0.0, "last": "", "noshow": 0})
+            g = agg.setdefault(ph, {"phone": ph, "name": c.get("name", ""), "n": 0, "spent": 0.0, "last": "", "first": "", "next": "", "noshow": 0,
+                                    "cancel": 0, "balance": 0.0, "note": "", "svc": {}, "staff": {}})
             g["note"] = c.get("note", "")
             g["name"] = c.get("name") or g["name"]
-        rows = list(agg.values())
+        old = (_now().date() - timedelta(days=60)).isoformat()
+        for g in agg.values():
+            g["avg"] = round(g["spent"] / g["n"], 2) if g["n"] else 0
+            g["fav"] = max(g["svc"], key=g["svc"].get) if g["svc"] else ""
+            g["fav_staff"] = max(g["staff"], key=g["staff"].get) if g["staff"] else ""
+            segs = []
+            if g["n"] <= 1:
+                segs.append("yeni")
+            if g["n"] >= 3:
+                segs.append("duzenli")
+            if g["n"] and g["last"] < old and not g["next"]:
+                segs.append("kayip")
+            if g["balance"] > 0:
+                segs.append("borc")
+            if g["noshow"]:
+                segs.append("gelmedi")
+            if g["note"]:
+                segs.append("notlu")
+            if g["next"]:
+                segs.append("yaklasan")
+            g["segs"] = segs
+        return list(agg.values())
+
+    @api_router.get("/yp/customers")
+    async def customers(q: str = "", seg: str = "", staff: str = "", svc: str = "", sort: str = "last", offset: int = 0, limit: int = 60, _: dict = Depends(adm)):
+        allr = await cust_all()
+        counts = {k: sum(1 for r in allr if k in r["segs"]) for k in ("yeni", "duzenli", "kayip", "borc", "gelmedi", "notlu", "yaklasan")}
+        rows = allr
         q = q.strip().lower()
         if q:
-            rows = [r for r in rows if q in r["name"].lower() or q in r["phone"]]
-        rows.sort(key=lambda r: (r["last"], r["name"]), reverse=True)
-        return {"rows": rows[:1000], "total": len(rows)}
+            dg = re.sub(r"\D", "", q).lstrip("0")
+            rows = [r for r in rows if q in r["name"].lower() or (dg and dg in r["phone"]) or q in (r.get("note") or "").lower() or any(q in k.lower() for k in r["svc"])]
+        if seg:
+            rows = [r for r in rows if seg in r["segs"]]
+        if staff:
+            rows = [r for r in rows if staff in r["staff"]]
+        if svc:
+            rows = [r for r in rows if svc in r["svc"]]
+        keys = {"last": lambda r: (r["last"], r["name"].lower()), "spent": lambda r: (r["spent"], r["name"].lower()), "n": lambda r: (r["n"], r["name"].lower()),
+                "next": lambda r: (r["next"] or "9999", r["name"].lower()), "name": lambda r: r["name"].lower()}
+        rows = sorted(rows, key=keys.get(sort, keys["last"]), reverse=sort in ("last", "spent", "n"))
+        offset, limit = max(offset, 0), min(max(limit, 1), 200)
+        out = [{k: v for k, v in r.items() if k not in ("svc", "staff")} for r in rows[offset:offset + limit]]
+        return {"rows": out, "total": len(rows), "all": len(allr), "counts": counts, "sum": {"spent": round(sum(r["spent"] for r in rows), 2), "n": sum(r["n"] for r in rows)}}
 
     @api_router.get("/yp/customers/{phone}")
     async def customer(phone: str, _: dict = Depends(adm)):
@@ -421,7 +473,45 @@ def register(api_router, db, deps):
         hist = [view(x) for x in await db.bookings.find({"phone": ph}, {"_id": 0}).sort([("date", -1), ("time", -1)]).to_list(500)]
         if not c.get("name") and hist:
             c["name"] = hist[0]["name"]
-        return {"customer": c, "history": hist}
+        g = next((r for r in await cust_all() if r["phone"] == ph), None) or {}
+        stats = {k: g.get(k) for k in ("n", "spent", "avg", "first", "last", "next", "noshow", "cancel", "balance", "fav", "fav_staff", "segs")}
+        stats["svc"] = sorted(((k, v) for k, v in (g.get("svc") or {}).items() if k), key=lambda t: -t[1])[:6]
+        return {"customer": c, "history": hist, "stats": stats}
+
+    @api_router.get("/yp/appts/find")
+    async def appts_find(q: str = "", a: str = "", b: str = "", stage: str = "", staff: str = "", order: str = "desc", offset: int = 0, limit: int = 80, _: dict = Depends(adm)):
+        """Randevu listesi: ad/telefon/hizmet/not araması + tarih, durum, kişi süzgeçleri."""
+        flt = {}
+        if a or b:
+            flt["date"] = {}
+            if a:
+                flt["date"]["$gte"] = _day(a)
+            if b:
+                flt["date"]["$lte"] = _day(b)
+        rows = [view(r) for r in await db.bookings.find(flt, {"_id": 0}).to_list(30000) if r.get("date") and re.fullmatch(r"\d\d:\d\d", str(r.get("time") or ""))]
+        q = q.strip().lower()
+        if q:
+            dg = re.sub(r"\D", "", q).lstrip("0")
+            rows = [r for r in rows if q in r["name"].lower() or (dg and dg in r["phone"]) or q in (r["note"] or "").lower() or q in " ".join(i.get("name", "") for i in r["items"]).lower() or q in r["no"].lower()]
+        grp = {"acik": ("talep", "bekliyor", "geldi", "islemde"), "tamamlandi": ("tamamlandi",), "gelmedi": ("gelmedi",), "iptal": ("iptal",)}
+        if stage == "odeme":
+            rows = [r for r in rows if r["stage"] == "tamamlandi" and r["balance"] > 0]
+        elif stage in grp:
+            rows = [r for r in rows if r["stage"] in grp[stage]]
+        if staff:
+            rows = [r for r in rows if r["staff_id"] == staff]
+        rows.sort(key=lambda r: (r["date"], r["time"]), reverse=order != "asc")
+        live = [r for r in rows if r["stage"] not in ("iptal", "gelmedi", "talep")]
+        offset, limit = max(offset, 0), min(max(limit, 1), 200)
+        return {"rows": rows[offset:offset + limit], "total": len(rows), "sum": {"total": round(sum(r["total"] for r in live), 2), "paid": round(sum(r["paid"] for r in live), 2),
+                                                                             "balance": round(sum(r["balance"] for r in live if r["stage"] == "tamamlandi"), 2)}}
+
+    @api_router.get("/yp/appts/{aid}")
+    async def appt_one(aid: str, _: dict = Depends(adm)):
+        old = await db.bookings.find_one({"id": aid}, {"_id": 0})
+        if not old:
+            raise HTTPException(404, "Randevu bulunamadı")
+        return view(old)
 
     @api_router.put("/yp/customers/{phone}")
     async def customer_put(phone: str, payload: dict, _: dict = Depends(adm)):

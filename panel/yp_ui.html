@@ -49,6 +49,15 @@ td{padding:11px 18px;border-top:1px solid var(--line);vertical-align:middle}
 td.r,th.r{text-align:right}.tw{overflow-x:auto}
 .seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;background:#fff;overflow:hidden}
 .seg button{padding:0 14px;min-height:38px;border:0;background:none;font-weight:600;font-size:13.5px;color:var(--mut)}.seg button.on{background:var(--ink);color:#fff}
+/* liste / süzgeç */
+.fbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:12px 18px;border-bottom:1px solid var(--line)}
+.fbar input[type=search],.fbar select,.fbar input[type=date]{border:1px solid #d0d5dd;border-radius:8px;padding:0 11px;min-height:38px;background:#fff;font:inherit;color:var(--tx)}
+.fbar input[type=search]{flex:1 1 220px}
+.fbar .chips{margin:0}.sumline{padding:10px 18px;font-size:13px;color:var(--mut);border-top:1px solid var(--line);display:flex;gap:16px;flex-wrap:wrap}
+.chip small{font-weight:500;opacity:.75;margin-left:3px}
+.stt{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin:2px 0 14px}.stt div{background:#faf9f6;border:1px solid var(--line);border-radius:9px;padding:8px 11px}.stt small{display:block;color:var(--mut);font-size:12px}.stt b{font-size:16px}
+.sug{border:1px solid var(--line);border-radius:8px;margin-top:-8px;margin-bottom:12px;overflow:hidden}.sug button{display:flex;justify-content:space-between;gap:10px;width:100%;text-align:left;border:0;border-top:1px solid var(--line);background:#fff;padding:9px 12px;font:inherit;cursor:pointer}.sug button:first-child{border-top:0}.sug button:hover{background:var(--blue-s)}
+.steps{display:flex;gap:4px;margin:0 0 14px}.steps i{flex:1;height:5px;border-radius:5px;background:#e4e7ec}.steps i.on{background:var(--blue)}
 /* takvim */
 .calw{overflow:auto}
 .cal{display:grid;min-width:640px}
@@ -141,6 +150,7 @@ label.f>textarea{min-height:70px;resize:vertical}
 <symbol id="web" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M3 9h18M9 22h6M12 18v4"/></symbol>
 <symbol id="gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/></symbol>
 <symbol id="plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="list" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01"/></symbol>
 <symbol id="more" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
 </defs></svg>
 <script>
@@ -149,7 +159,7 @@ var $=function(s,r){return (r||document).querySelector(s)};
 var esc=function(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})};
 var tl=function(n){return Number(n||0).toLocaleString('tr-TR',{maximumFractionDigits:2})+' ₺'};
 var TOK='',B=null,ROUTE='bugun',CUR={};
-var NAV=[['bugun','Bugün','home'],['takvim','Takvim','cal'],['musteri','Müşteriler','users'],['kasa','Kasa','wallet'],['ekip','Ekip','team'],['rapor','Raporlar','chart'],['site','Web Sitem','web'],['ayar','Ayarlar','gear']];
+var NAV=[['bugun','Bugün','home'],['takvim','Takvim','cal'],['randevu','Randevular','list'],['musteri','Müşteriler','users'],['kasa','Kasa','wallet'],['ekip','Ekip','team'],['rapor','Raporlar','chart'],['site','Web Sitem','web'],['ayar','Ayarlar','gear']];
 var STG={talep:['Onay bekliyor','y'],bekliyor:['Bekliyor','w'],geldi:['Geldi','b'],islemde:['İşlemde','b'],tamamlandi:['Tamamlandı','g'],gelmedi:['Gelmedi','r'],iptal:['İptal','r']};
 var GUN=['Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi','Pazar'];
 function ld(k){try{return localStorage.getItem(k)||''}catch(e){return ''}}
@@ -260,7 +270,7 @@ function apptForm(p){p=p||{};var items=p.items||[];var sel={};items.forEach(func
  var svs=(B.services||[]).filter(function(s){return s.active!==false});items.forEach(function(i){if(!svs.some(function(s){return s.name===i.name}))svs.push({name:i.name,price:i.price,dur:i.dur})});
  var st=actives();
  modal(p.id?(p.stage==='talep'?'Talebi onayla':'Randevuyu düzenle'):'Yeni randevu',
- '<form id="af" data-id="'+esc(p.id||'')+'"><div class="g2"><label class="f">Müşteri adı<input name="name" required value="'+esc(p.name||'')+'" maxlength="80" autocomplete="off"></label><label class="f">Telefon<input name="phone" inputmode="tel" value="'+esc(p.phone||'')+'" placeholder="05xx xxx xx xx"></label></div>'
+ '<form id="af" data-id="'+esc(p.id||'')+'"><div class="g2"><label class="f">Müşteri adı<input name="name" required value="'+esc(p.name||'')+'" maxlength="80" autocomplete="off"></label><label class="f">Telefon<input name="phone" inputmode="tel" value="'+esc(p.phone||'')+'" placeholder="05xx xxx xx xx"></label></div><div id="sug"></div>'
  +'<div class="g3"><label class="f">Tarih<input type="date" name="date" required value="'+esc(p.date||CUR.day||B.today)+'"></label><label class="f">Saat<select name="time">'+timeOpts(p.time||'10:00')+'</select></label><label class="f">'+esc(B.terms.kisi)+'<select name="staff_id">'+st.map(function(s){return '<option value="'+s.id+'"'+(s.id===p.staff_id?' selected':'')+'>'+esc(s.name)+'</option>'}).join('')+'</select></label></div>'
  +'<div class="note" style="font-weight:600;margin-bottom:2px">Hizmetler</div><div class="chips" id="sv">'+(svs.map(function(s){return '<button type="button" class="chip'+(sel[s.name]?' on':'')+'" data-a="chip" data-n="'+esc(s.name)+'" data-p="'+s.price+'" data-d="'+s.dur+'">'+esc(s.name)+' · '+tl(s.price)+'</button>'}).join('')||'<span class="note">Ayarlar bölümünden hizmet ekleyin.</span>')+'</div>'
  +'<div class="g3"><label class="f">İndirim (₺)<input name="discount" inputmode="decimal" value="'+(p.discount||'')+'"></label><label class="f">Süre (dk)<input name="dur" inputmode="numeric" value="'+(p.dur||'')+'" placeholder="otomatik"></label><label class="f">Nereden<select name="source">'+[['telefon','Telefon'],['salon','Salonda'],['whatsapp','WhatsApp'],['instagram','Instagram'],['site','Site']].map(function(o){return '<option value="'+o[0]+'"'+(o[0]===(p.source||'telefon')?' selected':'')+'>'+o[1]+'</option>'}).join('')+'</select></label></div>'
@@ -274,35 +284,82 @@ async function saveAppt(ev,force){ev.preventDefault();var f=ev.target,e=$('#ae')
  $('#asv').disabled=true;
  try{var id=f.dataset.id;await api(id?'/yp/appts/'+id:'/yp/appts',{method:id?'PUT':'POST',body:body});closeM();toast(id?'Kaydedildi':'Randevu oluşturuldu');refresh()}
  catch(x){$('#asv').disabled=false;if(x.status===409&&!force){e.innerHTML=esc(x.message)+' <button type="button" class="lnk" id="frc">Yine de ekle</button>';e.hidden=false;$('#frc').onclick=function(){saveAppt({preventDefault:function(){},target:f},true)}}else{e.textContent=x.message;e.hidden=false}}}
-async function openAppt(id,full){var d=CUR.day||B.today,found=null;
- var lists=[CUR.requests||[]];
- for(var i=0;i<lists.length;i++)found=found||lists[i].filter(function(x){return x.id===id})[0];
- if(!found){var a=(CUR.apptA||d),rr=await api('/yp/appts?a='+add(d,-1)+'&b='+add(d,1));found=rr.rows.filter(function(x){return x.id===id})[0]}
- if(!found){var t=await api('/yp/appts?a='+B.today+'&b='+B.today);found=t.rows.filter(function(x){return x.id===id})[0]}
- if(!found)throw new Error('Randevu bulunamadı');return found}
+async function openAppt(id){var f=(CUR.requests||[]).filter(function(x){return x.id===id})[0];if(f)return f;return await api('/yp/appts/'+id)}
 async function detail(id){var v=await openAppt(id),s=staffOf(v.staff_id)||{};CUR.v=v;var done=v.stage==='tamamlandi'||v.stage==='gelmedi'||v.stage==='iptal';
- var b='<dl class="kv"><dt>Durum</dt><dd>'+tag(v.stage,v.balance)+' <span class="note">'+esc(v.no||'')+'</span></dd><dt>Müşteri</dt><dd>'+esc(v.name)+(v.phone?' · <a href="tel:'+esc(v.phone)+'">'+esc(v.phone)+'</a> · <a href="https://wa.me/90'+esc(v.phone)+'" target="_blank" rel="noopener">WhatsApp</a>':'')+'</dd><dt>Zaman</dt><dd>'+esc(fd(v.date,1))+' '+esc(v.time)+' · '+v.dur+' dk</dd><dt>'+esc(B.terms.kisi)+'</dt><dd>'+esc(s.name||'Atanmadı')+'</dd><dt>Hizmet</dt><dd>'+svc(v)+'</dd>'+(v.note?'<dt>Not</dt><dd style="font-weight:400">'+esc(v.note)+'</dd>':'')+'</dl>';
+ var stp=['bekliyor','geldi','islemde','tamamlandi'],si=stp.indexOf(v.stage);var b=(si>-1?'<div class="steps" aria-hidden="true">'+stp.map(function(_,i){return '<i class="'+(i<=si?'on':'')+'"></i>'}).join('')+'</div>':'')+'<dl class="kv"><dt>Durum</dt><dd>'+tag(v.stage,v.balance)+' <span class="note">'+esc(v.no||'')+'</span></dd><dt>Müşteri</dt><dd>'+esc(v.name)+(v.phone?' · <a href="tel:'+esc(v.phone)+'">'+esc(v.phone)+'</a> · <a href="https://wa.me/90'+esc(v.phone)+'" target="_blank" rel="noopener">WhatsApp</a>':'')+'</dd><dt>Zaman</dt><dd>'+esc(fd(v.date,1))+' '+esc(v.time)+' · '+v.dur+' dk</dd><dt>'+esc(B.terms.kisi)+'</dt><dd>'+esc(s.name||'Atanmadı')+'</dd><dt>Hizmet</dt><dd>'+svc(v)+'</dd>'+(v.note?'<dt>Not</dt><dd style="font-weight:400">'+esc(v.note)+'</dd>':'')+'</dl>';
  if(v.items.length)b+='<div style="border:1px solid var(--line);border-radius:8px;padding:10px 14px;margin-bottom:12px"><div style="display:flex;justify-content:space-between"><span>Tutar</span><b class="num">'+tl(v.total)+'</b></div><div style="display:flex;justify-content:space-between"><span>Alınan</span><b class="num" style="color:var(--ok)">'+tl(v.paid)+'</b></div><div style="display:flex;justify-content:space-between"><span>Kalan</span><b class="num" style="color:'+(v.balance?'var(--warn)':'inherit')+'">'+tl(v.balance)+'</b></div>'+v.payments.map(function(p){return '<div class="note">'+esc((p.at||'').replace('T',' '))+' · '+esc(p.method)+' · '+tl(p.amount)+'</div>'}).join('')+'</div>';
  var bt='';
  if(v.stage==='talep')bt+='<button class="btn p" data-a="accept" data-id="'+v.id+'">Onayla</button><button class="btn" data-a="reject" data-id="'+v.id+'">Reddet</button>';
  else{if(v.stage==='bekliyor')bt+='<button class="btn" data-a="stage" data-id="'+v.id+'" data-to="geldi">Geldi</button><button class="btn" data-a="stage" data-id="'+v.id+'" data-to="gelmedi">Gelmedi</button>';
   if(v.stage==='geldi')bt+='<button class="btn" data-a="stage" data-id="'+v.id+'" data-to="islemde">İşleme al</button>';
   if(['bekliyor','geldi','islemde'].indexOf(v.stage)>-1)bt+='<button class="btn d" data-a="stage" data-id="'+v.id+'" data-to="iptal">İptal et</button>';
-  if(v.balance>0&&v.items.length)bt+='<button class="btn p" data-a="pay" data-id="'+v.id+'">Ödeme al</button>';
+  if(['bekliyor','geldi','islemde'].indexOf(v.stage)>-1&&v.items.length)bt+='<button class="btn p" data-a="finish" data-id="'+v.id+'">Tamamla ve ödeme al</button>';
+  else if(v.balance>0&&v.items.length)bt+='<button class="btn p" data-a="pay" data-id="'+v.id+'">Ödeme al</button>';
+  if(v.phone)bt+='<button class="btn" data-a="cust" data-p="'+esc(v.phone)+'">Müşteri geçmişi</button>';
   if(!done)bt+='<button class="btn" data-a="edit" data-id="'+v.id+'">Düzenle</button>'}
  modal('Randevu '+(v.no||''),b+'<div class="mf">'+bt+'</div>')}
 function payForm(v){modal('Ödeme al','<form id="pf" data-id="'+v.id+'"><p style="margin-bottom:10px"><b>'+esc(v.name)+'</b> · '+svc(v)+'<br><span class="note">Kalan: '+tl(v.balance)+'</span></p><div class="g2"><label class="f">Tutar (₺)<input name="amount" required inputmode="decimal" value="'+v.balance+'"></label><label class="f">Ödeme şekli<select name="method"><option>Nakit</option><option>Kart</option><option>Havale</option></select></label></div><div class="err" id="pe" hidden></div><div class="mf"><button type="button" class="btn" data-a="close">Vazgeç</button><button class="btn p" id="psv">Kasaya işle</button></div></form>')}
+/* ---------------- RANDEVULAR (liste, arama, süzgeç) ---------------- */
+var PER=[['gelecek','Yaklaşan'],['bugun','Bugün'],['yarin','Yarın'],['hafta','Bu hafta'],['ay','Bu ay'],['gecmis','Geçmiş'],['hepsi','Tümü']];
+var STF=[['','Hepsi'],['acik','Açık'],['tamamlandi','Tamamlanan'],['odeme','Ödeme bekleyen'],['gelmedi','Gelmedi'],['iptal','İptal']];
+function perRange(k){var t=B.today,d=pd(t),y=d.getUTCFullYear(),m=d.getUTCMonth();
+ if(k==='bugun')return [t,t,'asc'];if(k==='yarin')return [add(t,1),add(t,1),'asc'];if(k==='hafta'){var w=(d.getUTCDay()+6)%7;return [add(t,-w),add(t,6-w),'asc']}
+ if(k==='ay')return [iso(new Date(Date.UTC(y,m,1))),iso(new Date(Date.UTC(y,m+1,0))),'asc'];if(k==='gelecek')return [t,'','asc'];if(k==='gecmis')return ['',add(t,-1),'desc'];return ['','','desc']}
+V.randevu=async function(){var F=CUR.rf=CUR.rf||{q:'',per:'gelecek',stage:'',staff:'',n:80};
+ var h=head('Randevular','Tüm randevuları arayın, süzün; ödeme bekleyenleri bulun.',NEWB);
+ h+='<div class="card"><div class="fbar"><input type="search" id="rq" placeholder="Ad, telefon, hizmet, not veya randevu no ara" value="'+esc(F.q)+'" aria-label="Randevu ara"><select id="rs" aria-label="Kişi"><option value="">'+esc(B.terms.kisiler)+': hepsi</option>'+actives().map(function(s){return '<option value="'+s.id+'"'+(s.id===F.staff?' selected':'')+'>'+esc(s.name)+'</option>'}).join('')+'</select></div>'
+  +'<div class="fbar" style="gap:14px"><div class="chips" id="rp">'+PER.map(function(p){return '<button class="chip'+(p[0]===F.per?' on':'')+'" data-a="rfilt" data-k="per" data-v="'+p[0]+'">'+p[1]+'</button>'}).join('')+'</div><div class="chips" id="rt">'+STF.map(function(p){return '<button class="chip'+(p[0]===F.stage?' on':'')+'" data-a="rfilt" data-k="stage" data-v="'+p[0]+'">'+p[1]+'</button>'}).join('')+'</div></div><div id="rl"><div class="empty">Yükleniyor…</div></div></div>';
+ $('#main').innerHTML=h;
+ var tm;$('#rq').oninput=function(){F.q=this.value;F.n=80;clearTimeout(tm);tm=setTimeout(function(){V.randevu.load().catch(fail)},250)};
+ $('#rs').onchange=function(){F.staff=this.value;F.n=80;V.randevu.load().catch(fail)};
+ await V.randevu.load()};
+V.randevu.load=async function(){var F=CUR.rf,r=perRange(F.per);
+ var d=await api('/yp/appts/find?q='+encodeURIComponent(F.q)+'&a='+r[0]+'&b='+r[1]+'&stage='+F.stage+'&staff='+F.staff+'&order='+r[2]+'&limit='+F.n);
+ var rows=d.rows;
+ $('#rl').innerHTML=rows.length?'<div class="tw"><table><tr><th>Tarih</th><th>Müşteri</th><th>Hizmet</th><th>'+esc(B.terms.kisi)+'</th><th>Durum</th><th class="r">Tutar</th></tr>'+rows.map(function(x){var s=staffOf(x.staff_id)||{};
+   return '<tr data-a="open" data-id="'+x.id+'" style="cursor:pointer"><td class="num" style="white-space:nowrap"><b>'+esc(fd(x.date,1))+'</b> '+esc(x.time)+'</td><td><b>'+esc(x.name)+'</b><div class="note">'+esc(x.phone||'')+'</div></td><td>'+svc(x)+'</td><td>'+esc(s.name||'—')+'</td><td>'+tag(x.stage,x.balance)+'</td><td class="r num">'+(x.items.length?tl(x.total)+(x.balance>0&&x.stage==='tamamlandi'?'<div class="note" style="color:var(--warn)">kalan '+tl(x.balance)+'</div>':''):'—')+'</td></tr>'}).join('')+'</table></div>'
+   +'<div class="sumline"><span><b>'+d.total+'</b> randevu</span><span>Tutar <b class="num">'+tl(d.sum.total)+'</b></span><span>Alınan <b class="num">'+tl(d.sum.paid)+'</b></span>'+(d.sum.balance?'<span style="color:var(--warn)">Ödeme bekleyen <b class="num">'+tl(d.sum.balance)+'</b></span>':'')+(d.total>rows.length?'<button class="btn s" data-a="rmore" style="margin-left:auto">Daha fazla göster</button>':'')+'</div>'
+  :'<div class="empty">Bu süzgece uyan randevu yok.'+(CUR.rf.q||CUR.rf.stage||CUR.rf.staff?' <button class="btn s" data-a="rclear">Süzgeçleri temizle</button>':'')+'</div>'};
 /* ---------------- MÜŞTERİLER ---------------- */
-V.musteri=async function(){var q=CUR.q||'';
- $('#main').innerHTML=head('Müşteriler','Randevu aldıkça kendiliğinden birikir.',NEWB)+'<div class="card"><div style="padding:14px 18px"><input id="mq" class="btn" style="width:100%;justify-content:flex-start;font-weight:400" placeholder="Ad veya telefonla ara" value="'+esc(q)+'" type="search" aria-label="Müşteri ara"></div><div id="ml"></div></div>';
- async function load(){var r=await api('/yp/customers?q='+encodeURIComponent($('#mq').value));var rows=r.rows;
-  $('#ml').innerHTML=rows.length?'<div class="tw"><table><tr><th>Müşteri</th><th>Telefon</th><th class="r">Ziyaret</th><th class="r">Harcama</th><th>Son gelişi</th></tr>'+rows.map(function(c){return '<tr data-a="cust" data-p="'+esc(c.phone)+'" style="cursor:pointer"><td><b>'+esc(c.name)+'</b>'+(c.noshow?' <span class="tag r" style="font-size:11px">'+c.noshow+' gelmedi</span>':'')+'</td><td>'+esc(c.phone)+'</td><td class="r num">'+c.n+'</td><td class="r num">'+tl(c.spent)+'</td><td>'+(c.last?esc(fd(c.last,1)):'—')+'</td></tr>'}).join('')+'</table></div>':'<div class="empty">'+($('#mq').value?'Eşleşen müşteri yok.':'Henüz müşteri yok. İlk randevuyu açtığınızda burada görünür.')+'</div>'}
- var tm;$('#mq').oninput=function(){CUR.q=this.value;clearTimeout(tm);tm=setTimeout(function(){load().catch(fail)},250)};await load()};
-async function custCard(ph){var r=await api('/yp/customers/'+ph),c=r.customer,h=r.history;var spent=h.filter(function(x){return x.stage==='tamamlandi'}).reduce(function(a,x){return a+x.paid},0);
- modal(c.name||'Müşteri','<dl class="kv"><dt>Telefon</dt><dd><a href="tel:'+esc(ph)+'">'+esc(ph)+'</a> · <a href="https://wa.me/90'+esc(ph)+'" target="_blank" rel="noopener">WhatsApp</a></dd><dt>Harcama</dt><dd class="num">'+tl(spent)+' · '+h.filter(function(x){return x.stage==='tamamlandi'}).length+' ziyaret</dd></dl>'
- +'<label class="f">Müşteri notu (renk formülü, alerji, tercih…)<textarea id="cn" maxlength="2000">'+esc(c.note||'')+'</textarea></label><div class="note" style="font-weight:600;margin:4px 0">Geçmiş</div><div style="max-height:220px;overflow:auto;border:1px solid var(--line);border-radius:8px">'
- +(h.map(function(x){return '<div class="row" style="grid-template-columns:1fr auto;padding:8px 12px"><div><b>'+esc(fd(x.date,1))+' '+esc(x.time)+'</b><div class="m">'+svc(x)+'</div></div>'+tag(x.stage,x.balance)+'</div>'}).join('')||'<div class="empty">Kayıt yok</div>')+'</div>'
- +'<div class="mf" style="margin-top:12px"><button class="btn" data-a="close">Kapat</button><button class="btn" id="cns" data-p="'+esc(ph)+'">Notu kaydet</button><button class="btn p" data-a="newfor" data-p="'+esc(ph)+'" data-n="'+esc(c.name||'')+'">Randevu ekle</button></div>')}
+var SEGS=[['','Hepsi'],['yaklasan','Randevusu var'],['yeni','Yeni'],['duzenli','Düzenli (3+ ziyaret)'],['kayip','60 gündür gelmeyen'],['borc','Ödeme bekleyen'],['gelmedi','Gelmedi geçmişi'],['notlu','Notlu']];
+var SORTS=[['last','Son gelişe göre'],['spent','Harcamaya göre'],['n','Ziyaret sayısına göre'],['next','Sıradaki randevuya göre'],['name','Ada göre (A-Z)']];
+V.musteri=async function(){var F=CUR.mf=CUR.mf||{q:CUR.q||'',seg:'',staff:'',svc:'',sort:'last',n:60};
+ var svs=(B.services||[]).filter(function(s){return s.active!==false});
+ var h=head('Müşteriler','Randevu aldıkça kendiliğinden birikir. Aramak ve süzmek için aşağıyı kullanın.',NEWB+'<button class="btn" data-a="mcsv">Excel\'e aktar</button>');
+ h+='<div class="card"><div class="fbar"><input type="search" id="mq" placeholder="Ad, telefon, hizmet veya not ara" value="'+esc(F.q)+'" aria-label="Müşteri ara">'
+  +'<select id="ms" aria-label="'+esc(B.terms.kisi)+'"><option value="">'+esc(B.terms.kisiler)+': hepsi</option>'+actives().map(function(s){return '<option value="'+s.id+'"'+(s.id===F.staff?' selected':'')+'>'+esc(s.name)+'</option>'}).join('')+'</select>'
+  +'<select id="mv" aria-label="Hizmet"><option value="">Hizmet: hepsi</option>'+svs.map(function(s){return '<option'+(s.name===F.svc?' selected':'')+'>'+esc(s.name)+'</option>'}).join('')+'</select>'
+  +'<select id="mo" aria-label="Sırala">'+SORTS.map(function(o){return '<option value="'+o[0]+'"'+(o[0]===F.sort?' selected':'')+'>'+o[1]+'</option>'}).join('')+'</select></div>'
+  +'<div class="fbar"><div class="chips" id="mseg"></div></div><div id="ml"><div class="empty">Yükleniyor…</div></div></div>';
+ $('#main').innerHTML=h;
+ var tm;$('#mq').oninput=function(){F.q=CUR.q=this.value;F.n=60;clearTimeout(tm);tm=setTimeout(function(){V.musteri.load().catch(fail)},250)};
+ [['ms','staff'],['mv','svc'],['mo','sort']].forEach(function(p){$('#'+p[0]).onchange=function(){F[p[1]]=this.value;F.n=60;V.musteri.load().catch(fail)}});
+ await V.musteri.load()};
+V.musteri.url=function(n,off){var F=CUR.mf;return '/yp/customers?q='+encodeURIComponent(F.q)+'&seg='+F.seg+'&staff='+F.staff+'&svc='+encodeURIComponent(F.svc)+'&sort='+F.sort+'&offset='+(off||0)+'&limit='+n};
+V.musteri.load=async function(){var F=CUR.mf,r=await api(V.musteri.url(F.n)),rows=r.rows;
+ $('#mseg').innerHTML=SEGS.map(function(o){var c=o[0]?r.counts[o[0]]:r.all;return '<button class="chip'+(o[0]===F.seg?' on':'')+'" data-a="mfilt" data-v="'+o[0]+'">'+o[1]+'<small>'+c+'</small></button>'}).join('');
+ var fav=function(c){return c.fav?esc(c.fav):'<span class="note">—</span>'};
+ $('#ml').innerHTML=rows.length?'<div class="tw"><table><tr><th>Müşteri</th><th>Telefon</th><th class="r">Ziyaret</th><th class="r">Harcama</th><th class="r">Ortalama</th><th>Sık aldığı hizmet</th><th>Son geliş</th><th>Sıradaki</th></tr>'+rows.map(function(c){return '<tr data-a="cust" data-p="'+esc(c.phone)+'" style="cursor:pointer"><td><b>'+esc(c.name||'—')+'</b>'
+   +(c.balance>0?' <span class="tag y" style="font-size:11px">'+tl(c.balance)+' borç</span>':'')+(c.noshow?' <span class="tag r" style="font-size:11px">'+c.noshow+' gelmedi</span>':'')+(c.note?'<div class="note" style="max-width:240px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(c.note)+'</div>':'')+'</td><td>'+esc(c.phone)+'</td><td class="r num">'+c.n+'</td><td class="r num">'+tl(c.spent)+'</td><td class="r num">'+(c.avg?tl(c.avg):'—')+'</td><td>'+fav(c)+'</td><td>'+(c.last?esc(fd(c.last,1)):'—')+'</td><td>'+(c.next?'<b>'+esc(fd(c.next,1))+'</b>':'—')+'</td></tr>'}).join('')+'</table></div>'
+   +'<div class="sumline"><span><b>'+r.total+'</b> müşteri</span><span>Toplam harcama <b class="num">'+tl(r.sum.spent)+'</b></span><span>'+r.sum.n+' tamamlanan ziyaret</span>'+(r.total>rows.length?'<button class="btn s" data-a="mmore" style="margin-left:auto">Daha fazla göster</button>':'')+'</div>'
+  :'<div class="empty">'+((F.q||F.seg||F.staff||F.svc)?'Bu süzgece uyan müşteri yok. <button class="btn s" data-a="mclear">Süzgeçleri temizle</button>':'Henüz müşteri yok. İlk randevuyu açtığınızda burada görünür.')+'</div>'};
+async function mcsv(){var F=CUR.mf||{q:'',seg:'',staff:'',svc:'',sort:'last'},all=[],off=0,d;
+ do{d=await api(V.musteri.url(200,off).replace('&limit=200','&limit=200'));all=all.concat(d.rows);off+=200}while(off<d.total&&off<5000);
+ var q=function(v){return '"'+String(v==null?'':v).replace(/"/g,'""')+'"'};
+ var csv='﻿'+['Ad;Telefon;Ziyaret;Harcama;Ortalama;Sık hizmet;İlk geliş;Son geliş;Sıradaki randevu;Gelmedi;İptal;Borç;Not'].concat(all.map(function(c){return [c.name,c.phone,c.n,c.spent,c.avg,c.fav,c.first,c.last,c.next,c.noshow,c.cancel,c.balance,c.note].map(q).join(';')})).join('\r\n');
+ var u=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})),a=document.createElement('a');a.href=u;a.download='musteriler.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(u)},4000);toast(all.length+' müşteri indirildi')}
+var HF=[['','Hepsi'],['gelecek','Yaklaşan'],['tamamlandi','Tamamlanan'],['gelmedi','Gelmedi'],['iptal','İptal']];
+function histRows(h,f){var t=B.today;return h.filter(function(x){return !f||(f==='gelecek'?(x.date>=t&&['talep','bekliyor','geldi','islemde'].indexOf(x.stage)>-1):x.stage===f)}).map(function(x){var s=staffOf(x.staff_id)||{};return '<div class="row" data-a="open" data-id="'+x.id+'" style="grid-template-columns:1fr auto;padding:8px 12px;cursor:pointer"><div><b>'+esc(fd(x.date,1))+' '+esc(x.time)+'</b><div class="m">'+svc(x)+(s.name?' · '+esc(s.name):'')+(x.total?' · '+tl(x.total):'')+'</div>'+(x.note?'<div class="note">'+esc(x.note)+'</div>':'')+'</div>'+tag(x.stage,x.balance)+'</div>'}).join('')||'<div class="empty">Kayıt yok</div>'}
+async function custCard(ph){var r=await api('/yp/customers/'+ph),c=r.customer,h=r.history,s=r.stats;CUR.hist=h;
+ var fs=s.fav_staff?(staffOf(s.fav_staff)||{}).name:'';
+ modal(c.name||'Müşteri','<div class="stt"><div><small>Ziyaret</small><b class="num">'+(s.n||0)+'</b></div><div><small>Toplam harcama</small><b class="num">'+tl(s.spent||0)+'</b></div><div><small>Ortalama</small><b class="num">'+(s.avg?tl(s.avg):'—')+'</b></div><div><small>Son geliş</small><b>'+(s.last?esc(fd(s.last,1)):'—')+'</b></div><div><small>Sıradaki</small><b>'+(s.next?esc(fd(s.next,1)):'—')+'</b></div>'+(s.balance>0?'<div><small>Ödeme bekleyen</small><b class="num" style="color:var(--warn)">'+tl(s.balance)+'</b></div>':'')+((s.noshow||s.cancel)?'<div><small>Gelmedi / İptal</small><b>'+(s.noshow||0)+' / '+(s.cancel||0)+'</b></div>':'')+'</div>'
+ +'<div class="g2"><label class="f">Ad soyad<input id="cname" maxlength="80" value="'+esc(c.name||'')+'"></label><label class="f">Telefon<div style="margin-top:4px;min-height:40px;display:flex;align-items:center;gap:10px"><a href="tel:'+esc(ph)+'">'+esc(ph)+'</a><a href="https://wa.me/90'+esc(ph)+'" target="_blank" rel="noopener">WhatsApp</a></div></label></div>'
+ +((s.svc||[]).length?'<div class="note" style="margin-bottom:10px">Sık aldığı: '+s.svc.map(function(x){return '<b>'+esc(x[0])+'</b> ('+x[1]+')'}).join(', ')+(fs?' · Tercih ettiği: <b>'+esc(fs)+'</b>':'')+'</div>':'')
+ +'<label class="f">Müşteri notu (renk formülü, alerji, tercih…)<textarea id="cn" maxlength="2000">'+esc(c.note||'')+'</textarea></label>'
+ +'<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:4px 0 6px"><b class="note" style="font-size:13px">Geçmiş ('+h.length+')</b><div class="chips" style="margin:0" id="hf">'+HF.map(function(o){return '<button type="button" class="chip" data-a="hfilt" data-v="'+o[0]+'" style="min-height:30px;padding:3px 10px">'+o[1]+'</button>'}).join('')+'</div></div>'
+ +'<div id="hl" style="max-height:260px;overflow:auto;border:1px solid var(--line);border-radius:8px">'+histRows(h,'')+'</div>'
+ +'<div class="mf" style="margin-top:12px"><button class="btn" data-a="close">Kapat</button><button class="btn" id="cns" data-p="'+esc(ph)+'">Kaydet</button><button class="btn p" data-a="newfor" data-p="'+esc(ph)+'" data-n="'+esc(c.name||'')+'">Randevu ekle</button></div>',1);
+ var f0=document.querySelector('#hf .chip');if(f0)f0.classList.add('on')}
 /* ---------------- KASA ---------------- */
 V.kasa=async function(){var k=CUR.kr||'bugun',r=rng(k),c=await api('/yp/cash?a='+r[0]+'&b='+r[1]);
  var by={};c.rows.filter(function(x){return x.type==='in'}).forEach(function(x){by[x.method]=(by[x.method]||0)+x.amount});
@@ -459,7 +516,17 @@ document.addEventListener('click',async function(ev){
  else if(a==='pay'){var v3=await openAppt(id);closeM();payForm(v3)}
  else if(a==='day'){var n=+t.dataset.v;CUR.day=n?add(CUR.day||B.today,n):B.today;V.takvim().catch(fail)}
  else if(a==='slot'){if(ev.target.closest('.ev')||t.classList.contains('off'))return;var rc=t.getBoundingClientRect(),s0=Math.floor(mn(B.hours.start)/60)*60,m=s0+Math.round(((ev.clientY-rc.top)/64*60)/15)*15;m=Math.max(mn(B.hours.start),Math.min(m,mn(B.hours.end)));if(!t.dataset.s){toast('Önce kişi seçilen bir sütuna dokunun',true);return}apptForm({date:CUR.day,time:hm(m),staff_id:t.dataset.s})}
- else if(a==='cust'){await custCard(t.dataset.p)}
+ else if(a==='cust'){closeM();await custCard(t.dataset.p)}
+ else if(a==='rfilt'){CUR.rf[t.dataset.k]=t.dataset.v;CUR.rf.n=80;V.randevu().catch(fail)}
+ else if(a==='rmore'){CUR.rf.n+=80;await V.randevu.load()}
+ else if(a==='rclear'){CUR.rf.q='';CUR.rf.stage='';CUR.rf.staff='';V.randevu().catch(fail)}
+ else if(a==='mfilt'){CUR.mf.seg=t.dataset.v;CUR.mf.n=60;await V.musteri.load()}
+ else if(a==='mmore'){CUR.mf.n+=60;await V.musteri.load()}
+ else if(a==='mclear'){CUR.mf=null;CUR.q='';V.musteri().catch(fail)}
+ else if(a==='mcsv'){await mcsv()}
+ else if(a==='hfilt'){document.querySelectorAll('#hf .chip').forEach(function(c){c.classList.toggle('on',c===t)});$('#hl').innerHTML=histRows(CUR.hist||[],t.dataset.v)}
+ else if(a==='pick'){var f=$('#af');f.name.value=t.dataset.n;f.phone.value=t.dataset.p;$('#sug').innerHTML=t.dataset.i?'<div class="note" style="margin:-6px 0 10px">'+esc(t.dataset.i)+'</div>':''}
+ else if(a==='finish'){var vf=await api('/yp/appts/'+id+'/stage',{method:'POST',body:{to:'tamamlandi'}});closeM();refresh();if(vf.balance>0)payForm(vf);else toast('Tamamlandı')}
  else if(a==='kr'||a==='er'||a==='rr'){CUR[a]=t.dataset.v;refresh()}
  else if(a==='cashnew'){cashForm(t.dataset.t||'in')}
  else if(a==='cashdel'){if(await ask('Bu kasa kaydı silinsin mi? Randevudan alınan ödemeyse randevudan da düşer.','Sil')){await api('/yp/cash/'+id,{method:'DELETE'});toast('Silindi');refresh()}}
@@ -516,7 +583,9 @@ document.addEventListener('submit',async function(ev){var f=ev.target,id=f.id;if
  else if(id==='btf'){var th=CUR.brand.theme,p2=Object.assign({},CUR.prof);p2.edits=JSON.parse(JSON.stringify(p2.edits||{}));p2.edits[th]=p2.edits[th]||{};var bl=p2.edits[th][CUR.bn]||{};CUR.bt.forEach(function(x){var inp=f['t'+x.i],v=inp.value.trim();if(!v||v===(x.orig||x.text))delete bl[x.i];else bl[x.i]=v});p2.edits[th][CUR.bn]=bl;p2.blockstyle=JSON.parse(JSON.stringify(p2.blockstyle||{}));p2.blockstyle[th]=p2.blockstyle[th]||{};var bsv={};if(f.sh.value)bsv.h=f.sh.value;if(f.sb.value)bsv.b=f.sb.value;if(f.suc.checked)bsv.c=f.sc.value;if(Object.keys(bsv).length)p2.blockstyle[th][CUR.bn]=bsv;else delete p2.blockstyle[th][CUR.bn];await api('/site/profile',{method:'PUT',body:p2});CUR.prof=p2;closeM();toast('Yazılar güncellendi');loadBlocks();preview()}
  }catch(x){fail(x)}
  if(btn&&document.body.contains(btn))btn.disabled=false});
-document.addEventListener('click',function(ev){var b=ev.target.closest('#cns');if(!b)return;api('/yp/customers/'+b.dataset.p,{method:'PUT',body:{note:$('#cn').value}}).then(function(){toast('Not kaydedildi')}).catch(fail)});
+document.addEventListener('click',function(ev){var b=ev.target.closest('#cns');if(!b)return;api('/yp/customers/'+b.dataset.p,{method:'PUT',body:{note:$('#cn').value,name:($('#cname')||{}).value||''}}).then(function(){toast('Kaydedildi');if(ROUTE==='musteri')V.musteri.load().catch(fail)}).catch(fail)});
+(function(){var tm;document.addEventListener('input',function(ev){var el=ev.target;if(!el.closest||!el.closest('#af')||el.closest('#af').dataset.id)return;if(el.name!=='name'&&el.name!=='phone')return;var q=el.value.trim();clearTimeout(tm);var bx=$('#sug');if(!bx)return;if(q.length<2){bx.innerHTML='';return}
+ tm=setTimeout(function(){api('/yp/customers?limit=5&sort=last&q='+encodeURIComponent(q)).then(function(r){bx=$('#sug');if(!bx)return;bx.innerHTML=r.rows.length?'<div class="sug">'+r.rows.map(function(c){var info=(c.n?c.n+' ziyaret · son '+fd(c.last,1):'')+(c.fav?' · '+c.fav:'')+(c.note?' · Not: '+c.note:'');return '<button type="button" data-a="pick" data-n="'+esc(c.name)+'" data-p="'+esc(c.phone)+'" data-i="'+esc(info)+'"><span><b>'+esc(c.name)+'</b> <span class="note">'+esc(c.phone)+'</span></span><span class="note">'+(c.n?c.n+' ziyaret':'')+'</span></button>'}).join('')+'</div>':''}).catch(function(){})},220)})})();
 /* başlangıç */
 (async function(){TOK=ld('ypt')||ld('token');if(!TOK){showLogin();return}await start()})();
 </script></body></html>
