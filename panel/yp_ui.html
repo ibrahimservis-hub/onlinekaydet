@@ -86,9 +86,9 @@ label.f>textarea{min-height:70px;resize:vertical}
 .th .sv{height:74px;display:flex;align-items:flex-end;padding:8px 10px;color:#fff;font-weight:700;font-size:13px}
 .th .tb{padding:8px 10px;display:flex;gap:6px;flex-wrap:wrap}
 .tog{width:38px;height:22px;border-radius:22px;background:#d0d5dd;position:relative;flex:none;border:0;padding:0}.tog:after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;transition:left .15s}.tog.on{background:var(--blue)}.tog.on:after{left:18px}
-.sitegrid{display:grid;grid-template-columns:1fr 360px;gap:18px;align-items:start}
+.sitegrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(440px,46%);gap:18px;align-items:start}
 .pv{position:sticky;top:16px}
-.pv iframe{width:100%;height:640px;border:0;background:#fff;display:block}
+.pv iframe{width:100%;height:calc(100vh - 150px);min-height:560px;border:0;background:#fff;display:block}.md.full{width:min(1280px,96vw)!important;max-width:96vw}.md.full iframe{width:100%;height:78vh;border:0;background:#fff;display:block;border-radius:10px}
 .mhd,.mbar{display:none}
 #login{min-height:100vh;display:grid;place-items:center;padding:20px;background:var(--ink)}
 #login form{background:#fff;border-radius:14px;padding:28px;width:100%;max-width:380px}
@@ -337,7 +337,7 @@ V.rapor=async function(){var k=CUR.rr||'ay',r=rng(k==='uc'?'uc':k),d=await api('
  $('#main').innerHTML=h};
 /* ---------------- WEB SİTEM ---------------- */
 V.site=async function(){
- $('#main').innerHTML=head('Web Sitem','Temayı seçin, bölümleri açıp kapatın, yazıları değiştirin. Değişiklik siteye anında yansır.','<button class="btn" data-a="pvreload">Önizlemeyi yenile</button>')+'<div class="sitegrid"><div id="sl" style="display:grid;gap:18px"></div><div class="pv card"><div class="hd"><h2>Sitenizin görünümü</h2></div><iframe id="pvf" title="Site önizleme" sandbox="allow-scripts"></iframe></div></div>';
+ $('#main').innerHTML=head('Web Sitem','Temayı seçin, bölümleri açıp kapatın, yazıları değiştirin. Değişiklik siteye anında yansır.','<button class="btn" data-a="pvfull">Tam ekran önizle</button> <button class="btn" data-a="pvreload">Önizlemeyi yenile</button>')+'<div class="sitegrid"><div id="sl" style="display:grid;gap:18px"></div><div class="pv card"><div class="hd"><h2>Sitenizin görünümü</h2></div><iframe id="pvf" title="Site önizleme" sandbox="allow-scripts"></iframe></div></div>';
  var br=await api('/brand'),pr=await api('/site/profile');CUR.brand=br.brand;CUR.prof=pr.profile||{};CUR.profFull=pr;
  var sel=br.brand.theme,mine=br.themes.filter(function(t){return t.sector===B.sector}),rest=br.themes.filter(function(t){return t.sector!==B.sector});
  function card(t){return '<div class="th'+(t.slug===sel?' on':'')+'"><div class="sv" style="background:linear-gradient(135deg,'+esc(t.dark)+','+esc(t.accent)+')">'+esc(String(t.name).replace(/&amp;/g,'&'))+'</div><div class="tb"><button class="btn s" data-a="tprev" data-s="'+esc(t.slug)+'">Önizle</button>'+(t.slug===sel?'<span class="tag g">Seçili</span>':'<button class="btn s p" data-a="tpick" data-s="'+esc(t.slug)+'" data-n="'+esc(t.name)+'">Seç</button>')+'</div></div>'}
@@ -381,7 +381,9 @@ async function loadThemeImgs(){var el=$('#tim');if(!el)return;try{var r=await ap
 async function setThemeImg(pid,k){var th=CUR.brand.theme,p=CUR.prof;p.imgmap=p.imgmap||{};p.imgmap[th]=p.imgmap[th]||{};if(k)p.imgmap[th][pid]=k;else delete p.imgmap[th][pid];await saveProf();preview();await loadThemeImgs()}
 async function onThemeUpload(inp){var f=(inp.files||[])[0],pid=inp.dataset.p;inp.value='';if(!f)return;try{toast('Yükleniyor…');var k=await upImage(f,'slides');await setThemeImg(pid,k);toast('Resim değişti')}catch(e){toast(e.message||'Yüklenemedi',true)}}
 async function saveLayout(){var p=Object.assign({},CUR.prof);p.layout={order:CUR.blocks.map(function(x){return x.name}),hidden:CUR.blocks.filter(function(x){return x.hidden}).map(function(x){return x.name})};await api('/site/profile',{method:'PUT',body:p});CUR.prof=p;preview()}
-async function preview(){var f=$('#pvf');if(!f)return;try{var r=await fetch('/api/site/preview?path=/',{headers:{Authorization:'Bearer '+TOK}});if(!r.ok)throw 0;f.srcdoc=await r.text()}catch(e){f.srcdoc='<p style="font:15px sans-serif;padding:24px;color:#667085">Önizleme için önce bir tema seçin.</p>'}}
+function pvGuard(h){var g='<script>document.addEventListener("click",function(e){var a=e.target.closest&&e.target.closest("a[href]");if(!a)return;var h=a.getAttribute("href")||"";if(h.charAt(0)!=="#")e.preventDefault()},true)<\/script>';return h.indexOf('</body>')>0?h.replace('</body>',function(){return g+'</body>'}):h+g}
+function setFrame(f,h){if(f._u)URL.revokeObjectURL(f._u);f._u=URL.createObjectURL(new Blob([h],{type:'text/html'}));f.removeAttribute('srcdoc');f.src=f._u}
+async function preview(){var f=$('#pvf');if(!f)return;try{var r=await fetch('/api/site/preview?path=/',{headers:{Authorization:'Bearer '+TOK}});if(!r.ok)throw 0;CUR.pvhtml=pvGuard(await r.text());setFrame(f,CUR.pvhtml)}catch(e){CUR.pvhtml='';setFrame(f,'<p style="font:15px sans-serif;padding:24px;color:#667085">Önizleme için önce bir tema seçin.</p>')}}
 async function editBlock(name){var r=await api('/site/block-text?name='+encodeURIComponent(name));CUR.bt=r.texts;CUR.bn=name;
  modal('Bölüm yazıları','<form id="btf"><p class="note" style="margin-bottom:10px">Yalnızca yazıları değiştirir; tasarım bozulmaz. Boş bırakırsanız ilk haline döner.</p>'+r.texts.map(function(t){return '<label class="f">'+(t.tag?esc(t.tag)+' · ':'')+'<input name="t'+t.i+'" value="'+esc(t.text)+'" maxlength="600" data-o="'+esc(t.orig||t.text)+'"></label>'}).join('')+'<div class="mf"><button type="button" class="btn" data-a="close">Vazgeç</button><button class="btn p">Kaydet</button></div></form>',1)}
 /* ---------------- AYARLAR ---------------- */
@@ -427,6 +429,7 @@ document.addEventListener('click',async function(ev){
  else if(a==='tprev'){window.open('/tema-onizleme/'+t.dataset.s+'.html','_blank','noopener')}
  else if(a==='tpick'){if(await ask('Sitenizin teması “'+t.dataset.n+'” olarak değişsin mi? Yazılarınız ve bilgileriniz korunur.','Temayı değiştir')){var b=CUR.brand;await api('/brand',{method:'PUT',body:{theme:t.dataset.s,dark:b.dark,accent:b.accent,radius:b.radius}});toast('Tema değişti');V.site().catch(fail)}}
  else if(a==='bentog'){t.classList.toggle('on');t.setAttribute('aria-checked',t.classList.contains('on'))}
+ else if(a==='pvfull'){if(!CUR.pvhtml){await preview()}modal('Sitenizin görünümü','<iframe id="pvf2" title="Site önizleme büyük" sandbox="allow-scripts"></iframe>',1);$('#ov .md').classList.add('full');setFrame($('#pvf2'),CUR.pvhtml||'<p style="font:15px sans-serif;padding:24px">Önizleme yok</p>')}
  else if(a==='pvreload'){preview()}
  else if(a==='timgreset'){await setThemeImg(t.dataset.p,'');toast('İlk haline döndü')}
  else if(a==='bimg'){await blockImages(t.dataset.n)}

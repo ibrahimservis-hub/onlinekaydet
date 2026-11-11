@@ -101,6 +101,16 @@ with TestClient(s.app) as c:
         assert c.get("/api/site/profile", headers=H).json()["profile"]["imgmap"]["k6-butik-kuafor"][im[0]["pid"]] == k, "eski panel sildi"
         assert c.get("/api/site/theme-images", headers=H).json()["images"][0]["k"] == k
     t("tema resimleri listelenir, kimlik bazlı değiştirilir (galeri/lightbox dahil), eski panel silmez", tim)
+    def lay():
+        p = c.get("/api/site/profile", headers=H).json()["profile"]; p["layout"] = {"order": ["Galeri", "Ekip"], "hidden": ["Kampanyalar"]}
+        assert c.put("/api/site/profile", headers=H, json=p).status_code == 200
+        assert c.put("/api/brand", headers=H, json={"theme": "k5-atolye-kuafor", "dark": "#1a1a1a", "accent": "#b08d57", "radius": 8}).status_code == 200
+        p = c.get("/api/site/profile", headers=H).json()["profile"]; assert p["layout"] == {"order": [], "hidden": []}, p["layout"]
+        assert c.put("/api/site/logo", headers=H, json={"data": png("blue")}).status_code == 200
+        h = c.get("/api/site/preview?path=/", headers=H).text
+        assert re.search(r'<a class="lg[^"]*"[^>]*><img class="spx-logo"', h), "k5 başlığında logo yok"
+        assert c.put("/api/brand", headers=H, json={"theme": "k5-atolye-kuafor", "dark": "#1a1a1a", "accent": "#b08d57", "radius": 9}).status_code == 200
+    t("tema değişince bölüm düzeni sıfırlanır; k5 başlığında logo görünür", lay)
 print("OK", len(ok)); [print(" +", n) for n in ok]
 for n, e in bad: print(" -", n); print(e)
 sys.exit(1 if bad else 0)

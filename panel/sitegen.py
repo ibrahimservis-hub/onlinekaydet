@@ -240,7 +240,7 @@ def join_blocks(pre, blocks, tail):
 
 CSS = """<style data-spx-auto>
 .spx-off{display:none!important}
-.spx-logo{height:42px;width:auto;max-width:200px;object-fit:contain;display:block}
+.spx-logo{height:42px;width:auto;max-width:200px;object-fit:contain;display:block}a.lg:has(.spx-logo){display:inline-flex!important;align-items:center;gap:10px}
 .spx-sl{position:relative;overflow:hidden;background:var(--dk,#111)}
 .spx-sl-t{position:relative;aspect-ratio:16/6;min-height:240px;max-height:620px}
 .spx-s{position:absolute;inset:0;opacity:0;transition:opacity .7s ease;pointer-events:none}
@@ -383,6 +383,10 @@ def apply_profile(raw, th, ctx):
         h = re.sub(r'(<(?:a|div) class="lg[^"]*"[^>]*>)<span class="lm[^"]*">[^<]*</span>', lambda m: m.group(1) + img, h)
         if "spx-logo" not in h:
             h = re.sub(r'(<a class="lg[^"]*"[^>]*>)(<span class="ln">)', lambda m: m.group(1) + img + m.group(2), h)
+        if "spx-logo" not in h:                                   # <a class="lg">Firma adı</a> biçimindeki temalar (Kuaför 5-10 vb.)
+            def _lg(m):
+                return m.group(1) + img + ("" if ctx["p"].get("logo_only") else '<span class="ln">' + m.group(2) + "</span>") + "</a>"
+            h = re.sub(r'(<a class="lg[^"]*"[^>]*>)((?:(?!</a>).)*)</a>', _lg, h, count=1, flags=re.S)
         if ctx["p"].get("logo_only"):
             h = re.sub(r'(<img class="spx-logo"[^>]*>)<span class="ln">[^<]*</span>', r"\1", h)
     if ctx["p"].get("slogan"):
