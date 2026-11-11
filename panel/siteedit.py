@@ -360,7 +360,34 @@ def register(api_router, db, deps):
             hh, ll = str((v or {}).get("h") or "").strip()[:300], _t((v or {}).get("l"), 40)
             if ll and re.match(r"^(#[\w-]*|/[^\s]*|https?://[^\s]+|tel:[+\d\s]+|mailto:[^\s]+)$", hh):
                 ex_.append({"h": hh, "l": ll})
-        out["menu"] = {"edits": ed, "extra": ex_}
+        out["menu"] = {"edits": ed, "extra": ex_, "order": [str(o)[:300] for o in (mn.get("order") or [])[:80] if isinstance(o, str)]}
+        bs = {}
+        for th_, mp in (x.get("blockstyle") or {}).items():
+            if not isinstance(mp, dict) or len(bs) > 5:
+                continue
+            row = {}
+            for bn, st in list(mp.items())[:40]:
+                if not isinstance(st, dict):
+                    continue
+                v = {}
+                if st.get("h") in sitegen.FONTS:
+                    v["h"] = st["h"]
+                if st.get("b") in sitegen.FONTS:
+                    v["b"] = st["b"]
+                if re.fullmatch(r"#[0-9a-fA-F]{6}", str(st.get("c") or "")):
+                    v["c"] = st["c"]
+                if v:
+                    row[_t(bn, 60)] = v
+            bs[_t(th_, 60)] = row
+        out["blockstyle"] = bs
+        bk = {str(k): _t(v, 200 if k == "ok_msg" else 120) for k, v in (x.get("booktext") or {}).items() if k in {r[0] for r in sitegen.BOOKTEXT} and _t(v, 200)}
+        out["booktext"] = bk
+        out["coupon_off"] = bool(x.get("coupon_off"))
+        pm = x.get("promo") or {}
+        out["promo"] = {}
+        if isinstance(pm, dict) and pm:
+            out["promo"] = {"on": False if pm.get("on") is False else True, "text": _t(pm.get("text"), 120),
+                            "end": str(pm.get("end") or "") if re.fullmatch(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}", str(pm.get("end") or "")) else "", "btn": _t(pm.get("btn"), 30)}
         out["menu_off"] = [_t(v, 60) for v in (x.get("menu_off") or [])[:60]]
         ex, used = [], set()
         for e in (x.get("extra_pages") or [])[:20]:
@@ -407,7 +434,11 @@ def register(api_router, db, deps):
         async for r in db.site_images.find({"_id": {"$in": keys}}):
             imgs[r["_id"]] = "data:%s;base64,%s" % (r.get("mime") or "image/jpeg", base64.b64encode(bytes(r["data"])).decode())
         idx = sitegen.page_index(ctx, all_=True) if ctx else []
-        return {"profile": prof, "imgs": imgs, "has_theme": bool(ctx), "sector": sector, "logo": lg, "custom_home": bool(d.get("html")),
+        try:
+            pd = bool(ctx) and 'id="cd"' in raw_theme(ctx["th"]["slug"])
+        except Exception:                                          # noqa: BLE001
+            pd = False
+        return {"promo_default": pd, "profile": prof, "imgs": imgs, "has_theme": bool(ctx), "sector": sector, "logo": lg, "custom_home": bool(d.get("html")),
                 "name": (ctx or {}).get("name") or g.get("company_name") or "", "phone": g.get("company_phone") or "", "address": prof.get("address") or g.get("company_address") or "",
                 "default_services": [{"t": a, "d": b} for a, b in dflt.get("services", [])], "default_faq": [{"q": a, "a": b} for a, b in dflt.get("faq", [])],
                 "pages": [{"slug": x["slug"], "title": x["title"], "kind": x["kind"], "hidden": x["hidden"], "nav": x["nav"]} for x in idx],
@@ -416,9 +447,9 @@ def register(api_router, db, deps):
     @api_router.put("/site/profile")
     async def profile_put(payload: dict, _: dict = Depends(require_admin)):
         need_firm()
-        if "imgedits" not in payload or "imgmap" not in payload or "menu" not in payload:          # eski panel bu alanları bilmez: mevcut resim/menü değişikliklerini silmesin
+        if "imgedits" not in payload or "imgmap" not in payload or "menu" not in payload or "blockstyle" not in payload or "promo" not in payload or "booktext" not in payload:          # eski panel bu alanları bilmez: mevcut resim/menü değişikliklerini silmesin
             old_ = (await db.app_settings.find_one({"_id": "site_profile"}, {"_id": 0})) or {}
-            payload = dict(payload, imgedits=payload.get("imgedits", old_.get("imgedits") or {}), imgmap=payload.get("imgmap", old_.get("imgmap") or {}), menu=payload.get("menu", old_.get("menu") or {}))
+            payload = dict(payload, imgedits=payload.get("imgedits", old_.get("imgedits") or {}), imgmap=payload.get("imgmap", old_.get("imgmap") or {}), menu=payload.get("menu", old_.get("menu") or {}), blockstyle=payload.get("blockstyle", old_.get("blockstyle") or {}), promo=payload.get("promo", old_.get("promo") or {}), booktext=payload.get("booktext", old_.get("booktext") or {}), coupon_off=payload.get("coupon_off", old_.get("coupon_off") or False))
         prof = await san_profile(payload)
         await db.app_settings.update_one({"_id": "site_profile"}, {"$set": prof}, upsert=True)
         keep = [x["k"] for x in prof["slides"] + prof["gallery"]] + [e["img"] for e in prof["extra_pages"] if e["img"]] + [v for blks in prof["imgedits"].values() for tx in blks.values() for v in tx.values()] + [v for mp in prof["imgmap"].values() for v in mp.values()]
@@ -506,6 +537,18 @@ def register(api_router, db, deps):
             x["orig"] = b[x["i"]]["text"] if x["i"] < len(b) else x["text"]
         return {"texts": a}
 
+    @api_router.get("/site/booktext")
+    async def booktext_get(_: dict = Depends(require_admin)):
+        """Randevu formundaki yazılar (temadaki varsayılanlarıyla)."""
+        need_firm()
+        ctx = await build_ctx()
+        if not ctx:
+            raise HTTPException(400, "Önce bir tema seçin")
+        h = raw_theme(ctx["th"]["slug"])
+        f = sitegen.booktext_fields(h) if "function isFree(d,e,h){if(LIVE){var t=L.slots" in h else []
+        cur = ctx["p"].get("booktext") or {}
+        return {"fields": [dict(x, val=cur.get(x["k"], "")) for x in f], "coupon_off": bool(ctx["p"].get("coupon_off"))}
+
     @api_router.get("/site/menu")
     async def menu_get(_: dict = Depends(require_admin)):
         """Sitenin menüsündeki bağlantılar (temadan gelenler) ve kayıtlı düzenlemeler."""
@@ -518,7 +561,9 @@ def register(api_router, db, deps):
         bl = {b[0]: b[1] for b in (parts[1] if parts else [])}
         items = sitegen.menu_items(bl.get("Menü"), bl.get("Mobil menü"))
         m = ctx["p"].get("menu") or {}
-        return {"items": items, "edits": m.get("edits") or {}, "extra": m.get("extra") or []}
+        od = [o for o in (m.get("order") or [])]
+        items.sort(key=lambda x: od.index(x["h"]) if x["h"] in od else 10_000)
+        return {"items": items, "edits": m.get("edits") or {}, "extra": m.get("extra") or [], "order": od}
 
     @api_router.get("/site/theme-images")
     async def theme_images(_: dict = Depends(require_admin)):
@@ -550,7 +595,13 @@ def register(api_router, db, deps):
         r = await render(path, inline=True)
         if not r:
             raise HTTPException(404, "Sayfa bulunamadı")
-        return HTMLResponse(r[0], headers={"Cache-Control": "no-store"})
+        html = r[0]
+        if (path or "/").split("?")[0].strip("/") in ("", "index") and isinstance(html, str) and not (await doc()).get("html"):
+            try:
+                html = sitegen.mark_edit(html)
+            except Exception:                                      # noqa: BLE001
+                pass
+        return HTMLResponse(html, headers={"Cache-Control": "no-store"})
 
     # ---------------------------------------------------------------- yayın (domains.hosted_site çağırır)
     async def render(path, host="", inline=False):

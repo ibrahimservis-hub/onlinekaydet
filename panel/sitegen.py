@@ -368,7 +368,7 @@ def menu_items(*htmls):
 
 def apply_menu(h, menu):
     """Menü düzenlemesi: bağlantı adını değiştirir, gizler, ek bağlantı ekler. Düzenleme yoksa HTML'e dokunmaz."""
-    if not menu or not (menu.get("edits") or menu.get("extra")):
+    if not menu or not (menu.get("edits") or menu.get("extra") or menu.get("order")):
         return h
     import copy
     from bs4 import BeautifulSoup
@@ -407,6 +407,20 @@ def apply_menu(h, menu):
             else:
                 host.insert_after(n)
             last = n
+    order = [o for o in (menu.get("order") or []) if isinstance(o, str)]
+    if order:
+        hosts = []
+        for a in _nav_anchors(soup):
+            if a.get("href") in order and not a.get("data-yx"):
+                hosts.append((order.index(a["href"]), a.parent if a.parent.name == "li" and len(a.parent.find_all("a")) == 1 else a))
+        if len(hosts) > 1:
+            slots = []
+            for _, el in hosts:
+                m = soup.new_tag("x-slot")
+                el.replace_with(m)
+                slots.append(m)
+            for m, (_, el) in zip(slots, sorted(hosts, key=lambda t: t[0])):
+                m.replace_with(el)
     return str(soup)
 
 
@@ -505,7 +519,9 @@ def apply_profile(raw, th, ctx):
     if ctx.get("_oki"):
         out = _PXD.sub(lambda m: m.group(1) + "if(window.__OKI&&window.__OKI[i])return window.__OKI[i];" + m.group(2), out)
         out = out.replace("</body>", oki_script(ctx["_oki"]) + "</body>", 1) if "</body>" in out else out + oki_script(ctx["_oki"])
-    out = yp_book(out)
+    out = yp_book(out, ctx["p"])
+    out = apply_promo(out, ctx)
+    out = out.replace("</head>", blockstyle_html(ctx) + "</head>", 1) if "</head>" in out else out
     out = out.replace("</head>", CSS + "</head>", 1)
     if ctx["p"].get("slides"):
         out = out.replace("</body>", SLIDER_JS + "</body>", 1) if "</body>" in out else out + SLIDER_JS
@@ -699,6 +715,136 @@ def theme_image_ids(raw):
     return out
 
 
+def mark_edit(html):
+    """Önizleme için: tıklanıp yerinde düzenlenebilen yazılara bölüm adı ve sıra numarası işaretler (data-yb, data-yi)."""
+    parts = split_blocks(html)
+    if not parts:
+        return html
+    from bs4 import BeautifulSoup
+    pre, blocks, tail = parts
+    for b in blocks:
+        if b[0] in FIXED_TOP or b[0] == "Duyuru çubuğu":
+            continue
+        soup = BeautifulSoup(b[1], "html.parser")
+        ns = edit_nodes(soup)
+        done = False
+        for i, el in enumerate(ns):
+            if all(c.name in _INLINE for c in el.find_all(True)):
+                el["data-yb"], el["data-yi"] = b[0], str(i)
+                done = True
+        if done:
+            b[1] = str(soup)
+    return join_blocks(pre, blocks, tail)
+
+FONTS = ["Inter", "Poppins", "Montserrat", "Playfair Display", "Lora", "Merriweather", "Raleway", "Nunito", "DM Serif Display", "Oswald",
+         "Cormorant Garamond", "Roboto Slab", "Work Sans", "Manrope"]
+_HEADS = "h1,h2,h3,h4,summary,.eyebrow,figcaption b"
+_BODY = "p,li,span,small,a,label,dd,dt,blockquote,button,input"
+
+
+def blockstyle_html(ctx):
+    """Bölüm başına yazı tipi / yazı rengi (müşterinin seçtiği). Yalnız izinli yazı tipleri ve #renk kabul edilir."""
+    bs = ((ctx["p"].get("blockstyle") or {}).get(ctx["th"]["slug"], {})) if ctx.get("th") else {}
+    css, used = [], []
+    for name, st in bs.items():
+        sel = '[data-nm="%s"]' % re.sub(r'["\\\[\]<>{}]', "", str(name))
+        if st.get("h") in FONTS:
+            used.append(st["h"])
+            css.append("%s :is(%s){font-family:'%s',serif!important}" % (sel, _HEADS, st["h"]))
+        if st.get("b") in FONTS:
+            used.append(st["b"])
+            css.append("%s :is(%s){font-family:'%s',sans-serif!important}" % (sel, _BODY, st["b"]))
+        if re.fullmatch(r"#[0-9a-fA-F]{6}", st.get("c") or ""):
+            css.append("%s :is(h1,h2,h3,h4,p,li,span,small,summary,blockquote,dd,dt):not(.btn){color:%s!important}" % (sel, st["c"]))
+    if not css:
+        return ""
+    link = ""
+    if used:
+        link = '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?%s&display=swap">' % "&".join("family=" + f.replace(" ", "+") + ":wght@400;600;700" for f in dict.fromkeys(used))
+    return link + "<style>" + "".join(css) + "</style>"
+
+
+_PROMO_END = re.compile(r"e=new Date\(n\);e\.setDate\(n\.getDate\(\)\+\(\(7-n\.getDay\(\)\)%7\)\);e\.setHours\(23,59,59,0\);if\(e<=n\)e\.setDate\(e\.getDate\(\)\+7\);var f=\$\('#lft'\);f\.textContent=2\+\(n\.getDate\(\)%4\);")
+_PROMO_BAR = ('<div class="ypb" id="ypb"><span class="ypt">%s</span>%s%s</div>'
+              '<style>.ypb{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;justify-content:center;padding:9px 16px;background:var(--ac,#1155cc);color:#fff;font:600 14px/1.3 var(--fb,system-ui,sans-serif);text-align:center}'
+              '.ypb .ypc{display:flex;gap:8px}.ypb .ypc b{display:inline-block;min-width:34px;padding:3px 6px;background:rgba(0,0,0,.22);border-radius:6px;font-variant-numeric:tabular-nums}.ypb .ypc small{font-weight:500;margin-left:2px;opacity:.85}'
+              '.ypb button{border:0;background:#fff;color:#111;font:700 13px inherit;padding:7px 14px;border-radius:99px;cursor:pointer}</style>')
+_PROMO_JS = ("<script>(function(){var e=new Date('%s+03:00'),b=document.getElementById('ypb');if(!b||isNaN(e))return;function t(){var d=e-new Date();if(d<=0){b.style.display='none';return}"
+             "var q=function(i,v){var x=document.getElementById(i);if(x)x.textContent=v};q('ypd',Math.floor(d/864e5));q('yph',Math.floor(d%%864e5/36e5));q('ypm',Math.floor(d%%36e5/6e4));q('yps',Math.floor(d%%6e4/1e3))}t();setInterval(t,1000)})()</script>")
+
+
+def apply_promo(out, ctx):
+    """Üstteki kampanya çubuğu/sayacı: yazı, bitiş tarihi, düğme; kapatılabilir. Ayar yoksa temanın kendi hâli kalır."""
+    pr = ctx["p"].get("promo") or {}
+    if not pr:
+        return out
+    txt, end, btn = E(pr.get("text") or ""), pr.get("end") or "", E(pr.get("btn") or "")
+    has_theme = 'id="cd"' in out and 'id="an"' in out
+    if pr.get("on") is False:
+        return out.replace("</head>", "<style>#an,#ypb{display:none!important}</style></head>", 1) if has_theme else out
+    if has_theme:
+        if txt:
+            out = re.sub(r'(<div class="an" id="an"><span>).*?(</span><div class="cd")', lambda m: m.group(1) + txt + m.group(2), out, count=1, flags=re.S)
+        if btn:
+            out = re.sub(r'(<button class="ab2"[^>]*>)[^<]*(</button>)', lambda m: m.group(1) + btn + m.group(2), out, count=1)
+        if end:
+            out = re.sub(r'<span class="lft">.*?</span>', "", out, count=1, flags=re.S)
+            out = _PROMO_END.sub("e=new Date('%s+03:00');if(e<=n){var an=$('#an');if(an)an.style.display='none'}var f={};" % end, out, count=1)
+        return out
+    if not (txt or end):
+        return out
+    cd = ('<span class="ypc"><span><b id="ypd">0</b><small>gün</small></span><span><b id="yph">00</b><small>sa</small></span><span><b id="ypm">00</b><small>dk</small></span><span><b id="yps">00</b><small>sn</small></span></span>' if end else "")
+    bt = ('<button type="button" data-open>%s</button>' % btn) if btn else ""
+    bar = _PROMO_BAR % (txt, cd, bt) + (_PROMO_JS % end if end else "")
+    return re.sub(r"(<body[^>]*>)", lambda m: m.group(1) + bar, out, count=1) if "<body" in out else bar + out
+
+
+BOOKTEXT = [
+    ("title", "Başlık", r'(<div class="frm"><h3>)([^<]*)(</h3>)'),
+    ("sub", "Alt yazı", r'(<div class="sub">)([^<]*)(</div>)'),
+    ("h_service", "Hizmet başlığı", r'(<h4>)([^<]*)(</h4><div class="opts" id="o-s">)'),
+    ("h_expert", "Uzman başlığı", r'(<h4>)([^<]*)(</h4><div class="opts" id="o-e">)'),
+    ("h_day", "Gün başlığı", r'(<h4>)([^<]*)(</h4><div class="opts days" id="o-d">)'),
+    ("h_time", "Saat başlığı", r'(<h4>)([^<]*?)( ?<span id="o-cnt")'),
+    ("h_info", "Bilgiler başlığı", r'(<h4>)([^<]*)(</h4><div class="fld">)'),
+    ("l_name", "Ad soyad etiketi", r'(<label>)([^<]*)(<input[^>]*id="f-n")'),
+    ("ph_name", "Ad soyad örnek yazısı", r'(id="f-n"[^>]*placeholder=")([^"]*)(")'),
+    ("l_phone", "Telefon etiketi", r'(<label>)([^<]*)(<input[^>]*id="f-p")'),
+    ("ph_phone", "Telefon örnek yazısı", r'(id="f-p"[^>]*placeholder=")([^"]*)(")'),
+    ("l_coupon", "Kupon etiketi", r'(<label[^>]*>)([^<]*)(<input[^>]*id="f-c")'),
+    ("btn", "Kaydet düğmesi", r'(id="go">)([^<]*)(</button>)'),
+    ("ok_title", "Onay başlığı", r'(<div class="ok"><div class="tick"><svg.*?</svg></div><h3>)([^<]*)(</h3>)'),
+    ("ok_msg", "Onay mesajı (ad, hizmet ve saatten sonra gelir)", r"(\+t\.dataset\.v\+' )(randevunuz iletildi\.[^']*)(')"),
+    ("ok_btn", "Onay düğmesi", r'(id="okx">)([^<]*)(</button>)'),
+]
+
+
+def booktext_fields(h):
+    """Randevu formundaki düzenlenebilir yazılar ve temadaki varsayılanları [{k,label,def}]."""
+    out = []
+    for k, lab, rx in BOOKTEXT:
+        m = re.search(rx, h, re.S)
+        if m:
+            out.append({"k": k, "label": lab, "def": m.group(2)})
+    return out
+
+
+def apply_booktext(h, p):
+    bt = p.get("booktext") or {}
+    for k, lab, rx in BOOKTEXT:
+        v = (bt.get(k) or "").strip()
+        if not v:
+            continue
+        if k == "ok_msg":
+            v = v.replace("\\", "").replace("'", "\u2019").replace("<", "").replace("\n", " ")
+        else:
+            v = E(v)
+        h = re.sub(rx, lambda m, v=v: m.group(1) + v + m.group(3), h, count=1, flags=re.S)
+    if p.get("coupon_off"):
+        h = re.sub(r'<label[^>]*>[^<]*<input[^>]*id="f-c"[^>]*>(?:</input>)?</label>', "", h, count=1)
+    return h
+
+
 YP_BOOK_JS = r"""window.YPD={};
 window.YPS=function(j,dy){window.YPD[dy]=j;return(j.slots||[]).map(function(s){var q=s.time.split(':');return{m:+q[0]*60+ +q[1],available:!!s.available}})};
 window.YPF=function(dy,e,h){var j=window.YPD[dy];if(!j||!j.slots)return false;var s=null;for(var i=0;i<j.slots.length;i++){var q=j.slots[i].time.split(':');if(+q[0]*60+ +q[1]===h){s=j.slots[i];break}}
@@ -730,12 +876,13 @@ _YP_PATCH = [
 ]
 
 
-def yp_book(h):
+def yp_book(h, p=None):
     """Kuaför temalarının randevu çekmecesini panelin ekip/hizmet/doluluk verisine bağlar (yalnız gömülü ortak randevu kodu varsa)."""
     if "window.__OKLIVE=true;" not in h or "function isFree(d,e,h){if(LIVE){var t=L.slots" not in h:
         return h
     for a, b in _YP_PATCH:
         h = h.replace(a, b)
+    h = apply_booktext(h, p or {})
     h = h.replace("</head>", "<style>#sh .sheet.done .ok,#shs.done .ok{display:block!important}#sh .sheet.done .frm,#shs.done .frm{display:none!important}</style></head>", 1)
     return h.replace("window.__OKLIVE=true;", "window.__OKLIVE=true;" + YP_BOOK_JS, 1)
 

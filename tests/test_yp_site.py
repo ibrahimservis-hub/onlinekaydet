@@ -128,6 +128,34 @@ with TestClient(s.app) as c:
         assert c.put("/api/brand", headers=H, json={"theme": "k5-atolye-kuafor", "dark": "#1a1a1a", "accent": "#b08d57", "radius": 9}).status_code == 200
         assert not c.get("/api/site/profile", headers=H).json()["profile"]["menu"]["extra"], "tema değişince menü sıfırlanmalı"
     t("menü düzenlenir (ad, gizle, ek bağlantı), güvenli adres, tema değişince sıfırlanır; randevu paneldeki ekibe bağlanır", mn)
+    def pm():
+        assert c.put("/api/brand", headers=H, json={"theme": "k6-butik-kuafor", "dark": "#1a1a1a", "accent": "#b08d57", "radius": 8}).status_code == 200
+        p = c.get("/api/site/profile", headers=H).json()["profile"]
+        p["promo"] = {"on": True, "text": "Kasım indirimi %20", "end": "2099-12-01T20:00", "btn": "Randevu al"}
+        p["blockstyle"] = {"k6-butik-kuafor": {"Hizmetler": {"h": "Playfair Display", "b": "Evil;}", "c": "#aa0000"}}}
+        its = [x["h"] for x in c.get("/api/site/menu", headers=H).json()["items"]]
+        p["menu"] = {"edits": {}, "extra": [], "order": its[-1:] + its[:-1]}
+        assert c.put("/api/site/profile", headers=H, json=p).status_code == 200
+        q = c.get("/api/site/profile", headers=H).json()["profile"]
+        assert q["promo"]["end"] == "2099-12-01T20:00" and "b" not in q["blockstyle"]["k6-butik-kuafor"]["Hizmetler"], q
+        h = c.get("/api/site/preview?path=/", headers=H).text
+        assert 'id="ypb"' in h and "Kasım indirimi" in h and "2099-12-01T20:00+03:00" in h, "promo yok"
+        assert "Playfair+Display" in h and "Evil" not in h and "#aa0000" in h, "yazı biçimi yok"
+        r0 = c.get("/api/site/menu", headers=H).json()["items"][0]["l"]
+        sn = h.split('id="sn"')[1].split("</nav>")[0]
+        assert sn.index(">" + r0) < sn.index("Ana sayfa"), sn
+        r = c.get("/api/site/menu", headers=H).json(); assert r["items"][0]["h"] == its[-1], r["items"][:2]
+        assert 'data-yi="' in h and 'data-yb="' in h, "önizlemede yerinde düzenleme işareti yok"
+        bt = c.get("/api/site/booktext", headers=H).json(); assert len(bt["fields"]) >= 14, bt
+        q["booktext"] = {"l_coupon": "Hediye kodu", "btn": "Randevu iste"}; q["coupon_off"] = False
+        assert c.put("/api/site/profile", headers=H, json=q).status_code == 200
+        h2 = c.get("/api/site/preview?path=/", headers=H).text; assert "Randevu iste" in h2
+        q["coupon_off"] = True; assert c.put("/api/site/profile", headers=H, json=q).status_code == 200
+        h3 = c.get("/api/site/preview?path=/", headers=H).text; import re as _r; assert 'id="f-c"' not in h3, _r.findall(r".{120}id=.f-c..{60}", h3)
+        q.pop("promo"); q.pop("blockstyle"); q.pop("menu"); q.pop("booktext"); q.pop("coupon_off")
+        assert c.put("/api/site/profile", headers=H, json=q).status_code == 200
+        pp = c.get("/api/site/profile", headers=H).json()["profile"]; assert pp["promo"]["text"] and pp["booktext"]["btn"] and pp["coupon_off"], "eski panel ayarları sildi"
+    t("kampanya çubuğu, yazı tipi (izinli liste), menü sırası; eski panel silmez", pm)
 print("OK", len(ok)); [print(" +", n) for n in ok]
 for n, e in bad: print(" -", n); print(e)
 sys.exit(1 if bad else 0)
