@@ -2889,7 +2889,7 @@ async def yp_sayfa():
 @app.get("/salon/logo.png", include_in_schema=False)
 async def yp_logo():
     from fastapi.responses import Response as _R
-    return _R((Path(__file__).resolve().parent / "yp_logo.png").read_bytes(), media_type="image/png", headers={"Cache-Control": "public, max-age=86400"})
+    return _R(__import__("base64").b64decode((Path(__file__).resolve().parent / "yp_logo.b64").read_text()), media_type="image/png", headers={"Cache-Control": "public, max-age=86400"})
 governance.HOOKS.append(fieldops.call_hook)
 finance_plus.register(api_router, db, {"require_admin": require_admin, "get_current_user": get_current_user})
 async def _tech_hidden():
