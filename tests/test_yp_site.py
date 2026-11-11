@@ -87,6 +87,20 @@ with TestClient(s.app) as c:
         h = c.get("/api/site/preview?path=/", headers=H).text
         assert "instagram.com/x" in h and "Deneme Mah. 5" in h, "sosyal/adres yok"
     t("sosyal medya, adres, saat siteye işlenir", soc)
+    def tim():
+        r = c.get("/api/site/theme-images", headers=H); assert r.status_code == 200, r.text
+        im = r.json()["images"]; assert len(im) >= 10, len(im)
+        k = c.post("/api/site/image", headers=H, json={"data": png("orange"), "kind": "slides"}).json()["k"]
+        p = c.get("/api/site/profile", headers=H).json()["profile"]
+        p["imgmap"] = {"k6-butik-kuafor": {im[0]["pid"]: k, im[5]["pid"]: k}}
+        assert c.put("/api/site/profile", headers=H, json=p).status_code == 200
+        h = c.get("/api/site/preview?path=/", headers=H).text
+        assert "window.__OKI" in h and '"%s"' % im[0]["pid"] in h and "window.__OKI[i]" in h, "tema resmi yerleşmedi"
+        p2 = c.get("/api/site/profile", headers=H).json()["profile"]; p2.pop("imgmap", None)
+        assert c.put("/api/site/profile", headers=H, json=p2).status_code == 200
+        assert c.get("/api/site/profile", headers=H).json()["profile"]["imgmap"]["k6-butik-kuafor"][im[0]["pid"]] == k, "eski panel sildi"
+        assert c.get("/api/site/theme-images", headers=H).json()["images"][0]["k"] == k
+    t("tema resimleri listelenir, kimlik bazlı değiştirilir (galeri/lightbox dahil), eski panel silmez", tim)
 print("OK", len(ok)); [print(" +", n) for n in ok]
 for n, e in bad: print(" -", n); print(e)
 sys.exit(1 if bad else 0)

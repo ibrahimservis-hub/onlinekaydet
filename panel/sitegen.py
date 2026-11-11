@@ -416,6 +416,13 @@ def apply_profile(raw, th, ctx):
         blocks.insert(k, ["Slider", slider_html(ctx)])
     blocks = apply_layout(blocks, ctx)
     out = join_blocks(pre, blocks, tail)
+    imap = (ctx["p"].get("imgmap") or {}).get(ctx["th"]["slug"], {}) if ctx.get("th") else {}
+    if imap:
+        reg_ = ctx.setdefault("_oki", {})
+        for pid, k in imap.items():
+            u = ctx["img"](k)
+            if u:
+                reg_[str(pid)] = u
     if ctx.get("_oki"):
         out = _PXD.sub(lambda m: m.group(1) + "if(window.__OKI&&window.__OKI[i])return window.__OKI[i];" + m.group(2), out)
         out = out.replace("</body>", oki_script(ctx["_oki"]) + "</body>", 1) if "</body>" in out else out + oki_script(ctx["_oki"])
@@ -596,6 +603,20 @@ def edit_imgs(html, ed, url_of, reg=None):
             reg[uid] = url
         done = True
     return str(soup) if done else html
+
+
+_PXID = re.compile(r"""data-[ip]="(\d{5,10})"|\[(\d{5,10}),\s*'|PX\((\d{5,10})""")
+
+
+def theme_image_ids(raw):
+    """Temanın kullandığı stok resim kimlikleri (görünen sırayla, tekrarsız): data-i/data-p, betik dizileri [id,'kategori'] ve PX(id)."""
+    seen, out = set(), []
+    for m in _PXID.finditer(raw or ""):
+        v = next(g for g in m.groups() if g)
+        if v not in seen:
+            seen.add(v)
+            out.append(v)
+    return out
 
 
 def oki_script(reg):

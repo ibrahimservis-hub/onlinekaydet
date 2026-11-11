@@ -118,7 +118,7 @@ def register(api_router, db, deps):
         p = sitegen.effective(prof, sector)
         p["address"] = prof.get("address") or g.get("company_address") or ""
         imgs = {}
-        keys = [x["k"] for x in (p.get("slides") or []) + (p.get("gallery") or [])] + [e["img"] for e in (p.get("extra_pages") or []) if e.get("img")] + [v for blks in (p.get("imgedits") or {}).values() for tx in blks.values() for v in tx.values()]
+        keys = [x["k"] for x in (p.get("slides") or []) + (p.get("gallery") or [])] + [e["img"] for e in (p.get("extra_pages") or []) if e.get("img")] + [v for blks in (p.get("imgedits") or {}).values() for tx in blks.values() for v in tx.values()] + [v for mp in (p.get("imgmap") or {}).values() for v in mp.values()]
         if inline and keys:
             async for r in db.site_images.find({"_id": {"$in": keys}}):
                 imgs[r["_id"]] = "data:%s;base64,%s" % (r.get("mime") or "image/jpeg", base64.b64encode(bytes(r["data"])).decode())
@@ -343,6 +343,11 @@ def register(api_router, db, deps):
                 continue
             ie[_t(th_, 60)] = {_t(bn, 60): {str(int(i)): str(v) for i, v in list(tx.items())[:80] if str(i).isdigit() and re.fullmatch(r"[a-f0-9]{16}", str(v))} for bn, tx in list(blks.items())[:40] if isinstance(tx, dict)}
         out["imgedits"] = ie
+        im = {}
+        for th_, mp in (x.get("imgmap") or {}).items():
+            if isinstance(mp, dict) and len(im) <= 5:
+                im[_t(th_, 60)] = {str(p): str(v) for p, v in list(mp.items())[:200] if str(p).isdigit() and re.fullmatch(r"[a-f0-9]{16}", str(v))}
+        out["imgmap"] = im
         out["hidden_pages"] = [_t(v, 60) for v in (x.get("hidden_pages") or [])[:60]]
         out["menu_off"] = [_t(v, 60) for v in (x.get("menu_off") or [])[:60]]
         ex, used = [], set()
@@ -356,10 +361,14 @@ def register(api_router, db, deps):
                 sl, n = "%s-%d" % (base, n), n + 1
             used.add(sl)
             ex.append({"slug": sl, "title": tt, "body": "\n".join(_t(l, 800) for l in str(e.get("body") or "").replace("\r", "").split("\n"))[:6000], "img": str(e.get("img") or ""), "menu": bool(e.get("menu", True))})
-        want = [v for blks in ie.values() for tx in blks.values() for v in tx.values()] + [str(s.get("k") or "") for s in (x.get("slides") or [])[:8]] + [str(g.get("k") or "") for g in (x.get("gallery") or [])[:16]] + [e["img"] for e in ex if e["img"]]
+        want = [v for mp in im.values() for v in mp.values()] + [v for blks in ie.values() for tx in blks.values() for v in tx.values()] + [str(s.get("k") or "") for s in (x.get("slides") or [])[:8]] + [str(g.get("k") or "") for g in (x.get("gallery") or [])[:16]] + [e["img"] for e in ex if e["img"]]
         have = set()
         async for r in db.site_images.find({"_id": {"$in": want}}, {"_id": 1}):
             have.add(r["_id"])
+        for mp in im.values():
+            for p_ in list(mp):
+                if mp[p_] not in have:
+                    del mp[p_]
         for blks in ie.values():
             for bn in list(blks):
                 blks[bn] = {i: v for i, v in blks[bn].items() if v in have}
@@ -395,11 +404,12 @@ def register(api_router, db, deps):
     @api_router.put("/site/profile")
     async def profile_put(payload: dict, _: dict = Depends(require_admin)):
         need_firm()
-        if "imgedits" not in payload:          # eski panel bu alanı bilmez: mevcut resim değişikliklerini silmesin
-            payload = dict(payload, imgedits=((await db.app_settings.find_one({"_id": "site_profile"}, {"_id": 0})) or {}).get("imgedits") or {})
+        if "imgedits" not in payload or "imgmap" not in payload:          # eski panel bu alanları bilmez: mevcut resim değişikliklerini silmesin
+            old_ = (await db.app_settings.find_one({"_id": "site_profile"}, {"_id": 0})) or {}
+            payload = dict(payload, imgedits=payload.get("imgedits", old_.get("imgedits") or {}), imgmap=payload.get("imgmap", old_.get("imgmap") or {}))
         prof = await san_profile(payload)
         await db.app_settings.update_one({"_id": "site_profile"}, {"$set": prof}, upsert=True)
-        keep = [x["k"] for x in prof["slides"] + prof["gallery"]] + [e["img"] for e in prof["extra_pages"] if e["img"]] + [v for blks in prof["imgedits"].values() for tx in blks.values() for v in tx.values()]
+        keep = [x["k"] for x in prof["slides"] + prof["gallery"]] + [e["img"] for e in prof["extra_pages"] if e["img"]] + [v for blks in prof["imgedits"].values() for tx in blks.values() for v in tx.values()] + [v for mp in prof["imgmap"].values() for v in mp.values()]
         await db.site_images.delete_many({"_id": {"$nin": keep}})
         return {"ok": True}
 
@@ -483,6 +493,16 @@ def register(api_router, db, deps):
         for x in a:
             x["orig"] = b[x["i"]]["text"] if x["i"] < len(b) else x["text"]
         return {"texts": a}
+
+    @api_router.get("/site/theme-images")
+    async def theme_images(_: dict = Depends(require_admin)):
+        """Temanın kullandığı bütün stok resimler (galeri, ekip, kapak...) ve varsa değiştirilmiş hâlleri."""
+        need_firm()
+        ctx = await build_ctx()
+        if not ctx:
+            raise HTTPException(400, "Önce bir tema seçin")
+        cur = (ctx["p"].get("imgmap") or {}).get(ctx["th"]["slug"], {}) or {}
+        return {"images": [{"pid": p, "thumb": "https://images.pexels.com/photos/%s/pexels-photo-%s.jpeg?auto=compress&cs=tinysrgb&w=400" % (p, p), "k": cur.get(p, "")} for p in sitegen.theme_image_ids(raw_theme(ctx["th"]["slug"]))]}
 
     @api_router.get("/site/block-images")
     async def block_images(name: str, _: dict = Depends(require_admin)):
