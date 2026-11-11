@@ -500,6 +500,7 @@ def apply_profile(raw, th, ctx):
                 j = b[1].find("</div>", i)
                 b[1] = b[1][:j] + nv + b[1][j:]
         elif b[0] == "Alt bilgi":
+            b[1] = footer_logo(b[1], ctx)
             b[1] = b[1].replace("</footer>", footer_links(ctx, idx) + "</footer>", 1)
     for b in blocks:
         if b[0] in ("Menü", "Mobil menü"):
@@ -963,6 +964,22 @@ def edit_texts(html, ed):
             if first:
                 el.insert(0, v)
     return str(soup)
+
+
+def footer_logo(h, ctx):
+    """Yüklenen logo alt bilgide de görünsün: temalardaki üç marka kalıbı (div.lg, b.fl, ilk sütunun <b> başlığı)."""
+    if not ctx.get("logo") or "spx-logo" in h:
+        return h
+    name = ctx.get("name") or ""
+    img = '<img class="spx-logo spx-flogo" src="%s" alt="%s">' % (E(ctx["logo"]), E(name))
+    only = bool(ctx["p"].get("logo_only"))
+    def put(m):
+        return m.group(1) + img + ("" if only else '<span class="ln">' + m.group(2) + "</span>") + m.group(3)
+    for rx in (r'(<div class="lg">)([^<]*)(</div>)', r'(<div class="fl">)([^<]*)(</div>)', r'(<b class="fl">)([^<]*)(</b>)', r'(<div class="w"><div class="g"><div><)(?:b>)([^<]*)(</b>)'):
+        n = re.subn(rx, put if "<b>" not in rx else (lambda m: '<div class="w"><div class="g"><div>' + img + ("" if only else "<b>" + m.group(2) + "</b>")), h, count=1)
+        if n[1]:
+            return n[0]
+    return h
 
 
 def footer_links(ctx, idx):

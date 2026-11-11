@@ -314,6 +314,7 @@ def register(api_router, db, deps):
         old = await db.bookings.find_one({"id": aid}, {"_id": 0})
         if not old or not old.get("staff_id"):
             raise HTTPException(404, "Randevu bulunamadı")
+        await need_open(_now().date().isoformat())
         v = view(old)
         amt = _num(payload.get("amount"))
         if amt <= 0:
@@ -344,6 +345,7 @@ def register(api_router, db, deps):
 
     @api_router.post("/yp/cash")
     async def cash_add(payload: dict, user: dict = Depends(adm)):
+        await need_open(_now().date().isoformat())
         amt = _num(payload.get("amount"))
         if amt <= 0:
             raise HTTPException(422, "Tutar yazın")
@@ -357,11 +359,107 @@ def register(api_router, db, deps):
         await db.yp_cash.insert_one(dict(d))
         return d
 
+    async def day_closed(day):
+        return await db.yp_cashclose.find_one({"day": day}, {"_id": 0})
+
+    async def need_open(day):
+        if await day_closed(day):
+            raise HTTPException(409, "Bu günün kasası kapatılmış. Değiştirmek için önce Kasa bölümünden kapanışı açın.")
+
+    @api_router.post("/yp/walkin")
+    async def walkin(payload: dict, user: dict = Depends(adm)):
+        """Randevusuz, mağazaya/salona gelen müşteri: hizmet + ödeme tek adımda; kayıt tamamlanmış randevu olarak kasaya işlenir."""
+        now = _now()
+        today = now.date().isoformat()
+        await need_open(today)
+        p = dict(payload)
+        p["name"] = _t(p.get("name"), 80) or "Salona gelen müşteri"
+        p["date"], p["time"], p["source"] = today, now.strftime("%H:%M"), "salon"
+        o = await clean_appt(p)
+        o.update({"id": uuid.uuid4().hex, "no": await next_no(), "yp": True, "status": "tamamlandi", "stage": "tamamlandi", "payments": [], "job_id": "", "walkin": True,
+                  "created_at": now.isoformat(timespec="seconds"), "created_by": user.get("name", "")})
+        total = max(sum(i["price"] for i in o["items"]) - o["discount"], 0)
+        amt = _num(payload.get("amount")) if str(payload.get("amount") or "").strip() != "" else total
+        if amt < 0 or amt > total + 0.001:
+            raise HTTPException(422, "Alınan tutar toplamdan (%.2f ₺) fazla olamaz" % total)
+        m = payload.get("method") if payload.get("method") in METHODS else "Nakit"
+        if amt > 0:
+            pid = uuid.uuid4().hex[:12]
+            at = now.isoformat(timespec="minutes")
+            o["payments"] = [{"id": pid, "amount": amt, "method": m, "at": at}]
+            await db.yp_cash.insert_one({"id": pid, "type": "in", "amount": amt, "method": m, "at": at, "desc": "%s · %s" % (o["name"], " + ".join(i["name"] for i in o["items"])),
+                                         "kind": "randevu", "ref": o["id"], "ref_no": o["no"], "staff_id": o["staff_id"], "by": user.get("name", "")})
+        await db.bookings.insert_one(dict(o))
+        await remember(o)
+        return view(o)
+
+    @api_router.put("/yp/cash/{cid}")
+    async def cash_put(cid: str, payload: dict, _: dict = Depends(adm)):
+        c = await db.yp_cash.find_one({"id": cid}, {"_id": 0})
+        if not c:
+            raise HTTPException(404, "Kayıt bulunamadı")
+        await need_open(c["at"][:10])
+        m = payload.get("method") if payload.get("method") in METHODS else c["method"]
+        if c.get("kind") == "randevu":                                           # randevu ödemesi: tutar kalan borç sınırı içinde değişir, randevu da güncellenir
+            b = await db.bookings.find_one({"id": c.get("ref")}, {"_id": 0})
+            amt = _num(payload.get("amount")) if "amount" in payload else c["amount"]
+            if amt <= 0:
+                raise HTTPException(422, "Tutar yazın")
+            if b:
+                v = view(b)
+                if amt > v["balance"] + c["amount"] + 0.001:
+                    raise HTTPException(422, "Tutar randevu toplamından fazla olamaz")
+                await db.bookings.update_one({"id": b["id"], "payments.id": cid}, {"$set": {"payments.$.amount": amt, "payments.$.method": m}})
+            await db.yp_cash.update_one({"id": cid}, {"$set": {"amount": amt, "method": m}})
+            return {"ok": True}
+        amt = _num(payload.get("amount"))
+        if amt <= 0:
+            raise HTTPException(422, "Tutar yazın")
+        desc = _t(payload.get("desc"), 120)
+        if len(desc) < 2:
+            raise HTTPException(422, "Ne için olduğunu yazın")
+        await db.yp_cash.update_one({"id": cid}, {"$set": {"amount": amt, "method": m, "desc": desc, "type": "out" if payload.get("type") == "out" else "in"}})
+        return {"ok": True}
+
+    @api_router.get("/yp/cash/close")
+    async def close_get(day: str = "", _: dict = Depends(adm)):
+        """Günün kasa özeti (beklenen nakit) ve varsa kapanış kaydı."""
+        day = _day(day) if day else _now().date().isoformat()
+        rows = await db.yp_cash.find({"at": {"$gte": day, "$lte": day + "T99"}}, {"_id": 0}).to_list(20000)
+        by = {}
+        for r in rows:
+            by[r["method"]] = round(by.get(r["method"], 0) + (r["amount"] if r["type"] == "in" else -r["amount"]), 2)
+        tin = round(sum(r["amount"] for r in rows if r["type"] == "in"), 2)
+        tout = round(sum(r["amount"] for r in rows if r["type"] == "out"), 2)
+        return {"day": day, "in": tin, "out": tout, "net": round(tin - tout, 2), "by": by, "expected_cash": by.get("Nakit", 0), "n": len(rows), "closed": await day_closed(day)}
+
+    @api_router.post("/yp/cash/close")
+    async def close_do(payload: dict, user: dict = Depends(adm)):
+        """Gün sonu: sayılan nakiti yaz, fark hesaplanır; gün kilitlenir (kapanış açılana kadar kasa değişmez)."""
+        day = _day(payload.get("day")) if payload.get("day") else _now().date().isoformat()
+        if await day_closed(day):
+            raise HTTPException(409, "Bu gün zaten kapatılmış")
+        sm = await close_get(day, None)
+        raw = str(payload.get("counted") if payload.get("counted") is not None else "").strip()
+        if raw == "":
+            raise HTTPException(422, "Kasadaki sayılan nakit tutarını yazın")
+        counted = _num(raw)
+        rec = {"day": day, "in": sm["in"], "out": sm["out"], "net": sm["net"], "by_method": sm["by"], "expected_cash": sm["expected_cash"], "counted": counted,
+               "diff": round(counted - sm["expected_cash"], 2), "note": _t(payload.get("note"), 300), "closed_by": user.get("name", ""), "closed_at": _now().isoformat(timespec="minutes")}
+        await db.yp_cashclose.insert_one(dict(rec))
+        return rec
+
+    @api_router.delete("/yp/cash/close/{day}")
+    async def close_reopen(day: str, _: dict = Depends(adm)):
+        await db.yp_cashclose.delete_one({"day": _day(day)})
+        return {"ok": True}
+
     @api_router.delete("/yp/cash/{cid}")
     async def cash_del(cid: str, _: dict = Depends(adm)):
         c = await db.yp_cash.find_one({"id": cid}, {"_id": 0})
         if not c:
             raise HTTPException(404, "Kayıt bulunamadı")
+        await need_open(c["at"][:10])
         if c.get("kind") == "randevu":                                           # ödeme randevudan da düşer
             b = await db.bookings.find_one({"id": c.get("ref")}, {"_id": 0})
             if b:
