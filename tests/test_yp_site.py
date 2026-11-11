@@ -111,6 +111,23 @@ with TestClient(s.app) as c:
         assert re.search(r'<a class="lg[^"]*"[^>]*><img class="spx-logo"', h), "k5 başlığında logo yok"
         assert c.put("/api/brand", headers=H, json={"theme": "k5-atolye-kuafor", "dark": "#1a1a1a", "accent": "#b08d57", "radius": 9}).status_code == 200
     t("tema değişince bölüm düzeni sıfırlanır; k5 başlığında logo görünür", lay)
+    def mn():
+        assert c.put("/api/brand", headers=H, json={"theme": "k6-butik-kuafor", "dark": "#1a1a1a", "accent": "#b08d57", "radius": 8}).status_code == 200
+        r = c.get("/api/site/menu", headers=H); assert r.status_code == 200, r.text
+        it = r.json()["items"]; assert any(x["h"] == "#galeri" for x in it), it
+        p = c.get("/api/site/profile", headers=H).json()["profile"]
+        p["menu"] = {"edits": {"#galeri": {"l": "Fotoğraflarımız"}, "#ekip": {"off": True}}, "extra": [{"l": "Blog", "h": "https://blog.example.com"}, {"l": "Kötü", "h": "javascript:alert(1)"}]}
+        assert c.put("/api/site/profile", headers=H, json=p).status_code == 200
+        m = c.get("/api/site/profile", headers=H).json()["profile"]["menu"]; assert len(m["extra"]) == 1 and m["edits"]["#ekip"]["off"], m
+        h = c.get("/api/site/preview?path=/", headers=H).text
+        assert "Fotoğraflarımız" in h and ">Blog<" in h and 'href="#ekip">Ekip<' not in h.split('id="sn"')[1].split("</nav>")[0], "menü düzenlemesi sitede yok"
+        # eski panel (menu alanı yok) menüyü silmez
+        p.pop("menu"); assert c.put("/api/site/profile", headers=H, json=p).status_code == 200
+        assert c.get("/api/site/profile", headers=H).json()["profile"]["menu"]["extra"], "menü silindi"
+        assert "window.YPF" in h and "/api/public/yp/book" in h and "Randevunuz iletildi" in h, "randevu ekip/hizmet verisine bağlı değil"
+        assert c.put("/api/brand", headers=H, json={"theme": "k5-atolye-kuafor", "dark": "#1a1a1a", "accent": "#b08d57", "radius": 9}).status_code == 200
+        assert not c.get("/api/site/profile", headers=H).json()["profile"]["menu"]["extra"], "tema değişince menü sıfırlanmalı"
+    t("menü düzenlenir (ad, gizle, ek bağlantı), güvenli adres, tema değişince sıfırlanır; randevu paneldeki ekibe bağlanır", mn)
 print("OK", len(ok)); [print(" +", n) for n in ok]
 for n, e in bad: print(" -", n); print(e)
 sys.exit(1 if bad else 0)

@@ -349,6 +349,18 @@ def register(api_router, db, deps):
                 im[_t(th_, 60)] = {str(p): str(v) for p, v in list(mp.items())[:200] if str(p).isdigit() and re.fullmatch(r"[a-f0-9]{16}", str(v))}
         out["imgmap"] = im
         out["hidden_pages"] = [_t(v, 60) for v in (x.get("hidden_pages") or [])[:60]]
+        mn = x.get("menu") or {}
+        ed = {}
+        for k, v in list((mn.get("edits") or {}).items())[:80]:
+            k = str(k)[:300]
+            if isinstance(v, dict) and (v.get("off") or _t(v.get("l"), 40)):
+                ed[k] = {"l": _t(v.get("l"), 40), "off": bool(v.get("off"))}
+        ex_ = []
+        for v in (mn.get("extra") or [])[:10]:
+            hh, ll = str((v or {}).get("h") or "").strip()[:300], _t((v or {}).get("l"), 40)
+            if ll and re.match(r"^(#[\w-]*|/[^\s]*|https?://[^\s]+|tel:[+\d\s]+|mailto:[^\s]+)$", hh):
+                ex_.append({"h": hh, "l": ll})
+        out["menu"] = {"edits": ed, "extra": ex_}
         out["menu_off"] = [_t(v, 60) for v in (x.get("menu_off") or [])[:60]]
         ex, used = [], set()
         for e in (x.get("extra_pages") or [])[:20]:
@@ -404,9 +416,9 @@ def register(api_router, db, deps):
     @api_router.put("/site/profile")
     async def profile_put(payload: dict, _: dict = Depends(require_admin)):
         need_firm()
-        if "imgedits" not in payload or "imgmap" not in payload:          # eski panel bu alanları bilmez: mevcut resim değişikliklerini silmesin
+        if "imgedits" not in payload or "imgmap" not in payload or "menu" not in payload:          # eski panel bu alanları bilmez: mevcut resim/menü değişikliklerini silmesin
             old_ = (await db.app_settings.find_one({"_id": "site_profile"}, {"_id": 0})) or {}
-            payload = dict(payload, imgedits=payload.get("imgedits", old_.get("imgedits") or {}), imgmap=payload.get("imgmap", old_.get("imgmap") or {}))
+            payload = dict(payload, imgedits=payload.get("imgedits", old_.get("imgedits") or {}), imgmap=payload.get("imgmap", old_.get("imgmap") or {}), menu=payload.get("menu", old_.get("menu") or {}))
         prof = await san_profile(payload)
         await db.app_settings.update_one({"_id": "site_profile"}, {"$set": prof}, upsert=True)
         keep = [x["k"] for x in prof["slides"] + prof["gallery"]] + [e["img"] for e in prof["extra_pages"] if e["img"]] + [v for blks in prof["imgedits"].values() for tx in blks.values() for v in tx.values()] + [v for mp in prof["imgmap"].values() for v in mp.values()]
@@ -493,6 +505,20 @@ def register(api_router, db, deps):
         for x in a:
             x["orig"] = b[x["i"]]["text"] if x["i"] < len(b) else x["text"]
         return {"texts": a}
+
+    @api_router.get("/site/menu")
+    async def menu_get(_: dict = Depends(require_admin)):
+        """Sitenin menüsündeki bağlantılar (temadan gelenler) ve kayıtlı düzenlemeler."""
+        need_firm()
+        ctx = await build_ctx()
+        if not ctx:
+            raise HTTPException(400, "Önce bir tema seçin")
+        p2 = dict(ctx["p"], layout={"_all": True}, menu={})
+        parts = sitegen.split_blocks(sitegen.apply_profile(raw_theme(ctx["th"]["slug"]), ctx["th"], dict(ctx, p=p2)))
+        bl = {b[0]: b[1] for b in (parts[1] if parts else [])}
+        items = sitegen.menu_items(bl.get("Menü"), bl.get("Mobil menü"))
+        m = ctx["p"].get("menu") or {}
+        return {"items": items, "edits": m.get("edits") or {}, "extra": m.get("extra") or []}
 
     @api_router.get("/site/theme-images")
     async def theme_images(_: dict = Depends(require_admin)):

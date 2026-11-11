@@ -10,7 +10,7 @@ import time
 import uuid
 from datetime import datetime, timedelta, timezone
 
-from fastapi import Depends, HTTPException
+from fastapi import Depends, HTTPException, Request
 
 try:
     from zoneinfo import ZoneInfo
@@ -469,3 +469,135 @@ def register(api_router, db, deps):
                 "days": sorted(days.items()), "services": sorted(([k, v[0], v[1]] for k, v in svc.items()), key=lambda r: -r[1])[:8],
                 "sources": sorted(src.items(), key=lambda r: -r[1]),
                 "staff": sorted(([st.get(k, {}).get("name", "—"), v, st.get(k, {}).get("color", "#1155cc")] for k, v in per.items()), key=lambda r: -r[1])}
+
+    # ------------------------------------------------------------------ site: herkese açık randevu
+    # Siteyi gören müşteri ekibi ve hizmetleri panelden okur; boş saat kişi bazında hesaplanır (bekleyen talepler de dolu sayılır).
+    hits = {}
+
+    def limit(request, key, n, win):
+        ip = (request.headers.get("x-forwarded-for", "").split(",")[0].strip() or (request.client.host if request.client else ""))
+        now = time.time()
+        k = (key, ip)
+        hits[k] = [t for t in hits.get(k, []) if now - t < win]
+        if len(hits[k]) >= n:
+            raise HTTPException(429, "Çok fazla deneme, biraz sonra tekrar deneyin")
+        hits[k].append(now)
+
+    def hm(v, d):
+        try:
+            return _min(_tm(v))
+        except HTTPException:
+            return d
+
+    async def pub_state(pv=False):
+        B = await cfg()
+        staff = [r for r in await staff_all() if r.get("active", True)]
+        sv = [r for r in await db.yp_services.find({}, {"_id": 0}).sort("order", 1).to_list(500) if r.get("active", True)]
+        t = _now().date()
+        closed = B.get("closed_weekdays") or []
+        n = int(B.get("days_ahead") or 14)
+        days = [(t + timedelta(days=i)).isoformat() for i in range(n + 1) if (t + timedelta(days=i)).weekday() not in closed]
+        return B, staff, sv, days, bool(B.get("enabled")) or pv
+
+    def pub_staff(r):
+        return {"id": r["id"], "name": r.get("name", ""), "title": r.get("title", "")}
+
+    def pub_service(r):
+        return {"id": r["id"], "name": r.get("name", ""), "dur": int(r.get("dur") or 30), "price": r.get("price") or 0}
+
+    @api_router.get("/public/yp/info")
+    async def pub_info(request: Request, pv: int = 0):
+        limit(request, "ypinfo", 120, 600)
+        B, staff, sv, days, on = await pub_state(bool(pv))
+        return {"enabled": on, "notice": B.get("notice") or "", "days": days if on else [], "staff": [pub_staff(r) for r in staff],
+                "services": [pub_service(r) for r in sv], "start": B.get("start") or "09:00", "end": B.get("end") or "19:00"}
+
+    async def day_state(B, staff, day):
+        """Günün dolu aralıkları: kişi bazında + kişisiz (eski) kayıtlar; bekleyen talepler de dolu sayılır."""
+        wd = datetime.strptime(day, "%Y-%m-%d").weekday()
+        busy, anon = {}, []
+        for b in await db.bookings.find({"date": day, "status": {"$in": ["bekliyor", "onaylandi"]}}, {"_id": 0}).to_list(2000):
+            if b.get("stage") in ("iptal", "gelmedi") or not re.fullmatch(r"\d\d:\d\d", str(b.get("time") or "")):
+                continue
+            b0 = _min(b["time"])
+            iv = [b0, b0 + int(b.get("dur") or 30)]
+            if b.get("staff_id"):
+                busy.setdefault(b["staff_id"], []).append(iv)
+            else:
+                anon.append(iv)
+        return {"busy": busy, "anon": anon, "off": [r["id"] for r in staff if wd in (r.get("off") or [])]}
+
+    async def free_table(B, staff, day, dur, only=""):
+        """[{time, available, free:[staff_id], n}] + ham doluluk (tema kişi/hizmet seçimine göre kendisi hesaplar)."""
+        s0, s1 = hm(B.get("start"), 540), hm(B.get("end"), 1080)
+        step = max(15, min(int(B.get("slot_minutes") or 60), 60))
+        stt = await day_state(B, staff, day)
+        pool = [r["id"] for r in staff if (not only or r["id"] == only) and r["id"] not in stt["off"]] or ([] if staff else [""])
+        now = _now()
+        notice = int(B.get("min_notice_hours") or 0)
+        out = []
+        for m in range(s0, s1, step):
+            if m + dur > s1:
+                break
+            free = [i for i in pool if not any(m < b1 and b0 < m + dur for b0, b1 in stt["busy"].get(i, []))]
+            lost = sum(1 for b0, b1 in stt["anon"] if m < b1 and b0 < m + dur)
+            free = free[:max(0, len(free) - lost)]
+            t = "%02d:%02d" % (m // 60, m % 60)
+            n = datetime.fromisoformat("%sT%s" % (day, t)) >= now + timedelta(hours=notice)
+            out.append({"time": t, "available": bool(free) and n, "free": free if n else [], "n": n})
+        return out, stt, s1
+
+    def day_ok(days, day):
+        return bool(re.fullmatch(r"\d{4}-\d{2}-\d{2}", str(day or ""))) and day in days
+
+    @api_router.get("/public/yp/slots")
+    async def pub_slots(date: str, request: Request, dur: int = 0, staff: str = "", pv: int = 0):
+        limit(request, "ypslots", 240, 600)
+        B, st, _sv, days, on = await pub_state(bool(pv))
+        if not on or not day_ok(days, date):
+            return {"slots": []}
+        rows, stt, end = await free_table(B, st, date, max(15, min(int(dur or 30), 480)), str(staff or ""))
+        return {"slots": rows, "busy": stt["busy"], "anon": stt["anon"], "off": stt["off"], "end": end}
+
+    @api_router.post("/public/yp/book")
+    async def pub_book(payload: dict, request: Request):
+        limit(request, "ypbook", 8, 900)
+        dry = bool(payload.get("dry"))
+        B, staff, sv, days, on = await pub_state(dry)
+        if not on:
+            raise HTTPException(400, "Online randevu şu an kapalı. Lütfen bizi arayın.")
+        name = _t(payload.get("name"), 80)
+        phone = _phone(payload.get("phone"))
+        if len(name) < 2:
+            raise HTTPException(422, "Lütfen adınızı yazın")
+        if not re.fullmatch(r"[2-5]\d{9}", phone):
+            raise HTTPException(422, "Lütfen geçerli bir telefon numarası girin")
+        day, tm = str(payload.get("date") or ""), str(payload.get("time") or "")
+        if not day_ok(days, day):
+            raise HTTPException(422, "Seçilen gün uygun değil")
+        _tm(tm)
+        ids = [str(x) for x in (payload.get("services") or [])][:10]
+        by = {r["id"]: r for r in sv}
+        items = [{"name": by[i]["name"], "price": _num(by[i].get("price")), "dur": int(by[i].get("dur") or 30)} for i in ids if i in by]
+        if sv and not items:
+            raise HTTPException(422, "Lütfen hizmet seçin")
+        dur = max(15, min(sum(i["dur"] for i in items) or 30, 480))
+        want = str(payload.get("staff_id") or "")
+        if want and not any(r["id"] == want for r in staff):
+            raise HTTPException(422, "Seçilen kişi bulunamadı")
+        slot = next((x for x in (await free_table(B, staff, day, dur, want))[0] if x["time"] == tm), None)
+        if not slot or not slot["available"]:
+            raise HTTPException(409, "Bu saat dolu, lütfen başka bir saat seçin")
+        sid = want or (slot["free"][0] if slot["free"] else "")
+        if not dry:
+            doc = {"id": uuid.uuid4().hex, "name": name, "phone": phone, "date": day, "time": tm, "status": "bekliyor", "staff_id": sid, "items": items,
+                   "dur": dur, "discount": 0.0, "note": _t(payload.get("note"), 600), "device_type": ", ".join(i["name"] for i in items)[:120], "source": "site",
+                   "coupon": "", "job_id": "", "created_at": _now().isoformat(timespec="seconds")}
+            await db.bookings.insert_one(dict(doc))
+            try:
+                import notify
+                await notify.notify_owner_t(db, "Yeni online randevu: %s %s — %s %s" % (name, phone, day, tm), kind="booking")
+            except Exception:                                      # noqa: BLE001
+                pass
+        return {"ok": True, "dry": dry, "message": "Randevunuz iletildi. Salon onayladığında size dönüş yapılacak.", "staff_id": sid}
+

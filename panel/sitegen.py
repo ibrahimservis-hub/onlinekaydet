@@ -338,6 +338,78 @@ PAGE_MAP = {"hizmet": "hizmetlerimiz", "surec": "nasil-calisiyoruz", "neden": "h
             "once-sonra": "galeri", "bolge": "hizmet-bolgeleri", "sss": "sss", "iletisim": "iletisim", "hakkimizda": "hakkimizda"}
 
 
+_MENU_SKIP = {"soc", "s", "mi", "pgs-none"}
+
+
+def _nav_anchors(soup):
+    out = []
+    for a in soup.find_all("a", href=True):
+        cls = set(a.get("class") or [])
+        if cls & {"lg", "btn"} or not " ".join(a.get_text().split()):
+            continue
+        if any(set(par.get("class") or []) & _MENU_SKIP for par in a.parents):
+            continue
+        out.append(a)
+    return out
+
+
+def menu_items(*htmls):
+    """Menü bloklarındaki bağlantılar: [{h, l}] (aynı adres tek kez)."""
+    from bs4 import BeautifulSoup
+    seen, out = set(), []
+    for h in htmls:
+        for a in _nav_anchors(BeautifulSoup(h or "", "html.parser")):
+            k = a["href"]
+            if k not in seen:
+                seen.add(k)
+                out.append({"h": k, "l": " ".join(a.get_text().split())[:60]})
+    return out
+
+
+def apply_menu(h, menu):
+    """Menü düzenlemesi: bağlantı adını değiştirir, gizler, ek bağlantı ekler. Düzenleme yoksa HTML'e dokunmaz."""
+    if not menu or not (menu.get("edits") or menu.get("extra")):
+        return h
+    import copy
+    from bs4 import BeautifulSoup
+    soup = BeautifulSoup(h, "html.parser")
+    ed = menu.get("edits") or {}
+    anchors = _nav_anchors(soup)
+    for a in anchors:
+        e = ed.get(a["href"])
+        if not e:
+            continue
+        if e.get("off"):
+            par = a.parent
+            (par if par.name == "li" and len(par.find_all("a")) == 1 else a).decompose()
+        elif e.get("l"):
+            a.string = e["l"]
+    left = [a for a in anchors if a.parent is not None and not ed.get(a["href"], {}).get("off")]
+    if left and menu.get("extra"):
+        last = left[-1]
+        for x in menu["extra"]:
+            n = copy.copy(last)
+            for k in ("data-pg", "class", "id", "onclick"):
+                n.attrs.pop(k, None)
+            if "class" in last.attrs and "l" in (last.get("class") or []):
+                n["class"] = ["l"]
+            n["href"] = x["h"]
+            n.string = x["l"]
+            if x["h"].startswith("http"):
+                n["target"], n["rel"] = "_blank", "noopener"
+            host = last.parent if last.parent.name == "li" else last
+            if host.name == "li":
+                li = copy.copy(host)
+                li.clear()
+                li.append(n)
+                host.insert_after(li)
+                host = li
+            else:
+                host.insert_after(n)
+            last = n
+    return str(soup)
+
+
 def link_pages(h, idx, base="/", suffix=""):
     """Menü/alt bilgideki '#hizmet' gibi sayfa içi bağlantılar, o içeriğin kendi sayfası varsa o sayfaya gider (ana sayfada aşağı kaymaz)."""
     have = {x["slug"] for x in idx}
@@ -415,6 +487,9 @@ def apply_profile(raw, th, ctx):
                 b[1] = b[1][:j] + nv + b[1][j:]
         elif b[0] == "Alt bilgi":
             b[1] = b[1].replace("</footer>", footer_links(ctx, idx) + "</footer>", 1)
+    for b in blocks:
+        if b[0] in ("Menü", "Mobil menü"):
+            b[1] = apply_menu(b[1], ctx["p"].get("menu"))
     if ctx["p"].get("slides"):
         k = next((i for i, b in enumerate(blocks) if b[0] == "Ana görsel"), 2)
         blocks.insert(k, ["Slider", slider_html(ctx)])
@@ -430,6 +505,7 @@ def apply_profile(raw, th, ctx):
     if ctx.get("_oki"):
         out = _PXD.sub(lambda m: m.group(1) + "if(window.__OKI&&window.__OKI[i])return window.__OKI[i];" + m.group(2), out)
         out = out.replace("</body>", oki_script(ctx["_oki"]) + "</body>", 1) if "</body>" in out else out + oki_script(ctx["_oki"])
+    out = yp_book(out)
     out = out.replace("</head>", CSS + "</head>", 1)
     if ctx["p"].get("slides"):
         out = out.replace("</body>", SLIDER_JS + "</body>", 1) if "</body>" in out else out + SLIDER_JS
@@ -621,6 +697,47 @@ def theme_image_ids(raw):
             seen.add(v)
             out.append(v)
     return out
+
+
+YP_BOOK_JS = r"""window.YPD={};
+window.YPS=function(j,dy){window.YPD[dy]=j;return(j.slots||[]).map(function(s){var q=s.time.split(':');return{m:+q[0]*60+ +q[1],available:!!s.available}})};
+window.YPF=function(dy,e,h){var j=window.YPD[dy];if(!j||!j.slots)return false;var s=null;for(var i=0;i<j.slots.length;i++){var q=j.slots[i].time.split(':');if(+q[0]*60+ +q[1]===h){s=j.slots[i];break}}
+if(!s||!s.n)return false;var sv=document.querySelector('#o-s .on'),dur=+(sv&&sv.dataset.d)||30;if(h+dur>j.end)return false;var I=window.YPI||{staff:[]},ids=[];
+var one=null;(I.staff||[]).forEach(function(x){if(x.name&&e&&x.name.toLowerCase()===String(e).toLowerCase())one=x.id});
+if(one)ids=[one];else ids=(I.staff||[]).map(function(x){return x.id});if(!ids.length)ids=[''];
+ids=ids.filter(function(i){return(j.off||[]).indexOf(i)<0});
+var free=ids.filter(function(i){return!(j.busy[i]||[]).some(function(b){return h<b[1]&&b[0]<h+dur})});
+var lost=(j.anon||[]).filter(function(b){return h<b[1]&&b[0]<h+dur}).length;return free.length-lost>0};
+window.YPB=function(c){window.YPI=c;var sig=JSON.stringify([c.services,c.staff]);if(window.YPSIG===sig)return;window.YPSIG=sig;
+var os=document.getElementById('o-s'),oe=document.getElementById('o-e');
+if(os&&c.services&&c.services.length){os.innerHTML='';c.services.forEach(function(s,i){var b=document.createElement('button');b.textContent=s.name;b.dataset.id=s.id;b.dataset.d=s.dur;if(i===0)b.className='on';os.appendChild(b)})}
+if(oe){oe.innerHTML='';var f=document.createElement('button');f.textContent='Fark etmez';f.className='on';oe.appendChild(f);(c.staff||[]).forEach(function(x){var b=document.createElement('button');b.textContent=x.name;b.dataset.id=x.id;oe.appendChild(b)})}};
+"""
+
+_YP_PATCH = [
+    ("fetch('/api/public/booking/config').then(function(r){return r.json()}).then(function(c){",
+     "fetch('/api/public/yp/info').then(function(r){return r.json()}).then(function(c){window.YPB(c);"),
+    ("fetch('/api/public/booking/slots?date='+dy)", "fetch('/api/public/yp/slots?date='+dy)"),
+    ("L.slots[dy]=(j.slots||[]).map(function(s){var q=s.time.split(':');return{m:+q[0]*60+ +q[1],available:!!s.available}})", "L.slots[dy]=window.YPS(j,dy)"),
+    ("function isFree(d,e,h){if(LIVE){var t=L.slots[iso(d)];return!!t&&t.some(function(s){return s.m===h&&s.available})}", "function isFree(d,e,h){if(LIVE){return window.YPF(iso(d),e,h)}"),
+    ("if(id==='o-d'||id==='o-e')renderTimes()", "if(id!=='o-t')renderTimes()"),
+    ("if(!pick('o-s',s)){var nb=document.createElement('button');nb.textContent=s;A('#o-s button').forEach(function(x){x.classList.remove('on')});nb.className='on';$('#o-s').appendChild(nb)}",
+     "pick('o-s',s);if(!$('#o-s .on')){var f0=$('#o-s button');if(f0)f0.classList.add('on')}"),
+    ("fetch('/api/public/booking',{method", "fetch('/api/public/yp/book',{method"),
+    ("device_type:s?s.textContent:'',fault:note,coupon:cp?cp.value:''", "services:s&&s.dataset.id?[s.dataset.id]:[],staff_id:(ex&&ex.dataset.id)||'',note:note,coupon:cp?cp.value:''"),
+    ("fin(n,s,d,t,x.j.message)", "L.at=0;load(true);fin(n,s,d,t,n.split(' ')[0]+', '+(s?s.textContent:'')+' için '+d.dataset.l+' ('+d.dataset.v+') saat '+t.dataset.v+' randevunuz iletildi. Salon onayladığında size mesaj gelecek.')"),
+    ("<h3>Randevunuz alındı</h3>", "<h3>Randevunuz iletildi</h3>"),
+]
+
+
+def yp_book(h):
+    """Kuaför temalarının randevu çekmecesini panelin ekip/hizmet/doluluk verisine bağlar (yalnız gömülü ortak randevu kodu varsa)."""
+    if "window.__OKLIVE=true;" not in h or "function isFree(d,e,h){if(LIVE){var t=L.slots" not in h:
+        return h
+    for a, b in _YP_PATCH:
+        h = h.replace(a, b)
+    h = h.replace("</head>", "<style>#sh .sheet.done .ok,#shs.done .ok{display:block!important}#sh .sheet.done .frm,#shs.done .frm{display:none!important}</style></head>", 1)
+    return h.replace("window.__OKLIVE=true;", "window.__OKLIVE=true;" + YP_BOOK_JS, 1)
 
 
 def oki_script(reg):

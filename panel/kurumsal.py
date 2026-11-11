@@ -246,7 +246,7 @@ def register(api_router, db, deps, app):
             raise HTTPException(403, "Premium temalar için onay gerekir. Onay için bizimle iletişime geçin.")
         if b["theme"] and b["theme"] != (await brand()).get("theme"):
             # bölüm sırası/gizli bölüm adları temaya özgüdür: tema değişince yeni temanın kendi düzeni açılır (yazı ve resim değişiklikleri temaya göre saklı kalır)
-            await db.app_settings.update_one({"_id": "site_profile"}, {"$set": {"layout": {"order": [], "hidden": []}}})
+            await db.app_settings.update_one({"_id": "site_profile"}, {"$set": {"layout": {"order": [], "hidden": []}, "menu": {"edits": {}, "extra": []}}})
         await db.app_settings.update_one({"_id": "brand"}, {"$set": b}, upsert=True)
         return {"brand": b}
 
