@@ -139,6 +139,25 @@ def register(api_router, db, deps):
         return {"ok": True, "sector": sid, "terms": pk["terms"], "modules": pk["modules"],
                 "integrations": pk["integrations"], "reports": pk["reports"], "flow": pk["flow"]}
 
+    # ------------------------------------------------------------ site motoru
+    @api_router.get("/yp/site-engine")
+    async def engine_get(_: dict = Depends(adm)):
+        """Site hangi motorla yayınlanıyor: hazır tema mı, panelde kurulan bölümler mi."""
+        st = await db.app_settings.find_one({"_id": "yp_pack"}, {"_id": 0, "site_engine": 1}) or {}
+        return {"engine": st.get("site_engine") or "tema"}
+
+    @api_router.put("/yp/site-engine")
+    async def engine_put(payload: dict, _: dict = Depends(adm)):
+        e = str(payload.get("engine") or "").strip()
+        if e not in ("tema", "blok"):
+            raise HTTPException(422, "Motor 'tema' ya da 'blok' olmalı")
+        if e == "blok":
+            n = await db.yp_pages.count_documents({"home": True, "status": "live"})
+            if not n:
+                raise HTTPException(422, "Önce ana sayfaya bölüm ekleyin")
+        await db.app_settings.update_one({"_id": "yp_pack"}, {"$set": {"site_engine": e}}, upsert=True)
+        return {"ok": True, "engine": e}
+
     # ------------------------------------------------------------ sayfalar
     @api_router.get("/yp/pages")
     async def pages(_: dict = Depends(adm)):

@@ -19,6 +19,8 @@ from fastapi.responses import HTMLResponse, Response
 import shop as shopmod
 import shop_legal
 import cerez as cerez_mod
+import blokgen
+import blocks as blok_tanim
 import storefront
 import ilan
 import sektor_mod
@@ -137,7 +139,7 @@ def register(api_router, db, deps):
             legal = [x for x in shop_legal.SLUGS if x[0] in ("cerez-politikasi", "gizlilik-kvkk")]
         else:
             legal = []
-        return {"modules": mods, "cerez": cz, "th": th, "name": name, "tel": tel, "p": p, "sector": sector, "logo": logo, "city": prof.get("city") or "", "legal": legal, "shop_on": shop_ok, "dev": dev,
+        return {"modules": mods, "cerez": cz, "th": th, "brand": brand, "name": name, "tel": tel, "p": p, "sector": sector, "logo": logo, "city": prof.get("city") or "", "legal": legal, "shop_on": shop_ok, "dev": dev,
                 "img": (lambda k: imgs.get(k, "")) if inline else (lambda k: "/api/public/site-img/" + k),
                 "logo_abs": "/api/public/site-logo" if lg else ""}
 
@@ -654,6 +656,73 @@ def register(api_router, db, deps):
         return HTMLResponse(html, headers={"Cache-Control": "no-store"})
 
     # ---------------------------------------------------------------- yayın (domains.hosted_site çağırır)
+    async def blok_veri(rows, ctx):
+        """Bölümlerin beslendiği listeler: ürünler, hizmetler, ekip, yorumlar, adres."""
+        gerek = {(blok_tanim.BY_ID.get(b.get("bid")) or {}).get("manage") or "" for b in rows}
+        out, kasa = {}, {}
+        if "Ürünler" in gerek:
+            pr = await db.yp_products.find({"active": {"$ne": False}}, {"_id": 0, "name": 1, "price": 1, "images": 1, "slug": 1, "id": 1}).limit(24).to_list(24)
+            kasa["urun"] = [(x.get("name") or "", ("%s ₺" % blokgen.para(x.get("price"))) if x.get("price") else "",
+                             "/magaza/urun/" + str(x.get("slug") or x.get("id") or ""), (x.get("images") or [None])[0] or "") for x in pr]
+        if "Ayarlar › Hizmetler" in gerek:
+            sv = await db.yp_services.find({"active": {"$ne": False}}, {"_id": 0, "name": 1, "price": 1, "dur": 1}).limit(40).to_list(40)
+            kasa["hizmet"] = [(x.get("name") or "", ("%s ₺" % blokgen.para(x.get("price"))) if x.get("price") else "") for x in sv]
+        if "Ekip" in gerek:
+            st = await db.yp_staff.find({"active": {"$ne": False}}, {"_id": 0, "name": 1, "title": 1}).sort("order", 1).limit(24).to_list(24)
+            kasa["ekip"] = [(x.get("name") or "", x.get("title") or "", "", "") for x in st]
+        if "Yorumlar" in gerek:
+            yo = await db.yp_content.find({"type": "yorum", "onay": True}, {"_id": 0, "text": 1, "ad": 1, "name": 1}).limit(12).to_list(12)
+            kasa["yorum"] = [(x.get("text") or "", x.get("ad") or x.get("name") or "") for x in yo]
+        adres = ((ctx.get("p") or {}).get("address") or ctx.get("city") or "")
+        for b in rows:
+            mg = (blok_tanim.BY_ID.get(b.get("bid")) or {}).get("manage") or ""
+            w = b.get("wire")
+            d = {}
+            if mg == "Ürünler" and kasa.get("urun"):
+                d["cards"] = kasa["urun"]
+            elif mg == "Ayarlar › Hizmetler" and kasa.get("hizmet"):
+                d["rows" if w in ("rows", "faq") else "cards"] = kasa["hizmet"] if w in ("rows", "faq") else [(a, b2, "", "") for a, b2 in kasa["hizmet"]]
+            elif mg == "Ekip" and kasa.get("ekip"):
+                d["cards"] = kasa["ekip"]
+            elif mg == "Yorumlar" and kasa.get("yorum"):
+                d["quotes"] = kasa["yorum"]
+            if w == "map":
+                d["address"] = adres
+            out[b["iid"]] = d
+        return out
+
+    async def blok_motor_acik():
+        """Bölüm motoru yalnız işletme açıkça açtığında devreye girer.
+        Kapalıyken mevcut tema sitesi olduğu gibi yayında kalır."""
+        try:
+            st = await db.app_settings.find_one({"_id": "yp_pack"}, {"_id": 0, "site_engine": 1})
+        except Exception:                                          # noqa: BLE001
+            return False
+        return (st or {}).get("site_engine") == "blok"
+
+    async def blok_sayfa(p, ctx, dev):
+        """Panelde kurulmuş bölüm sayfası varsa onu üretir, yoksa None."""
+        if not await blok_motor_acik():
+            return None
+        try:
+            doc_ = await db.yp_pages.find_one({"home": True, "status": "live"}, {"_id": 0}) if p in ("", "index") \
+                else await db.yp_pages.find_one({"slug": p, "status": "live"}, {"_id": 0})
+        except Exception:                                          # noqa: BLE001
+            return None
+        if not doc_ or not doc_.get("blocks"):
+            return None
+        rows = []
+        for b in doc_["blocks"]:
+            t = blok_tanim.BY_ID.get(b.get("bid"))
+            if t:
+                rows.append(dict(b, wire=t["wire"], name=t["name"]))
+        if not rows:
+            return None
+        mn = await db.yp_pages.find({"status": "live", "menu.top": True}, {"_id": 0, "slug": 1, "title": 1, "home": 1, "menu": 1}).sort("order", 1).limit(8).to_list(8)
+        menu = [{"slug": x.get("slug") or "", "home": x.get("home"), "title": (x.get("menu") or {}).get("label") or x.get("title") or ""} for x in mn]
+        c2 = dict(ctx, menu_pages=menu, yil=datetime.now(timezone.utc).year)
+        return blokgen.page_html(doc_, rows, c2, await blok_veri(rows, ctx), dev)
+
     async def render(path, host="", inline=False, dev=""):
         """(içerik, tür) ya da None. Özel (düzenleyici) sayfalar önce, sonra otomatik sayfalar."""
         d = await doc()
@@ -665,6 +734,9 @@ def register(api_router, db, deps):
             return "User-agent: *\nAllow: /\nSitemap: https://%s/sitemap.xml\n" % host, "text/plain"
         if p == "sitemap.xml" and host and ctx:
             return sitegen.sitemap(ctx, host, [x["slug"] for x in d.get("pages", []) if x["slug"] not in {i["slug"] for i in sitegen.page_index(ctx)}], str(d.get("updated_at") or "")), "application/xml"
+        bs = await blok_sayfa(p, ctx, dev) if ctx else None
+        if bs:                                                     # panelde kurulmuş bölüm sayfası temanın önüne geçer
+            return bs, "text/html"
         home = d.get("html")
         if home is not None and ctx and d.get("home_theme") and d["home_theme"] != ctx["th"]["slug"]:
             home = None  # tema değişti: eski temadan kalma ana sayfa kaydı kullanılmaz

@@ -776,10 +776,13 @@ V.bolum=async function(){
   +'<div class="bxtop"><label class="f" style="margin:0;min-width:210px">Sayfa<select id="bxpg" data-a="bxpg"></select></label>'
   +'<div class="seg" role="group" aria-label="Hangi cihaz"><button data-a="bxdev" data-d="web"'+(BX.dev==='web'?' class="on"':'')+'>Bilgisayar</button>'
   +'<button data-a="bxdev" data-d="phone"'+(BX.dev==='phone'?' class="on"':'')+'>Telefon</button></div>'
-  +'<div class="sp"></div><span class="note" id="bxn"></span></div>'
+  +'<div class="sp"></div><span class="note" id="bxn"></span>'
+  +'<label class="f" style="margin:0"><span style="font-size:12px">Site neyle yayınlansın</span>'
+  +'<select id="bxeng" data-a="bxeng"><option value="tema">Hazır tema</option><option value="blok">Buradaki bölümler</option></select></label></div>'
   +'<div class="bxwrap"><div class="card"><div class="hd"><h2>Bu sayfadaki bölümler</h2><div class="sp"></div><span class="note">Sürükleyip sıralayın</span></div><div id="bxl"><div class="empty">Yükleniyor…</div></div></div>'
   +'<div class="card"><div class="hd"><h2>Kaba yerleşim</h2></div><div class="pad"><div id="bxp" class="bxpv"></div></div></div></div>';
- await bxPages()};
+ await bxPages();
+ try{var e=await api('/yp/site-engine');BX.eng=e.engine;var se=$('#bxeng');if(se)se.value=e.engine}catch(x){}};
 async function bxPages(){var r=await api('/yp/pages');BX.pages=r.rows||[];
  if(!BX.pid||!BX.pages.some(function(p){return p.id===BX.pid})){var h=BX.pages.filter(function(p){return p.home})[0];BX.pid=(h||BX.pages[0]||{}).id||''}
  var sel=$('#bxpg');if(sel)sel.innerHTML=BX.pages.map(function(p){return '<option value="'+esc(p.id)+'"'+(p.id===BX.pid?' selected':'')+'>'+esc(p.title)+(p.home?' (ana sayfa)':'')+' · '+p.n+' bölüm</option>'}).join('');
@@ -989,6 +992,10 @@ document.addEventListener('click',async function(ev){
 document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!$('#ov').hidden)closeM()});
 document.addEventListener('change',function(e){var t=e.target;
  if(t&&t.id==='bxpg'){BX.pid=t.value;bxLoad().catch(fail);return}
+ if(t&&t.id==='bxeng'){(async function(){var y=t.value;
+   if(y==='blok'&&!await ask('Siteniz bundan sonra hazır tema yerine buradaki bölümlerle yayınlansın mı? İstediğiniz an temaya dönebilirsiniz.','Bölümlerle yayınla')){t.value=BX.eng||'tema';return}
+   try{await api('/yp/site-engine',{method:'PUT',body:{engine:y}});BX.eng=y;toast(y==='blok'?'Site bölümlerle yayınlanıyor':'Hazır temaya dönüldü')}
+   catch(x){t.value=BX.eng||'tema';fail(x)}})();return}
  if(t&&t.dataset&&(t.dataset.ki||t.dataset.kis)){bxImg(t,!!t.dataset.kis).catch(fail);return}
  if(t&&t.dataset&&t.dataset.up){if(t.dataset.up==='bimg')onBlockUpload(t);else if(t.dataset.up==='timg')onThemeUpload(t);else onUpload(t)}});
 document.addEventListener('input',function(e){if(e.target.form&&fid(e.target.form)==='af')calcTot()});
