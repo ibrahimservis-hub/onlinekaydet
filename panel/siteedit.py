@@ -11,7 +11,7 @@ import html as _html
 import io
 import os
 import re
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from fastapi import Depends, HTTPException, Request
 from fastapi.responses import HTMLResponse, Response
@@ -23,11 +23,13 @@ import blokgen
 import blok_eticaret
 import blok_tanitim
 import blok_hareket
+import blok_donusum
 import blocks as blok_tanim
 
 blokgen.kayit_al(blok_eticaret.KAYIT, blok_eticaret.CSS)
 blokgen.kayit_al(blok_tanitim.KAYIT, blok_tanitim.CSS)
 blokgen.kayit_al(blok_hareket.KAYIT, blok_hareket.CSS)
+blokgen.kayit_al(blok_donusum.KAYIT, blok_donusum.CSS)
 import storefront
 import ilan
 import sektor_mod
@@ -753,6 +755,46 @@ def register(api_router, db, deps):
         if "Ayarlar › Bağlantılar" in gerek:
             kasa["baglantilar"] = (ctx.get("p") or {}).get("social") or {}
         adres = ((ctx.get("p") or {}).get("address") or ctx.get("city") or "")
+        prof = ctx.get("p") or {}
+        if "Web Sitem › Blog" in gerek:
+            try:
+                yz = await db.yp_content.find({"type": "yazi", "onay": {"$ne": False}},
+                                              {"_id": 0, "baslik": 1, "ozet": 1, "slug": 1, "img": 1, "tarih": 1}).limit(12).to_list(12)
+            except Exception:                                      # noqa: BLE001
+                yz = []
+            kasa["yazilar"] = yz
+        if "Web Sitem › SSS" in gerek:
+            try:
+                sq = await db.yp_content.find({"type": "sss"}, {"_id": 0, "soru": 1, "cevap": 1}).limit(40).to_list(40)
+            except Exception:                                      # noqa: BLE001
+                sq = []
+            kasa["sss"] = sq
+        if "Web Sitem › Dosyalar" in gerek:
+            kasa["dosyalar"] = [x for x in (prof.get("files") or []) if isinstance(x, dict)]
+        if "Ayarlar › Saatler" in gerek:
+            sa = prof.get("hours") or []
+            kasa["saatler"] = sa
+            try:
+                simdi = datetime.now(timezone.utc) + timedelta(hours=3)
+                kasa["bugun"] = simdi.weekday()
+                g = sa[simdi.weekday()] if len(sa) > simdi.weekday() else {}
+                if g and not g.get("kapali") and g.get("ac") and g.get("kapa"):
+                    hhmm = simdi.strftime("%H:%M")
+                    kasa["acik_mi"] = str(g["ac"]) <= hhmm <= str(g["kapa"])
+                else:
+                    kasa["acik_mi"] = False
+            except Exception:                                      # noqa: BLE001
+                kasa["bugun"], kasa["acik_mi"] = None, None
+        if "Ayarlar › Şubeler" in gerek:
+            kasa["subeler"] = [x for x in (prof.get("branches") or []) if isinstance(x, dict)]
+        if "Ayarlar › Bölgeler" in gerek:
+            kasa["bolgeler"] = [str(x) for x in (prof.get("areas") or []) if str(x).strip()]
+        if "Ayarlar › İletişim" in gerek:
+            kasa["iletisim"] = {"tel": ctx.get("tel") or "", "eposta": prof.get("email") or "",
+                                "adres": adres, "whatsapp": prof.get("whatsapp") or ""}
+            kasa["baglantilar"] = prof.get("social") or {}
+        if "Ayarlar › Yasal" in gerek:
+            kasa["yasal"] = list(ctx.get("legal") or [])
         for b in rows:
             mg = (blok_tanim.BY_ID.get(b.get("bid")) or {}).get("manage") or ""
             w = b.get("wire")
@@ -786,6 +828,30 @@ def register(api_router, db, deps):
                 d["belgeler"] = kasa.get("belgeler") or []
             if mg == "Ayarlar › Bağlantılar":
                 d["baglantilar"] = kasa.get("baglantilar") or {}
+            if mg == "Web Sitem › Blog":
+                d["yazilar"] = kasa.get("yazilar") or []
+            if mg == "Web Sitem › SSS":
+                d["sss"] = kasa.get("sss") or []
+            if mg == "Web Sitem › Dosyalar":
+                d["dosyalar"] = kasa.get("dosyalar") or []
+            if mg == "Ayarlar › Adres":
+                d["adres"] = adres
+            if mg == "Ayarlar › Saatler":
+                d["saatler"] = kasa.get("saatler") or []
+                d["bugun"] = kasa.get("bugun")
+                d["acik_mi"] = kasa.get("acik_mi")
+            if mg == "Ayarlar › Şubeler":
+                d["subeler"] = kasa.get("subeler") or []
+            if mg == "Ayarlar › Bölgeler":
+                d["bolgeler"] = kasa.get("bolgeler") or []
+            if mg == "Ayarlar › İletişim":
+                d["iletisim"] = kasa.get("iletisim") or {}
+                d["baglantilar"] = kasa.get("baglantilar") or {}
+            if mg == "Ayarlar › Yasal":
+                d["yasal"] = kasa.get("yasal") or []
+            if mg == "Randevu ayarları":
+                d["hizmetler"] = kasa.get("hizmetler") or []
+                d["ekip"] = kasa.get("ekip_k") or []
             if mg.startswith("Ürünler"):
                 d["urunler"] = kasa.get("urunler") or []
                 d["satis"] = kasa.get("satis") or {}
