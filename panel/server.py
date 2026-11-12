@@ -2909,6 +2909,9 @@ entegrasyon.register(api_router, db, {"require_admin": require_admin, "probe": N
 import bildirim
 bildirim.register(api_router, db, {"require_admin": require_admin, "send_sms": None})
 
+import icerik
+icerik.register(api_router, db, {"require_admin": require_admin})
+
 @app.get("/salon", include_in_schema=False)
 async def yp_sayfa():
     """Yeni yönetim paneli (randevuyla çalışan işler). Eski /admin ekranından ayrıdır."""
