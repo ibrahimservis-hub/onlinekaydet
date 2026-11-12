@@ -2879,6 +2879,8 @@ import sektor_kayit
 sektor_kayit.register(api_router, db, {"require_admin": require_admin})
 import yp  # yeni yönetim paneli (ayrı uçlar: /api/yp/*)
 yp.register(api_router, db, {"require_admin": require_admin})
+import blocks_api  # bölüm motoru: katalog, rozet, sektör paketi, sayfalar
+blocks_api.register(api_router, db, {"require_admin": require_admin})
 
 @app.get("/salon", include_in_schema=False)
 async def yp_sayfa():
