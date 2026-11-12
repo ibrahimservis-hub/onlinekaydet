@@ -3443,7 +3443,7 @@ if _FE:
         if not fid:
             return JSONResponse({"detail": "Bulunamadı"}, status_code=404)
         fn = getattr(api_router, "site_custom_serve", None)
-        r = await fn("/" + rest.strip("/"), "") if fn else None
+        r = await fn("/" + rest.strip("/"), "", request.headers.get("user-agent", "")) if fn else None
         if not r:
             return JSONResponse({"detail": "Sayfa bulunamadı"}, status_code=404)
         h = r[0]

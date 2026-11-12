@@ -105,7 +105,7 @@ def register(api_router, db, deps):
             _raw_cache[slug] = open(p, encoding="utf-8").read()
         return _raw_cache[slug]
 
-    async def build_ctx(inline=False):
+    async def build_ctx(inline=False, dev=""):
         """Tema + firma profili bağlamı. Tema seçili değilse None."""
         brand = await db.app_settings.find_one({"_id": "brand"}, {"_id": 0}) or {}
         th = next((t for t in THEMES if t["slug"] == (brand.get("theme") or "")), None)
@@ -130,7 +130,7 @@ def register(api_router, db, deps):
         mods = None if mods is None else list(mods)
         shop_ok = bool(feats.get("shop_enabled")) and (mods is None or "magaza" in mods)   # paket Mağaza'yı içermiyorsa tema bölümü de yayında olmaz
         legal = list(shop_legal.SLUGS) if shop_ok else []
-        return {"modules": mods, "th": th, "name": name, "tel": tel, "p": p, "sector": sector, "logo": logo, "city": prof.get("city") or "", "legal": legal, "shop_on": shop_ok,
+        return {"modules": mods, "th": th, "name": name, "tel": tel, "p": p, "sector": sector, "logo": logo, "city": prof.get("city") or "", "legal": legal, "shop_on": shop_ok, "dev": dev,
                 "img": (lambda k: imgs.get(k, "")) if inline else (lambda k: "/api/public/site-img/" + k),
                 "logo_abs": "/api/public/site-logo" if lg else ""}
 
@@ -343,6 +343,33 @@ def register(api_router, db, deps):
                 continue
             ie[_t(th_, 60)] = {_t(bn, 60): {str(int(i)): str(v) for i, v in list(tx.items())[:80] if str(i).isdigit() and re.fullmatch(r"[a-f0-9]{16}", str(v))} for bn, tx in list(blks.items())[:40] if isinstance(tx, dict)}
         out["imgedits"] = ie
+        pz = x.get("phone") or {}
+        if isinstance(pz, dict):
+            pl = pz.get("layout") or {}
+            ph_out = {}
+            if isinstance(pl, dict) and (pl.get("order") or pl.get("hidden")):
+                ph_out["layout"] = {"order": [_t(n, 60) for n in (pl.get("order") or [])[:40] if _t(n, 60)],
+                                    "hidden": [_t(n, 60) for n in (pl.get("hidden") or [])[:40] if _t(n, 60)]}
+            pe = {}
+            for th_, blks in (pz.get("edits") or {}).items():
+                if not isinstance(blks, dict) or len(pe) > 5:
+                    continue
+                pe[_t(th_, 60)] = {_t(bn, 60): {str(int(i)): str(v)[:600] for i, v in list(tx.items())[:80] if str(i).isdigit()} for bn, tx in list(blks.items())[:40] if isinstance(tx, dict)}
+            if pe:
+                ph_out["edits"] = pe
+            pi = {}
+            for th_, blks in (pz.get("imgedits") or {}).items():
+                if not isinstance(blks, dict) or len(pi) > 5:
+                    continue
+                pi[_t(th_, 60)] = {_t(bn, 60): {str(int(i)): str(v) for i, v in list(tx.items())[:80] if str(i).isdigit() and re.fullmatch(r"[a-f0-9]{16}", str(v))} for bn, tx in list(blks.items())[:40] if isinstance(tx, dict)}
+            if pi:
+                ph_out["imgedits"] = pi
+            ui = pz.get("ui") or {}
+            if isinstance(ui, dict) and ui:
+                ph_out["ui"] = {_t(k, 40): (v if isinstance(v, (bool, int)) else _t(v, 120)) for k, v in list(ui.items())[:60] if _t(k, 40)}
+            out["phone"] = ph_out
+        else:
+            out["phone"] = {}
         im = {}
         for th_, mp in (x.get("imgmap") or {}).items():
             if isinstance(mp, dict) and len(im) <= 5:
@@ -447,9 +474,9 @@ def register(api_router, db, deps):
     @api_router.put("/site/profile")
     async def profile_put(payload: dict, _: dict = Depends(require_admin)):
         need_firm()
-        if "imgedits" not in payload or "imgmap" not in payload or "menu" not in payload or "blockstyle" not in payload or "promo" not in payload or "booktext" not in payload:          # eski panel bu alanları bilmez: mevcut resim/menü değişikliklerini silmesin
+        if "imgedits" not in payload or "imgmap" not in payload or "menu" not in payload or "blockstyle" not in payload or "promo" not in payload or "booktext" not in payload or "phone" not in payload:          # eski panel bu alanları bilmez: mevcut resim/menü değişikliklerini silmesin
             old_ = (await db.app_settings.find_one({"_id": "site_profile"}, {"_id": 0})) or {}
-            payload = dict(payload, imgedits=payload.get("imgedits", old_.get("imgedits") or {}), imgmap=payload.get("imgmap", old_.get("imgmap") or {}), menu=payload.get("menu", old_.get("menu") or {}), blockstyle=payload.get("blockstyle", old_.get("blockstyle") or {}), promo=payload.get("promo", old_.get("promo") or {}), booktext=payload.get("booktext", old_.get("booktext") or {}), coupon_off=payload.get("coupon_off", old_.get("coupon_off") or False))
+            payload = dict(payload, imgedits=payload.get("imgedits", old_.get("imgedits") or {}), imgmap=payload.get("imgmap", old_.get("imgmap") or {}), menu=payload.get("menu", old_.get("menu") or {}), blockstyle=payload.get("blockstyle", old_.get("blockstyle") or {}), promo=payload.get("promo", old_.get("promo") or {}), booktext=payload.get("booktext", old_.get("booktext") or {}), coupon_off=payload.get("coupon_off", old_.get("coupon_off") or False), phone=payload.get("phone", old_.get("phone") or {}))
         prof = await san_profile(payload)
         await db.app_settings.update_one({"_id": "site_profile"}, {"$set": prof}, upsert=True)
         keep = [x["k"] for x in prof["slides"] + prof["gallery"]] + [e["img"] for e in prof["extra_pages"] if e["img"]] + [v for blks in prof["imgedits"].values() for tx in blks.values() for v in tx.values()] + [v for mp in prof["imgmap"].values() for v in mp.values()]
@@ -494,6 +521,7 @@ def register(api_router, db, deps):
         return Response(base64.b64decode(m.group(2)), media_type=m.group(1), headers={"Cache-Control": "public, max-age=86400", "Content-Security-Policy": "sandbox"})
 
     async def base_blocks(ctx, with_edits, footer=False):
+        # ctx içindeki "dev" telefon ise sitegen telefon katmanını kendiliğinden uygular
         p2 = dict(ctx["p"], layout={"_all": True})
         if not with_edits:
             p2["edits"] = {}
@@ -504,28 +532,35 @@ def register(api_router, db, deps):
                 [b[0] for b in (parts[1] if parts else []) if b[0] not in sitegen.FIXED_TOP + sitegen.FIXED_BOTTOM])
 
     @api_router.get("/site/blocks")
-    async def blocks_get(_: dict = Depends(require_admin)):
-        """Ana sayfadaki bölümler (sıra + gizli bilgisi). Her temada aynı yapı olduğu için tüm temalarda çalışır."""
+    async def blocks_get(dev: str = "", _: dict = Depends(require_admin)):
+        """Ana sayfadaki bölümler (sıra + gizli bilgisi). dev=phone ise telefona özel sıra/gizleme döner."""
         need_firm()
-        ctx = await build_ctx()
+        ctx = await build_ctx(dev="phone" if dev == "phone" else "")
         if not ctx:
             raise HTTPException(400, "Önce bir tema seçin")
         blocks, names = await base_blocks(ctx, True)
         org_, _nn = await base_blocks(ctx, False)
         lay = ctx["p"].get("layout") or {}
+        ph = (ctx["p"].get("phone") or {}) if ctx.get("dev") == "phone" else {}
+        ayri = bool(ph.get("layout"))                      # telefon sırası bilgisayardan ayrı mı
+        if ayri:
+            lay = dict(lay, **{k: v for k, v in (ph["layout"] or {}).items() if k in ("order", "hidden")})
+        ped = ((ph.get("edits") or {}).get(ctx["th"]["slug"], {}) or {}) if ph else {}
+        pie = ((ph.get("imgedits") or {}).get(ctx["th"]["slug"], {}) or {}) if ph else {}
         order = [n for n in (lay.get("order") or []) if n in blocks] + [n for n in names if n not in (lay.get("order") or [])]
         from bs4 import BeautifulSoup
         out = []
         for n in order:
             soup = BeautifulSoup(blocks[n], "html.parser")
             hd = soup.find(["h1", "h2", "h3"])
-            out.append({"name": n, "hidden": n in (lay.get("hidden") or []) or (sitegen.dflt_off(blocks[n]) and n not in (lay.get("order") or [])), "title": " ".join(hd.get_text().split())[:70] if hd else "", "n": len(sitegen.edit_nodes(soup)), "ni": len(sitegen.block_images(org_[n])) if n in org_ else 0})
-        return {"blocks": out}
+            out.append({"name": n, "hidden": n in (lay.get("hidden") or []) or (sitegen.dflt_off(blocks[n]) and n not in (lay.get("order") or [])), "title": " ".join(hd.get_text().split())[:70] if hd else "", "n": len(sitegen.edit_nodes(soup)), "ni": len(sitegen.block_images(org_[n])) if n in org_ else 0,
+                        "own": bool(ped.get(n)) or bool(pie.get(n))})     # telefona özel yazı/resim var mı
+        return {"blocks": out, "dev": ctx.get("dev") or "web", "own_order": ayri}
 
     @api_router.get("/site/block-text")
-    async def block_text(name: str, _: dict = Depends(require_admin)):
+    async def block_text(name: str, dev: str = "", _: dict = Depends(require_admin)):
         need_firm()
-        ctx = await build_ctx()
+        ctx = await build_ctx(dev="phone" if dev == "phone" else "")
         if not ctx:
             raise HTTPException(400, "Önce bir tema seçin")
         cur, _n = await base_blocks(ctx, True, True)
@@ -535,7 +570,15 @@ def register(api_router, db, deps):
         a, b = sitegen.block_texts(cur[name]), sitegen.block_texts(org[name])
         for x in a:
             x["orig"] = b[x["i"]]["text"] if x["i"] < len(b) else x["text"]
-        return {"texts": a}
+        if ctx.get("dev") == "phone":                     # telefonda: bilgisayardaki hâli ve hangisi telefona özel
+            wctx = await build_ctx()
+            wcur, _n3 = await base_blocks(wctx, True, True)
+            w = sitegen.block_texts(wcur[name]) if name in wcur else []
+            own = ((((ctx["p"].get("phone") or {}).get("edits") or {}).get(ctx["th"]["slug"], {}) or {}).get(name) or {})
+            for x in a:
+                x["web"] = w[x["i"]]["text"] if x["i"] < len(w) else x["orig"]
+                x["own"] = str(x["i"]) in own
+        return {"texts": a, "dev": ctx.get("dev") or "web"}
 
     @api_router.get("/site/booktext")
     async def booktext_get(_: dict = Depends(require_admin)):
@@ -589,10 +632,10 @@ def register(api_router, db, deps):
         return {"images": [dict(x, thumb="https://images.pexels.com/photos/%s/pexels-photo-%s.jpeg?auto=compress&cs=tinysrgb&w=400" % (x["pid"], x["pid"]), k=cur.get(str(x["i"]), "")) for x in sitegen.block_images(org[name])]}
 
     @api_router.get("/site/preview")
-    async def preview(path: str = "/", _: dict = Depends(require_admin)):
-        """Panelde canlı önizleme: yayındakiyle aynı üretim, görseller gömülü."""
+    async def preview(path: str = "/", dev: str = "", _: dict = Depends(require_admin)):
+        """Panelde canlı önizleme: yayındakiyle aynı üretim, görseller gömülü. dev=phone ise telefon görünümü."""
         need_firm()
-        r = await render(path, inline=True)
+        r = await render(path, inline=True, dev="phone" if dev == "phone" else "")
         if not r:
             raise HTTPException(404, "Sayfa bulunamadı")
         html = r[0]
@@ -604,13 +647,13 @@ def register(api_router, db, deps):
         return HTMLResponse(html, headers={"Cache-Control": "no-store"})
 
     # ---------------------------------------------------------------- yayın (domains.hosted_site çağırır)
-    async def render(path, host="", inline=False):
+    async def render(path, host="", inline=False, dev=""):
         """(içerik, tür) ya da None. Özel (düzenleyici) sayfalar önce, sonra otomatik sayfalar."""
         d = await doc()
         p = (path or "/").split("?")[0].strip("/")
         if p.endswith(".html"):
             p = p[:-5]
-        ctx = await build_ctx(inline=inline)
+        ctx = await build_ctx(inline=inline, dev=dev)
         if p == "robots.txt" and host:
             return "User-agent: *\nAllow: /\nSitemap: https://%s/sitemap.xml\n" % host, "text/plain"
         if p == "sitemap.xml" and host and ctx:
@@ -694,8 +737,8 @@ def register(api_router, db, deps):
             h = await inline_imgs(h)
         return h, "text/html"
 
-    async def serve(path: str, host: str = ""):
-        r = await render(path, host)
+    async def serve(path: str, host: str = "", ua: str = ""):
+        r = await render(path, host, dev="phone" if sitegen.is_phone(ua) else "")
         return r
 
     api_router.site_custom_serve = serve

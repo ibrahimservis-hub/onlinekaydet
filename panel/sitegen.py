@@ -606,9 +606,27 @@ def strip_mod(b, ctx):
     b[1] = str(soup)
 
 
+_PHONE_UA = re.compile(r"iphone|ipod|android.*mobile|windows phone|blackberry|bb10|iemobile|opera mini|mobile safari", re.I)
+_TABLET_UA = re.compile(r"ipad|tablet|android(?!.*mobile)", re.I)
+
+
+def is_phone(ua):
+    """Tarayıcı imzasına göre telefon mu. Tablet telefon sayılmaz: bilgisayar görünümünü alır."""
+    ua = ua or ""
+    return bool(_PHONE_UA.search(ua)) and not _TABLET_UA.search(ua)
+
+
+def phone_over(ctx):
+    """Telefon görünümü için müşterinin ayrı düzenlemeleri. Bilgisayar görünümünde boş."""
+    return (ctx["p"].get("phone") or {}) if ctx.get("dev") == "phone" else {}
+
+
 def apply_layout(blocks, ctx):
     """Müşterinin bölüm sırası, gizlediği bölümler ve metin düzenlemeleri."""
+    ph = phone_over(ctx)
     lay = ctx["p"].get("layout") or {}
+    if ph.get("layout") and not lay.get("_all"):   # telefona ayrı sıra / gizleme (panel listelemesinde değil)
+        lay = dict(lay, **{k: v for k, v in (ph["layout"] or {}).items() if k in ("order", "hidden")})
     order = [n for n in (lay.get("order") or []) if isinstance(n, str)]
     hidden = set(lay.get("hidden") or [])
     shop_on = bool(ctx.get("shop_on"))
@@ -629,6 +647,16 @@ def apply_layout(blocks, ctx):
     mid = [b for b in blocks if b[0] not in FIXED_TOP + FIXED_BOTTOM]
     edits = (ctx["p"].get("edits") or {}).get(ctx["th"]["slug"], {}) if ctx.get("th") else {}
     iedits = (ctx["p"].get("imgedits") or {}).get(ctx["th"]["slug"], {}) if ctx.get("th") else {}
+    ped = (ph.get("edits") or {}).get(ctx["th"]["slug"], {}) if ctx.get("th") else {}
+    if ped:                                    # telefona özel yazılar bilgisayardakilerin üzerine biner
+        edits = dict(edits)
+        for bn, tx in ped.items():
+            edits[bn] = dict(edits.get(bn) or {}, **tx)
+    pie = (ph.get("imgedits") or {}).get(ctx["th"]["slug"], {}) if ctx.get("th") else {}
+    if pie:
+        iedits = dict(iedits)
+        for bn, tx in pie.items():
+            iedits[bn] = dict(iedits.get(bn) or {}, **tx)
     for b in mid + [x for x in bot if x[0] == "Alt bilgi"]:
         if edits.get(b[0]):
             b[1] = edit_texts(b[1], edits[b[0]])

@@ -243,7 +243,7 @@ def register(api_router, db, deps):
             return HTMLResponse("<!doctype html><meta charset=utf-8><title>Site bulunamadı</title><p style='font:16px system-ui;padding:40px'>Bu alan adı için yayınlanmış bir site yok.</p>", status_code=404)
         _fn = getattr(api_router, "site_custom_serve", None)
         if _fn:
-            _h = await _fn(request.query_params.get("p", "/"), host)
+            _h = await _fn(request.query_params.get("p", "/"), host, request.headers.get("user-agent", ""))
             if _h:
                 return HTMLResponse(_h[0], media_type=_h[1], headers={"Cache-Control": "no-cache"})
         brand = await db.app_settings.find_one({"_id": "brand"}, {"_id": 0}) or {}
