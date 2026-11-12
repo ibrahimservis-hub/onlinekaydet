@@ -92,7 +92,7 @@ def eligible(c, cart, ctx):
     sub = scope_sum(c, items)
     qty = sum(_int(i.get("qty"), 1) for i in items if in_scope(c.get("scope"), i))
     if _num(cd.get("min_total")) and sub < _num(cd.get("min_total")):
-        return False, "en az %s ₺ tutar gerekli" % _num(cd["min_total"])
+        return False, "en az %s ₺ tutar gerekli" % _n(cd["min_total"])
     if _int(cd.get("min_qty")) and qty < _int(cd["min_qty"]):
         return False, "en az %d ürün gerekli" % _int(cd["min_qty"])
     if cd.get("payment") and _t(ctx.get("payment"), 20) != cd["payment"]:
@@ -160,7 +160,7 @@ def run_one(c, cart, ctx):
             for u in sorted(grp, key=lambda u: u["price"])[:give]:
                 cuts.append((u, round(u["price"] * pct / 100.0, 2)))
             n += 1
-        note = "%d ürün %%%s indirimli" % (n * give, _num(pct)) if n else ""
+        note = "%d ürün %%%s indirimli" % (n * give, _n(pct)) if n else ""
 
     elif typ == "urun":
         pct = min(max(_num(g.get("percent")), 0.0), 100.0)
@@ -316,6 +316,18 @@ def clean(c, old=None):
     return out
 
 
+def _n(v):
+    """Sayıyı Türkçe yaz: 1000 -> 1.000, 50.0 -> 50, 12.5 -> 12,5"""
+    v = _num(v)
+    t = ("%d" % int(v)) if float(v).is_integer() else ("%.2f" % v).rstrip("0").rstrip(".")
+    neg, t = t.startswith("-"), t.lstrip("-")
+    tam, _, kus = t.partition(".")
+    par = ""
+    while len(tam) > 3:
+        par, tam = "." + tam[-3:] + par, tam[:-3]
+    return ("-" if neg else "") + tam + par + (("," + kus) if kus else "")
+
+
 def summary(c):
     """Panelde ve sitede gösterilecek tek satırlık özet."""
     cd, g = c.get("cond") or {}, c.get("gain") or {}
@@ -323,17 +335,17 @@ def summary(c):
     if t == "x_al_y_ode":
         return "%d al %d öde" % (_int(cd.get("buy")), _int(cd.get("pay")))
     if t == "kademeli":
-        return "%d alana %d ürün %%%s" % (_int(cd.get("buy")), _int(cd.get("give")), _num(g.get("y_percent")))
+        return "%d alana %d ürün %%%s" % (_int(cd.get("buy")), _int(cd.get("give")), _n(g.get("y_percent")))
     if t == "kargo":
-        return "%s ₺ üzeri kargo bedava" % _num(cd.get("min_total")) if _num(cd.get("min_total")) else "kargo bedava"
+        return ("%s ₺ üzeri kargo bedava" % _n(cd.get("min_total"))) if _num(cd.get("min_total")) else "kargo bedava"
     if t == "hediye":
         return "hediye ürün"
     if t == "kupon":
         kod = cd.get("code") or ""
-        return "%s kodu ile %s" % (kod, "%%%s" % _num(g.get("percent")) if _num(g.get("percent"))
-                                   else "%s ₺" % _num(g.get("amount")))
-    base = "%%%s indirim" % _num(g.get("percent")) if _num(g.get("percent")) else "%s ₺ indirim" % _num(g.get("amount"))
-    return ("%s ₺ üzeri %s" % (_num(cd.get("min_total")), base)) if _num(cd.get("min_total")) else base
+        return "%s kodu ile %s" % (kod, ("%%%s" % _n(g.get("percent"))) if _num(g.get("percent"))
+                                   else "%s ₺" % _n(g.get("amount")))
+    base = ("%%%s indirim" % _n(g.get("percent"))) if _num(g.get("percent")) else "%s ₺ indirim" % _n(g.get("amount"))
+    return ("%s ₺ üzeri %s" % (_n(cd.get("min_total")), base)) if _num(cd.get("min_total")) else base
 
 
 def register(api_router, db, deps):

@@ -133,7 +133,16 @@ def register(api_router, db, deps):
         g = await db.app_settings.find_one({"_id": "global"}, {"_id": 0}) or {}
         B = await cfg()
         sv = await db.yp_services.find({}, {"_id": 0}).sort("order", 1).to_list(500)
-        return {"firm": g.get("company_name") or "", "sector": key, "terms": terms(key), "user": user.get("name") or user.get("email") or "", "staff": st, "services": sv,
+        pk = await db.app_settings.find_one({"_id": "yp_pack"}, {"_id": 0}) or {}
+        mods = pk.get("modules")
+        if mods is None:
+            try:
+                import blocks
+                mods = list((blocks.pack(pk.get("sector") or key) or {}).get("modules") or [])
+            except Exception:                                      # noqa: BLE001
+                mods = []
+        return {"firm": g.get("company_name") or "", "sector": key, "terms": terms(key), "modules": list(mods),
+                "user": user.get("name") or user.get("email") or "", "staff": st, "services": sv,
                 "hours": {"start": B.get("start") or "09:00", "end": B.get("end") or "19:00", "closed": B.get("closed_weekdays") or [], "online": bool(B.get("enabled")),
                           "slot": int(B.get("slot_minutes") or 30)},
                 "today": _now().date().isoformat(), "now": _now().strftime("%H:%M")}

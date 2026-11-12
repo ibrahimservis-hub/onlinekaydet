@@ -214,6 +214,7 @@ def clean(p, old=None):
            "desc": str(p.get("desc") or "")[:12000], "specs": specs,
            "cost": _num(p.get("cost")), "price": price, "sale_price": sale, "vat": vat,
            "stock": _int(p.get("stock")), "track_stock": False if p.get("track_stock") is False else True,
+           "low_at": _int(p.get("low_at"), _int(old.get("low_at"), 5)),
            "variants": vr, "images": imgs,
            "weight": _num(p.get("weight")), "desi": _num(p.get("desi")),
            "warranty": _t(p.get("warranty"), 60), "min_qty": max(_int(p.get("min_qty"), 1), 1),
@@ -266,9 +267,10 @@ def register(api_router, db, deps):
                 "indirimli": lambda r: r["discount"] > 0,
                 "kanalsiz": lambda r: len(r["channels_on"]) <= 1,
                 "kar_dusuk": lambda r: r["margin"] < 10}
+        counts = {k: sum(1 for r in rows if f(r)) for k, f in segs.items()}
+        counts["hepsi"] = len(rows)
         if seg in segs:
             rows = [r for r in rows if segs[seg](r)]
-        counts = {k: sum(1 for r in rows if f(r)) for k, f in segs.items()} if not seg else {}
         key = {"yeni": lambda r: r.get("created_at", ""), "ad": lambda r: r["name"].lower(),
                "fiyat": lambda r: r["sale"], "stok": lambda r: _int(r.get("stock")),
                "kar": lambda r: r["margin"]}.get(sort.rstrip("_d"), lambda r: r.get("created_at", ""))

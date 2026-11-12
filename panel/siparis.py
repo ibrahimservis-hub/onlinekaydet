@@ -154,7 +154,8 @@ def register(api_router, db, deps):
                 "counts": dict({k: len([r for r in allr if r.get("status") == k]) for k in STATES},
                                hepsi=len(allr), acik=len([r for r in allr if r.get("status") in OPEN])),
                 "states": [{"id": k, "name": v} for k, v in STATES.items()],
-                "cargos": [{"id": k, "name": v} for k, v in CARGOS.items()]}
+                "cargos": [{"id": k, "name": v} for k, v in CARGOS.items()],
+                "channels": [{"id": k, "name": v[0]} for k, v in CHANNELS.items()]}
 
     @api_router.get("/yp/orders/{oid}")
     async def order_get(oid: str, _=Depends(require_admin)):
