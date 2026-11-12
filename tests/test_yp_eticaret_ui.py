@@ -97,7 +97,7 @@ with sync_playwright() as p:
         pg.click("#slist [data-a=sip-ac]"); pg.wait_for_selector(".md .flow", timeout=6000)
         m = pg.inner_text(".md")
         assert "Keten Gömlek" in m and "Tahsil edilen" in m and "Net kâr" in m, m[:300]
-        assert pg.eval_on_selector_all(".md .flow .s", "a=>a.length") == 5
+        assert pg.eval_on_selector_all(".md .flow .stp", "a=>a.length") == 5
         pg.click(".md [data-a=sip-durum][data-v=onaylandi]"); pg.wait_for_timeout(900)
         assert "Onaylandı" in pg.inner_text("#slist")
     t("sipariş detayı açılıyor, durum akışı panelden ilerliyor", g)

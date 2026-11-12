@@ -141,7 +141,14 @@ def register(api_router, db, deps):
                 mods = list((blocks.pack(pk.get("sector") or key) or {}).get("modules") or [])
             except Exception:                                      # noqa: BLE001
                 mods = []
-        return {"firm": g.get("company_name") or "", "sector": key, "terms": terms(key), "modules": list(mods),
+        try:
+            import isakis
+            psec = pk.get("sector") or key
+            akis = len([f for f in isakis.FLOWS if psec in f["sectors"]])
+        except Exception:                                          # noqa: BLE001
+            akis = 0
+        return {"firm": g.get("company_name") or "", "sector": key, "pack": pk.get("sector") or key,
+                "terms": terms(key), "modules": list(mods), "work_flows": akis,
                 "user": user.get("name") or user.get("email") or "", "staff": st, "services": sv,
                 "hours": {"start": B.get("start") or "09:00", "end": B.get("end") or "19:00", "closed": B.get("closed_weekdays") or [], "online": bool(B.get("enabled")),
                           "slot": int(B.get("slot_minutes") or 30)},
