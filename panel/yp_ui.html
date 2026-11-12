@@ -324,6 +324,9 @@ table.gr .r{text-align:right}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 /* ---- sayfa bölümleri (katalog) ---- */
 .md.xw{max-width:1180px}
+.bxbg{background:var(--blue-s,#e8effc);border:1px solid #c5d9f7;border-radius:10px;padding:11px 14px;font-size:13.5px;line-height:1.55;color:#28405f}
+.bxbg.ok{background:var(--ok-s,#e3f4ea);border-color:#bfe3cd;color:#15603c}
+.bxbg a{color:var(--blue);font-weight:600}
 .bxtop{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 14px}
 .bxwrap{display:grid;grid-template-columns:1fr 340px;gap:16px;align-items:start}
 @media(max-width:1100px){.bxwrap{grid-template-columns:1fr}}
@@ -384,6 +387,7 @@ table.gr .r{text-align:right}
 <symbol id="team" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-3.9 3.1-6.5 7-6.5s7 2.6 7 6.5"/></symbol>
 <symbol id="chart" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M21 20H3"/></symbol>
 <symbol id="web" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M3 9h18M9 22h6M12 18v4"/></symbol>
+<symbol id="layers" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="6" rx="1.5"/><rect x="3" y="12" width="8" height="9" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/></symbol>
 <symbol id="gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/></symbol>
 <symbol id="plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
 <symbol id="list" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01"/></symbol>
@@ -398,8 +402,8 @@ var tl=function(n){return Number(n||0).toLocaleString('tr-TR',{maximumFractionDi
 function fid(f){return f.getAttribute?f.getAttribute('id'):''}
 function fval(f,k){var el=f.elements?f.elements[k]:null;return el?el.value:''}
 var TOK='',B=null,ROUTE='bugun',CUR={};
-var BASE_NAV=[['bugun','Bugün','home'],['takvim','Takvim','cal'],['randevu','Randevular','list'],['musteri','Müşteriler','users'],['kasa','Kasa','wallet'],['ekip','Ekip','team'],['rapor','Raporlar','chart'],['site','Web Sitem','web'],['is','İş kayıtları','wrench'],['icerik','İçerikler','docs'],['bildirim','Bildirimler','bell'],['entegrasyon','Entegrasyonlar','plug'],['ayar','Ayarlar','gear'],['destek','Destek','life']];
-var NAV=BASE_NAV.slice(),EXTRA=['iade','bolum'];
+var BASE_NAV=[['bugun','Bugün','home'],['takvim','Takvim','cal'],['randevu','Randevular','list'],['musteri','Müşteriler','users'],['kasa','Kasa','wallet'],['ekip','Ekip','team'],['rapor','Raporlar','chart'],['site','Web Sitem','web'],['bolum','Sayfa bölümleri','layers'],['is','İş kayıtları','wrench'],['icerik','İçerikler','docs'],['bildirim','Bildirimler','bell'],['entegrasyon','Entegrasyonlar','plug'],['ayar','Ayarlar','gear'],['destek','Destek','life']];
+var NAV=BASE_NAV.slice(),EXTRA=['iade'];
 function buildNav(){var m=(B&&B.modules)||[],ins=[];
  if(m.indexOf('shop')>-1||m.indexOf('stok')>-1)ins.push(['urun','Ürünler','store']);
  if(m.indexOf('siparis')>-1)ins.push(['siparis','Siparişler','truck']);
@@ -666,7 +670,7 @@ V.site=async function(){
  var p0=pr.profile||{};var sel=br.brand.theme,mine=br.themes.filter(function(t){return t.sector===B.sector}),rest=br.themes.filter(function(t){return t.sector!==B.sector});
  function card(t){return '<div class="th'+(t.slug===sel?' on':'')+'"><div class="sv" style="background:linear-gradient(135deg,'+esc(t.dark)+','+esc(t.accent)+')">'+esc(String(t.name).replace(/&amp;/g,'&'))+'</div><div class="tb"><button class="btn s" data-a="tprev" data-s="'+esc(t.slug)+'">Önizle</button>'+(t.slug===sel?'<span class="tag g">Seçili</span>':'<button class="btn s p" data-a="tpick" data-s="'+esc(t.slug)+'" data-n="'+esc(t.name)+'">Seç</button>')+'</div></div>'}
  var h='<div class="card"><div class="hd"><h2>Sitenin teması</h2><div class="sp"></div><span class="note">'+mine.length+' tema</span></div><div class="tg">'+(mine.map(card).join('')||'<div class="empty" style="grid-column:1/-1">Bu işe özel tema bulunamadı.</div>')+'</div>'+(rest.length?'<div class="pad"><button class="lnk" data-a="moreth">Diğer sektörlerin temalarını da göster ('+rest.length+')</button><div class="tg" id="rest" hidden style="padding:12px 0 0">'+rest.map(card).join('')+'</div></div>':'')+'</div>';
- h+='<div class="card"><div class="hd"><h2>Sayfadaki bölümler</h2><div class="sp"></div><button class="btn s" data-a="bxgit">Bölüm ekle ve düzenle</button></div><div id="bl"><div class="empty">Yükleniyor…</div></div></div>';
+ h+='<div class="card"><div class="hd"><h2>Sayfadaki bölümler</h2><div class="sp"></div><button class="btn s" data-a="bxgit">Sayfa bölümleri</button></div><div id="bl"><div class="empty">Yükleniyor…</div></div></div>';
  h+='<div class="card"><div class="hd"><h2>Menü</h2></div><div class="pad"><div class="note" style="margin-bottom:8px">Sitenin üstündeki menü bağlantılarının yazısını değiştirin, istemediğinizi kapatın, kendi bağlantınızı ekleyin.</div><div id="mnu"><div class="note">Yükleniyor…</div></div></div></div>';
  var pm=p0.promo||{},pon=pm.on===true||(pm.on!==false&&!!pr.promo_default);
  h+='<div class="card"><div class="hd"><h2>Kampanya sayacı (üst çubuk)</h2></div><form id="prf" class="pad"><label class="f" style="display:flex;align-items:center;gap:10px"><button type="button" class="tog'+(pon?' on':'')+'" id="pron" data-a="bentog" role="switch" aria-checked="'+pon+'" aria-label="Kampanya çubuğu"></button> Sitenin üstünde kampanya çubuğu görünsün</label><label class="f">Duyuru yazısı<input name="text" maxlength="120" value="'+esc(pm.text||'')+'" placeholder="Örn. İlk boyada %20 indirim"></label><div class="g2"><label class="f">Sayaç bitiş tarihi ve saati<input type="datetime-local" name="end" value="'+esc(pm.end||'')+'"></label><label class="f">Düğme yazısı (randevu açar)<input name="btn" maxlength="30" value="'+esc(pm.btn||'')+'" placeholder="Randevu al"></label></div><div class="note">Bitiş tarihi geçince çubuk kendiliğinden kalkar. Tarih boşsa sayaç görünmez; temada hazır duran örnek sayaç yazıları yerine sizin yazınız çıkar.</div><div class="mf"><button class="btn p">Kaydet</button></div></form></div>';
@@ -779,10 +783,15 @@ V.bolum=async function(){
   +'<div class="sp"></div><span class="note" id="bxn"></span>'
   +'<label class="f" style="margin:0"><span style="font-size:12px">Site neyle yayınlansın</span>'
   +'<select id="bxeng" data-a="bxeng"><option value="tema">Hazır tema</option><option value="blok">Buradaki bölümler</option></select></label></div>'
+  +'<div id="bxbilgi"></div>'
   +'<div class="bxwrap"><div class="card"><div class="hd"><h2>Bu sayfadaki bölümler</h2><div class="sp"></div><span class="note">Sürükleyip sıralayın</span></div><div id="bxl"><div class="empty">Yükleniyor…</div></div></div>'
   +'<div class="card"><div class="hd"><h2>Kaba yerleşim</h2></div><div class="pad"><div id="bxp" class="bxpv"></div></div></div></div>';
  await bxPages();
- try{var e=await api('/yp/site-engine');BX.eng=e.engine;var se=$('#bxeng');if(se)se.value=e.engine}catch(x){}};
+ try{var e=await api('/yp/site-engine');BX.eng=e.engine;var se=$('#bxeng');if(se)se.value=e.engine;bxBilgi()}catch(x){}};
+function bxBilgi(){var el=$('#bxbilgi');if(!el)return;
+ el.innerHTML=BX.eng==='blok'
+  ?'<div class="bxbg ok" style="margin:0 0 14px">Siteniz buradaki bölümlerle yayınlanıyor. Yaptığınız değişiklik siteye anında yansır.</div>'
+  :'<div class="bxbg" style="margin:0 0 14px">Siteniz şu an <b>hazır temayla</b> yayında. Buradaki bölümleri hazırlayabilirsiniz; <b>“Site neyle yayınlansın”</b> seçeneğini değiştirene kadar sitenizde görünmezler. Temanın yazı ve resimlerini <a href="#site">Web Sitem</a> ekranından düzenlersiniz.</div>'}
 async function bxPages(){var r=await api('/yp/pages');BX.pages=r.rows||[];
  if(!BX.pid||!BX.pages.some(function(p){return p.id===BX.pid})){var h=BX.pages.filter(function(p){return p.home})[0];BX.pid=(h||BX.pages[0]||{}).id||''}
  var sel=$('#bxpg');if(sel)sel.innerHTML=BX.pages.map(function(p){return '<option value="'+esc(p.id)+'"'+(p.id===BX.pid?' selected':'')+'>'+esc(p.title)+(p.home?' (ana sayfa)':'')+' · '+p.n+' bölüm</option>'}).join('');
@@ -994,7 +1003,7 @@ document.addEventListener('change',function(e){var t=e.target;
  if(t&&t.id==='bxpg'){BX.pid=t.value;bxLoad().catch(fail);return}
  if(t&&t.id==='bxeng'){(async function(){var y=t.value;
    if(y==='blok'&&!await ask('Siteniz bundan sonra hazır tema yerine buradaki bölümlerle yayınlansın mı? İstediğiniz an temaya dönebilirsiniz.','Bölümlerle yayınla')){t.value=BX.eng||'tema';return}
-   try{await api('/yp/site-engine',{method:'PUT',body:{engine:y}});BX.eng=y;toast(y==='blok'?'Site bölümlerle yayınlanıyor':'Hazır temaya dönüldü')}
+   try{await api('/yp/site-engine',{method:'PUT',body:{engine:y}});BX.eng=y;bxBilgi();toast(y==='blok'?'Site bölümlerle yayınlanıyor':'Hazır temaya dönüldü')}
    catch(x){t.value=BX.eng||'tema';fail(x)}})();return}
  if(t&&t.dataset&&(t.dataset.ki||t.dataset.kis)){bxImg(t,!!t.dataset.kis).catch(fail);return}
  if(t&&t.dataset&&t.dataset.up){if(t.dataset.up==='bimg')onBlockUpload(t);else if(t.dataset.up==='timg')onThemeUpload(t);else onUpload(t)}});

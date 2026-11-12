@@ -36,6 +36,22 @@ with sync_playwright() as pw:
     pg.fill("#lf input[name=email]", EMAIL); pg.fill("#lf input[name=password]", PW)
     pg.click("#lb"); pg.wait_for_selector("#app:not([hidden])", timeout=15000); pg.wait_for_timeout(400)
 
+    def menu():
+        n = pg.locator('#nav a[data-r=bolum]')
+        assert n.count() == 1, "sol menüde Sayfa bölümleri olmalı"
+        assert "Sayfa bölümleri" in n.inner_text()
+        n.click(); pg.wait_for_selector("#bxl .row", timeout=10000)
+        assert pg.evaluate("location.hash") == "#bolum"
+    t("sol menüden açılır", menu)
+
+    def bilgi():
+        b = pg.locator("#bxbilgi .bxbg")
+        assert b.count() == 1, "durum satırı olmalı"
+        m = b.inner_text()
+        assert "hazır temayla" in m and "görünmezler" in m, "tema kipinde durum açıkça yazmalı: %s" % m
+        assert pg.locator('#bxbilgi a[href="#site"]').count() == 1, "Web Sitem'e bağlantı olmalı"
+    t("tema kipinde durum satırı iki düzenleyiciyi ayırt ettirir", bilgi)
+
     def ac():
         pg.evaluate("location.hash='#bolum'"); pg.wait_for_selector("#bxl .row", timeout=10000)
         assert pg.locator("#bxpg option").count() >= 1, "sayfa seçici dolmalı"
