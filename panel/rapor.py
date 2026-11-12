@@ -406,6 +406,7 @@ def register(api_router, db, deps):
             yk = [c["key"] for c in r["cols"] if c["type"] in ("para", "num")][:2]
             ch = {"type": r["chart"], "x": [str(x.get(xk, "")) for x in rows[:40]],
                   "series": [{"name": [c["label"] for c in r["cols"] if c["key"] == k][0],
+                              "money": [c["type"] for c in r["cols"] if c["key"] == k][0] == "para",
                               "data": [_n(x.get(k)) for x in rows[:40]]} for k in yk]}
         return {"report": r, "from": a, "to": b, "rows": rows, "sum": toplam, "chart": ch, "n": len(rows)}
 
