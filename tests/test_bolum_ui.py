@@ -69,6 +69,25 @@ with sync_playwright() as pw:
         assert "Mobil + web ayrı" in kart.inner_text() or "Tek düzen" in kart.inner_text()
     t("katalog açılır: kategoriler, kartlar, tel çerçeve önizlemesi", kat)
 
+    def kartYuksek():
+        # ızgara satırları içerikten kısa kalırsa kartlar üst üste biner (bkz. 21.9px çökmesi)
+        d = pg.evaluate("""() => {
+          const ks = [...document.querySelectorAll('#bxg .bxcard')].slice(0, 16);
+          const r = ks.map(k => k.getBoundingClientRect());
+          let cakisma = 0;
+          for (let i = 0; i < r.length; i++) for (let j = i + 1; j < r.length; j++) {
+            const a = r[i], b = r[j];
+            if (a.left < b.right - 1 && b.left < a.right - 1 && a.top < b.bottom - 1 && b.top < a.bottom - 1) cakisma++;
+          }
+          const k0 = ks[0];
+          return {h: k0.getBoundingClientRect().height, sh: k0.scrollHeight,
+                  wf: k0.querySelector('.wf').getBoundingClientRect().height, cakisma: cakisma};
+        }""")
+        assert d["cakisma"] == 0, "kartlar üst üste binmemeli, çakışan çift: %d" % d["cakisma"]
+        assert d["h"] >= d["sh"] - 3, "kart içeriğini kesmemeli (yükseklik %.1f, içerik %d)" % (d["h"], d["sh"])
+        assert d["wf"] > 80, "tel çerçeve büzülmemeli, gelen: %.1f" % d["wf"]
+    t("katalog kartları içerik boyunda durur, üst üste binmez", kartYuksek)
+
     def ktg():
         pg.click('#bxc button[data-c="eticaret"]'); pg.wait_for_timeout(600)
         pg.wait_for_selector("#bxg .bxcard", timeout=8000)
