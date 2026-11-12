@@ -66,3 +66,38 @@ Sahibin panelinde modül/ekran/rapor/entegrasyon **ekleme–çıkarma çok kolay
 
 ## 10. Kalite çıtası
 Ticimax, İdeaSoft, ikas ve benzeri firmalardan **daha iyi** olacak. Her adım gerçekten çalışacak.
+
+---
+
+## 11. Sektörel araştırma notları (2026-11-12, internet taraması)
+
+### Kombi / HVAC teknik servis — servis formu alanları
+Müşteri ve iş yeri bilgileri · servis adresi · **marka, model, seri no, kurulum yeri** ·
+sistem tipi (kombi, split, VRF, kazan…) · cihazın genel durumu · servis tarihi, **varış ve ayrılış saati** ·
+hizmet türü (bakım / onarım / kurulum / arıza tespiti / acil) · arıza başlangıcı ·
+**ekrandaki arıza kodu** · yapılan işlemler · ölçümler (basınç/bar, baca gazı) · değişen parça ·
+işçilik + parça ücreti · **garanti (1 yıl parça / 1 yıl işçilik)** · önce–sonra fotoğraf ·
+**müşteri imzası** · PDF servis fişi · **periyodik bakım hatırlatması**.
+Not: parça uyumluluğu tam model kodundan doğrulanır; MYK/MEB ustalık belgesi müşteriye gösterilir.
+
+### Avukat / hukuk bürosu
+Dosya yönetimi (hukuk alanına göre kategori, karşı taraf, vekil) · **dosya bazlı zaman çizelgesi (safahat)** ·
+müvekkil takibi (bireysel/kurumsal) · **duruşma ve keşif takvimi + artan uyarılar (90/60/30/14/7 gün)** ·
+tebligat durumu · **süre hesaplama** · vekâletname takibi · evrak yönetimi ve arşiv ·
+harç/masraf girişi · **tahsilat ve taksit planı** · kronometreyle çalışma süresi, saatlik ücret,
+faturalandırılabilir süre · serbest meslek makbuzu · UYAP Avukat Portal'dan dosya/evrak/safahat
+çekme ve **fark takibi** · raporlar (dosya, müvekkil, finans).
+
+### Sürücü kursu (MTSK)
+**Özel MTSK Modülü / MEBBİS uyumu** · kursiyer kaydı ve **eksik evrak takibi** (belgeler taranıp
+il/ilçe MEM onayına gider) · ehliyet sınıfı · teorik ders ve **günlük yoklama** (grup bazlı) ·
+**direksiyon ders programı** (usta öğretici ve araç ataması, dönem, hafta içi/sonu grubu) ·
+direksiyon takip formu · **e-Sınav randevusu ve sonucu** (50 soru: trafik 23, ilk yardım 12,
+araç tekniği 9, trafik adabı 6) · direksiyon sınavı · sertifika (e-Devlet) · fatura modüle işlenir ·
+araç ve güzergâh kayıtları · toplu SMS · muhasebe ve personel.
+
+### Veteriner kliniği
+Hasta sahibi + **evcil hayvan profili** (tür, ırk, yaş, cinsiyet, fotoğraf, çip no) ·
+**anamnez → muayene → teşhis → tedavi → reçete** akışı · **aşı takvimi ve otomatik hatırlatma** ·
+laboratuvar tahlil ve ödeme takibi · ilaç stoğu (**FEFO, son kullanma, minimum seviye uyarısı**) ·
+pansiyon/bakım ayrı hizmet tipi · cari hesap, taksit, kasa · tek tıkla WhatsApp · tür/yaş/cinsiyet raporları.
