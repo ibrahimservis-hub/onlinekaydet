@@ -24,12 +24,14 @@ import blok_eticaret
 import blok_tanitim
 import blok_hareket
 import blok_donusum
+import blok_yapi
 import blocks as blok_tanim
 
 blokgen.kayit_al(blok_eticaret.KAYIT, blok_eticaret.CSS)
 blokgen.kayit_al(blok_tanitim.KAYIT, blok_tanitim.CSS)
 blokgen.kayit_al(blok_hareket.KAYIT, blok_hareket.CSS)
 blokgen.kayit_al(blok_donusum.KAYIT, blok_donusum.CSS)
+blokgen.kayit_al(blok_yapi.KAYIT, blok_yapi.CSS, blok_yapi.KABUK)
 import storefront
 import ilan
 import sektor_mod
@@ -795,6 +797,24 @@ def register(api_router, db, deps):
             kasa["baglantilar"] = prof.get("social") or {}
         if "Ayarlar › Yasal" in gerek:
             kasa["yasal"] = list(ctx.get("legal") or [])
+        if "Ürünler › Odalar" in gerek:
+            try:
+                kasa["odalar"] = await db.yp_products.find({"cat": {"$regex": "oda", "$options": "i"}},
+                                                           {"_id": 0, "name": 1, "price": 1, "images": 1, "desc": 1}).limit(12).to_list(12)
+            except Exception:                                      # noqa: BLE001
+                kasa["odalar"] = []
+            kasa["odalar"] = [{"ad": x.get("name") or "", "fiyat": x.get("price") or 0,
+                               "desc": x.get("desc") or "", "images": x.get("images") or []} for x in kasa["odalar"]]
+        if "Takvim › Programlar" in gerek:
+            try:
+                kasa["program"] = await db.yp_content.find({"type": "program"}, {"_id": 0}).limit(60).to_list(60)
+            except Exception:                                      # noqa: BLE001
+                kasa["program"] = []
+        if "Takvim › Etkinlikler" in gerek:
+            try:
+                kasa["etkinlikler"] = await db.yp_content.find({"type": "etkinlik"}, {"_id": 0}).limit(40).to_list(40)
+            except Exception:                                      # noqa: BLE001
+                kasa["etkinlikler"] = []
         for b in rows:
             mg = (blok_tanim.BY_ID.get(b.get("bid")) or {}).get("manage") or ""
             w = b.get("wire")
@@ -849,6 +869,25 @@ def register(api_router, db, deps):
                 d["baglantilar"] = kasa.get("baglantilar") or {}
             if mg == "Ayarlar › Yasal":
                 d["yasal"] = kasa.get("yasal") or []
+            if mg == "Ürünler › Odalar":
+                d["odalar"] = kasa.get("odalar") or []
+            if mg == "Takvim › Programlar":
+                d["program"] = kasa.get("program") or []
+            if mg == "Takvim › Etkinlikler":
+                d["etkinlikler"] = kasa.get("etkinlikler") or []
+            if mg == "QR menü":
+                d["menu"] = kasa.get("urunler") or kasa.get("hizmetler") or []
+            if mg == "Ürünler › Portföy":
+                d["portfoy_turleri"] = kasa.get("portfoy_turleri") or []
+            if mg == "Ayarlar › Markalar":
+                d["markalar"] = kasa.get("markalar") or []
+            d.setdefault("adres", adres)
+            d.setdefault("accent", (ctx.get("brand") or {}).get("accent") or "#1155cc")
+            d.setdefault("yil", datetime.now(timezone.utc).year)
+            d.setdefault("firma", ctx.get("name") or "")
+            d.setdefault("baglantilar", kasa.get("baglantilar") or (ctx.get("p") or {}).get("social") or {})
+            d.setdefault("iletisim", kasa.get("iletisim") or {"tel": ctx.get("tel") or "", "adres": adres})
+            d.setdefault("kategoriler", kasa.get("kategoriler") or [])
             if mg == "Randevu ayarları":
                 d["hizmetler"] = kasa.get("hizmetler") or []
                 d["ekip"] = kasa.get("ekip_k") or []

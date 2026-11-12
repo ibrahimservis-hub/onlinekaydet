@@ -126,6 +126,8 @@ def ekle(h, cfg, accent="#1155cc"):
     b = band(cfg, accent)
     if not b or not h or "</body>" not in h:
         return h
+    if 'id="okc"' in h:                     # sayfada çerez bölümü varsa ikinci band eklenmez
+        return h
     return h.replace("</body>", b + "</body>", 1)
 
 

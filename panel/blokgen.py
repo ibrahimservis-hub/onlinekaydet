@@ -360,13 +360,30 @@ WIRES = {"hero": w_hero, "split": w_split, "g3": w_g3, "g6": w_g6, "g5": w_g5, "
 
 OZEL = {}                 # bölüm kimliğine göre kendi üreticisi; blok_*.py dosyaları doldurur
 EK_CSS = []               # kategori dosyalarının kendi stilleri
+KABUK = {}                # sayfanın kabuğunu ayarlayan bölümler (menü, logo, alt bilgi)
 
 
-def kayit_al(d, css=""):
-    """Bir kategorinin kendi üreticilerini ve stillerini devreye alır."""
+def kayit_al(d, css="", kabuk=None):
+    """Bir kategorinin kendi üreticilerini, stillerini ve kabuk katkılarını devreye alır."""
     OZEL.update(d)
     if css and css not in EK_CSS:
         EK_CSS.append(css)
+    if kabuk:
+        KABUK.update(kabuk)
+
+
+def kabuk_ayar(rows, dev, data):
+    """Kabuğu ayarlayan bölümlerin katkıları."""
+    out = {}
+    for b in rows:
+        fn = KABUK.get(b.get("bid"))
+        if not fn or not b.get("on", True):
+            continue
+        try:
+            out.update({k: x for k, x in (fn(b, dev, (data or {}).get(b["iid"]) or {}) or {}).items() if x is not None})
+        except Exception:                                          # noqa: BLE001
+            continue
+    return out
 
 
 def block_html(b, dev="", data=None):
@@ -393,6 +410,8 @@ CSS = (
     ".bk-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}"
     # kabuk
     ".bk-top{background:var(--dk);color:#fff;position:sticky;top:0;z-index:40}"
+    ".bk-top-duz{position:static}"
+    ".bk-top-orta .bk-brand{margin:0 auto}"
     ".bk-top .bk-w{display:flex;align-items:center;gap:16px;min-height:66px}"
     ".bk-top a{color:#fff;text-decoration:none}"
     ".bk-brand{font-weight:800;font-size:19px;letter-spacing:-.2px;margin-right:auto}"
@@ -481,13 +500,14 @@ NAVJS = ("<script>(function(){var b=document.getElementById('bkmb');if(!b)return
 def page_html(page, rows, ctx, data=None, dev=""):
     """Bölümlerden tam sayfa üretir."""
     data = data or {}
+    kb = kabuk_ayar(rows, dev, data)
     brand = ctx.get("brand") or {}
     dk = brand.get("dark") or "#0a1f44"
     ac = brand.get("accent") or "#f27a1a"
     ad = ctx.get("name") or ""
     tel = ctx.get("tel") or ""
     telh = re.sub(r"[^\d+]", "", tel)
-    logo = ctx.get("logo") or ""
+    logo = kb.get("logo") or ctx.get("logo") or ""
     govde = "".join(block_html(b, dev, data.get(b["iid"]) or data.get(b.get("bid")) or {}) for b in rows)
     menu = "".join('<a href="%s">%s</a>' % (E(link(p.get("slug_url") or ("/" if p.get("home") else "/" + str(p.get("slug") or ""))) or "/"), E(str(p.get("title") or "")))
                    for p in (ctx.get("menu_pages") or [])[:7])
@@ -498,21 +518,24 @@ def page_html(page, rows, ctx, data=None, dev=""):
         '<meta name="viewport" content="width=device-width,initial-scale=1">'
         "<title>%(t)s</title>%(d)s"
         "<style>:root{--dk:%(dk)s;--ac:%(ac)s}%(css)s%(ekcss)s</style></head><body>"
-        '<header class="bk-top"><div class="bk-w">'
+        '<header class="bk-top%(topc)s"><div class="bk-w">'
         '<a class="bk-brand" href="/">%(logo)s</a>'
         '<nav class="bk-nav" aria-label="Ana menü">%(menu)s</nav>'
         '<button class="bk-mb" id="bkmb" type="button" aria-label="Menü" aria-expanded="false">'
         '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">'
         '<path d="M4 7h16M4 12h16M4 17h16"/></svg></button>'
-        "%(tel)s</div></header><main>%(body)s</main>"
-        '<footer class="bk-foot"><div class="bk-w"><span>© %(yil)s %(ad)s</span>%(ftel)s'
-        '<span class="bk-cr"><a href="https://onlinekaydet.com" rel="noopener">OnlineKaydet ile yayınlanır</a></span>'
-        "</div></footer>%(js)s</body></html>"
+        "%(tel)s</div></header><main>%(body)s</main>%(foot)s%(js)s</body></html>"
     ) % {
         "t": E(bas), "dk": E(dk), "ac": E(ac), "css": CSS, "ekcss": "".join(EK_CSS), "menu": menu,
         "d": ('<meta name="description" content="%s">' % E(aciklama)) if aciklama else "",
-        "logo": ('<img src="%s" alt="%s">' % (E(img_url(logo)), E(ad))) if logo else E(ad),
+        "topc": ("" if kb.get("menu_yapis", True) else " bk-top-duz") + (" bk-top-orta" if kb.get("logo_orta") else ""),
+        "foot": "" if kb.get("footer_var") else (
+            '<footer class="bk-foot"><div class="bk-w"><span>&copy; %s %s</span>%s'
+            '<span class="bk-cr"><a href="https://onlinekaydet.com" rel="noopener">OnlineKaydet ile yayınlanır</a></span>'
+            "</div></footer>") % (E(str(ctx.get("yil") or "")), E(ad),
+                                  ('<span><a href="tel:%s">%s</a></span>' % (E(telh), E(tel_goster(tel)))) if tel else ""),
+        "logo": ('<img src="%s" alt="%s"%s>' % (E(img_url(logo)), E(ad),
+                                                (' style="height:%dpx"' % int(kb["logo_boy"])) if kb.get("logo_boy") else "")) if logo else E(ad),
         "tel": ('<a class="bk-tel" href="tel:%s">%s</a>' % (E(telh), E(tel_goster(tel)))) if tel else "",
-        "ftel": ('<span><a href="tel:%s">%s</a></span>' % (E(telh), E(tel_goster(tel)))) if tel else "",
-        "ad": E(ad), "yil": _h.escape(str(ctx.get("yil") or "")), "body": govde, "js": NAVJS,
+        "ad": E(ad), "body": govde, "js": NAVJS,
     }
