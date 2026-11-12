@@ -20,7 +20,10 @@ import shop as shopmod
 import shop_legal
 import cerez as cerez_mod
 import blokgen
+import blok_eticaret
 import blocks as blok_tanim
+
+blokgen.kayit_al(blok_eticaret.KAYIT, blok_eticaret.CSS)
 import storefront
 import ilan
 import sektor_mod
@@ -659,11 +662,46 @@ def register(api_router, db, deps):
     async def blok_veri(rows, ctx):
         """Bölümlerin beslendiği listeler: ürünler, hizmetler, ekip, yorumlar, adres."""
         gerek = {(blok_tanim.BY_ID.get(b.get("bid")) or {}).get("manage") or "" for b in rows}
+        kimlik = {b.get("bid") for b in rows}
         out, kasa = {}, {}
-        if "Ürünler" in gerek:
-            pr = await db.yp_products.find({"active": {"$ne": False}}, {"_id": 0, "name": 1, "price": 1, "images": 1, "slug": 1, "id": 1}).limit(24).to_list(24)
+        if "Ürünler" in gerek or "Ürünler › Kategoriler" in gerek or "Ürünler › Markalar" in gerek:
+            pr = await db.yp_products.find({"status": {"$ne": "draft"}},
+                                           {"_id": 0, "id": 1, "name": 1, "slug": 1, "cat": 1, "brand": 1,
+                                            "price": 1, "sale_price": 1, "stock": 1, "low_at": 1,
+                                            "track_stock": 1, "images": 1, "channels": 1,
+                                            "status": 1, "created_at": 1}).limit(200).to_list(200)
             kasa["urun"] = [(x.get("name") or "", ("%s ₺" % blokgen.para(x.get("price"))) if x.get("price") else "",
-                             "/magaza/urun/" + str(x.get("slug") or x.get("id") or ""), (x.get("images") or [None])[0] or "") for x in pr]
+                             "/magaza/urun/" + str(x.get("slug") or x.get("id") or ""), (x.get("images") or [None])[0] or "") for x in pr[:24]]
+            kasa["urunler"] = pr
+            sat = {}
+            if "v_coksatan" in kimlik or "v_hizli_sepet" in kimlik:
+                try:
+                    async for o in db.yp_orders.find({"state": {"$nin": ["iptal"]}}, {"_id": 0, "items": 1}).limit(600):
+                        for it in (o.get("items") or []):
+                            k = str(it.get("pid") or it.get("id") or "")
+                            if k:
+                                sat[k] = sat.get(k, 0) + int(it.get("qty") or 1)
+                except Exception:                                  # noqa: BLE001
+                    sat = {}
+            kasa["satis"] = sat
+            kt, mk = {}, {}
+            for x in pr:
+                c = (x.get("cat") or "").strip()
+                if c:
+                    e = kt.setdefault(c, {"ad": c, "n": 0, "img": ""})
+                    e["n"] += 1
+                    if not e["img"]:
+                        e["img"] = (x.get("images") or [None])[0] or ""
+                mm = (x.get("brand") or "").strip()
+                if mm:
+                    mk[mm] = mk.get(mm, 0) + 1
+            kasa["kategoriler"] = sorted(kt.values(), key=lambda e: -e["n"])
+            kasa["markalar"] = [{"ad": a, "n": n} for a, n in sorted(mk.items(), key=lambda e: -e[1])]
+            try:
+                st_ = await db.app_settings.find_one({"_id": "yp_pack"}, {"_id": 0, "badges": 1}) or {}
+                kasa["rozetler"] = blok_tanim.badge_list(st_.get("badges") or [])
+            except Exception:                                      # noqa: BLE001
+                kasa["rozetler"] = []
         if "Ayarlar › Hizmetler" in gerek:
             sv = await db.yp_services.find({"active": {"$ne": False}}, {"_id": 0, "name": 1, "price": 1, "dur": 1}).limit(40).to_list(40)
             kasa["hizmet"] = [(x.get("name") or "", ("%s ₺" % blokgen.para(x.get("price"))) if x.get("price") else "") for x in sv]
@@ -688,6 +726,12 @@ def register(api_router, db, deps):
                 d["quotes"] = kasa["yorum"]
             if w == "map":
                 d["address"] = adres
+            if mg.startswith("Ürünler"):
+                d["urunler"] = kasa.get("urunler") or []
+                d["satis"] = kasa.get("satis") or {}
+                d["kategoriler"] = kasa.get("kategoriler") or []
+                d["markalar"] = kasa.get("markalar") or []
+                d["rozetler"] = kasa.get("rozetler") or []
             out[b["iid"]] = d
         return out
 

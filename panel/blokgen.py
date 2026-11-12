@@ -358,13 +358,24 @@ WIRES = {"hero": w_hero, "split": w_split, "g3": w_g3, "g6": w_g6, "g5": w_g5, "
          "form": w_form, "ba": w_ba, "drawer": w_drawer}
 
 
+OZEL = {}                 # bölüm kimliğine göre kendi üreticisi; blok_*.py dosyaları doldurur
+EK_CSS = []               # kategori dosyalarının kendi stilleri
+
+
+def kayit_al(d, css=""):
+    """Bir kategorinin kendi üreticilerini ve stillerini devreye alır."""
+    OZEL.update(d)
+    if css and css not in EK_CSS:
+        EK_CSS.append(css)
+
+
 def block_html(b, dev="", data=None):
-    """Bir bölümün HTML'i. Kapalıysa ya da içeriği yoksa boş döner."""
+    """Bir bölümün HTML'i. Önce bölümün kendi üreticisi, yoksa yerleşim kalıbı."""
     if not b.get("on", True):
         return ""
     if dev == "phone" and v(b, "on_m", dev, True) is False:
         return ""
-    fn = WIRES.get(b.get("wire"))
+    fn = OZEL.get(b.get("bid")) or WIRES.get(b.get("wire"))
     if not fn:
         return ""
     try:
@@ -486,7 +497,7 @@ def page_html(page, rows, ctx, data=None, dev=""):
         '<!DOCTYPE html><html lang="tr"><head><meta charset="utf-8">'
         '<meta name="viewport" content="width=device-width,initial-scale=1">'
         "<title>%(t)s</title>%(d)s"
-        "<style>:root{--dk:%(dk)s;--ac:%(ac)s}%(css)s</style></head><body>"
+        "<style>:root{--dk:%(dk)s;--ac:%(ac)s}%(css)s%(ekcss)s</style></head><body>"
         '<header class="bk-top"><div class="bk-w">'
         '<a class="bk-brand" href="/">%(logo)s</a>'
         '<nav class="bk-nav" aria-label="Ana menü">%(menu)s</nav>'
@@ -498,7 +509,7 @@ def page_html(page, rows, ctx, data=None, dev=""):
         '<span class="bk-cr"><a href="https://onlinekaydet.com" rel="noopener">OnlineKaydet ile yayınlanır</a></span>'
         "</div></footer>%(js)s</body></html>"
     ) % {
-        "t": E(bas), "dk": E(dk), "ac": E(ac), "css": CSS, "menu": menu,
+        "t": E(bas), "dk": E(dk), "ac": E(ac), "css": CSS, "ekcss": "".join(EK_CSS), "menu": menu,
         "d": ('<meta name="description" content="%s">' % E(aciklama)) if aciklama else "",
         "logo": ('<img src="%s" alt="%s">' % (E(img_url(logo)), E(ad))) if logo else E(ad),
         "tel": ('<a class="bk-tel" href="tel:%s">%s</a>' % (E(telh), E(tel_goster(tel)))) if tel else "",
