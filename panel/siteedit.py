@@ -22,10 +22,12 @@ import cerez as cerez_mod
 import blokgen
 import blok_eticaret
 import blok_tanitim
+import blok_hareket
 import blocks as blok_tanim
 
 blokgen.kayit_al(blok_eticaret.KAYIT, blok_eticaret.CSS)
 blokgen.kayit_al(blok_tanitim.KAYIT, blok_tanitim.CSS)
+blokgen.kayit_al(blok_hareket.KAYIT, blok_hareket.CSS)
 import storefront
 import ilan
 import sektor_mod
@@ -730,9 +732,26 @@ def register(api_router, db, deps):
         if "Pazarlama › Duyuru" in gerek:
             dy = await db.yp_duyuru.find_one({"on": True}, {"_id": 0, "text": 1}) or {}
             kasa["duyuru"] = dy.get("text") or ""
-        if "Yorumlar" in gerek:
-            yo = await db.yp_content.find({"type": "yorum", "onay": True}, {"_id": 0, "text": 1, "ad": 1, "name": 1}).limit(12).to_list(12)
+        if "Yorumlar" in gerek or "Yorumlar › Google" in gerek:
+            yo = await db.yp_content.find({"type": "yorum", "onay": True},
+                                          {"_id": 0, "text": 1, "ad": 1, "name": 1, "puan": 1, "star": 1, "video": 1}).limit(40).to_list(40)
             kasa["yorum"] = [(x.get("text") or "", x.get("ad") or x.get("name") or "") for x in yo]
+            kasa["yorumlar"] = [{"yazi": x.get("text") or "", "ad": x.get("ad") or x.get("name") or "",
+                                 "puan": x.get("puan") or x.get("star") or 5} for x in yo if x.get("text")]
+            kasa["video_yorum"] = [{"url": x.get("video"), "ad": x.get("ad") or x.get("name") or ""} for x in yo if x.get("video")]
+            try:
+                g = await db.app_settings.find_one({"_id": "google"}, {"_id": 0}) or {}
+            except Exception:                                      # noqa: BLE001
+                g = {}
+            kasa["google"] = {"puan": g.get("rating"), "adet": g.get("count"),
+                              "yorumlar": [{"yazi": x.get("text") or "", "ad": x.get("author") or "",
+                                            "puan": x.get("rating") or 5} for x in (g.get("reviews") or [])[:12]]}
+        if "Web Sitem › Fotoğraflar" in gerek:
+            kasa["fotograflar"] = [x.get("k") for x in ((ctx.get("p") or {}).get("gallery") or []) if x.get("k")]
+        if "Web Sitem › Belgeler" in gerek:
+            kasa["belgeler"] = [x.get("k") for x in ((ctx.get("p") or {}).get("docs") or []) if x.get("k")]
+        if "Ayarlar › Bağlantılar" in gerek:
+            kasa["baglantilar"] = (ctx.get("p") or {}).get("social") or {}
         adres = ((ctx.get("p") or {}).get("address") or ctx.get("city") or "")
         for b in rows:
             mg = (blok_tanim.BY_ID.get(b.get("bid")) or {}).get("manage") or ""
@@ -757,6 +776,16 @@ def register(api_router, db, deps):
                 d["cekler"] = kasa.get("cekler") or []
             if mg == "Pazarlama › Duyuru":
                 d["duyuru"] = kasa.get("duyuru") or ""
+            if mg.startswith("Yorumlar"):
+                d["yorumlar"] = kasa.get("yorumlar") or []
+                d["video_yorum"] = kasa.get("video_yorum") or []
+                d["google"] = kasa.get("google") or {}
+            if mg == "Web Sitem › Fotoğraflar":
+                d["fotograflar"] = kasa.get("fotograflar") or []
+            if mg == "Web Sitem › Belgeler":
+                d["belgeler"] = kasa.get("belgeler") or []
+            if mg == "Ayarlar › Bağlantılar":
+                d["baglantilar"] = kasa.get("baglantilar") or {}
             if mg.startswith("Ürünler"):
                 d["urunler"] = kasa.get("urunler") or []
                 d["satis"] = kasa.get("satis") or {}
