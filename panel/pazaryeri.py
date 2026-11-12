@@ -29,6 +29,66 @@ def _now():
     return datetime.now(TR).replace(tzinfo=None).isoformat(timespec="seconds")
 
 
+# ---------------------------------------------------------------- stok (paylaşılan çekirdek)
+async def queue_push(db, pid, channel, kind="stock", ref=""):
+    await db.yp_sync.insert_one({"id": uuid.uuid4().hex[:12], "product": pid, "channel": channel,
+                                 "kind": kind, "state": "bekliyor", "tries": 0, "ref": ref,
+                                 "at": _now(), "err": ""})
+
+
+async def take_stock(db, pid, qty, source, ref):
+    """Stoğu koşullu düş. Yetersizse hiç düşmez. Aynı `ref` ikinci kez işlenmez."""
+    qty = _int(qty)
+    if qty <= 0:
+        raise HTTPException(422, "Adet 1 veya daha fazla olmalı")
+    key = "%s|%s|%s" % (source, ref, pid)
+    if ref and await db.yp_stock_log.find_one({"key": key}, {"_id": 1}):
+        return {"ok": True, "repeat": True, "taken": 0}
+    p = await db.yp_products.find_one({"id": pid}, {"_id": 0})
+    if not p:
+        raise HTTPException(404, "Ürün bulunamadı")
+    before = _int(p.get("stock"))
+    if p.get("track_stock", True):
+        r = await db.yp_products.update_one({"id": pid, "stock": {"$gte": qty}}, {"$inc": {"stock": -qty}})
+        if not r.modified_count:
+            return {"ok": False, "repeat": False, "taken": 0, "stock": before,
+                    "err": "Stok yetersiz: %d adet var, %d istendi" % (before, qty)}
+    after = max(before - qty, 0)
+    await db.yp_stock_log.insert_one({"id": uuid.uuid4().hex[:12], "key": key, "product": pid, "delta": -qty,
+                                      "before": before, "after": after, "source": source, "ref": ref,
+                                      "at": _now(), "seq": time.time()})
+    for k, on in (p.get("channels") or {}).items():
+        if on and k != source and k in MARKETS:
+            await queue_push(db, pid, k, "stock", ref)
+    if after <= 0:
+        for k, on in (p.get("channels") or {}).items():
+            if on and k in MARKETS:
+                await queue_push(db, pid, k, "passive", ref)
+    return {"ok": True, "repeat": False, "taken": qty, "stock": after}
+
+
+async def give_stock(db, pid, qty, source, ref):
+    """İptal/iade: stoğu geri ekle ve kanallara bildir. Aynı `ref` ikinci kez eklenmez."""
+    qty = _int(qty)
+    if qty <= 0:
+        return {"ok": True, "given": 0}
+    key = "iade|%s|%s" % (ref, pid)
+    if ref and await db.yp_stock_log.find_one({"key": key}, {"_id": 1}):
+        return {"ok": True, "repeat": True, "given": 0}
+    p = await db.yp_products.find_one({"id": pid}, {"_id": 0})
+    if not p:
+        return {"ok": False, "given": 0, "err": "Ürün bulunamadı"}
+    before = _int(p.get("stock"))
+    await db.yp_products.update_one({"id": pid}, {"$inc": {"stock": qty}})
+    await db.yp_stock_log.insert_one({"id": uuid.uuid4().hex[:12], "key": key, "product": pid, "delta": qty,
+                                      "before": before, "after": before + qty, "source": source, "ref": ref,
+                                      "at": _now(), "seq": time.time()})
+    for k, on in (p.get("channels") or {}).items():
+        if on and k in MARKETS:
+            await queue_push(db, pid, k, "stock", ref)
+    return {"ok": True, "repeat": False, "given": qty, "stock": before + qty}
+
+
 def register(api_router, db, deps):
     adm = deps["require_admin"]
     push = deps.get("channel_push")                                # canlıda pazaryeri API'sine gönderen yardımcı
@@ -107,9 +167,7 @@ def register(api_router, db, deps):
 
     # ------------------------------------------------------------ gönderim kuyruğu
     async def queue(pid, channel, kind="stock", ref=""):
-        await db.yp_sync.insert_one({"id": uuid.uuid4().hex[:12], "product": pid, "channel": channel,
-                                     "kind": kind, "state": "bekliyor", "tries": 0, "ref": ref,
-                                     "at": _now(), "err": ""})
+        await queue_push(db, pid, channel, kind, ref)
 
     async def ready(pid, cid):
         """Ürün bu kanala gönderilebilir mi: kategori ve marka eşleşmiş olmalı."""
@@ -145,36 +203,7 @@ def register(api_router, db, deps):
             sent += 1
         return {"ok": True, "sent": sent, "skipped": skip[:50], "skipped_n": len(skip)}
 
-    # ------------------------------------------------------------ stok senkronu (çekirdek)
-    async def take_stock(pid, qty, source, ref):
-        """Stoğu koşullu düş. Yetersizse düşmez. Aynı `ref` ikinci kez işlenmez."""
-        qty = _int(qty)
-        if qty <= 0:
-            raise HTTPException(422, "Adet 1 veya daha fazla olmalı")
-        key = "%s|%s|%s" % (source, ref, pid)
-        if ref and await db.yp_stock_log.find_one({"key": key}, {"_id": 1}):
-            return {"ok": True, "repeat": True, "taken": 0}
-        p = await db.yp_products.find_one({"id": pid}, {"_id": 0})
-        if not p:
-            raise HTTPException(404, "Ürün bulunamadı")
-        before = _int(p.get("stock"))
-        if p.get("track_stock", True):
-            r = await db.yp_products.update_one({"id": pid, "stock": {"$gte": qty}}, {"$inc": {"stock": -qty}})
-            if not r.modified_count:
-                return {"ok": False, "repeat": False, "taken": 0, "stock": before,
-                        "err": "Stok yetersiz: %d adet var, %d istendi" % (before, qty)}
-        after = max(before - qty, 0)
-        await db.yp_stock_log.insert_one({"id": uuid.uuid4().hex[:12], "key": key, "product": pid, "delta": -qty,
-                                          "before": before, "after": after, "source": source, "ref": ref, "at": _now(), "seq": time.time()})
-        for k, on in (p.get("channels") or {}).items():
-            if on and k != source and k in MARKETS:
-                await queue(pid, k, "stock", ref)
-        if after <= 0:
-            for k, on in (p.get("channels") or {}).items():
-                if on and k in MARKETS:
-                    await queue(pid, k, "passive", ref)
-        return {"ok": True, "repeat": False, "taken": qty, "stock": after}
-
+    # ------------------------------------------------------------ stok senkronu
     @api_router.post("/yp/stock/take")
     async def stock_take(payload: dict, _: dict = Depends(adm)):
         """Sipariş geldi: stok düş, diğer kanallara gönderimi kuyruğa al."""
@@ -183,7 +212,7 @@ def register(api_router, db, deps):
             raise HTTPException(422, "Kanal tanınmadı")
         out = []
         for it in (payload.get("items") or [])[:200]:
-            out.append(dict(await take_stock(_t((it or {}).get("product"), 24), it.get("qty", 1), src,
+            out.append(dict(await take_stock(db, _t((it or {}).get("product"), 24), it.get("qty", 1), src,
                                              _t(payload.get("ref"), 60)), product=it.get("product")))
         bad = [o for o in out if not o["ok"]]
         return {"ok": not bad, "rows": out, "queued": await db.yp_sync.count_documents({"state": "bekliyor"})}

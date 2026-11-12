@@ -2897,6 +2897,12 @@ urun.register(api_router, db, {"require_admin": require_admin, "fetch_url": _fet
 import pazaryeri  # pazaryeri eşleştirme ve stok senkronu
 pazaryeri.register(api_router, db, {"require_admin": require_admin, "channel_push": None})
 
+import kampanya
+kampanya.register(api_router, db, {"require_admin": require_admin})
+
+import siparis
+siparis.register(api_router, db, {"require_admin": require_admin})
+
 @app.get("/salon", include_in_schema=False)
 async def yp_sayfa():
     """Yeni yönetim paneli (randevuyla çalışan işler). Eski /admin ekranından ayrıdır."""
