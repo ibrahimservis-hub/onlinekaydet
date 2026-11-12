@@ -376,16 +376,19 @@ def register(api_router, db, deps):
         if not row or not (row.get("keys") or {}):
             raise HTTPException(422, "Önce bilgileri girip kaydedin")
         ok, err = check(p["id"], row.get("keys") or {}, row.get("mode") or "test")
+        msg = ""
         if ok and probe:
             try:
-                ok, err = await probe(p["id"], row)
+                sonuc = await probe(p["id"], row)
+                ok, err = sonuc[0], sonuc[1]
+                msg = sonuc[2] if len(sonuc) > 2 else ""
             except Exception as e:                                 # noqa: BLE001
-                ok, err = False, "Bağlantı kurulamadı: %s" % str(e)[:160]
+                ok, err, msg = False, "Bağlantı kurulamadı: %s" % str(e)[:160], ""
         await db.yp_integrations.update_one({"id": p["id"]}, {"$set": {
             "ok": ok, "err": "" if ok else err, "at": _now(),
             "last_ok": _now() if ok else (row.get("last_ok") or "")}})
-        await log(p["id"], "deneme başarılı" if ok else "deneme hatası", err)
-        return {"ok": ok, "err": err, "msg": "Bağlantı çalışıyor" if ok else err}
+        await log(p["id"], "deneme başarılı" if ok else "deneme hatası", err or msg)
+        return {"ok": ok, "err": err, "msg": (msg or "Bağlantı çalışıyor") if ok else err}
 
     @api_router.delete("/yp/integrations/{pid}")
     async def kaldir(pid: str, _: dict = Depends(adm)):
