@@ -21,9 +21,11 @@ import shop_legal
 import cerez as cerez_mod
 import blokgen
 import blok_eticaret
+import blok_tanitim
 import blocks as blok_tanim
 
 blokgen.kayit_al(blok_eticaret.KAYIT, blok_eticaret.CSS)
+blokgen.kayit_al(blok_tanitim.KAYIT, blok_tanitim.CSS)
 import storefront
 import ilan
 import sektor_mod
@@ -703,11 +705,31 @@ def register(api_router, db, deps):
             except Exception:                                      # noqa: BLE001
                 kasa["rozetler"] = []
         if "Ayarlar › Hizmetler" in gerek:
-            sv = await db.yp_services.find({"active": {"$ne": False}}, {"_id": 0, "name": 1, "price": 1, "dur": 1}).limit(40).to_list(40)
+            sv = await db.yp_services.find({"active": {"$ne": False}},
+                                           {"_id": 0, "name": 1, "price": 1, "dur": 1, "cat": 1, "desc": 1, "img": 1}).limit(60).to_list(60)
             kasa["hizmet"] = [(x.get("name") or "", ("%s ₺" % blokgen.para(x.get("price"))) if x.get("price") else "") for x in sv]
+            kasa["hizmetler"] = sv
         if "Ekip" in gerek:
-            st = await db.yp_staff.find({"active": {"$ne": False}}, {"_id": 0, "name": 1, "title": 1}).sort("order", 1).limit(24).to_list(24)
+            st = await db.yp_staff.find({"active": {"$ne": False}},
+                                        {"_id": 0, "name": 1, "title": 1, "img": 1}).sort("order", 1).limit(24).to_list(24)
             kasa["ekip"] = [(x.get("name") or "", x.get("title") or "", "", "") for x in st]
+            kasa["ekip_k"] = [{"ad": x.get("name") or "", "unvan": x.get("title") or "", "img": x.get("img") or ""} for x in st]
+        if "Pazarlama › Paketler" in gerek:
+            try:
+                pk = await db.yp_camps.find({"type": "paket"}, {"_id": 0}).limit(12).to_list(12)
+            except Exception:                                      # noqa: BLE001
+                pk = []
+            kasa["paketler"] = [{"ad": x.get("name") or "", "fiyat": x.get("price") or 0,
+                                 "aciklama": x.get("desc") or "", "kazanc": x.get("save") or 0} for x in pk]
+        if "Pazarlama › Hediye çekleri" in gerek:
+            try:
+                ck = await db.yp_camps.find({"type": "kupon"}, {"_id": 0, "amount": 1}).limit(8).to_list(8)
+            except Exception:                                      # noqa: BLE001
+                ck = []
+            kasa["cekler"] = [{"tutar": x.get("amount") or 0} for x in ck if x.get("amount")]
+        if "Pazarlama › Duyuru" in gerek:
+            dy = await db.yp_duyuru.find_one({"on": True}, {"_id": 0, "text": 1}) or {}
+            kasa["duyuru"] = dy.get("text") or ""
         if "Yorumlar" in gerek:
             yo = await db.yp_content.find({"type": "yorum", "onay": True}, {"_id": 0, "text": 1, "ad": 1, "name": 1}).limit(12).to_list(12)
             kasa["yorum"] = [(x.get("text") or "", x.get("ad") or x.get("name") or "") for x in yo]
@@ -722,10 +744,19 @@ def register(api_router, db, deps):
                 d["rows" if w in ("rows", "faq") else "cards"] = kasa["hizmet"] if w in ("rows", "faq") else [(a, b2, "", "") for a, b2 in kasa["hizmet"]]
             elif mg == "Ekip" and kasa.get("ekip"):
                 d["cards"] = kasa["ekip"]
+                d["ekip"] = kasa.get("ekip_k") or []
             elif mg == "Yorumlar" and kasa.get("yorum"):
                 d["quotes"] = kasa["yorum"]
             if w == "map":
                 d["address"] = adres
+            if mg == "Ayarlar › Hizmetler":
+                d["hizmetler"] = kasa.get("hizmetler") or []
+            if mg == "Pazarlama › Paketler":
+                d["paketler"] = kasa.get("paketler") or []
+            if mg == "Pazarlama › Hediye çekleri":
+                d["cekler"] = kasa.get("cekler") or []
+            if mg == "Pazarlama › Duyuru":
+                d["duyuru"] = kasa.get("duyuru") or ""
             if mg.startswith("Ürünler"):
                 d["urunler"] = kasa.get("urunler") or []
                 d["satis"] = kasa.get("satis") or {}
