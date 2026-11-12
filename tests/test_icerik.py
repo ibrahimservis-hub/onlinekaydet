@@ -104,6 +104,19 @@ with TestClient(s.app) as c:
         assert len(c.get("/api/yp/content/yorum", headers=H, params={"state": "onay"}).json()["items"]) == 0
     t("arama ve durum süzgeci çalışıyor", i)
 
+    def k():
+        r = c.get("/api/public/yp/icerik?t=yorum,sss").json()["items"]
+        assert set(r) == {"yorum", "sss"}, list(r)
+        assert len(r["yorum"]) == 1, "yalnız onaylanmış yorum siteye gider: %s" % r["yorum"]
+        assert r["yorum"][0]["name"] == "Zeynep D." and "state" not in r["yorum"][0]
+        assert "by" not in r["yorum"][0], "iç alanlar siteye sızmamalı"
+        assert len(r["sss"]) == 4
+        c.post("/api/yp/content/duyuru", headers=H, json={"text": "Süresi geçmiş", "until": "2020-01-01"})
+        c.post("/api/yp/content/duyuru", headers=H, json={"text": "Geçerli duyuru", "until": "2030-01-01"})
+        d = c.get("/api/public/yp/icerik?t=duyuru").json()["items"]["duyuru"]
+        assert [x["text"] for x in d] == ["Geçerli duyuru"], "süresi geçen duyuru siteye gitmemeli: %s" % d
+    t("site ucu yalnız yayındaki ve süresi geçmemiş kayıtları veriyor", k)
+
 for x in ok: print("  ✓", x)
 for x, e in bad: print("  ✗", x, "\n", e)
 print(("OK %d geçti" % len(ok)) if not bad else ("HATA %d/%d" % (len(bad), len(ok) + len(bad))))

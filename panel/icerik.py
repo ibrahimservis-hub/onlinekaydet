@@ -306,6 +306,24 @@ def register(api_router, db, deps):
         await db.yp_content.update_one({"id": r["id"]}, {"$set": st})
         return {"ok": True, "item": view(t, dict(r, **st))}
 
+    @api_router.get("/public/yp/icerik")
+    async def site_veri(t: str = "", limit: int = 50):
+        """Sitenin kullandığı içerik: yalnız yayında olanlar, kendi sırasıyla.
+
+        Tema bu uca bir kez sorar ve bölümleri doldurur. Onay bekleyen, reddedilen,
+        gizlenen ve süresi geçmiş kayıtlar buradan dönmez.
+        """
+        ids = [_t(x, 30) for x in (t or "").split(",") if _t(x, 30) in BY_ID]
+        if not ids:
+            ids = list(BY_ID)
+        out = {}
+        for tid in ids[:20]:
+            rows = await site_icerik(db, tid, min(max(limit, 1), 200))
+            tt = BY_ID[tid]
+            alanlar = {f["key"] for f in tt["fields"]}
+            out[tid] = [{k: v for k, v in r.items() if k in alanlar or k == "id"} for r in rows]
+        return {"ok": True, "items": out}
+
     # Siteden gelen yorum: önce onaya düşer
     @api_router.post("/public/yp/yorum")
     async def yorum_gelen(payload: dict):

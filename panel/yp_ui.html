@@ -98,6 +98,25 @@ label.f>textarea{min-height:70px;resize:vertical}
 .sw2 input:checked + i:after{left:18px}
 .smsph .bub{max-width:100%}
 .md .smsph{margin-top:4px}
+.ictab{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-bottom:16px}
+.ictab .c{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 13px;text-align:left;font:inherit;cursor:pointer}
+.ictab .c b{display:block;font-size:13.5px;font-weight:650}
+.ictab .c small{display:block;font-size:12px;color:var(--mut);margin-top:3px;line-height:1.4}
+.ictab .c .ln3{display:flex;gap:8px;margin-top:9px;font-size:12px;font-weight:600;align-items:center;flex-wrap:wrap}
+.ictab .c.on{border-color:var(--blue);box-shadow:0 0 0 1px var(--blue)}
+.ictab .c .bek{background:var(--warn-s);color:#8a5a20;border-radius:20px;padding:1px 8px;font-size:11.5px}
+.ic{display:grid;gap:9px}
+.ic .r4{display:grid;grid-template-columns:24px 1fr auto auto;gap:11px;align-items:center;border:1px solid var(--line);
+ border-radius:11px;background:#fff;padding:12px 13px}
+.ic .r4.bek2{border-color:#f0dcc4;background:#fffdf8}
+.ic .gr2{color:#c6c1b6;cursor:grab;font-size:15px;line-height:1;user-select:none}
+.ic b{display:block;font-size:14px;font-weight:650;overflow:hidden;text-overflow:ellipsis}
+.ic .sub2{font-size:12.5px;color:var(--mut);margin-top:3px;line-height:1.5}
+.ic .meta2{display:flex;gap:9px;align-items:center;margin-top:8px;font-size:12px;color:var(--mut);flex-wrap:wrap}
+.ic .ac3{display:flex;gap:6px;align-items:center}
+.ic .ph2{width:52px;height:52px;border-radius:9px;object-fit:cover;background:#e9e7df}
+.bosluk{border:1px dashed var(--line);border-radius:12px;padding:26px;text-align:center;color:var(--mut);font-size:13.5px;background:#fff}
+.bosluk b{display:block;font-size:15px;color:var(--tx);margin-bottom:5px}
 .nrow{display:grid;grid-template-columns:1fr 330px;gap:16px;align-items:start}
 .nlist .n{border:1px solid var(--line);border-radius:12px;background:#fff;padding:13px 15px;margin-bottom:10px}
 .nlist .n .t4{display:flex;align-items:flex-start;gap:11px}
@@ -285,7 +304,7 @@ table.gr .r{text-align:right}
 <symbol id="plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
 <symbol id="list" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01"/></symbol>
 <symbol id="more" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
-<symbol id="store" viewBox="0 0 24 24"><path d="M4 9.5V19a1.5 1.5 0 0 0 1.5 1.5h13A1.5 1.5 0 0 0 20 19V9.5"/><path d="M3 9.5 4.6 4.6A1.5 1.5 0 0 1 6 3.5h12a1.5 1.5 0 0 1 1.4 1.1L21 9.5a3 3 0 0 1-6 0 3 3 0 0 1-6 0 3 3 0 0 1-6 0Z"/></symbol><symbol id="tag" viewBox="0 0 24 24"><path d="M3.5 11V4.5a1 1 0 0 1 1-1H11l8.5 8.5a1.5 1.5 0 0 1 0 2.1l-5.4 5.4a1.5 1.5 0 0 1-2.1 0Z"/><circle cx="8" cy="8" r="1.4"/></symbol><symbol id="truck" viewBox="0 0 24 24"><path d="M2.5 7.5h11v9h-11z"/><path d="M13.5 11h4l3 3v2.5h-7z"/><circle cx="6.5" cy="18.5" r="1.9"/><circle cx="17" cy="18.5" r="1.9"/></symbol><symbol id="plug" viewBox="0 0 24 24"><path d="M9 3.5v5M15 3.5v5"/><path d="M6.5 8.5h11v3a5.5 5.5 0 0 1-11 0Z"/><path d="M12 17v3.5"/></symbol><symbol id="bell" viewBox="0 0 24 24"><path d="M6.5 9.5a5.5 5.5 0 0 1 11 0c0 4 1.5 5.5 1.5 5.5H5s1.5-1.5 1.5-5.5Z"/><path d="M10 18.5a2 2 0 0 0 4 0"/></symbol></defs></svg>
+<symbol id="store" viewBox="0 0 24 24"><path d="M4 9.5V19a1.5 1.5 0 0 0 1.5 1.5h13A1.5 1.5 0 0 0 20 19V9.5"/><path d="M3 9.5 4.6 4.6A1.5 1.5 0 0 1 6 3.5h12a1.5 1.5 0 0 1 1.4 1.1L21 9.5a3 3 0 0 1-6 0 3 3 0 0 1-6 0 3 3 0 0 1-6 0Z"/></symbol><symbol id="tag" viewBox="0 0 24 24"><path d="M3.5 11V4.5a1 1 0 0 1 1-1H11l8.5 8.5a1.5 1.5 0 0 1 0 2.1l-5.4 5.4a1.5 1.5 0 0 1-2.1 0Z"/><circle cx="8" cy="8" r="1.4"/></symbol><symbol id="truck" viewBox="0 0 24 24"><path d="M2.5 7.5h11v9h-11z"/><path d="M13.5 11h4l3 3v2.5h-7z"/><circle cx="6.5" cy="18.5" r="1.9"/><circle cx="17" cy="18.5" r="1.9"/></symbol><symbol id="plug" viewBox="0 0 24 24"><path d="M9 3.5v5M15 3.5v5"/><path d="M6.5 8.5h11v3a5.5 5.5 0 0 1-11 0Z"/><path d="M12 17v3.5"/></symbol><symbol id="bell" viewBox="0 0 24 24"><path d="M6.5 9.5a5.5 5.5 0 0 1 11 0c0 4 1.5 5.5 1.5 5.5H5s1.5-1.5 1.5-5.5Z"/><path d="M10 18.5a2 2 0 0 0 4 0"/></symbol><symbol id="docs" viewBox="0 0 24 24"><path d="M7 3.5h7l4.5 4.5V20a1.5 1.5 0 0 1-1.5 1.5H7A1.5 1.5 0 0 1 5.5 20V5A1.5 1.5 0 0 1 7 3.5Z"/><path d="M14 3.5V8h4.5M8.5 12.5h7M8.5 16h5"/></symbol></defs></svg>
 <script>
 "use strict";
 var $=function(s,r){return (r||document).querySelector(s)};
@@ -295,7 +314,7 @@ var tl=function(n){return Number(n||0).toLocaleString('tr-TR',{maximumFractionDi
 function fid(f){return f.getAttribute?f.getAttribute('id'):''}
 function fval(f,k){var el=f.elements?f.elements[k]:null;return el?el.value:''}
 var TOK='',B=null,ROUTE='bugun',CUR={};
-var BASE_NAV=[['bugun','Bugün','home'],['takvim','Takvim','cal'],['randevu','Randevular','list'],['musteri','Müşteriler','users'],['kasa','Kasa','wallet'],['ekip','Ekip','team'],['rapor','Raporlar','chart'],['site','Web Sitem','web'],['bildirim','Bildirimler','bell'],['entegrasyon','Entegrasyonlar','plug'],['ayar','Ayarlar','gear']];
+var BASE_NAV=[['bugun','Bugün','home'],['takvim','Takvim','cal'],['randevu','Randevular','list'],['musteri','Müşteriler','users'],['kasa','Kasa','wallet'],['ekip','Ekip','team'],['rapor','Raporlar','chart'],['site','Web Sitem','web'],['icerik','İçerikler','docs'],['bildirim','Bildirimler','bell'],['entegrasyon','Entegrasyonlar','plug'],['ayar','Ayarlar','gear']];
 var NAV=BASE_NAV.slice(),EXTRA=['iade'];
 function buildNav(){var m=(B&&B.modules)||[],ins=[];
  if(m.indexOf('shop')>-1||m.indexOf('stok')>-1)ins.push(['urun','Ürünler','store']);
@@ -1485,6 +1504,122 @@ document.addEventListener('submit',function(ev){var f=ev.target,id=fid(f);
  if(ev.target.id==='duytxt'){var s=$('#duygo');if(s)s.disabled=true;CUR.duyOk=false}});
  document.addEventListener('change',function(ev){
   if(ev.target.name==='ch'){var l=ev.target.closest('label');if(l)l.classList.toggle('on',ev.target.checked)}})})();
+
+/* ---------------- İÇERİKLER (tek ekran, on üç tür) ---------------- */
+function yildiz(n){n=+n||0;var s='';for(var i=1;i<=5;i++)s+=i<=n?'★':'☆';return s}
+function icOzet(t,r){
+ var cols=t.fields.filter(function(f){return f.col});
+ var bas=cols[0]?r[cols[0].key]:'';
+ var alt=cols.slice(1).map(function(f){
+  if(f.type==='puan')return yildiz(r[f.key]);
+  if(f.type==='num')return r[f.key]?tl(r[f.key]):'';
+  return r[f.key]||''}).filter(Boolean);
+ return {bas:bas||'(başlıksız)',alt:alt};}
+V.icerik=async function(){var F=CUR.icf=CUR.icf||{tid:'',state:'',q:''};
+ var r=await api('/yp/content');CUR.ictypes=r.types||[];
+ if(!F.tid&&CUR.ictypes.length)F.tid=CUR.ictypes[0].id;
+ var h=head('İçerikler','Sitedeki bölümleri besleyen kayıtlar · sıra sürükleyerek değişir',
+  '<button class="btn" data-a="ic-site">Sitede göster</button>'
+  +'<button class="btn p" data-a="ic-yeni"><svg class="i"><use href="#plus"/></svg>Kayıt ekle</button>');
+ h+='<div class="ictab">'+CUR.ictypes.map(function(t){
+  return '<button class="c '+(t.id===F.tid?'on':'')+'" data-a="ic-tur" data-v="'+t.id+'">'
+   +'<b>'+esc(t.name)+'</b><small>'+esc(t.desc)+'</small>'
+   +'<div class="ln3"><span>'+t.n+' kayıt</span>'
+   +(t.onay?'<span class="bek">'+t.onay+' onay bekliyor</span>'
+     :(t.n?'<span style="color:var(--ok)">yayında</span>':'<span class="note">boş</span>'))
+   +'</div></button>'}).join('')+'</div>';
+ h+='<div class="card"><div class="fbar"><input type="search" id="icq" placeholder="Kayıtlarda ara" value="'+esc(F.q)+'"></div>'
+  +'<div class="fbar chips" id="icseg"></div><div id="iclist" class="pad"></div></div>';
+ $('#main').innerHTML=h;await V.icerik.load()};
+V.icerik.load=async function(){var F=CUR.icf;
+ var r=await api('/yp/content/'+F.tid+'?q='+encodeURIComponent(F.q)+'&state='+F.state);
+ CUR.ict=r.type;CUR.icrows=r.items||[];var c=r.counts||{},t=r.type;
+ var sg=$('#icseg');
+ if(sg)sg.innerHTML=[['','Hepsi',c.hepsi]].concat(t.moderate?[['onay','Onay bekleyen',c.onay]]:[])
+  .concat([['yayin','Yayında',c.yayin],['gizli','Gizli',c.gizli]]).map(function(s){
+   return '<button class="chip '+(F.state===s[0]?'on':'')+'" data-a="icseg" data-v="'+s[0]+'">'+s[1]+'<small>'+(s[2]||0)+'</small></button>'}).join('');
+ var el=$('#iclist');if(!el)return;
+ if(!CUR.icrows.length){el.innerHTML='<div class="bosluk"><b>'+esc(t.name)+'</b>'+esc(t.empty||'Henüz kayıt yok.')+'</div>';return}
+ el.innerHTML='<div class="ic">'+CUR.icrows.map(function(r2){
+  var o=icOzet(t,r2),bek=r2.state==='onay';
+  var gor=t.fields.filter(function(f){return f.type==='img'&&r2[f.key]})[0];
+  return '<div class="r4'+(bek?' bek2':'')+'" data-id="'+esc(r2.id)+'" draggable="true">'
+   +'<span class="gr2" title="Sürükleyin">⠿</span>'
+   +'<div style="min-width:0"><b>'+esc(o.bas)+'</b>'
+   +(o.alt.length?'<div class="sub2">'+esc(o.alt.join(' · '))+'</div>':'')
+   +'<div class="meta2"><span class="tag '+(bek?'y':(r2.on?'g':'w'))+'">'+esc(r2.state_name)+'</span>'
+   +'<span class="note">'+esc((r2.at||'').slice(0,10))+'</span></div></div>'
+   +(gor?'<img class="ph2" src="'+esc(r2[gor.key])+'" alt="">':'')
+   +'<div class="ac3">'
+   +(bek?'<button class="btn s" data-a="ic-karar" data-v="red" data-id="'+esc(r2.id)+'">Reddet</button>'
+        +'<button class="btn s p" data-a="ic-karar" data-v="onay" data-id="'+esc(r2.id)+'">Onayla</button>'
+     :'<button class="btn s" data-a="ic-duzen" data-id="'+esc(r2.id)+'">Düzenle</button>')
+   +'</div></div>'}).join('')+'</div>'};
+function icAlan(f,v){
+ var ad='name="'+f.key+'"',ph=f.hint?' placeholder="'+esc(f.hint)+'"':'';
+ if(f.type==='area')return '<textarea '+ad+' rows="4"'+ph+'>'+esc(v||'')+'</textarea>';
+ if(f.type==='sel')return '<select '+ad+'><option value="">Seçin</option>'
+  +f.options.map(function(o){return '<option'+(o===v?' selected':'')+'>'+esc(o)+'</option>'}).join('')+'</select>';
+ if(f.type==='puan')return '<select '+ad+'>'+[5,4,3,2,1].map(function(n){
+  return '<option value="'+n+'"'+(+v===n?' selected':'')+'>'+yildiz(n)+' ('+n+')</option>'}).join('')+'</select>';
+ if(f.type==='date')return '<input type="date" '+ad+' value="'+esc(v||'')+'">';
+ if(f.type==='num')return '<input type="number" step="0.01" '+ad+' value="'+esc(v==null?'':v)+'"'+ph+'>';
+ if(f.type==='imgs')return '<textarea '+ad+' rows="3" placeholder="Her satıra bir görsel bağlantısı">'
+  +esc((v||[]).join('\n'))+'</textarea>';
+ return '<input '+ad+' value="'+esc(v==null?'':v)+'"'+ph+'>'}
+function icForm(t,r){r=r||{};
+ return '<form id="icf" data-t="'+esc(t.id)+'" data-id="'+esc(r.id||'')+'">'
+  +t.fields.map(function(f){
+   return '<label class="f">'+esc(f.label)+(f.required?'':' <span class="note">(isteğe bağlı)</span>')
+    +icAlan(f,r[f.key])+(f.hint&&f.type!=='imgs'&&f.type!=='text'?'<div class="note" style="margin-top:4px">'+esc(f.hint)+'</div>':'')+'</label>'}).join('')
+  +'<div class="row" style="padding:12px 0;border-top:1px solid var(--line)"><div class="t">Sitede görünsün'
+  +'<div class="m">Kapatırsanız kayıt durur ama sitede görünmez</div></div>'
+  +'<label class="sw2"><input type="checkbox" name="on"'+(r.id?(r.on?' checked':''):' checked')+'><i></i></label></div>'
+  +'<div class="mf">'+(r.id?'<button type="button" class="btn" data-a="ic-sil" data-id="'+esc(r.id)+'">Sil</button>':'')
+  +'<div class="sp"></div><button type="button" class="btn" data-a="close">Vazgeç</button>'
+  +'<button class="btn p">Kaydet</button></div></form>'}
+function icVeri(f,t){var d={};
+ t.fields.forEach(function(fl){var el=f.elements[fl.key];if(!el)return;
+  d[fl.key]=fl.type==='imgs'?el.value.split('\n').map(function(x){return x.trim()}).filter(Boolean):el.value});
+ return d}
+
+/* ---------------- içerik olayları ---------------- */
+document.addEventListener('click',function(ev){var b=ev.target.closest('[data-a]');if(!b)return;var a=b.dataset.a;
+ if(a==='ic-tur'){CUR.icf.tid=b.dataset.v;CUR.icf.state='';CUR.icf.q='';V.icerik().catch(fail)}
+ else if(a==='icseg'){CUR.icf.state=b.dataset.v;V.icerik.load().catch(fail)}
+ else if(a==='ic-yeni'){if(!CUR.ict)return;modal(CUR.ict.name+' — yeni kayıt',icForm(CUR.ict))}
+ else if(a==='ic-duzen'){var r=(CUR.icrows||[]).filter(function(x){return x.id===b.dataset.id})[0];
+  if(r)modal(CUR.ict.name+' — düzenle',icForm(CUR.ict,r))}
+ else if(a==='ic-sil'){ask('Kayıt silinsin mi? Bu işlem geri alınamaz.','Sil').then(function(){
+  api('/yp/content/'+CUR.ict.id+'/'+b.dataset.id,{method:'DELETE'}).then(function(){
+   closeM();toast('Kayıt silindi');V.icerik()}).catch(fail)})}
+ else if(a==='ic-karar'){api('/yp/content/'+CUR.ict.id+'/'+b.dataset.id+'/onay',{method:'POST',
+   body:{karar:b.dataset.v}}).then(function(){toast(b.dataset.v==='onay'?'Onaylandı, sitede görünecek':'Reddedildi');
+   V.icerik()}).catch(fail)}
+ else if(a==='ic-site'){location.hash='#site'}
+});
+document.addEventListener('submit',function(ev){var f=ev.target;if(fid(f)!=='icf')return;ev.preventDefault();
+ var t=CUR.ict,id=f.dataset.id,btn=f.querySelector('button.p');btn.disabled=true;
+ api('/yp/content/'+t.id+(id?'/'+id:''),{method:id?'PUT':'POST',
+  body:{data:icVeri(f,t),on:f.elements.on.checked}})
+  .then(function(){closeM();toast(id?'Kayıt güncellendi':'Kayıt eklendi');V.icerik()})
+  .catch(function(e){btn.disabled=false;fail(e)})});
+(function(){var tm;document.addEventListener('input',function(ev){if(ev.target.id!=='icq')return;
+ clearTimeout(tm);var v=ev.target.value;tm=setTimeout(function(){CUR.icf.q=v;V.icerik.load().catch(fail)},260)})})();
+/* sürükle bırak sıralama */
+(function(){var src=null;
+ document.addEventListener('dragstart',function(e){var r=e.target.closest&&e.target.closest('#iclist .r4');
+  if(!r)return;src=r;r.style.opacity='.45';e.dataTransfer.effectAllowed='move';try{e.dataTransfer.setData('text','x')}catch(x){}});
+ document.addEventListener('dragover',function(e){if(!src)return;var r=e.target.closest&&e.target.closest('#iclist .r4');
+  if(!r||r===src)return;e.preventDefault();
+  var b=r.getBoundingClientRect(),sonra=e.clientY>b.top+b.height/2;
+  r.parentNode.insertBefore(src,sonra?r.nextSibling:r)});
+ document.addEventListener('drop',function(e){if(src)e.preventDefault()});
+ document.addEventListener('dragend',function(){if(!src)return;src.style.opacity='';src=null;
+  var ids=Array.prototype.map.call(document.querySelectorAll('#iclist .r4'),function(x){return x.dataset.id});
+  if(!ids.length||!CUR.ict)return;
+  api('/yp/content/'+CUR.ict.id+'/sira',{method:'POST',body:{ids:ids}})
+   .then(function(){toast('Sıra kaydedildi')}).catch(fail)})})();
 
 /* başlangıç */
 (async function(){TOK=ld('ypt')||ld('token');if(!TOK){showLogin();return}await start()})();
