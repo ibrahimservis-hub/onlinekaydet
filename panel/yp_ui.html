@@ -89,6 +89,40 @@ label.f>textarea{min-height:70px;resize:vertical}
 #toast{position:fixed;left:50%;bottom:120px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:11px 18px;border-radius:10px;z-index:80;font-weight:600;max-width:90vw}
 #toast.bad{background:var(--bad)}
 /* e-ticaret: ürün, sipariş, kampanya */
+/* açma kapama anahtarı */
+.sw2{position:relative;display:inline-block;width:38px;height:22px;flex:none}
+.sw2 input{position:absolute;inset:0;opacity:0;width:100%;height:100%;margin:0;cursor:pointer;z-index:2}
+.sw2 i{position:absolute;inset:0;border-radius:22px;background:#d0d5dd;transition:background .15s;display:block}
+.sw2 i:after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;transition:left .15s}
+.sw2 input:checked + i{background:var(--blue)}
+.sw2 input:checked + i:after{left:18px}
+.smsph .bub{max-width:100%}
+.md .smsph{margin-top:4px}
+.nrow{display:grid;grid-template-columns:1fr 330px;gap:16px;align-items:start}
+.nlist .n{border:1px solid var(--line);border-radius:12px;background:#fff;padding:13px 15px;margin-bottom:10px}
+.nlist .n .t4{display:flex;align-items:flex-start;gap:11px}
+.nlist .n b{display:block;font-size:14px;font-weight:650}
+.nlist .n small{display:block;font-size:12.5px;color:var(--mut);margin-top:2px}
+.nlist .n .msg{background:#faf9f6;border:1px solid var(--line);border-radius:9px;padding:9px 11px;
+ font-size:13px;line-height:1.5;color:#3a4254;margin-top:10px;font-family:ui-monospace,Menlo,monospace;white-space:pre-wrap}
+.nlist .n .ft3{display:flex;align-items:center;gap:9px;margin-top:9px;font-size:12.5px;color:var(--mut);flex-wrap:wrap}
+.kan{display:inline-flex;gap:4px}
+.kan span{border:1px solid var(--line);border-radius:7px;padding:2px 7px;font-size:11.5px;font-weight:600;color:var(--mut)}
+.kan span.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.smsb{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:var(--mut)}
+.smsb i{font-style:normal;background:#faf9f6;border:1px solid var(--line);border-radius:6px;padding:1px 7px;color:var(--tx)}
+.smsb.uni i{background:var(--warn-s);border-color:#f0dcc4;color:#8a5a20}
+.sms2{border:1px solid var(--line);border-radius:12px;background:#fff;padding:14px 15px}
+.smsph{border:1px solid var(--line);border-radius:14px;padding:13px;background:#faf9f6}
+.bub{background:#fff;border:1px solid var(--line);border-radius:12px;border-bottom-left-radius:4px;
+ padding:10px 12px;font-size:13px;line-height:1.5;color:#1f2733}
+.frm{font-size:11.5px;color:var(--mut);margin-bottom:6px;font-weight:600}
+.tip2{background:var(--warn-s);border:1px solid #f0dcc4;border-radius:10px;padding:10px 12px;font-size:12.5px;
+ color:#7a5218;line-height:1.5;margin-top:11px}
+.varl{display:flex;gap:6px;flex-wrap:wrap}
+.varl .vr{border:1px dashed var(--line);border-radius:7px;padding:4px 9px;font-size:12.5px;color:var(--mut);
+ font-family:ui-monospace,Menlo,monospace;background:#fff;cursor:pointer}
+.varl .vr:hover{border-style:solid;border-color:var(--blue);color:var(--blue)}
 .egrp{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-bottom:16px}
 .egrp .c{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px;text-align:left;font:inherit;cursor:pointer}
 .egrp .c b{display:block;font-size:14px;font-weight:650}
@@ -251,7 +285,7 @@ table.gr .r{text-align:right}
 <symbol id="plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
 <symbol id="list" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01"/></symbol>
 <symbol id="more" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
-<symbol id="store" viewBox="0 0 24 24"><path d="M4 9.5V19a1.5 1.5 0 0 0 1.5 1.5h13A1.5 1.5 0 0 0 20 19V9.5"/><path d="M3 9.5 4.6 4.6A1.5 1.5 0 0 1 6 3.5h12a1.5 1.5 0 0 1 1.4 1.1L21 9.5a3 3 0 0 1-6 0 3 3 0 0 1-6 0 3 3 0 0 1-6 0Z"/></symbol><symbol id="tag" viewBox="0 0 24 24"><path d="M3.5 11V4.5a1 1 0 0 1 1-1H11l8.5 8.5a1.5 1.5 0 0 1 0 2.1l-5.4 5.4a1.5 1.5 0 0 1-2.1 0Z"/><circle cx="8" cy="8" r="1.4"/></symbol><symbol id="truck" viewBox="0 0 24 24"><path d="M2.5 7.5h11v9h-11z"/><path d="M13.5 11h4l3 3v2.5h-7z"/><circle cx="6.5" cy="18.5" r="1.9"/><circle cx="17" cy="18.5" r="1.9"/></symbol><symbol id="plug" viewBox="0 0 24 24"><path d="M9 3.5v5M15 3.5v5"/><path d="M6.5 8.5h11v3a5.5 5.5 0 0 1-11 0Z"/><path d="M12 17v3.5"/></symbol></defs></svg>
+<symbol id="store" viewBox="0 0 24 24"><path d="M4 9.5V19a1.5 1.5 0 0 0 1.5 1.5h13A1.5 1.5 0 0 0 20 19V9.5"/><path d="M3 9.5 4.6 4.6A1.5 1.5 0 0 1 6 3.5h12a1.5 1.5 0 0 1 1.4 1.1L21 9.5a3 3 0 0 1-6 0 3 3 0 0 1-6 0 3 3 0 0 1-6 0Z"/></symbol><symbol id="tag" viewBox="0 0 24 24"><path d="M3.5 11V4.5a1 1 0 0 1 1-1H11l8.5 8.5a1.5 1.5 0 0 1 0 2.1l-5.4 5.4a1.5 1.5 0 0 1-2.1 0Z"/><circle cx="8" cy="8" r="1.4"/></symbol><symbol id="truck" viewBox="0 0 24 24"><path d="M2.5 7.5h11v9h-11z"/><path d="M13.5 11h4l3 3v2.5h-7z"/><circle cx="6.5" cy="18.5" r="1.9"/><circle cx="17" cy="18.5" r="1.9"/></symbol><symbol id="plug" viewBox="0 0 24 24"><path d="M9 3.5v5M15 3.5v5"/><path d="M6.5 8.5h11v3a5.5 5.5 0 0 1-11 0Z"/><path d="M12 17v3.5"/></symbol><symbol id="bell" viewBox="0 0 24 24"><path d="M6.5 9.5a5.5 5.5 0 0 1 11 0c0 4 1.5 5.5 1.5 5.5H5s1.5-1.5 1.5-5.5Z"/><path d="M10 18.5a2 2 0 0 0 4 0"/></symbol></defs></svg>
 <script>
 "use strict";
 var $=function(s,r){return (r||document).querySelector(s)};
@@ -261,7 +295,7 @@ var tl=function(n){return Number(n||0).toLocaleString('tr-TR',{maximumFractionDi
 function fid(f){return f.getAttribute?f.getAttribute('id'):''}
 function fval(f,k){var el=f.elements?f.elements[k]:null;return el?el.value:''}
 var TOK='',B=null,ROUTE='bugun',CUR={};
-var BASE_NAV=[['bugun','Bugün','home'],['takvim','Takvim','cal'],['randevu','Randevular','list'],['musteri','Müşteriler','users'],['kasa','Kasa','wallet'],['ekip','Ekip','team'],['rapor','Raporlar','chart'],['site','Web Sitem','web'],['entegrasyon','Entegrasyonlar','plug'],['ayar','Ayarlar','gear']];
+var BASE_NAV=[['bugun','Bugün','home'],['takvim','Takvim','cal'],['randevu','Randevular','list'],['musteri','Müşteriler','users'],['kasa','Kasa','wallet'],['ekip','Ekip','team'],['rapor','Raporlar','chart'],['site','Web Sitem','web'],['bildirim','Bildirimler','bell'],['entegrasyon','Entegrasyonlar','plug'],['ayar','Ayarlar','gear']];
 var NAV=BASE_NAV.slice(),EXTRA=['iade'];
 function buildNav(){var m=(B&&B.modules)||[],ins=[];
  if(m.indexOf('shop')>-1||m.indexOf('stok')>-1)ins.push(['urun','Ürünler','store']);
@@ -771,17 +805,17 @@ V.urun.load=async function(){var F=CUR.uf;
  SEL.urun=SEL.urun.filter(function(id){return rows.some(function(p){return p.id===id})});selDraw('urun')};
 function urunForm(p){p=p||{};var y=function(k,d){return p[k]==null?(d||''):p[k]};
  return '<form id="uf" data-id="'+esc(p.id||'')+'">'
-  +'<label>Ürün adı<input name="name" required value="'+esc(y('name'))+'" placeholder="Keten Gömlek — Beyaz"></label>'
+  +'<label class="f">Ürün adı<input name="name" required value="'+esc(y('name'))+'" placeholder="Keten Gömlek — Beyaz"></label>'
   +'<div class="g2"><label>Stok kodu<input name="sku" value="'+esc(y('sku'))+'"></label><label>Barkod<input name="barcode" value="'+esc(y('barcode'))+'"></label></div>'
   +'<div class="g2"><label>Kategori<input name="cat" value="'+esc(y('cat'))+'" list="ucats"></label><label>Marka<input name="brand" value="'+esc(y('brand'))+'"></label></div>'
   +'<div class="g2"><label>Satış fiyatı (KDV dâhil)<input name="price" type="number" step="0.01" min="0" required value="'+esc(y('price'))+'"></label>'
-  +'<label>İndirimli fiyat<input name="sale" type="number" step="0.01" min="0" value="'+esc(p.sale_price||'')+'"></label></div>'
+  +'<label class="f">İndirimli fiyat<input name="sale" type="number" step="0.01" min="0" value="'+esc(p.sale_price||'')+'"></label></div>'
   +'<div class="g2"><label>Alış fiyatı<input name="cost" type="number" step="0.01" min="0" value="'+esc(y('cost'))+'"></label>'
-  +'<label>KDV %<select name="vat">'+[0,1,10,20].map(function(v){return '<option'+(v===(p.vat==null?20:p.vat)?' selected':'')+'>'+v+'</option>'}).join('')+'</select></label></div>'
+  +'<label class="f">KDV %<select name="vat">'+[0,1,10,20].map(function(v){return '<option'+(v===(p.vat==null?20:p.vat)?' selected':'')+'>'+v+'</option>'}).join('')+'</select></label></div>'
   +'<div class="g2"><label>Stok<input name="stock" type="number" step="1" min="0" value="'+esc(y('stock',0))+'"></label>'
-  +'<label>Az stok uyarısı<input name="low_at" type="number" step="1" min="0" value="'+esc(y('low_at',5))+'"></label></div>'
-  +'<label>Görsel bağlantısı<input name="img" value="'+esc((p.images||[])[0]||'')+'" placeholder="https://…"></label>'
-  +'<label>Açıklama<textarea name="desc" rows="3">'+esc(y('desc'))+'</textarea></label>'
+  +'<label class="f">Az stok uyarısı<input name="low_at" type="number" step="1" min="0" value="'+esc(y('low_at',5))+'"></label></div>'
+  +'<label class="f">Görsel bağlantısı<input name="img" value="'+esc((p.images||[])[0]||'')+'" placeholder="https://…"></label>'
+  +'<label class="f">Açıklama<textarea name="desc" rows="3">'+esc(y('desc'))+'</textarea></label>'
   +'<div id="ukar" class="stt"></div>'
   +'<div class="mf">'+(p.id?'<button type="button" class="btn" data-a="urun-sil" data-id="'+esc(p.id)+'">Sil</button>':'')
   +'<div class="sp"></div><button type="button" class="btn" data-a="close">Vazgeç</button><button class="btn p">Kaydet</button></div></form>'
@@ -859,10 +893,10 @@ async function sipAc(id){var r=await api('/yp/orders/'+id),o=r.item;CUR.sip=o;
   +'<p style="font-size:13.5px;line-height:1.55;margin:9px 0 0">'+esc((o.customer||{}).address||'—')+'<br>'+esc(((o.customer||{}).district||'')+' '+((o.customer||{}).city||''))+'</p></div></div>'
   +'<div class="card" style="margin-top:14px"><div class="hd"><h2>Kargo</h2></div><div class="pad">'
   +'<form id="cgf"><label>Pazaryeri sipariş no<input name="market_no" value="'+esc(o.market_no||'')+'" placeholder="Trendyol / Hepsiburada sipariş numarası"></label>'
-  +'<label>Firma<select name="firm"><option value="">Seçin</option>'
+  +'<label class="f">Firma<select name="firm"><option value="">Seçin</option>'
   +(CUR.cargos||[]).map(function(c){return '<option value="'+c.id+'"'+((o.cargo||{}).firm===c.id?' selected':'')+'>'+esc(c.name)+'</option>'}).join('')
   +'</select></label><label>Takip numarası<input name="code" value="'+esc((o.cargo||{}).code||'')+'"></label>'
-  +'<label>Gönderi barkodu<input name="barcode" value="'+esc((o.cargo||{}).barcode||'')+'" placeholder="Pazaryerinin verdiği kargo barkodu"></label>'
+  +'<label class="f">Gönderi barkodu<input name="barcode" value="'+esc((o.cargo||{}).barcode||'')+'" placeholder="Pazaryerinin verdiği kargo barkodu"></label>'
   +'<p class="note" style="margin:0 0 10px">Fişte basılan barkod: '+esc(o.scan||o.no)+'</p>'
   +'<button class="btn" style="width:100%">Kaydet</button></form></div></div>'
   +'<div class="card" style="margin-top:14px"><div class="hd"><h2>İşlem</h2></div><div class="pad" style="display:grid;gap:8px">'
@@ -874,8 +908,8 @@ function iadeForm(o){
   +(o.items||[]).map(function(i,n){return '<label class="row" style="display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line)">'
    +'<input type="checkbox" name="pick" value="'+n+'" style="width:auto"> <span style="flex:1"><b>'+esc(i.name)+'</b><div class="note">'+i.qty+' adet · '+tl(i.price)+'</div></span>'
    +'<input type="number" name="q'+n+'" min="1" max="'+i.qty+'" value="'+i.qty+'" style="width:70px"></label>'}).join('')
-  +'<label style="margin-top:12px">İade sebebi<select name="reason"><option value="bedeni olmadi">Bedeni olmadı</option><option value="kusurlu urun">Kusurlu ürün</option><option value="yanlis urun">Yanlış ürün</option><option value="begenmedim">Beğenmedim</option><option value="gec teslim">Geç teslim</option><option value="diger">Diğer</option></select></label>'
-  +'<label>Açıklama<textarea name="detail" rows="2"></textarea></label>'
+  +'<label class="f" style="margin-top:12px">İade sebebi<select name="reason"><option value="bedeni olmadi">Bedeni olmadı</option><option value="kusurlu urun">Kusurlu ürün</option><option value="yanlis urun">Yanlış ürün</option><option value="begenmedim">Beğenmedim</option><option value="gec teslim">Geç teslim</option><option value="diger">Diğer</option></select></label>'
+  +'<label class="f">Açıklama<textarea name="detail" rows="2"></textarea></label>'
   +'<div class="mf"><button type="button" class="btn" data-a="close">Vazgeç</button><button class="btn p">İade talebini kaydet</button></div></form>'}
 V.iade=async function(){var r=await api('/yp/returns');CUR.iadeler=r.items||[];
  var h=head('İadeler','Onayladığınız iadede stok geri eklenir, tamamlandığında ücret iadesi kaydedilir.','<button class="btn" data-a="go-siparis">Siparişler</button>');
@@ -933,19 +967,19 @@ function kmpForm(k){k=k||{type:'x_al_y_ode',scope:{all:true},cond:{buy:3,pay:2},
  else rule='<div class="xy"><span>Sepet</span><input name="min_total" type="number" min="0" style="width:96px" value="'+(cd.min_total||0)+'"><span>₺ üzerinde</span><input name="percent" type="number" min="0" max="100" value="'+(g.percent||10)+'"><span>% indirim</span></div>'
   +'<div class="xy" style="margin-top:8px"><span>ya da sabit</span><input name="amount" type="number" min="0" style="width:96px" value="'+(g.amount||0)+'"><span>₺ indirim (oran 0 ise bu kullanılır)</span></div>';
  return '<form id="kf" data-id="'+esc(k.id||'')+'" data-type="'+esc(k.type)+'">'
-  +'<label>Kampanya tipi</label><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-bottom:14px">'+tiles+'</div>'
-  +'<label>Kampanya adı (müşteri bunu görür)<input name="name" required value="'+esc(k.name||'')+'" placeholder="3 al 2 öde — Çorap ve iç giyim"></label>'
-  +'<label>Kural</label>'+rule
-  +'<label style="margin-top:12px">Hangi ürünlerde</label>'
+  +'<label class="f">Kampanya tipi</label><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-bottom:14px">'+tiles+'</div>'
+  +'<label class="f">Kampanya adı (müşteri bunu görür)<input name="name" required value="'+esc(k.name||'')+'" placeholder="3 al 2 öde — Çorap ve iç giyim"></label>'
+  +'<label class="f">Kural</label>'+rule
+  +'<label class="f" style="margin-top:12px">Hangi ürünlerde</label>'
   +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px">'
   +'<button type="button" class="chip '+(sc.all?'on':'')+'" data-a="kmp-all">Tüm ürünler</button></div>'
   +'<div class="g2"><label>Kategoriler (virgülle)<input name="cats" value="'+esc((sc.cats||[]).join(', '))+'" placeholder="Çorap, İç Giyim"></label>'
-  +'<label>Markalar (virgülle)<input name="brands" value="'+esc((sc.brands||[]).join(', '))+'"></label></div>'
+  +'<label class="f">Markalar (virgülle)<input name="brands" value="'+esc((sc.brands||[]).join(', '))+'"></label></div>'
   +'<div class="g2"><label>Başlangıç<input name="start" type="date" value="'+esc(k.start||'')+'"></label><label>Bitiş<input name="end" type="date" value="'+esc(k.end||'')+'"></label></div>'
   +'<div class="row" style="padding:12px 0;border-top:1px solid var(--line)"><div class="t">Tek başına geçerli<div class="m">Başka kampanyayla birleşmez; hangisi müşteri lehineyse o uygulanır</div></div>'
-  +'<label class="tg"><input type="checkbox" name="exclusive"'+(k.exclusive?' checked':'')+'><i></i></label></div>'
+  +'<label class="sw2"><input type="checkbox" name="exclusive"'+(k.exclusive?' checked':'')+'><i></i></label></div>'
   +'<div class="g2"><label>Öncelik<input name="priority" type="number" value="'+(k.priority||10)+'"></label>'
-  +'<label>Kullanım limiti (0 = sınırsız)<input name="total" type="number" min="0" value="'+((k.limit||{}).total||0)+'"></label></div>'
+  +'<label class="f">Kullanım limiti (0 = sınırsız)<input name="total" type="number" min="0" value="'+((k.limit||{}).total||0)+'"></label></div>'
   +'<div class="mf">'+(k.id?'<button type="button" class="btn" data-a="kmp-sil" data-id="'+esc(k.id)+'">Sil</button>':'')
   +'<div class="sp"></div><button type="button" class="btn" data-a="kmp-dene">Sepette dene</button>'
   +'<button type="button" class="btn" data-a="close">Vazgeç</button><button class="btn p">Kaydet</button></div></form>'}
@@ -966,7 +1000,7 @@ async function kmpDene(){var rows=CUR.deneSepet||[];
  var body='<p class="note" style="margin:0 0 10px">Örnek bir sepet kurun; hangi kampanyanın girdiğini, girmeyenin neden girmediğini aşağıda görün.</p>'
   +'<div id="dsepet"></div><button type="button" class="btn" data-a="dene-ekle" style="margin-top:8px">Ürün ekle</button>'
   +'<div class="g2" style="margin-top:12px"><label>Kargo ücreti<input id="dship" type="number" value="49.9"></label>'
-  +'<label>Kupon kodu<input id="dcode" placeholder="HOSGELDIN" style="text-transform:uppercase"></label></div>'
+  +'<label class="f">Kupon kodu<input id="dcode" placeholder="HOSGELDIN" style="text-transform:uppercase"></label></div>'
   +'<button type="button" class="btn p" data-a="dene-calistir" style="width:100%;margin-top:6px">Sepeti hesapla</button>'
   +'<div id="dsonuc" style="margin-top:14px"></div>';
  modal('Kampanya dene',body);deneCiz()}
@@ -1138,26 +1172,26 @@ document.addEventListener('click',function(ev){var b=ev.target.closest('[data-a]
  /* ürün toplu */
  else if(a==='usel-fiyat')modal(SEL.urun.length+' üründe fiyat güncelle',
   '<form id="ubf" data-op="price"><p class="note" style="margin:0 0 10px">Zam için artı, indirim için eksi yazın. İndirimli fiyat varsa o da aynı oranda değişir.</p>'
-  +'<label>Yüzde<input name="percent" type="number" step="0.1" required placeholder="10 veya -15"></label>'
+  +'<label class="f">Yüzde<input name="percent" type="number" step="0.1" required placeholder="10 veya -15"></label>'
   +'<div class="mf"><button type="button" class="btn" data-a="close">Vazgeç</button><button class="btn p">Uygula</button></div></form>');
  else if(a==='usel-indirim')modal(SEL.urun.length+' ürüne indirim uygula',
   '<form id="ubf" data-op="sale"><p class="note" style="margin:0 0 10px">İndirimli fiyat, satış fiyatından bu oran düşülerek hesaplanır. 0 yazarsanız indirim kalkar.</p>'
-  +'<label>İndirim yüzdesi<input name="percent" type="number" min="0" max="95" required value="10"></label>'
+  +'<label class="f">İndirim yüzdesi<input name="percent" type="number" min="0" max="95" required value="10"></label>'
   +'<div class="mf"><button type="button" class="btn" data-a="close">Vazgeç</button><button class="btn p">Uygula</button></div></form>');
  else if(a==='usel-stok')modal(SEL.urun.length+' üründe stok güncelle',
   '<form id="ubf" data-op="stock"><div class="g2"><label>Stoğu şu sayıya ayarla<input name="set" type="number" min="0" placeholder="örn. 50"></label>'
-  +'<label>ya da ekle / çıkar<input name="add" type="number" placeholder="örn. 10 veya -5"></label></div>'
+  +'<label class="f">ya da ekle / çıkar<input name="add" type="number" placeholder="örn. 10 veya -5"></label></div>'
   +'<p class="note">İkisini birden doldurmayın. Stok değişince açık pazaryerlerine gönderim kuyruğa alınır.</p>'
   +'<div class="mf"><button type="button" class="btn" data-a="close">Vazgeç</button><button class="btn p">Uygula</button></div></form>');
  else if(a==='usel-kategori')modal(SEL.urun.length+' ürünün kategori / markası',
   '<form id="ubf" data-op="cat2"><label>Kategori<input name="cat" list="ucats" placeholder="Boş bırakırsanız değişmez"></label>'
-  +'<label>Marka<input name="brand" placeholder="Boş bırakırsanız değişmez"></label>'
+  +'<label class="f">Marka<input name="brand" placeholder="Boş bırakırsanız değişmez"></label>'
   +'<datalist id="ucats">'+((CUR.ucats||[]).map(function(c){return '<option>'+esc(c)+'</option>'}).join(''))+'</datalist>'
   +'<div class="mf"><button type="button" class="btn" data-a="close">Vazgeç</button><button class="btn p">Uygula</button></div></form>');
  else if(a==='usel-kanal')modal(SEL.urun.length+' ürünü pazaryerinde aç / kapat',
   '<form id="ubf" data-op="channel"><label>Kanal<select name="channel">'
   +(CUR.kanallar||[]).map(function(c){return '<option value="'+c.id+'">'+esc(c.name)+'</option>'}).join('')+'</select></label>'
-  +'<label>İşlem<select name="on"><option value="1">Kanalda satışa aç</option><option value="0">Kanaldan kaldır</option></select></label>'
+  +'<label class="f">İşlem<select name="on"><option value="1">Kanalda satışa aç</option><option value="0">Kanaldan kaldır</option></select></label>'
   +'<div class="mf"><button type="button" class="btn" data-a="close">Vazgeç</button><button class="btn p">Uygula</button></div></form>');
  else if(a==='usel-durum')modal(SEL.urun.length+' ürünün durumu',
   '<form id="ubf" data-op="status"><label>Durum<select name="status"><option value="live">Yayında</option><option value="draft">Taslak (sitede görünmez)</option></select></label>'
@@ -1231,7 +1265,7 @@ function entForm(i){
   var inp=f.type==='area'?'<textarea name="'+f.key+'" rows="3">'+esc(v)+'</textarea>'
    :'<input name="'+f.key+'" type="'+(f.type==='number'?'number':'text')+'" value="'+esc(v)+'"'
      +(f.secret?' class="mono" autocomplete="off"':'')+(f.required?'':' placeholder="İsteğe bağlı"')+'>';
-  return '<label>'+esc(f.label)+(f.required?'':' <span class="note">(isteğe bağlı)</span>')+inp
+  return '<label class="f">'+esc(f.label)+(f.required?'':' <span class="note">(isteğe bağlı)</span>')+inp
    +(f.hint?'<div class="note" style="margin:-8px 0 12px">'+esc(f.hint)+'</div>':'')+'</label>'}).join('');
  var durum=i.state==='hata'?'<div class="errbox"><b>Son deneme başarısız.</b> '+esc(i.err)+'</div>':
   (i.state==='bagli'?'<div class="okbox">Bağlantı çalışıyor'+(i.last_ok?' · son başarılı deneme '+esc(i.last_ok.slice(0,16).replace('T',' ')):'')+'</div>':'');
@@ -1246,12 +1280,17 @@ function entForm(i){
   +alan
   +'<div class="row" style="padding:12px 0;border-top:1px solid var(--line)"><div class="t">Bu entegrasyonu kullan'
   +'<div class="m">Kapatırsanız çalışmaz, ayarlarınız durur</div></div>'
-  +'<label class="tg"><input type="checkbox" name="on"'+((i.on||i.state==='yok')?' checked':'')+'><i></i></label></div>'
+  +'<label class="sw2"><input type="checkbox" name="on"'+((i.on||i.state==='yok')?' checked':'')+'><i></i></label></div>'
   +'<div class="mf">'+(i.state!=='yok'?'<button type="button" class="btn" data-a="ent-sil" data-id="'+esc(i.id)+'">Bağlantıyı kaldır</button>':'')
   +'<div class="sp"></div>'
   +(i.can_test?'<button type="button" class="btn" data-a="ent-dene" data-id="'+esc(i.id)+'">Bağlantıyı dene</button>':'')
   +'<button class="btn p">Kaydet</button></div></form>'}
-async function entAc(id){var r=await api('/yp/integrations/'+id);CUR.ent=r.item;modal(r.item.name,entForm(r.item))}
+async function entAc(id){var r=await api('/yp/integrations/'+id);CUR.ent=r.item;
+ var kul=(r.uses||[]).length?'<div class="card" style="margin:14px 0 0"><div class="hd"><h2>Bu entegrasyon nerede kullanılıyor</h2></div>'
+  +'<div class="pad">'+r.uses.map(function(u){return '<div class="row" style="padding:8px 0;border-top:1px solid var(--line)">'
+   +'<div><b>'+esc(u.name)+'</b><div class="m">'+esc(u.desc)+'</div></div></div>'}).join('')
+  +'<div class="note" style="margin-top:8px">Bağlantıyı kapatırsanız bunlar çalışmaz.</div></div></div>':'';
+ modal(r.item.name,entForm(r.item)+kul)}
 async function entKayit(){var r=await api('/yp/integrations/log/son');
  modal('İşlem kaydı',(r.items||[]).length?'<div class="logwrap">'+r.items.map(function(x){
   var bad=/hata/i.test(x.event);
@@ -1302,6 +1341,150 @@ document.addEventListener('submit',function(ev){var f=ev.target;if(fid(f)!=='ent
  clearTimeout(tm);var v=ev.target.value;tm=setTimeout(function(){CUR.ef.q=v;entCiz()},200)});
  document.addEventListener('change',function(ev){if(ev.target.id!=='egrp'){return}
   CUR.ef.group=ev.target.value;V.entegrasyon().catch(fail)})})();
+
+/* ---------------- BİLDİRİMLER ---------------- */
+function smsRozet(s){var u=s.unicode?' uni':'';
+ return '<span class="smsb'+u+'">Uzunluk<i>'+s.chars+' karakter · '+s.parts+' SMS'+(s.unicode?' · Türkçe':'')+'</i></span>'}
+V.bildirim=async function(){var F=CUR.bf=CUR.bf||{group:''};
+ var r=await api('/yp/notify');CUR.bil=r.items||[];CUR.bilMeta=r;
+ var h=head('Bildirimler','Hazır metinler sektörünüze göre gelir · değiştirebilir, istediğiniz an geri alabilirsiniz',
+  '<button class="btn" data-a="bil-takip">Stok / fiyat takipleri</button>'
+  +'<button class="btn" data-a="bil-kayit">Gönderim kaydı</button>'
+  +'<button class="btn p" data-a="bil-duyuru">Duyuru gönder</button>');
+ h+='<div class="fbar chips" style="border:0;padding-left:0">'
+  +[['','Hepsi',(r.counts||{}).hepsi]].concat((r.groups||[]).map(function(g){return [g.id,g.name,g.n]})).map(function(s){
+   return '<button class="chip '+(F.group===s[0]?'on':'')+'" data-a="bseg" data-v="'+s[0]+'">'+s[1]+'<small>'+(s[2]||0)+'</small></button>'}).join('')+'</div>';
+ h+='<div class="nrow"><div class="nlist" id="blist"></div><div>'
+  +'<div class="sms2"><div class="frm">Müşterinin telefonunda böyle görünür</div>'
+  +'<div class="smsph"><div class="bub" id="bprev">Bir bildirim seçin</div></div>'
+  +'<div class="tip2"><b>Türkçe karakter üç kat pahalıya gelir.</b> “Sipariş”, “çıktı” gibi kelimelerdeki '
+  +'ş, ç, ı, ğ harfleri mesajı 160 değil 70 karakterde böler. Düzenlerken gösteriyoruz, tek tuşla sadeleştiriyoruz.</div></div>'
+  +'<div class="card" style="margin-top:16px"><div class="hd"><h2>SMS sağlayıcısı</h2></div><div class="pad">'
+  +(r.sms_ready?'<div style="display:flex;align-items:center;gap:10px"><span class="lg2">'+entKisa(r.sms_provider)+'</span>'
+    +'<div style="flex:1"><b>'+esc(r.sms_provider)+'</b><div class="note">Bağlı</div></div><span class="st2 g2">Hazır</span></div>'
+   :'<div class="note">SMS sağlayıcısı bağlı değil. Mesajlar gönderilmez.</div>'
+    +'<button class="btn" style="width:100%;margin-top:10px" data-a="git-ent">Entegrasyonlara git</button>')
+  +'</div></div></div></div>';
+ $('#main').innerHTML=h;bilCiz()};
+function bilCiz(){var F=CUR.bf,rows=(CUR.bil||[]).filter(function(i){return !F.group||i.group===F.group});
+ var el=$('#blist');if(!el)return;
+ if(!rows.length){el.innerHTML='<div class="empty">Bu kümede bildirim yok.</div>';return}
+ var ch=(CUR.bilMeta.channels||[]);
+ el.innerHTML=rows.map(function(i){
+  return '<div class="n" data-id="'+esc(i.id)+'"><div class="t4"><div style="flex:1"><b>'+esc(i.name)+'</b>'
+   +'<small>'+esc(i.desc)+(i.ticari?' · ticari ileti, izin gerekir':'')+'</small></div>'
+   +'<label class="sw2"><input type="checkbox" data-a="bil-ac" data-id="'+esc(i.id)+'"'+(i.on?' checked':'')+'><i></i></label></div>'
+   +'<div class="msg">'+esc(i.text)+'</div>'
+   +'<div class="ft3"><span class="kan">'+ch.map(function(k){
+     return '<span class="'+(i.channels.indexOf(k.id)>-1?'on':'')+'">'+esc(k.name)+'</span>'}).join('')+'</span>'
+   +smsRozet(i.sms)+(i.custom?'<span class="note">· düzenlendi</span>':'')
+   +'<span style="flex:1"></span><button class="btn s" data-a="bil-ac2" data-id="'+esc(i.id)+'">Düzenle</button></div></div>'}).join('')}
+function bilForm(i){
+ return '<form id="bilf" data-id="'+esc(i.id)+'">'
+  +'<p class="note" style="margin:0 0 10px">'+esc(i.desc)+'</p>'
+  +'<label class="f">Mesaj<textarea name="text" rows="4" id="biltxt">'+esc(i.text)+'</textarea></label>'
+  +'<div id="bilsms" style="display:flex;align-items:center;gap:10px;margin:-8px 0 12px;flex-wrap:wrap"></div>'
+  +'<div class="note" style="margin-bottom:6px">Kullanabileceğiniz değişkenler — tıklayın, metne eklensin</div>'
+  +'<div class="varl">'+i.vars.map(function(v){
+    return '<button type="button" class="vr" data-a="bil-var" data-v="'+esc(v.key)+'" title="'+esc(v.label)+'">{'+esc(v.key)+'}</button>'}).join('')+'</div>'
+  +'<div class="note" style="margin:10px 0 6px">Hangi kanallardan gitsin</div>'
+  +'<div style="display:flex;gap:7px;flex-wrap:wrap">'+(CUR.bilMeta.channels||[]).map(function(k){
+    return '<label class="chip '+(i.channels.indexOf(k.id)>-1?'on':'')+'" style="cursor:pointer">'
+     +'<input type="checkbox" name="ch" value="'+k.id+'" hidden'+(i.channels.indexOf(k.id)>-1?' checked':'')+'>'+esc(k.name)+'</label>'}).join('')+'</div>'
+  +'<div class="smsph" style="margin-top:14px"><div class="frm">Önizleme</div><div class="bub" id="bilprev">…</div></div>'
+  +'<div class="mf">'+(i.custom?'<button type="button" class="btn" data-a="bil-sifirla" data-id="'+esc(i.id)+'">Hazır metne dön</button>':'')
+  +'<div class="sp"></div><button type="button" class="btn" data-a="bil-sade">Türkçe karakterleri sadeleştir</button>'
+  +'<button class="btn p">Kaydet</button></div></form>'}
+async function bilAc(id){var i=(CUR.bil||[]).filter(function(x){return x.id===id})[0];if(!i)return;
+ CUR.bilCur=i;modal(i.name,bilForm(i));await bilOnizle()}
+async function bilOnizle(){var f=$('#bilf');if(!f)return;
+ try{var r=await api('/yp/notify/'+f.dataset.id+'/onizle',{method:'POST',body:{text:$('#biltxt').value}});
+  var p=$('#bilprev');if(p)p.textContent=r.text;
+  var s=$('#bilsms');if(s)s.innerHTML=smsRozet(r.sms)+'<span class="note">'+esc(r.sms.encoding)
+   +(r.sms.simple?' · sadeleştirirsen '+r.sms.simple.parts+' SMS':'')+'</span>'}catch(e){}}
+async function bilDuyuru(){
+ var seg=[['hepsi','Tüm müşteriler'],['son90','Son 90 günde gelenler'],['gelmeyen','90 gündür gelmeyenler'],['siparis_veren','Sipariş verenler']];
+ modal('Duyuru gönder','<form id="duyf"><p class="note" style="margin:0 0 10px">Kampanya mesajı ticari iletidir; izin vermeyen müşterilere gönderilmez.</p>'
+  +'<label class="f">Kime<select name="segment">'+seg.map(function(s){return '<option value="'+s[0]+'">'+s[1]+'</option>'}).join('')+'</select></label>'
+  +'<label class="f">Mesaj<textarea name="text" rows="4" id="duytxt" placeholder="Kasim ayina ozel tum hizmetlerde %20 indirim. Randevu icin: ..."></textarea></label>'
+  +'<div id="duysms" style="display:flex;align-items:center;gap:10px;margin:-8px 0 12px;flex-wrap:wrap"></div>'
+  +'<div id="duyozet"></div>'
+  +'<div class="mf"><button type="button" class="btn" data-a="close">Vazgeç</button>'
+  +'<button type="button" class="btn" data-a="duy-hesap">Kaç kişiye gidecek?</button>'
+  +'<button class="btn p" id="duygo" disabled>Gönder</button></div></form>',true)}
+async function duyHesap(){var f=$('#duyf');if(!f)return;
+ var r=await api('/yp/notify/duyuru',{method:'POST',body:{text:fval(f,'text'),segment:fval(f,'segment'),dene:true}});
+ CUR.duyOk=r.n>0;
+ $('#duysms').innerHTML=smsRozet(r.sms)+'<span class="note">'+esc(r.sms.encoding)+'</span>';
+ $('#duyozet').innerHTML='<div class="tot" style="border:1px solid var(--line);border-radius:10px">'
+  +'<div class="r3"><span>Gönderilecek kişi</span><b>'+r.n+'</b></div>'
+  +(r.atlanan?'<div class="r3"><span>İzin vermeyen / telefonsuz</span><b style="color:var(--warn)">'+r.atlanan+'</b></div>':'')
+  +'<div class="r3"><span>Kişi başı</span><b>'+r.sms.parts+' SMS</b></div>'
+  +'<div class="r3 big"><span>Toplam SMS</span><span>'+r.toplam_sms+'</span></div></div>'
+  +'<div class="smsph" style="margin-top:12px"><div class="frm">Örnek</div><div class="bub">'+esc(r.ornek)+'</div></div>';
+ $('#duygo').disabled=!r.n}
+async function bilTakip(){var r=await api('/yp/notify/takip');
+ modal('Stok ve fiyat takipleri','<p class="note" style="margin:0 0 10px">Müşteriler tükenen ürün için haber isteyebilir; stoğa girince ya da fiyat düşünce mesaj gider.</p>'
+  +((r.items||[]).length?'<table class="gr"><thead><tr><th>Ürün</th><th>Telefon</th><th>Takip</th><th class="r">Stok</th><th class="r">Fiyat</th><th>Durum</th></tr></thead><tbody>'
+   +r.items.map(function(x){return '<tr><td>'+esc(x.urun||'—')+'</td><td>'+esc(ftel(x.phone))+'</td>'
+    +'<td>'+(x.kind==='stok'?'Stoğa gelince':'Fiyat düşünce')+'</td><td class="r num">'+(x.stock||0)+'</td>'
+    +'<td class="r num">'+tl(x.price)+'</td><td>'+(x.sent?'<span class="tag g">Haber verildi</span>':'<span class="tag w">Bekliyor</span>')+'</td></tr>'}).join('')
+   +'</tbody></table>':'<div class="empty">Takip isteği yok.</div>')
+  +'<div class="mf"><button type="button" class="btn" data-a="close">Kapat</button>'
+  +'<button type="button" class="btn p" data-a="takip-calistir">Şimdi kontrol et</button></div>')}
+async function bilKayit(){var r=await api('/yp/notify/log');
+ modal('Gönderim kaydı',(r.items||[]).length?'<div class="logwrap">'+r.items.map(function(x){
+  return '<div class="logrow"><span class="note">'+esc((x.at||'').slice(0,16).replace('T',' '))+'</span>'
+   +'<span><b>'+esc(ftel(x.phone))+'</b> '+esc(x.text)+'</span>'
+   +'<span class="st2 '+(x.state==='hata'?'r2':'g2')+'">'+(x.state==='hata'?'Hata':'Gitti')+'</span></div>'}).join('')+'</div>'
+  :'<div class="empty">Henüz mesaj gönderilmedi.</div>')}
+
+/* ---------------- bildirim olayları ---------------- */
+document.addEventListener('click',function(ev){var b=ev.target.closest('[data-a]');if(!b)return;var a=b.dataset.a;
+ if(a==='bseg'){CUR.bf.group=b.dataset.v;bilCiz();
+  document.querySelectorAll('[data-a=bseg]').forEach(function(x){x.classList.toggle('on',x.dataset.v===b.dataset.v)})}
+ else if(a==='bil-ac2'){bilAc(b.dataset.id).catch(fail)}
+ else if(a==='bil-ac'){var on=b.checked;
+  api('/yp/notify/'+b.dataset.id,{method:'PUT',body:{on:on}}).then(function(r){
+   var i=(CUR.bil||[]).filter(function(x){return x.id===r.item.id})[0];if(i)i.on=r.item.on;
+   toast(on?'Bildirim açıldı':'Bildirim kapatıldı')}).catch(fail)}
+ else if(a==='bil-var'){var t=$('#biltxt');if(!t)return;
+  var p=t.selectionStart||t.value.length,v='{'+b.dataset.v+'}';
+  t.value=t.value.slice(0,p)+v+t.value.slice(t.selectionEnd||p);t.focus();
+  t.selectionStart=t.selectionEnd=p+v.length;bilOnizle()}
+ else if(a==='bil-sade'){var t2=$('#biltxt');if(!t2)return;
+  var m={'ç':'c','Ç':'C','ğ':'g','Ğ':'G','ı':'i','İ':'I','ö':'o','Ö':'O','ş':'s','Ş':'S','ü':'u','Ü':'U'};
+  t2.value=t2.value.replace(/[çÇğĞıİöÖşŞüÜ]/g,function(x){return m[x]});bilOnizle()}
+ else if(a==='bil-sifirla'){api('/yp/notify/'+b.dataset.id+'/sifirla',{method:'POST'}).then(function(r){
+  closeM();toast('Hazır metne dönüldü');V.bildirim()}).catch(fail)}
+ else if(a==='bil-duyuru'){bilDuyuru().catch(fail)}
+ else if(a==='duy-hesap'){duyHesap().catch(fail)}
+ else if(a==='bil-takip'){bilTakip().catch(fail)}
+ else if(a==='takip-calistir'){api('/yp/notify/takip/calistir',{method:'POST'}).then(function(r){
+  closeM();toast(r.n?r.n+' müşteriye haber verildi':'Haber verilecek ürün yok')}).catch(fail)}
+ else if(a==='bil-kayit'){bilKayit().catch(fail)}
+ else if(a==='git-ent'){location.hash='#entegrasyon'}
+});
+document.addEventListener('submit',function(ev){var f=ev.target,id=fid(f);
+ if(id==='bilf'){ev.preventDefault();
+  var ch=Array.prototype.map.call(f.querySelectorAll('input[name=ch]:checked'),function(x){return x.value});
+  var btn=f.querySelector('button.p');btn.disabled=true;
+  api('/yp/notify/'+f.dataset.id,{method:'PUT',body:{text:fval(f,'text'),channels:ch}})
+   .then(function(){closeM();toast('Bildirim kaydedildi');V.bildirim()})
+   .catch(function(e){btn.disabled=false;fail(e)})}
+ else if(id==='duyf'){ev.preventDefault();
+  if(!CUR.duyOk)return toast('Önce “Kaç kişiye gidecek?” ile hesaplayın',true);
+  ask('Duyuru gönderilsin mi? Gönderim başladıktan sonra durdurulamaz.','Gönder').then(function(){
+   var btn=$('#duygo');if(btn)btn.disabled=true;
+   api('/yp/notify/duyuru',{method:'POST',body:{text:fval(f,'text'),segment:fval(f,'segment')}})
+    .then(function(r){closeM();toast(r.n+' kişiye gönderildi ('+r.toplam_sms+' SMS)')})
+    .catch(function(e){if(btn)btn.disabled=false;fail(e)})})}
+});
+(function(){var tm;document.addEventListener('input',function(ev){
+ if(ev.target.id==='biltxt'){clearTimeout(tm);tm=setTimeout(function(){bilOnizle()},300)}
+ if(ev.target.id==='duytxt'){var s=$('#duygo');if(s)s.disabled=true;CUR.duyOk=false}});
+ document.addEventListener('change',function(ev){
+  if(ev.target.name==='ch'){var l=ev.target.closest('label');if(l)l.classList.toggle('on',ev.target.checked)}})})();
 
 /* başlangıç */
 (async function(){TOK=ld('ypt')||ld('token');if(!TOK){showLogin();return}await start()})();

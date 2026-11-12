@@ -96,7 +96,17 @@ with TestClient(s.app) as c:
         c.post("/api/yp/sectors/kuafor", headers=H, json={})
         assert c.put("/api/yp/integrations/nebim", headers=H, json={"keys": {}}).status_code == 403, "paket dışı"
         assert c.get("/api/yp/integrations/nebim", headers=H).status_code == 403
+
+    def j():
+        c.post("/api/yp/sectors/eticaret", headers=H, json={})
+        u = c.get("/api/yp/integrations/netgsm", headers=H).json()["uses"]
+        adlar = [x["name"] for x in u]
+        assert adlar, "SMS entegrasyonunun nerede kullanıldığı listelenmeli"
+        assert not [a for a in adlar if a.startswith("Randevu")], "e-ticarette randevu bildirimi gösterilmemeli: %s" % adlar
+        k2 = c.get("/api/yp/integrations/aras", headers=H).json()["uses"]
+        assert any("Kargo fişi" in x["name"] for x in k2), k2
     t("paket dışı ve hatalı istekler reddediliyor", i)
+    t("entegrasyonun nerede kullanıldığı pakete göre listeleniyor", j)
 
     def k():
         c.post("/api/yp/sectors/eticaret", headers=H, json={})

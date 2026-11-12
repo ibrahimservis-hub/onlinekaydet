@@ -292,6 +292,41 @@ def register(api_router, db, deps):
                            "hata": len([i for i in items if i["state"] == "hata"]),
                            "yok": len([i for i in items if i["state"] == "yok"])}}
 
+    async def nerede(p):
+        """Bu entegrasyon panelde nerede çalışıyor? Kapatmanın neyi durduracağını göster."""
+        out = []
+        if p["group"] in ("sms", "diger") and p["id"] != "canli_destek":
+            try:
+                import bildirim
+                import blocks
+                d = await db.app_settings.find_one({"_id": "yp_pack"}, {"_id": 0}) or {}
+                mods = d.get("modules")
+                if mods is None:
+                    mods = list((blocks.pack(d.get("sector") or "") or {}).get("modules") or [])
+                mods = set(mods or [])
+                rows = {r["id"]: r for r in await db.yp_notify.find({}, {"_id": 0}).to_list(200)}
+                kanal = "whatsapp" if p["id"] == "whatsapp" else ("eposta" if p["id"] == "smtp" else "sms")
+                for e in bildirim.EVENTS:
+                    if e["module"] and e["module"] not in mods:    # firmanın paketinde olmayan olay gösterilmez
+                        continue
+                    r = rows.get(e["id"]) or {}
+                    ks = r.get("channels") if r.get("channels") is not None else e["channels"]
+                    if kanal in (ks or []) and r.get("on", bool(ks)):
+                        out.append({"name": e["name"], "desc": e["desc"], "on": True})
+            except Exception:                                      # noqa: BLE001
+                pass
+        if p["group"] == "pos":
+            out.append({"name": "Sitede ödeme", "desc": "Müşteri kartla öderken", "on": True})
+        if p["group"] == "kargo":
+            out += [{"name": "Gönderi oluşturma", "desc": "Sipariş kargoya verilince", "on": True},
+                    {"name": "Kargo fişi", "desc": "Takip numarası ve barkod", "on": True}]
+        if p["group"] == "efatura":
+            out.append({"name": "Fatura kesme", "desc": "Sipariş teslim edilince", "on": True})
+        if p["group"] == "pazaryeri":
+            out += [{"name": "Stok senkronu", "desc": "Satış olunca diğer kanallara bildirilir", "on": True},
+                    {"name": "Sipariş aktarımı", "desc": "Pazaryeri siparişleri panele düşer", "on": True}]
+        return out[:12]
+
     @api_router.get("/yp/integrations/{pid}")
     async def tek(pid: str, _: dict = Depends(adm)):
         p = BY_ID.get(_t(pid, 40))
@@ -300,7 +335,7 @@ def register(api_router, db, deps):
         izin = await allow_list()
         if p["id"] not in izin:
             raise HTTPException(403, "Bu entegrasyon paketinizde yok")
-        return {"item": view(p, await row_of(p["id"]), True)}
+        return {"item": view(p, await row_of(p["id"]), True), "uses": await nerede(p)}
 
     @api_router.put("/yp/integrations/{pid}")
     async def kaydet(pid: str, payload: dict, _: dict = Depends(adm)):
