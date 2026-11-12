@@ -14,6 +14,7 @@ from datetime import datetime, timedelta, timezone
 
 from fastapi import Depends, HTTPException
 
+import barkod
 from kampanya import _n, apply_campaigns
 from pazaryeri import give_stock, take_stock
 from urun import CHANNELS, _int, _num, _t, profit
@@ -69,6 +70,7 @@ def clean_items(rows):
         if price <= 0:
             raise HTTPException(422, "%s: fiyat girilmeli" % name)
         out.append({"product": pid, "name": name, "sku": _t(it.get("sku"), 40),
+                    "barcode": _t(it.get("barcode"), 40),
                     "variant": _t(it.get("variant"), 60), "qty": qty, "price": price,
                     "cost": _num(it.get("cost")), "vat": _num(it.get("vat"), 20.0),
                     "cat": _t(it.get("cat"), 40), "brand": _t(it.get("brand"), 40)})
@@ -89,6 +91,12 @@ def order_profit(o):
     return round(net, 2)
 
 
+def sevk_kodu(o):
+    """Fişte basılacak barkod: pazaryerinin verdiği gönderi barkodu > kargo takip no > sipariş no."""
+    cg = o.get("cargo") or {}
+    return _t(cg.get("barcode"), 40) or _t(cg.get("code"), 40) or _t(o.get("no"), 40)
+
+
 def view(o):
     o = dict(o)
     o["state_name"] = STATES.get(o.get("status"), o.get("status", ""))
@@ -97,6 +105,7 @@ def view(o):
     o["next"] = [{"id": s, "name": STATES[s]} for s in FLOW.get(o.get("status"), ())]
     o["qty"] = sum(_int(i.get("qty"), 1) for i in o.get("items") or [])
     o["profit"] = order_profit(o)
+    o["scan"] = sevk_kodu(o)
     return o
 
 
@@ -122,6 +131,8 @@ def _fis_css():
             ".nt{margin-top:10px;font-size:12px;color:#475467}"
             ".sg{margin-top:16px;display:flex;justify-content:space-between;font-size:11px;color:#667085}"
             ".sg span{border-top:1px solid #98a2b3;padding-top:4px;width:40%;text-align:center}"
+            ".bc{text-align:center;padding:9px 11px}.bc svg{display:block;margin:4px auto 0}"
+            ".bc2{margin:4px 0 2px}.ub{margin-top:3px}.ub svg{display:block}"
             "@media print{.noprint{display:none}}")
 
 
@@ -135,17 +146,26 @@ def _esc(v):
 
 
 def fis_html(orders, kind, firm=""):
-    """Toplu kargo fişi / sipariş fişi: tek sayfada art arda, her sipariş ayrı kâğıt."""
+    """Toplu kargo fişi / sipariş fişi: tek sayfada art arda, her sipariş ayrı kâğıt.
+
+    Barkod kâğıttan okunacak diye SVG basılır. Kargo fişinde sevk barkodu
+    (pazaryerinin verdiği gönderi barkodu, yoksa kargo takip numarası) büyük basılır;
+    sipariş fişinde ürünlerin kendi barkodları satır satır yer alır ki depoda
+    toplama sırasında el terminaliyle okunabilsin.
+    """
     out = []
     for o in orders:
         c = o.get("customer") or {}
         adres = " ".join(x for x in [c.get("address"), c.get("district"), c.get("city")] if x)
         cg = o.get("cargo") or {}
+        pazar = _t(o.get("market_no"), 40)
         head = ("<div class='hd'><div><h1>%s</h1><div style='color:#667085;font-size:12px'>%s</div></div>"
                 "<div style='text-align:right'><div class='no'>%s</div>"
-                "<div style='color:#667085;font-size:12px'>%s</div></div></div>"
+                "<div style='color:#667085;font-size:12px'>%s</div>%s</div></div>"
                 % ("Kargo fişi" if kind == "kargo" else "Sipariş fişi", _esc(firm), _esc(o.get("no")),
-                   _esc(str(o.get("at") or "")[:16].replace("T", " "))))
+                   _esc(str(o.get("at") or "")[:16].replace("T", " ")),
+                   ("<div style='color:#667085;font-size:12px'>%s: %s</div>"
+                    % (_esc(o.get("channel_name") or o.get("channel")), _esc(pazar))) if pazar else ""))
         sag = (("<b>Gönderici</b>%s<br>%s" % (_esc(firm) or "—",
                                               _esc(CARGOS.get(cg.get("firm", ""), "Kargo firması seçilmedi"))))
                if kind == "kargo" else
@@ -156,25 +176,35 @@ def fis_html(orders, kind, firm=""):
         kutu = ("<div class='g'><div class='bx'><b>Alıcı</b>%s<br>%s<br>%s</div>"
                 "<div class='bx'>%s</div></div>"
                 % (_esc(c.get("name")), _esc(_tel(c.get("phone"))), _esc(adres) or "—", sag))
+        sevk = sevk_kodu(o)
         if kind == "kargo":
-            body = (kutu + ("<div class='bx'><b>Takip numarası</b><div class='bk'>%s</div></div>"
-                            % (_esc(cg.get("code")) or "—"))
-                    + ("<div class='nt'>%d ürün · %s · %s</div>"
+            etiket = ("Gönderi barkodu" if _t(cg.get("barcode"), 40) else
+                      ("Kargo takip numarası" if _t(cg.get("code"), 40) else "Sipariş numarası"))
+            body = (kutu
+                    + ("<div class='bx bc'><b>%s</b>%s</div>"
+                       % (etiket, barkod.svg(sevk, height=62, module=2.0)))
+                    + (("<div class='bx bc' style='margin-top:8px'><b>%s sipariş numarası</b>%s</div>"
+                        % (_esc(o.get("channel_name") or "Pazaryeri"), barkod.svg(pazar, height=40, module=1.5)))
+                       if pazar else "")
+                    + ("<div class='nt'>%d ürün · %s ₺ · %s</div>"
                        % (sum(_int(i.get("qty"), 1) for i in o.get("items") or []),
-                          _n(o.get("total")) + " ₺",
-                          "Kapıda ödeme" if not o.get("paid") else "Ödendi"))
+                          _n(o.get("total")), "Kapıda ödeme" if not o.get("paid") else "Ödendi"))
                     + ("<div class='nt'>Not: %s</div>" % _esc(o.get("note")) if o.get("note") else "")
                     + "<div class='sg'><span>Teslim eden</span><span>Teslim alan</span></div>")
         else:
-            satir = "".join("<tr><td>%s<div style='color:#667085;font-size:11px'>%s</div></td>"
+            satir = "".join("<tr><td>%s<div style='color:#667085;font-size:11px'>%s</div>%s</td>"
                             "<td class='r a'>%d</td><td class='r b2'>%s ₺</td><td class='r c2'>%s ₺</td></tr>"
                             % (_esc(i.get("name")), _esc(i.get("sku") or i.get("variant") or ""),
+                               ("<div class='ub'>%s</div>" % barkod.svg(_t(i.get("barcode"), 40), height=26,
+                                                                       module=1.1)) if i.get("barcode") else "",
                                _int(i.get("qty"), 1), _n(i.get("price")),
                                _n(_num(i.get("price")) * _int(i.get("qty"), 1) - _num(i.get("discount"))))
                             for i in o.get("items") or [])
             kamp = "".join("<div><span>%s</span><span>−%s ₺</span></div>" % (_esc(k.get("name")), _n(k.get("discount")))
                            for k in o.get("camps") or [])
-            body = (kutu + "<table><tr><th>Ürün</th><th class='r a'>Adet</th><th class='r b2'>Fiyat</th>"
+            body = (kutu
+                    + ("<div class='bc bc2'>%s</div>" % barkod.svg(sevk, height=44, module=1.6))
+                    + "<table><tr><th>Ürün</th><th class='r a'>Adet</th><th class='r b2'>Fiyat</th>"
                     "<th class='r c2'>Tutar</th></tr>%s</table>" % satir
                     + ("<div class='tot'><div><span>Ara toplam</span><span>%s ₺</span></div>%s"
                        "<div><span>Kargo</span><span>%s</span></div>"
@@ -262,6 +292,21 @@ def register(api_router, db, deps):
         ch = _t(payload.get("channel"), 24) or "site"
         if ch not in CHANNELS:
             raise HTTPException(422, "Satış kanalı geçersiz")
+        # ürün kartındaki barkod, stok kodu, alış fiyatı ve kategori satıra kopyalansın:
+        # fiş barkodu ve kâr hesabı bunlara bakar
+        for it in items:
+            if not it.get("product"):
+                continue
+            pr = await db.yp_products.find_one({"id": it["product"]}, {"_id": 0})
+            if not pr:
+                continue
+            for k, src in (("barcode", "barcode"), ("sku", "sku"), ("cat", "cat"), ("brand", "brand")):
+                if not it.get(k):
+                    it[k] = _t(pr.get(src), 60)
+            if not _num(it.get("cost")):
+                it["cost"] = _num(pr.get("cost"))
+            if not _num(it.get("vat")):
+                it["vat"] = _num(pr.get("vat"), 20.0)
         camps = await db.yp_camps.find({"on": True}, {"_id": 0}).to_list(400)
         phone = _phone(cust.get("phone"))
         past = await db.yp_orders.count_documents({"customer.phone": phone}) if phone else 0
@@ -292,8 +337,10 @@ def register(api_router, db, deps):
              "ship_fee": calc["ship"], "ship_cost": _num(payload.get("ship_cost")),
              "free_ship": calc["free_ship"], "gifts": calc["gifts"], "total": calc["total"],
              "payment": _t(payload.get("payment"), 20), "paid": bool(payload.get("paid")),
+             "market_no": _t(payload.get("market_no"), 40).upper(),
              "cargo": {"firm": _t((payload.get("cargo") or {}).get("firm"), 24),
-                       "code": _t((payload.get("cargo") or {}).get("code"), 40).upper(), "label": ""},
+                       "code": _t((payload.get("cargo") or {}).get("code"), 40).upper(),
+                       "barcode": _t((payload.get("cargo") or {}).get("barcode"), 40).upper(), "label": ""},
              "invoice": {"no": "", "uuid": "", "state": ""}, "note": _t(payload.get("note"), 400),
              "timeline": [{"at": _now(), "by": "panel", "state": "yeni", "note": "sipariş oluşturuldu"}]}
         await db.yp_orders.insert_one(dict(o))
@@ -342,9 +389,11 @@ def register(api_router, db, deps):
             if firm and firm not in CARGOS:
                 raise HTTPException(422, "Kargo firması geçersiz")
             st["cargo"] = {"firm": firm, "code": _t(cg.get("code"), 40).upper(),
+                           "barcode": _t(cg.get("barcode"), 40).upper(),
                            "label": _t(cg.get("label"), 300)}
         for k, f in (("note", lambda v: _t(v, 400)), ("payment", lambda v: _t(v, 20)),
-                     ("paid", bool), ("ship_cost", _num)):
+                     ("paid", bool), ("ship_cost", _num),
+                     ("market_no", lambda v: _t(v, 40).upper())):
             if k in payload:
                 st[k] = f(payload[k])
         if "customer" in payload:

@@ -822,12 +822,17 @@ async function sipAc(id){var r=await api('/yp/orders/'+id),o=r.item;CUR.sip=o;
   +'<b>'+esc((o.customer||{}).name||'')+'</b><div class="note">'+esc(ftel((o.customer||{}).phone))+(o.customer&&o.customer.email?' · '+esc(o.customer.email):'')+'</div>'
   +'<p style="font-size:13.5px;line-height:1.55;margin:9px 0 0">'+esc((o.customer||{}).address||'—')+'<br>'+esc(((o.customer||{}).district||'')+' '+((o.customer||{}).city||''))+'</p></div></div>'
   +'<div class="card" style="margin-top:14px"><div class="hd"><h2>Kargo</h2></div><div class="pad">'
-  +'<form id="cgf"><label>Firma<select name="firm"><option value="">Seçin</option>'
+  +'<form id="cgf"><label>Pazaryeri sipariş no<input name="market_no" value="'+esc(o.market_no||'')+'" placeholder="Trendyol / Hepsiburada sipariş numarası"></label>'
+  +'<label>Firma<select name="firm"><option value="">Seçin</option>'
   +(CUR.cargos||[]).map(function(c){return '<option value="'+c.id+'"'+((o.cargo||{}).firm===c.id?' selected':'')+'>'+esc(c.name)+'</option>'}).join('')
   +'</select></label><label>Takip numarası<input name="code" value="'+esc((o.cargo||{}).code||'')+'"></label>'
-  +'<button class="btn" style="width:100%">Kargoyu kaydet</button></form></div></div>'
+  +'<label>Gönderi barkodu<input name="barcode" value="'+esc((o.cargo||{}).barcode||'')+'" placeholder="Pazaryerinin verdiği kargo barkodu"></label>'
+  +'<p class="note" style="margin:0 0 10px">Fişte basılan barkod: '+esc(o.scan||o.no)+'</p>'
+  +'<button class="btn" style="width:100%">Kaydet</button></form></div></div>'
   +'<div class="card" style="margin-top:14px"><div class="hd"><h2>İşlem</h2></div><div class="pad" style="display:grid;gap:8px">'
-  +nx+'<button class="btn" data-a="sip-iade" data-id="'+esc(o.id)+'">İade al</button></div></div></div></div>',true)}
+  +nx+'<button class="btn" data-a="sip-fis" data-v="kargo" data-id="'+esc(o.id)+'">Kargo fişi yazdır</button>'
+  +'<button class="btn" data-a="sip-fis" data-v="siparis" data-id="'+esc(o.id)+'">Sipariş fişi yazdır</button>'
+  +'<button class="btn" data-a="sip-iade" data-id="'+esc(o.id)+'">İade al</button></div></div></div></div>',true)}
 function iadeForm(o){
  return '<form id="iaf" data-id="'+esc(o.id)+'"><p class="note" style="margin:0 0 10px">Onayladığınızda ürün stoğa geri eklenir ve açık pazaryerlerine bildirilir.</p>'
   +(o.items||[]).map(function(i,n){return '<label class="row" style="display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line)">'
@@ -967,6 +972,8 @@ document.addEventListener('click',function(ev){var b=ev.target.closest('[data-a]
    var go=function(){api('/yp/orders/'+o.id+'/status',{method:'POST',body:{status:v}}).then(function(){closeM();toast('Sipariş '+(OST[v]?OST[v][0].toLowerCase():v));V.siparis.load()}).catch(fail)};
    if(v==='iptal')ask('Sipariş iptal edilsin mi? Ürünler stoğa geri eklenir.','İptal et').then(go);else go()}
  else if(a==='sip-iade'){iadeAc(b.dataset.id).catch(fail)}
+ else if(a==='sip-fis'){api('/yp/orders/print',{method:'POST',body:{ids:[b.dataset.id],kind:b.dataset.v}})
+   .then(function(r){yazdir(r.html)}).catch(fail)}
  else if(a==='sip-iade-liste'){CUR.ist='';V.iade().catch(fail)}
  else if(a==='go-siparis'){V.siparis().catch(fail)}
  else if(a==='iseg'){CUR.ist=b.dataset.v;V.iade().catch(fail)}
@@ -1001,8 +1008,10 @@ document.addEventListener('submit',function(ev){var f=ev.target;
  else if(f.id==='hzf'){ev.preventDefault();var btn=f.querySelector('button.p');btn.disabled=true;
   api('/yp/products/parse',{method:'POST',body:{url:f.url.value}}).then(function(r){
    modal('Ürünü onaylayın',urunForm(r.item||r));setTimeout(urunKar,0);toast('Bilgiler sayfadan alındı, fiyat ve stoğu kontrol edin')}).catch(function(e){btn.disabled=false;fail(e)})}
- else if(f.id==='cgf'){ev.preventDefault();api('/yp/orders/'+CUR.sip.id,{method:'PUT',body:{cargo:{firm:f.firm.value,code:f.code.value}}})
-   .then(function(){toast('Kargo bilgisi kaydedildi');CUR.sip.cargo={firm:f.firm.value,code:f.code.value}}).catch(fail)}
+ else if(f.id==='cgf'){ev.preventDefault();
+  api('/yp/orders/'+CUR.sip.id,{method:'PUT',body:{market_no:f.market_no.value,
+   cargo:{firm:f.firm.value,code:f.code.value,barcode:f.barcode.value}}})
+   .then(function(r){toast('Kargo bilgisi kaydedildi');CUR.sip=r.item;sipAc(CUR.sip.id).catch(fail)}).catch(fail)}
  else if(f.id==='iaf'){ev.preventDefault();var o=(CUR.sip||{}),items=[];
   Array.prototype.forEach.call(f.querySelectorAll('input[name=pick]:checked'),function(c){var n=+c.value,it=(o.items||[])[n];
    if(it)items.push({product:it.product,name:it.name,qty:+f['q'+n].value||1,reason:f.reason.value})});
