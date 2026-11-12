@@ -2921,6 +2921,9 @@ isakis.register(api_router, db, {"require_admin": require_admin})
 import yprapor
 yprapor.register(api_router, db, {"require_admin": require_admin})
 
+import cerez
+cerez.register(api_router, db, {"require_admin": require_admin})
+
 @app.get("/salon", include_in_schema=False)
 async def yp_sayfa():
     """Yeni yönetim paneli (randevuyla çalışan işler). Eski /admin ekranından ayrıdır."""

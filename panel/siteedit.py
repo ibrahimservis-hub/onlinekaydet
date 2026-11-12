@@ -18,6 +18,7 @@ from fastapi.responses import HTMLResponse, Response
 
 import shop as shopmod
 import shop_legal
+import cerez as cerez_mod
 import storefront
 import ilan
 import sektor_mod
@@ -129,8 +130,14 @@ def register(api_router, db, deps):
         mods = fm.get("modules")                       # None: paket sınırı yok (eski/tek firma) -> hepsi açık
         mods = None if mods is None else list(mods)
         shop_ok = bool(feats.get("shop_enabled")) and (mods is None or "magaza" in mods)   # paket Mağaza'yı içermiyorsa tema bölümü de yayında olmaz
-        legal = list(shop_legal.SLUGS) if shop_ok else []
-        return {"modules": mods, "th": th, "name": name, "tel": tel, "p": p, "sector": sector, "logo": logo, "city": prof.get("city") or "", "legal": legal, "shop_on": shop_ok, "dev": dev,
+        cz = dict(cerez_mod.VARSAYILAN, **((await db.app_settings.find_one({"_id": "cerez"}, {"_id": 0})) or {}))
+        if shop_ok:
+            legal = list(shop_legal.SLUGS)
+        elif cz.get("on"):                      # çerez bandı açıkken politika ve aydınlatma metni her sitede açılır
+            legal = [x for x in shop_legal.SLUGS if x[0] in ("cerez-politikasi", "gizlilik-kvkk")]
+        else:
+            legal = []
+        return {"modules": mods, "cerez": cz, "th": th, "name": name, "tel": tel, "p": p, "sector": sector, "logo": logo, "city": prof.get("city") or "", "legal": legal, "shop_on": shop_ok, "dev": dev,
                 "img": (lambda k: imgs.get(k, "")) if inline else (lambda k: "/api/public/site-img/" + k),
                 "logo_abs": "/api/public/site-logo" if lg else ""}
 
@@ -706,7 +713,7 @@ def register(api_router, db, deps):
             h = compose_page(await themed_home(ctx), ttl + " · " + ctx["name"], body)
             if not h:
                 return None
-        elif p in shop_legal.TITLES and ctx and ctx.get("legal"):
+        elif ctx and p in {k for k, _ in (ctx.get("legal") or [])}:
             sc = await db.app_settings.find_one({"_id": "shop_settings"}, {"_id": 0}) or {}
             cfg = {**shopmod.SHOP_DEFAULT, **sc}
             body = shop_legal.page(p, shopmod.merge_legal(cfg.get("legal")), cfg, cfg.get("legal_docs"), str(cfg.get("updated_at") or ""))
@@ -733,6 +740,7 @@ def register(api_router, db, deps):
         if ctx and ctx.get("shop_on"):
             h = sitegen.account_icons(h)
         h = sitegen.credit(sitegen.seo_finish(h, host))
+        h = cerez_mod.ekle(h, ctx.get("cerez") if ctx else None, ((ctx or {}).get("th") or {}).get("accent") or "#1155cc")
         if inline:
             h = await inline_imgs(h)
         return h, "text/html"
