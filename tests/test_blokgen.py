@@ -13,7 +13,8 @@ def t(n, f):
 import blokgen
 
 def b1():
-    b = {"iid": "i1", "bid": "hero", "wire": "hero", "on": True,
+    # kendi üreticisi olmayan bölüm: yerleşim kalıbı devreye girer
+    b = {"iid": "i1", "bid": "_kalip_deneme", "wire": "hero", "on": True,
          "set": {"title": "Başlık", "sub": "Alt", "cta": "Randevu", "cta_to": "/randevu", "pad": 70, "align": "orta"},
          "set_m": {"pad": 24, "align": "sol"}}
     w, f = blokgen.block_html(b, ""), blokgen.block_html(b, "phone")
@@ -21,6 +22,14 @@ def b1():
     assert "--bk-pad:24px" in f and "bk-a-l" in f, "telefon ayarı binmeli"
     assert "Başlık" in w and 'href="/randevu"' in w
 t("telefonda set_m set'in üzerine biner, dokunulmayan miras kalır", b1)
+
+def b1b():
+    b = {"iid": "i2", "bid": "hero", "wire": "hero", "on": True,
+         "set": {"title": "Başlık", "pad": 70, "align": "orta"}, "set_m": {"pad": 24, "align": "sol"}}
+    w, f = blokgen.block_html(b, ""), blokgen.block_html(b, "phone")
+    assert "--bk-pad:70px" in w and "--bk-pad:24px" in f, "kendi üreticisi olan bölümde de miras işlemeli"
+    assert "bkt-a-c" in w and "bkt-a-l" in f
+t("kendi üreticisi olan bölümde de telefon mirası işler", b1b)
 
 def b2():
     kotu = {"iid": "i", "bid": "hero", "wire": "hero", "on": True,
