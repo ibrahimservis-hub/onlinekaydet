@@ -14,7 +14,7 @@ from datetime import datetime, timedelta, timezone
 
 from fastapi import Depends, HTTPException
 
-from kampanya import apply_campaigns
+from kampanya import _n, apply_campaigns
 from pazaryeri import give_stock, take_stock
 from urun import CHANNELS, _int, _num, _t, profit
 
@@ -98,6 +98,94 @@ def view(o):
     o["qty"] = sum(_int(i.get("qty"), 1) for i in o.get("items") or [])
     o["profit"] = order_profit(o)
     return o
+
+
+def _fis_css():
+    return ("@page{size:A4;margin:10mm}*{box-sizing:border-box}"
+            "body{font:13px/1.45 -apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#101828;margin:0}"
+            ".f{page-break-after:always;padding:6mm 0;border-bottom:1px dashed #d0d5dd}"
+            ".f:last-child{page-break-after:auto;border:0}"
+            ".hd{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;"
+            "border-bottom:2px solid #101828;padding-bottom:8px;margin-bottom:10px}"
+            ".hd h1{font-size:18px;margin:0}.hd .no{font:700 15px ui-monospace,Menlo,monospace}"
+            ".g{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:12px}"
+            ".bx{border:1px solid #d0d5dd;border-radius:8px;padding:9px 11px}"
+            ".bx b{display:block;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:#667085;margin-bottom:4px}"
+            "table{width:100%;border-collapse:collapse;margin-top:6px}"
+            "th{text-align:left;font-size:11px;text-transform:uppercase;color:#667085;border-bottom:1px solid #d0d5dd;padding:6px 4px}"
+            "td{padding:7px 4px;border-bottom:1px solid #eaecf0}.r{text-align:right}"
+            "th.a,td.a{width:70px}th.b2,td.b2{width:100px}th.c2,td.c2{width:110px}"
+            ".tot{margin-top:8px;margin-left:auto;width:48%}"
+            ".tot div{display:flex;justify-content:space-between;padding:3px 0}"
+            ".tot .b{font-weight:700;border-top:1px solid #101828;padding-top:6px;margin-top:4px}"
+            ".bk{font:700 20px ui-monospace,Menlo,monospace;letter-spacing:.1em;margin-top:8px}"
+            ".nt{margin-top:10px;font-size:12px;color:#475467}"
+            ".sg{margin-top:16px;display:flex;justify-content:space-between;font-size:11px;color:#667085}"
+            ".sg span{border-top:1px solid #98a2b3;padding-top:4px;width:40%;text-align:center}"
+            "@media print{.noprint{display:none}}")
+
+
+def _tel(v):
+    d = "".join(ch for ch in str(v or "") if ch.isdigit())
+    return "%s %s %s %s" % (d[:4], d[4:7], d[7:9], d[9:]) if len(d) == 11 else (v or "")
+
+
+def _esc(v):
+    return (str(v or "").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;"))
+
+
+def fis_html(orders, kind, firm=""):
+    """Toplu kargo fişi / sipariş fişi: tek sayfada art arda, her sipariş ayrı kâğıt."""
+    out = []
+    for o in orders:
+        c = o.get("customer") or {}
+        adres = " ".join(x for x in [c.get("address"), c.get("district"), c.get("city")] if x)
+        cg = o.get("cargo") or {}
+        head = ("<div class='hd'><div><h1>%s</h1><div style='color:#667085;font-size:12px'>%s</div></div>"
+                "<div style='text-align:right'><div class='no'>%s</div>"
+                "<div style='color:#667085;font-size:12px'>%s</div></div></div>"
+                % ("Kargo fişi" if kind == "kargo" else "Sipariş fişi", _esc(firm), _esc(o.get("no")),
+                   _esc(str(o.get("at") or "")[:16].replace("T", " "))))
+        sag = (("<b>Gönderici</b>%s<br>%s" % (_esc(firm) or "—",
+                                              _esc(CARGOS.get(cg.get("firm", ""), "Kargo firması seçilmedi"))))
+               if kind == "kargo" else
+               ("<b>Sipariş bilgisi</b>Satış kanalı: %s<br>Ödeme: %s<br>Kargo: %s"
+                % (_esc(o.get("channel_name") or o.get("channel")),
+                   "Ödendi" if o.get("paid") else "Bekliyor",
+                   _esc(CARGOS.get(cg.get("firm", ""), "—")))))
+        kutu = ("<div class='g'><div class='bx'><b>Alıcı</b>%s<br>%s<br>%s</div>"
+                "<div class='bx'>%s</div></div>"
+                % (_esc(c.get("name")), _esc(_tel(c.get("phone"))), _esc(adres) or "—", sag))
+        if kind == "kargo":
+            body = (kutu + ("<div class='bx'><b>Takip numarası</b><div class='bk'>%s</div></div>"
+                            % (_esc(cg.get("code")) or "—"))
+                    + ("<div class='nt'>%d ürün · %s · %s</div>"
+                       % (sum(_int(i.get("qty"), 1) for i in o.get("items") or []),
+                          _n(o.get("total")) + " ₺",
+                          "Kapıda ödeme" if not o.get("paid") else "Ödendi"))
+                    + ("<div class='nt'>Not: %s</div>" % _esc(o.get("note")) if o.get("note") else "")
+                    + "<div class='sg'><span>Teslim eden</span><span>Teslim alan</span></div>")
+        else:
+            satir = "".join("<tr><td>%s<div style='color:#667085;font-size:11px'>%s</div></td>"
+                            "<td class='r a'>%d</td><td class='r b2'>%s ₺</td><td class='r c2'>%s ₺</td></tr>"
+                            % (_esc(i.get("name")), _esc(i.get("sku") or i.get("variant") or ""),
+                               _int(i.get("qty"), 1), _n(i.get("price")),
+                               _n(_num(i.get("price")) * _int(i.get("qty"), 1) - _num(i.get("discount"))))
+                            for i in o.get("items") or [])
+            kamp = "".join("<div><span>%s</span><span>−%s ₺</span></div>" % (_esc(k.get("name")), _n(k.get("discount")))
+                           for k in o.get("camps") or [])
+            body = (kutu + "<table><tr><th>Ürün</th><th class='r a'>Adet</th><th class='r b2'>Fiyat</th>"
+                    "<th class='r c2'>Tutar</th></tr>%s</table>" % satir
+                    + ("<div class='tot'><div><span>Ara toplam</span><span>%s ₺</span></div>%s"
+                       "<div><span>Kargo</span><span>%s</span></div>"
+                       "<div class='b'><span>Genel toplam</span><span>%s ₺</span></div></div>"
+                       % (_n(o.get("subtotal")), kamp,
+                          "Bedava" if o.get("free_ship") else _n(o.get("ship_fee")) + " ₺", _n(o.get("total"))))
+                    + ("<div class='nt'>Not: %s</div>" % _esc(o.get("note")) if o.get("note") else ""))
+        out.append("<div class='f'>%s%s</div>" % (head, body))
+    return ("<!doctype html><html lang='tr'><head><meta charset='utf-8'><title>%s</title><style>%s</style></head>"
+            "<body>%s<script>window.onload=function(){setTimeout(function(){window.print()},250)}</script>"
+            "</body></html>" % ("Kargo fişi" if kind == "kargo" else "Sipariş fişi", _fis_css(), "".join(out)))
 
 
 def register(api_router, db, deps):
@@ -274,6 +362,112 @@ def register(api_router, db, deps):
         if "cargo" in st and st["cargo"].get("code"):
             await log(o["id"], o.get("status", ""), "kargo kodu: %s" % st["cargo"]["code"])
         return {"ok": True, "item": view(await get_order(o["id"]))}
+
+    # ------------------------------------------------------------ toplu işlem
+    @api_router.post("/yp/orders/bulk")
+    async def order_bulk(payload: dict, _=Depends(require_admin)):
+        """Seçili siparişlerde toplu değişiklik: durum, kargo firması, ödeme işareti, not.
+
+        Her sipariş kendi akış kuralına göre değerlendirilir; uymayan sipariş atlanır ve
+        sebebiyle birlikte geri bildirilir. Böylece 40 siparişlik bir seçimde tek bir
+        uygunsuz kayıt yüzünden işlem yarıda kalmaz."""
+        ids = [_t(i, 24) for i in (payload.get("ids") or [])][:2000]
+        op = _t(payload.get("op"), 20)
+        if not ids or op not in ("status", "cargo", "paid", "note"):
+            raise HTTPException(422, "Yapılacak işlemi ve siparişleri seçin")
+        new = _t(payload.get("status"), 20)
+        if op == "status" and new not in STATES:
+            raise HTTPException(422, "Durum geçersiz")
+        firm = _t((payload.get("cargo") or {}).get("firm"), 24)
+        if op == "cargo" and firm and firm not in CARGOS:
+            raise HTTPException(422, "Kargo firması geçersiz")
+        done, skip = 0, []
+        for oid in ids:
+            o = await db.yp_orders.find_one({"id": oid}, {"_id": 0})
+            if not o:
+                continue
+            no, cur = o.get("no", ""), o.get("status", "yeni")
+            if op == "status":
+                if new == cur:
+                    continue
+                if not can_go(cur, new):
+                    skip.append({"no": no, "why": "%s → %s geçişi yok" % (STATES[cur], STATES[new])})
+                    continue
+                if new == "kargoda" and not (o.get("cargo") or {}).get("firm"):
+                    skip.append({"no": no, "why": "kargo firması seçilmemiş"})
+                    continue
+                if new == "iptal":
+                    for it in o.get("items") or []:
+                        if it.get("product"):
+                            await give_stock(db, it["product"], it["qty"], "iptal", no + "-iptal")
+                    for c in o.get("camps") or []:
+                        if c.get("id"):
+                            await db.yp_camps.update_one({"id": c["id"], "limit.used": {"$gt": 0}},
+                                                         {"$inc": {"limit.used": -1}})
+                st = {"status": new}
+                if new == "teslim":
+                    st["paid"] = True
+                    st["delivered_at"] = _now()
+                await db.yp_orders.update_one({"id": oid}, {"$set": st})
+                await log(oid, new, "toplu işlem")
+            elif op == "cargo":
+                if cur in ("teslim", "iptal"):
+                    skip.append({"no": no, "why": "%s siparişte kargo değişmez" % STATES[cur]})
+                    continue
+                cg = dict(o.get("cargo") or {})
+                cg["firm"] = firm or cg.get("firm", "")
+                await db.yp_orders.update_one({"id": oid}, {"$set": {"cargo": cg}})
+                await log(oid, cur, "kargo firması: %s" % CARGOS.get(cg["firm"], "—"))
+            elif op == "paid":
+                await db.yp_orders.update_one({"id": oid}, {"$set": {"paid": bool(payload.get("on", True))}})
+                await log(oid, cur, "ödeme işaretlendi" if payload.get("on", True) else "ödeme işareti kaldırıldı")
+            else:
+                await db.yp_orders.update_one({"id": oid}, {"$set": {"note": _t(payload.get("note"), 400)}})
+            done += 1
+        return {"ok": True, "n": done, "skipped": skip,
+                "msg": "%d sipariş güncellendi%s" % (done, (", %d tanesi atlandı" % len(skip)) if skip else "")}
+
+    @api_router.post("/yp/orders/print")
+    async def order_print(payload: dict, _=Depends(require_admin)):
+        """Toplu kargo fişi veya sipariş fişi: yazdırmaya hazır tek sayfa."""
+        ids = [_t(i, 24) for i in (payload.get("ids") or [])][:200]
+        kind = "kargo" if _t(payload.get("kind"), 10) != "siparis" else "siparis"
+        if not ids:
+            raise HTTPException(422, "Fişi yazdırılacak siparişleri seçin")
+        rows = [view(o) for o in await db.yp_orders.find({"id": {"$in": ids}}, {"_id": 0}).to_list(200)]
+        if not rows:
+            raise HTTPException(404, "Sipariş bulunamadı")
+        rows.sort(key=lambda o: ids.index(o["id"]) if o["id"] in ids else 0)
+        g = await db.app_settings.find_one({"_id": "global"}, {"_id": 0}) or {}
+        return {"ok": True, "n": len(rows), "kind": kind,
+                "html": fis_html(rows, kind, g.get("company_name") or "")}
+
+    @api_router.post("/yp/orders/export")
+    async def order_export(payload: dict, _=Depends(require_admin)):
+        """Seçili siparişleri Excel'in açabildiği CSV olarak ver."""
+        ids = [_t(i, 24) for i in (payload.get("ids") or [])][:5000]
+        q = {"id": {"$in": ids}} if ids else {}
+        rows = [view(o) for o in await db.yp_orders.find(q, {"_id": 0}).to_list(5000)]
+        rows.sort(key=lambda o: o.get("seq") or 0, reverse=True)
+        head = ["Sipariş no", "Tarih", "Durum", "Kanal", "Müşteri", "Telefon", "İl", "Adres",
+                "Ürünler", "Adet", "Ara toplam", "İndirim", "Kargo", "Toplam", "Net kâr",
+                "Kargo firması", "Takip no", "Ödeme", "Not"]
+        def cell(v):
+            t = str(v if v is not None else "").replace('"', '""').replace("\n", " ")
+            return '"%s"' % t
+        lines = [";".join(head)]
+        for o in rows:
+            c = o.get("customer") or {}
+            cg = o.get("cargo") or {}
+            lines.append(";".join(cell(x) for x in [
+                o.get("no"), str(o.get("at") or "")[:16].replace("T", " "), o.get("state_name"),
+                o.get("channel_name"), c.get("name"), c.get("phone"), c.get("city"), c.get("address"),
+                " + ".join("%s x%d" % (i.get("name"), _int(i.get("qty"), 1)) for i in o.get("items") or []),
+                o.get("qty"), o.get("subtotal"), o.get("discount"), o.get("ship_fee"), o.get("total"),
+                o.get("profit"), CARGOS.get(cg.get("firm", ""), ""), cg.get("code"),
+                "Ödendi" if o.get("paid") else "Bekliyor", o.get("note")]))
+        return {"ok": True, "n": len(rows), "name": "siparisler-%s.csv" % _now()[:10],
+                "csv": "\ufeff" + "\n".join(lines)}
 
     # ------------------------------------------------------------ iade
     @api_router.get("/yp/returns")

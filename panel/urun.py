@@ -351,7 +351,8 @@ def register(api_router, db, deps):
         """Toplu işlem: fiyat/stok/kanal/durum. `op` ve `ids` zorunlu."""
         ids = [str(i) for i in (payload.get("ids") or [])][:5000]
         op = payload.get("op")
-        if not ids or op not in ("price", "stock", "channel", "status", "delete", "cat"):
+        if not ids or op not in ("price", "stock", "channel", "status", "delete", "cat",
+                                 "brand", "sale", "vat", "low_at", "cost"):
             raise HTTPException(422, "Yapılacak işlemi ve ürünleri seçin")
         n = 0
         for pid in ids:
@@ -377,6 +378,22 @@ def register(api_router, db, deps):
                 up["status"] = "draft" if payload.get("status") == "draft" else "live"
             elif op == "cat":
                 up["cat"] = _t(payload.get("cat"), 80)
+            elif op == "brand":
+                up["brand"] = _t(payload.get("brand"), 60)
+            elif op == "sale":
+                pct = min(max(_num(payload.get("percent")), 0.0), 95.0)
+                if pct:
+                    up["sale_price"] = round(_num(p["price"]) * (1 - pct / 100.0), 2)
+                else:
+                    up["sale_price"] = 0.0
+            elif op == "cost":
+                pct = _num(payload.get("percent"))
+                up["cost"] = round(_num(p.get("cost")) * (1 + pct / 100.0), 2)
+            elif op == "vat":
+                v = _int(payload.get("vat"), 20)
+                up["vat"] = v if v in VATS else 20
+            elif op == "low_at":
+                up["low_at"] = max(_int(payload.get("low_at")), 0)
             if op == "delete":
                 await db.yp_products.delete_one({"id": pid})
             else:
@@ -384,6 +401,28 @@ def register(api_router, db, deps):
                 await db.yp_products.update_one({"id": pid}, {"$set": up})
             n += 1
         return {"ok": True, "n": n}
+
+    @api_router.post("/yp/products/export")
+    async def prod_export(payload: dict, _: dict = Depends(adm)):
+        """Seçili ürünleri (seçim yoksa hepsini) Excel'in açabildiği CSV olarak ver."""
+        ids = [_t(i, 24) for i in (payload.get("ids") or [])][:20000]
+        q = {"id": {"$in": ids}} if ids else {}
+        rows = [view(p) for p in await db.yp_products.find(q, {"_id": 0}).to_list(20000)]
+        rows.sort(key=lambda r: r.get("name", "").lower())
+        head = ["Ürün adı", "Stok kodu", "Barkod", "Kategori", "Marka", "Alış", "Satış", "İndirimli",
+                "KDV", "Stok", "Az stok eşiği", "Kâr", "Kâr oranı %", "Durum", "Açık kanallar"]
+        def cell(v):
+            return '"%s"' % str(v if v is not None else "").replace('"', '""')
+        lines = [";".join(head)]
+        for r in rows:
+            lines.append(";".join(cell(x) for x in [
+                r.get("name"), r.get("sku"), r.get("barcode"), r.get("cat"), r.get("brand"),
+                r.get("cost"), r.get("price"), r.get("sale_price") or "", r.get("vat"),
+                r.get("stock"), r.get("low_at", 5), (r.get("profit") or {}).get("net"), r.get("margin"),
+                "Yayında" if r.get("status") != "draft" else "Taslak",
+                ", ".join(CHANNELS[k][0] for k in r.get("channels_on") or [] if k in CHANNELS)]))
+        return {"ok": True, "n": len(rows), "name": "urunler-%s.csv" % _now()[:10],
+                "csv": "\ufeff" + "\n".join(lines)}
 
     @api_router.post("/yp/products/{pid}/profit")
     async def profit_calc(pid: str, payload: dict, _: dict = Depends(adm)):

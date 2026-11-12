@@ -121,7 +121,7 @@ with sync_playwright() as p:
         pg.click('#useg button[data-v=""]'); pg.wait_for_timeout(700)
         pg.fill("#uq", "keten"); pg.wait_for_timeout(900)
         pg.wait_for_selector("#ulist tbody tr", timeout=8000)
-        stok = pg.inner_text("#ulist tbody tr td:nth-child(4)")
+        stok = pg.inner_text("#ulist tbody tr td:nth-child(5)")
         assert "11" in stok, "2 satıldı 1 iade döndü → 11 olmalı: %s" % stok
     t("stok sipariş ve iadeye göre doğru: 12 − 2 + 1 = 11", i)
 

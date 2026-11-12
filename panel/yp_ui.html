@@ -86,9 +86,20 @@ label.f>textarea{min-height:70px;resize:vertical}
 .md .mh{display:flex;align-items:center;padding:16px 20px 6px}.md .mh h3{font-size:17px;font-weight:700;flex:1}.md .mh button{border:0;background:none;font-size:24px;line-height:1;color:var(--mut);width:40px;height:40px}
 .md .mb{padding:8px 20px 20px}.md .mf{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;padding-top:6px}
 .kv{display:grid;grid-template-columns:110px 1fr;gap:6px 12px;margin:8px 0 14px}.kv dt{color:var(--mut)}.kv dd{margin:0;font-weight:600}
-#toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:11px 18px;border-radius:10px;z-index:80;font-weight:600;max-width:90vw}
+#toast{position:fixed;left:50%;bottom:120px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:11px 18px;border-radius:10px;z-index:80;font-weight:600;max-width:90vw}
 #toast.bad{background:var(--bad)}
 /* e-ticaret: ürün, sipariş, kampanya */
+.selbar{position:sticky;bottom:0;z-index:30;display:flex;align-items:center;gap:9px;flex-wrap:wrap;
+ padding:11px 18px;background:var(--ink);color:#fff;border-radius:0 0 var(--r) var(--r);margin:0 -1px -1px}
+.selbar b{font-size:14px}
+.selbar .btn{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.25);color:#fff}
+.selbar .btn:hover{background:rgba(255,255,255,.22)}
+.selbar .sp{flex:1 1 0;min-width:4px}
+.selbar select{border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.12);color:#fff;border-radius:8px;min-height:36px;padding:0 10px;font:inherit}
+.selbar select option{color:#101828}
+td.ck,th.ck{width:38px;padding-right:0}
+td.ck input,th.ck input{width:17px;height:17px}
+tr.sel{background:var(--blue-s)}
 .pimg{width:40px;height:40px;border-radius:8px;background:linear-gradient(140deg,#e8e2d9,#d5ccc0);flex:none;object-fit:cover}
 .cn{display:flex;align-items:center;gap:10px}
 .cn b{display:block;font-size:14px}
@@ -683,7 +694,7 @@ function stokBar(p){var pct=Math.max(0,Math.min(100,(p.stock||0)/Math.max(p.low_
  return '<span class="stokbar"><i style="width:'+pct+'%;background:'+c+'"></i></span><b class="num">'+(p.stock||0)+'</b>'}
 V.urun=async function(){var F=CUR.uf=CUR.uf||{q:'',cat:'',brand:'',channel:'',seg:'',sort:'yeni',n:40,off:0};
  var h=head('Ürünler','Stok tüm satış kanallarında ortaktır; bir kanalda satılan ürün diğerlerinde de düşer.',
-  '<button class="btn" data-a="urun-hizli">Bağlantıdan ürün ekle</button><button class="btn p" data-a="urun-yeni"><svg class="i"><use href="#plus"/></svg>Ürün ekle</button>');
+  '<button class="btn" data-a="usel-disa">Excel\'e aktar</button><button class="btn" data-a="urun-hizli">Bağlantıdan ürün ekle</button><button class="btn p" data-a="urun-yeni"><svg class="i"><use href="#plus"/></svg>Ürün ekle</button>');
  h+='<div class="card"><div class="fbar"><input type="search" id="uq" placeholder="Ürün adı, stok kodu, barkod veya marka ara" value="'+esc(F.q)+'">'
   +'<select id="ucat"></select><select id="ubrand"></select>'
   +'<select id="usort"><option value="yeni">En yeni</option><option value="ad">İsme göre</option><option value="fiyat">Fiyat (artan)</option><option value="fiyat_d">Fiyat (azalan)</option><option value="stok">Stok (az → çok)</option><option value="kar">Kâr (yüksek → düşük)</option></select>'
@@ -705,11 +716,11 @@ V.urun.load=async function(){var F=CUR.uf;
   return '<button class="chip '+(F.seg===s[0]?'on':'')+'" data-a="useg" data-v="'+s[0]+'">'+s[1]+'<small>'+(s[2]||0)+'</small></button>'}).join('');
  var rows=CUR.urunler;var el=$('#ulist');if(!el)return;
  if(!rows.length){el.innerHTML='<div class="empty">Ürün yok. “Ürün ekle” ile başlayın ya da bir ürün sayfasının bağlantısını yapıştırın.</div>';return}
- el.innerHTML='<table class="gr"><thead><tr><th>Ürün</th><th>Kategori</th><th class="r">Fiyat</th><th>Stok</th><th class="r">Kâr</th><th>Durum</th><th></th></tr></thead><tbody>'
+ el.innerHTML='<table class="gr"><thead><tr>'+ckHead('urun')+'<th>Ürün</th><th>Kategori</th><th class="r">Fiyat</th><th>Stok</th><th class="r">Kâr</th><th>Durum</th><th></th></tr></thead><tbody>'
   +rows.map(function(p){
    var st=p.out?['Tükendi','r']:(p.low?['Az stok','y']:(p.status==='draft'?['Taslak','w']:['Yayında','g']));
    var im=(p.images||[])[0]||'';
-   return '<tr><td><div class="cn"><span class="pimg"'+(im?' style="background-image:url(\''+esc(im)+'\');background-size:cover"':'')+'></span>'
+   return '<tr>'+ckCell('urun',p.id)+'<td><div class="cn"><span class="pimg"'+(im?' style="background-image:url(\''+esc(im)+'\');background-size:cover"':'')+'></span>'
     +'<span><b>'+esc(p.name)+'</b><small>'+esc(p.sku||'—')+'</small></span></div></td>'
     +'<td>'+esc(p.cat||'—')+'</td>'
     +'<td class="r"><b class="num">'+tl(p.sale)+'</b>'+(p.discount>0?'<div class="note" style="text-decoration:line-through">'+tl(p.price)+'</div>':'')+'</td>'
@@ -720,7 +731,8 @@ V.urun.load=async function(){var F=CUR.uf;
   +'</tbody></table><div class="sumline"><span><b style="color:var(--tx)">'+(r.total||rows.length)+'</b> ürün</span>'
   +'<span>Stok değeri <b style="color:var(--tx)">'+tl((r.sum||{}).stock_value||0)+'</b></span>'
   +'<span>Ortalama kâr <b style="color:var(--tx)">%'+((r.sum||{}).margin||0)+'</b></span>'
-  +(c.az_stok?'<span style="color:var(--warn)">'+c.az_stok+' ürün az stoklu</span>':'')+'</div>'};
+  +(c.az_stok?'<span style="color:var(--warn)">'+c.az_stok+' ürün az stoklu</span>':'')+'</div>';
+ SEL.urun=SEL.urun.filter(function(id){return rows.some(function(p){return p.id===id})});selDraw('urun')};
 function urunForm(p){p=p||{};var y=function(k,d){return p[k]==null?(d||''):p[k]};
  return '<form id="uf" data-id="'+esc(p.id||'')+'">'
   +'<label>Ürün adı<input name="name" required value="'+esc(y('name'))+'" placeholder="Keten Gömlek — Beyaz"></label>'
@@ -753,7 +765,7 @@ function flowBar(cur){var i=OFLOW.indexOf(cur);if(i<0)return '';
   return '<span class="s '+cl+'"><i></i>'+OST[k][0]+'</span>'+(n<OFLOW.length-1?'<span class="ln '+(n<i?'d':'')+'"></span>':'')}).join('')+'</div>'}
 V.siparis=async function(){var F=CUR.sf=CUR.sf||{q:'',status:'',channel:'',cargo:'',sort:'yeni',n:40,off:0,tab:'siparis'};
  var h=head('Siparişler','Sipariş kaydedildiğinde stok anında düşer; iptal ve iade onayında geri döner.',
-  '<button class="btn" data-a="sip-iade-liste">İadeler</button><button class="btn p" data-a="sip-yeni"><svg class="i"><use href="#plus"/></svg>Sipariş ekle</button>');
+  '<button class="btn" data-a="ssel-disa">Excel\'e aktar</button><button class="btn" data-a="sip-iade-liste">İadeler</button><button class="btn p" data-a="sip-yeni"><svg class="i"><use href="#plus"/></svg>Sipariş ekle</button>');
  h+='<div id="sfig" class="figs"></div><div class="card"><div class="fbar">'
   +'<input type="search" id="sq" placeholder="Sipariş no, müşteri, telefon veya kargo kodu ara" value="'+esc(F.q)+'">'
   +'<select id="sch"><option value="">Tüm kanallar</option></select><select id="scg"><option value="">Tüm kargolar</option></select>'
@@ -775,9 +787,9 @@ V.siparis.load=async function(){var F=CUR.sf;
    +'<div class="fig"><small>İade</small><b class="num">'+tl(rp.iade)+'</b><span>'+(rp.iade_n||0)+' iade · indirim '+tl(rp.indirim)+'</span></div>'}catch(e){}
  var el=$('#slist');if(!el)return;var rows=CUR.siparisler;
  if(!rows.length){el.innerHTML='<div class="empty">Bu süzgece uyan sipariş yok.</div>';return}
- el.innerHTML='<table class="gr"><thead><tr><th>Sipariş</th><th>Müşteri</th><th>Kanal</th><th class="r">Adet</th><th class="r">Tutar</th><th>Durum</th><th>Kargo</th><th></th></tr></thead><tbody>'
+ el.innerHTML='<table class="gr"><thead><tr>'+ckHead('siparis')+'<th>Sipariş</th><th>Müşteri</th><th>Kanal</th><th class="r">Adet</th><th class="r">Tutar</th><th>Durum</th><th>Kargo</th><th></th></tr></thead><tbody>'
   +rows.map(function(o){var st=OST[o.status]||['?','w'];
-   return '<tr><td><span class="onum">'+esc(o.no)+'</span><div class="note">'+esc((o.at||'').slice(0,16).replace('T',' '))+'</div></td>'
+   return '<tr>'+ckCell('siparis',o.id)+'<td><span class="onum">'+esc(o.no)+'</span><div class="note">'+esc((o.at||'').slice(0,16).replace('T',' '))+'</div></td>'
     +'<td><b>'+esc((o.customer||{}).name||'—')+'</b><div class="note">'+esc(ftel((o.customer||{}).phone))+'</div></td>'
     +'<td>'+esc(o.channel_name||o.channel)+'</td><td class="r num">'+(o.qty||0)+'</td>'
     +'<td class="r"><b class="num">'+tl(o.total)+'</b></td>'
@@ -785,7 +797,8 @@ V.siparis.load=async function(){var F=CUR.sf;
     +'<td>'+(o.cargo_name?esc(o.cargo_name)+'<div class="note">'+esc((o.cargo||{}).code||'')+'</div>':'<span class="note">—</span>')+'</td>'
     +'<td class="r"><button class="btn s" data-a="sip-ac" data-id="'+esc(o.id)+'">Aç</button></td></tr>'}).join('')
   +'</tbody></table><div class="sumline"><span><b style="color:var(--tx)">'+(r.total||rows.length)+'</b> sipariş</span>'
-  +'<span>Toplam <b style="color:var(--tx)">'+tl(r.sum||0)+'</b></span></div>'};
+  +'<span>Toplam <b style="color:var(--tx)">'+tl(r.sum||0)+'</b></span></div>';
+ SEL.siparis=SEL.siparis.filter(function(id){return rows.some(function(o){return o.id===id})});selDraw('siparis')};
 async function sipAc(id){var r=await api('/yp/orders/'+id),o=r.item;CUR.sip=o;
  var items=(o.items||[]).map(function(i){return '<div class="iline"><span class="pimg"></span>'
   +'<span><b>'+esc(i.name)+'</b><small>'+esc(i.sku||i.variant||'')+'</small></span>'
@@ -1010,6 +1023,126 @@ document.addEventListener('submit',function(ev){var f=ev.target;
  if(el.id==='sch'){CUR.sf.channel=el.value;V.siparis.load().catch(fail)}
  if(el.id==='scg'){CUR.sf.cargo=el.value;V.siparis.load().catch(fail)}
  if(el.id==='ssort'){CUR.sf.sort=el.value;V.siparis.load().catch(fail)}})})();
+
+
+/* ---------------- toplu seçim ---------------- */
+var SEL={urun:[],siparis:[]};
+function selHas(k,id){return SEL[k].indexOf(id)>-1}
+function selTog(k,id,on){var i=SEL[k].indexOf(id);if(on&&i<0)SEL[k].push(id);if(!on&&i>-1)SEL[k].splice(i,1)}
+function selClear(k){SEL[k]=[]}
+function ckCell(k,id){return '<td class="ck"><input type="checkbox" data-sel="'+k+'" value="'+esc(id)+'"'+(selHas(k,id)?' checked':'')+'></td>'}
+function ckHead(k){return '<th class="ck"><input type="checkbox" data-selall="'+k+'"></th>'}
+function selDraw(k){
+ document.querySelectorAll('[data-sel="'+k+'"]').forEach(function(c){c.checked=selHas(k,c.value);
+  var tr=c.closest('tr');if(tr)tr.classList.toggle('sel',c.checked)});
+ var all=document.querySelector('[data-selall="'+k+'"]');
+ if(all){var boxes=document.querySelectorAll('[data-sel="'+k+'"]');
+  all.checked=boxes.length>0&&SEL[k].length>=boxes.length;
+  all.indeterminate=SEL[k].length>0&&!all.checked}
+ var bar=$('#selbar-'+k);if(bar)bar.outerHTML=selBar(k);else{var el=$('#'+(k==='urun'?'ulist':'slist'));
+  if(el&&SEL[k].length)el.insertAdjacentHTML('beforeend',selBar(k))}}
+function selBar(k){if(!SEL[k].length)return '<span id="selbar-'+k+'" hidden></span>';
+ var n=SEL[k].length;
+ if(k==='urun')return '<div class="selbar" id="selbar-urun"><b>'+n+' ürün seçildi</b>'
+  +'<button class="btn s" data-a="usel-fiyat">Fiyat güncelle</button>'
+  +'<button class="btn s" data-a="usel-indirim">İndirim uygula</button>'
+  +'<button class="btn s" data-a="usel-stok">Stok güncelle</button>'
+  +'<button class="btn s" data-a="usel-kategori">Kategori / marka</button>'
+  +'<button class="btn s" data-a="usel-kanal">Pazaryerine aç / kapat</button>'
+  +'<button class="btn s" data-a="usel-durum">Yayına al / gizle</button>'
+  +'<button class="btn s" data-a="usel-disa">Excel\'e aktar</button>'
+  +'<span class="sp"></span><button class="btn s" data-a="usel-sil">Sil</button>'
+  +'<button class="btn s" data-a="sel-bos" data-k="urun">Seçimi bırak</button></div>';
+ return '<div class="selbar" id="selbar-siparis"><b>'+n+' sipariş seçildi</b>'
+  +'<select id="sbdurum"><option value="">Durumu değiştir…</option>'
+  +'<option value="onaylandi">Onayla</option><option value="hazirlaniyor">Hazırlanıyor</option>'
+  +'<option value="kargoda">Kargoya ver</option><option value="teslim">Teslim edildi</option>'
+  +'<option value="iptal">İptal et</option></select>'
+  +'<select id="sbkargo"><option value="">Kargo firmasını değiştir…</option>'
+  +(CUR.cargos||[]).map(function(c){return '<option value="'+c.id+'">'+esc(c.name)+'</option>'}).join('')+'</select>'
+  +'<button class="btn s" data-a="ssel-kargofis">Kargo fişi yazdır</button>'
+  +'<button class="btn s" data-a="ssel-sipfis">Sipariş fişi yazdır</button>'
+  +'<button class="btn s" data-a="ssel-odendi">Ödendi işaretle</button>'
+  +'<button class="btn s" data-a="ssel-disa">Excel\'e aktar</button>'
+  +'<span class="sp"></span><button class="btn s" data-a="sel-bos" data-k="siparis">Seçimi bırak</button></div>'}
+function yazdir(html){var w=window.open('','_blank');if(!w)return toast('Yazdırma penceresi engellendi, tarayıcı izni verin',true);
+ w.document.open();w.document.write(html);w.document.close()}
+function csvIndir(name,csv){var b=new Blob([csv],{type:'text/csv;charset=utf-8'}),u=URL.createObjectURL(b);
+ var a2=document.createElement('a');a2.href=u;a2.download=name||'liste.csv';document.body.appendChild(a2);a2.click();
+ setTimeout(function(){URL.revokeObjectURL(u);a2.remove()},800)}
+async function uBulk(body,msg){var r=await api('/yp/products/bulk',{method:'POST',body:Object.assign({ids:SEL.urun},body)});
+ closeM();toast(msg.replace('{n}',r.n));selClear('urun');await V.urun.load()}
+async function sBulk(body){var r=await api('/yp/orders/bulk',{method:'POST',body:Object.assign({ids:SEL.siparis},body)});
+ closeM();toast(r.msg||'Güncellendi',!!(r.skipped||[]).length);
+ if((r.skipped||[]).length)setTimeout(function(){modal('Atlanan siparişler',
+  '<p class="note" style="margin:0 0 10px">Bu siparişler kendi akışına uymadığı için değişmedi:</p>'
+  +r.skipped.map(function(x){return '<div class="row" style="padding:8px 0;border-top:1px solid var(--line)"><b class="onum">'+esc(x.no)+'</b><div class="m">'+esc(x.why)+'</div></div>'}).join('')
+  +'<div class="mf"><button class="btn p" data-a="close">Tamam</button></div>')},600);
+ selClear('siparis');await V.siparis.load()}
+document.addEventListener('change',function(ev){var el=ev.target;
+ if(el.dataset&&el.dataset.sel){selTog(el.dataset.sel,el.value,el.checked);selDraw(el.dataset.sel)}
+ else if(el.dataset&&el.dataset.selall){var k=el.dataset.selall;
+  SEL[k]=el.checked?Array.prototype.map.call(document.querySelectorAll('[data-sel="'+k+'"]'),function(c){return c.value}):[];
+  selDraw(k)}
+ else if(el.id==='sbdurum'&&el.value){var v=el.value;el.value='';
+  var go=function(){sBulk({op:'status',status:v}).catch(fail)};
+  if(v==='iptal')ask(SEL.siparis.length+' sipariş iptal edilsin mi? Ürünler stoğa geri eklenir.','İptal et').then(go);else go()}
+ else if(el.id==='sbkargo'&&el.value){var f=el.value;el.value='';sBulk({op:'cargo',cargo:{firm:f}}).catch(fail)}});
+document.addEventListener('click',function(ev){var b=ev.target.closest('[data-a]');if(!b)return;var a=b.dataset.a;
+ if(a==='sel-bos'){selClear(b.dataset.k);(b.dataset.k==='urun'?V.urun.load():V.siparis.load()).catch(fail)}
+ /* ürün toplu */
+ else if(a==='usel-fiyat')modal(SEL.urun.length+' üründe fiyat güncelle',
+  '<form id="ubf" data-op="price"><p class="note" style="margin:0 0 10px">Zam için artı, indirim için eksi yazın. İndirimli fiyat varsa o da aynı oranda değişir.</p>'
+  +'<label>Yüzde<input name="percent" type="number" step="0.1" required placeholder="10 veya -15"></label>'
+  +'<div class="mf"><button type="button" class="btn" data-a="close">Vazgeç</button><button class="btn p">Uygula</button></div></form>');
+ else if(a==='usel-indirim')modal(SEL.urun.length+' ürüne indirim uygula',
+  '<form id="ubf" data-op="sale"><p class="note" style="margin:0 0 10px">İndirimli fiyat, satış fiyatından bu oran düşülerek hesaplanır. 0 yazarsanız indirim kalkar.</p>'
+  +'<label>İndirim yüzdesi<input name="percent" type="number" min="0" max="95" required value="10"></label>'
+  +'<div class="mf"><button type="button" class="btn" data-a="close">Vazgeç</button><button class="btn p">Uygula</button></div></form>');
+ else if(a==='usel-stok')modal(SEL.urun.length+' üründe stok güncelle',
+  '<form id="ubf" data-op="stock"><div class="g2"><label>Stoğu şu sayıya ayarla<input name="set" type="number" min="0" placeholder="örn. 50"></label>'
+  +'<label>ya da ekle / çıkar<input name="add" type="number" placeholder="örn. 10 veya -5"></label></div>'
+  +'<p class="note">İkisini birden doldurmayın. Stok değişince açık pazaryerlerine gönderim kuyruğa alınır.</p>'
+  +'<div class="mf"><button type="button" class="btn" data-a="close">Vazgeç</button><button class="btn p">Uygula</button></div></form>');
+ else if(a==='usel-kategori')modal(SEL.urun.length+' ürünün kategori / markası',
+  '<form id="ubf" data-op="cat2"><label>Kategori<input name="cat" list="ucats" placeholder="Boş bırakırsanız değişmez"></label>'
+  +'<label>Marka<input name="brand" placeholder="Boş bırakırsanız değişmez"></label>'
+  +'<datalist id="ucats">'+((CUR.ucats||[]).map(function(c){return '<option>'+esc(c)+'</option>'}).join(''))+'</datalist>'
+  +'<div class="mf"><button type="button" class="btn" data-a="close">Vazgeç</button><button class="btn p">Uygula</button></div></form>');
+ else if(a==='usel-kanal')modal(SEL.urun.length+' ürünü pazaryerinde aç / kapat',
+  '<form id="ubf" data-op="channel"><label>Kanal<select name="channel">'
+  +(CUR.kanallar||[]).map(function(c){return '<option value="'+c.id+'">'+esc(c.name)+'</option>'}).join('')+'</select></label>'
+  +'<label>İşlem<select name="on"><option value="1">Kanalda satışa aç</option><option value="0">Kanaldan kaldır</option></select></label>'
+  +'<div class="mf"><button type="button" class="btn" data-a="close">Vazgeç</button><button class="btn p">Uygula</button></div></form>');
+ else if(a==='usel-durum')modal(SEL.urun.length+' ürünün durumu',
+  '<form id="ubf" data-op="status"><label>Durum<select name="status"><option value="live">Yayında</option><option value="draft">Taslak (sitede görünmez)</option></select></label>'
+  +'<div class="mf"><button type="button" class="btn" data-a="close">Vazgeç</button><button class="btn p">Uygula</button></div></form>');
+ else if(a==='usel-sil')ask(SEL.urun.length+' ürün silinsin mi? Bu işlem geri alınamaz.','Sil').then(function(){
+  uBulk({op:'delete'},'{n} ürün silindi').catch(fail)});
+ else if(a==='usel-disa')api('/yp/products/export',{method:'POST',body:{ids:SEL.urun}}).then(function(r){
+  csvIndir(r.name,r.csv);toast(r.n+' ürün Excel dosyasına aktarıldı')}).catch(fail);
+ /* sipariş toplu */
+ else if(a==='ssel-kargofis'||a==='ssel-sipfis')api('/yp/orders/print',{method:'POST',
+  body:{ids:SEL.siparis,kind:a==='ssel-kargofis'?'kargo':'siparis'}}).then(function(r){
+   yazdir(r.html);toast(r.n+' fiş yazdırmaya hazır')}).catch(fail);
+ else if(a==='ssel-odendi')sBulk({op:'paid',on:true}).catch(fail);
+ else if(a==='ssel-disa')api('/yp/orders/export',{method:'POST',body:{ids:SEL.siparis}}).then(function(r){
+  csvIndir(r.name,r.csv);toast(r.n+' sipariş Excel dosyasına aktarıldı')}).catch(fail);
+});
+document.addEventListener('submit',function(ev){var f=ev.target;if(f.id!=='ubf')return;ev.preventDefault();
+ var op=f.dataset.op;
+ if(op==='price'||op==='sale')uBulk({op:op,percent:+f.percent.value||0},'{n} ürün güncellendi').catch(fail);
+ else if(op==='stock'){var body={op:'stock'};
+  if(f.add.value!=='')body.add=+f.add.value;else if(f.set.value!=='')body.set=+f.set.value;else return toast('Bir değer yazın',true);
+  uBulk(body,'{n} üründe stok güncellendi').catch(fail)}
+ else if(op==='cat2'){var jobs=[];
+  if(f.cat.value)jobs.push({op:'cat',cat:f.cat.value});
+  if(f.brand.value)jobs.push({op:'brand',brand:f.brand.value});
+  if(!jobs.length)return toast('Kategori veya marka yazın',true);
+  (async function(){for(var i=0;i<jobs.length;i++)await api('/yp/products/bulk',{method:'POST',body:Object.assign({ids:SEL.urun},jobs[i])});
+   closeM();toast(SEL.urun.length+' ürün güncellendi');selClear('urun');await V.urun.load()})().catch(fail)}
+ else if(op==='channel')uBulk({op:'channel',channel:f.channel.value,on:f.on.value==='1'},'{n} üründe kanal güncellendi').catch(fail);
+ else if(op==='status')uBulk({op:'status',status:f.status.value},'{n} ürün güncellendi').catch(fail)});
 
 /* başlangıç */
 (async function(){TOK=ld('ypt')||ld('token');if(!TOK){showLogin();return}await start()})();
