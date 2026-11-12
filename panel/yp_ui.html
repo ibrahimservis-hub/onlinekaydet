@@ -29,7 +29,7 @@ main{padding:26px 32px 40px;min-width:0}
 .btn.s{min-height:34px;padding:0 11px;font-size:13px}.btn.d{color:var(--bad)}.btn[disabled]{opacity:.55;cursor:default}
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r)}
 .card h2{font-size:15px;font-weight:650}
-.card .hd{display:flex;align-items:center;gap:10px;padding:15px 18px 10px}.card .hd .sp{flex:1}.card .hd a,.lnk{color:var(--blue);font-weight:600;font-size:13px;text-decoration:none;background:none;border:0;padding:0;cursor:pointer}
+.card .hd{display:flex;align-items:center;gap:10px;padding:15px 18px 10px}.pv .hd{flex-wrap:wrap;row-gap:8px}.card .hd .sp{flex:1}.card .hd a,.lnk{color:var(--blue);font-weight:600;font-size:13px;text-decoration:none;background:none;border:0;padding:0;cursor:pointer}
 .pad{padding:0 18px 16px}
 .figs{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--line);border-radius:var(--r);background:#fff;margin-bottom:18px}
 .fig{padding:16px 20px;border-left:1px solid var(--line)}.fig:first-child{border-left:0}
@@ -297,7 +297,15 @@ table.gr .r{text-align:right}
 .th .sv{height:74px;display:flex;align-items:flex-end;padding:8px 10px;color:#fff;font-weight:700;font-size:13px}
 .th .tb{padding:8px 10px;display:flex;gap:6px;flex-wrap:wrap}
 .tog{width:38px;height:22px;border-radius:22px;background:#d0d5dd;position:relative;flex:none;border:0;padding:0}.tog:after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;transition:left .15s}.tog.on{background:var(--blue)}.tog.on:after{left:18px}
-.sitegrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(560px,58%);gap:18px;align-items:start}
+.sitegrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(460px,46%);gap:18px;align-items:start}
+.stabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin:0 0 18px;overflow-x:auto}
+.stabs button{border:0;background:none;padding:0 14px 11px;font-weight:600;font-size:14.5px;color:var(--mut);position:relative;white-space:nowrap;min-height:38px}
+.stabs button:hover{color:var(--ink2)}
+.stabs button.on{color:var(--ink)}
+.stabs button.on:after{content:"";position:absolute;left:10px;right:10px;bottom:-1px;height:2.5px;background:var(--blue);border-radius:2px}
+.stbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 14px;border-bottom:1px solid var(--line);background:#fbfaf7;border-radius:var(--r) var(--r) 0 0}
+.stbar select{min-height:38px;border:1px solid var(--line);border-radius:8px;padding:0 10px;background:#fff;font-weight:600;font-size:13.5px;color:var(--ink);max-width:260px}
+@media(max-width:1100px){.sitegrid{grid-template-columns:1fr}.pv{position:static}}
 .pv{position:sticky;top:16px}
 .pv iframe{width:100%;height:calc(100vh - 140px);min-height:640px;border:0;background:#fff;display:block}.pv.phone iframe{width:auto;aspect-ratio:393/852;height:calc(100vh - 200px);min-height:560px;max-width:calc(100% - 24px);margin:12px auto;border:10px solid #14161a;border-radius:40px;box-shadow:0 12px 36px rgba(16,24,40,.28)}
 .md.full.phone iframe{width:auto;aspect-ratio:393/852;height:80vh;margin:0 auto;border:10px solid #14161a;border-radius:40px}
@@ -402,8 +410,8 @@ var tl=function(n){return Number(n||0).toLocaleString('tr-TR',{maximumFractionDi
 function fid(f){return f.getAttribute?f.getAttribute('id'):''}
 function fval(f,k){var el=f.elements?f.elements[k]:null;return el?el.value:''}
 var TOK='',B=null,ROUTE='bugun',CUR={};
-var BASE_NAV=[['bugun','Bugün','home'],['takvim','Takvim','cal'],['randevu','Randevular','list'],['musteri','Müşteriler','users'],['kasa','Kasa','wallet'],['ekip','Ekip','team'],['rapor','Raporlar','chart'],['site','Web Sitem','web'],['bolum','Sayfa bölümleri','layers'],['is','İş kayıtları','wrench'],['icerik','İçerikler','docs'],['bildirim','Bildirimler','bell'],['entegrasyon','Entegrasyonlar','plug'],['ayar','Ayarlar','gear'],['destek','Destek','life']];
-var NAV=BASE_NAV.slice(),EXTRA=['iade'];
+var BASE_NAV=[['bugun','Bugün','home'],['takvim','Takvim','cal'],['randevu','Randevular','list'],['musteri','Müşteriler','users'],['kasa','Kasa','wallet'],['ekip','Ekip','team'],['rapor','Raporlar','chart'],['site','Web Sitem','web'],['is','İş kayıtları','wrench'],['icerik','İçerikler','docs'],['bildirim','Bildirimler','bell'],['entegrasyon','Entegrasyonlar','plug'],['ayar','Ayarlar','gear'],['destek','Destek','life']];
+var NAV=BASE_NAV.slice(),EXTRA=['iade','bolum'];
 function buildNav(){var m=(B&&B.modules)||[],ins=[];
  if(m.indexOf('shop')>-1||m.indexOf('stok')>-1)ins.push(['urun','Ürünler','store']);
  if(m.indexOf('siparis')>-1)ins.push(['siparis','Siparişler','truck']);
@@ -664,30 +672,63 @@ V.raporEski=async function(){var k=CUR.rr||'ay',r=rng(k==='uc'?'uc':k),d=await a
  h+='<div class="card"><div class="hd"><h2>Müşteriler</h2></div><div class="pad"><dl class="kv"><dt>Yeni müşteri</dt><dd class="num">'+d.new+'</dd><dt>Geri gelen</dt><dd class="num">'+d.back+'</dd><dt>Gelen toplam</dt><dd class="num">'+d.seen+'</dd></dl></div></div></div>';
  $('#main').innerHTML=h};
 /* ---------------- WEB SİTEM ---------------- */
+var ST={tab:'bolum',ed:''};
+var STAB=[['bolum','Bölümler'],['tasarim','Tasarım'],['gorsel','Görseller'],['bilgi','Bilgiler'],['menu','Menü']];
+function stabs(){return '<div class="stabs" role="tablist">'+STAB.map(function(x){var on=ST.tab===x[0];
+ return '<button role="tab" data-a="sitetab" data-t="'+x[0]+'"'+(on?' class="on"':'')+' aria-selected="'+on+'">'+x[1]+'</button>'}).join('')+'</div>'}
 V.site=async function(){
- $('#main').innerHTML=head('Web Sitem','Temayı seçin, bölümleri açıp kapatın, yazıları değiştirin. Değişiklik siteye anında yansır.','<button class="btn" data-a="pvfull">Tam ekran önizle</button> <button class="btn" data-a="pvreload">Önizlemeyi yenile</button>')+'<div class="sitegrid"><div id="sl" style="display:grid;gap:18px"></div><div class="pv card"><div class="hd"><h2>Sitenizin görünümü</h2><div class="sp"></div><span id="pvp"></span><div class="seg" role="group" aria-label="Önizleme modu"><button data-a="pvmode" data-m="0">Gezin</button><button data-a="pvmode" data-m="1" class="on">Düzenle: yazı · yazı tipi · sıra</button></div><div class="seg" role="group" aria-label="Önizleme cihazı"><button data-a="pvdev" data-d="web">Bilgisayar</button><button data-a="pvdev" data-d="phone">Telefon</button></div></div><iframe id="pvf" title="Site önizleme" sandbox="allow-scripts"></iframe></div></div>';
- var br=await api('/brand'),pr=await api('/site/profile');CUR.brand=br.brand;CUR.prof=pr.profile||{};CUR.profFull=pr;
- var p0=pr.profile||{};var sel=br.brand.theme,mine=br.themes.filter(function(t){return t.sector===B.sector}),rest=br.themes.filter(function(t){return t.sector!==B.sector});
+ $('#main').innerHTML=head('Web Sitem','Sayfanızın bölümlerini düzenleyin, tasarımı seçin, bilgilerinizi güncelleyin.','<button class="btn" data-a="pvfull">Tam ekran önizle</button> <button class="btn" data-a="pvreload">Önizlemeyi yenile</button>')
+  +stabs()+'<div class="sitegrid"><div id="sl" style="display:grid;gap:18px"></div><div class="pv card"><div class="hd"><h2>Sitenizin görünümü</h2><div class="sp"></div><span id="pvp"></span><div class="seg" role="group" aria-label="Önizleme modu"><button data-a="pvmode" data-m="0">Gezin</button><button data-a="pvmode" data-m="1" class="on">Düzenle: yazı · yazı tipi · sıra</button></div><div class="seg" role="group" aria-label="Önizleme cihazı"><button data-a="pvdev" data-d="web">Bilgisayar</button><button data-a="pvdev" data-d="phone">Telefon</button></div></div><iframe id="pvf" title="Site önizleme" sandbox="allow-scripts"></iframe><div id="bxkaba" class="pad" hidden><div id="bxp" class="bxpv"></div><div class="note" style="margin-top:10px">Bu düzen henüz yayında değil; sitenizde şu an yayındaki düzen görünüyor.</div></div></div></div>';
+ var br=await api('/brand'),pr=await api('/site/profile');CUR.brand=br.brand;CUR.brandAll=br;CUR.prof=pr.profile||{};CUR.profFull=pr;
+ try{var e=await api('/yp/site-engine');BX.eng=e.engine}catch(x){BX.eng=BX.eng||'tema'}
+ if(!ST.ed)ST.ed=BX.eng||'tema';
+ await siteTab();
+ preview();var dv='web';try{dv=localStorage.ypdev||'web'}catch(_){}setDev(dv)};
+async function siteTab(){var el=$('#sl');if(!el)return;var t=ST.tab;
+ document.querySelectorAll('[data-a=sitetab]').forEach(function(b){var on=b.dataset.t===t;b.classList.toggle('on',on);b.setAttribute('aria-selected',on)});
+ if(t==='tasarim'){el.innerHTML=stTema()+logoCard()+stPromo()+stBook()}
+ else if(t==='gorsel'){el.innerHTML=mediaCards();loadThemeImgs()}
+ else if(t==='bilgi'){el.innerHTML=stBilgi()}
+ else if(t==='menu'){el.innerHTML=stMenu();loadMenu()}
+ else{if(!ST.ed)ST.ed=BX.eng||'tema';el.innerHTML=stBolum();
+  if(ST.ed==='blok'){await bxPages()}else{loadBlocks()}}
+ pvKip()}
+function pvKip(){var f=$('#pvf'),k=$('#bxkaba');if(!f||!k)return;
+ var kaba=ST.tab==='bolum'&&ST.ed==='blok'&&(BX.eng||'tema')!=='blok';f.hidden=kaba;k.hidden=!kaba;
+ document.querySelectorAll('.pv .hd .seg').forEach(function(g){g.hidden=kaba})}
+function stBolum(){var ed=ST.ed,eng=BX.eng||'tema',canli=eng===ed,h='<div class="card">';
+ h+='<div class="stbar"><div class="seg" role="group" aria-label="Hangi düzen">'
+  +'<button data-a="sted" data-e="tema"'+(ed==='tema'?' class="on"':'')+'>Hazır tema'+(eng==='tema'?' · yayında':'')+'</button>'
+  +'<button data-a="sted" data-e="blok"'+(ed==='blok'?' class="on"':'')+'>Kendi bölümlerim'+(eng==='blok'?' · yayında':'')+'</button></div>';
+ if(ed==='blok')h+='<select id="bxpg" data-a="bxpg" aria-label="Sayfa"></select>'
+  +'<div class="seg" role="group" aria-label="Hangi cihaz"><button data-a="bxdev" data-d="web"'+(BX.dev==='web'?' class="on"':'')+'>Bilgisayar</button>'
+  +'<button data-a="bxdev" data-d="phone"'+(BX.dev==='phone'?' class="on"':'')+'>Telefon</button></div>';
+ h+='<div class="sp"></div><span class="note" id="bxn"></span>';
+ if(!canli)h+='<button class="btn s p" data-a="styayin" data-e="'+ed+'">Bu düzeni yayına al</button>';
+ if(ed==='blok')h+='<button class="btn p" data-a="bxadd">Bölüm ekle</button>';
+ h+='</div>';
+ h+=canli?'<div class="bxbg ok" style="margin:13px 14px 0">Siteniz şu an bu düzenle yayında. Değişiklikleriniz siteye anında yansır.</div>'
+  :'<div class="bxbg" style="margin:13px 14px 0">Bu düzen <b>yayında değil</b>; sitenizde '+(eng==='blok'?'kendi bölümleriniz':'hazır temanız')+' görünüyor. Hazırlayın, hazır olunca <b>“Bu düzeni yayına al”</b> deyin. İstediğiniz an geri dönebilirsiniz.</div>';
+ h+=ed==='blok'?'<div id="bxl"><div class="empty">Yükleniyor…</div></div>':'<div id="bl"><div class="empty">Yükleniyor…</div></div>';
+ return h+'</div>'}
+function stTema(){var br=CUR.brandAll||{themes:[]},sel=(CUR.brand||{}).theme;
+ var mine=(br.themes||[]).filter(function(t){return t.sector===B.sector}),rest=(br.themes||[]).filter(function(t){return t.sector!==B.sector});
  function card(t){return '<div class="th'+(t.slug===sel?' on':'')+'"><div class="sv" style="background:linear-gradient(135deg,'+esc(t.dark)+','+esc(t.accent)+')">'+esc(String(t.name).replace(/&amp;/g,'&'))+'</div><div class="tb"><button class="btn s" data-a="tprev" data-s="'+esc(t.slug)+'">Önizle</button>'+(t.slug===sel?'<span class="tag g">Seçili</span>':'<button class="btn s p" data-a="tpick" data-s="'+esc(t.slug)+'" data-n="'+esc(t.name)+'">Seç</button>')+'</div></div>'}
- var h='<div class="card"><div class="hd"><h2>Sitenin teması</h2><div class="sp"></div><span class="note">'+mine.length+' tema</span></div><div class="tg">'+(mine.map(card).join('')||'<div class="empty" style="grid-column:1/-1">Bu işe özel tema bulunamadı.</div>')+'</div>'+(rest.length?'<div class="pad"><button class="lnk" data-a="moreth">Diğer sektörlerin temalarını da göster ('+rest.length+')</button><div class="tg" id="rest" hidden style="padding:12px 0 0">'+rest.map(card).join('')+'</div></div>':'')+'</div>';
- h+='<div class="card"><div class="hd"><h2>Sayfadaki bölümler</h2><div class="sp"></div><button class="btn s" data-a="bxgit">Sayfa bölümleri</button></div><div id="bl"><div class="empty">Yükleniyor…</div></div></div>';
- h+='<div class="card"><div class="hd"><h2>Menü</h2></div><div class="pad"><div class="note" style="margin-bottom:8px">Sitenin üstündeki menü bağlantılarının yazısını değiştirin, istemediğinizi kapatın, kendi bağlantınızı ekleyin.</div><div id="mnu"><div class="note">Yükleniyor…</div></div></div></div>';
- var pm=p0.promo||{},pon=pm.on===true||(pm.on!==false&&!!pr.promo_default);
- h+='<div class="card"><div class="hd"><h2>Kampanya sayacı (üst çubuk)</h2></div><form id="prf" class="pad"><label class="f" style="display:flex;align-items:center;gap:10px"><button type="button" class="tog'+(pon?' on':'')+'" id="pron" data-a="bentog" role="switch" aria-checked="'+pon+'" aria-label="Kampanya çubuğu"></button> Sitenin üstünde kampanya çubuğu görünsün</label><label class="f">Duyuru yazısı<input name="text" maxlength="120" value="'+esc(pm.text||'')+'" placeholder="Örn. İlk boyada %20 indirim"></label><div class="g2"><label class="f">Sayaç bitiş tarihi ve saati<input type="datetime-local" name="end" value="'+esc(pm.end||'')+'"></label><label class="f">Düğme yazısı (randevu açar)<input name="btn" maxlength="30" value="'+esc(pm.btn||'')+'" placeholder="Randevu al"></label></div><div class="note">Bitiş tarihi geçince çubuk kendiliğinden kalkar. Tarih boşsa sayaç görünmez; temada hazır duran örnek sayaç yazıları yerine sizin yazınız çıkar.</div><div class="mf"><button class="btn p">Kaydet</button></div></form></div>';
- h+='<div class="card"><div class="hd"><h2>Randevu formu</h2></div><div class="pad" style="display:grid;gap:12px"><div class="note">Sitedeki randevu penceresinin yazılarını değiştirin; seçtiğiniz hizmet ve personel Ekip ile Hizmetler listenizden otomatik gelir.</div><label class="f" style="display:flex;align-items:center;gap:10px"><button type="button" class="tog'+(p0.coupon_off?'':' on')+'" id="cpon" data-a="cptog" role="switch" aria-checked="'+(!p0.coupon_off)+'" aria-label="Kupon kodu alanı"></button> Kupon kodu alanı görünsün (kampanya açıksa)</label><div><button class="btn" data-a="bookedit">Form yazılarını düzenle</button></div></div></div>';
- var p=CUR.prof;
- h+=mediaCards();
- h+='<div class="card"><div class="hd"><h2>İletişim, footer ve sosyal medya</h2></div><form id="pf2" class="pad"><div class="g2"><label class="f">Slogan<input name="slogan" maxlength="110" value="'+esc(p.slogan||'')+'"></label><label class="f">WhatsApp numarası<input name="whatsapp" maxlength="20" value="'+esc(p.whatsapp||'')+'" placeholder="905xxxxxxxxx"></label></div><label class="f">Adres<input name="address" maxlength="200" value="'+esc(p.address||pr.address||'')+'"></label><div class="g2"><label class="f">Çalışma saatleri (sitede görünür)<input name="hours" maxlength="120" value="'+esc(p.hours||'')+'" placeholder="Pzt–Cmt 09:00–19:00"></label><label class="f">E-posta<input name="email" maxlength="80" value="'+esc(p.email||'')+'"></label></div><div class="g3">'+SOC.map(function(x){return '<label class="f">'+x[1]+'<input name="soc_'+x[0]+'" maxlength="200" value="'+esc((p.social||{})[x[0]]||'')+'" placeholder="https://…"></label>'}).join('')+'</div><label class="f">Hakkımızda<textarea name="about" maxlength="3000">'+esc(p.about||'')+'</textarea></label><div class="g2"><label class="f">Google başlığı (SEO)<input name="seo_title" maxlength="70" value="'+esc(p.seo_title||'')+'"></label><label class="f">Google açıklaması (SEO)<input name="seo_desc" maxlength="300" value="'+esc(p.seo_desc||'')+'"></label></div><div class="note" style="margin-bottom:8px">Footer’daki adres, saat, telefon ve sosyal medya bağlantıları bu alanlardan gelir. Footer yazılarını ayrıca aşağıdaki “Alt bilgi (footer)” satırından değiştirebilirsiniz. “OnlineKaydet ile yayınlanır” bağlantısı sabittir.</div><div class="mf"><button class="btn p">Kaydet</button></div></form></div>';
- $('#sl').innerHTML=h;
- loadBlocks();loadMenu();loadThemeImgs();preview();var dv='web';try{dv=localStorage.ypdev||'web'}catch(_){}setDev(dv)};
+ return '<div class="card"><div class="hd"><h2>Sitenin teması</h2><div class="sp"></div><span class="note">'+mine.length+' tema</span></div><div class="tg">'+(mine.map(card).join('')||'<div class="empty" style="grid-column:1/-1">Bu işe özel tema bulunamadı.</div>')+'</div>'+(rest.length?'<div class="pad"><button class="lnk" data-a="moreth">Diğer sektörlerin temalarını da göster ('+rest.length+')</button><div class="tg" id="rest" hidden style="padding:12px 0 0">'+rest.map(card).join('')+'</div></div>':'')+'</div>'}
+function stPromo(){var pr=CUR.profFull||{},p0=CUR.prof||{};var pm=p0.promo||{},pon=pm.on===true||(pm.on!==false&&!!pr.promo_default);
+ return '<div class="card"><div class="hd"><h2>Kampanya sayacı (üst çubuk)</h2></div><form id="prf" class="pad"><label class="f" style="display:flex;align-items:center;gap:10px"><button type="button" class="tog'+(pon?' on':'')+'" id="pron" data-a="bentog" role="switch" aria-checked="'+pon+'" aria-label="Kampanya çubuğu"></button> Sitenin üstünde kampanya çubuğu görünsün</label><label class="f">Duyuru yazısı<input name="text" maxlength="120" value="'+esc(pm.text||'')+'" placeholder="Örn. İlk boyada %20 indirim"></label><div class="g2"><label class="f">Sayaç bitiş tarihi ve saati<input type="datetime-local" name="end" value="'+esc(pm.end||'')+'"></label><label class="f">Düğme yazısı (randevu açar)<input name="btn" maxlength="30" value="'+esc(pm.btn||'')+'" placeholder="Randevu al"></label></div><div class="note">Bitiş tarihi geçince çubuk kendiliğinden kalkar. Tarih boşsa sayaç görünmez; temada hazır duran örnek sayaç yazıları yerine sizin yazınız çıkar.</div><div class="mf"><button class="btn p">Kaydet</button></div></form></div>'}
+function stBook(){var p0=CUR.prof||{};return '<div class="card"><div class="hd"><h2>Randevu formu</h2></div><div class="pad" style="display:grid;gap:12px"><div class="note">Sitedeki randevu penceresinin yazılarını değiştirin; seçtiğiniz hizmet ve personel Ekip ile Hizmetler listenizden otomatik gelir.</div><label class="f" style="display:flex;align-items:center;gap:10px"><button type="button" class="tog'+(p0.coupon_off?'':' on')+'" id="cpon" data-a="cptog" role="switch" aria-checked="'+(!p0.coupon_off)+'" aria-label="Kupon kodu alanı"></button> Kupon kodu alanı görünsün (kampanya açıksa)</label><div><button class="btn" data-a="bookedit">Form yazılarını düzenle</button></div></div></div>'}
+function stBilgi(){var p=CUR.prof||{},pr=CUR.profFull||{};return '<div class="card"><div class="hd"><h2>İletişim, footer ve sosyal medya</h2></div><form id="pf2" class="pad"><div class="g2"><label class="f">Slogan<input name="slogan" maxlength="110" value="'+esc(p.slogan||'')+'"></label><label class="f">WhatsApp numarası<input name="whatsapp" maxlength="20" value="'+esc(p.whatsapp||'')+'" placeholder="905xxxxxxxxx"></label></div><label class="f">Adres<input name="address" maxlength="200" value="'+esc(p.address||pr.address||'')+'"></label><div class="g2"><label class="f">Çalışma saatleri (sitede görünür)<input name="hours" maxlength="120" value="'+esc(p.hours||'')+'" placeholder="Pzt–Cmt 09:00–19:00"></label><label class="f">E-posta<input name="email" maxlength="80" value="'+esc(p.email||'')+'"></label></div><div class="g3">'+SOC.map(function(x){return '<label class="f">'+x[1]+'<input name="soc_'+x[0]+'" maxlength="200" value="'+esc((p.social||{})[x[0]]||'')+'" placeholder="https://…"></label>'}).join('')+'</div><label class="f">Hakkımızda<textarea name="about" maxlength="3000">'+esc(p.about||'')+'</textarea></label><div class="g2"><label class="f">Google başlığı (SEO)<input name="seo_title" maxlength="70" value="'+esc(p.seo_title||'')+'"></label><label class="f">Google açıklaması (SEO)<input name="seo_desc" maxlength="300" value="'+esc(p.seo_desc||'')+'"></label></div><div class="note" style="margin-bottom:8px">Footer’daki adres, saat, telefon ve sosyal medya bağlantıları bu alanlardan gelir. Footer yazılarını ayrıca aşağıdaki “Alt bilgi (footer)” satırından değiştirebilirsiniz. “OnlineKaydet ile yayınlanır” bağlantısı sabittir.</div><div class="mf"><button class="btn p">Kaydet</button></div></form></div>'}
+function stMenu(){return '<div class="card"><div class="hd"><h2>Menü</h2></div><div class="pad"><div class="note" style="margin-bottom:8px">Sitenin üstündeki menü bağlantılarının yazısını değiştirin, istemediğinizi kapatın, kendi bağlantınızı ekleyin.</div><div id="mnu"><div class="note">Yükleniyor…</div></div></div></div>'}
 async function loadBlocks(){var el=$('#bl');if(!el)return;try{var r=await api('/site/blocks');CUR.blocks=r.blocks;drawBlocks();pvSendMode()}catch(e){el.innerHTML='<div class="empty">'+esc(e.message)+'</div>'}}
 function drawBlocks(){var b=CUR.blocks;$('#bl').innerHTML=b.map(function(x,i){return '<div class="row" data-dk="blk" data-di="'+i+'" style="grid-template-columns:auto auto 1fr auto auto;'+(x.hidden?'opacity:.6':'')+'"><span class="grip" title="Sürükleyip bırakın" aria-hidden="true">⠿</span><div style="display:flex;flex-direction:column;gap:2px"><button class="btn s" style="min-height:26px;padding:0 8px" data-a="bup" data-i="'+i+'" aria-label="Yukarı" '+(i?'':'disabled')+'>▲</button><button class="btn s" style="min-height:26px;padding:0 8px" data-a="bdn" data-i="'+i+'" aria-label="Aşağı" '+(i<b.length-1?'':'disabled')+'>▼</button></div><div><div class="t" style="font-size:14.5px">'+esc(x.title||x.name)+'</div><div class="m">'+esc(x.name)+(x.n?' · '+x.n+' yazı':'')+'</div></div><span style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn s" data-a="bedit" data-n="'+esc(x.name)+'"'+(x.n?'':' disabled')+'>Yazı · yazı tipi</button><button class="btn s" data-a="bimg" data-n="'+esc(x.name)+'"'+(x.ni?'':' disabled')+'>Resimler'+(x.ni?' ('+x.ni+')':'')+'</button></span><button class="tog'+(x.hidden?'':' on')+'" role="switch" aria-checked="'+(!x.hidden)+'" aria-label="Bölümü göster/gizle" data-a="btog" data-i="'+i+'"></button></div>'}).join('')+'<div class="row" style="grid-template-columns:1fr auto"><div><div class="t" style="font-size:14.5px">Alt bilgi (footer)</div><div class="m">Her sayfanın en altı · adres ve bağlantılar yukarıdaki formdan gelir</div></div><button class="btn s" data-a="bedit" data-n="Alt bilgi">Yazılar</button></div>'}
 
 var SOC=[['instagram','Instagram'],['facebook','Facebook'],['x','X (Twitter)'],['youtube','YouTube'],['tiktok','TikTok'],['linkedin','LinkedIn']];
 function imgSrc(k){var d=(CUR.profFull&&CUR.profFull.imgs||{})[k];return d||('/api/public/site-img/'+k)}
+function logoCard(){var p=CUR.prof||{},lg=(CUR.profFull||{}).logo||'';return '<div class="card"><div class="hd"><h2>Logo</h2></div><div class="lgbox"><div class="lp">'+(lg?'<img src="'+esc(lg)+'" alt="Logo">':'<span class="note">Logo yok</span>')+'</div><div style="display:grid;gap:8px"><div style="display:flex;gap:8px;flex-wrap:wrap"><span class="btn s p upl">Logo yükle<input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" data-up="logo" aria-label="Logo yükle"></span>'+(lg?'<button class="btn s d" data-a="logodel">Kaldır</button>':'')+'</div><label style="display:flex;gap:8px;align-items:center;font-size:13.5px"><input type="checkbox" id="lgonly" data-a="lgonly" style="width:auto;margin:0;min-height:0" '+(p.logo_only?'checked':'')+'> Sitede yalnızca logo görünsün (firma adı yazısı olmasın)</label><div class="note">Şeffaf PNG veya SVG en iyi sonucu verir. Logo sitenin üst menüsünde görünür.</div></div></div></div>'}
 function mediaCards(){var p=CUR.prof,pf=CUR.profFull||{},lg=pf.logo||'';
  function grid(kind,max){var a=p[kind]||[];return '<div class="ph">'+a.map(function(x,i){return '<div class="it"><img src="'+esc(imgSrc(x.k))+'" alt="Fotoğraf '+(i+1)+'" loading="lazy"><button data-a="phdel" data-kind="'+kind+'" data-i="'+i+'" aria-label="Fotoğrafı sil">×</button></div>'}).join('')+'</div>'+(a.length<max?'':'')}
- var h='<div class="card"><div class="hd"><h2>Temadaki resimler</h2></div><div class="pad"><div class="note" style="margin-bottom:6px">Temanın hazır örnek resimleri (galeri, ekip, kapak…). Birini kendi fotoğrafınızla değiştirince tema her yerde onu kullanır; galeri ve büyütme ekranı dahil.</div><div id="tim"><div class="note">Yükleniyor…</div></div></div></div><div class="card"><div class="hd"><h2>Logo</h2></div><div class="lgbox"><div class="lp">'+(lg?'<img src="'+esc(lg)+'" alt="Logo">':'<span class="note">Logo yok</span>')+'</div><div style="display:grid;gap:8px"><div style="display:flex;gap:8px;flex-wrap:wrap"><span class="btn s p upl">Logo yükle<input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" data-up="logo" aria-label="Logo yükle"></span>'+(lg?'<button class="btn s d" data-a="logodel">Kaldır</button>':'')+'</div><label style="display:flex;gap:8px;align-items:center;font-size:13.5px"><input type="checkbox" id="lgonly" data-a="lgonly" style="width:auto;margin:0;min-height:0" '+(p.logo_only?'checked':'')+'> Sitede yalnızca logo görünsün (firma adı yazısı olmasın)</label><div class="note">Şeffaf PNG veya SVG en iyi sonucu verir. Logo sitenin üst menüsünde görünür.</div></div></div></div>';
+ var h='<div class="card"><div class="hd"><h2>Temadaki resimler</h2></div><div class="pad"><div class="note" style="margin-bottom:6px">Temanın hazır örnek resimleri (galeri, ekip, kapak…). Birini kendi fotoğrafınızla değiştirince tema her yerde onu kullanır; galeri ve büyütme ekranı dahil.</div><div id="tim"><div class="note">Yükleniyor…</div></div></div></div>';
  h+='<div class="card"><div class="hd"><h2>Fotoğraflar</h2></div><div class="pad"><div class="note" style="margin-bottom:10px">Sitenin ana sayfasındaki kayan fotoğraflar. Telefondan seçerek de ekleyebilirsiniz. En çok 8 adet.</div></div>'+grid('slides',8)+'<div class="pad"><span class="btn s p upl">Fotoğraf ekle<input type="file" accept="image/*" multiple data-up="slides" aria-label="Slayt fotoğrafı ekle"></span></div></div>';
  h+='<div class="card"><div class="hd"><h2>Galeri</h2></div><div class="pad"><div class="note" style="margin-bottom:10px">Çalışmalarınızdan fotoğraflar. Yükleyince sitede “Galeri” sayfası açılır ve menüye eklenir. En çok 16 adet.</div></div>'+grid('gallery',16)+'<div class="pad"><span class="btn s p upl">Galeriye ekle<input type="file" accept="image/*" multiple data-up="gallery" aria-label="Galeriye fotoğraf ekle"></span></div></div>';
  return h}
@@ -774,24 +815,9 @@ function wfBox(w){
   ba:'<div class="g" style="grid-template-columns:1fr 1fr"><i style="height:54px"></i><i style="height:54px"></i></div>',
   drawer:'<div class="g" style="grid-template-columns:1fr 2fr"><i style="height:58px"></i><div class="r">'+b(3)+'</div></div>'};
  return '<div class="wf">'+(m[w]||b(3))+'</div>'}
-V.bolum=async function(){
- $('#main').innerHTML=head('Sayfa bölümleri','Sayfanıza hazır bölüm ekleyin, sırasını değiştirin, her bölümü bilgisayar ve telefon için ayrı ayarlayın.',
-  '<button class="btn" data-a="bxsite">Web Sitem</button> <button class="btn p" data-a="bxadd">Bölüm ekle</button>')
-  +'<div class="bxtop"><label class="f" style="margin:0;min-width:210px">Sayfa<select id="bxpg" data-a="bxpg"></select></label>'
-  +'<div class="seg" role="group" aria-label="Hangi cihaz"><button data-a="bxdev" data-d="web"'+(BX.dev==='web'?' class="on"':'')+'>Bilgisayar</button>'
-  +'<button data-a="bxdev" data-d="phone"'+(BX.dev==='phone'?' class="on"':'')+'>Telefon</button></div>'
-  +'<div class="sp"></div><span class="note" id="bxn"></span>'
-  +'<label class="f" style="margin:0"><span style="font-size:12px">Site neyle yayınlansın</span>'
-  +'<select id="bxeng" data-a="bxeng"><option value="tema">Hazır tema</option><option value="blok">Buradaki bölümler</option></select></label></div>'
-  +'<div id="bxbilgi"></div>'
-  +'<div class="bxwrap"><div class="card"><div class="hd"><h2>Bu sayfadaki bölümler</h2><div class="sp"></div><span class="note">Sürükleyip sıralayın</span></div><div id="bxl"><div class="empty">Yükleniyor…</div></div></div>'
-  +'<div class="card"><div class="hd"><h2>Kaba yerleşim</h2></div><div class="pad"><div id="bxp" class="bxpv"></div></div></div></div>';
- await bxPages();
- try{var e=await api('/yp/site-engine');BX.eng=e.engine;var se=$('#bxeng');if(se)se.value=e.engine;bxBilgi()}catch(x){}};
-function bxBilgi(){var el=$('#bxbilgi');if(!el)return;
- el.innerHTML=BX.eng==='blok'
-  ?'<div class="bxbg ok" style="margin:0 0 14px">Siteniz buradaki bölümlerle yayınlanıyor. Yaptığınız değişiklik siteye anında yansır.</div>'
-  :'<div class="bxbg" style="margin:0 0 14px">Siteniz şu an <b>hazır temayla</b> yayında. Buradaki bölümleri hazırlayabilirsiniz; <b>“Site neyle yayınlansın”</b> seçeneğini değiştirene kadar sitenizde görünmezler. Temanın yazı ve resimlerini <a href="#site">Web Sitem</a> ekranından düzenlersiniz.</div>'}
+V.bolum=async function(){ST.tab='bolum';ST.ed=ST.ed||'blok';
+ if((location.hash||'')!=='#site'){location.replace('#site');return}
+ await V.site()};
 async function bxPages(){var r=await api('/yp/pages');BX.pages=r.rows||[];
  if(!BX.pid||!BX.pages.some(function(p){return p.id===BX.pid})){var h=BX.pages.filter(function(p){return p.home})[0];BX.pid=(h||BX.pages[0]||{}).id||''}
  var sel=$('#bxpg');if(sel)sel.innerHTML=BX.pages.map(function(p){return '<option value="'+esc(p.id)+'"'+(p.id===BX.pid?' selected':'')+'>'+esc(p.title)+(p.home?' (ana sayfa)':'')+' · '+p.n+' bölüm</option>'}).join('');
@@ -982,8 +1008,13 @@ document.addEventListener('click',async function(ev){
  else if(a==='btog'){var i=+t.dataset.i;CUR.blocks[i].hidden=!CUR.blocks[i].hidden;drawBlocks();await saveLayout()}
  else if(a==='bup'||a==='bdn'){var j=+t.dataset.i,k=a==='bup'?j-1:j+1;var bb=CUR.blocks;var tmp=bb[j];bb[j]=bb[k];bb[k]=tmp;drawBlocks();await saveLayout()}
  else if(a==='bedit'){await editBlock(t.dataset.n)}
- else if(a==='bxsite'){location.hash='#site'}
- else if(a==='bxgit'){location.hash='#bolum'}
+ else if(a==='sitetab'){ST.tab=t.dataset.t;await siteTab()}
+ else if(a==='sted'){ST.ed=t.dataset.e;await siteTab()}
+ else if(a==='styayin'){var y=t.dataset.e;
+  if(y==='blok'&&!await ask('Siteniz bundan sonra hazır tema yerine kendi bölümlerinizle yayınlansın mı? İstediğiniz an temaya dönebilirsiniz.','Bölümlerle yayınla'))return;
+  if(y==='tema'&&!await ask('Siteniz hazır temayla yayınlansın mı? Hazırladığınız bölümler silinmez, saklı kalır.','Temaya dön'))return;
+  await api('/yp/site-engine',{method:'PUT',body:{engine:y}});BX.eng=y;
+  toast(y==='blok'?'Site bölümlerle yayınlanıyor':'Hazır temaya dönüldü');await siteTab();preview()}
  else if(a==='bxadd'){if(!BX.pid){toast('Önce bir sayfa seçin',true);return}BX.q='';BX.cat='';await bxCat()}
  else if(a==='bxcat'){BX.cat=t.dataset.c;await bxCat()}
  else if(a==='bxpick'){await bxPick(t.dataset.b)}
@@ -1001,10 +1032,6 @@ document.addEventListener('click',async function(ev){
 document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!$('#ov').hidden)closeM()});
 document.addEventListener('change',function(e){var t=e.target;
  if(t&&t.id==='bxpg'){BX.pid=t.value;bxLoad().catch(fail);return}
- if(t&&t.id==='bxeng'){(async function(){var y=t.value;
-   if(y==='blok'&&!await ask('Siteniz bundan sonra hazır tema yerine buradaki bölümlerle yayınlansın mı? İstediğiniz an temaya dönebilirsiniz.','Bölümlerle yayınla')){t.value=BX.eng||'tema';return}
-   try{await api('/yp/site-engine',{method:'PUT',body:{engine:y}});BX.eng=y;bxBilgi();toast(y==='blok'?'Site bölümlerle yayınlanıyor':'Hazır temaya dönüldü')}
-   catch(x){t.value=BX.eng||'tema';fail(x)}})();return}
  if(t&&t.dataset&&(t.dataset.ki||t.dataset.kis)){bxImg(t,!!t.dataset.kis).catch(fail);return}
  if(t&&t.dataset&&t.dataset.up){if(t.dataset.up==='bimg')onBlockUpload(t);else if(t.dataset.up==='timg')onThemeUpload(t);else onUpload(t)}});
 document.addEventListener('input',function(e){if(e.target.form&&fid(e.target.form)==='af')calcTot()});

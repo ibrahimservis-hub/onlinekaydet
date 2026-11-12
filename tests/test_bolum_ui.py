@@ -36,27 +36,53 @@ with sync_playwright() as pw:
     pg.fill("#lf input[name=email]", EMAIL); pg.fill("#lf input[name=password]", PW)
     pg.click("#lb"); pg.wait_for_selector("#app:not([hidden])", timeout=15000); pg.wait_for_timeout(400)
 
-    def menu():
-        n = pg.locator('#nav a[data-r=bolum]')
-        assert n.count() == 1, "sol menüde Sayfa bölümleri olmalı"
-        assert "Sayfa bölümleri" in n.inner_text()
-        n.click(); pg.wait_for_selector("#bxl .row", timeout=10000)
-        assert pg.evaluate("location.hash") == "#bolum"
-    t("sol menüden açılır", menu)
+    def bolumeGit():
+        """Web Sitem > Bölümler > Kendi bölümlerim"""
+        if pg.evaluate("location.hash") != "#site":
+            pg.evaluate("location.hash='#site'")
+        pg.wait_for_selector(".stabs button", timeout=10000)
+        pg.click('.stabs button[data-t="bolum"]'); pg.wait_for_timeout(250)
+        pg.click('[data-a="sted"][data-e="blok"]')
+        pg.wait_for_selector("#bxl .row", timeout=10000)
 
-    def bilgi():
-        b = pg.locator("#bxbilgi .bxbg")
-        assert b.count() == 1, "durum satırı olmalı"
-        m = b.inner_text()
-        assert "hazır temayla" in m and "görünmezler" in m, "tema kipinde durum açıkça yazmalı: %s" % m
-        assert pg.locator('#bxbilgi a[href="#site"]').count() == 1, "Web Sitem'e bağlantı olmalı"
-    t("tema kipinde durum satırı iki düzenleyiciyi ayırt ettirir", bilgi)
+    def menu():
+        assert pg.locator('#nav a[data-r=bolum]').count() == 0, "ayrı 'Sayfa bölümleri' menüsü kalmamalı"
+        n = pg.locator('#nav a[data-r=site]')
+        assert n.count() == 1 and "Web Sitem" in n.inner_text(), "tek giriş Web Sitem olmalı"
+        n.click(); pg.wait_for_selector(".stabs button", timeout=10000)
+        adlar = pg.locator(".stabs button").all_inner_texts()
+        assert adlar == ["Bölümler", "Tasarım", "Görseller", "Bilgiler", "Menü"], adlar
+        assert pg.evaluate("location.hash") == "#site"
+    t("tek menü girişi: Web Sitem, içinde beş sekme", menu)
+
+    def eskiBag():
+        pg.evaluate("location.hash='#bolum'"); pg.wait_for_selector(".stabs button", timeout=10000)
+        assert pg.evaluate("location.hash") == "#site", "eski #bolum bağlantısı Web Sitem'e taşımalı"
+        assert pg.locator('.stabs button[data-t="bolum"].on').count() == 1, "Bölümler sekmesi açık gelmeli"
+    t("eski #bolum bağlantısı Bölümler sekmesini açar", eskiBag)
+
+    def duzen():
+        bolumeGit()
+        b = pg.locator(".stbar .seg button")
+        assert b.count() >= 2, "hazır tema / kendi bölümlerim anahtarı olmalı"
+        assert "yayında" in b.first.inner_text(), "yayındaki düzen işaretlenmeli: %s" % b.first.inner_text()
+        m = pg.inner_text("#sl .bxbg")
+        assert "yayında değil" in m, "yayında olmayan düzen açıkça söylenmeli: %s" % m
+        assert pg.locator('[data-a="styayin"]').count() == 1, "yayına alma düğmesi olmalı"
+    t("iki düzen tek anahtarda, hangisinin yayında olduğu yazar", duzen)
+
+    def tema():
+        pg.click('[data-a="sted"][data-e="tema"]'); pg.wait_for_selector("#bl .row", timeout=10000)
+        assert pg.locator("#bxl").count() == 0, "tema düzeninde blok listesi görünmemeli"
+        assert pg.locator("#bl .row").count() > 0, "tema bölümleri aynı yerde listelenmeli"
+    t("hazır tema düzeni aynı listede açılır", tema)
 
     def ac():
-        pg.evaluate("location.hash='#bolum'"); pg.wait_for_selector("#bxl .row", timeout=10000)
+        bolumeGit()
         assert pg.locator("#bxpg option").count() >= 1, "sayfa seçici dolmalı"
         assert pg.locator("#bxp .it").count() == pg.locator("#bxl .row").count(), "kaba yerleşim bölüm sayısıyla aynı olmalı"
-    t("ekran açılır: sayfa seçici, bölüm listesi ve kaba yerleşim gelir", ac)
+        assert pg.locator("#pvf").is_hidden(), "yayında olmayan düzende kaba yerleşim gösterilmeli"
+    t("sayfa seçici, bölüm listesi ve kaba yerleşim gelir", ac)
 
     def kat():
         pg.click('[data-a="bxadd"]'); pg.wait_for_selector("#bxg .bxcard", timeout=8000)
@@ -173,7 +199,7 @@ with sync_playwright() as pw:
         yeni = pg.evaluate("BX.rows.map(function(x){return x.iid})")
         assert yeni != ad and yeni[-1] == ad[-2], "sıra değişmeli"
         pg.reload(); pg.wait_for_selector("#app:not([hidden])", timeout=15000)
-        pg.evaluate("location.hash='#bolum'"); pg.wait_for_selector("#bxl .row", timeout=10000)
+        bolumeGit()
         assert pg.evaluate("BX.rows.map(function(x){return x.iid})") == yeni, "sıra sunucuda kalmalı"
     t("yukarı/aşağı sırayı değiştirir ve sunucuda kalır", sira)
 
