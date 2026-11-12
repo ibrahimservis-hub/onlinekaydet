@@ -2881,6 +2881,19 @@ import yp  # yeni yönetim paneli (ayrı uçlar: /api/yp/*)
 yp.register(api_router, db, {"require_admin": require_admin})
 import blocks_api  # bölüm motoru: katalog, rozet, sektör paketi, sayfalar
 blocks_api.register(api_router, db, {"require_admin": require_admin})
+import urun  # e-ticaret ürün modülü
+
+
+async def _fetch_url(u):                                               # hızlı ürün ekleme: sayfayı indir
+    import httpx
+    async with httpx.AsyncClient(timeout=12, follow_redirects=True,
+                                 headers={"User-Agent": "Mozilla/5.0 (compatible; OnlineKaydet/1.0)"}) as cl:
+        r = await cl.get(u)
+        r.raise_for_status()
+        return r.text[:900000]
+
+
+urun.register(api_router, db, {"require_admin": require_admin, "fetch_url": _fetch_url})
 
 @app.get("/salon", include_in_schema=False)
 async def yp_sayfa():
