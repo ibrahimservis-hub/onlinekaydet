@@ -333,15 +333,20 @@ def S(sid, name, terms, blocks, modules, integrations, reports, flow="randevu", 
 
 _BASE_BLOCKS = ["hero", "hizmet_liste", "galeri", "ekip", "yorumlar", "sss", "harita", "saatler", "iletisim_form",
                 "mobil_bar", "footer", "menu_gorunum", "logo_bolum", "kvkk", "cerez"]
-_BASE_INT = ["google_isletme", "netgsm", "whatsapp", "ga4", "search_console"]
+_BASE_INT = ["google_isletme", "netgsm", "iletimerkezi", "verimor", "mutlucell", "masgsm", "whatsapp",
+             "smtp", "ga4", "search_console", "google_ads", "meta_pixel", "canli_destek", "havale", "kapida"]
 _BASE_REP = ["ciro", "musteri", "personel", "kasa"]
 _SHOP_BLOCKS = ["v_indirim", "v_coksatan", "v_yeni", "v_kategori", "v_marka", "v_serit", "v_buyuk_kart",
                 "guvence", "odeme_logo", "taksit", "siparis_takip", "uyelik", "sepet_hatirlat", "story",
                 "site_arama", "iade_kosul"]
 _SHOP_MOD = ["shop", "stok", "siparis", "iade", "kampanya", "pazaryeri", "kargo", "efatura", "uyelik"]
-_SHOP_INT = ["iyzico", "paytr", "param", "banka_pos", "trendyol", "hepsiburada", "n11", "ciceksepeti", "amazon_tr",
-             "pttavm", "pazarama", "yurtici", "aras", "mng", "ptt", "surat", "parasut", "birfatura", "nebim",
-             "logo", "mikro", "netsis", "gib_earsiv", "meta_pixel", "tiktok_pixel", "google_merchant"]
+_SHOP_INT = ["iyzico", "paytr", "param", "sipay", "craftgate", "banka_pos",
+             "trendyol", "hepsiburada", "n11", "ciceksepeti", "amazon_tr", "pttavm", "pazarama",
+             "idefix", "modanisa", "temu",
+             "yurtici", "aras", "mng", "ptt", "surat", "ups", "sendeo", "hepsijet", "kolaygelsin",
+             "parasut", "birfatura", "uyumsoft", "izibiz", "nes", "edm", "qnb_efinans", "gib_earsiv",
+             "nebim", "logo", "mikro", "netsis", "dia", "akinsoft",
+             "tiktok_pixel", "google_merchant"]
 _SHOP_REP = ["satis", "kar", "kanal", "iade_rapor", "stok_devir", "sepet_terk", "kampanya_etki"]
 
 SECTOR_PACKS = {
