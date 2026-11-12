@@ -481,7 +481,7 @@ def sanitize(bid, data, mobile=False):
     out = {}
     for f in fields_of(bid):
         if mobile and not f.get("m") and f["t"] not in ("sel", "sw", "slider", "num"):
-            pass
+            continue                                   # telefona ayrı tutulmayan alan set_m'ye yazılmaz
         k = f["k"]
         if k not in data:
             continue

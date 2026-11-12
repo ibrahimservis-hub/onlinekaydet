@@ -322,6 +322,40 @@ table.gr .r{text-align:right}
  .md{border-radius:14px}#ov{padding:2vh 8px}
 }
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+/* ---- sayfa bölümleri (katalog) ---- */
+.md.xw{max-width:1180px}
+.bxtop{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 14px}
+.bxwrap{display:grid;grid-template-columns:1fr 340px;gap:16px;align-items:start}
+@media(max-width:1100px){.bxwrap{grid-template-columns:1fr}}
+.bxbody{display:grid;grid-template-columns:196px 1fr;gap:14px}
+@media(max-width:820px){.bxbody{grid-template-columns:1fr}.bxcat{border-right:0;border-bottom:1px solid var(--line);padding:0 0 8px}}
+.bxcat{border-right:1px solid var(--line);padding:0 10px 10px 0;display:grid;gap:2px;align-content:start;max-height:62vh;overflow:auto}
+.bxcat button{text-align:left;border:0;background:none;padding:9px 11px;border-radius:8px;font:600 13.5px inherit;color:var(--tx);display:flex;gap:8px;width:100%;cursor:pointer}
+.bxcat button .n{margin-left:auto;color:var(--mut)}
+.bxcat button.on{background:var(--ink);color:#fff}
+.bxcat button.on .n{color:#c6cfe2}
+.bxcat .t5{font-size:11px;letter-spacing:.07em;color:var(--mut);font-weight:700;padding:13px 11px 4px}
+.bxgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(206px,1fr));gap:12px;overflow:auto;max-height:62vh;padding:2px 3px 10px;align-content:start}
+.bxcard{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff;text-align:left;padding:0;display:flex;flex-direction:column;cursor:pointer;position:relative}
+.bxcard:hover{border-color:var(--blue);box-shadow:0 2px 10px rgba(17,85,204,.10)}
+.bxcard .in{padding:10px 11px;display:grid;gap:2px;flex:1}
+.bxcard .t{font-size:13.5px;font-weight:650;color:var(--ink);line-height:1.3}
+.bxcard .m{font-size:12px;color:var(--mut);line-height:1.35}
+.bxcard .fo{border-top:1px solid #f0eee7;padding:7px 11px;font-size:11.5px;color:var(--blue);font-weight:600}
+.bxtag{position:absolute;top:8px;right:8px;font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:999px;z-index:1}
+.bxtag.u{background:var(--ok-s);color:var(--ok)}
+.bxtag.h{background:var(--blue);color:#fff}
+.bxown{font-size:11.5px;font-weight:650;padding:2px 8px;border-radius:999px;background:var(--ok-s);color:var(--ok);border:1px solid #bfe3cd}
+.bxmiras{font-size:11.5px;color:var(--mut)}
+.wf{position:relative;background:#faf9f6;border-bottom:1px solid #f0eee7;padding:12px;display:grid;gap:5px;height:98px;align-content:center}
+.wf i{display:block;background:#dedacf;border-radius:3px;height:8px}
+.wf .bg{height:32px;border-radius:5px}
+.wf .r,.wf .g{display:grid;gap:5px}
+.wf .bt{height:11px;width:44px;background:#c3cbd8;border-radius:4px}
+.bxpv{display:grid;gap:6px}
+.bxpv .it{border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#fff}
+.bxpv .it.off{opacity:.45}
+.bxpv .it .nm{font-size:11.5px;color:var(--mut);padding:5px 9px;border-top:1px solid #f0eee7;background:#fcfbf8}
 </style></head><body>
 <div id="login" hidden>
  <form id="lf" autocomplete="on"><img src="/salon/logo.png" alt="OnlineKaydet"><h1>Yönetim Paneli</h1><p class="s">E-posta ve şifrenizle girin</p>
@@ -365,7 +399,7 @@ function fid(f){return f.getAttribute?f.getAttribute('id'):''}
 function fval(f,k){var el=f.elements?f.elements[k]:null;return el?el.value:''}
 var TOK='',B=null,ROUTE='bugun',CUR={};
 var BASE_NAV=[['bugun','Bugün','home'],['takvim','Takvim','cal'],['randevu','Randevular','list'],['musteri','Müşteriler','users'],['kasa','Kasa','wallet'],['ekip','Ekip','team'],['rapor','Raporlar','chart'],['site','Web Sitem','web'],['is','İş kayıtları','wrench'],['icerik','İçerikler','docs'],['bildirim','Bildirimler','bell'],['entegrasyon','Entegrasyonlar','plug'],['ayar','Ayarlar','gear'],['destek','Destek','life']];
-var NAV=BASE_NAV.slice(),EXTRA=['iade'];
+var NAV=BASE_NAV.slice(),EXTRA=['iade','bolum'];
 function buildNav(){var m=(B&&B.modules)||[],ins=[];
  if(m.indexOf('shop')>-1||m.indexOf('stok')>-1)ins.push(['urun','Ürünler','store']);
  if(m.indexOf('siparis')>-1)ins.push(['siparis','Siparişler','truck']);
@@ -632,7 +666,7 @@ V.site=async function(){
  var p0=pr.profile||{};var sel=br.brand.theme,mine=br.themes.filter(function(t){return t.sector===B.sector}),rest=br.themes.filter(function(t){return t.sector!==B.sector});
  function card(t){return '<div class="th'+(t.slug===sel?' on':'')+'"><div class="sv" style="background:linear-gradient(135deg,'+esc(t.dark)+','+esc(t.accent)+')">'+esc(String(t.name).replace(/&amp;/g,'&'))+'</div><div class="tb"><button class="btn s" data-a="tprev" data-s="'+esc(t.slug)+'">Önizle</button>'+(t.slug===sel?'<span class="tag g">Seçili</span>':'<button class="btn s p" data-a="tpick" data-s="'+esc(t.slug)+'" data-n="'+esc(t.name)+'">Seç</button>')+'</div></div>'}
  var h='<div class="card"><div class="hd"><h2>Sitenin teması</h2><div class="sp"></div><span class="note">'+mine.length+' tema</span></div><div class="tg">'+(mine.map(card).join('')||'<div class="empty" style="grid-column:1/-1">Bu işe özel tema bulunamadı.</div>')+'</div>'+(rest.length?'<div class="pad"><button class="lnk" data-a="moreth">Diğer sektörlerin temalarını da göster ('+rest.length+')</button><div class="tg" id="rest" hidden style="padding:12px 0 0">'+rest.map(card).join('')+'</div></div>':'')+'</div>';
- h+='<div class="card"><div class="hd"><h2>Sayfadaki bölümler</h2></div><div id="bl"><div class="empty">Yükleniyor…</div></div></div>';
+ h+='<div class="card"><div class="hd"><h2>Sayfadaki bölümler</h2><div class="sp"></div><button class="btn s" data-a="bxgit">Bölüm ekle ve düzenle</button></div><div id="bl"><div class="empty">Yükleniyor…</div></div></div>';
  h+='<div class="card"><div class="hd"><h2>Menü</h2></div><div class="pad"><div class="note" style="margin-bottom:8px">Sitenin üstündeki menü bağlantılarının yazısını değiştirin, istemediğinizi kapatın, kendi bağlantınızı ekleyin.</div><div id="mnu"><div class="note">Yükleniyor…</div></div></div></div>';
  var pm=p0.promo||{},pon=pm.on===true||(pm.on!==false&&!!pr.promo_default);
  h+='<div class="card"><div class="hd"><h2>Kampanya sayacı (üst çubuk)</h2></div><form id="prf" class="pad"><label class="f" style="display:flex;align-items:center;gap:10px"><button type="button" class="tog'+(pon?' on':'')+'" id="pron" data-a="bentog" role="switch" aria-checked="'+pon+'" aria-label="Kampanya çubuğu"></button> Sitenin üstünde kampanya çubuğu görünsün</label><label class="f">Duyuru yazısı<input name="text" maxlength="120" value="'+esc(pm.text||'')+'" placeholder="Örn. İlk boyada %20 indirim"></label><div class="g2"><label class="f">Sayaç bitiş tarihi ve saati<input type="datetime-local" name="end" value="'+esc(pm.end||'')+'"></label><label class="f">Düğme yazısı (randevu açar)<input name="btn" maxlength="30" value="'+esc(pm.btn||'')+'" placeholder="Randevu al"></label></div><div class="note">Bitiş tarihi geçince çubuk kendiliğinden kalkar. Tarih boşsa sayaç görünmez; temada hazır duran örnek sayaç yazıları yerine sizin yazınız çıkar.</div><div class="mf"><button class="btn p">Kaydet</button></div></form></div>';
@@ -708,7 +742,7 @@ function setDev(d){CUR.dev=d;try{localStorage.ypdev=d}catch(_){}document.querySe
  document.addEventListener('dragend',function(e){document.querySelectorAll('.row[draggable]').forEach(function(r){r.removeAttribute('draggable');r.classList.remove('dragging','dragover')});src=null});
  document.addEventListener('dragover',function(e){var r=e.target.closest&&e.target.closest('.row[data-dk]');if(!r||!src||r.dataset.dk!==src.dataset.dk)return;e.preventDefault();document.querySelectorAll('.row.dragover').forEach(function(x){x.classList.remove('dragover')});r.classList.add('dragover')});
  document.addEventListener('drop',async function(e){var r=e.target.closest&&e.target.closest('.row[data-dk]');if(!r||!src||r.dataset.dk!==src.dataset.dk)return;e.preventDefault();var a=+src.dataset.di,b=+r.dataset.di,k=src.dataset.dk;src=null;if(a===b)return;
-  try{if(k==='blk'){var x=CUR.blocks.splice(a,1)[0];CUR.blocks.splice(b,0,x);drawBlocks();await saveLayout()}else if(k==='mnu'){syncMenu();var y=CUR.menu.items.splice(a,1)[0];CUR.menu.items.splice(b,0,y);CUR.menu.moved=1;drawMenu()}}catch(x){fail(x)}});
+  try{if(k==='bxb'){var z=BX.rows.splice(a,1)[0];BX.rows.splice(b,0,z);bxDraw();await bxSira()}else if(k==='blk'){var x=CUR.blocks.splice(a,1)[0];CUR.blocks.splice(b,0,x);drawBlocks();await saveLayout()}else if(k==='mnu'){syncMenu();var y=CUR.menu.items.splice(a,1)[0];CUR.menu.items.splice(b,0,y);CUR.menu.moved=1;drawMenu()}}catch(x){fail(x)}});
 })();
 async function loadMenu(){var el=$('#mnu');if(!el)return;try{var r=await api('/site/menu');CUR.menu={items:r.items,edits:JSON.parse(JSON.stringify(r.edits||{})),extra:(r.extra||[]).slice(),order:r.order||[]};drawMenu()}catch(e){el.innerHTML='<div class="empty">'+esc(e.message)+'</div>'}}
 function syncMenu(){var m=CUR.menu;if(!m)return;Array.from(document.querySelectorAll('#mnu [data-mi]')).forEach(function(i){var x=m.items[+i.dataset.mi],v=i.value.trim(),e=m.edits[x.h]||{};if(v&&v!==x.l)e.l=v;else delete e.l;if(e.l||e.off)m.edits[x.h]=e;else delete m.edits[x.h]});
@@ -721,6 +755,143 @@ async function editBlock(name){var r=await api('/site/block-text?name='+encodeUR
 var FONTS=['Inter','Poppins','Montserrat','Playfair Display','Lora','Merriweather','Raleway','Nunito','DM Serif Display','Oswald','Cormorant Garamond','Roboto Slab','Work Sans','Manrope'];
 function styleBox(){var st=(((CUR.prof.blockstyle||{})[CUR.brand.theme]||{})[CUR.bn])||{};function sel(n,v){return '<select name="'+n+'"><option value="">Temanın kendi yazı tipi</option>'+FONTS.map(function(f){return '<option'+(f===v?' selected':'')+' style="font-family:\''+f+'\'">'+f+'</option>'}).join('')+'</select>'}
  return '<div class="note" style="font-weight:600;margin:14px 0 6px">Yazı biçimi (bu bölüm)</div><div class="g3"><label class="f">Başlık yazı tipi'+sel('sh',st.h)+'</label><label class="f">Metin yazı tipi'+sel('sb',st.b)+'</label><label class="f">Yazı rengi<span style="display:flex;gap:8px;align-items:center"><input type="color" name="sc" value="'+esc(st.c||'#222222')+'" style="width:44px;padding:2px"><label style="display:flex;gap:6px;align-items:center;font-size:13px"><input type="checkbox" name="suc"'+(st.c?' checked':'')+'> özel renk</label></span></label></div>'}
+/* ---------------- SAYFA BÖLÜMLERİ (katalog) ---------------- */
+var BX={pid:'',dev:'web',pages:[],page:null,rows:[],cat:'',q:'',cats:[],cards:[],total:0,cur:null,meta:null,badges:[]};
+function wfBox(w){
+ function b(n,h){var o='';for(var i=0;i<n;i++)o+='<i style="height:'+(h||8)+'px"></i>';return o}
+ function g(n,c,h){return '<div class="g" style="grid-template-columns:repeat('+c+',1fr)">'+b(n,h)+'</div>'}
+ var m={hero:'<i class="bg"></i>'+b(2)+'<i class="bt"></i>',
+  split:'<div class="g" style="grid-template-columns:1fr 1fr"><i style="height:50px"></i><div class="r">'+b(3)+'</div></div>',
+  g2:g(2,2,42),g3:g(3,3,36),g5:g(5,5,26),g6:g(6,3,28),rows:b(4,12),
+  form:b(3,14)+'<i class="bt"></i>',band:'<i style="height:18px"></i>',logos:g(5,5,16),
+  video:'<i style="height:58px"></i>',cta:b(1,10)+'<i class="bt" style="margin:0 auto"></i>',
+  full:'<i style="height:68px"></i>',stat:g(3,3,28),faq:b(3,14),quote:b(1,10)+b(2),
+  map:'<i style="height:58px"></i>',
+  ba:'<div class="g" style="grid-template-columns:1fr 1fr"><i style="height:54px"></i><i style="height:54px"></i></div>',
+  drawer:'<div class="g" style="grid-template-columns:1fr 2fr"><i style="height:58px"></i><div class="r">'+b(3)+'</div></div>'};
+ return '<div class="wf">'+(m[w]||b(3))+'</div>'}
+V.bolum=async function(){
+ $('#main').innerHTML=head('Sayfa bölümleri','Sayfanıza hazır bölüm ekleyin, sırasını değiştirin, her bölümü bilgisayar ve telefon için ayrı ayarlayın.',
+  '<button class="btn" data-a="bxsite">Web Sitem</button> <button class="btn p" data-a="bxadd">Bölüm ekle</button>')
+  +'<div class="bxtop"><label class="f" style="margin:0;min-width:210px">Sayfa<select id="bxpg" data-a="bxpg"></select></label>'
+  +'<div class="seg" role="group" aria-label="Hangi cihaz"><button data-a="bxdev" data-d="web"'+(BX.dev==='web'?' class="on"':'')+'>Bilgisayar</button>'
+  +'<button data-a="bxdev" data-d="phone"'+(BX.dev==='phone'?' class="on"':'')+'>Telefon</button></div>'
+  +'<div class="sp"></div><span class="note" id="bxn"></span></div>'
+  +'<div class="bxwrap"><div class="card"><div class="hd"><h2>Bu sayfadaki bölümler</h2><div class="sp"></div><span class="note">Sürükleyip sıralayın</span></div><div id="bxl"><div class="empty">Yükleniyor…</div></div></div>'
+  +'<div class="card"><div class="hd"><h2>Kaba yerleşim</h2></div><div class="pad"><div id="bxp" class="bxpv"></div></div></div></div>';
+ await bxPages()};
+async function bxPages(){var r=await api('/yp/pages');BX.pages=r.rows||[];
+ if(!BX.pid||!BX.pages.some(function(p){return p.id===BX.pid})){var h=BX.pages.filter(function(p){return p.home})[0];BX.pid=(h||BX.pages[0]||{}).id||''}
+ var sel=$('#bxpg');if(sel)sel.innerHTML=BX.pages.map(function(p){return '<option value="'+esc(p.id)+'"'+(p.id===BX.pid?' selected':'')+'>'+esc(p.title)+(p.home?' (ana sayfa)':'')+' · '+p.n+' bölüm</option>'}).join('');
+ await bxLoad()}
+async function bxLoad(){if(!BX.pid){$('#bxl').innerHTML='<div class="empty">Sayfa yok.</div>';return}
+ var r=await api('/yp/pages/'+BX.pid+'/blocks');BX.rows=r.rows||[];BX.page=r.page;bxDraw()}
+function bxOwn(x){var n=Object.keys(x.set_m||{}).length;return n}
+function bxDraw(){var el=$('#bxl');if(!el)return;var b=BX.rows,tel=BX.dev==='phone';
+ var nn=$('#bxn');if(nn)nn.textContent=b.length+' bölüm'+(tel?' · telefon görünümü düzenleniyor':'');
+ if(!b.length){el.innerHTML='<div class="empty">Bu sayfada henüz bölüm yok. “Bölüm ekle” ile başlayın.</div>';bxPrev();return}
+ el.innerHTML=b.map(function(x,i){var o=bxOwn(x);
+  return '<div class="row" data-dk="bxb" data-di="'+i+'" style="grid-template-columns:auto auto 1fr auto auto auto;'+(x.on?'':'opacity:.55')+'">'
+   +'<span class="grip" title="Sürükleyip bırakın" aria-hidden="true">⠿</span>'
+   +'<div style="display:flex;flex-direction:column;gap:2px"><button class="btn s" style="min-height:26px;padding:0 8px" data-a="bxup" data-i="'+i+'" aria-label="Yukarı"'+(i?'':' disabled')+'>▲</button>'
+   +'<button class="btn s" style="min-height:26px;padding:0 8px" data-a="bxdn" data-i="'+i+'" aria-label="Aşağı"'+(i<b.length-1?'':' disabled')+'>▼</button></div>'
+   +'<div><div class="t" style="font-size:14.5px">'+esc(x.name)+'</div><div class="m">'+esc(x.desc)+(x.manage?' · '+esc(x.manage)+' listenizden gelir':'')+'</div></div>'
+   +'<span>'+(tel?(o?'<span class="bxown">telefona özel · '+o+'</span>':'<span class="bxmiras">bilgisayarla aynı</span>'):'')+'</span>'
+   +'<span style="display:flex;gap:6px"><button class="btn s" data-a="bxset" data-i="'+i+'">Ayarlar</button>'
+   +'<button class="btn s d" data-a="bxdel" data-i="'+i+'" aria-label="Bölümü kaldır">×</button></span>'
+   +'<button class="tog'+(x.on?' on':'')+'" role="switch" aria-checked="'+(!!x.on)+'" aria-label="Bölümü göster/gizle" data-a="bxtog" data-i="'+i+'"></button></div>'}).join('');
+ bxPrev()}
+function bxPrev(){var p=$('#bxp');if(!p)return;
+ p.innerHTML=BX.rows.length?BX.rows.map(function(x){return '<div class="it'+(x.on?'':' off')+'">'+wfBox(x.wire)+'<div class="nm">'+esc(x.name)+'</div></div>'}).join('')
+  :'<div class="note">Bölüm ekleyince sayfanın kabası burada görünür.</div>'}
+async function bxCat(){var q=[];if(BX.cat)q.push('cat='+encodeURIComponent(BX.cat));if(BX.q)q.push('q='+encodeURIComponent(BX.q));
+ var r=await api('/yp/blocks'+(q.length?'?'+q.join('&'):''));BX.cats=r.cats||[];BX.cards=r.rows||[];BX.total=r.total||0;
+ var ad=BX.cat?(BX.cats.filter(function(c){return c.id===BX.cat})[0]||{}).name||'' : '';
+ modal('Bölüm ekle'+(ad?' · '+ad:''),
+  '<div class="note" style="margin:-2px 0 12px">'+BX.cards.length+' bölüm · ürün ve hizmetleriniz otomatik gelir · her bölüm bilgisayar ve telefon için ayrı ayarlanır</div>'
+  +'<div class="bxbody"><div class="bxcat" id="bxc"></div><div class="bxgrid" id="bxg"></div></div>',1);
+ var md=document.querySelector('#ov .md');if(md)md.classList.add('xw');
+ var mh=document.querySelector('#ov .mh');
+ if(mh)mh.insertAdjacentHTML('beforeend','<input id="bxq" placeholder="Bölüm ara" value="'+esc(BX.q)+'" style="max-width:240px;min-height:36px;border:1px solid #d0d5dd;border-radius:8px;padding:0 10px;font:14px inherit;margin-right:8px">');
+ var qi=$('#bxq');if(qi){qi.oninput=function(){clearTimeout(BX.t);BX.t=setTimeout(function(){BX.q=qi.value.trim();bxCat().catch(fail)},260)};if(innerWidth>900)qi.focus()}
+ bxCatDraw()}
+function bxCatDraw(){
+ $('#bxc').innerHTML='<button data-a="bxcat" data-c=""'+(BX.cat?'':' class="on"')+'>Tümü <span class="n">'+BX.total+'</span></button>'
+  +'<div class="t5">BÖLÜMLER</div>'
+  +BX.cats.map(function(c){return '<button data-a="bxcat" data-c="'+esc(c.id)+'"'+(BX.cat===c.id?' class="on"':'')+'>'+esc(c.name)+' <span class="n">'+c.n+'</span></button>'}).join('');
+ $('#bxg').innerHTML=BX.cards.length?BX.cards.map(function(x){
+  var tag=x.tags&&x.tags.indexOf('hareket')>=0?'<span class="bxtag h">HAREKETLİ</span>':(x.manage?'<span class="bxtag u">'+esc(x.manage.toUpperCase())+'</span>':'');
+  return '<button class="bxcard" data-a="bxpick" data-b="'+esc(x.id)+'">'+tag+wfBox(x.wire)
+   +'<div class="in"><div class="t">'+esc(x.name)+'</div><div class="m">'+esc(x.desc)+'</div></div>'
+   +'<div class="fo">'+(x.resp?'Mobil + web ayrı':'Tek düzen')+'</div></button>'}).join('')
+  :'<div class="empty" style="grid-column:1/-1">Aramanıza uyan bölüm yok.</div>'}
+async function bxPick(bid){var r=await api('/yp/pages/'+BX.pid+'/blocks',{method:'POST',body:{bid:bid}});closeM();toast('“'+r.name+'” eklendi');await bxLoad();await bxSet(r.iid)}
+async function bxSet(iid){var x=null;for(var i=0;i<BX.rows.length;i++)if(BX.rows[i].iid===iid)x=BX.rows[i];
+ if(!x)return;var r=await api('/yp/blocks/'+x.bid);BX.cur=x;BX.meta=r;BX.badges=r.badges||[];bxForm()}
+function bxTelAlan(f){return !!f.m||['sel','sw','slider','num'].indexOf(f.t)>=0}
+function bxVal(f){var x=BX.cur,d=BX.meta.defaults||{};
+ if(BX.dev==='phone'&&Object.prototype.hasOwnProperty.call(x.set_m||{},f.k))return x.set_m[f.k];
+ if(Object.prototype.hasOwnProperty.call(x.set||{},f.k))return x.set[f.k];
+ return d[f.k]}
+function bxOwned(f){return BX.dev==='phone'&&Object.prototype.hasOwnProperty.call(BX.cur.set_m||{},f.k)}
+function bxField(f){var v=bxVal(f),k=esc(f.k),tel=BX.dev==='phone';
+ var son=tel?(bxOwned(f)?' <span class="bxown">telefona özel</span> <button type="button" class="lnk" data-a="bxgeri" data-k="'+k+'">bilgisayardakine dön</button>':' <span class="bxmiras">bilgisayarla aynı</span>'):'';
+ var h=f.hint?'<div class="note" style="font-weight:500;margin-top:3px">'+esc(f.hint)+'</div>':'';
+ function wrap(inner){return '<label class="f">'+esc(f.l)+son+inner+h+'</label>'}
+ if(f.t==='sw')return '<div class="row" style="grid-template-columns:1fr auto;padding:9px 0;border-bottom:1px solid #f4f2ec"><div><div class="t" style="font-size:14px">'+esc(f.l)+son+'</div>'+h+'</div>'
+   +'<button type="button" class="tog'+(v?' on':'')+'" role="switch" aria-checked="'+(!!v)+'" data-a="bxsw" data-k="'+k+'" aria-label="'+esc(f.l)+'"></button></div>';
+ if(f.t==='sel')return wrap('<select data-k="'+k+'">'+(f.opt||[]).map(function(o){return '<option value="'+esc(o)+'"'+(String(o)===String(v)?' selected':'')+'>'+esc(o)+'</option>'}).join('')+'</select>');
+ if(f.t==='slider')return wrap('<span style="display:flex;gap:10px;align-items:center"><input type="range" data-k="'+k+'" min="'+(f.min||0)+'" max="'+(f.max||100)+'" value="'+esc(v==null?(f.d||0):v)+'" oninput="this.nextElementSibling.textContent=this.value" style="flex:1"><b style="min-width:34px;text-align:right;font-size:13px">'+esc(v==null?(f.d||0):v)+'</b></span>');
+ if(f.t==='color')return wrap('<input type="color" data-k="'+k+'" value="'+esc(v||'#1155cc')+'" style="width:52px;padding:2px">');
+ if(f.t==='font')return wrap('<select data-k="'+k+'"><option value="">Temanın kendi yazı tipi</option>'+FONTS.map(function(x){return '<option'+(x===v?' selected':'')+' style="font-family:\''+x+'\'">'+x+'</option>'}).join('')+'</select>');
+ if(f.t==='area')return wrap('<textarea data-k="'+k+'" rows="3" maxlength="4000">'+esc(v||'')+'</textarea>');
+ if(f.t==='num')return wrap('<input type="number" data-k="'+k+'" value="'+esc(v==null?'':v)+'">');
+ if(f.t==='link')return wrap('<input data-k="'+k+'" value="'+esc(v||'')+'" maxlength="300" placeholder="/sayfa ya da https://…">');
+ if(f.t==='rozet'){var se=(v||[]);return wrap('<span style="display:flex;gap:7px;flex-wrap:wrap;padding-top:4px">'+BX.badges.map(function(bb){return '<label style="display:flex;gap:5px;align-items:center;font-size:13px;font-weight:500"><input type="checkbox" data-kb="'+k+'" value="'+esc(bb.id)+'"'+(se.indexOf(bb.id)>=0?' checked':'')+'> <span style="background:'+esc(bb.color)+';color:#fff;border-radius:999px;padding:1px 8px;font-size:11.5px;font-weight:700">'+esc(bb.name)+'</span></label>'}).join('')+'</span>')}
+ if(f.t==='img')return wrap('<span style="display:flex;gap:9px;align-items:center">'+(v?'<img src="'+esc(imgSrc(v))+'" alt="" style="width:62px;height:42px;object-fit:cover;border-radius:6px;border:1px solid var(--line)">':'')
+   +'<input type="file" accept="image/*" data-ki="'+k+'" style="font-size:13px">'+(v?'<button type="button" class="btn s d" data-a="bximgdel" data-k="'+k+'">Kaldır</button>':'')+'</span>');
+ if(f.t==='imgs')return wrap('<span style="display:flex;gap:9px;align-items:center;flex-wrap:wrap">'+((v||[]).map(function(kk){return '<img src="'+esc(imgSrc(kk))+'" alt="" style="width:52px;height:38px;object-fit:cover;border-radius:6px;border:1px solid var(--line)">'}).join(''))
+   +'<input type="file" accept="image/*" multiple data-kis="'+k+'" style="font-size:13px"></span>');
+ if(f.t==='urun')return '<div class="row" style="grid-template-columns:1fr auto;padding:9px 0;border-bottom:1px solid #f4f2ec"><div><div class="t" style="font-size:14px">'+esc(f.l)+'</div><div class="note">Ürünleriniz Ürünler ekranından gelir; burada kural seçmeniz yeter.</div></div><button type="button" class="btn s" data-a="bxurun">Ürünler</button></div>';
+ return wrap('<input data-k="'+k+'" value="'+esc(v||'')+'" maxlength="300">')}
+function bxForm(){var m=BX.meta,x=BX.cur,tel=BX.dev==='phone';
+ var fs=m.fields.filter(function(f){return !tel||bxTelAlan(f)});
+ var atl=tel?m.fields.length-fs.length:0;
+ modal(m.block.name,'<form id="bxf">'
+  +'<div class="seg" style="margin:0 0 12px" role="group" aria-label="Hangi cihaz"><button type="button" data-a="bxfdev" data-d="web"'+(tel?'':' class="on"')+'>Bilgisayar</button>'
+  +'<button type="button" data-a="bxfdev" data-d="phone"'+(tel?' class="on"':'')+'>Telefon</button></div>'
+  +'<div class="note" style="margin:0 0 12px">'+esc(m.block.desc)+(tel?' · Telefonda değiştirmediğiniz ayar bilgisayardakiyle aynı kalır.'+(atl?' Yazı ve görsel alanları iki cihazda ortaktır ('+atl+' alan).':''):'')+'</div>'
+  +fs.map(bxField).join('')
+  +'<div class="mf"><button type="button" class="btn" data-a="close">Vazgeç</button><button class="btn p">Kaydet</button></div></form>',1);
+ var md=document.querySelector('#ov .md');if(md)md.classList.add('wide')}
+function bxMiras(k){var x=BX.cur,d=BX.meta.defaults||{};
+ return Object.prototype.hasOwnProperty.call(x.set||{},k)?x.set[k]:d[k]}
+function bxAyni(a,b){if(Array.isArray(a)||Array.isArray(b))return JSON.stringify(a||[])===JSON.stringify(b||[]);
+ if(a==null&&b==null)return true;return String(a)===String(b)}
+async function bxKaydet(fm){var tel=BX.dev==='phone',x=BX.cur,gelen={};
+ Array.from(fm.querySelectorAll('[data-k]')).forEach(function(el){var k=el.dataset.k,f=null;
+  BX.meta.fields.forEach(function(ff){if(ff.k===k)f=ff});if(!f)return;
+  var v=el.type==='range'||f.t==='num'?Number(el.value):el.value;gelen[k]=v});
+ Array.from(fm.querySelectorAll('[data-a="bxsw"]')).forEach(function(el){gelen[el.dataset.k]=el.classList.contains('on')});
+ var rz={};Array.from(fm.querySelectorAll('[data-kb]')).forEach(function(el){(rz[el.dataset.kb]=rz[el.dataset.kb]||[]);if(el.checked)rz[el.dataset.kb].push(el.value)});
+ Object.keys(rz).forEach(function(k){gelen[k]=rz[k]});
+ var body;
+ if(!tel){body={set:gelen}}
+ else{var set={},sil=[];                       // telefonda yalnız gerçekten değişeni ayır; aynı kalan bilgisayardan miras alsın
+  Object.keys(gelen).forEach(function(k){
+   if(!bxAyni(gelen[k],bxMiras(k)))set[k]=gelen[k];
+   else if(Object.prototype.hasOwnProperty.call(x.set_m||{},k))sil.push(k)});
+  body={set_m:set,set_m_del:sil}}
+ var r=await api('/yp/pages/'+BX.pid+'/blocks/'+x.iid,{method:'PUT',body:body});
+ for(var i=0;i<BX.rows.length;i++)if(BX.rows[i].iid===x.iid){BX.rows[i].set=r.set;BX.rows[i].set_m=r.set_m}
+ closeM();toast('Kaydedildi');bxDraw()}
+async function bxGeri(k){var r=await api('/yp/pages/'+BX.pid+'/blocks/'+BX.cur.iid,{method:'PUT',body:{set_m_del:[k]}});
+ BX.cur.set_m=r.set_m;for(var i=0;i<BX.rows.length;i++)if(BX.rows[i].iid===BX.cur.iid)BX.rows[i].set_m=r.set_m;bxForm()}
+async function bxSira(){await api('/yp/pages/'+BX.pid+'/blocks/order',{method:'POST',body:{ids:BX.rows.map(function(x){return x.iid})}})}
+async function bxImg(el,coklu){var ks=[];for(var i=0;i<el.files.length;i++){var k=await upImage(el.files[i],'block');ks.push(k);if(!coklu)break}
+ var k=el.dataset.ki||el.dataset.kis,set={};set[k]=coklu?ks:ks[0];
+ var r=await api('/yp/pages/'+BX.pid+'/blocks/'+BX.cur.iid,{method:'PUT',body:(BX.dev==='phone'?{set_m:set}:{set:set})});
+ BX.cur.set=r.set;BX.cur.set_m=r.set_m;toast('Görsel eklendi');bxForm()}
 /* ---------------- AYARLAR ---------------- */
 V.ayar=async function(){var h=head('Ayarlar','Hizmet listesi, çalışma saatleri ve online randevu.');
  var sv=(await api('/yp/boot')).services;B.services=sv;
@@ -799,13 +970,32 @@ document.addEventListener('click',async function(ev){
  else if(a==='btog'){var i=+t.dataset.i;CUR.blocks[i].hidden=!CUR.blocks[i].hidden;drawBlocks();await saveLayout()}
  else if(a==='bup'||a==='bdn'){var j=+t.dataset.i,k=a==='bup'?j-1:j+1;var bb=CUR.blocks;var tmp=bb[j];bb[j]=bb[k];bb[k]=tmp;drawBlocks();await saveLayout()}
  else if(a==='bedit'){await editBlock(t.dataset.n)}
+ else if(a==='bxsite'){location.hash='#site'}
+ else if(a==='bxgit'){location.hash='#bolum'}
+ else if(a==='bxadd'){if(!BX.pid){toast('Önce bir sayfa seçin',true);return}BX.q='';BX.cat='';await bxCat()}
+ else if(a==='bxcat'){BX.cat=t.dataset.c;await bxCat()}
+ else if(a==='bxpick'){await bxPick(t.dataset.b)}
+ else if(a==='bxdev'){BX.dev=t.dataset.d;document.querySelectorAll('[data-a="bxdev"]').forEach(function(x){x.classList.toggle('on',x.dataset.d===BX.dev)});bxDraw()}
+ else if(a==='bxfdev'){BX.dev=t.dataset.d;bxForm()}
+ else if(a==='bxset'){await bxSet(BX.rows[+t.dataset.i].iid)}
+ else if(a==='bxsw'){t.classList.toggle('on');t.setAttribute('aria-checked',t.classList.contains('on'))}
+ else if(a==='bxgeri'){await bxGeri(t.dataset.k)}
+ else if(a==='bxurun'){closeM();location.hash='#urun'}
+ else if(a==='bximgdel'){var sd={};sd[t.dataset.k]='';var rr=await api('/yp/pages/'+BX.pid+'/blocks/'+BX.cur.iid,{method:'PUT',body:(BX.dev==='phone'?{set_m:sd}:{set:sd})});BX.cur.set=rr.set;BX.cur.set_m=rr.set_m;bxForm()}
+ else if(a==='bxtog'){var bi=+t.dataset.i,bx=BX.rows[bi];bx.on=!bx.on;t.classList.toggle('on',bx.on);t.setAttribute('aria-checked',bx.on);await api('/yp/pages/'+BX.pid+'/blocks/'+bx.iid,{method:'PUT',body:{on:bx.on}});bxDraw()}
+ else if(a==='bxdel'){var di=+t.dataset.i,dx=BX.rows[di];if(await ask('“'+dx.name+'” bölümü bu sayfadan kaldırılsın mı?','Kaldır')){await api('/yp/pages/'+BX.pid+'/blocks/'+dx.iid,{method:'DELETE'});toast('Kaldırıldı');await bxLoad()}}
+ else if(a==='bxup'||a==='bxdn'){var ui=+t.dataset.i,uj=a==='bxup'?ui-1:ui+1;if(uj<0||uj>=BX.rows.length)return;var uu=BX.rows.splice(ui,1)[0];BX.rows.splice(uj,0,uu);bxDraw();await bxSira()}
  }catch(e){fail(e)}});
 document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!$('#ov').hidden)closeM()});
-document.addEventListener('change',function(e){var t=e.target;if(t&&t.dataset&&t.dataset.up){if(t.dataset.up==='bimg')onBlockUpload(t);else if(t.dataset.up==='timg')onThemeUpload(t);else onUpload(t)}});
+document.addEventListener('change',function(e){var t=e.target;
+ if(t&&t.id==='bxpg'){BX.pid=t.value;bxLoad().catch(fail);return}
+ if(t&&t.dataset&&(t.dataset.ki||t.dataset.kis)){bxImg(t,!!t.dataset.kis).catch(fail);return}
+ if(t&&t.dataset&&t.dataset.up){if(t.dataset.up==='bimg')onBlockUpload(t);else if(t.dataset.up==='timg')onThemeUpload(t);else onUpload(t)}});
 document.addEventListener('input',function(e){if(e.target.form&&fid(e.target.form)==='af')calcTot()});
-document.addEventListener('submit',async function(ev){var f=ev.target,id=fid(f);if(['af','pf','cf2','sf','spf','svf','bkf','pf2','btf','mnf','prf','bkt','wf','ncf','clf','cef'].indexOf(id)<0)return;ev.preventDefault();
+document.addEventListener('submit',async function(ev){var f=ev.target,id=fid(f);if(['af','pf','cf2','sf','spf','svf','bkf','pf2','btf','mnf','prf','bkt','wf','ncf','clf','cef','bxf'].indexOf(id)<0)return;ev.preventDefault();
  var btn=f.querySelector('button:not([type=button])');if(btn)btn.disabled=true;
  try{
+ if(id==='bxf'){await bxKaydet(f);return}
  if(id==='af'){await saveAppt(ev);return}
  if(id==='pf'){try{await api('/yp/appts/'+f.dataset.id+'/pay',{method:'POST',body:{amount:f.amount.value,method:f.method.value}});closeM();toast('Ödeme kasaya işlendi');refresh()}catch(x){$('#pe').textContent=x.message;$('#pe').hidden=false}}
  else if(id==='wf'){var e=$('#we');e.hidden=true;$('#wsv').disabled=true;try{var it=chosen();await api('/yp/walkin',{method:'POST',body:{name:f.name.value,phone:f.phone.value,staff_id:f.staff_id.value,items:it,discount:f.discount.value,amount:f.amount.value,method:f.method.value}});closeM();toast('Kaydedildi ve kasaya işlendi');refresh()}catch(x){$('#wsv').disabled=false;e.textContent=x.message;e.hidden=false}}

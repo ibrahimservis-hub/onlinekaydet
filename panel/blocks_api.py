@@ -261,6 +261,11 @@ def register(api_router, db, deps):
                 b["set"] = dict(b.get("set") or {}, **blocks.sanitize(b["bid"], payload["set"]))
             if isinstance(payload.get("set_m"), dict):
                 b["set_m"] = dict(b.get("set_m") or {}, **blocks.sanitize(b["bid"], payload["set_m"], mobile=True))
+            if isinstance(payload.get("set_m_del"), list):         # telefona özel ayarı bırak: bilgisayardakini miras alsın
+                sm = dict(b.get("set_m") or {})
+                for k in payload["set_m_del"][:60]:
+                    sm.pop(str(k), None)
+                b["set_m"] = sm
             if isinstance(payload.get("badges"), list):
                 ok = {x["id"] for x in blocks.badge_list((await state())["custom_badges"])}
                 b["badges"] = [str(x)[:24] for x in payload["badges"][:12] if str(x) in ok]
