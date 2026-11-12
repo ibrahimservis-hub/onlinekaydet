@@ -2894,6 +2894,8 @@ async def _fetch_url(u):                                               # hızlı
 
 
 urun.register(api_router, db, {"require_admin": require_admin, "fetch_url": _fetch_url})
+import pazaryeri  # pazaryeri eşleştirme ve stok senkronu
+pazaryeri.register(api_router, db, {"require_admin": require_admin, "channel_push": None})
 
 @app.get("/salon", include_in_schema=False)
 async def yp_sayfa():
