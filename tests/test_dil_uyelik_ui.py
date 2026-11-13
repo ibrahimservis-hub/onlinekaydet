@@ -93,6 +93,13 @@ with sync_playwright() as pw:
         d = c.get("/api/yp/duyuru", headers=H).json()
         assert d["on"] and d["text"] == "Bayram indirimi başladı", d
     t("Duyuru ekranı: metin kaydedilir, yayına alınır", du)
+    def ep():
+        pg.evaluate("V.eplus()"); pg.wait_for_selector('#epck', timeout=10000)
+        assert pg.locator('#epfd').count() == 1 and pg.locator('#eprk').count() == 1 and pg.locator('#epdl .epd').count() == 6
+        pg.click('[data-a="ep-dl"]'); assert pg.locator('#epdl .epd').count() == 7
+        pg.click('[data-k="akakce"]'); pg.wait_for_selector('[data-k="akakce"].on', timeout=8000)
+        assert c.get("/api/yp/feed", headers=H).json()["akakce"] is True
+    t("Fiyat ve güvenlik ekranı: besleme, risk, çark dilimleri", ep)
     t("sayfa hatası yok", lambda: errs and (_ for _ in ()).throw(AssertionError(errs)) or None)
     br.close()
 print("ok", len(ok), "bad", len(bad))

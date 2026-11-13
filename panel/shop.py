@@ -19,6 +19,7 @@ from fastapi import Depends, HTTPException, Request
 
 import notify
 import shop_legal
+import eticaret_plus
 import shop_channels
 import shop_sync
 
@@ -969,9 +970,15 @@ def register(api_router, db, deps):
             "created_at": _now(), "updated_at": _now(),
         }
         order["history"] = [{"status": order["status"], "at": _now(), "note": avail[pm_id]["label"]}]
+        try:
+            order["risk"] = await eticaret_plus.risk_hesapla(db, order)
+        except Exception:      # noqa: BLE001
+            order["risk"] = None
         await db.shop_orders.insert_one(dict(order))
         try:
-            await notify.notify_owner_t(db, f"Yeni mağaza siparişi {order['order_no']}: {name} · {total:.2f} TL", kind="shop_order")
+            rk = order.get("risk") or {}
+            risk_not = (" · RİSK: %s (%s)" % (rk["seviye"].upper(), ", ".join(rk["nedenler"]))) if rk.get("seviye") in ("orta", "yuksek") and rk.get("bildir", True) else ""
+            await notify.notify_owner_t(db, f"Yeni mağaza siparişi {order['order_no']}: {name} · {total:.2f} TL" + risk_not, kind="shop_order")
         except Exception:      # noqa: BLE001
             pass
         return {"ok": True, "order_no": order["order_no"], "total": total, "shipping": shipping, "subtotal": order["subtotal"], "cod_fee": cod_fee,

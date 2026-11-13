@@ -22,6 +22,7 @@ import cerez as cerez_mod
 import dil as dil_mod
 import uyelik as dil_mod_uyelik
 import duyuru as duyuru_mod
+import eticaret_plus as ep_mod
 import blokgen
 import blok_eticaret
 import blok_tanitim
@@ -1055,6 +1056,13 @@ def register(api_router, db, deps):
                 if bas:
                     h = re.sub(r"(<body\b[^>]*>)", lambda m: m.group(1) + bas, h, 1)
                 r = (h.replace("</body>", son + "</body>", 1) if son else h, r[1])
+        if r and not inline_ and str(r[1]).startswith("text/html") and "</body>" in r[0] and 'id="okck"' not in r[0]:
+            try:
+                ck = ep_mod.cark_html(await ep_mod._cfg(db, "yp_cark", ep_mod.CARK_DEF))
+            except Exception:                                      # noqa: BLE001
+                ck = ""
+            if ck:
+                r = (r[0].replace("</body>", ck + "</body>", 1), r[1])
         return r
 
     api_router.site_render_raw = render_raw
