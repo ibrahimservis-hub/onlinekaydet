@@ -152,5 +152,39 @@ with TestClient(s.app) as c:
         finally:
             notify.send = eski
     t("haber ver: stok geldi / fiyat düştü SMS bir kez gider", haberver)
+    def yorum():
+        sent = []
+        import notify
+        eski = notify.send
+        async def sahte(db, ch, to, text, kind="", ref=""):
+            sent.append((to, text, kind)); return {"status": "sent"}
+        notify.send = sahte
+        try:
+            u = "/api/public/shop/yorum"
+            foto = "data:image/jpeg;base64,/9j/4AAQSkZJRg=="
+            assert c.post(u, json={"product_id": PID, "rating": 9, "name": "A", "text": "çok iyi ürün"}).status_code == 422
+            assert c.post(u, json={"product_id": PID, "rating": 5, "name": "A", "text": "çok iyi ürün", "photos": ["http://x/y.jpg"]}).status_code == 422
+            r = c.post(u, json={"product_id": PID, "rating": 5, "name": "Ali", "text": "çok iyi ürün", "photos": [foto], "phone": "0533 444 55 66"}); assert r.json()["onay_bekliyor"], r.text
+            assert c.post(u, json={"product_id": PID, "rating": 4, "name": "Ali", "text": "tekrar yazıyorum", "phone": "0533 444 55 66"}).status_code == 409
+            assert c.get("/api/public/shop/yorum/%s" % PID).json()["adet"] == 0
+            L = c.get("/api/yp/yorumlar", headers=O).json()["rows"]; assert len(L) == 1 and L[0]["urun"]
+            assert c.put("/api/yp/yorumlar/%s" % L[0]["id"], headers=O, json={"status": "ok"}).json()["status"] == "ok"
+            g = c.get("/api/public/shop/yorum/%s" % PID).json(); assert g["adet"] == 1 and g["ortalama"] == 5 and "phone" not in g["rows"][0] and g["rows"][0]["photos"] == [foto]
+            # hatırlatma: kapalıyken 0; açık + 3 gün geçmiş teslimde 1 kez
+            async def hazirla():
+                fm = await s.db.main().firms.find_one({"login_email": "pl@x.com"}); d = s.db.firm(fm["db"])
+                await d.shop_orders.update_many({"status": {"$ne": "iptal"}}, {"$set": {"status": "teslim_edildi", "history": [{"status": "teslim_edildi", "at": "2020-01-01T00:00:00+00:00"}]}})
+                return await d.shop_orders.count_documents({"status": "teslim_edildi", "yorum_hat": {"$exists": False}})
+            n = c.portal.call(hazirla)
+            assert c.post("/api/yp/yorumlar/hatirlat", headers=O).json()["gonderilen"] == 0
+            c.put("/api/yp/yorumlar/ayar", headers=O, json={"hatirla": True, "gun": 3})
+            assert n >= 1, n
+            assert c.post("/api/yp/yorumlar/hatirlat", headers=O).json()["gonderilen"] >= 1 and sent and sent[0][2] == "yorum_hat"
+            assert c.post("/api/yp/yorumlar/hatirlat", headers=O).json()["gonderilen"] == 0
+            assert c.get("/api/yp/yorumlar", headers={"Authorization": "Bearer x"}).status_code in (401, 403)
+            assert c.delete("/api/yp/yorumlar/%s" % L[0]["id"], headers=O).json()["ok"]
+        finally:
+            notify.send = eski
+    t("yorum: fotoğraflı, onaylı yayın, tekrar engeli, teslimden sonra hatırlatma", yorum)
 print("ok", len(ok), "bad", len(bad))
 for n, e in bad: print("FAIL", n, "\n", e)
