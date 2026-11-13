@@ -65,7 +65,7 @@ def register(api_router, db, deps):
         return p
 
     async def ensure_home():
-        if not await db.yp_pages.count_documents({}):
+        if not await db.yp_pages.count_documents({"id": {"$ne": "tema-ek"}}):
             st = await state()
             ids = (st["pack"].get("blocks") or ["hero"])[:8]
             inst = [i for i in (blocks.new_instance(b) for b in ids) if i]
@@ -177,7 +177,7 @@ def register(api_router, db, deps):
     @api_router.get("/yp/pages")
     async def pages(_: dict = Depends(adm)):
         await ensure_home()
-        rows = await db.yp_pages.find({}, {"_id": 0, "blocks": 0}).sort("order", 1).to_list(200)
+        rows = await db.yp_pages.find({"id": {"$ne": "tema-ek"}}, {"_id": 0, "blocks": 0}).sort("order", 1).to_list(200)
         cnt = {p["id"]: len(p.get("blocks") or []) for p in await db.yp_pages.find({}, {"_id": 0, "id": 1, "blocks": 1}).to_list(200)}
         return {"rows": [dict(r, n=cnt.get(r["id"], 0)) for r in rows]}
 
@@ -196,7 +196,7 @@ def register(api_router, db, deps):
                 inst.append(dict(b, iid=uuid.uuid4().hex[:10]))
         elif payload.get("blocks"):
             inst = [i for i in (blocks.new_instance(b) for b in list(payload["blocks"])[:40]) if i]
-        n = await db.yp_pages.count_documents({})
+        n = await db.yp_pages.count_documents({"id": {"$ne": "tema-ek"}})
         doc = {"id": uuid.uuid4().hex[:12], "slug": sl, "title": title, "home": False,
                "status": "draft" if payload.get("draft") else "live", "order": n,
                "menu": {"top": bool(payload.get("menu", True)), "footer": bool(payload.get("footer")),
@@ -209,6 +209,8 @@ def register(api_router, db, deps):
     @api_router.put("/yp/pages/{pid}")
     async def page_put(pid: str, payload: dict, _: dict = Depends(adm)):
         p = await page_or_404(pid)
+        if pid == "tema-ek":
+            raise HTTPException(422, "Bu kap düzenlenemez")
         up = {"updated_at": _now()}
         if "title" in payload:
             up["title"] = _t(payload["title"], 80) or p["title"]
@@ -226,9 +228,20 @@ def register(api_router, db, deps):
         await db.yp_pages.update_one({"id": pid}, {"$set": up})
         return dict(p, **up, blocks=None, n=len(p.get("blocks") or []))
 
+    @api_router.post("/yp/tema-ek")
+    async def tema_ek(_: dict = Depends(adm)):
+        """Hazır temaya kütüphaneden bölüm eklemek için gizli bölüm kabı (yayında ayrı sayfa olarak görünmez)."""
+        if not await db.yp_pages.find_one({"id": "tema-ek"}, {"_id": 1}):
+            await db.yp_pages.insert_one({"id": "tema-ek", "slug": "__tema-ek", "title": "Temaya eklenen bölümler", "home": False,
+                                          "status": "gizli", "order": 9999, "menu": {"top": False, "footer": False, "mobile": False, "label": "", "parent": ""},
+                                          "blocks": [], "created_at": _now(), "updated_at": _now()})
+        return {"pid": "tema-ek"}
+
     @api_router.delete("/yp/pages/{pid}")
     async def page_del(pid: str, _: dict = Depends(adm)):
         p = await page_or_404(pid)
+        if pid == "tema-ek":
+            raise HTTPException(422, "Bu kap silinemez")
         if p.get("home"):
             raise HTTPException(422, "Ana sayfa silinemez")
         await db.yp_pages.delete_one({"id": pid})

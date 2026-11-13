@@ -77,6 +77,14 @@ def page_template(title: str, name: str, tel: str, dark: str, accent: str) -> st
     ) % {"t": e(title), "n": e(name), "d": dark or "#0a1f44", "a": accent or "#f27a1a", "th": e(telhref), "tel": e(tel or "")}
 
 
+TEMA_EK = "tema-ek"
+
+
+def tema_ek_ad(b):
+    """Ek bölümün tema listesindeki adı (sıra/gizleme bu adla tutulur)."""
+    return ("Ek · %s · %s" % (str(b.get("name") or "Bölüm")[:40], str(b.get("iid") or "")[:4]))[:60]
+
+
 def compose_page(home: str, title: str, content: str):
     """Ana sayfanın <head>, üst bilgi, alt bilgi ve betikleriyle yeni sayfa kurar (tema görünümü korunur). Başarısızsa None."""
     try:
@@ -154,9 +162,40 @@ def register(api_router, db, deps):
             legal = [x for x in shop_legal.SLUGS if x[0] in ("cerez-politikasi", "gizlilik-kvkk")]
         else:
             legal = []
-        return {"modules": mods, "cerez": cz, "th": th, "brand": brand, "name": name, "tel": tel, "p": p, "sector": sector, "logo": logo, "city": prof.get("city") or "", "legal": legal, "shop_on": shop_ok, "dev": dev,
+        ctx = {"modules": mods, "cerez": cz, "th": th, "brand": brand, "name": name, "tel": tel, "p": p, "sector": sector, "logo": logo, "city": prof.get("city") or "", "legal": legal, "shop_on": shop_ok, "dev": dev,
                 "img": (lambda k: imgs.get(k, "")) if inline else (lambda k: "/api/public/site-img/" + k),
                 "logo_abs": "/api/public/site-logo" if lg else ""}
+        await tema_ek_yukle(ctx, dev)
+        return ctx
+
+    async def tema_ek_yukle(ctx, dev=""):
+        """Hazır temaya bölüm kütüphanesinden eklenen bölümler (yp_pages 'tema-ek')."""
+        try:
+            pg = await db.yp_pages.find_one({"id": TEMA_EK}, {"_id": 0, "blocks": 1})
+        except Exception:                                          # noqa: BLE001
+            pg = None
+        rows = []
+        for b in (pg or {}).get("blocks") or []:
+            t = blok_tanim.BY_ID.get(b.get("bid"))
+            if t and b.get("on", True):
+                rows.append(dict(b, wire=t["wire"], name=t["name"]))
+        if not rows:
+            return
+        try:
+            veri = await blok_veri(rows, ctx)
+        except Exception:                                          # noqa: BLE001
+            veri = {}
+        th = ctx.get("th") or {}
+        dk = th.get("dark") or (ctx.get("brand") or {}).get("dark") or "#0a1f44"
+        ac = th.get("accent") or (ctx.get("brand") or {}).get("accent") or "#f27a1a"
+        out = []
+        for b in rows:
+            h = blokgen.tema_bolum(b, "phone" if dev == "phone" else "", veri.get(b["iid"]) or veri.get(b.get("bid")) or {}, dk, ac)
+            n = tema_ek_ad(b)                                      # boşken de listede durur ki panelden doldurulabilsin; sitede boş görünür
+            out.append([n, '<div class="ed" data-nm="%s">%s</div>' % (_html.escape(n), h)])
+        ctx["tema_ek"] = out
+        ctx["tema_ek_iid"] = {tema_ek_ad(b): b["iid"] for b in rows}
+        ctx["tema_ek_css"] = blokgen.tema_css()
 
     async def themed_home(ctx):
         return sitegen.apply_profile(raw_theme(ctx["th"]["slug"]), ctx["th"], ctx)
@@ -578,8 +617,12 @@ def register(api_router, db, deps):
             soup = BeautifulSoup(blocks[n], "html.parser")
             hd = soup.find(["h1", "h2", "h3"])
             out.append({"name": n, "hidden": n in (lay.get("hidden") or []) or (sitegen.dflt_off(blocks[n]) and n not in (lay.get("order") or [])), "title": " ".join(hd.get_text().split())[:70] if hd else "", "n": len(sitegen.edit_nodes(soup)), "ni": len(sitegen.block_images(org_[n])) if n in org_ else 0,
-                        "own": bool(ped.get(n)) or bool(pie.get(n))})     # telefona özel yazı/resim var mı
+                        "own": bool(ped.get(n)) or bool(pie.get(n)), "ek": (ctx.get("tema_ek_iid") or {}).get(n, "")})     # telefona özel yazı/resim var mı
+        for x in out:
+            if x["ek"] and not x["title"]:
+                x["title"] = x["name"].split(" · ")[1] if x["name"].count(" · ") >= 2 else x["name"]
         return {"blocks": out, "dev": ctx.get("dev") or "web", "own_order": ayri}
+
 
     @api_router.get("/site/block-text")
     async def block_text(name: str, dev: str = "", _: dict = Depends(require_admin)):

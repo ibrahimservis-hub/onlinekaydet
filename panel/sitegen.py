@@ -508,8 +508,14 @@ def apply_profile(raw, th, ctx):
     if ctx["p"].get("slides"):
         k = next((i for i, b in enumerate(blocks) if b[0] == "Ana görsel"), 2)
         blocks.insert(k, ["Slider", slider_html(ctx)])
+    ek = ctx.get("tema_ek") or []
+    if ek:                                     # bölüm kütüphanesinden eklenenler: alt bilginin hemen önüne, sırası paneldeki sıradan gelir
+        k = next((i for i, b in enumerate(blocks) if b[0] in FIXED_BOTTOM), len(blocks))
+        blocks = blocks[:k] + [[n, x] for n, x in ek] + blocks[k:]
     blocks = apply_layout(blocks, ctx)
     out = join_blocks(pre, blocks, tail)
+    if ek and 'class="okek' in out and 'id="okek-css"' not in out:
+        out = out.replace("</head>", '<style id="okek-css">%s</style></head>' % ctx.get("tema_ek_css", ""), 1)
     imap = (ctx["p"].get("imgmap") or {}).get(ctx["th"]["slug"], {}) if ctx.get("th") else {}
     if imap:
         reg_ = ctx.setdefault("_oki", {})

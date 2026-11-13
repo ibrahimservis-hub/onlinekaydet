@@ -539,3 +539,20 @@ def page_html(page, rows, ctx, data=None, dev=""):
         "tel": ('<a class="bk-tel" href="tel:%s">%s</a>' % (E(telh), E(tel_goster(tel)))) if tel else "",
         "ad": E(ad), "body": govde, "js": NAVJS,
     }
+
+
+def tema_css():
+    """Tema içine eklenen bölümler için CSS: sayfa kabuğu (body, üst menü, alt bilgi) kuralları olmadan."""
+    i = CSS.index(".bk{padding")
+    j = CSS.index(".bk-foot{")
+    k = CSS.index("@media(prefers-reduced-motion")
+    return ".okek{display:block}.okek img{max-width:100%;height:auto}.okek .bk-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}" \
+        + CSS[i:j] + CSS[k:] + "".join(EK_CSS)
+
+
+def tema_bolum(b, dev="", data=None, dk="#0a1f44", ac="#f27a1a"):
+    """Tek bölümü tema içine girecek biçimde sarar; boşsa ''."""
+    h = block_html(b, dev, data)
+    if not h:
+        return ""
+    return '<div class="okek" style="--dk:%s;--ac:%s">%s</div>' % (E(dk), E(ac), h)
