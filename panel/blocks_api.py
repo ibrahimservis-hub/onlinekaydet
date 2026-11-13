@@ -12,6 +12,7 @@ from datetime import datetime, timedelta, timezone
 from fastapi import Depends, HTTPException
 
 import blocks
+import blok_ornek
 
 try:
     from zoneinfo import ZoneInfo
@@ -86,8 +87,22 @@ def register(api_router, db, deps):
         if cat:
             rows = [r for r in rows if r["cat"] == cat]
         cats = [{"id": c, "name": n, "n": cnt.get(c, 0)} for c, n in blocks.CATS if cnt.get(c)]
+        rows = [dict(r, photo=blok_ornek.foto(r["id"], st["sector"], 400)) for r in rows]
         return {"rows": rows, "cats": cats, "total": sum(cnt.values()), "sector": st["sector"],
                 "sector_name": (st["pack"] or {}).get("name", ""), "modules": st["modules"]}
+
+    @api_router.get("/yp/blocks/{bid}/onizleme")
+    async def block_preview(bid: str, dev: str = "", _: dict = Depends(adm)):
+        """Bölümün örnek fotoğraf ve metinle çizilmiş hali (katalog önizlemesi)."""
+        import blokgen
+        b = blocks.BY_ID.get(bid)
+        if not b:
+            raise HTTPException(404, "Bölüm bulunamadı")
+        st = await state()
+        inst = blocks.new_instance(bid)
+        inst["set"].update(blok_ornek.ornek_set(b, st["sector"]))
+        html = blokgen.page_html({"title": b["name"]}, [inst], {"name": "Örnek işletme", "brand": {}}, {}, dev)
+        return {"html": html, "photo": blok_ornek.foto(bid, st["sector"]), "name": b["name"], "desc": b["desc"]}
 
     @api_router.get("/yp/blocks/{bid}")
     async def block_one(bid: str, _: dict = Depends(adm)):
@@ -257,6 +272,8 @@ def register(api_router, db, deps):
         if len(rows) >= 60:
             raise HTTPException(422, "Bir sayfada en çok 60 bölüm olabilir")
         inst = blocks.new_instance(bid)
+        inst["set"].update(blok_ornek.ornek_set(meta, st["sector"]))
+        inst["ornek"] = True
         at = payload.get("at")
         if isinstance(at, int) and 0 <= at <= len(rows):
             rows.insert(at, inst)
