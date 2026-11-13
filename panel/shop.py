@@ -41,7 +41,7 @@ FEATURES_DEFAULT = {
 }
 
 SHOP_DEFAULT = {
-    "title": "ServisPlus Mağaza",
+    "title": "Mağaza",
     "subtitle": "Güvenli alışveriş. Ödeme yöntemlerini sipariş adımında seçersiniz.",
     "slider_title": "Mağaza Ürünleri",
     "bank_accounts": [],           # [{bank, holder, iban, branch, note}]
@@ -844,7 +844,10 @@ def register(api_router, db, deps):
         await require_shop()
         s = await shop_cfg()
         lg = s["legal"]
-        return {"title": s["title"], "subtitle": s["subtitle"], "shipping_fee": s["shipping_fee"], "free_shipping_over": s["free_shipping_over"],
+        ttl = (s.get("title") or "").strip()
+        if not ttl or "servisplus" in ttl.lower():
+            ttl = "Mağaza"
+        return {"title": ttl, "subtitle": s["subtitle"], "shipping_fee": s["shipping_fee"], "free_shipping_over": s["free_shipping_over"],
                 "terms": s["terms"], "contact_phone": s["contact_phone"] or lg.get("phone", ""), "payment_note": s["payment_note"],
                 "payment_methods": await methods_public(s), "cod_max_total": s["cod_max_total"], "min_order": s["min_order"],
                 "legal_docs": [{"slug": k, "title": t, "checkout": k in shop_legal.CHECKOUT_DOCS} for k, t in shop_legal.SLUGS]}

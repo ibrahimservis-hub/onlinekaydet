@@ -1140,7 +1140,11 @@ ACCOUNT_BAR = (
     '<a href="/magaza#sepet" aria-label="Sepetim" title="Sepetim"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7h12l1 13H5L6 7z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg>\'+(n?"<i>"+n+"</i>":"")+\'</a>\';'
     'var h=document.querySelector("body > header, header, .hd, #hd, nav.nv, .nav"),t=null;'
     'if(h&&h.offsetWidth>0){var c=[h].concat([].slice.call(h.querySelectorAll("div,nav")));for(var i=0;i<c.length;i++){var s=getComputedStyle(c[i]);if(s.display.indexOf("flex")>-1&&c[i].children.length>=2&&c[i].offsetWidth>=h.offsetWidth*.6){t=c[i];break}}}'
-    'if(t){var l=t.lastElementChild;if(window.innerWidth<760&&l&&(l.tagName==="BUTTON"||/burger|menu|mn|tg/i.test(l.className+l.id))){t.insertBefore(d,l)}else{t.appendChild(d)}}'
+    'if(t){var l=t.lastElementChild;if(window.innerWidth<760&&l&&(l.tagName==="BUTTON"||/burger|bgr|hamb|menu|mn|tg/i.test(l.className+l.id))){t.insertBefore(d,l)}else{t.appendChild(d)}'
+    'var fit=function(){if(t.scrollWidth<=t.clientWidth+1)return;var f=t.firstElementChild;if(f&&f!==d){f.style.minWidth="0";f.style.flexShrink="1";f.style.overflow="hidden";'
+    '[].slice.call(f.querySelectorAll("span,b,strong,em,div,p")).forEach(function(e){if(!e.querySelector("img,svg")){e.style.minWidth="0";e.style.overflow="hidden";e.style.textOverflow="ellipsis";e.style.whiteSpace="nowrap"}})}'
+    'if(t.scrollWidth>t.clientWidth+1){d.style.gap="4px";d.style.marginLeft="4px";[].slice.call(d.children).forEach(function(a){a.style.width=a.style.height="36px"})}};'
+    'fit();addEventListener("resize",fit)}'
     'else{d.className+=" fx";document.body.appendChild(d)}})();</script>'
 )
 
