@@ -323,6 +323,11 @@ def register(api_router, db, deps):
             raise HTTPException(422, "Önce randevuyu açıp kimin yapacağını ve hizmeti seçin")
         st = "onaylandi" if to in OPEN else ("tamamlandi" if to == "tamamlandi" else "iptal")
         await db.bookings.update_one({"id": aid}, {"$set": {"stage": to, "status": st, "yp": True}})
+        if to == "tamamlandi" and old.get("stage") != "tamamlandi" and getattr(api_router, "uye_puan_kazan", None):
+            try:
+                await api_router.uye_puan_kazan(old.get("phone"), v["total"], "randevu:" + aid, "Randevu")
+            except Exception:                                      # noqa: BLE001
+                pass
         return view({**old, "stage": to, "status": st})
 
     @api_router.post("/yp/appts/{aid}/pay")

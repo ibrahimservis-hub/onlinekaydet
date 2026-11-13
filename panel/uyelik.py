@@ -114,6 +114,8 @@ def register(api_router, db, deps):
         if not (c["sms"] or c["eposta"] or c["google"]):
             c["eposta"] = True
         await db.app_settings.update_one({"_id": "yp_uyelik"}, {"$set": c}, upsert=True)
+        if c["on"]:                                                # kayıt/giriş uçları üyelik açılınca çalışsın
+            await db.app_settings.update_one({"_id": "site_features"}, {"$set": {"customer_portal_enabled": True}}, upsert=True)
         return c
 
     def pub(a):
@@ -154,11 +156,41 @@ def register(api_router, db, deps):
     async def disari(_: dict = Depends(adm)):
         return {"rows": [pub(a) async for a in db.customer_accounts.find({}, {"_id": 0, "password_hash": 0})]}
 
+    async def puan_kazan(phone, tutar, ref, neden="Alışveriş"):
+        """Tamamlanan randevu/siparişten üyeye puan: 100 ₺ başına ayarlı puan. Aynı kayıt iki kez puan vermez."""
+        c, _p = await get_cfg(db, await sektor())
+        if not (c["on"] and c["puan_on"]) or not phone:
+            return 0
+        d = re.sub(r"\D", "", str(phone))
+        a = await db.customer_accounts.find_one({"phone_key": d[-10:]}, {"_id": 0, "id": 1}) if len(d) >= 10 else None
+        n = int(float(tutar or 0) / 100 * c["puan_100"])
+        if not a or n <= 0 or await db.uye_puan.find_one({"ref": ref}, {"_id": 1}):
+            return 0
+        await db.customer_accounts.update_one({"id": a["id"]}, {"$inc": {"puan": n}})
+        await db.uye_puan.insert_one({"id": uuid.uuid4().hex[:12], "aid": a["id"], "puan": n, "neden": neden, "ref": ref, "at": _now()})
+        return n
+    api_router.uye_puan_kazan = puan_kazan
+
     @api_router.get("/public/uyelik")
     async def acik_ayar():
         c, p = await get_cfg(db, await sektor())
         return {"on": c["on"], "zorunlu": c["zorunlu"], "yontem": {"sms": c["sms"], "eposta": c["eposta"], "google": c["google"]},
-                "kvkk": c["kvkk"], "ozel_onay": p["ozel_onay"], "puan_on": c["puan_on"], "bolumler": p["bolumler"] if c["on"] else []}
+                "kvkk": c["kvkk"], "ozel_onay": p["ozel_onay"], "puan_on": c["puan_on"], "bolumler": [x for x in p["bolumler"] if x["id"] != "puan" or c["puan_on"]] if c["on"] else []}
+
+    @api_router.get("/public/uyelik/randevular")
+    async def randevular(request: Request):
+        a = await me(request)
+        key = re.sub(r"\D", "", a.get("phone") or "")[-10:]
+        out = []
+        if len(key) >= 10:
+            async for b in db.bookings.find({}, {"_id": 0}).sort("date", -1).limit(3000):
+                if re.sub(r"\D", "", b.get("phone") or "")[-10:] == key:
+                    out.append({"id": b.get("id"), "no": b.get("no", ""), "tarih": b.get("date", ""), "saat": b.get("time", ""),
+                                "hizmet": ", ".join(str(i.get("name", "")) for i in (b.get("items") or []) if i.get("name")) or b.get("service", "") or "",
+                                "durum": b.get("stage") or b.get("status") or ""})
+                    if len(out) >= 50:
+                        break
+        return {"rows": out}
 
     @api_router.get("/public/uyelik/hesabim")
     async def hesabim(request: Request):

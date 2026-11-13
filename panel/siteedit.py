@@ -956,8 +956,8 @@ def register(api_router, db, deps):
             return None
         if p in ("", "index"):
             h = home
-        elif (p in ("magaza", "hesabim") or re.fullmatch(r"magaza/urun/[^/]{1,120}", p)) and ctx and ctx.get("shop_on"):
-            body = storefront.shop_page() if p.startswith("magaza") else storefront.account_page()
+        elif (p in ("magaza", "hesabim") or re.fullmatch(r"magaza/urun/[^/]{1,120}", p)) and ctx and (ctx.get("shop_on") or (p == "hesabim" and ((await db.app_settings.find_one({"_id": "yp_uyelik"}, {"_id": 0, "on": 1})) or {}).get("on"))):
+            body = storefront.shop_page() if p.startswith("magaza") else storefront.account_page(bool(ctx.get("shop_on")))
             ttl = "Mağaza" if p == "magaza" else "Hesabım"
             if p.startswith("magaza/urun/"):
                 try:

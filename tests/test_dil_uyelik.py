@@ -81,6 +81,29 @@ with TestClient(s.app) as c:
         assert hs["puan"]["bakiye"] == 120 and hs["puan"]["gecmis"] and hs["uye"]["grup"] == "VIP"
         assert c.get("/api/public/uyelik/%s~hesabim" % F).status_code == 401
     t("üye kaydı, grup ve puan, Hesabım ekranı; girişsiz 401", k)
+    def m():
+        c.put("/api/yp/uyelik", headers=H, json={"on": True, "puan_on": True, "puan_100": 10})
+        pu = c.get("/api/public/uyelik/%s~x" % F)
+        # /hesabim sayfası mağaza kapalıyken de üyelik açıkken yayında
+        pg = c.get("/api/site/preview?path=/hesabim", headers=H)
+        assert pg.status_code == 200 and "okm-root" in pg.text and "/public/uyelik" in pg.text, pg.status_code
+        # randevu tamamlanınca otomatik puan
+        r = c.post("/api/public/customer/%s~register" % F, json={"name": "Puan Test", "phone": "05329998877", "password": "sifre123"}); assert r.status_code == 200, r.text
+        tk = r.json()["token"]
+        st = c.post("/api/yp/staff", headers=H, json={"name": "Elif Usta"}).json()["id"]
+        D = __import__("datetime").date.today().isoformat()
+        ap = c.post("/api/yp/appts", headers=H, json={"name": "Puan Test", "phone": "0532 999 88 77", "date": D, "time": "11:00", "staff_id": st, "items": [{"name": "Saç kesimi", "price": 1000, "dur": 60}]})
+        assert ap.status_code == 200, ap.text
+        aid = ap.json()["id"]
+        A = {"Authorization": "Bearer " + tk}
+        rr = c.get("/api/public/uyelik/%s~randevular" % F, headers=A).json()["rows"]
+        assert len(rr) == 1 and rr[0]["hizmet"] == "Saç kesimi", rr
+        for _ in range(2):                                          # iki kez tamamlansa da puan bir kez yazılır
+            assert c.post("/api/yp/appts/%s/stage" % aid, headers=H, json={"to": "tamamlandi"}).status_code == 200
+        hs = c.get("/api/public/uyelik/%s~hesabim" % F, headers=A).json()
+        assert hs["puan"]["bakiye"] == 100 and hs["puan"]["gecmis"][0]["neden"] == "Randevu", hs["puan"]
+        pb = c.get("/api/public/uyelik/%s~x" % F).json() if False else None
+    t("Hesabım sayfası üyelik açıkken yayında", m)
 print("ok", len(ok), "bad", len(bad))
 for n, tb in bad: print("FAIL", n, tb)
 sys.exit(1 if bad else 0)
