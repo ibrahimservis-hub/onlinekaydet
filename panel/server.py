@@ -2881,8 +2881,9 @@ import yp  # yeni yönetim paneli (ayrı uçlar: /api/yp/*)
 yp.register(api_router, db, {"require_admin": require_admin})
 import blocks_api  # bölüm motoru: katalog, rozet, sektör paketi, sayfalar
 blocks_api.register(api_router, db, {"require_admin": require_admin})
-import dil, uyelik
+import dil, uyelik, duyuru
 dil.register(api_router, db, {"require_admin": require_admin})
+duyuru.register(api_router, db, {"require_admin": require_admin})
 uyelik.register(api_router, db, {"require_admin": require_admin, "JWT_SECRET": JWT_SECRET, "JWT_ALGORITHM": JWT_ALGORITHM})
 import urun  # e-ticaret ürün modülü
 

@@ -218,8 +218,16 @@ AKIS_METIN = {"siparis": "eticaret", "servis": "servis", "muayene": "servis", "d
               "etkinlik": "randevu", "randevu": "randevu"}
 
 
+# Randevu metni başka akışa düşünce sektörün kendi sözcüğüyle yazılır (rezervasyon, görüşme…).
+SOZCUK = {"rezervasyon": ("rezervasyon", "Rezervasyon"), "ilan": ("gorusme", "Gorusme"), "etkinlik": ("kayit", "Kayit"),
+          "muayene": ("muayene randevu", "Muayene randevu")}
+
+
 def default_text(e, akis):
     t = e["texts"]
+    if akis in SOZCUK and akis not in t and t.get("randevu"):
+        kucuk, buyuk = SOZCUK[akis]
+        return t["randevu"].replace("randevu", kucuk).replace("Randevu", buyuk)
     k = AKIS_METIN.get(akis, akis)
     return t.get(k) or t.get(akis) or t.get("randevu") or t.get("eticaret") or list(t.values())[0]
 

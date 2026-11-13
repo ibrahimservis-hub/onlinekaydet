@@ -1026,9 +1026,26 @@ def register(api_router, db, deps):
         if len(pw) < 6 or len(pw) > 72:
             raise HTTPException(422, "Şifre en az 6 karakter olmalı")
         key = phone_key(phone)
+        riza = {}
+        try:                                                       # üyelik açıksa KVKK ve (sağlıkta) özel rıza onayı şart
+            import uyelik as _uy
+            _sec = ((await db.app_settings.find_one({"_id": "yp_pack"}, {"_id": 0})) or {}).get("sector") or ""
+            _c, _p = await _uy.get_cfg(db, _sec)
+            if _c["on"] and _c["kvkk"]:
+                if not payload.get("kvkk_onay"):
+                    raise HTTPException(422, "Devam etmek için KVKK aydınlatma metnini onaylamalısınız.")
+                riza["kvkk_at"] = _now()
+                if _p["ozel_onay"]:
+                    if not payload.get("ozel_riza"):
+                        raise HTTPException(422, "Sağlık verilerinizin işlenmesi için açık rıza vermelisiniz.")
+                    riza["ozel_riza_at"] = _now()
+        except HTTPException:
+            raise
+        except Exception:                                          # noqa: BLE001
+            pass
         if await db.customer_accounts.find_one({"phone_key": key}, {"_id": 1}):
             raise HTTPException(409, "Bu telefon numarasıyla zaten üyelik var. Giriş yapın.")
-        acc = {"id": _id(), "name": name, "phone": phone, "phone_key": key, "email": str(payload.get("email", "")).strip()[:120],
+        acc = {**riza, "id": _id(), "name": name, "phone": phone, "phone_key": key, "email": str(payload.get("email", "")).strip()[:120],
                "password_hash": hash_password(pw), "address": "", "city": "", "district": "", "created_at": _now(), "last_login": _now()}
         await db.customer_accounts.insert_one(dict(acc))
         await cust_login_event(request, acc, phone, True, "")

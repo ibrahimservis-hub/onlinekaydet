@@ -21,6 +21,7 @@ import shop_legal
 import cerez as cerez_mod
 import dil as dil_mod
 import uyelik as dil_mod_uyelik
+import duyuru as duyuru_mod
 import blokgen
 import blok_eticaret
 import blok_tanitim
@@ -1044,6 +1045,16 @@ def register(api_router, db, deps):
             if (uy or {}).get("on"):
                 btn = dil_mod_uyelik.buton(("/" + lang) if lang and lang != cfg["ana"] and cfg.get("adresli") else "")
                 r = (r[0].replace("</body>", btn + "</body>", 1), r[1])
+        if r and not inline_ and str(r[1]).startswith("text/html") and "</body>" in r[0] and 'id="okdy' not in r[0]:
+            try:
+                bas, son = duyuru_mod.render_html(await duyuru_mod.get_cfg(db))
+            except Exception:                                      # noqa: BLE001
+                bas, son = "", ""
+            if bas or son:
+                h = r[0]
+                if bas:
+                    h = re.sub(r"(<body\b[^>]*>)", lambda m: m.group(1) + bas, h, 1)
+                r = (h.replace("</body>", son + "</body>", 1) if son else h, r[1])
         return r
 
     api_router.site_render_raw = render_raw

@@ -19,7 +19,7 @@ SEKTOR_DIL = {  # sektör paketi -> önerilen başlangıç dilleri (ana dil hari
     "eticaret": _EN, "lokanta": ["en", "de", "ar"], "emlak": ["en", "ar", "ru"], "avukat": _EN, "saglik": ["en", "ar"], "surucu": _EN,
     "kurs": _EN, "temizlik": _EN, "organizasyon": _EN_DE,
 }
-DEF = {"on": False, "ana": "tr", "diller": [], "tarayici": True, "adresli": True, "rtl": True, "gorunum": "ad"}
+DEF = {"on": False, "ana": "tr", "diller": [], "tarayici": True, "adresli": True, "rtl": True, "gorunum": "ad", "korunan": []}
 _SKIP = re.compile(r"(<script\b.*?</script>|<style\b.*?</style>|<noscript\b.*?</noscript>|<svg\b.*?</svg>)", re.S | re.I)
 _TXT = re.compile(r">([^<>]+)<")
 _EXT = re.compile(r"\.(css|js|png|jpe?g|gif|webp|svg|ico|xml|txt|pdf|json|woff2?)(\?|$)", re.I)
@@ -246,6 +246,8 @@ def register(api_router, db, deps):
                 u[k] = bool(payload[k])
         if payload.get("gorunum") in ("ad", "kod", "bayrak"):
             u["gorunum"] = payload["gorunum"]
+        if isinstance(payload.get("korunan"), list):
+            u["korunan"] = [str(x).strip()[:60] for x in payload["korunan"] if str(x).strip()][:100]
         if payload.get("ana") in LANGS:
             u["ana"] = payload["ana"]
         if isinstance(payload.get("diller"), list):
@@ -281,10 +283,10 @@ def register(api_router, db, deps):
             n += 1
         return {"ok": True, "n": n}
 
-    def _llm(c, lang, texts):
+    def _llm(c, lang, texts, korunan=()):
         body = {"model": c.get("chat_model") or "gpt-4o-mini", "temperature": 0.2, "response_format": {"type": "json_object"},
                 "messages": [{"role": "system", "content": "Bir web sitesinin Türkçe metinlerini %s diline çevir. Kısa, doğal ve pazarlama diline uygun yaz. "
-                              "Sayıları, marka adlarını, telefonları değiştirme. Yalnızca JSON döndür: {\"t\":[çeviriler]} — aynı sayıda ve aynı sırada." % LANGS[lang][0]},
+                              "Sayıları, marka adlarını, telefonları değiştirme.%s Yalnızca JSON döndür: {\"t\":[çeviriler]} — aynı sayıda ve aynı sırada." % (LANGS[lang][0], (" Şu kelimeleri çevirmeden aynen bırak: " + ", ".join(korunan) + ".") if korunan else "")},
                              {"role": "user", "content": json.dumps(texts, ensure_ascii=False)}]}
         r = requests.post(c["base_url"].rstrip("/") + "/chat/completions", headers={"Authorization": "Bearer " + c["api_key"]}, json=body, timeout=90)
         r.raise_for_status()
@@ -305,7 +307,7 @@ def register(api_router, db, deps):
         done = 0
         for ch in _chunks(todo, 25):
             try:
-                out = await asyncio.to_thread(_llm, c, lang, ch)
+                out = await asyncio.to_thread(_llm, c, lang, ch, (await get_cfg(db, await sektor())).get("korunan") or [])
             except Exception as e:                                 # noqa: BLE001
                 raise HTTPException(502, "Çeviri servisi yanıt vermedi: %s" % str(e)[:120])
             for src, tx in zip(ch, out):

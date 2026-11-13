@@ -28,6 +28,7 @@ B = {
     "etkinlik": ("etkinlik", "Etkinliklerim", "Teklifler, ödeme takvimi, galeri"),
     "talep": ("talep", "Taleplerim", "Hizmet talepleri, tekrarlayan hizmet"),
     "puan": ("puan", "Puanlarım", "Bakiye, kazanılan ve harcanan puanlar"),
+    "cuzdan": ("cuzdan", "Cüzdanım", "Bakiye ve hareketler"),
     "adres": ("adres", "Adreslerim", "Adres defteri"),
     "bilgi": ("bilgi", "Bilgilerim", "Ad, telefon, şifre, hesabı sil"),
 }
@@ -53,7 +54,8 @@ PROFIL = {
 GENEL = (["randevu", "siparis", "bilgi"], False, "", "", False)
 GRUPLAR = ["Üye", "VIP", "Kurumsal"]
 DEF = {"on": False, "zorunlu": False, "sms": False, "eposta": True, "google": False, "google_client_id": "", "kvkk": True, "puan_on": None,
-       "puan_100": 10, "odul_esik": 500, "odul_oran": 10, "misafir_bagla": True}
+       "puan_100": 10, "odul_esik": 500, "odul_oran": 10, "misafir_bagla": True,
+       "cuzdan_on": False, "hatirlat_on": False, "hatirlat_gun": 3}
 
 
 # sektör bölümlerine üye başına kayıt: (başlık adı, detay adı, tarih adı)
@@ -81,6 +83,15 @@ def buton(prefix=""):
 def profil(sector):
     bol, puan, pa, hat, ozel = PROFIL.get(sector, GENEL)
     return {"bolumler": [dict(zip(("id", "ad", "aciklama"), B[b])) for b in bol], "puan": puan, "puan_aciklama": pa, "hatirlatma": hat, "ozel_onay": ozel}
+
+
+def bolumler(c, p):
+    """Sektör bölümleri; puan ve cüzdan yalnız açıksa görünür."""
+    out = [x for x in p["bolumler"] if x["id"] != "puan" or c["puan_on"]]
+    if c.get("cuzdan_on"):
+        i = next((k for k, x in enumerate(out) if x["id"] == "bilgi"), len(out))
+        out.insert(i, dict(zip(("id", "ad", "aciklama"), B["cuzdan"])))
+    return out
 
 
 def _now():
@@ -130,12 +141,12 @@ def register(api_router, db, deps):
     @api_router.put("/yp/uyelik")
     async def ayar_put(payload: dict, _: dict = Depends(adm)):
         c, _p = await get_cfg(db, await sektor())
-        for k in ("on", "zorunlu", "sms", "eposta", "google", "kvkk", "puan_on", "misafir_bagla"):
+        for k in ("on", "zorunlu", "sms", "eposta", "google", "kvkk", "puan_on", "misafir_bagla", "cuzdan_on", "hatirlat_on"):
             if k in payload:
                 c[k] = bool(payload[k])
         if "google_client_id" in payload:
             c["google_client_id"] = re.sub(r"[^A-Za-z0-9._\-]", "", str(payload["google_client_id"]))[:120]
-        for k, lo, hi in (("puan_100", 1, 1000), ("odul_esik", 10, 100000), ("odul_oran", 1, 100)):
+        for k, lo, hi in (("hatirlat_gun", 1, 30), ("puan_100", 1, 1000), ("odul_esik", 10, 100000), ("odul_oran", 1, 100)):
             if k in payload:
                 try:
                     c[k] = max(lo, min(hi, int(payload[k])))
@@ -150,7 +161,7 @@ def register(api_router, db, deps):
 
     def pub(a):
         return {"id": a["id"], "ad": a.get("name", ""), "telefon": a.get("phone", ""), "eposta": a.get("email", ""), "grup": a.get("grup") or "Üye",
-                "puan": int(a.get("puan") or 0), "not": a.get("uye_notu", ""), "kayit": a.get("created_at", ""), "son": a.get("last_login", "")}
+                "puan": int(a.get("puan") or 0), "cuzdan": round(float(a.get("cuzdan") or 0), 2), "not": a.get("uye_notu", ""), "kayit": a.get("created_at", ""), "son": a.get("last_login", "")}
 
     @api_router.get("/yp/uyelik/uyeler")
     async def uyeler(q: str = "", _: dict = Depends(adm)):
@@ -180,6 +191,16 @@ def register(api_router, db, deps):
             n = max(-100000, min(100000, n))
             await db.customer_accounts.update_one({"id": aid}, {"$inc": {"puan": n}})
             await db.uye_puan.insert_one({"id": uuid.uuid4().hex[:12], "aid": aid, "puan": n, "neden": str(payload.get("neden") or "Elle")[:80], "at": _now()})
+        if payload.get("cuzdan_ekle"):
+            try:
+                t = round(float(payload["cuzdan_ekle"]), 2)
+            except (TypeError, ValueError):
+                raise HTTPException(422, "Tutar sayı olmalı")
+            t = max(-1000000, min(1000000, t))
+            if float(a.get("cuzdan") or 0) + t < 0:
+                raise HTTPException(422, "Bakiye eksiye düşemez")
+            await db.customer_accounts.update_one({"id": aid}, {"$inc": {"cuzdan": t}})
+            await db.uye_cuzdan.insert_one({"id": uuid.uuid4().hex[:12], "aid": aid, "tutar": t, "neden": str(payload.get("neden") or "Elle")[:80], "at": _now()})
         return pub(await db.customer_accounts.find_one({"id": aid}, {"_id": 0}))
 
     @api_router.get("/yp/uyelik/uyeler/{aid}/kayit")
@@ -206,6 +227,128 @@ def register(api_router, db, deps):
         await db.uye_kayit.delete_one({"id": kid, "aid": aid})
         return {"ok": True}
 
+    # ------------------------------------------------------------ toplu SMS
+    @api_router.post("/yp/uyelik/sms")
+    async def toplu_sms(payload: dict, _: dict = Depends(adm)):
+        metin = str(payload.get("metin") or "").strip()[:320]
+        grup = payload.get("grup") or ""
+        if len(metin) < 3:
+            raise HTTPException(422, "Mesaj metni yazın")
+        q = {"grup": grup} if grup in GRUPLAR and grup != "Üye" else ({"$or": [{"grup": "Üye"}, {"grup": {"$exists": False}}]} if grup == "Üye" else {})
+        rows = [a async for a in db.customer_accounts.find(q, {"_id": 0, "phone": 1, "name": 1, "sms_ret": 1}).limit(5000)]
+        hedef = [a for a in rows if len(_pk(a.get("phone"))) >= 10 and not a.get("sms_ret")]
+        if payload.get("dene"):
+            return {"ok": True, "n": len(hedef), "atlanan": len(rows) - len(hedef)}
+        if not await db.yp_integrations.find_one({"group": "sms", "on": True, "ok": True}, {"_id": 1}):
+            raise HTTPException(422, "Önce bir SMS sağlayıcısı bağlayın (Entegrasyonlar › SMS)")
+        import notify
+        ok = 0
+        for a in hedef:
+            r = await notify.send(db, "sms", a["phone"], metin.replace("{ad}", (a.get("name") or "").split(" ")[0]), kind="uye_duyuru")
+            ok += 1 if r.get("status") == "sent" else 0
+        return {"ok": True, "n": len(hedef), "gonderildi": ok}
+
+    # ------------------------------------------------------------ Excel (.xlsx) — bağımlılıksız
+    @api_router.get("/yp/uyelik/export.xlsx")
+    async def xlsx(_: dict = Depends(adm)):
+        import io
+        import zipfile
+        from xml.sax.saxutils import escape
+        from fastapi.responses import Response
+        rows = [["Ad", "Telefon", "E-posta", "Grup", "Puan", "Cüzdan", "Kayıt tarihi"]]
+        async for a in db.customer_accounts.find({}, {"_id": 0, "password_hash": 0}).sort("created_at", -1):
+            p = pub(a)
+            rows.append([p["ad"], p["telefon"], p["eposta"], p["grup"], p["puan"], p["cuzdan"], (p["kayit"] or "")[:10]])
+
+        def cell(v, r, c):
+            ref = "%s%d" % (chr(65 + c), r + 1)
+            if isinstance(v, (int, float)):
+                return '<c r="%s"><v>%s</v></c>' % (ref, v)
+            return '<c r="%s" t="inlineStr"><is><t>%s</t></is></c>' % (ref, escape(str(v)))
+        sheet = ('<?xml version="1.0" encoding="UTF-8"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>'
+                 + "".join('<row r="%d">%s</row>' % (i + 1, "".join(cell(v, i, j) for j, v in enumerate(r))) for i, r in enumerate(rows)) + "</sheetData></worksheet>")
+        buf = io.BytesIO()
+        with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
+            z.writestr("[Content_Types].xml", '<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/></Types>')
+            z.writestr("_rels/.rels", '<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>')
+            z.writestr("xl/workbook.xml", '<?xml version="1.0" encoding="UTF-8"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="Üyeler" sheetId="1" r:id="rId1"/></sheets></workbook>')
+            z.writestr("xl/_rels/workbook.xml.rels", '<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/></Relationships>')
+            z.writestr("xl/worksheets/sheet1.xml", sheet)
+        return Response(buf.getvalue(), media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", headers={"Content-Disposition": "attachment; filename=uyeler.xlsx"})
+
+    # ------------------------------------------------------------ favoriler (hesaba bağlı)
+    @api_router.put("/public/uyelik/favori")
+    async def favori(payload: dict, request: Request):
+        a = await me(request)
+        pid = str(payload.get("id") or "")[:60]
+        if not pid:
+            raise HTTPException(422, "Ürün gerekli")
+        if await db.uye_favori.find_one({"aid": a["id"], "pid": pid}, {"_id": 1}):
+            await db.uye_favori.delete_one({"aid": a["id"], "pid": pid})
+            return {"on": False}
+        await db.uye_favori.insert_one({"aid": a["id"], "pid": pid, "ad": str(payload.get("name") or "")[:120], "slug": str(payload.get("slug") or "")[:120], "at": _now()})
+        return {"on": True}
+
+    @api_router.get("/public/uyelik/favoriler")
+    async def favoriler(request: Request):
+        a = await me(request)
+        return {"rows": [r async for r in db.uye_favori.find({"aid": a["id"]}, {"_id": 0, "aid": 0}).sort("at", -1).limit(200)]}
+
+    # ------------------------------------------------------------ müşteriden iade talebi
+    @api_router.post("/public/uyelik/iade")
+    async def iade(payload: dict, request: Request):
+        a = await me(request)
+        no = str(payload.get("order_no") or "").strip().upper()
+        o = await db.shop_orders.find_one({"order_no": no, "account_id": a["id"]}, {"_id": 0})
+        if not o:
+            raise HTTPException(404, "Sipariş bulunamadı")
+        if o.get("status") != "teslim_edildi":
+            raise HTTPException(422, "İade talebi teslim edilen siparişler için açılır")
+        if await db.yp_returns.find_one({"order_no": no, "state": {"$in": ["talep", "onay", "tamam"]}}, {"_id": 1}):
+            raise HTTPException(409, "Bu sipariş için zaten bir iade talebi var")
+        n = await db.yp_returns.count_documents({})
+        items = [{"product": "", "name": i.get("name", ""), "qty": int(i.get("qty") or 1), "price": float(i.get("price") or 0), "reason": "diger"} for i in o.get("items") or []]
+        r = {"id": uuid.uuid4().hex[:12], "no": "IA-%s-%05d" % (_now()[:4], n + 1), "order": o["id"], "order_no": no,
+             "customer": (o.get("customer") or {}).get("name", ""), "phone": (o.get("customer") or {}).get("phone", ""), "items": items,
+             "reason": str(payload.get("reason") or "diger")[:40], "detail": str(payload.get("detail") or "")[:400], "state": "talep",
+             "refund": round(sum(i["price"] * i["qty"] for i in items), 2), "cargo": "", "at": _now(), "seq": n + 1, "kaynak": "müşteri",
+             "timeline": [{"at": _now(), "by": "müşteri", "state": "talep", "note": "Müşteri hesabından iade talebi"}]}
+        await db.yp_returns.insert_one(dict(r))
+        return {"ok": True, "no": r["no"]}
+
+    @api_router.get("/public/uyelik/iadeler")
+    async def iadeler(request: Request):
+        a = await me(request)
+        nos = [o["order_no"] async for o in db.shop_orders.find({"account_id": a["id"]}, {"_id": 0, "order_no": 1})]
+        rows = [{k: r.get(k) for k in ("no", "order_no", "state", "refund", "at")} async for r in db.yp_returns.find({"order_no": {"$in": nos}}, {"_id": 0}).sort("at", -1)] if nos else []
+        return {"rows": rows}
+
+    # ------------------------------------------------------------ sektörel hatırlatma (tarihli kayıtlar için günlük tarama)
+    async def hatirlat_tara(_db=None):
+        c, p = await get_cfg(db, await sektor())
+        if not (c["on"] and c.get("hatirlat_on") and p["hatirlatma"]):
+            return 0
+        import notify
+        hedef = (datetime.now(timezone.utc) + timedelta(days=int(c.get("hatirlat_gun") or 3))).date().isoformat()
+        n = 0
+        async for k in db.uye_kayit.find({"tarih": hedef}, {"_id": 0}):
+            ref = "uyehat:" + k["id"]
+            if await db.outbox.find_one({"kind": "uye_hatirlat", "ref": ref}, {"_id": 1}):
+                continue
+            a = await db.customer_accounts.find_one({"id": k["aid"]}, {"_id": 0, "phone": 1, "name": 1})
+            if not a or len(_pk(a.get("phone"))) < 10:
+                continue
+            ad = (a.get("name") or "").split(" ")[0]
+            r = await notify.send(db, "sms", a["phone"], "Merhaba %s, %s tarihli \"%s\" kaydınız yaklaşıyor. Detay için hesabınıza bakabilirsiniz." % (ad, hedef[8:10] + "." + hedef[5:7], k.get("baslik", "")), kind="uye_hatirlat", ref=ref)
+            n += 1 if r.get("status") == "sent" else 0
+        return n
+    api_router.uye_hatirlat_tara = hatirlat_tara
+    try:
+        import governance
+        governance.HOOKS.append(hatirlat_tara)
+    except Exception:                                              # noqa: BLE001
+        pass
+
     @api_router.get("/yp/uyelik/export")
     async def disari(_: dict = Depends(adm)):
         return {"rows": [pub(a) async for a in db.customer_accounts.find({}, {"_id": 0, "password_hash": 0})]}
@@ -221,6 +364,16 @@ def register(api_router, db, deps):
         if not (c["on"] and c[need]):
             raise HTTPException(404, "Bu giriş yöntemi kapalı")
         return c
+
+    async def _kvkk_sart(key, payload):
+        """Yeni hesap açılacaksa KVKK (ve sağlıkta özel rıza) onayı gerekir; var olan hesaba giriş etkilenmez."""
+        c, p = await get_cfg(db, await sektor())
+        if await db.customer_accounts.find_one({"phone_key": key}, {"_id": 1}) or not c["kvkk"]:
+            return
+        if not payload.get("kvkk_onay"):
+            raise HTTPException(422, "Devam etmek için KVKK aydınlatma metnini onaylamalısınız.")
+        if p["ozel_onay"] and not payload.get("ozel_riza"):
+            raise HTTPException(422, "Sağlık verilerinizin işlenmesi için açık rıza vermelisiniz.")
 
     async def _hesap(key, name, phone="", email=""):
         a = await db.customer_accounts.find_one({"phone_key": key}, {"_id": 0})
@@ -269,6 +422,7 @@ def register(api_router, db, deps):
             await db.uye_kod.update_one({"key": key}, {"$inc": {"deneme": 1}})
             raise HTTPException(422, "Kod hatalı.")
         await db.uye_kod.delete_one({"key": key})
+        await _kvkk_sart(key, payload)
         a = await _hesap(key, str(payload.get("ad") or ""), phone)
         return {"token": _token(a), "account": _acc(a)}
 
@@ -289,6 +443,7 @@ def register(api_router, db, deps):
         mail = d["email"].lower()
         a = await db.customer_accounts.find_one({"email": mail}, {"_id": 0})
         if not a:
+            await _kvkk_sart("g:" + str(d.get("sub") or mail), payload)
             a = await _hesap("g:" + str(d.get("sub") or mail), d.get("name") or mail.split("@")[0], "", mail)
         else:
             await db.customer_accounts.update_one({"id": a["id"]}, {"$set": {"last_login": _now()}})
@@ -314,7 +469,7 @@ def register(api_router, db, deps):
         c, p = await get_cfg(db, await sektor())
         return {"on": c["on"], "zorunlu": c["zorunlu"], "yontem": {"sms": c["sms"], "eposta": c["eposta"], "google": bool(c["google"] and c.get("google_client_id"))},
                 "google_client_id": c.get("google_client_id", "") if c["google"] else "",
-                "kvkk": c["kvkk"], "ozel_onay": p["ozel_onay"], "puan_on": c["puan_on"], "bolumler": [x for x in p["bolumler"] if x["id"] != "puan" or c["puan_on"]] if c["on"] else []}
+                "kvkk": c["kvkk"], "ozel_onay": p["ozel_onay"], "puan_on": c["puan_on"], "bolumler": bolumler(c, p) if c["on"] else [], "hatirlatma": p["hatirlatma"] if c.get("hatirlat_on") else ""}
 
     @api_router.get("/public/uyelik/randevular")
     async def randevular(request: Request):
@@ -358,8 +513,9 @@ def register(api_router, db, deps):
     async def hesabim(request: Request):
         a = await me(request)
         c, p = await get_cfg(db, await sektor())
-        bol = [x for x in p["bolumler"] if x["id"] != "puan" or c["puan_on"]]
+        bol = bolumler(c, p)
         led = [{k: r[k] for k in ("puan", "neden", "at")} async for r in db.uye_puan.find({"aid": a["id"]}, {"_id": 0}).sort("at", -1).limit(20)]
         puan = int(a.get("puan") or 0)
-        return {"uye": pub(a), "bolumler": bol, "puan": {"acik": c["puan_on"], "bakiye": puan, "esik": c["odul_esik"], "kalan": max(0, c["odul_esik"] - puan),
+        cled = [{k: r[k] for k in ("tutar", "neden", "at")} async for r in db.uye_cuzdan.find({"aid": a["id"]}, {"_id": 0}).sort("at", -1).limit(20)]
+        return {"uye": pub(a), "bolumler": bol, "cuzdan": {"acik": c.get("cuzdan_on", False), "bakiye": round(float(a.get("cuzdan") or 0), 2), "gecmis": cled}, "puan": {"acik": c["puan_on"], "bakiye": puan, "esik": c["odul_esik"], "kalan": max(0, c["odul_esik"] - puan),
                                                       "indirim": c["odul_oran"], "gecmis": led}}

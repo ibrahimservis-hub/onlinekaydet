@@ -70,7 +70,7 @@ with TestClient(s.app) as c:
         assert p["on"]
     t("üyelik ayarı kaydedilir, giriş yöntemi boş bırakılamaz", i)
     def k():
-        r = c.post("/api/public/customer/%s~register" % F, json={"name": "Merve Kaya", "phone": "05321112233", "password": "sifre123"})
+        r = c.post("/api/public/customer/%s~register" % F, json={"kvkk_onay": True, "name": "Merve Kaya", "phone": "05321112233", "password": "sifre123"})
         assert r.status_code == 200, r.text
         tk = r.json()["token"]
         L = c.get("/api/yp/uyelik/uyeler", headers=H).json()["rows"]
@@ -88,7 +88,7 @@ with TestClient(s.app) as c:
         pg = c.get("/api/site/preview?path=/hesabim", headers=H)
         assert pg.status_code == 200 and "okm-root" in pg.text and "/public/uyelik" in pg.text, pg.status_code
         # randevu tamamlanınca otomatik puan
-        r = c.post("/api/public/customer/%s~register" % F, json={"name": "Puan Test", "phone": "05329998877", "password": "sifre123"}); assert r.status_code == 200, r.text
+        r = c.post("/api/public/customer/%s~register" % F, json={"kvkk_onay": True, "name": "Puan Test", "phone": "05329998877", "password": "sifre123"}); assert r.status_code == 200, r.text
         tk = r.json()["token"]
         st = c.post("/api/yp/staff", headers=H, json={"name": "Elif Usta"}).json()["id"]
         D = __import__("datetime").date.today().isoformat()
@@ -121,9 +121,9 @@ with TestClient(s.app) as c:
             assert c.post("/api/public/uyelik/%s~sms-kod" % F, json={"phone": "0532 123 45 67"}).status_code == 429   # bir dakika bekletir
             kod = kodlar[0].split(": ")[1].split(" ")[0]
             assert c.post("/api/public/uyelik/%s~sms-giris" % F, json={"phone": "05321234567", "kod": "000000"}).status_code == 422
-            r = c.post("/api/public/uyelik/%s~sms-giris" % F, json={"phone": "05321234567", "kod": kod, "ad": "Sms Üye"}); assert r.status_code == 200, r.text
+            r = c.post("/api/public/uyelik/%s~sms-giris" % F, json={"kvkk_onay": True, "phone": "05321234567", "kod": kod, "ad": "Sms Üye"}); assert r.status_code == 200, r.text
             assert r.json()["account"]["name"] == "Sms Üye" and r.json()["token"]
-            assert c.post("/api/public/uyelik/%s~sms-giris" % F, json={"phone": "05321234567", "kod": kod}).status_code == 422   # kod tek kullanımlık
+            assert c.post("/api/public/uyelik/%s~sms-giris" % F, json={"kvkk_onay": True, "phone": "05321234567", "kod": kod}).status_code == 422   # kod tek kullanımlık
         finally:
             notify.send = eski
         # Google: istemci kimliği yokken çalışmaz; girilince token doğrulanır
@@ -136,10 +136,10 @@ with TestClient(s.app) as c:
         eski_get = uyelik.requests.get
         uyelik.requests.get = lambda *a, **k: R({"aud": "abc-123.apps.googleusercontent.com", "email": "g@ornek.com", "email_verified": "true", "name": "Google Üye", "sub": "42"})
         try:
-            r = c.post("/api/public/uyelik/%s~google" % F, json={"credential": "tok"}); assert r.status_code == 200, r.text
+            r = c.post("/api/public/uyelik/%s~google" % F, json={"kvkk_onay": True, "credential": "tok"}); assert r.status_code == 200, r.text
             assert r.json()["account"]["email"] == "g@ornek.com"
             uyelik.requests.get = lambda *a, **k: R({"aud": "baska", "email": "g@ornek.com", "email_verified": "true"})
-            assert c.post("/api/public/uyelik/%s~google" % F, json={"credential": "tok"}).status_code == 401
+            assert c.post("/api/public/uyelik/%s~google" % F, json={"kvkk_onay": True, "credential": "tok"}).status_code == 401
         finally:
             uyelik.requests.get = eski_get
     t("SMS koduyla ve Google ile giriş yalnız admin açınca çalışır, kod tek kullanımlık", gir)
@@ -156,7 +156,7 @@ with TestClient(s.app) as c:
         assert c.put("/api/site/features", headers=H, json={"shop_enabled": True, "customer_portal_enabled": True}).status_code == 200
         PID = c.post("/api/shop/products", headers=H, json={"name": "Şampuan", "price": 500, "stock": 5, "category": "Bakım", "brand": "X"}).json()["id"]
         c.put("/api/shop/settings", headers=H, json={"shipping_fee": 0, "bank_accounts": [{"bank": "Ziraat", "holder": "Firma", "iban": "TR330006100519786457841326"}]})
-        rr = c.post("/api/public/customer/%s~register" % F, json={"name": "Sip Üye", "phone": "0533 444 55 66", "password": "sifre123"}); assert rr.status_code == 200, rr.text
+        rr = c.post("/api/public/customer/%s~register" % F, json={"kvkk_onay": True, "name": "Sip Üye", "phone": "0533 444 55 66", "password": "sifre123"}); assert rr.status_code == 200, rr.text
         A = {"Authorization": "Bearer " + rr.json()["token"]}
         o = c.post("/api/public/shop/%s~orders" % F, headers=A, json={"customer": {"name": "Sip Üye", "phone": "0533 444 55 66", "address": "Atatürk cad. no 5 Çankaya", "city": "Ankara", "district": "Çankaya", "email": ""},
                                                                       "items": [{"product_id": PID, "qty": 2}], "accept_terms": True, "payment_method": "havale"}); assert o.status_code == 200, o.text
@@ -174,7 +174,7 @@ with TestClient(s.app) as c:
             def json(s): return {"aud": "abc-123.apps.googleusercontent.com", "email": "tel@ornek.com", "email_verified": "true", "name": "Tel Üye", "sub": "77"}
         eski = uyelik.requests.get; uyelik.requests.get = lambda *a, **k: R()
         try:
-            r = c.post("/api/public/uyelik/%s~google" % F, json={"credential": "t"}); assert r.status_code == 200, r.text
+            r = c.post("/api/public/uyelik/%s~google" % F, json={"kvkk_onay": True, "credential": "t"}); assert r.status_code == 200, r.text
         finally:
             uyelik.requests.get = eski
         A = {"Authorization": "Bearer " + r.json()["token"]}
@@ -197,6 +197,54 @@ with TestClient(s.app) as c:
         assert any(r["tur"] == "Kategori" and r["src"] == "Yedek parça" for r in rows)
         assert c.put("/api/yp/dil/ceviri", headers=H, json={"lang": "en", "items": [{"src": "Kombi eşanjörü", "text": "Boiler heat exchanger"}]}).json()["n"] == 1
     t("panelden girilen ürün ve kategori adları çeviri tablosuna türüyle girer", ek)
+
+    def yeni():
+        rr = c.post("/api/public/customer/%s~register" % F, json={"kvkk_onay": True, "name": "Zeynep Ak", "phone": "0535 777 88 99", "password": "sifre123"}); assert rr.status_code == 200, rr.text
+        A = {"Authorization": "Bearer " + rr.json()["token"]}
+        # KVKK onayı olmadan kayıt reddedilir
+        assert c.post("/api/public/customer/%s~register" % F, json={"name": "Onaysiz", "phone": "0535 111 00 00", "password": "sifre123"}).status_code in (400, 422)
+        aid = [u for u in c.get("/api/yp/uyelik/uyeler", headers=H).json()["rows"] if u["ad"] == "Zeynep Ak"][0]["id"]
+        # cüzdan
+        r = c.put("/api/yp/uyelik/uyeler/%s" % aid, headers=H, json={"cuzdan_ekle": 150}); assert r.status_code == 200, r.text
+        hs = c.get("/api/public/uyelik/%s~hesabim" % F, headers=A).json()
+        assert (hs.get("cuzdan") or {}).get("bakiye", hs.get("cuzdan")) in (150, 150.0), hs
+        # toplu SMS: deneme sayar, sağlayıcı yoksa gerçek gönderim reddedilir
+        d = c.post("/api/yp/uyelik/sms", headers=H, json={"metin": "Merhaba {ad}", "dene": True}).json()
+        assert d["n"] >= 1
+        assert c.post("/api/yp/uyelik/sms", headers=H, json={"metin": "Merhaba {ad}"}).status_code == 422
+        assert c.post("/api/yp/uyelik/sms", headers=H, json={"metin": "x"}).status_code == 422
+        import notify
+        gonder = []
+        async def sahte(db, ch, to, text, **k): gonder.append(text); return {"status": "sent"}
+        eski = notify.send; notify.send = sahte
+        try:
+            async def ekle():
+                fm = await s.db.main().firms.find_one({"login_email": "dil@x.com"})
+                await s.db.firm(fm["db"]).yp_integrations.insert_one({"id": "netgsm", "group": "sms", "on": True, "ok": True})
+            c.portal.call(ekle)
+            g = c.post("/api/yp/uyelik/sms", headers=H, json={"metin": "Merhaba {ad}"}).json()
+            assert g.get("gonderildi"), g
+            assert g["gonderildi"] >= 1 and "Merhaba Zeynep" in gonder, (g, gonder)
+        finally:
+            notify.send = eski
+        # Excel
+        x = c.get("/api/yp/uyelik/export.xlsx", headers=H); assert x.status_code == 200 and x.content[:2] == b"PK", x.status_code
+        import zipfile, io
+        z = zipfile.ZipFile(io.BytesIO(x.content)); assert "xl/worksheets/sheet1.xml" in z.namelist() and "Zeynep" in z.read("xl/worksheets/sheet1.xml").decode() + z.read("xl/sharedStrings.xml").decode() if "xl/sharedStrings.xml" in z.namelist() else True
+        # favori aç/kapat
+        assert c.put("/api/public/uyelik/%s~favori" % F, headers=A, json={"id": "p1", "name": "Ürün"}).json()["on"] is True
+        assert len(c.get("/api/public/uyelik/%s~favoriler" % F, headers=A).json()["rows"]) == 1
+        assert c.put("/api/public/uyelik/%s~favori" % F, headers=A, json={"id": "p1"}).json()["on"] is False
+        # teslim edilmemiş siparişe iade açılmaz
+        assert c.post("/api/public/uyelik/%s~iade" % F, headers=A, json={"order_no": "YOK"}).status_code == 404
+        # duyuru
+        assert c.put("/api/yp/duyuru", headers=H, json={"on": True, "tur": "bant", "text": "Bayram indirimi", "renk": "#f27a1a"}).json()["text"] == "Bayram indirimi"
+        assert c.put("/api/yp/duyuru", headers=H, json={"tur": "bant", "renk": "zz"}).json()["renk"] == "#f27a1a"
+    t("KVKK şartı, cüzdan, toplu SMS, xlsx, favori, iade, duyuru ayarı", yeni)
+    def kor():
+        r = c.put("/api/yp/dil", headers=H, json={"korunan": ["Servis Plus", "OnlineKaydet"], "ana": "tr"}).json()
+        assert r["korunan"] == ["Servis Plus", "OnlineKaydet"], r
+    t("korunan sözlük kaydedilir", kor)
 print("ok", len(ok), "bad", len(bad))
 for n, tb in bad: print("FAIL", n, tb)
 sys.exit(1 if bad else 0)

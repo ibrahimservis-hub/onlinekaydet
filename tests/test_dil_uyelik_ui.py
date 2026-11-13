@@ -70,6 +70,29 @@ with sync_playwright() as pw:
         pg.locator('.bxcard [data-a="bxprev"]').first.click(); pg.wait_for_selector('#ov iframe', timeout=10000)
         assert "pexels" in pg.get_attribute('#ov iframe', 'srcdoc')
     t("katalogda Önizle örnek fotoğraflı bölümü gösterir", onz)
+    pg.evaluate("document.getElementById('ov').hidden=true")
+    def uy2():
+        pg.click('#nav a[data-r=uyelik]'); pg.wait_for_selector('[data-a="uy-sms"]', timeout=10000)
+        assert pg.locator('[data-a="uy-xlsx"]').count() == 1 and pg.locator('[data-k="cuzdan_on"]').count() == 1
+        pg.click('[data-a="uy-sms"]'); pg.wait_for_selector('#uysf', timeout=8000); pg.wait_for_timeout(600)
+        assert "üyeye gidecek" in pg.inner_text("#uysn")
+        pg.evaluate("document.getElementById(\"ov\").hidden=true")
+    t("Üyelik: toplu SMS penceresi ve Excel düğmesi", uy2)
+    def dl2():
+        pg.click('#nav a[data-r=dil]'); pg.wait_for_selector('#dl-ana', timeout=10000)
+        pg.fill('#dl-kor', "OnlineKaydet, Servis Plus"); pg.click('[data-a="dl-kor"]'); pg.wait_for_timeout(600)
+        pg.select_option('#dl-gor', 'kod'); pg.wait_for_timeout(600)
+        c2 = c.get("/api/yp/dil", headers=H).json()["cfg"]
+        assert c2["korunan"] == ["OnlineKaydet", "Servis Plus"] and c2["gorunum"] == "kod", c2
+        assert pg.locator('[data-a="dl-csv"]').count() == 1
+    t("Diller: ana dil, görünüm, sözlük ve CSV", dl2)
+    def du():
+        pg.click('#nav a[data-r=duyuru]'); pg.wait_for_selector('#duf', timeout=10000)
+        pg.fill('#duf textarea[name=text]', "Bayram indirimi başladı"); pg.click('#duf button[type=submit]'); pg.wait_for_timeout(600)
+        pg.click('[data-a="du-tog"]'); pg.wait_for_timeout(700)
+        d = c.get("/api/yp/duyuru", headers=H).json()
+        assert d["on"] and d["text"] == "Bayram indirimi başladı", d
+    t("Duyuru ekranı: metin kaydedilir, yayına alınır", du)
     t("sayfa hatası yok", lambda: errs and (_ for _ in ()).throw(AssertionError(errs)) or None)
     br.close()
 print("ok", len(ok), "bad", len(bad))
