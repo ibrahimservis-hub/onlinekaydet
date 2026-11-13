@@ -19,6 +19,7 @@ from fastapi.responses import HTMLResponse, Response
 import shop as shopmod
 import shop_legal
 import cerez as cerez_mod
+import dil as dil_mod
 import blokgen
 import blok_eticaret
 import blok_tanitim
@@ -932,7 +933,7 @@ def register(api_router, db, deps):
         c2 = dict(ctx, menu_pages=menu, yil=datetime.now(timezone.utc).year)
         return blokgen.page_html(doc_, rows, c2, await blok_veri(rows, ctx), dev)
 
-    async def render(path, host="", inline=False, dev=""):
+    async def render_raw(path, host="", inline=False, dev=""):
         """(içerik, tür) ya da None. Özel (düzenleyici) sayfalar önce, sonra otomatik sayfalar."""
         d = await doc()
         p = (path or "/").split("?")[0].strip("/")
@@ -1025,6 +1026,28 @@ def register(api_router, db, deps):
         if inline:
             h = await inline_imgs(h)
         return h, "text/html"
+
+    async def render(path, host="", inline=False, dev=""):
+        inline_ = inline
+        """Çok dilli site: /en/... adresi çözülür, sayfa ziyaretçinin diline çevrilir, dil seçici eklenir."""
+        lang, p2, cfg = await dil_mod.parse_path(db, path)
+        r = await render_raw(p2 if lang else path, host, inline, dev)
+        if lang and r and str(r[1]).startswith("text/html"):
+            rest = (p2 or "/").split("?")[0].strip("/")
+            r = (dil_mod.apply_page(r[0], cfg, lang, rest, await dil_mod.tablo(db, lang) if lang != cfg["ana"] else {}), r[1])
+        if r and not inline_ and str(r[1]).startswith("text/html") and "</body>" in r[0] and "okuye" not in r[0]:
+            try:
+                uy = await db.app_settings.find_one({"_id": "yp_uyelik"}, {"_id": 0, "on": 1})
+            except Exception:                                      # noqa: BLE001
+                uy = None
+            if (uy or {}).get("on"):
+                btn = ('<style>.okuye{position:fixed;right:14px;top:12px;z-index:9400;background:#fff;color:#0a1f44;border:1px solid #cfd5e2;border-radius:10px;'
+                       'padding:8px 13px;font:600 13px system-ui,sans-serif;text-decoration:none;box-shadow:0 4px 16px #0a1f4426}[dir=rtl] .okuye{right:auto;left:14px}</style>'
+                       '<a class="okuye" href="%s/hesabim">👤 Giriş yap / Hesabım</a>' % (("/" + lang) if lang and lang != cfg["ana"] and cfg.get("adresli") else ""))
+                r = (r[0].replace("</body>", btn + "</body>", 1), r[1])
+        return r
+
+    api_router.site_render_raw = render_raw
 
     async def serve(path: str, host: str = "", ua: str = ""):
         r = await render(path, host, dev="phone" if sitegen.is_phone(ua) else "")
