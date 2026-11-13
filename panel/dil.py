@@ -173,6 +173,25 @@ def _chunks(a, n):
 def register(api_router, db, deps):
     adm = deps["require_admin"]
 
+    async def ek_metinler():
+        """Panelden girilen içerikler: sayfada o an görünmese de (ör. 20'den sonraki ürünler) çeviri tablosuna girsin. {metin: tür}"""
+        out = {}
+
+        async def al(col, alanlar, tur, flt=None, n=300):
+            try:
+                async for r in getattr(db, col).find(flt or {}, {"_id": 0, **{a: 1 for a in alanlar}}).limit(n):
+                    for a in alanlar:
+                        v = re.sub(r"\s+", " ", str(r.get(a) or "")).strip()
+                        if 2 <= len(v) <= 240 and re.search(r"[A-Za-zÇĞİÖŞÜçğıöşü]", v):
+                            out.setdefault(v, tur)
+            except Exception:                                      # noqa: BLE001
+                pass
+        await al("shop_products", ["name", "short"], "Ürün", {"active": True})
+        await al("shop_categories", ["name"], "Kategori")
+        await al("yp_services", ["name"], "Hizmet")
+        await al("yp_pages", ["title"], "Sayfa", {"status": "live"}, 60)
+        return out
+
     async def metinler():
         raw = getattr(api_router, "site_render_raw", None)
         slugs = [""]
@@ -199,6 +218,10 @@ def register(api_router, db, deps):
                     if t not in seen:
                         seen.add(t)
                         out.append(t)
+        for k in await ek_metinler():
+            if k not in seen:
+                seen.add(k)
+                out.append(k)
         return out[:1500]
 
     @api_router.get("/yp/dil")
@@ -236,7 +259,8 @@ def register(api_router, db, deps):
         if lang not in LANGS:
             raise HTTPException(404, "Dil bulunamadı")
         t = await tablo(db, lang)
-        rows = [{"k": key(x), "src": x, "text": t.get(x, ""), "durum": "hazir" if x in t else "eksik"} for x in await metinler()]
+        tur = await ek_metinler()
+        rows = [{"k": key(x), "src": x, "text": t.get(x, ""), "durum": "hazir" if x in t else "eksik", "tur": tur.get(x, "Sayfa metni")} for x in await metinler()]
         return {"rows": rows, "eksik": sum(1 for r in rows if r["durum"] == "eksik")}
 
     @api_router.put("/yp/dil/ceviri")

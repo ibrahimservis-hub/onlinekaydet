@@ -188,6 +188,14 @@ with TestClient(s.app) as c:
         assert blok_ornek.HAVUZ.get("kurs") and len(blok_ornek.HAVUZ["kurs"]) >= 3
         assert str(blok_ornek.HAVUZ["kurs"][0]) in blok_ornek.foto("hero", "kurs", 400)
     t("kurs paketinin kendi fotoğrafları var", kurs)
+    def ek():
+        c.post("/api/shop/products", headers=H, json={"name": "Kombi eşanjörü", "price": 900, "stock": 3, "category": "Yedek parça", "brand": "Baymak"})
+        c.put("/api/yp/dil", headers=H, json={"on": True, "diller": ["en"]})
+        rows = c.get("/api/yp/dil/ceviri?lang=en", headers=H).json()["rows"]
+        urun = [r for r in rows if r["src"] == "Kombi eşanjörü"]
+        assert urun and urun[0]["tur"] == "Ürün", [r["src"] for r in rows][:8]
+        assert c.put("/api/yp/dil/ceviri", headers=H, json={"lang": "en", "items": [{"src": "Kombi eşanjörü", "text": "Boiler heat exchanger"}]}).json()["n"] == 1
+    t("panelden girilen ürün ve kategori adları çeviri tablosuna türüyle girer", ek)
 print("ok", len(ok), "bad", len(bad))
 for n, tb in bad: print("FAIL", n, tb)
 sys.exit(1 if bad else 0)
