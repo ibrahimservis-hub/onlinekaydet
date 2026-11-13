@@ -123,5 +123,34 @@ with TestClient(s.app) as c:
         finally:
             requests.post = eski
     t("webhook: sipariş olayı imzalı gider", webhook)
+    def haberver():
+        sent = []
+        async def ekle():
+            fm = await s.db.main().firms.find_one({"login_email": "pl@x.com"}); d = s.db.firm(fm["db"])
+            await d.yp_integrations.update_one({"id": "sms"}, {"$set": {"id": "sms", "group": "sms", "on": True, "ok": True, "keys": {}}}, upsert=True)
+        c.portal.call(ekle)
+        import notify
+        eski = notify.send
+        async def sahte(db, ch, to, text, kind="", ref=""):
+            sent.append((to, text)); return {"status": "sent"}
+        notify.send = sahte
+        try:
+            u = "/api/public/shop/haberver"
+            assert c.post(u, json={"product_id": PID2, "phone": "123", "tur": "stok"}).status_code == 422
+            assert c.post(u, json={"product_id": PID, "phone": "0533 111 22 33", "tur": "stok"}).status_code == 409
+            assert c.post(u, json={"product_id": PID2, "phone": "0533 111 22 33", "tur": "stok"}).json()["ok"]
+            assert c.post(u, json={"product_id": PID2, "phone": "0533 111 22 33", "tur": "stok"}).json().get("tekrar")
+            assert c.post(u, json={"product_id": PID, "phone": "0533 111 22 33", "tur": "fiyat"}).json()["ok"]
+            L = c.get("/api/yp/haberver", headers=O).json()["rows"]; assert sum(r["bekleyen"] for r in L) == 2, L
+            assert c.post("/api/yp/haberver/tara", headers=O).json()["gonderilen"] == 0
+            c.put("/api/shop/products/%s" % PID2, headers=O, json={"name": "Stoksuz", "price": 50, "stock": 4, "category": "X"})
+            c.put("/api/shop/products/%s" % PID, headers=O, json={"name": "Eşanjör & Set", "price": 500, "stock": 5, "category": "Eşanjör"})
+            assert c.post("/api/yp/haberver/tara", headers=O).json()["gonderilen"] == 2, sent
+            assert any("stokta" in t for _, t in sent) and any("düştü" in t for _, t in sent)
+            assert c.post("/api/yp/haberver/tara", headers=O).json()["gonderilen"] == 0
+            assert c.get("/api/yp/haberver", headers=Bad).status_code in (401, 403) if (Bad := {"Authorization": "Bearer x"}) else 0
+        finally:
+            notify.send = eski
+    t("haber ver: stok geldi / fiyat düştü SMS bir kez gider", haberver)
 print("ok", len(ok), "bad", len(bad))
 for n, e in bad: print("FAIL", n, "\n", e)

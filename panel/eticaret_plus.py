@@ -220,6 +220,29 @@ async def webhook_gonder(db, olay, veri):
         return False
 
 
+async def haberver_tara(db, host=""):
+    """Stok geldi / fiyat düştü talepleri için SMS yollar; her talep bir kez işlenir. Giden sayısını döner."""
+    import notify
+    n = 0
+    async for a in db.shop_alerts.find({"sent": ""}, {"_id": 0}).limit(200):
+        p = await db.shop_products.find_one({"id": a["pid"], "active": True}, {"_id": 0, "name": 1, "price": 1, "stock": 1, "slug": 1, "track_stock": 1})
+        if not p:
+            continue
+        stokta = (not p.get("track_stock", True)) or p.get("stock", 0) > 0
+        if a["tur"] == "stok" and not stokta:
+            continue
+        if a["tur"] == "fiyat" and not _num(p.get("price")) < _num(a.get("price_at")):
+            continue
+        link = ("https://%s" % host if host else "") + "/magaza/urun/" + str(p.get("slug") or a["pid"])
+        metin = ("%s yeniden stokta! Hemen incele: %s" % (p["name"], link)) if a["tur"] == "stok" else \
+                ("%s fiyatı düştü: %.2f TL (önceki %.2f TL). %s" % (p["name"], _num(p["price"]), _num(a["price_at"]), link))
+        r = await notify.send(db, "sms", a["phone"], metin, kind="haber_ver", ref="alert:" + a["id"])
+        if (r or {}).get("status") == "sent":
+            await db.shop_alerts.update_one({"id": a["id"]}, {"$set": {"sent": _now()}})
+            n += 1
+    return n
+
+
 SEPET_DEF = {"oto": False, "bekleme_dk": 120, "metin": "Merhaba {ad}, sepetinizde ürünler sizi bekliyor. Tamamlamak için: {link}"}
 
 
@@ -501,5 +524,53 @@ def register(api_router, db, deps):
             except Exception:      # noqa: BLE001
                 pass
         governance.HOOKS.append(_sepet_hook)
+    except Exception:      # noqa: BLE001
+        pass
+
+    # ---- Stoğa gelince / fiyat düşünce haber ver
+    @api_router.post("/public/shop/haberver")
+    async def haber_ekle(payload: dict):
+        ph = re.sub(r"\D", "", str(payload.get("phone", "")))[-10:]
+        if len(ph) != 10 or not ph.startswith("5"):
+            raise HTTPException(422, "Lütfen geçerli bir cep telefonu numarası girin (5xx xxx xx xx)")
+        tur = "fiyat" if payload.get("tur") == "fiyat" else "stok"
+        p = await db.shop_products.find_one({"id": str(payload.get("product_id", "")), "active": True}, {"_id": 0, "id": 1, "price": 1, "stock": 1, "track_stock": 1})
+        if not p:
+            raise HTTPException(404, "Ürün bulunamadı")
+        if tur == "stok" and ((not p.get("track_stock", True)) or p.get("stock", 0) > 0):
+            raise HTTPException(409, "Bu ürün zaten stokta")
+        if await db.shop_alerts.find_one({"pid": p["id"], "phone": ph, "tur": tur, "sent": ""}):
+            return {"ok": True, "tekrar": True}
+        if await db.shop_alerts.count_documents({"phone": ph, "sent": ""}) >= 10:
+            raise HTTPException(429, "Bu numara için çok fazla bekleyen talep var")
+        await db.shop_alerts.insert_one({"id": secrets.token_hex(8), "pid": p["id"], "phone": ph, "tur": tur, "price_at": p.get("price"), "sent": "", "at": _now()})
+        return {"ok": True}
+
+    @api_router.get("/yp/haberver")
+    async def haber_liste(_: dict = Depends(adm)):
+        sat = {}
+        async for a in db.shop_alerts.find({}, {"_id": 0}):
+            k = (a["pid"], a["tur"])
+            sat.setdefault(k, {"pid": a["pid"], "tur": a["tur"], "bekleyen": 0, "giden": 0})
+            sat[k]["giden" if a["sent"] else "bekleyen"] += 1
+        for v in sat.values():
+            p = await db.shop_products.find_one({"id": v["pid"]}, {"_id": 0, "name": 1})
+            v["ad"] = (p or {}).get("name", "(silinmiş ürün)")
+        return {"rows": sorted(sat.values(), key=lambda r: -r["bekleyen"])}
+
+    @api_router.post("/yp/haberver/tara")
+    async def haber_tara(request: Request, _: dict = Depends(adm)):
+        host = request.headers.get("x-forwarded-host") or request.headers.get("host") or ""
+        return {"gonderilen": await haberver_tara(db, host)}
+
+    try:
+        import governance
+
+        async def _haber_hook(d):
+            try:
+                await haberver_tara(d)
+            except Exception:      # noqa: BLE001
+                pass
+        governance.HOOKS.append(_haber_hook)
     except Exception:      # noqa: BLE001
         pass
