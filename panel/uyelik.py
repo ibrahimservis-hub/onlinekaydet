@@ -4,7 +4,12 @@ import re
 import uuid
 from datetime import datetime, timezone, timedelta
 
+import asyncio
+import hashlib
+import secrets
+
 import jwt
+import requests
 from fastapi import Depends, HTTPException, Request
 
 # bölüm: (kimlik, ad, açıklama)
@@ -47,8 +52,21 @@ PROFIL = {
 }
 GENEL = (["randevu", "siparis", "bilgi"], False, "", "", False)
 GRUPLAR = ["Üye", "VIP", "Kurumsal"]
-DEF = {"on": False, "zorunlu": False, "sms": True, "eposta": True, "google": False, "kvkk": True, "puan_on": None,
+DEF = {"on": False, "zorunlu": False, "sms": False, "eposta": True, "google": False, "google_client_id": "", "kvkk": True, "puan_on": None,
        "puan_100": 10, "odul_esik": 500, "odul_oran": 10, "misafir_bagla": True}
+
+
+# sektör bölümlerine üye başına kayıt: (başlık adı, detay adı, tarih adı)
+ETIKET = {"arac": ("Plaka / araç", "Servis geçmişi, notlar", "Muayene / bakım tarihi"),
+          "hayvan": ("Hayvanın adı ve türü", "Aşı, reçete, notlar", "Sonraki kontrol tarihi"),
+          "rezervasyon": ("Konaklama / masa", "Ayrıntı, fatura no", "Tarih"),
+          "uyelik": ("Paket adı", "Kalan seans, ders programı", "Bitiş tarihi"),
+          "favori": ("Favori", "Not", "Tarih"),
+          "dosya": ("Dosya adı", "Durum, evrak", "Güncelleme tarihi"),
+          "form": ("Form adı", "Durum", "Tarih"),
+          "ders": ("Ders / sınav", "Program, ödeme planı", "Tarih"),
+          "etkinlik": ("Etkinlik", "Teklif, ödeme takvimi", "Etkinlik tarihi"),
+          "talep": ("Talep", "Durum, açıklama", "Tarih")}
 
 
 def profil(sector):
@@ -97,7 +115,8 @@ def register(api_router, db, deps):
         n = await db.customer_accounts.count_documents({})
         ay = (datetime.now(timezone.utc) - timedelta(days=30)).isoformat()
         yeni = await db.customer_accounts.count_documents({"created_at": {"$gte": ay}})
-        return {"cfg": c, "profil": p, "gruplar": GRUPLAR, "sayilar": {"uye": n, "yeni": yeni}, "sektor": sec}
+        sms_hazir = bool(await db.yp_integrations.find_one({"group": "sms", "on": True, "ok": True}, {"_id": 1}))
+        return {"cfg": c, "profil": p, "gruplar": GRUPLAR, "sayilar": {"uye": n, "yeni": yeni}, "sektor": sec, "sms_hazir": sms_hazir}
 
     @api_router.put("/yp/uyelik")
     async def ayar_put(payload: dict, _: dict = Depends(adm)):
@@ -105,6 +124,8 @@ def register(api_router, db, deps):
         for k in ("on", "zorunlu", "sms", "eposta", "google", "kvkk", "puan_on", "misafir_bagla"):
             if k in payload:
                 c[k] = bool(payload[k])
+        if "google_client_id" in payload:
+            c["google_client_id"] = re.sub(r"[^A-Za-z0-9._\-]", "", str(payload["google_client_id"]))[:120]
         for k, lo, hi in (("puan_100", 1, 1000), ("odul_esik", 10, 100000), ("odul_oran", 1, 100)):
             if k in payload:
                 try:
@@ -152,9 +173,117 @@ def register(api_router, db, deps):
             await db.uye_puan.insert_one({"id": uuid.uuid4().hex[:12], "aid": aid, "puan": n, "neden": str(payload.get("neden") or "Elle")[:80], "at": _now()})
         return pub(await db.customer_accounts.find_one({"id": aid}, {"_id": 0}))
 
+    @api_router.get("/yp/uyelik/uyeler/{aid}/kayit")
+    async def kayit_list(aid: str, _: dict = Depends(adm)):
+        rows = [r async for r in db.uye_kayit.find({"aid": aid}, {"_id": 0}).sort("at", -1).limit(200)]
+        return {"rows": rows, "etiket": {k: list(v) for k, v in ETIKET.items()}}
+
+    @api_router.post("/yp/uyelik/uyeler/{aid}/kayit")
+    async def kayit_add(aid: str, payload: dict, _: dict = Depends(adm)):
+        if not await db.customer_accounts.find_one({"id": aid}, {"_id": 1}):
+            raise HTTPException(404, "Üye bulunamadı")
+        bolum = str(payload.get("bolum") or "")
+        baslik = str(payload.get("baslik") or "").strip()[:120]
+        if bolum not in ETIKET or not baslik:
+            raise HTTPException(422, "Bölüm ve başlık gerekli")
+        d = {"id": uuid.uuid4().hex[:12], "aid": aid, "bolum": bolum, "baslik": baslik, "detay": str(payload.get("detay") or "").strip()[:500],
+             "tarih": str(payload.get("tarih") or "").strip()[:20], "at": _now()}
+        await db.uye_kayit.insert_one(dict(d))
+        d.pop("_id", None)
+        return d
+
+    @api_router.delete("/yp/uyelik/uyeler/{aid}/kayit/{kid}")
+    async def kayit_del(aid: str, kid: str, _: dict = Depends(adm)):
+        await db.uye_kayit.delete_one({"id": kid, "aid": aid})
+        return {"ok": True}
+
     @api_router.get("/yp/uyelik/export")
     async def disari(_: dict = Depends(adm)):
         return {"rows": [pub(a) async for a in db.customer_accounts.find({}, {"_id": 0, "password_hash": 0})]}
+
+    def _token(a):
+        return jwt.encode({"sub": a["id"], "typ": "customer", "exp": datetime.now(timezone.utc) + timedelta(days=30)}, secret, algorithm=alg)
+
+    def _pk(p):
+        return re.sub(r"\D", "", p or "")[-10:]
+
+    async def _giris_ac(need):
+        c, _p = await get_cfg(db, await sektor())
+        if not (c["on"] and c[need]):
+            raise HTTPException(404, "Bu giriş yöntemi kapalı")
+        return c
+
+    async def _hesap(key, name, phone="", email=""):
+        a = await db.customer_accounts.find_one({"phone_key": key}, {"_id": 0})
+        if not a:
+            a = {"id": uuid.uuid4().hex[:12], "name": (name or "Üye")[:120], "phone": phone, "phone_key": key, "email": email[:120],
+                 "password_hash": "", "address": "", "city": "", "district": "", "created_at": _now(), "last_login": _now()}
+            await db.customer_accounts.insert_one(dict(a))
+        else:
+            await db.customer_accounts.update_one({"id": a["id"]}, {"$set": {"last_login": _now()}})
+        return a
+
+    def _acc(a):
+        return {"id": a["id"], "name": a.get("name", ""), "phone": a.get("phone", ""), "email": a.get("email", ""), "address": a.get("address", ""),
+                "city": a.get("city", ""), "district": a.get("district", ""), "created_at": a.get("created_at", "")}
+
+    @api_router.post("/public/uyelik/sms-kod")
+    async def sms_kod(payload: dict):
+        await _giris_ac("sms")
+        phone = str(payload.get("phone") or "").strip()[:30]
+        key = _pk(phone)
+        if len(key) < 10:
+            raise HTTPException(422, "Lütfen geçerli bir telefon numarası girin.")
+        old = await db.uye_kod.find_one({"key": key}, {"_id": 0})
+        if old and old.get("at", 0) > datetime.now(timezone.utc).timestamp() - 60:
+            raise HTTPException(429, "Yeni kod için bir dakika bekleyin.")
+        kod = "%06d" % secrets.randbelow(1000000)
+        import notify
+        r = await notify.send(db, "sms", phone, "Giriş kodunuz: %s (10 dakika geçerli)" % kod, kind="uye_kod", store_text="Giriş kodunuz: ******")
+        if r.get("status") != "sent":
+            raise HTTPException(422, "SMS gönderilemedi. İşletmenin SMS ayarı tamamlanmamış olabilir.")
+        now = datetime.now(timezone.utc).timestamp()
+        await db.uye_kod.update_one({"key": key}, {"$set": {"key": key, "h": hashlib.sha256((kod + key).encode()).hexdigest(), "exp": now + 600, "at": now, "deneme": 0}}, upsert=True)
+        return {"ok": True}
+
+    @api_router.post("/public/uyelik/sms-giris")
+    async def sms_giris(payload: dict):
+        await _giris_ac("sms")
+        phone = str(payload.get("phone") or "").strip()[:30]
+        key = _pk(phone)
+        kod = str(payload.get("kod") or "").strip()
+        r = await db.uye_kod.find_one({"key": key}, {"_id": 0})
+        now = datetime.now(timezone.utc).timestamp()
+        if not r or r["exp"] < now or r.get("deneme", 0) >= 5:
+            raise HTTPException(422, "Kodun süresi dolmuş. Yeni kod isteyin.")
+        if hashlib.sha256((kod + key).encode()).hexdigest() != r["h"]:
+            await db.uye_kod.update_one({"key": key}, {"$inc": {"deneme": 1}})
+            raise HTTPException(422, "Kod hatalı.")
+        await db.uye_kod.delete_one({"key": key})
+        a = await _hesap(key, str(payload.get("ad") or ""), phone)
+        return {"token": _token(a), "account": _acc(a)}
+
+    @api_router.post("/public/uyelik/google")
+    async def google_giris(payload: dict):
+        c = await _giris_ac("google")
+        cid = c.get("google_client_id")
+        if not cid:
+            raise HTTPException(404, "Google girişi tamamlanmamış")
+        cred = str(payload.get("credential") or "")[:4000]
+        try:
+            r = await asyncio.to_thread(requests.get, "https://oauth2.googleapis.com/tokeninfo", params={"id_token": cred}, timeout=10)
+            d = r.json() if r.status_code == 200 else {}
+        except Exception:                                          # noqa: BLE001
+            d = {}
+        if d.get("aud") != cid or str(d.get("email_verified")).lower() != "true" or not d.get("email"):
+            raise HTTPException(401, "Google doğrulaması başarısız")
+        mail = d["email"].lower()
+        a = await db.customer_accounts.find_one({"email": mail}, {"_id": 0})
+        if not a:
+            a = await _hesap("g:" + str(d.get("sub") or mail), d.get("name") or mail.split("@")[0], "", mail)
+        else:
+            await db.customer_accounts.update_one({"id": a["id"]}, {"$set": {"last_login": _now()}})
+        return {"token": _token(a), "account": _acc(a)}
 
     async def puan_kazan(phone, tutar, ref, neden="Alışveriş"):
         """Tamamlanan randevu/siparişten üyeye puan: 100 ₺ başına ayarlı puan. Aynı kayıt iki kez puan vermez."""
@@ -174,7 +303,8 @@ def register(api_router, db, deps):
     @api_router.get("/public/uyelik")
     async def acik_ayar():
         c, p = await get_cfg(db, await sektor())
-        return {"on": c["on"], "zorunlu": c["zorunlu"], "yontem": {"sms": c["sms"], "eposta": c["eposta"], "google": c["google"]},
+        return {"on": c["on"], "zorunlu": c["zorunlu"], "yontem": {"sms": c["sms"], "eposta": c["eposta"], "google": bool(c["google"] and c.get("google_client_id"))},
+                "google_client_id": c.get("google_client_id", "") if c["google"] else "",
                 "kvkk": c["kvkk"], "ozel_onay": p["ozel_onay"], "puan_on": c["puan_on"], "bolumler": [x for x in p["bolumler"] if x["id"] != "puan" or c["puan_on"]] if c["on"] else []}
 
     @api_router.get("/public/uyelik/randevular")
@@ -191,6 +321,14 @@ def register(api_router, db, deps):
                     if len(out) >= 50:
                         break
         return {"rows": out}
+
+    @api_router.get("/public/uyelik/kayitlar")
+    async def kayitlar(request: Request, bolum: str = ""):
+        a = await me(request)
+        q = {"aid": a["id"]}
+        if bolum:
+            q["bolum"] = bolum
+        return {"rows": [r async for r in db.uye_kayit.find(q, {"_id": 0, "aid": 0}).sort("tarih", -1).limit(100)]}
 
     @api_router.get("/public/uyelik/hesabim")
     async def hesabim(request: Request):

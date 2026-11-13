@@ -44,6 +44,14 @@ with sync_playwright() as pw:
         pg.click('[data-k="on"]'); pg.wait_for_timeout(600)
         assert pg.locator('[data-k="on"]').get_attribute("aria-checked") == "true"
     t("Üyelik ekranı açılır, anahtar kaydedilir", uy)
+    def gg():
+        pg.click('[data-k="google"]'); pg.wait_for_selector('#uyg input[name=gid]', timeout=10000)
+        assert "SMS sağlayıcısı" not in pg.inner_text("#main")            # SMS kapalıyken uyarı yok
+        pg.fill('#uyg input[name=gid]', "abc-1.apps.googleusercontent.com"); pg.click('#uyg button'); pg.wait_for_timeout(700)
+        pg.click('[data-k="sms"]'); pg.wait_for_timeout(700)
+        assert "SMS sağlayıcısı bağlı değil" in pg.inner_text("#main")      # bağlı değilken açıkça uyarır
+        assert pg.input_value('#uyg input[name=gid]').startswith("abc-1")
+    t("Google istemci kimliği girilir, SMS bağlı değilse uyarı çıkar", gg)
     def dl():
         pg.click('#nav a[data-r=dil]'); pg.wait_for_selector('[data-a="dl-dil"]', timeout=10000)
         assert pg.locator('[data-a="dl-dil"][data-id="en"]').get_attribute("aria-pressed") == "true"   # kuaför için İngilizce hazır gelir

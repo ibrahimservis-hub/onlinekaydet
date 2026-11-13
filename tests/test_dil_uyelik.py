@@ -104,6 +104,68 @@ with TestClient(s.app) as c:
         assert hs["puan"]["bakiye"] == 100 and hs["puan"]["gecmis"][0]["neden"] == "Randevu", hs["puan"]
         pb = c.get("/api/public/uyelik/%s~x" % F).json() if False else None
     t("Hesabım sayfası üyelik açıkken yayında", m)
+    def gir():
+        import notify
+        c.put("/api/yp/uyelik", headers=H, json={"on": True, "sms": False, "google": False, "eposta": True})
+        py = c.get("/api/public/uyelik/%s~x" % F).json() if False else None
+        # kapalıyken SMS ve Google uçları 404 (normal giriş çalışır)
+        assert c.post("/api/public/uyelik/%s~sms-kod" % F, json={"phone": "05321234567"}).status_code == 404
+        assert c.post("/api/public/uyelik/%s~google" % F, json={"credential": "x"}).status_code == 404
+        c.put("/api/yp/uyelik", headers=H, json={"sms": True, "google": True})
+        kodlar = []
+        async def fake(db_, ch, to, text, **kw):
+            kodlar.append(text); return {"status": "sent"}
+        eski = notify.send; notify.send = fake
+        try:
+            r = c.post("/api/public/uyelik/%s~sms-kod" % F, json={"phone": "0532 123 45 67"}); assert r.status_code == 200, r.text
+            assert c.post("/api/public/uyelik/%s~sms-kod" % F, json={"phone": "0532 123 45 67"}).status_code == 429   # bir dakika bekletir
+            kod = kodlar[0].split(": ")[1].split(" ")[0]
+            assert c.post("/api/public/uyelik/%s~sms-giris" % F, json={"phone": "05321234567", "kod": "000000"}).status_code == 422
+            r = c.post("/api/public/uyelik/%s~sms-giris" % F, json={"phone": "05321234567", "kod": kod, "ad": "Sms Üye"}); assert r.status_code == 200, r.text
+            assert r.json()["account"]["name"] == "Sms Üye" and r.json()["token"]
+            assert c.post("/api/public/uyelik/%s~sms-giris" % F, json={"phone": "05321234567", "kod": kod}).status_code == 422   # kod tek kullanımlık
+        finally:
+            notify.send = eski
+        # Google: istemci kimliği yokken çalışmaz; girilince token doğrulanır
+        assert c.post("/api/public/uyelik/%s~google" % F, json={"credential": "x"}).status_code == 404
+        assert c.put("/api/yp/uyelik", headers=H, json={"google_client_id": "abc-123.apps.googleusercontent.com"}).json()["google_client_id"].startswith("abc-123")
+        class R:
+            status_code = 200
+            def __init__(s, d): s.d = d
+            def json(s): return s.d
+        eski_get = uyelik.requests.get
+        uyelik.requests.get = lambda *a, **k: R({"aud": "abc-123.apps.googleusercontent.com", "email": "g@ornek.com", "email_verified": "true", "name": "Google Üye", "sub": "42"})
+        try:
+            r = c.post("/api/public/uyelik/%s~google" % F, json={"credential": "tok"}); assert r.status_code == 200, r.text
+            assert r.json()["account"]["email"] == "g@ornek.com"
+            uyelik.requests.get = lambda *a, **k: R({"aud": "baska", "email": "g@ornek.com", "email_verified": "true"})
+            assert c.post("/api/public/uyelik/%s~google" % F, json={"credential": "tok"}).status_code == 401
+        finally:
+            uyelik.requests.get = eski_get
+    t("SMS koduyla ve Google ile giriş yalnız admin açınca çalışır, kod tek kullanımlık", gir)
+    def kyt():
+        c.put("/api/yp/sectors/veteriner", headers=H) if False else c.post("/api/yp/sectors/veteriner", headers=H)
+        L = c.get("/api/yp/uyelik/uyeler", headers=H).json()["rows"]; aid = L[0]["id"]
+        r = c.post("/api/yp/uyelik/uyeler/%s/kayit" % aid, headers=H, json={"bolum": "hayvan", "baslik": "Pamuk (kedi)", "detay": "Karma aşı", "tarih": "2026-12-01"}); assert r.status_code == 200, r.text
+        assert c.post("/api/yp/uyelik/uyeler/%s/kayit" % aid, headers=H, json={"bolum": "olmayan", "baslik": "x"}).status_code == 422
+        assert len(c.get("/api/yp/uyelik/uyeler/%s/kayit" % aid, headers=H).json()["rows"]) == 1
+        c.post("/api/yp/sectors/kuafor", headers=H)
+    t("sektör bölümü için üye kaydı eklenir, geçersiz bölüm reddedilir", kyt)
+    def sip():
+        c.put("/api/yp/uyelik", headers=H, json={"on": True, "puan_on": True, "puan_100": 10})
+        assert c.put("/api/site/features", headers=H, json={"shop_enabled": True, "customer_portal_enabled": True}).status_code == 200
+        PID = c.post("/api/shop/products", headers=H, json={"name": "Şampuan", "price": 500, "stock": 5, "category": "Bakım", "brand": "X"}).json()["id"]
+        c.put("/api/shop/settings", headers=H, json={"shipping_fee": 0, "bank_accounts": [{"bank": "Ziraat", "holder": "Firma", "iban": "TR330006100519786457841326"}]})
+        rr = c.post("/api/public/customer/%s~register" % F, json={"name": "Sip Üye", "phone": "0533 444 55 66", "password": "sifre123"}); assert rr.status_code == 200, rr.text
+        A = {"Authorization": "Bearer " + rr.json()["token"]}
+        o = c.post("/api/public/shop/%s~orders" % F, headers=A, json={"customer": {"name": "Sip Üye", "phone": "0533 444 55 66", "address": "Atatürk cad. no 5 Çankaya", "city": "Ankara", "district": "Çankaya", "email": ""},
+                                                                      "items": [{"product_id": PID, "qty": 2}], "accept_terms": True, "payment_method": "havale"}); assert o.status_code == 200, o.text
+        oid = [x for x in c.get("/api/shop/orders", headers=H).json() if x["order_no"] == o.json()["order_no"]][0]["id"]
+        for _ in range(2):
+            assert c.put("/api/shop/orders/%s" % oid, headers=H, json={"status": "teslim_edildi"}).status_code == 200
+        hs = c.get("/api/public/uyelik/%s~hesabim" % F, headers=A).json()
+        assert hs["puan"]["bakiye"] == 100 and hs["puan"]["gecmis"][0]["neden"] == "Sipariş", hs["puan"]
+    t("teslim edilen siparişten puan bir kez yazılır", sip)
 print("ok", len(ok), "bad", len(bad))
 for n, tb in bad: print("FAIL", n, tb)
 sys.exit(1 if bad else 0)

@@ -584,6 +584,11 @@ def register(api_router, db, deps):
         if upd:
             upd["updated_at"] = _now()
             await db.shop_orders.update_one({"id": oid}, {"$set": upd})
+            if upd.get("status") == "teslim_edildi" and o.get("status") != "teslim_edildi" and getattr(api_router, "uye_puan_kazan", None):
+                try:
+                    await api_router.uye_puan_kazan((o.get("customer") or {}).get("phone"), o.get("total"), "siparis:" + oid, "Sipariş")
+                except Exception:                                  # noqa: BLE001
+                    pass
         return {**o, **upd}
 
     @api_router.delete("/shop/orders/{oid}")

@@ -1242,7 +1242,7 @@ V.uyelik=async function(){var r=await api('/yp/uyelik'),u=await api('/yp/uyelik/
  h+='<div class="card"><div class="hd"><h2>Üyelik ayarları</h2><span class="note">'+r.sayilar.uye+' üye · son 30 günde '+r.sayilar.yeni+' yeni</span></div>'
   +swRow('on','Üyelik açık','Sitede “Giriş yap / Hesabım” bağlantısı görünür.',c.on)
   +swRow('zorunlu','Randevu için üyelik şart','Kapalıyken misafir olarak da randevu alınabilir.',c.zorunlu)
-  +swRow('eposta','E-posta ile giriş','',c.eposta)+swRow('sms','SMS koduyla giriş','',c.sms)+swRow('google','Google ile giriş','',c.google)
+  +swRow('eposta','Telefon ve şifre ile giriş','Sitedeki normal giriş. Diğer yöntemler kapalıysa yalnız bu çalışır.',c.eposta)+swRow('sms','SMS koduyla giriş','Üye telefonuna 6 haneli kod gelir.'+(c.sms&&!r.sms_hazir?' <b style="color:#b45309">SMS sağlayıcısı bağlı değil: Entegrasyonlar › SMS.</b>':''),c.sms)+swRow('google','Google ile giriş','Ziyaretçi Google hesabıyla girer.'+(c.google&&!c.google_client_id?' <b style="color:#b45309">Aşağıya Google istemci kimliği girilmeden görünmez.</b>':''),c.google)+(c.google?'<form id="uyg" class="pad" style="display:flex;gap:10px;align-items:end;flex-wrap:wrap"><label class="f" style="flex:1;min-width:240px">Google istemci kimliği (Client ID)<input name="gid" value="'+esc(c.google_client_id||'')+'" placeholder="123456-abc.apps.googleusercontent.com"></label><button class="btn p" type="submit">Kaydet</button></form>':'')
   +swRow('kvkk','KVKK onay kutusu','Kayıt formunda aydınlatma metni onayı istenir.',c.kvkk)
   +(r.profil.ozel_onay?'<div class="note pad">Bu sektörde sağlık verisi için ayrıca açık rıza alınır.</div>':'')
   +swRow('misafir_bagla','Misafir kayıtlarını üyeye bağla','Aynı telefonla alınmış eski randevular hesaba eklenir.',c.misafir_bagla)
@@ -1255,12 +1255,21 @@ V.uyelik=async function(){var r=await api('/yp/uyelik'),u=await api('/yp/uyelik/
    :'<div class="empty">Henüz üye yok. Üyelik açıkken siteden kayıt olanlar burada görünür.</div>')+'</div>';
  $('#main').innerHTML=h;
  var q=$('#uyq');if(q)q.onkeydown=function(e){if(e.key==='Enter'){CUR.uq=q.value.trim();V.uyelik().catch(fail)}};
+ var g=$('#uyg');if(g)g.onsubmit=function(e){e.preventDefault();api('/yp/uyelik',{method:'PUT',body:{google_client_id:g.elements.gid.value}}).then(function(){toast('Kaydedildi');V.uyelik()}).catch(fail)};
  var f=$('#uyp');if(f)f.onsubmit=function(e){e.preventDefault();var b={};['puan_100','odul_esik','odul_oran'].forEach(function(k){b[k]=+f.elements[k].value});api('/yp/uyelik',{method:'PUT',body:b}).then(function(){toast('Kaydedildi')}).catch(fail)}};
 function uyForm(x){return '<form id="uyf" data-id="'+esc(x.id)+'" style="display:grid;gap:12px"><div class="note">'+esc(x.ad)+' · '+esc(x.telefon||x.eposta)+' · şu an '+x.puan+' puan</div>'
  +'<label class="f">Grup<select name="grup">'+CUR.uy.gruplar.map(function(g){return '<option'+(g===x.grup?' selected':'')+'>'+esc(g)+'</option>'}).join('')+'</select></label>'
  +'<label class="f">Not<textarea name="not" rows="2">'+esc(x.not||'')+'</textarea></label>'
  +(CUR.uy.profil.puan?'<label class="f">Puan ekle / çıkar<input name="puan_ekle" type="number" placeholder="örn. 50 veya -20"></label><label class="f">Neden<input name="neden" placeholder="Doğum günü hediyesi"></label>':'')
- +'<button class="btn p" type="submit">Kaydet</button></form>'}
+ +'<button class="btn p" type="submit">Kaydet</button></form><div id="uyk"></div>'}
+var UYK=['arac','hayvan','rezervasyon','uyelik','favori','dosya','form','ders','etkinlik','talep'];
+function uyKayit(aid){var bol=CUR.uy.profil.bolumler.filter(function(b){return UYK.indexOf(b.id)>-1});var el=$('#uyk');if(!el||!bol.length){if(el)el.innerHTML='';return}
+ api('/yp/uyelik/uyeler/'+aid+'/kayit').then(function(r){var et=r.etiket;
+  el.innerHTML='<hr style="margin:14px 0;border:0;border-top:1px solid #e3e6ee"><b>Hesabım kayıtları</b><div class="note">Üye bunları sitede kendi hesabında görür.</div>'
+   +r.rows.map(function(k){return '<div class="row" style="grid-template-columns:1fr auto"><div><div class="t" style="font-size:14px">'+esc(k.baslik)+' <span class="note">'+esc((bol.filter(function(b){return b.id===k.bolum})[0]||{}).ad||'')+'</span></div><div class="m">'+esc(k.tarih||'')+' '+esc(k.detay||'')+'</div></div><button class="btn s d" data-a="uyk-sil" data-id="'+esc(k.id)+'" data-aid="'+esc(aid)+'" aria-label="Sil">×</button></div>'}).join('')
+   +'<form id="uykf" style="display:grid;gap:8px;margin-top:10px"><select name="bolum">'+bol.map(function(b){return '<option value="'+b.id+'">'+esc(b.ad)+'</option>'}).join('')+'</select><input name="baslik" placeholder="Başlık"><input name="detay" placeholder="Detay"><input name="tarih" type="date"><button class="btn" type="submit">Kayıt ekle</button></form>';
+  var f=$('#uykf'),sel=f.elements.bolum,up=function(){var e2=et[sel.value]||[];f.elements.baslik.placeholder=e2[0]||'Başlık';f.elements.detay.placeholder=e2[1]||'Detay'};sel.onchange=up;up();
+  f.onsubmit=function(ev){ev.preventDefault();api('/yp/uyelik/uyeler/'+aid+'/kayit',{method:'POST',body:{bolum:f.elements.bolum.value,baslik:f.elements.baslik.value,detay:f.elements.detay.value,tarih:f.elements.tarih.value}}).then(function(){uyKayit(aid)}).catch(fail)}}).catch(fail)}
 /* ---------------- DİLLER ---------------- */
 V.dil=async function(){var r=await api('/yp/dil');CUR.dl=r;var c=r.cfg;CUR.dlang=CUR.dlang||(c.diller[0]||'');
  var h=head('Diller','Siteniz ziyaretçinin dilinde açılır; adresler /en gibi ayrı sayfalardır, arama motorları her dili ayrı görür.','');
@@ -1403,7 +1412,8 @@ document.addEventListener('click',function(ev){var b=ev.target.closest('[data-a]
    if(v2==='onay')ask('İade onaylansın mı? Ürünler stoğa geri eklenir ve açık pazaryerlerine bildirilir.','Onayla').then(send);else send()}
  /* üyelik + diller */
  else if(a==='uy-tog'){var k=b.dataset.k,on=!b.classList.contains('on'),o={};o[k]=on;api('/yp/uyelik',{method:'PUT',body:o}).then(function(){return V.uyelik()}).catch(fail)}
- else if(a==='uy-ac'){var x=(CUR.uyeler||[]).filter(function(z){return z.id===b.dataset.id})[0];if(x){modal('Üyeyi düzenle',uyForm(x));var f=$('#uyf');f.onsubmit=function(e){e.preventDefault();var o={grup:f.elements.grup.value,not:f.elements.not.value};if(f.elements.puan_ekle&&f.elements.puan_ekle.value){o.puan_ekle=+f.elements.puan_ekle.value;o.neden=f.elements.neden.value}api('/yp/uyelik/uyeler/'+f.dataset.id,{method:'PUT',body:o}).then(function(){$('#ov').hidden=true;toast('Kaydedildi');V.uyelik()}).catch(fail)}}}
+ else if(a==='uy-ac'){var x=(CUR.uyeler||[]).filter(function(z){return z.id===b.dataset.id})[0];if(x){modal('Üyeyi düzenle',uyForm(x));uyKayit(x.id);var f=$('#uyf');f.onsubmit=function(e){e.preventDefault();var o={grup:f.elements.grup.value,not:f.elements.not.value};if(f.elements.puan_ekle&&f.elements.puan_ekle.value){o.puan_ekle=+f.elements.puan_ekle.value;o.neden=f.elements.neden.value}api('/yp/uyelik/uyeler/'+f.dataset.id,{method:'PUT',body:o}).then(function(){$('#ov').hidden=true;toast('Kaydedildi');V.uyelik()}).catch(fail)}}}
+ else if(a==='uyk-sil'){api('/yp/uyelik/uyeler/'+b.dataset.aid+'/kayit/'+b.dataset.id,{method:'DELETE'}).then(function(){uyKayit(b.dataset.aid)}).catch(fail)}
  else if(a==='uy-export'){api('/yp/uyelik/export').then(function(ex){var cs='Ad;Telefon;E-posta;Grup;Puan\n'+ex.rows.map(function(z){return [z.ad,z.telefon,z.eposta,z.grup,z.puan].join(';')}).join('\n');var bl=new Blob(['\ufeff'+cs],{type:'text/csv'}),an=document.createElement('a');an.href=URL.createObjectURL(bl);an.download='uyeler.csv';an.click()}).catch(fail)}
  else if(a==='dl-tog'){var k2=b.dataset.k,o2={};o2[k2]=!b.classList.contains('on');api('/yp/dil',{method:'PUT',body:o2}).then(function(){return V.dil()}).catch(fail)}
  else if(a==='dl-dil'){var c1=CUR.dl.cfg,id=b.dataset.id,ds=c1.diller.slice(),ix=ds.indexOf(id);if(ix>-1)ds.splice(ix,1);else ds.push(id);api('/yp/dil',{method:'PUT',body:{diller:ds}}).then(function(){return V.dil()}).catch(fail)}
