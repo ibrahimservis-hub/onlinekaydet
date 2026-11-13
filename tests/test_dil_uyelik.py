@@ -194,6 +194,7 @@ with TestClient(s.app) as c:
         rows = c.get("/api/yp/dil/ceviri?lang=en", headers=H).json()["rows"]
         urun = [r for r in rows if r["src"] == "Kombi eşanjörü"]
         assert urun and urun[0]["tur"] == "Ürün", [r["src"] for r in rows][:8]
+        assert any(r["tur"] == "Kategori" and r["src"] == "Yedek parça" for r in rows)
         assert c.put("/api/yp/dil/ceviri", headers=H, json={"lang": "en", "items": [{"src": "Kombi eşanjörü", "text": "Boiler heat exchanger"}]}).json()["n"] == 1
     t("panelden girilen ürün ve kategori adları çeviri tablosuna türüyle girer", ek)
 print("ok", len(ok), "bad", len(bad))

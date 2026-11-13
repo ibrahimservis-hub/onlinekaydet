@@ -187,6 +187,7 @@ def register(api_router, db, deps):
             except Exception:                                      # noqa: BLE001
                 pass
         await al("shop_products", ["name", "short"], "Ürün", {"active": True})
+        await al("shop_products", ["category"], "Kategori", {"active": True})
         await al("shop_categories", ["name"], "Kategori")
         await al("yp_services", ["name"], "Hizmet")
         await al("yp_pages", ["title"], "Sayfa", {"status": "live"}, 60)
