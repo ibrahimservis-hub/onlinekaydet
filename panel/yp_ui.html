@@ -297,7 +297,7 @@ table.gr .r{text-align:right}
 .th .sv{height:74px;display:flex;align-items:flex-end;padding:8px 10px;color:#fff;font-weight:700;font-size:13px}
 .th .tb{padding:8px 10px;display:flex;gap:6px;flex-wrap:wrap}
 .tog{width:38px;height:22px;border-radius:22px;background:#d0d5dd;position:relative;flex:none;border:0;padding:0}.tog:after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;transition:left .15s}.tog.on{background:var(--blue)}.tog.on:after{left:18px}
-.sitegrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(460px,46%);gap:18px;align-items:start}
+.sitegrid{display:grid;grid-template-columns:minmax(400px,40%) minmax(0,1fr);gap:18px;align-items:start}.sitegrid.genis{grid-template-columns:minmax(0,1fr)}.sitegrid.genis>#sl{display:none!important}.pvbox{position:relative;overflow:hidden;height:calc(100vh - 150px);min-height:620px;background:#eceef2}.pv .pvbox iframe{position:absolute;top:0;left:0;transform-origin:0 0;border:0;background:#fff;margin:0;max-width:none;min-height:0;aspect-ratio:auto;box-sizing:border-box;box-shadow:none;border-radius:0}.pv.phone .pvbox iframe{border:10px solid #14161a;border-radius:44px;box-shadow:0 14px 40px rgba(16,24,40,.3)}.pvbox[hidden]{display:none}
 .stabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin:0 0 18px;overflow-x:auto}
 .stabs button{border:0;background:none;padding:0 14px 11px;font-weight:600;font-size:14.5px;color:var(--mut);position:relative;white-space:nowrap;min-height:38px}
 .stabs button:hover{color:var(--ink2)}
@@ -321,7 +321,7 @@ table.gr .r{text-align:right}
 @media(max-width:900px){
  .app{display:block}.rail{display:none}main{padding:16px 14px 100px}
  .top h1{font-size:21px}.figs{grid-template-columns:1fr 1fr}.fig{padding:13px 14px;border-top:1px solid var(--line)}.fig:nth-child(-n+2){border-top:0}.fig:nth-child(3){border-left:0}.fig b{font-size:21px}
- .cols,.sitegrid{grid-template-columns:1fr}.pv{position:static}.pv iframe{height:480px}
+ .cols,.sitegrid{grid-template-columns:1fr}.pv{position:static}.pv iframe{height:480px}.pvbox{height:72vh;min-height:520px}
  .mhd{display:flex;align-items:center;padding:12px 16px;background:var(--ink)}.mhd img{height:22px}
  .mbar{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);padding:8px 6px 14px;z-index:20}
  .mbar a{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:600;color:var(--mut);text-decoration:none;min-height:44px;justify-content:center}.mbar a.on{color:var(--blue)}
@@ -680,12 +680,12 @@ function stabs(){return '<div class="stabs" role="tablist">'+STAB.map(function(x
  return '<button role="tab" data-a="sitetab" data-t="'+x[0]+'"'+(on?' class="on"':'')+' aria-selected="'+on+'">'+x[1]+'</button>'}).join('')+'</div>'}
 V.site=async function(){
  $('#main').innerHTML=head('Web Sitem','Sayfanızın bölümlerini düzenleyin, tasarımı seçin, bilgilerinizi güncelleyin.','<button class="btn" data-a="pvfull">Tam ekran önizle</button> <button class="btn" data-a="pvreload">Önizlemeyi yenile</button>')
-  +stabs()+'<div class="sitegrid"><div id="sl" style="display:grid;gap:18px"></div><div class="pv card"><div class="hd"><h2>Sitenizin görünümü</h2><div class="sp"></div><span id="pvp"></span><div class="seg" role="group" aria-label="Önizleme modu"><button data-a="pvmode" data-m="0">Gezin</button><button data-a="pvmode" data-m="1" class="on">Düzenle: yazı · yazı tipi · sıra</button></div><div class="seg" role="group" aria-label="Önizleme cihazı"><button data-a="pvdev" data-d="web">Bilgisayar</button><button data-a="pvdev" data-d="phone">Telefon</button></div></div><iframe id="pvf" title="Site önizleme" sandbox="allow-scripts"></iframe><div id="bxkaba" class="pad" hidden><div id="bxp" class="bxpv"></div><div class="note" style="margin-top:10px">Bu düzen henüz yayında değil; sitenizde şu an yayındaki düzen görünüyor.</div></div></div></div>';
+  +stabs()+'<div class="sitegrid"><div id="sl" style="display:grid;gap:18px"></div><div class="pv card"><div class="hd"><h2>Sitenizin görünümü</h2><div class="sp"></div><span id="pvp"></span><div class="seg" role="group" aria-label="Önizleme modu"><button data-a="pvmode" data-m="0">Gezin</button><button data-a="pvmode" data-m="1" class="on">Düzenle: yazı · yazı tipi · sıra</button></div><div class="seg" role="group" aria-label="Önizleme cihazı"><button data-a="pvdev" data-d="web">Bilgisayar</button><button data-a="pvdev" data-d="phone">Telefon</button></div><button class="btn s" data-a="pvgenis" id="pvgb" aria-pressed="false" title="Listeyi gizleyip önizlemeyi tam genişlikte göster">Geniş önizleme</button></div><div class="pvbox" id="pvbox"><iframe id="pvf" title="Site önizleme" sandbox="allow-scripts"></iframe></div><div id="bxkaba" class="pad" hidden><div id="bxp" class="bxpv"></div><div class="note" style="margin-top:10px">Bu düzen henüz yayında değil; sitenizde şu an yayındaki düzen görünüyor.</div></div></div></div>';
  var br=await api('/brand'),pr=await api('/site/profile');CUR.brand=br.brand;CUR.brandAll=br;CUR.prof=pr.profile||{};CUR.profFull=pr;
  try{var e=await api('/yp/site-engine');BX.eng=e.engine}catch(x){BX.eng=BX.eng||'tema'}
  if(!ST.ed)ST.ed=BX.eng||'tema';
  await siteTab();
- preview();var dv='web';try{dv=localStorage.ypdev||'web'}catch(_){}setDev(dv)};
+ preview();var dv='web';try{dv=localStorage.ypdev||'web'}catch(_){}setDev(dv);var gn='';try{gn=localStorage.ypgenis||''}catch(_){}pvGenis(!!gn)};
 async function siteTab(){var el=$('#sl');if(!el)return;var t=ST.tab;
  document.querySelectorAll('[data-a=sitetab]').forEach(function(b){var on=b.dataset.t===t;b.classList.toggle('on',on);b.setAttribute('aria-selected',on)});
  if(t==='tasarim'){el.innerHTML=stTema()+logoCard()+stPromo()+stBook()}
@@ -696,7 +696,7 @@ async function siteTab(){var el=$('#sl');if(!el)return;var t=ST.tab;
   if(ST.ed==='blok'){await bxPages()}else{loadBlocks()}}
  pvKip()}
 function pvKip(){var f=$('#pvf'),k=$('#bxkaba');if(!f||!k)return;
- var kaba=ST.tab==='bolum'&&ST.ed==='blok'&&(BX.eng||'tema')!=='blok';f.hidden=kaba;k.hidden=!kaba;
+ var kaba=ST.tab==='bolum'&&ST.ed==='blok'&&(BX.eng||'tema')!=='blok';var bx0=$('#pvbox');(bx0||f).hidden=kaba;k.hidden=!kaba;if(!kaba)pvFit();
  document.querySelectorAll('.pv .hd .seg').forEach(function(g){g.hidden=kaba})}
 function stBolum(){var ed=ST.ed,eng=BX.eng||'tema',canli=eng===ed,h='<div class="card">';
  h+='<div class="stbar"><div class="seg" role="group" aria-label="Hangi düzen">'
@@ -783,7 +783,14 @@ window.addEventListener('message',async function(e){var d=e.data||{};if(!d||type
   var body=d.body;if(d.method==='POST'&&u.indexOf('/api/public/yp/book')===0){try{var o=JSON.parse(body||'{}');o.dry=true;body=JSON.stringify(o)}catch(_){}}
   try{var r=await fetch(u,{method:d.method||'GET',headers:{Authorization:'Bearer '+TOK,'Content-Type':'application/json'},body:body});send(r.status,await r.text())}catch(_){send(503,JSON.stringify({detail:'Bağlantı kurulamadı'}))}}
 });
-function setDev(d){CUR.dev=d;try{localStorage.ypdev=d}catch(_){}document.querySelectorAll('.pv,#ov .md').forEach(function(e){e.classList.toggle('phone',d==='phone')});document.querySelectorAll('[data-a=pvdev]').forEach(function(b){b.classList.toggle('on',b.dataset.d===d)})}
+function pvFit(){var b=$('#pvbox'),f=$('#pvf');if(!b||!f||b.hidden)return;var W=b.clientWidth,H=b.clientHeight;if(!W||!H)return;
+ var tel=(CUR.dev||'web')==='phone',s,fw,fh,x=0,y=0;
+ if(tel){fw=413;fh=872;s=Math.min(1.15,(H-28)/fh,(W-28)/fw);x=Math.round((W-fw*s)/2);y=Math.round((H-fh*s)/2)}
+ else{fw=1280;s=Math.min(1,W/fw);fh=Math.ceil(H/s)}
+ f.style.width=fw+'px';f.style.height=fh+'px';f.style.transform='translate('+x+'px,'+y+'px) scale('+s+')';
+ if(!b._ro&&window.ResizeObserver){b._ro=new ResizeObserver(function(){pvFit()});b._ro.observe(b)}}
+function pvGenis(on){var g=document.querySelector('.sitegrid');if(!g)return;g.classList.toggle('genis',on);try{localStorage.ypgenis=on?'1':''}catch(_){}var bt=$('#pvgb');if(bt){bt.classList.toggle('p',on);bt.setAttribute('aria-pressed',on);bt.textContent=on?'Listeyi göster':'Geniş önizleme'}setTimeout(pvFit,0)}
+function setDev(d){setTimeout(pvFit,0);CUR.dev=d;try{localStorage.ypdev=d}catch(_){}document.querySelectorAll('.pv,#ov .md').forEach(function(e){e.classList.toggle('phone',d==='phone')});document.querySelectorAll('[data-a=pvdev]').forEach(function(b){b.classList.toggle('on',b.dataset.d===d)})}
 (function(){var src=null;
  document.addEventListener('mousedown',function(e){var g=e.target.closest&&e.target.closest('.grip');if(g){var r=g.closest('.row');if(r)r.setAttribute('draggable','true')}});
  document.addEventListener('dragstart',function(e){var r=e.target.closest&&e.target.closest('.row[data-dk]');if(!r)return;src=r;r.classList.add('dragging');try{e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',r.dataset.di)}catch(_){}});
@@ -1001,6 +1008,7 @@ document.addEventListener('click',async function(ev){
  else if(a==='bookedit'){var bt=await api('/site/booktext');if(!bt.fields.length){toast('Bu temanın randevu penceresi sabit yazılıdır',true)}else{CUR.bkf=bt.fields;modal('Randevu formu yazıları','<form id="bkt"><p class="note" style="margin-bottom:10px">Boş bırakılan alan temanın kendi yazısını kullanır.</p>'+bt.fields.map(function(x){return '<label class="f">'+esc(x.label)+'<input name="'+x.k+'" maxlength="200" value="'+esc(x.val)+'" placeholder="'+esc(x.def)+'"></label>'}).join('')+'<div class="mf"><button type="button" class="btn" data-a="close">Vazgeç</button><button class="btn p">Kaydet</button></div></form>',1)}}
  else if(a==='pvmode'){CUR.ymode=+t.dataset.m;document.querySelectorAll('[data-a=pvmode]').forEach(function(b){b.classList.toggle('on',+b.dataset.m===CUR.ymode)});pvSendMode()}
  else if(a==='bentog'){t.classList.toggle('on');t.setAttribute('aria-checked',t.classList.contains('on'))}
+ else if(a==='pvgenis'){pvGenis(!document.querySelector('.sitegrid.genis'))}
  else if(a==='pvfull'){if(!CUR.pvhtml){await preview()}modal('Sitenizin görünümü','<iframe id="pvf2" title="Site önizleme büyük" sandbox="allow-scripts"></iframe>',1);$('#ov .md').classList.add('full');setDev(CUR.dev||'web');setFrame($('#pvf2'),CUR.pvhtml||'<p style="font:15px sans-serif;padding:24px">Önizleme yok</p>')}
  else if(a==='pvreload'){preview()}
  else if(a==='timgreset'){await setThemeImg(t.dataset.p,'');toast('İlk haline döndü')}

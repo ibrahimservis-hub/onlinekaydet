@@ -58,6 +58,23 @@ with sync_playwright() as pw:
         assert pg.locator('#bl [data-a="tekset"]').count() == 0
         assert not errs, errs
     t("hazır temada bölüm ekle / ayarla / kaldır", akis)
+    def onizleme():
+        pg.evaluate("window.scrollTo(0,0)"); pg.wait_for_timeout(300)
+        pg.click('[data-a="pvdev"][data-d="web"]'); pg.wait_for_timeout(1500)
+        w = pg.evaluate("document.getElementById('pvf').style.width"); assert w == "1280px", w
+        bw = pg.evaluate("document.getElementById('pvbox').clientWidth"); assert bw > 600, bw
+        pg.screenshot(path="/tmp/pv_web.png")
+        pg.click('[data-a="pvdev"][data-d="phone"]'); pg.wait_for_timeout(1200)
+        assert pg.evaluate("document.getElementById('pvf').style.width") == "413px"
+        pg.screenshot(path="/tmp/pv_tel.png")
+        pg.click('[data-a="pvgenis"]'); pg.wait_for_timeout(800)
+        assert pg.locator(".sitegrid.genis").count() == 1 and not pg.locator("#sl").is_visible()
+        pg.click('[data-a="pvdev"][data-d="web"]'); pg.wait_for_timeout(1200)
+        pg.screenshot(path="/tmp/pv_genis.png")
+        pg.click('[data-a="pvgenis"]'); pg.wait_for_timeout(500)
+        assert pg.locator("#sl").is_visible()
+        assert not errs, errs
+    t("önizleme: gerçek masaüstü genişliği, büyük telefon, geniş mod", onizleme)
     br.close()
 srv.should_exit = True
 print("ok", len(ok), "bad", len(bad))
