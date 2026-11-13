@@ -286,6 +286,11 @@ def register(api_router, db, deps):
                   "created_at": _now().isoformat(timespec="seconds"), "created_by": user.get("name", "")})
         await db.bookings.insert_one(dict(o))
         await remember(o)
+        try:
+            import eticaret_plus
+            await eticaret_plus.webhook_gonder(db, "randevu.olustu", {"no": o.get("no"), "musteri": o.get("name"), "telefon": o.get("phone"), "tarih": o.get("date"), "saat": o.get("time")})
+        except Exception:      # noqa: BLE001
+            pass
         return view(o)
 
     @api_router.put("/yp/appts/{aid}")

@@ -100,6 +100,18 @@ with sync_playwright() as pw:
         pg.click('[data-k="akakce"]'); pg.wait_for_selector('[data-k="akakce"].on', timeout=8000)
         assert c.get("/api/yp/feed", headers=H).json()["akakce"] is True
     t("Fiyat ve güvenlik ekranı: besleme, risk, çark dilimleri", ep)
+    def dt():
+        pg.evaluate("V.destek()"); pg.wait_for_selector('[data-a="dt-yeni"]', timeout=10000); pg.click('[data-a="dt-yeni"]'); pg.wait_for_selector('#dtdrop', timeout=8000)
+        png = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
+        pg.evaluate("""(b64)=>{var bin=atob(b64),u=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);
+          var f=new File([u],'image.png',{type:'image/png'}),dt=new DataTransfer();dt.items.add(f);
+          document.dispatchEvent(new ClipboardEvent('paste',{clipboardData:dt,bubbles:true,cancelable:true}))}""", png)
+        pg.wait_for_selector('#dtek img', timeout=8000)
+        pg.evaluate("""(b64)=>{var bin=atob(b64),u=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);
+          var f=new File([u],'b.png',{type:'image/png'}),dt=new DataTransfer();dt.items.add(f);
+          document.getElementById('dtdrop').dispatchEvent(new DragEvent('drop',{dataTransfer:dt,bubbles:true,cancelable:true}))}""", png)
+        pg.wait_for_function("document.querySelectorAll('#dtek img').length==2", timeout=8000)
+    t("Destek: Ctrl+V ile yapıştırma ve sürükle-bırak ekran görüntüsü ekler", dt)
     t("sayfa hatası yok", lambda: errs and (_ for _ in ()).throw(AssertionError(errs)) or None)
     br.close()
 print("ok", len(ok), "bad", len(bad))

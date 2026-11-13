@@ -979,6 +979,8 @@ def register(api_router, db, deps):
             await db.shop_carts.delete_one({"account_id": acc0["id"]})
         except Exception:      # noqa: BLE001
             pass
+        await eticaret_plus.webhook_gonder(db, "siparis.olustu", {"order_no": order["order_no"], "total": total, "status": order["status"], "musteri": name, "telefon": phone, "odeme": pm_id,
+                                                          "urunler": [{"ad": i["name"], "adet": i["qty"], "fiyat": i["price"]} for i in items]})
         try:
             rk = order.get("risk") or {}
             risk_not = (" · RİSK: %s (%s)" % (rk["seviye"].upper(), ", ".join(rk["nedenler"]))) if rk.get("seviye") in ("orta", "yuksek") and rk.get("bildir", True) else ""

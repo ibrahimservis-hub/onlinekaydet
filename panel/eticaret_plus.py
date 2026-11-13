@@ -196,6 +196,30 @@ def cark_html(c):
     return css + '<button id="okck" type="button">Çarkı çevir</button>' + kutu + js
 
 
+async def webhook_gonder(db, olay, veri):
+    """Bağlı 'Webhook / API' entegrasyonuna olayı imzalı JSON olarak yollar. Hata siparişi/randevuyu etkilemez."""
+    try:
+        row = await db.yp_integrations.find_one({"id": "webhook", "on": True}, {"_id": 0})
+        k = (row or {}).get("keys") or {}
+        url = str(k.get("url") or "")
+        if not url.startswith(("https://", "http://")):
+            return False
+        import asyncio
+        import hashlib
+        import hmac
+        gov = json.dumps({"olay": olay, "veri": veri, "zaman": _now()}, ensure_ascii=False, default=str).encode()
+        h = {"Content-Type": "application/json; charset=utf-8", "X-OnlineKaydet-Olay": olay}
+        if k.get("secret"):
+            h["X-OnlineKaydet-Imza"] = hmac.new(str(k["secret"]).encode(), gov, hashlib.sha256).hexdigest()
+
+        def _post():
+            import requests
+            return requests.post(url, data=gov, headers=h, timeout=5).status_code
+        return 200 <= await asyncio.to_thread(_post) < 300
+    except Exception:      # noqa: BLE001
+        return False
+
+
 SEPET_DEF = {"oto": False, "bekleme_dk": 120, "metin": "Merhaba {ad}, sepetinizde ürünler sizi bekliyor. Tamamlamak için: {link}"}
 
 

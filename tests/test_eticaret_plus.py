@@ -101,5 +101,27 @@ with TestClient(s.app) as c:
         assert c.post("/api/public/shop/%s~orders" % F, json=body, headers=T).status_code == 200
         assert not [x for x in c.get("/api/yp/sepetler", headers=O).json()["rows"] if x["name"] == "Sepet Kisi"]
     t("sepet: kaydedilir, terk sayılır, SMS hatırlatma, raporlar, siparişte silinir", sepet)
+    def webhook():
+        import asyncio, hmac, hashlib, json as _j, requests
+        got = []
+        class R:  status_code = 200
+        eski = requests.post
+        requests.post = lambda url, data=None, headers=None, timeout=0: (got.append((url, data, headers)), R())[1]
+        try:
+            async def ekle():
+                fm = await s.db.main().firms.find_one({"login_email": "pl@x.com"})
+                await s.db.firm(fm["db"]).yp_integrations.update_one({"id": "webhook"}, {"$set": {"id": "webhook", "on": True, "ok": True, "keys": {"url": "https://example.com/hook", "secret": "gizli"}}}, upsert=True)
+            c.portal.call(ekle)
+            body = {"customer": {"name": "Hook Kisi", "phone": "0533 444 55 66", "address": "Atatürk cad. no 5 Çankaya", "city": "Ankara", "district": "Çankaya", "email": ""},
+                    "items": [{"product_id": PID, "qty": 1}], "accept_terms": True, "payment_method": "havale"}
+            rr = c.post("/api/public/customer/%s~register" % F, json={"name": "Hook Kisi", "phone": "0534 111 22 33", "password": "parola1234"}); T = {"Authorization": "Bearer " + rr.json()["token"]}
+            assert c.post("/api/public/shop/%s~orders" % F, json=body, headers=T).status_code == 200
+            assert got, "webhook çağrılmadı"
+            url, data, h = got[0]; assert url == "https://example.com/hook" and h["X-OnlineKaydet-Olay"] == "siparis.olustu"
+            assert h["X-OnlineKaydet-Imza"] == hmac.new(b"gizli", data, hashlib.sha256).hexdigest()
+            assert _j.loads(data)["veri"]["musteri"] == "Hook Kisi"
+        finally:
+            requests.post = eski
+    t("webhook: sipariş olayı imzalı gider", webhook)
 print("ok", len(ok), "bad", len(bad))
 for n, e in bad: print("FAIL", n, "\n", e)

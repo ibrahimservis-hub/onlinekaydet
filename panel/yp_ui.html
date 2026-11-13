@@ -146,7 +146,7 @@ label.f>textarea{min-height:70px;resize:vertical}
 .sshot img{width:62px;height:44px;border-radius:7px;object-fit:cover;border:1px solid var(--line);display:block}
 .drop{border:1.5px dashed var(--line);border-radius:11px;padding:16px;text-align:center;color:var(--mut);
  font-size:13px;background:#fff;cursor:pointer;margin-top:11px}
-.drop:hover{border-color:var(--blue);color:var(--blue)}
+.drop:hover,.drop.on{border-color:var(--blue);color:var(--blue)}
 .drop b{display:block;color:var(--tx);font-size:13.5px;margin-bottom:3px}
 .ictab{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-bottom:16px}
 .ictab .c{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 13px;text-align:left;font:inherit;cursor:pointer}
@@ -2281,6 +2281,15 @@ document.addEventListener('click',function(ev){
 document.addEventListener('change',function(ev){
  if(ev.target.id==='dtfile')dosyaYukle(ev.target,'#dtek').catch(fail);
  if(ev.target.id==='dtfile2')dosyaYukle(ev.target,'#dtek2').catch(fail)});
+function dtHedef(){return document.getElementById('dtdrop')?'#dtek':(document.getElementById('dtdrop2')?'#dtek2':'')}
+['dragenter','dragover'].forEach(function(n){document.addEventListener(n,function(ev){var d=ev.target.closest&&ev.target.closest('#dtdrop,#dtdrop2');if(d){ev.preventDefault();d.classList.add('on')}})});
+document.addEventListener('dragleave',function(ev){var d=ev.target.closest&&ev.target.closest('#dtdrop,#dtdrop2');if(d)d.classList.remove('on')});
+document.addEventListener('drop',function(ev){var d=ev.target.closest&&ev.target.closest('#dtdrop,#dtdrop2');if(!d)return;ev.preventDefault();d.classList.remove('on');
+ var f=[].filter.call(ev.dataTransfer.files||[],function(x){return /^image\//.test(x.type)});if(f.length)dosyaYukle({files:f},d.id==='dtdrop'?'#dtek':'#dtek2').catch(fail)});
+document.addEventListener('paste',function(ev){var h=dtHedef();if(!h)return;
+ var f=[].map.call((ev.clipboardData&&ev.clipboardData.items)||[],function(i){return i.kind==='file'&&/^image\//.test(i.type)?i.getAsFile():null}).filter(Boolean);
+ if(!f.length)return;ev.preventDefault();f=f.map(function(x,n){return x.name&&x.name!=='image.png'?x:new File([x],'ekran-goruntusu-'+Date.now()+'-'+n+'.png',{type:x.type})});
+ dosyaYukle({files:f},h).then(function(){toast('Ekran görüntüsü eklendi')}).catch(fail)});
 document.addEventListener('input',function(ev){var el=ev.target;
  if(el.dataset&&el.dataset.pn!==undefined){var p=CUR.isparts[+el.dataset.pn];
   if(p)p[el.dataset.f]=(el.dataset.f==='qty'||el.dataset.f==='price')?+el.value||0:el.value}});
