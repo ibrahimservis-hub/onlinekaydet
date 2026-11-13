@@ -215,7 +215,7 @@ def register(api_router, db, deps):
         if mods is None:
             return None                                   # modül tanımı olmayan eski firma: kısıt yok
         seg = path[5:] if path.startswith("/api/") else ""
-        eff = set(mods) | ({"randevu"} if "pazarlama" in mods else set()) | ({"magaza"} if "eticaret" in mods else set())   # e-ticaret mağaza uçlarını da açar      # pazarlama paketi online randevuyu da kapsar (eski paketler bozulmaz)
+        eff = set(mods) | ({"randevu"} if "pazarlama" in mods else set()) | ({"magaza", "site"} if "eticaret" in mods else set())   # e-ticaret mağaza uçlarını da açar      # pazarlama paketi online randevuyu da kapsar (eski paketler bozulmaz)
         bk = seg.startswith(("growth/bookings", "growth/settings"))
         for m, pre in MODULE_PREFIX.items():
             if m == "pazarlama" and bk and "randevu" in eff:                    # yalnız Online randevu olan firma randevu ayarlarını ve kayıtlarını yönetebilir
@@ -267,8 +267,8 @@ def register(api_router, db, deps):
             return
         fdb = db.firm(f["db"])
         await fdb.app_settings.update_one({"_id": "firm"}, {"$set": {"modules": list(mods)}}, upsert=True)
-        on = "magaza" in mods
-        was = prev is None or "magaza" in prev
+        on = "magaza" in mods or "eticaret" in mods
+        was = prev is None or "magaza" in prev or "eticaret" in prev
         if (not on) or (on != was):
             await fdb.app_settings.update_one({"_id": "site_features"}, {"$set": {"shop_enabled": on}}, upsert=True)
 

@@ -65,7 +65,7 @@ table{width:100%;border-collapse:collapse}th{text-align:left;font-size:11px;lett
 /*ICONS*/
 const LOGO="/*LOGO*/";
 const SEC={kombi:"Kombi & Isıtma",klima:"Klima & Soğutma",beyaz_esya:"Beyaz Eşya",elektronik:"Elektronik & TV",bilgisayar:"Bilgisayar & Telefon",tesisat:"Tesisat & Su",elektrik:"Elektrik",guvenlik:"Güvenlik & Kamera"},PKG={baslangic:"Başlangıç",profesyonel:"Profesyonel",tam:"Tam Paket",kurumsal:"Kurumsal"};
-const MOD={servis:"Servis",personel:"Personel",muhasebe:"Muhasebe",rapor:"Rapor",sms:"SMS",magaza:"Mağaza",site:"Site",pazarlama:"Pazarlama",bakim:"Bakım ve garanti",teklif:"Teklif",bayi:"Bayi",qr:"QR etiket",atama:"Oto atama",takip:"Canlı takip",odeme:"Ödeme linki",efatura:"E-arşiv",portal:"Portal",arayan:"Arayan no"},SOON={};
+const MOD={servis:"Servis",personel:"Personel",muhasebe:"Muhasebe",rapor:"Rapor",sms:"SMS",eticaret:"E-ticaret",magaza:"Yedek parça mağazası",site:"Site",pazarlama:"Pazarlama",bakim:"Bakım ve garanti",teklif:"Teklif",bayi:"Bayi",qr:"QR etiket",atama:"Oto atama",takip:"Canlı takip",odeme:"Ödeme linki",efatura:"E-arşiv",portal:"Portal",arayan:"Arayan no"},SOON={};
 let TOKEN=sessionStorage.getItem("ok_t")||"",CACHE={};
 const $=s=>document.querySelector(s),esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 function ic(){document.querySelectorAll("i[data-i]").forEach(e=>{e.innerHTML='<svg viewBox="0 0 24 24">'+(P[e.dataset.i]||"")+"</svg>"})}

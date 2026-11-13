@@ -35,6 +35,18 @@ with TestClient(s.app) as c:
         r = c.put(f"/api/admin/firms/{S['fid']}", headers=A, json={"modules": ["magaza"]}); assert r.json()["modules"] == ["servis", "magaza"]
         assert c.get("/api/jobs", headers=S["M"]).status_code == 200, "servis çekirdek: kapatılamaz"
     t("sahip modülleri tek tek açıp kapatır; servis her zaman açık", f)
+    def f2():
+        r = c.put(f"/api/admin/firms/{S['fid']}", headers=A, json={"modules": ["eticaret"]}); assert r.status_code == 200, r.text
+        assert "eticaret" in r.json()["modules"]
+        assert c.get("/api/admin/modules", headers=A).status_code in (200, 404)
+        b = c.get("/api/yp/boot", headers=S["M"]).json()
+        assert b["eticaret"] is True and "shop" in b["modules"] and "iade" in b["modules"], b["modules"]
+        assert c.get("/api/shop/products", headers=S["M"]).status_code == 200, "e-ticaret mağaza uçlarını da açar"
+        assert c.get("/api/site/features", headers=S["M"]).json()["shop_enabled"] is True, "siteye mağaza kendiliğinden gelir"
+        c.put(f"/api/admin/firms/{S['fid']}", headers=A, json={"modules": ["servis"]})
+        assert c.get("/api/yp/boot", headers=S["M"]).json()["eticaret"] is False
+        assert c.get("/api/site/features", headers=S["M"]).status_code == 403, "kapanınca site ve mağaza uçları da kapanır"
+    t("sahip firmaya E-ticaret modülünü açınca panel alanları ve site mağazası birlikte gelir", f2)
     def g():
         assert c.post("/api/admin/firms", headers=A, json={"name": "X Firma", "email": "x@x.com", "password": "sifre12345", "package": "yok"}).status_code == 400
     t("bilinmeyen paket reddedilir", g)
