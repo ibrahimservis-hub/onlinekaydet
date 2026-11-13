@@ -158,8 +158,11 @@ def register(api_router, db, deps):
     async def hangi():
         mods, sec = await modul()
         out = []
+        izin = ((await db.app_settings.find_one({"_id": "yp_pack"}, {"_id": 0, "reports_allowed": 1})) or {}).get("reports_allowed")
         for r in REPORTS:
             if r["modules"] and not (set(r["modules"]) & mods):
+                continue
+            if izin is not None and r["id"] not in izin:                    # sahip bu firmaya yalnız seçili raporları açtı
                 continue
             out.append(r)
         return out

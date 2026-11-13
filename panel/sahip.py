@@ -264,6 +264,54 @@ def register(app, api_router, db, deps):
                 "expiring_14d": sum(bool(f.get("expires_at")) and now <= f["expires_at"] <= lim for f in firms),
                 "packages": pk, "sectors": sec, "revenue_30d": round(sum(r["amount"] for r in rev), 2), "jobs_30d": jobs30}
 
+    # ------------------------------------------------------------------ paket izinleri (sektör / modül / rapor / entegrasyon / bölüm)
+    def _izin_katalog():
+        import blocks, entegrasyon, yprapor
+        mods = sorted({m for p in blocks.SECTOR_PACKS.values() for m in p["modules"]})
+        return {"sectors": [{"id": p["id"], "name": p["name"]} for p in blocks.pack_list()],
+                "modules": [{"id": m, "name": m} for m in mods],
+                "reports": [{"id": r["id"], "name": r["name"], "group": r["group"]} for r in yprapor.REPORTS],
+                "integrations": [{"id": p["id"], "name": p["name"], "group": p["group"]} for p in entegrasyon.CATALOG],
+                "blocks": [{"id": b["id"], "name": b["name"], "group": b.get("cat", "")} for b in blocks.BLOCKS]}
+
+    _IZIN = {"sectors_allowed": "sectors", "modules": "modules", "reports_allowed": "reports", "integrations_allowed": "integrations", "allow": "blocks"}
+
+    @api_router.get("/admin/firms/{fid}/yp-izin")
+    async def yp_izin_get(fid: str, me: dict = Depends(require_admin)):
+        main_only()
+        f = await get_firm(fid)
+        d = await db.firm(f["db"]).app_settings.find_one({"_id": "yp_pack"}, {"_id": 0}) or {}
+        return {"izin": {k: d.get(k) for k in _IZIN}, "sector": d.get("sector", ""), "katalog": _izin_katalog()}
+
+    @api_router.put("/admin/firms/{fid}/yp-izin")
+    async def yp_izin_put(fid: str, payload: dict, me: dict = Depends(require_admin)):
+        """Her anahtar liste (yalnız bunlar açık) ya da null (kısıt yok / paketin kendi listesi) olabilir."""
+        main_only()
+        f = await get_firm(fid)
+        kat = _izin_katalog()
+        sets, unsets = {}, {}
+        for k, kk in _IZIN.items():
+            if k not in payload:
+                continue
+            v = payload[k]
+            if v is None:
+                unsets[k] = ""
+                continue
+            if not isinstance(v, list):
+                raise HTTPException(status_code=422, detail="Liste bekleniyor: " + k)
+            gecerli = {x["id"] for x in kat[kk]}
+            sets[k] = [x for x in dict.fromkeys(str(i) for i in v) if x in gecerli]
+        if not sets and not unsets:
+            raise HTTPException(status_code=422, detail="Değişiklik yok")
+        up = {}
+        if sets:
+            up["$set"] = sets
+        if unsets:
+            up["$unset"] = unsets
+        await db.firm(f["db"]).app_settings.update_one({"_id": "yp_pack"}, up, upsert=True)
+        await audit(me, "PAKET İZNİ", f"{f['name']}: " + ", ".join(sorted(list(sets) + list(unsets))))
+        return await yp_izin_get(fid, me)
+
     # ------------------------------------------------------------------ sahip müdahalesi (firma adına ayar)
     @api_router.get("/admin/firms/{fid}/service-settings")
     async def owner_ss_get(fid: str, me: dict = Depends(require_admin)):
