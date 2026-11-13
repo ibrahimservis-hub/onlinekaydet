@@ -69,6 +69,15 @@ ETIKET = {"arac": ("Plaka / araç", "Servis geçmişi, notlar", "Muayene / bakı
           "talep": ("Talep", "Durum, açıklama", "Tarih")}
 
 
+def buton(prefix=""):
+    """Sitenin sağ kenarında ortada duran Giriş yap / Hesabım sekmesi: başlık, menü ve kampanya çubuğunu örtmez."""
+    return ('<style>.okuye{position:fixed;right:0;top:50%%;transform:translateY(-50%%);z-index:9400;display:flex;align-items:center;gap:6px;background:#0a1f44;color:#fff;'
+            'border-radius:12px 0 0 12px;min-height:44px;padding:0 14px;font:600 13px system-ui,sans-serif;text-decoration:none;box-shadow:0 4px 18px #0a1f444d}'
+            '.okuye:hover{background:#f27a1a}[dir=rtl] .okuye{right:auto;left:0;border-radius:0 12px 12px 0}'
+            '@media(max-width:860px){.okuye{min-width:44px;justify-content:center;padding:0 10px}.okuye span{display:none}}</style>'
+            '<a class="okuye" href="%s/hesabim" aria-label="Giriş yap / Hesabım">\U0001F464<span>Giriş yap / Hesabım</span></a>' % prefix)
+
+
 def profil(sector):
     bol, puan, pa, hat, ozel = PROFIL.get(sector, GENEL)
     return {"bolumler": [dict(zip(("id", "ad", "aciklama"), B[b])) for b in bol], "puan": puan, "puan_aciklama": pa, "hatirlatma": hat, "ozel_onay": ozel}

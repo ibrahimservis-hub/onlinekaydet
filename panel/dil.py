@@ -105,7 +105,7 @@ def selector(cfg, cur, rest):
            ".okdil>b{display:block;background:#fff;color:#0a1f44;border:1px solid #cfd5e2;border-radius:10px;padding:8px 12px;cursor:pointer;box-shadow:0 4px 16px #0a1f4426}"
            ".okdil div{display:none;position:absolute;bottom:42px;left:0;min-width:140px;background:#fff;border-radius:10px;box-shadow:0 8px 28px #0a1f4430;padding:6px}"
            ".okdil.ac div{display:block}.okdil a{display:block;padding:8px 10px;border-radius:6px;color:#0a1f44;text-decoration:none;font-weight:500}"
-           ".okdil a.on{background:#fff3e8;color:#f27a1a;font-weight:700}[dir=rtl] .okdil{left:auto;right:14px}</style>")
+           ".okdil a.on{background:#fff3e8;color:#f27a1a;font-weight:700}[dir=rtl] .okdil{left:auto;right:14px}@media(max-width:860px){.okdil{bottom:84px}.okdil div{bottom:42px}}</style>")
     js = ("<script>(function(){var b=document.querySelector('.okdil');b.firstChild.onclick=function(){b.classList.toggle('ac')};"
           "b.querySelectorAll('a').forEach(function(a){a.onclick=function(){document.cookie='dil='+a.dataset.d+';path=/;max-age=31536000'}});"
           "var m=document.cookie.match(/(?:^|; )dil=(\\w+)/);if(!m&&%s){var n=(navigator.language||'').slice(0,2),ok=%s;"

@@ -20,6 +20,7 @@ import shop as shopmod
 import shop_legal
 import cerez as cerez_mod
 import dil as dil_mod
+import uyelik as dil_mod_uyelik
 import blokgen
 import blok_eticaret
 import blok_tanitim
@@ -1041,9 +1042,7 @@ def register(api_router, db, deps):
             except Exception:                                      # noqa: BLE001
                 uy = None
             if (uy or {}).get("on"):
-                btn = ('<style>.okuye{position:fixed;right:14px;top:12px;z-index:9400;background:#fff;color:#0a1f44;border:1px solid #cfd5e2;border-radius:10px;'
-                       'padding:8px 13px;font:600 13px system-ui,sans-serif;text-decoration:none;box-shadow:0 4px 16px #0a1f4426}[dir=rtl] .okuye{right:auto;left:14px}</style>'
-                       '<a class="okuye" href="%s/hesabim">👤 Giriş yap / Hesabım</a>' % (("/" + lang) if lang and lang != cfg["ana"] and cfg.get("adresli") else ""))
+                btn = dil_mod_uyelik.buton(("/" + lang) if lang and lang != cfg["ana"] and cfg.get("adresli") else "")
                 r = (r[0].replace("</body>", btn + "</body>", 1), r[1])
         return r
 
