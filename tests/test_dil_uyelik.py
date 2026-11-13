@@ -166,6 +166,28 @@ with TestClient(s.app) as c:
         hs = c.get("/api/public/uyelik/%s~hesabim" % F, headers=A).json()
         assert hs["puan"]["bakiye"] == 100 and hs["puan"]["gecmis"][0]["neden"] == "Sipariş", hs["puan"]
     t("teslim edilen siparişten puan bir kez yazılır", sip)
+    def tel():
+        import notify
+        c.put("/api/yp/uyelik", headers=H, json={"on": True, "google": True, "google_client_id": "abc-123.apps.googleusercontent.com"})
+        class R:
+            status_code = 200
+            def json(s): return {"aud": "abc-123.apps.googleusercontent.com", "email": "tel@ornek.com", "email_verified": "true", "name": "Tel Üye", "sub": "77"}
+        eski = uyelik.requests.get; uyelik.requests.get = lambda *a, **k: R()
+        try:
+            r = c.post("/api/public/uyelik/%s~google" % F, json={"credential": "t"}); assert r.status_code == 200, r.text
+        finally:
+            uyelik.requests.get = eski
+        A = {"Authorization": "Bearer " + r.json()["token"]}
+        assert r.json()["account"]["phone"] == ""
+        assert c.put("/api/public/uyelik/%s~telefon" % F, headers=A, json={"phone": "123"}).status_code == 422
+        assert c.put("/api/public/uyelik/%s~telefon" % F, headers=A, json={"phone": "0533 444 55 66"}).status_code == 409   # başka üyede kayıtlı
+        assert c.put("/api/public/uyelik/%s~telefon" % F, headers=A, json={"phone": "0544 111 22 33"}).status_code == 200
+    t("Google ile girene telefon eklenir; geçersiz ve başkasına ait numara reddedilir", tel)
+    def kurs():
+        import blok_ornek
+        assert blok_ornek.HAVUZ.get("kurs") and len(blok_ornek.HAVUZ["kurs"]) >= 3
+        assert str(blok_ornek.HAVUZ["kurs"][0]) in blok_ornek.foto("hero", "kurs", 400)
+    t("kurs paketinin kendi fotoğrafları var", kurs)
 print("ok", len(ok), "bad", len(bad))
 for n, tb in bad: print("FAIL", n, tb)
 sys.exit(1 if bad else 0)

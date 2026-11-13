@@ -322,6 +322,21 @@ def register(api_router, db, deps):
                         break
         return {"rows": out}
 
+    @api_router.put("/public/uyelik/telefon")
+    async def telefon(payload: dict, request: Request):
+        """Google ile girenin telefonu yoktur; eklenince randevu ve siparişleri hesaba bağlanır, puan kazanır."""
+        a = await me(request)
+        phone = str(payload.get("phone") or "").strip()[:30]
+        key = _pk(phone)
+        if len(key) < 10:
+            raise HTTPException(422, "Lütfen geçerli bir telefon numarası girin.")
+        if a.get("phone") and _pk(a["phone"]) == key:
+            return {"ok": True, "phone": a["phone"]}
+        if await db.customer_accounts.find_one({"phone_key": key, "id": {"$ne": a["id"]}}, {"_id": 1}):
+            raise HTTPException(409, "Bu telefon başka bir üyelikte kayıtlı.")
+        await db.customer_accounts.update_one({"id": a["id"]}, {"$set": {"phone": phone, "phone_key": key}})
+        return {"ok": True, "phone": phone}
+
     @api_router.get("/public/uyelik/kayitlar")
     async def kayitlar(request: Request, bolum: str = ""):
         a = await me(request)

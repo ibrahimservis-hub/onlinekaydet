@@ -59,7 +59,7 @@ function pmeth(){return INFO.payment_methods.filter(function(m){return m.id===PM
 function fee(){var m=pmeth();return m&&m.fee?m.fee:0}
 function total(){return sub()+ship()+fee()}
 var root=$('#okm-root');
-root.innerHTML='<div class="w"><div id="okm-msg"></div><div id="okm-v"></div></div><div class="ov" id="okm-pv"><div class="pn c" id="okm-pvb"></div></div>';
+root.innerHTML='<div class="w"><div id="okm-msg">'+(ACC.phone?'':'<div class="msg wa">Randevu, sipariş ve puanlarınızın hesabınızda görünmesi için telefon numaranızı ekleyin.<div style="display:flex;gap:8px;margin-top:8px"><input id="ph_n" type="tel" placeholder="05xx xxx xx xx" style="flex:1"><button class="bt sm" id="ph_go">Ekle</button></div></div>')+'</div><div id="okm-v"></div></div><div class="ov" id="okm-pv"><div class="pn c" id="okm-pvb"></div></div>';
 function msg(h,k){$('#okm-msg').innerHTML=h?'<div class="msg '+(k||'ok')+'">'+h+'</div>':''}
 function go(v){VIEW=v;history.replaceState(null,'','/magaza'+(v==='shop'?'':'#'+v));window.scrollTo(0,0);render()}
 function render(){if(VIEW==='product')return productView();if(VIEW==='cart')return cartView();if(VIEW==='checkout')return checkoutView();if(VIEW==='done')return;shopView()}
@@ -211,7 +211,7 @@ function gsi(){var el=$('#okm-g');if(!el||!UYE||!UYE.on||!UYE.yontem||!UYE.yonte
 function panel(){if(UYE&&UYE.on){MENU=UYE.bolumler.filter(function(b){return b.id!=='siparis'||UYE.shop}).map(function(b){return [b.id,b.ad]}).concat([['gizli','Verilerim ve güvenlik']]);if(UYE.shop&&!MENU.some(function(m){return m[0]==='siparis'}))MENU.unshift(['siparis','Siparişlerim']);if(!UYE.tabSet){UYE.tabSet=1;if(!location.hash)TAB=MENU[0][0]}}
 if(!MENU.some(function(m){return m[0]===TAB}))TAB='siparis';
  root.innerHTML='<div class="w"><div class="top"><div><h1>Hesabım</h1><p class="sub">'+E(ACC.name)+' · '+E(ACC.phone)+'</p></div><div class="acts"><a class="bt" href="/magaza">Alışverişe devam</a></div></div><div id="okm-msg"></div><div class="lay3"><nav class="side">'+MENU.map(function(m){return '<button data-t="'+m[0]+'" class="'+(m[0]===TAB?'on':'')+'">'+m[1]+'</button>'}).join('')+'<button id="a_out" class="out">Çıkış yap</button></nav><div id="okm-tab"></div></div></div>';
- root.onclick=function(e){var b=e.target.closest('[data-t]');if(b){TAB=b.dataset.t;history.replaceState(null,'','#'+TAB);A('.side button').forEach(function(x){x.classList.toggle('on',x.dataset.t===TAB)});tab()}if(e.target.id==='a_out'){setTok('');location.href='/hesabim'}};tab();
+ root.onclick=function(e){if(e.target.id==='ph_go'){api('PUT','/public/uyelik/telefon',{phone:$('#ph_n').value}).then(function(r){ACC.phone=r.phone;panel()}).catch(function(x){toast(x.message,1)});return}var b=e.target.closest('[data-t]');if(b){TAB=b.dataset.t;history.replaceState(null,'','#'+TAB);A('.side button').forEach(function(x){x.classList.toggle('on',x.dataset.t===TAB)});tab()}if(e.target.id==='a_out'){setTok('');location.href='/hesabim'}};tab();
  var od=qs.get('odeme');if(od==='ok')$('#okm-msg').innerHTML='<div class="msg ok">Ödemeniz alındı, teşekkürler.</div>'}
 function tab(){var el=$('#okm-tab');el.innerHTML='<div class="empty">Yükleniyor…</div>';
  if(TAB==='siparis')api('GET','/public/customer/orders').then(function(rs){el.innerHTML='<h2 class="h2">Siparişlerim</h2>'+(rs.length?rs.map(order).join(''):'<div class="empty">Henüz siparişiniz yok. <a href="/magaza"><u>Mağazaya göz atın</u></a>.</div>');

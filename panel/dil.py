@@ -180,7 +180,16 @@ def register(api_router, db, deps):
             if p.get("slug") and not p.get("home"):
                 slugs.append(p["slug"])
         out, seen = [], set()
-        for s in slugs[:30]:
+        # mağaza açıksa vitrin ve ürün sayfaları da çevrilir (ürün adı, açıklama, düğmeler)
+        try:
+            ft = await db.app_settings.find_one({"_id": "site_features"}, {"_id": 0, "shop_enabled": 1}) or {}
+            if ft.get("shop_enabled"):
+                slugs.append("magaza")
+                async for pr in db.shop_products.find({"active": True}, {"_id": 0, "slug": 1, "id": 1}).limit(20):
+                    slugs.append("magaza/urun/" + (pr.get("slug") or pr.get("id") or ""))
+        except Exception:                                          # noqa: BLE001
+            pass
+        for s in slugs[:60]:
             try:
                 r = await raw("/" + s) if raw else None
             except Exception:                                      # noqa: BLE001
