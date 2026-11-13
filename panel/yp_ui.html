@@ -429,6 +429,7 @@ function buildNav(){var m=(B&&B.modules)||[],ins=[];
  if(m.indexOf('siparis')>-1)ins.push(['siparis','Siparişler','truck']);
  if(m.indexOf('kampanya')>-1)ins.push(['kampanya','Kampanyalar','tag']);
  if(m.indexOf('shop')>-1)ins.push(['eplus','Fiyat ve güvenlik','chart']);
+ if(m.indexOf('shop')>-1)ins.push(['popvitrin','Popup vitrin','store']);
  if(m.indexOf('iade')>-1)ins.push(['iade','İadeler','truck']);
  if(m.indexOf('pazaryeri')>-1)ins.push(['pazaryeri','Pazaryerleri','plug']);
  NAV=BASE_NAV.slice();
@@ -1753,6 +1754,36 @@ document.addEventListener('click',function(ev){var b=ev.target.closest('[data-a]
  else if(a==='ssel-disa')api('/yp/orders/export',{method:'POST',body:{ids:SEL.siparis}}).then(function(r){
   csvIndir(r.name,r.csv);toast(r.n+' sipariş Excel dosyasına aktarıldı')}).catch(fail);
 });
+/* ---- Popup ürün vitrini ---- */
+var PV={};
+V.popvitrin=async function(){var c=await api('/yp/popvitrin');PV=c;PV.sel=(c.secili||[]).slice();
+ var op=function(o,v){return Object.keys(o).map(function(k){return '<option value="'+k+'"'+(k===v?' selected':'')+'>'+esc(o[k])+'</option>'}).join('')};
+ var h=head('Popup ürün vitrini','Sitenize girenlere seçtiğiniz ürünleri küçük bir pencerede gösterir. Ziyaretçi kapatınca seçtiğiniz sıklıkta tekrar çıkmaz.','');
+ if(!c.magaza_acik)h+='<div class="card pad" style="border-left:4px solid #d97706">Mağazanız kapalı olduğu için pencere sitede görünmez. Web Sitem › Mağaza bölümünden açabilirsiniz.</div>';
+ h+='<div class="card"><div class="hd"><h2>Pencere</h2></div>'+swRow('on','Popup vitrin yayında','Açıkken sitenizde görünür.',c.on).replace('uy-tog','pv-tog')
+  +'<form id="pvf" class="pad" style="display:grid;gap:12px">'
+  +'<div style="display:grid;gap:12px;grid-template-columns:1fr 1fr"><label class="f">Hangi ürünler?<select name="kural">'+op(c.kurallar,c.kural)+'</select></label><label class="f">Kaç ürün?<select name="adet">'+[2,3,4,6,8].map(function(n){return '<option'+(n===+c.adet?' selected':'')+'>'+n+'</option>'}).join('')+'</select></label></div>'
+  +'<div id="pvsec"'+(c.kural==='secili'?'':' hidden')+'><div class="f" style="margin-bottom:6px">Seçili ürünler (en fazla 8)</div><div id="pvsl"></div><label class="f">Ürün ara ve ekle<input id="pvq" autocomplete="off" placeholder="Ürün adı veya stok kodu"></label><div id="pvh"></div></div>'
+  +'<label class="f">Başlık<input name="baslik" maxlength="60" value="'+esc(c.baslik||'')+'" placeholder="Kaçırmayın"></label>'
+  +'<label class="f">Alt yazı<input name="alt" maxlength="120" value="'+esc(c.alt||'')+'" placeholder="Sizin için seçtiğimiz ürünler"></label>'
+  +'<label class="f">Alttaki düğme yazısı<input name="buton" maxlength="30" value="'+esc(c.buton||'')+'" placeholder="Tüm ürünler"></label>'
+  +'<div style="display:grid;gap:12px;grid-template-columns:1fr 1fr 1fr"><label class="f">Kaç saniye sonra açılsın?<input name="gecikme" type="number" min="0" max="120" value="'+(+c.gecikme||0)+'"></label><label class="f">Ne sıklıkla?<select name="siklik">'+op(c.sikliklar,c.siklik)+'</select></label><label class="f">Hangi sayfalarda?<select name="sayfa">'+op(c.sayfalar,c.sayfa)+'</select></label></div>'
+  +'<label style="display:flex;gap:10px;align-items:center;font-size:14px;cursor:pointer"><input name="cikis" type="checkbox" style="width:20px;height:20px;min-height:0;flex:none;margin:0"'+(c.cikis?' checked':'')+'> Bilgisayarda ziyaretçi sayfadan çıkmak üzereyken de aç</label>'
+  +'<div><button class="btn p" type="submit">Kaydet</button></div></form></div>'
+  +'<div class="card"><div class="hd"><h2>Şu an gösterilecek ürünler</h2></div><div class="pad" id="pvon"></div></div>';
+ $('#main').innerHTML=h;pvSel();pvOn(c.onizleme||[]);
+ var f=$('#pvf');f.elements.kural.onchange=function(){$('#pvsec').hidden=this.value!=='secili'};
+ f.onsubmit=function(e){e.preventDefault();var el=f.elements;api('/yp/popvitrin',{method:'PUT',body:{kural:el.kural.value,adet:+el.adet.value,baslik:el.baslik.value,alt:el.alt.value,buton:el.buton.value,gecikme:+el.gecikme.value||0,siklik:el.siklik.value,sayfa:el.sayfa.value,cikis:el.cikis.checked,ids:PV.sel.map(function(x){return x.id})}})
+  .then(function(r){PV.on=r.on;pvOn(r.onizleme||[]);toast('Kaydedildi')}).catch(fail)}};
+function pvOn(rows){var el=$('#pvon');if(!el)return;el.innerHTML=rows.length?'<div style="display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(130px,1fr))">'+rows.map(function(p){return '<div style="border:1px solid var(--ln,#e2e8f0);border-radius:10px;padding:8px"><div style="aspect-ratio:1/1;border-radius:8px;overflow:hidden;background:#f1f5f9">'+(p.img?'<img src="'+esc(p.img)+'" alt="" style="width:100%;height:100%;object-fit:cover">':'')+'</div><div style="font-size:13px;font-weight:600;margin-top:6px">'+esc(p.name)+'</div><div class="m">'+(+p.price||0).toFixed(2)+' ₺</div></div>'}).join('')+'</div>':'<p class="note" style="margin:0">Bu kurala uyan stokta ürün yok; pencere sitede açılmaz. İndirimli ürün yoksa başka bir kural seçin.</p>'}
+function pvSel(){var el=$('#pvsl');if(!el)return;el.innerHTML=PV.sel.length?PV.sel.map(function(x,i){return '<div class="row" style="grid-template-columns:1fr auto;padding:6px 0"><div>'+esc(x.name)+'</div><button type="button" class="btn" data-a="pv-sil" data-i="'+i+'" aria-label="Çıkar">Çıkar</button></div>'}).join(''):'<p class="note" style="margin:0 0 6px">Henüz ürün seçilmedi.</p>'}
+var pvT=0;
+document.addEventListener('input',function(ev){if(ev.target.id!=='pvq')return;clearTimeout(pvT);var q=ev.target.value.trim();
+ pvT=setTimeout(function(){api('/yp/popvitrin/ara?q='+encodeURIComponent(q)).then(function(r){PV.hits=r.rows;$('#pvh').innerHTML=r.rows.map(function(x,i){return '<button type="button" class="btn" style="display:block;width:100%;text-align:left;margin:3px 0" data-a="pv-ekle" data-i="'+i+'"'+(x.stokta?'':' disabled')+'>'+esc(x.name)+' — '+(+x.price||0).toFixed(2)+' ₺'+(x.stokta?'':' (stokta yok)')+'</button>'}).join('')||'<p class="note">Ürün bulunamadı.</p>'}).catch(fail)},250)});
+document.addEventListener('click',function(ev){var b=ev.target.closest&&ev.target.closest('[data-a]');if(!b)return;var a=b.dataset.a;
+ if(a==='pv-tog')api('/yp/popvitrin',{method:'PUT',body:{on:!b.classList.contains('on')}}).then(function(){return V.popvitrin()}).catch(fail);
+ else if(a==='pv-ekle'){var x=(PV.hits||[])[+b.dataset.i];if(!x)return;if(PV.sel.length>=8)return toast('En fazla 8 ürün seçilebilir',true);if(!PV.sel.some(function(y){return y.id===x.id}))PV.sel.push(x);$('#pvq').value='';$('#pvh').innerHTML='';pvSel()}
+ else if(a==='pv-sil'){PV.sel.splice(+b.dataset.i,1);pvSel()}});
 /* ---- Elle sipariş girişi (telefonla, WhatsApp, mağazadan) ---- */
 var SN={items:[],hits:[]};
 function snSatir(){var t=0;var h=SN.items.map(function(it,i){t+=it.qty*it.price;return '<tr><td>'+esc(it.name)+'</td><td style="width:70px"><input type="number" min="1" value="'+it.qty+'" data-sn="qty" data-i="'+i+'" style="width:60px"></td><td style="width:100px"><input type="number" min="0" step="0.01" value="'+it.price+'" data-sn="price" data-i="'+i+'" style="width:90px"></td><td><button type="button" class="btn" data-a="sn-sil" data-i="'+i+'" aria-label="Satırı sil">×</button></td></tr>'}).join('');

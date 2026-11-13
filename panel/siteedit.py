@@ -1146,6 +1146,19 @@ def register(api_router, db, deps):
                 if bas:
                     h = re.sub(r"(<body\b[^>]*>)", lambda m: m.group(1) + bas, h, 1)
                 r = (h.replace("</body>", son + "</body>", 1) if son else h, r[1])
+        if r and not inline_ and str(r[1]).startswith("text/html") and "</body>" in r[0] and 'id="okpv' not in r[0]:
+            try:
+                import popvitrin as _pv
+                pc = await _pv.get_cfg(db)
+                pv = ""
+                if pc.get("on"):
+                    ft = await db.app_settings.find_one({"_id": "site_features"}, {"_id": 0, "shop_enabled": 1}) or {}
+                    if ft.get("shop_enabled"):
+                        pv = _pv.render_html(pc, await _pv.urunler(db, pc), (p2 if lang else path) or "/")
+            except Exception:                                      # noqa: BLE001
+                pv = ""
+            if pv:
+                r = (r[0].replace("</body>", pv + "</body>", 1), r[1])
         if r and not inline_ and str(r[1]).startswith("text/html") and "</body>" in r[0] and 'id="okck"' not in r[0]:
             try:
                 ck = ep_mod.cark_html(await ep_mod._cfg(db, "yp_cark", ep_mod.CARK_DEF))
