@@ -242,10 +242,27 @@ def register(api_router, db, deps):
         if not tenant.current():
             return HTMLResponse("<!doctype html><meta charset=utf-8><title>Site bulunamadı</title><p style='font:16px system-ui;padding:40px'>Bu alan adı için yayınlanmış bir site yok.</p>", status_code=404)
         _fn = getattr(api_router, "site_custom_serve", None)
+        _p = request.query_params.get("p", "/")
+        import yonlendirme as _yn
+        try:
+            _y = await _yn.bul(db, _p)
+        except Exception:                                          # noqa: BLE001
+            _y = None
+        if _y:
+            from fastapi.responses import RedirectResponse
+            return RedirectResponse(_y[0], status_code=_y[1])
         if _fn:
-            _h = await _fn(request.query_params.get("p", "/"), host, request.headers.get("user-agent", ""))
+            _ua = request.headers.get("user-agent", "")
+            _h = await _fn(_p, host, _ua)
             if _h:
                 return HTMLResponse(_h[0], media_type=_h[1], headers={"Cache-Control": "no-cache"})
+            if _yn.norm(_p) != "/" and await _fn("/", host, _ua):     # site var ama bu adres yok: gerçek 404
+                if not re.search(r"\.(ico|png|jpe?g|webp|gif|svg|css|js|map|woff2?|txt|xml)$", _yn.norm(_p)):
+                    await _yn.kaydet_404(db, _p, request.headers.get("referer", ""))
+                _nf = getattr(api_router, "site_not_found", None)
+                _nh = await _nf(host, _ua) if _nf else None
+                return HTMLResponse(_nh or "<!doctype html><meta charset=utf-8><title>Sayfa bulunamadı</title><p style='font:16px system-ui;padding:40px'>Aradığınız sayfa bulunamadı. <a href='/'>Ana sayfa</a></p>",
+                                    status_code=404, headers={"Cache-Control": "no-cache"})
         brand = await db.app_settings.find_one({"_id": "brand"}, {"_id": 0}) or {}
         g = await db.app_settings.find_one({"_id": "global"}, {"_id": 0}) or {}
         f = await db.main().firms.find_one({"db": tenant.current()}, {"_id": 0, "name": 1, "phone": 1}) or {}

@@ -1072,3 +1072,26 @@ def register(api_router, db, deps):
         return r
 
     api_router.site_custom_serve = serve
+
+    async def not_found(host: str = "", ua: str = ""):
+        """Temanın üst ve alt bilgisiyle 'sayfa bulunamadı' sayfası; site yoksa None."""
+        ctx = await build_ctx(dev="phone" if sitegen.is_phone(ua) else "")
+        if not ctx:
+            return None
+        home = await themed_home(ctx)
+        if not home:
+            return None
+        body = ('<section style="max-width:640px;margin:0 auto;padding:72px 20px;text-align:center">'
+                '<p style="font-size:64px;font-weight:800;margin:0;line-height:1;opacity:.25">404</p>'
+                '<h1 style="margin:12px 0 8px">Aradığınız sayfa bulunamadı</h1>'
+                '<p style="line-height:1.6;opacity:.8">Adres değişmiş ya da sayfa kaldırılmış olabilir.</p>'
+                '<p style="margin-top:24px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap">'
+                '<a href="/" style="display:inline-block;min-height:44px;line-height:44px;padding:0 22px;border-radius:10px;background:#0a1f44;color:#fff;text-decoration:none;font-weight:700">Ana sayfaya dön</a>'
+                + ('<a href="/magaza" style="display:inline-block;min-height:44px;line-height:44px;padding:0 22px;border-radius:10px;border:1px solid currentColor;text-decoration:none;font-weight:700">Mağazaya git</a>' if ctx.get("shop_on") else "")
+                + '</p></section>')
+        h = compose_page(home, "Sayfa bulunamadı · " + ctx["name"], body)
+        if not h:
+            return None
+        return h.replace("</head>", '<meta name="robots" content="noindex"></head>', 1)
+
+    api_router.site_not_found = not_found
