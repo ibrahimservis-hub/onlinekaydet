@@ -134,6 +134,18 @@ with TestClient(s.app) as c:
         assert r["items"][0]["name"] == "Keten Gömlek", "ürün bilgisi karttan dolmalı"
     t("kampanya deneme ekranı ürün bilgisini kendi dolduruyor", k)
 
+    def tel():
+        pid = mk("Telefon Siparişi Ürünü", 5)
+        r = c.post("/api/yp/orders", headers=H, json={"channel": "telefon", "payment": "kapida",
+            "customer": {"name": "Ali Veli", "phone": "0532 999 88 77"},
+            "items": [{"product": pid, "name": "Telefon Siparişi Ürünü", "price": 900, "qty": 2}]})
+        assert r.status_code == 200, r.text
+        o = r.json()["item"]
+        assert o["channel"] == "telefon" and o["channel_name"] == "Telefonla sipariş", o["channel_name"]
+        assert stok(pid) == 3
+        assert any(x["id"] == "telefon" for x in c.get("/api/yp/orders", headers=H).json()["channels"])
+    t("telefonla sipariş kanalı: kayıt + stok düşümü", tel)
+
 for n in ok: print("  ✓", n)
 for n, e in bad: print("  ✗", n, "\n", e)
 print(("OK %d geçti" % len(ok)) if not bad else ("HATA %d/%d" % (len(bad), len(ok) + len(bad))))

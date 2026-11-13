@@ -17,7 +17,11 @@ from fastapi import Depends, HTTPException
 import barkod
 from kampanya import _n, apply_campaigns
 from pazaryeri import give_stock, take_stock
-from urun import CHANNELS, _int, _num, _t, profit
+from urun import CHANNELS as _PAZAR, _int, _num, _t, profit
+
+# Sipariş kanalları: pazaryerleri + panelden elle girilen kanallar (telefonla sipariş dahil; komisyon yok)
+CHANNELS = dict(_PAZAR)
+CHANNELS.update({"telefon": ("Telefonla sipariş", 0.0), "whatsapp": ("WhatsApp sipariş", 0.0), "magaza": ("Mağazadan (yerinde)", 0.0)})
 
 try:
     from zoneinfo import ZoneInfo

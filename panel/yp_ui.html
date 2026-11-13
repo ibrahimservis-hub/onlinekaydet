@@ -1753,6 +1753,36 @@ document.addEventListener('click',function(ev){var b=ev.target.closest('[data-a]
  else if(a==='ssel-disa')api('/yp/orders/export',{method:'POST',body:{ids:SEL.siparis}}).then(function(r){
   csvIndir(r.name,r.csv);toast(r.n+' sipariş Excel dosyasına aktarıldı')}).catch(fail);
 });
+/* ---- Elle sipariş girişi (telefonla, WhatsApp, mağazadan) ---- */
+var SN={items:[],hits:[]};
+function snSatir(){var t=0;var h=SN.items.map(function(it,i){t+=it.qty*it.price;return '<tr><td>'+esc(it.name)+'</td><td style="width:70px"><input type="number" min="1" value="'+it.qty+'" data-sn="qty" data-i="'+i+'" style="width:60px"></td><td style="width:100px"><input type="number" min="0" step="0.01" value="'+it.price+'" data-sn="price" data-i="'+i+'" style="width:90px"></td><td><button type="button" class="btn" data-a="sn-sil" data-i="'+i+'" aria-label="Satırı sil">×</button></td></tr>'}).join('');
+ var el=$('#snl');if(el)el.innerHTML=SN.items.length?'<table class="tb"><thead><tr><th>Ürün</th><th>Adet</th><th>Fiyat</th><th></th></tr></thead><tbody>'+h+'</tbody></table><p class="note" style="margin:6px 0 0">Ara toplam: <b>'+t.toFixed(2)+' ₺</b> (kampanya ve kargo kaydedince hesaplanır)</p>':'<p class="note">Aşağıdan ürün arayıp ekleyin.</p>'}
+function snYeni(){SN={items:[],hits:[]};var kn=(CUR.kanallar||[]).filter(function(k){return ['telefon','whatsapp','magaza','site'].indexOf(k.id)>-1});
+ var ko=(kn.length?kn:[{id:'telefon',name:'Telefonla sipariş'},{id:'whatsapp',name:'WhatsApp sipariş'},{id:'magaza',name:'Mağazadan (yerinde)'}]).map(function(k){return '<option value="'+k.id+'"'+(k.id==='telefon'?' selected':'')+'>'+esc(k.name)+'</option>'}).join('');
+ modal('Sipariş ekle','<form id="snf"><div class="g2"><label>Müşteri adı<input name="name" required maxlength="90"></label><label>Telefon<input name="phone" inputmode="tel" maxlength="20"></label></div>'
+ +'<div class="g2"><label>İl<input name="city" maxlength="40"></label><label>İlçe<input name="district" maxlength="40"></label></div>'
+ +'<label>Adres<textarea name="address" rows="2" maxlength="400"></textarea></label>'
+ +'<div class="g2"><label>Sipariş nereden geldi?<select name="channel">'+ko+'</select></label><label>Ödeme<select name="payment"><option value="kapida">Kapıda ödeme</option><option value="havale">Havale / EFT</option><option value="kart">Kredi kartı</option><option value="nakit">Nakit</option></select></label></div>'
+ +'<label class="chk"><input type="checkbox" name="paid"> Ödemesi alındı</label>'
+ +'<div id="snl"></div><label>Ürün ara (ad, stok kodu, barkod)<input id="snq" autocomplete="off" placeholder="Yazmaya başlayın"></label><div id="snh"></div>'
+ +'<label>Not<input name="note" maxlength="400"></label><div style="margin-top:12px"><button class="btn p" type="submit">Siparişi kaydet</button></div></form>',true);snSatir()}
+var snT=0;
+document.addEventListener('input',function(ev){var e=ev.target;
+ if(e.id==='snq'){clearTimeout(snT);var q=e.value.trim();if(q.length<2){$('#snh').innerHTML='';return}
+  snT=setTimeout(function(){api('/yp/products?q='+encodeURIComponent(q)+'&limit=8').then(function(r){SN.hits=r.rows||[];
+   $('#snh').innerHTML=SN.hits.length?SN.hits.map(function(x,i){return '<button type="button" class="btn" style="display:block;width:100%;text-align:left;margin:3px 0" data-a="sn-ekle" data-i="'+i+'">'+esc(x.name)+' — '+(+x.sale).toFixed(2)+' ₺ <span class="note">stok '+(x.stock||0)+'</span></button>'}).join(''):'<p class="note">Ürün bulunamadı.</p>'}).catch(fail)},250)}
+ else if(e.dataset&&e.dataset.sn){var it=SN.items[+e.dataset.i];if(it){it[e.dataset.sn]=Math.max(+e.value||0,e.dataset.sn==='qty'?1:0)}}});
+document.addEventListener('click',function(ev){var b=ev.target.closest&&ev.target.closest('[data-a]');if(!b)return;var a=b.dataset.a;
+ if(a==='sip-yeni')snYeni();
+ else if(a==='sn-ekle'){var x=SN.hits[+b.dataset.i];if(!x)return;var ex=SN.items.filter(function(i){return i.product===x.id})[0];
+  if(ex)ex.qty++;else SN.items.push({product:x.id,name:x.name,qty:1,price:+x.sale||0,sku:x.sku||'',barcode:x.barcode||''});
+  $('#snq').value='';$('#snh').innerHTML='';snSatir()}
+ else if(a==='sn-sil'){SN.items.splice(+b.dataset.i,1);snSatir()}});
+document.addEventListener('submit',function(ev){var f=ev.target;if(f.id!=='snf')return;ev.preventDefault();
+ if(!SN.items.length)return toast('En az bir ürün ekleyin',true);
+ api('/yp/orders',{method:'POST',body:{channel:f.channel.value,payment:f.payment.value,paid:f.paid.checked,note:f.note.value,items:SN.items,
+  customer:{name:f.name.value,phone:f.phone.value,city:f.city.value,district:f.district.value,address:f.address.value}}})
+ .then(function(r){closeM();toast('Sipariş oluştu: '+(r.item&&r.item.no||''));V.siparis.load()}).catch(fail)});
 document.addEventListener('submit',function(ev){var f=ev.target;if(fid(f)!=='ubf')return;ev.preventDefault();
  var op=f.dataset.op;
  if(op==='price'||op==='sale')uBulk({op:op,percent:+f.percent.value||0},'{n} ürün güncellendi').catch(fail);
