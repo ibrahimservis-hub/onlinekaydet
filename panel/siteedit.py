@@ -988,6 +988,12 @@ def register(api_router, db, deps):
             out[b["iid"]] = d
         return out
 
+    try:
+        import blocks_api as _ba
+        _ba.VERI, _ba.CTX = blok_veri, build_ctx
+    except Exception:                                              # noqa: BLE001
+        pass
+
     async def blok_motor_acik():
         """Bölüm motoru yalnız işletme açıkça açtığında devreye girer.
         Kapalıyken mevcut tema sitesi olduğu gibi yayında kalır."""

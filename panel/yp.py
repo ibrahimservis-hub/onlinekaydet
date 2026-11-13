@@ -134,13 +134,11 @@ def register(api_router, db, deps):
         B = await cfg()
         sv = await db.yp_services.find({}, {"_id": 0}).sort("order", 1).to_list(500)
         pk = await db.app_settings.find_one({"_id": "yp_pack"}, {"_id": 0}) or {}
-        mods = pk.get("modules")
-        if mods is None:
-            try:
-                import blocks
-                mods = list((blocks.pack(pk.get("sector") or key) or {}).get("modules") or [])
-            except Exception:                                      # noqa: BLE001
-                mods = []
+        try:
+            import blocks
+            mods, _sec, eshop = await blocks.firma_modulleri(db)
+        except Exception:                                          # noqa: BLE001
+            mods, eshop = list(pk.get("modules") or []), False
         try:
             import isakis
             psec = pk.get("sector") or key
@@ -148,7 +146,7 @@ def register(api_router, db, deps):
         except Exception:                                          # noqa: BLE001
             akis = 0
         return {"firm": g.get("company_name") or "", "sector": key, "pack": pk.get("sector") or key,
-                "terms": terms(key), "modules": list(mods), "work_flows": akis,
+                "terms": terms(key), "modules": list(mods), "eticaret": bool(eshop), "work_flows": akis,
                 "user": user.get("name") or user.get("email") or "", "staff": st, "services": sv,
                 "hours": {"start": B.get("start") or "09:00", "end": B.get("end") or "19:00", "closed": B.get("closed_weekdays") or [], "online": bool(B.get("enabled")),
                           "slot": int(B.get("slot_minutes") or 30)},

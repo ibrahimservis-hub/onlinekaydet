@@ -436,7 +436,7 @@ def catalog(sector="", modules=(), allow=None):
     for b in BLOCKS:
         if allow is not None and b["id"] not in allow:
             continue
-        if b["sectors"] != ["*"] and sector and sector not in b["sectors"]:
+        if b["sectors"] != ["*"] and sector and sector not in b["sectors"] and not ("shop" in mods and ("shop" in (b["needs"] or []) or b["cat"] == "eticaret")):
             continue
         if b["needs"] and not set(b["needs"]) <= mods:
             continue
@@ -537,3 +537,32 @@ def pack_list():
              "blocks": len(p["blocks"]), "modules": len(p["modules"]),
              "integrations": len(p["integrations"]), "reports": len(p["reports"]), "flow": p["flow"]}
             for p in SECTOR_PACKS.values()]
+
+
+# ---------------------------------------------------------------- e-ticaret açık mı (tek yerden)
+SHOP_MOD, SHOP_INT, SHOP_REP, SHOP_BLOCKS = _SHOP_MOD, _SHOP_INT, _SHOP_REP, _SHOP_BLOCKS
+
+
+async def firma_modulleri(db):
+    """(modüller, sektör, e-ticaret açık mı). Modüller: sahibin seçimi ya da sektör paketi.
+    E-ticaret açıksa (paket 'shop' içeriyor ya da sahip firmaya 'E-ticaret' modülünü açtı)
+    ürün, sipariş, kampanya, iade, pazaryeri, kargo, e-fatura ve üyelik birlikte gelir."""
+    d = await db.app_settings.find_one({"_id": "yp_pack"}, {"_id": 0}) or {}
+    sec = d.get("sector")
+    if not sec:
+        s = await db.app_settings.find_one({"_id": "sector"}, {"_id": 0}) or {}
+        sec = s.get("key") or ""
+    mods = d.get("modules")
+    if mods is None:
+        mods = list((pack(sec) or {}).get("modules") or [])
+    acik = "shop" in mods
+    if not acik:
+        try:
+            import tenant
+            f = await db.main().firms.find_one({"db": tenant.current()}, {"_id": 0, "modules": 1}) if tenant.current() else None
+            acik = "eticaret" in ((f or {}).get("modules") or [])
+        except Exception:                                          # noqa: BLE001
+            acik = False
+    if acik:
+        mods = list(dict.fromkeys(list(mods) + _SHOP_MOD))
+    return list(mods), sec, acik

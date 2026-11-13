@@ -9,7 +9,7 @@ import re
 import uuid
 from datetime import datetime, timedelta, timezone
 
-from fastapi import Depends, HTTPException
+from fastapi import Depends, HTTPException, Request
 
 import blocks
 import blok_ornek
@@ -20,6 +20,8 @@ try:
 except Exception:                                                  # noqa: BLE001
     TR = timezone(timedelta(hours=3))
 
+VERI = None          # siteedit kaydında bağlanır: (rows, ctx) -> bölüm verisi
+CTX = None
 RESERVED = {"api", "admin", "panel", "salon", "yonetim", "static", "uploads"}
 
 
@@ -51,9 +53,7 @@ def register(api_router, db, deps):
             s = await db.app_settings.find_one({"_id": "sector"}, {"_id": 0}) or {}
             sec = s.get("key") or ""
         pk = blocks.pack(sec) or {}
-        mods = d.get("modules")
-        if mods is None:
-            mods = pk.get("modules") or []
+        mods, _s, _e = await blocks.firma_modulleri(db)
         return {"sector": sec, "pack": pk, "modules": list(mods),
                 "allow": d.get("allow"), "custom_badges": d.get("badges") or [],
                 "sectors_allowed": d.get("sectors_allowed")}
@@ -92,16 +92,28 @@ def register(api_router, db, deps):
                 "sector_name": (st["pack"] or {}).get("name", ""), "modules": st["modules"]}
 
     @api_router.get("/yp/blocks/{bid}/onizleme")
-    async def block_preview(bid: str, dev: str = "", _: dict = Depends(adm)):
-        """Bölümün örnek fotoğraf ve metinle çizilmiş hali (katalog önizlemesi)."""
+    async def block_preview(bid: str, request: Request, dev: str = "", _: dict = Depends(adm)):
+        """Bölümün çizilmiş hali: firmanın gerçek ürün/hizmet/yorumları, yoksa gerçek fotoğraflı örneklerle (katalog önizlemesi)."""
         import blokgen
         b = blocks.BY_ID.get(bid)
         if not b:
             raise HTTPException(404, "Bölüm bulunamadı")
         st = await state()
-        inst = blocks.new_instance(bid)
-        inst["set"].update(blok_ornek.ornek_set(b, st["sector"]))
-        html = blokgen.page_html({"title": b["name"]}, [inst], {"name": "Örnek işletme", "brand": {}}, {}, dev)
+        inst = dict(blocks.new_instance(bid), wire=b["wire"], name=b["name"])
+        inst["set"].update(blok_ornek.ornek_alan(b, st["sector"]))
+        origin = str(request.base_url).rstrip("/")
+        veri, ad, brand = {}, "Örnek işletme", {}
+        try:
+            ctx = await CTX() if CTX else None
+            if ctx:
+                ad, brand = ctx.get("name") or ad, ctx.get("brand") or {}
+            if VERI:
+                veri = await VERI([inst], ctx or {"p": {}})
+        except Exception:                                          # noqa: BLE001
+            veri = {}
+        veri[inst["iid"]] = blok_ornek.ornek_veri(b, veri.get(inst["iid"]), origin, st["sector"])
+        html = blokgen.page_html({"title": b["name"]}, [inst], {"name": ad, "brand": brand}, veri, dev)
+        html = html.replace("<head>", '<head><base href="%s/">' % origin, 1)
         return {"html": html, "photo": blok_ornek.foto(bid, st["sector"]), "name": b["name"], "desc": b["desc"]}
 
     @api_router.get("/yp/blocks/{bid}")
@@ -279,7 +291,8 @@ def register(api_router, db, deps):
             raise HTTPException(403, "Bu bölüm paketinizde yok")
         if meta["needs"] and not set(meta["needs"]) <= set(st["modules"]):
             raise HTTPException(403, "Bu bölüm için %s modülü açık olmalı" % ", ".join(meta["needs"]))
-        if meta["sectors"] != ["*"] and st["sector"] and st["sector"] not in meta["sectors"]:
+        if meta["sectors"] != ["*"] and st["sector"] and st["sector"] not in meta["sectors"] \
+                and not ("shop" in st["modules"] and ("shop" in (meta["needs"] or []) or meta["cat"] == "eticaret")):
             raise HTTPException(403, "Bu bölüm bu sektörde kullanılmıyor")
         rows = list(p.get("blocks") or [])
         if len(rows) >= 60:

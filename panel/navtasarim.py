@@ -384,8 +384,6 @@ def tw_html(tw):
         css.append(".btn,button.btn,a.btn,.cta,.bk,.b1,.b2{border-radius:%s!important}" % TW_DUGME[t["dugme"]])
     if t["yazi"]:
         css.append("html{font-size:%d%%!important}" % t["yazi"])
-    link = ""
-    if used:
-        link = '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?%s&display=swap">' % "&".join(
-            "family=" + f.replace(" ", "+") + ":wght@400;600;700" for f in dict.fromkeys(used))
+    import sitegen
+    link = sitegen.font_link(used)
     return link + '<style id="oktw">' + "".join(css) + "</style>"

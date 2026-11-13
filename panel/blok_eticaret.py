@@ -119,10 +119,12 @@ def urun_kart(b, dev, d, p, ek_rozet="", alt="", buyuk=False):
     if s < t:
         fiyat = '<span class="bke-es">%s ₺</span>%s' % (para(t), fiyat)
     hover = " bke-hv" if v(b, "anim_hover", dev, True) else ""
-    return ('<a class="bke-k%s%s" href="%s">%s%s<div class="bke-g"><h3>%s</h3><div class="bke-ff">%s</div>%s</div></a>') % (
+    mk = str(p.get("brand") or "").strip()
+    return ('<a class="bke-k%s%s" href="%s"><span class="bke-im">%s<span class="bke-inc" aria-hidden="true">İncele</span></span>%s<div class="bke-g">%s<h3>%s</h3><div class="bke-ff">%s</div>%s</div></a>') % (
         " bke-buyuk" if buyuk else "", hover, E(urun_yolu(p)),
-        ('<img src="%s" alt="%s" loading="lazy">' % (E(img_url(im)), E(str(p.get("name") or "")))) if im else '<span class="bke-bos" aria-hidden="true"></span>',
+        ('<img src="%s" alt="%s" loading="lazy" onerror="this.style.visibility=\'hidden\'">' % (E(img_url(im)), E(str(p.get("name") or "")))) if im else '<span class="bke-bos" aria-hidden="true"></span>',
         rozet_html(b, dev, d, p, ek_rozet),
+        ('<span class="bke-mrk">%s</span>' % E(mk)) if mk else "",
         E(str(p.get("name") or "")), fiyat,
         ('<div class="bke-alt">%s</div>' % alt) if alt else "")
 
@@ -469,7 +471,14 @@ CSS = (
     ".bke-g{align-items:stretch}"
     ".bke-k{position:relative;display:flex;flex-direction:column;background:#fff;border:1px solid #e7e4dc;"
     "border-radius:var(--bk-r,12px);overflow:hidden;text-decoration:none;color:inherit}"
-    ".bke-k img,.bke-k .bke-bos{width:100%;aspect-ratio:1/1;object-fit:cover;display:block;background:#f1efe9}"
+    ".bke-im{position:relative;display:block;overflow:hidden;background:#f4f2ec}"
+    ".bke-k img,.bke-k .bke-bos{width:100%;aspect-ratio:1/1;object-fit:cover;display:block;background:#f1efe9;transition:transform .5s cubic-bezier(.2,.7,.2,1)}"
+    ".bke-hv:hover img{transform:scale(1.045)}"
+    ".bke-inc{position:absolute;left:12px;right:12px;bottom:12px;text-align:center;background:rgba(255,255,255,.94);color:#14181f;font-weight:700;font-size:13.5px;"
+    "padding:9px 0;border-radius:999px;opacity:0;transform:translateY(8px);transition:opacity .2s,transform .2s;box-shadow:0 4px 14px rgba(0,0,0,.12)}"
+    ".bke-hv:hover .bke-inc,.bke-hv:focus-visible .bke-inc{opacity:1;transform:none}"
+    "@media (hover:none){.bke-inc{display:none}}"
+    ".bke-mrk{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;opacity:.55;font-weight:600}"
     ".bke-hv{transition:border-color .16s,box-shadow .16s,transform .16s}"
     ".bke-hv:hover{border-color:var(--ac);box-shadow:0 6px 20px rgba(10,20,34,.10);transform:translateY(-2px)}"
     ".bke-g2{padding:12px 13px;display:flex;flex-direction:column;gap:5px;flex:1}"
@@ -480,7 +489,7 @@ CSS = (
     ".bke-es{text-decoration:line-through;opacity:.5;font-size:14px}"
     ".bke-alt{margin-top:7px}"
     ".bke-rzl{position:absolute;top:9px;left:9px;display:flex;flex-direction:column;gap:4px;align-items:flex-start;z-index:1}"
-    ".bke-rz{background:#1155cc;color:#fff;font-size:11.5px;font-weight:800;padding:3px 8px;border-radius:999px;line-height:1.35}"
+    ".bke-rz{background:#1155cc;color:#fff;font-size:11.5px;font-weight:800;padding:3px 9px;border-radius:999px;line-height:1.35;letter-spacing:.02em}"
     ".bke-rz.bke-oz{background:var(--ac)}"
     ".bke-sep{width:100%;min-height:40px;border:1px solid var(--ac);background:#fff;color:var(--ac);"
     "border-radius:9px;font:700 14px inherit;cursor:pointer}"

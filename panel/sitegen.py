@@ -777,8 +777,32 @@ def mark_edit(html):
             b[1] = str(soup)
     return join_blocks(pre, blocks, tail)
 
-FONTS = ["Inter", "Poppins", "Montserrat", "Playfair Display", "Lora", "Merriweather", "Raleway", "Nunito", "DM Serif Display", "Oswald",
-         "Cormorant Garamond", "Roboto Slab", "Work Sans", "Manrope"]
+# Türkçe karakter (ğ ş ı İ ç ö ü) destekli Google yazı tipleri, gruplu
+FONT_GRUP = [
+    ("Sade (sans)", ["Inter", "Poppins", "Montserrat", "Raleway", "Nunito", "Work Sans", "Manrope", "Open Sans", "Roboto", "Lato", "Rubik",
+                     "Mulish", "Outfit", "Plus Jakarta Sans", "DM Sans", "Figtree", "Sora", "Urbanist", "Lexend", "Barlow", "Josefin Sans",
+                     "Quicksand", "Karla", "Source Sans 3", "Noto Sans", "Fira Sans", "Exo 2", "Archivo", "Space Grotesk", "Jost"]),
+    ("Klasik (serif)", ["Playfair Display", "Lora", "Merriweather", "DM Serif Display", "Cormorant Garamond", "Roboto Slab", "Libre Baskerville",
+                        "EB Garamond", "Crimson Pro", "Prata", "Bodoni Moda", "Fraunces", "Noto Serif", "Spectral", "Cinzel", "Marcellus"]),
+    ("Güçlü başlık", ["Oswald", "Bebas Neue", "Anton", "Abril Fatface", "Alfa Slab One", "Archivo Black", "Teko", "Righteous", "Bricolage Grotesque"]),
+    ("El yazısı", ["Dancing Script", "Pacifico", "Great Vibes", "Caveat", "Satisfy", "Sacramento", "Allura", "Kaushan Script"]),
+]
+FONTS = [f for _g, fs in FONT_GRUP for f in fs]
+
+
+def font_link(fonts):
+    """Seçilen yazı tiplerini Google Fonts'tan yükleyen <link> (yalnız izinli listeden)."""
+    fs = [f for f in dict.fromkeys(fonts or []) if f in FONTS]
+    if not fs:
+        return ""
+    return '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?%s&display=swap">' % "&".join(
+        "family=" + f.replace(" ", "+") + (":wght@400;700" if f in _TEK_AGIRLIK_DEGIL else "") for f in fs)
+
+
+# yalnız tek ağırlığı olan yazı tipleri için :wght istemek isteği bozar
+_TEK = {"Bebas Neue", "Anton", "Abril Fatface", "Alfa Slab One", "Archivo Black", "Righteous", "Prata", "Pacifico", "Great Vibes", "Satisfy",
+        "Sacramento", "Allura", "Kaushan Script", "Marcellus", "DM Serif Display"}
+_TEK_AGIRLIK_DEGIL = set(FONTS) - _TEK
 _HEADS = "h1,h2,h3,h4,summary,.eyebrow,figcaption b"
 _BODY = "p,li,span,small,a,label,dd,dt,blockquote,button,input"
 
@@ -799,10 +823,7 @@ def blockstyle_html(ctx):
             css.append("%s :is(h1,h2,h3,h4,p,li,span,small,summary,blockquote,dd,dt):not(.btn){color:%s!important}" % (sel, st["c"]))
     if not css:
         return ""
-    link = ""
-    if used:
-        link = '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?%s&display=swap">' % "&".join("family=" + f.replace(" ", "+") + ":wght@400;600;700" for f in dict.fromkeys(used))
-    return link + "<style>" + "".join(css) + "</style>"
+    return font_link(used) + "<style>" + "".join(css) + "</style>"
 
 
 _PROMO_END = re.compile(r"e=new Date\(n\);e\.setDate\(n\.getDate\(\)\+\(\(7-n\.getDay\(\)\)%7\)\);e\.setHours\(23,59,59,0\);if\(e<=n\)e\.setDate\(e\.getDate\(\)\+7\);var f=\$\('#lft'\);f\.textContent=2\+\(n\.getDate\(\)%4\);")

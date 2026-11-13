@@ -18,7 +18,7 @@ from pydantic import BaseModel
 import tenant
 
 MODULES = {"servis": "Servis kayıtları", "personel": "Usta / personel", "muhasebe": "Muhasebe ve kasa", "rapor": "Raporlar",
-           "sms": "SMS ve mesaj şablonları", "magaza": "Yedek parça mağazası", "site": "Web sitesi", "pazarlama": "Pazarlama",
+           "sms": "SMS ve mesaj şablonları", "magaza": "Yedek parça mağazası (teknik servis)", "eticaret": "E-ticaret (ürün, sipariş, pazaryeri, kargo)", "site": "Web sitesi", "pazarlama": "Pazarlama",
            "bakim": "Bakım hatırlatma ve garanti", "teklif": "Teklif ve onay", "bayi": "Bayi (B2B)", "qr": "QR cihaz etiketi",
            "atama": "Otomatik usta atama", "takip": "Canlı usta takibi", "odeme": "Ödeme linki (online tahsilat)",
            "efatura": "E-arşiv fatura bağlantısı", "portal": "Müşteri portalı", "arayan": "Arayan numara tanıma", "randevu": "Online randevu"}
@@ -215,7 +215,7 @@ def register(api_router, db, deps):
         if mods is None:
             return None                                   # modül tanımı olmayan eski firma: kısıt yok
         seg = path[5:] if path.startswith("/api/") else ""
-        eff = set(mods) | ({"randevu"} if "pazarlama" in mods else set())      # pazarlama paketi online randevuyu da kapsar (eski paketler bozulmaz)
+        eff = set(mods) | ({"randevu"} if "pazarlama" in mods else set()) | ({"magaza"} if "eticaret" in mods else set())   # e-ticaret mağaza uçlarını da açar      # pazarlama paketi online randevuyu da kapsar (eski paketler bozulmaz)
         bk = seg.startswith(("growth/bookings", "growth/settings"))
         for m, pre in MODULE_PREFIX.items():
             if m == "pazarlama" and bk and "randevu" in eff:                    # yalnız Online randevu olan firma randevu ayarlarını ve kayıtlarını yönetebilir

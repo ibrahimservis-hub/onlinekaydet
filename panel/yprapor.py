@@ -147,12 +147,11 @@ def register(api_router, db, deps):
         if not sec:
             s = await db.app_settings.find_one({"_id": "sector"}, {"_id": 0}) or {}
             sec = s.get("key") or ""
-        if mods is None:
-            try:
-                import blocks
-                mods = list((blocks.pack(sec) or {}).get("modules") or [])
-            except Exception:                                      # noqa: BLE001
-                mods = []
+        try:
+            import blocks
+            mods, sec, _e = await blocks.firma_modulleri(db)
+        except Exception:                                          # noqa: BLE001
+            mods = list(mods or [])
         return set(mods or []), sec
 
     async def hangi():

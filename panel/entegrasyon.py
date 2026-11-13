@@ -306,8 +306,14 @@ def register(api_router, db, deps):
         except Exception:                                          # noqa: BLE001
             pack = []
         izin = d.get("integrations_allowed")
+        try:
+            _m, _s, eshop = await blocks.firma_modulleri(db)
+        except Exception:                                          # noqa: BLE001
+            eshop = False
+        if eshop:                                                  # e-ticaret açık: ödeme, pazaryeri, kargo, e-fatura, ERP hepsi gelir
+            pack = list(dict.fromkeys(pack + blocks.SHOP_INT))
         if izin is None:                                           # sahip seçim yapmadıysa paketin kendi listesi
-            return set(pack) if pack else set(BY_ID)
+            return (set(pack) & set(BY_ID)) if pack else set(BY_ID)
         return set(izin) & set(BY_ID)                              # sahip seçtiyse söz onundur
 
     async def row_of(pid):

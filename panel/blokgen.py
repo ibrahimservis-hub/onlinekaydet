@@ -509,6 +509,11 @@ def page_html(page, rows, ctx, data=None, dev=""):
     telh = re.sub(r"[^\d+]", "", tel)
     logo = kb.get("logo") or ctx.get("logo") or ""
     govde = "".join(block_html(b, dev, data.get(b["iid"]) or data.get(b.get("bid")) or {}) for b in rows)
+    try:                                   # bölümlerde seçilen yazı tipleri gerçekten yüklensin
+        import sitegen as _sg
+        govde = _sg.font_link([str(v(b, k, dev) or "") for b in rows for k in ("font_h", "font_b")]) + govde
+    except Exception:                                              # noqa: BLE001
+        pass
     menu = "".join('<a href="%s">%s</a>' % (E(link(p.get("slug_url") or ("/" if p.get("home") else "/" + str(p.get("slug") or ""))) or "/"), E(str(p.get("title") or "")))
                    for p in (ctx.get("menu_pages") or [])[:7])
     bas = "%s · %s" % (page.get("title") or "", ad) if page.get("title") and not page.get("home") else ad
