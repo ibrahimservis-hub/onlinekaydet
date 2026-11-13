@@ -69,5 +69,37 @@ with TestClient(s.app) as c:
         h = ep.cark_html(dict(ep.CARK_DEF, on=True)); assert 'id="okck"' in h and "Çarkı çevir" in h and "emoji" not in h
         assert ep.cark_html(dict(ep.CARK_DEF)) == ""
     t("çarkıfelek: ağırlıklı seçim, telefon başına bir hak, kupon kampanyası açılır", cark)
+    def sepet():
+        rr = c.post("/api/public/customer/%s~register" % F, json={"name": "Sepet Kisi", "phone": "0533 444 55 66", "password": "parola1234"}); T = {"Authorization": "Bearer " + rr.json()["token"]}
+        assert c.put("/api/public/shop/%s~sepet" % F, json={"items": []}).status_code == 401
+        r = c.put("/api/public/shop/%s~sepet" % F, headers=T, json={"items": [{"id": PID, "q": 2}, {"id": "yok", "q": 1}]}); assert r.json()["n"] == 1, r.text
+        l = c.get("/api/yp/sepetler", headers=O).json(); row = [x for x in l["rows"] if x["phone"].endswith("5556") or x["name"] == "Sepet Kisi"][0]
+        assert row["total"] == 2 * 900 and row["durum"] == "aktif" and l["ozet"]["aktif"] >= 1, row
+        assert c.post("/api/yp/sepetler/yok/hatirla", headers=O).status_code == 404
+        # eski sepet terk sayılır
+        async def eskit():
+            fm = await s.db.main().firms.find_one({"login_email": "pl@x.com"})
+            await s.db.firm(fm["db"]).shop_carts.update_one({"id": row["id"]}, {"$set": {"updated_at": "2020-01-01T00:00:00+00:00"}})
+        c.portal.call(eskit)
+        assert c.get("/api/yp/sepetler", headers=O).json()["ozet"]["terk"] >= 1
+        import notify
+        gid = []
+        async def sahte(db, ch, to, text, **k): gid.append((to, text)); return {"status": "sent"}
+        eski = notify.send; notify.send = sahte
+        try:
+            assert c.post("/api/yp/sepetler/%s/hatirla" % row["id"], headers=O).json()["ok"] and "Sepet" in gid[0][1] and "/magaza" in gid[0][1], gid
+        finally:
+            notify.send = eski
+        assert c.post("/api/yp/sectors/eticaret", headers=O).status_code == 200
+        raporlar = [x["id"] for x in c.get("/api/yp/rapor", headers=O).json()["items"]]
+        assert "sepet_terk" in raporlar and "stok_devir" in raporlar, raporlar
+        j = c.get("/api/yp/rapor/sepet_terk?frm=2019-01-01", headers=O).json(); assert j["n"] >= 1 and "terk" in j["rows"][0]["durum"].lower(), j["rows"]
+        d = c.get("/api/yp/rapor/stok_devir", headers=O).json(); assert d["n"] >= 1 and "devir" in d["rows"][0]
+        # sipariş verince sepet silinir
+        body = {"customer": {"name": "Sepet Kisi", "phone": "0533 444 55 66", "address": "Atatürk cad. no 5 Çankaya", "city": "Ankara", "district": "Çankaya", "email": ""},
+                "items": [{"product_id": PID, "qty": 1}], "accept_terms": True, "payment_method": "havale"}
+        assert c.post("/api/public/shop/%s~orders" % F, json=body, headers=T).status_code == 200
+        assert not [x for x in c.get("/api/yp/sepetler", headers=O).json()["rows"] if x["name"] == "Sepet Kisi"]
+    t("sepet: kaydedilir, terk sayılır, SMS hatırlatma, raporlar, siparişte silinir", sepet)
 print("ok", len(ok), "bad", len(bad))
 for n, e in bad: print("FAIL", n, "\n", e)

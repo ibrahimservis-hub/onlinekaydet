@@ -976,6 +976,10 @@ def register(api_router, db, deps):
             order["risk"] = None
         await db.shop_orders.insert_one(dict(order))
         try:
+            await db.shop_carts.delete_one({"account_id": acc0["id"]})
+        except Exception:      # noqa: BLE001
+            pass
+        try:
             rk = order.get("risk") or {}
             risk_not = (" · RİSK: %s (%s)" % (rk["seviye"].upper(), ", ".join(rk["nedenler"]))) if rk.get("seviye") in ("orta", "yuksek") and rk.get("bildir", True) else ""
             await notify.notify_owner_t(db, f"Yeni mağaza siparişi {order['order_no']}: {name} · {total:.2f} TL" + risk_not, kind="shop_order")

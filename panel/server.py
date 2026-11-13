@@ -2885,7 +2885,7 @@ import dil, uyelik, duyuru
 dil.register(api_router, db, {"require_admin": require_admin})
 duyuru.register(api_router, db, {"require_admin": require_admin})
 import eticaret_plus
-eticaret_plus.register(api_router, db, {"require_admin": require_admin})
+eticaret_plus.register(api_router, db, {"require_admin": require_admin, "JWT_SECRET": JWT_SECRET, "JWT_ALGORITHM": JWT_ALGORITHM})
 uyelik.register(api_router, db, {"require_admin": require_admin, "JWT_SECRET": JWT_SECRET, "JWT_ALGORITHM": JWT_ALGORITHM})
 import urun  # e-ticaret ürün modülü
 

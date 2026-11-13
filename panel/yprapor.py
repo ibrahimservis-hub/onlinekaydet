@@ -55,6 +55,15 @@ REPORTS = [
        C("ciro", "Getirdiği ciro", "para", True), C("sepet", "Ortalama sepet", "para")],
       ["kampanya"],
       note="Kampanyalı sepet ortalaması kampanyasızdan düşükse indirim ciroyu büyütmüyor demektir."),
+    R("sepet_terk", "Sepet terki", "Ödemeye gitmeyen sepetler ve bekleyen tutar", "satis",
+      [C("name", "Müşteri"), C("phone", "Telefon"), C("urun", "Ürünler"), C("tutar", "Sepet tutarı", "para", True),
+       C("bekleme", "Bekleme"), C("durum", "Durum")],
+      ["shop"], chart="",
+      note="Terk edilen sepet, ödeme noktasına gelmeden bırakılan sepettir. Hatırlatma SMS'i bu tutarın bir bölümünü geri kazandırır."),
+    R("stok_devir", "Stok devir hızı", "Ürün ne kadar hızlı satılıp yenileniyor", "satis",
+      [C("name", "Ürün"), C("stok", "Stok", "num", True), C("satis", "Satılan", "num", True), C("devir", "Devir (satılan/stok)", "num"), C("durum", "Yorum")],
+      ["shop"], chart="bar",
+      note="Devir 1'in altındaysa ürün stokta bekliyor, 3 ve üstüyse stok yetmeyebilir; ikisi de nakit akışını etkiler."),
     R("iade", "İadeler", "Oran ve sebep kırılımı", "satis",
       [C("reason", "Sebep"), C("n", "Adet", "num", True), C("tutar", "Tutar", "para", True),
        C("oran", "Payı", "yuzde")],
@@ -195,6 +204,27 @@ def register(api_router, db, deps):
             for r in rows:
                 r["oran"] = _pct(r["kar"], r["ciro"])
             return rows
+        if rid == "sepet_terk":
+            rows = []
+            for c in await db.shop_carts.find({}, {"_id": 0}).sort("updated_at", -1).to_list(2000):
+                if str(c.get("updated_at", ""))[:10] < a or str(c.get("updated_at", ""))[:10] > b:
+                    continue
+                try:
+                    dk = int((datetime.now(timezone.utc) - datetime.fromisoformat(c["updated_at"])).total_seconds() // 60)
+                except Exception:                                  # noqa: BLE001
+                    dk = 0
+                rows.append({"name": c.get("name") or "—", "phone": c.get("phone", ""), "urun": ", ".join("%s ×%s" % (i["name"], i["q"]) for i in c.get("items", []))[:120],
+                             "tutar": round(_n(c.get("total")), 2), "bekleme": ("%d sa" % (dk // 60)) if dk >= 60 else ("%d dk" % dk),
+                             "durum": ("Terk edildi" if dk >= 60 else "Aktif") + (" · hatırlatıldı" if c.get("hatirlatildi") else "")})
+            return rows
+        if rid == "stok_devir":
+            rows = []
+            for p in await db.shop_products.find({"track_stock": {"$ne": False}}, {"_id": 0}).to_list(5000):
+                st, sat = int(p.get("stock") or 0), int(p.get("sold") or 0)
+                dv = round(sat / st, 2) if st else (float(sat) if sat else 0.0)
+                rows.append({"name": p.get("name"), "stok": st, "satis": sat, "devir": dv,
+                             "durum": "Tükendi" if st <= 0 else ("Stokta bekliyor" if dv < 1 else ("Hızlı dönüyor, stok yetmeyebilir" if dv >= 3 else "Dengeli"))})
+            return sorted(rows, key=lambda r: r["devir"])
         if rid == "urun_satis":
             g = {}
             for o in await siparisler(a, b):

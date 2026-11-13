@@ -51,7 +51,8 @@ var PL={kart:'Kredi / banka kartı',havale:'Havale / EFT',kapida_nakit:'Kapıda 
 SHOP_JS = r"""(function(){""" + COMMON + r"""
 var KEY='okcart-live',C=[],INFO=null,F={q:'',category:'',brand:'',sort:'pop',min:'',max:'',in_stock:false,discount:false,page:1},ACC=null,ADR=[],PM='',SELA='',NEWA=false,BUSY=false,VIEW='shop',EM='';
 try{C=JSON.parse(localStorage.getItem(KEY)||'[]')}catch(e){C=[]}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(C))}catch(e){}cnt()}
+var CT=0;function sync(){if(!tok())return;clearTimeout(CT);CT=setTimeout(function(){api('PUT','/public/shop/sepet',{items:C.map(function(x){return{id:x.id,q:x.q}})}).catch(function(){})},1500)}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(C))}catch(e){}cnt();sync()}
 function cnt(){var n=C.reduce(function(a,x){return a+x.q},0);A('[data-cc]').forEach(function(e){e.textContent=n})}
 function sub(){return C.reduce(function(a,x){return a+x.price*x.q},0)}
 function ship(){var s=sub();return INFO&&INFO.free_shipping_over&&s>=INFO.free_shipping_over?0:(INFO?INFO.shipping_fee:0)}

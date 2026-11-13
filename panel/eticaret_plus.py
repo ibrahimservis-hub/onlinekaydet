@@ -196,8 +196,32 @@ def cark_html(c):
     return css + '<button id="okck" type="button">Çarkı çevir</button>' + kutu + js
 
 
+SEPET_DEF = {"oto": False, "bekleme_dk": 120, "metin": "Merhaba {ad}, sepetinizde ürünler sizi bekliyor. Tamamlamak için: {link}"}
+
+
+def sepet_durum(c, now=None):
+    now = now or datetime.now(timezone.utc)
+    try:
+        t = datetime.fromisoformat(c["updated_at"])
+    except Exception:      # noqa: BLE001
+        return "aktif"
+    return "terk" if (now - t) >= timedelta(minutes=60) else "aktif"
+
+
+async def sepet_hatirla(db, c, host, metin):
+    """Sepet sahibine SMS gider; aynı sepete ikinci kez gitmez."""
+    import notify
+    ad = (c.get("name") or "").split(" ")[0] or "değerli müşterimiz"
+    link = "https://%s/magaza" % host if host else "/magaza"
+    r = await notify.send(db, "sms", c.get("phone", ""), metin.replace("{ad}", ad).replace("{link}", link), kind="sepet_hatirlat", ref="sepet:" + c["id"])
+    if (r or {}).get("status") == "sent":
+        await db.shop_carts.update_one({"id": c["id"]}, {"$set": {"hatirlatildi": _now()}})
+    return r
+
+
 def register(api_router, db, deps):
     adm = deps["require_admin"]
+    secret, alg = deps.get("JWT_SECRET"), deps.get("JWT_ALGORITHM", "HS256")
 
     # ---- XML besleme
     @api_router.get("/yp/feed")
@@ -369,3 +393,89 @@ def register(api_router, db, deps):
         else:
             await db.yp_cark_log.update_one({"phone": ph}, {"$set": {"dilim": x["ad"]}})
         return {"index": idx, "ad": x["ad"], "kod": kod}
+
+    # ---- Aktif / terk edilmiş sepetler
+    async def musteri(request: Request):
+        import jwt
+        h = request.headers.get("authorization", "")
+        try:
+            pl = jwt.decode(h[7:], secret, algorithms=[alg]) if h.lower().startswith("bearer ") else {}
+        except Exception:      # noqa: BLE001
+            pl = {}
+        acc = await db.customer_accounts.find_one({"id": pl.get("sub")}, {"_id": 0}) if pl.get("typ") == "customer" else None
+        if not acc:
+            raise HTTPException(401, "Giriş yapmanız gerekiyor")
+        return acc
+
+    @api_router.put("/public/shop/sepet")
+    async def sepet_kaydet(payload: dict, request: Request):
+        a = await musteri(request)
+        items, top = [], 0.0
+        for it in (payload.get("items") or [])[:30]:
+            p = await db.shop_products.find_one({"id": it.get("id") or it.get("product_id"), "active": True}, {"_id": 0, "id": 1, "name": 1, "price": 1, "images": 1})
+            if not p:
+                continue
+            q = max(1, min(int(_num(it.get("q") or it.get("qty"), 1)), 20))
+            items.append({"id": p["id"], "name": p["name"], "price": p["price"], "q": q})
+            top += p["price"] * q
+        if not items:
+            await db.shop_carts.delete_one({"account_id": a["id"]})
+            return {"ok": True, "n": 0}
+        cur = await db.shop_carts.find_one({"account_id": a["id"]}, {"_id": 0, "id": 1, "hatirlatildi": 1}) or {}
+        await db.shop_carts.update_one({"account_id": a["id"]}, {"$set": {
+            "id": cur.get("id") or secrets.token_hex(8), "account_id": a["id"], "name": a.get("name", ""), "phone": a.get("phone", ""), "items": items,
+            "total": round(top, 2), "updated_at": _now(), "hatirlatildi": cur.get("hatirlatildi", "")}}, upsert=True)
+        return {"ok": True, "n": len(items)}
+
+    @api_router.get("/yp/sepetler")
+    async def sepet_liste(_: dict = Depends(adm)):
+        c = await _cfg(db, "yp_sepet", SEPET_DEF)
+        rows = await db.shop_carts.find({}, {"_id": 0}).sort("updated_at", -1).to_list(500)
+        for r in rows:
+            r["durum"] = sepet_durum(r)
+        return {"cfg": c, "rows": rows, "ozet": {"aktif": sum(1 for r in rows if r["durum"] == "aktif"), "terk": sum(1 for r in rows if r["durum"] == "terk"),
+                                                 "tutar": round(sum(r["total"] for r in rows if r["durum"] == "terk"), 2)}}
+
+    @api_router.put("/yp/sepetler")
+    async def sepet_cfg(payload: dict, _: dict = Depends(adm)):
+        c = await _cfg(db, "yp_sepet", SEPET_DEF)
+        if "oto" in payload:
+            c["oto"] = bool(payload["oto"])
+        if "bekleme_dk" in payload:
+            c["bekleme_dk"] = max(60, min(2880, int(_num(payload["bekleme_dk"], 120))))
+        if "metin" in payload and str(payload["metin"]).strip():
+            c["metin"] = str(payload["metin"]).strip()[:300]
+        await db.app_settings.update_one({"_id": "yp_sepet"}, {"$set": c}, upsert=True)
+        return c
+
+    @api_router.post("/yp/sepetler/{cid}/hatirla")
+    async def sepet_hatirla_api(cid: str, request: Request, _: dict = Depends(adm)):
+        c = await db.shop_carts.find_one({"id": cid}, {"_id": 0})
+        if not c:
+            raise HTTPException(404, "Sepet bulunamadı")
+        if not c.get("phone"):
+            raise HTTPException(422, "Bu müşterinin telefonu yok")
+        cfg = await _cfg(db, "yp_sepet", SEPET_DEF)
+        host = request.headers.get("x-forwarded-host") or request.headers.get("host") or ""
+        r = await sepet_hatirla(db, c, host, cfg["metin"])
+        if (r or {}).get("status") != "sent":
+            raise HTTPException(422, "SMS gönderilemedi. SMS bağlantınızı kontrol edin.")
+        return {"ok": True}
+
+    try:
+        import governance
+
+        async def _sepet_hook(d):
+            try:
+                cfg = await _cfg(d, "yp_sepet", SEPET_DEF)
+                if not cfg["oto"]:
+                    return
+                esik = (datetime.now(timezone.utc) - timedelta(minutes=int(cfg["bekleme_dk"]))).isoformat()
+                async for c in d.shop_carts.find({"updated_at": {"$lte": esik}, "hatirlatildi": {"$in": ["", None]}}, {"_id": 0}).limit(50):
+                    if c.get("phone"):
+                        await sepet_hatirla(d, c, "", cfg["metin"])
+            except Exception:      # noqa: BLE001
+                pass
+        governance.HOOKS.append(_sepet_hook)
+    except Exception:      # noqa: BLE001
+        pass

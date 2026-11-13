@@ -401,6 +401,7 @@
           (d.payments || []).forEach(function (p) { h += '<div class="ky-r" style="font-size:12px"><span>' + esc(p.method) + ' · ' + esc((p.at || '').replace('T', ' ')) + '</span><span>' + kyMoney(p.amount) + '</span></div>'; });
           if (s.balance > 0) h += '<div class="ky-lb" style="margin-top:8px">Ödeme al</div><input id="ky_pamt" type="number" min="0" step="any" class="ky-in" value="' + s.balance + '"><div class="ky-pay">' + ['Nakit', 'Kart', 'Havale'].map(function (m) { return '<button data-pm="' + m + '" class="' + (m === payM ? 'on' : '') + '">' + m + '</button>'; }).join('') + '</div><button class="spx-b p ky-go" id="ky_pay" style="width:100%">Ödemeyi al</button>';
         } else h += '<p style="color:#64748b;font-size:12px;margin:8px 0 0">Kaydettikten sonra ödeme alabilirsiniz.</p>';
+        if (id) h += '<button id="ky_belge" class="ky-btn" style="margin-top:10px;width:100%;min-height:44px">Belge yazdır / PDF</button>';
         h += '</div>';
         if (sc.comm > 0) h += '<div class="spx-card"><div class="ky-h">' + esc(sc.staff_l) + ' primi</div><div class="ky-r"><span>Oran (%)</span><span><input id="ky_comm_pct" type="number" min="0" max="100" class="ky-in" style="width:80px;min-height:30px;text-align:right" value="' + esc(d.comm_pct == null ? sc.comm : d.comm_pct) + '"></span></div><div class="ky-r"><span>Tutar</span><b>' + kyMoney(s.comm) + '</b></div></div>';
         return h;
@@ -409,6 +410,7 @@
         var box = $('#ky_hesap'); if (!box) return;
         ['ky_discount', 'ky_comm_pct'].forEach(function (i) { var e = $('#' + i); if (e) e.onchange = function () { d[i.slice(3)] = this.value; box.innerHTML = hesap(); bindHesap(); }; });
         Array.prototype.forEach.call(box.querySelectorAll('[data-pm]'), function (b) { b.onclick = function () { payM = b.getAttribute('data-pm'); Array.prototype.forEach.call(box.querySelectorAll('[data-pm]'), function (x) { x.classList.toggle('on', x === b); }); }; });
+        var bl = $('#ky_belge'); if (bl) bl.onclick = function () { var w = window.open('', '_blank'); fetch(API + '/admin/kayit/' + id + '/belge', { headers: { Authorization: 'Bearer ' + LS.get('token', '') } }).then(function (r) { if (!r.ok) throw new Error('Belge hazırlanamadı'); return r.text(); }).then(function (h) { if (w) { w.document.open(); w.document.write(h); w.document.close(); } else toast('Açılır pencere engellendi; izin verin'); }).catch(function (e) { if (w) w.close(); fail(e); }); };
         var pb = $('#ky_pay'); if (pb) pb.onclick = function () { pb.disabled = true; call('POST', '/admin/kayit/' + id + '/odeme', { amount: $('#ky_pamt').value, method: payM }).then(function () { toast('Ödeme alındı'); kyForm(id); }).catch(function (e) { pb.disabled = false; fail(e); }); };
       }
       function paint() {

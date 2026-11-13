@@ -9,6 +9,7 @@ import uuid
 from datetime import date, datetime, timedelta
 
 from fastapi import Depends, HTTPException
+from fastapi.responses import Response
 
 import sektor
 import sektor_dil
@@ -262,6 +263,70 @@ def sums(tpl, d):
     return {"lines": lines, "gross": gross, "discount": disc, "total": total, "paid": paid, "balance": round(max(total - paid, 0), 2), "commission": comm}
 
 
+def belge_html(t, r, sm, g):
+    """Kayıttan yazdırılabilir belge: başlık sektörün adıyla, alanlar şablondan, imza kutuları."""
+    import html as _h
+    e = lambda v: _h.escape(str(v if v is not None else ""))
+    para = lambda v: ("%.2f" % float(v or 0)).replace(".", ",") + " ₺"
+    adim = {x["k"]: x["l"] for x in t["steps"] + t["side"]}
+    out = []
+    for baslik, alanlar in t["sections"]:
+        satir = []
+        for f in alanlar:
+            v = r.get(f["k"])
+            if f["t"] == "select":
+                v = dict(f["opts"]).get(v, v)
+            elif f["t"] in ("dt", "date"):
+                v = (v or "").replace("T", " ")
+            elif f["t"] == "num" and not v:
+                v = ""
+            if v not in ("", None):
+                satir.append("<tr><th>%s</th><td>%s</td></tr>" % (e(f["l"]), e(v)))
+        if satir:
+            out.append("<h2>%s</h2><table class=kv>%s</table>" % (e(baslik), "".join(satir)))
+    for it in t["items"]:
+        rows = r.get(it["k"]) or []
+        if rows:
+            out.append("<h2>%s</h2><table class=ln><tr><th>%s</th><th class=n>Adet</th><th class=n>Birim</th><th class=n>Tutar</th></tr>%s</table>" % (
+                e(it["l"]), e(it["name"]), "".join("<tr><td>%s</td><td class=n>%s</td><td class=n>%s</td><td class=n>%s</td></tr>" % (
+                    e(x.get("name")), e(("%g" % x.get("qty", 1))), para(x.get("price")), para(x.get("qty", 1) * x.get("price", 0))) for x in rows)))
+    ozet = "".join("<tr><th>%s</th><td class=n>%s</td></tr>" % (e(l["l"]), para(l["v"])) for l in sm["lines"] if l["v"])
+    if sm["discount"]:
+        ozet += "<tr><th>İndirim</th><td class=n>-%s</td></tr>" % para(sm["discount"])
+    ozet += "<tr class=tot><th>Toplam</th><td class=n>%s</td></tr>" % para(sm["total"])
+    if sm["paid"]:
+        ozet += "<tr><th>Alınan</th><td class=n>%s</td></tr><tr><th>Kalan</th><td class=n>%s</td></tr>" % (para(sm["paid"]), para(sm["balance"]))
+    if sm["total"]:
+        out.append("<table class='kv sum'>%s</table>" % ozet)
+    chk = t["check"]
+    done = [o[1] for o in chk[1] if (r.get("check") or {}).get(o[0])]
+    todo = [o[1] for o in chk[1] if not (r.get("check") or {}).get(o[0])]
+    if done or todo:
+        out.append("<h2>%s</h2><ul class=ck>%s</ul>" % (e(chk[0]), "".join("<li>&#9745; %s</li>" % e(x) for x in done) + "".join("<li>&#9744; %s</li>" % e(x) for x in todo)))
+    if r.get("notes"):
+        out.append("<h2>%s</h2><p class=nt>%s</p>" % (e(t.get("notes_l") or "Not"), e(r["notes"])))
+    tarih = datetime.fromtimestamp(r.get("created_at") or time.time()).strftime("%d.%m.%Y %H:%M")
+    firma = g.get("company_name") or "OnlineKaydet"
+    iletisim = " · ".join(x for x in (g.get("company_phone"), g.get("company_address")) if x)
+    css = ("@page{size:A4;margin:14mm}body{font:13px/1.45 system-ui,Segoe UI,Arial;color:#0a1f44;margin:0}.pg{max-width:780px;margin:0 auto;padding:18px}"
+           "header{display:flex;justify-content:space-between;border-bottom:3px solid #f27a1a;padding-bottom:10px;margin-bottom:12px}header h1{margin:0;font-size:22px}"
+           "header .r{text-align:right;font-size:12px}h2{font-size:13px;text-transform:uppercase;letter-spacing:.04em;margin:16px 0 6px;color:#f27a1a}"
+           "table{width:100%;border-collapse:collapse}th,td{padding:5px 8px;border-bottom:1px solid #dbe2ee;text-align:left;vertical-align:top}.kv th{width:34%;font-weight:600;color:#475569}"
+           ".ln th{background:#eef2f8;font-size:12px}.n{text-align:right}.sum{max-width:320px;margin-left:auto;margin-top:12px}.tot th,.tot td{font-size:15px;font-weight:800;border-top:2px solid #0a1f44}"
+           ".ck{list-style:none;padding:0;margin:0;columns:2}.nt{white-space:pre-wrap;border:1px solid #dbe2ee;border-radius:6px;padding:8px}"
+           ".sg{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-top:46px}.sg div{border-top:1px solid #0a1f44;padding-top:5px;font-size:12px;text-align:center}"
+           "footer{margin-top:26px;font-size:11px;color:#64748b;border-top:1px solid #dbe2ee;padding-top:8px}.bar{padding:10px;text-align:center;background:#eef2f8}"
+           "@media print{.bar{display:none}}")
+    return ('<!doctype html><html lang="tr"><head><meta charset="utf-8"><title>%s %s</title><style>%s</style></head><body>'
+            '<div class="bar"><button onclick="window.print()" style="min-height:44px;padding:0 20px;font:700 15px system-ui">Yazdır / PDF olarak kaydet</button></div>'
+            '<div class="pg"><header><div><h1>%s</h1><div>%s</div></div><div class="r"><b>%s</b><br>%s<br>Durum: %s</div></header>%s'
+            '<div class="sg"><div>%s</div><div>%s</div></div>'
+            '<footer>Bu belge OnlineKaydet ile hazırlanmıştır. Kişisel veriler 6698 sayılı KVKK kapsamında işlenir.</footer></div></body></html>') % (
+        e(t["title"]), e(r.get("no")), css, e(t["title"]), e(firma + (" · " + iletisim if iletisim else "")), e(r.get("no")), e(tarih),
+        e(adim.get(r.get("status"), r.get("status"))), "".join(out), e(r.get("customer_name") or "Müşteri"), e(r.get("staff") or firma))
+
+
+
 def clean(tpl, p):
     d = {}
     for _, fl in tpl["sections"]:
@@ -341,6 +406,16 @@ def register(api_router, db, deps):
         summary = [[t["plural"] + " (toplam)", len(rows)], ["Açık", open_], ["Bugün", sum(1 for r in rows if (r.get("when") or "").startswith(today))],
                    ["Bekleyen tahsilat", ("%.2f ₺" % sum(r.get("balance", 0) for r in rows if r.get("status") != "iptal")).replace(".", ",")]]
         return {"rows": out, "summary": summary, "counts": cnt, "total": len(rows)}
+
+    @api_router.get("/admin/kayit/{rid}/belge")
+    async def k_belge(rid: str, _: dict = Depends(require_admin)):
+        """Sektöre göre başlıklı, yazdırılabilir A4 belge (tarayıcıdan 'PDF olarak kaydet')."""
+        key, t = await tpl_or_404()
+        r = await db.records.find_one({"id": rid}, {"_id": 0})
+        if not r:
+            raise HTTPException(404, "Kayıt bulunamadı")
+        g = await db.app_settings.find_one({"_id": "global"}, {"_id": 0}) or {}
+        return Response(belge_html(t, r, sums(t, r), g), media_type="text/html; charset=utf-8")
 
     @api_router.get("/admin/kayit/{rid}")
     async def k_one(rid: str, _: dict = Depends(require_admin)):
