@@ -105,6 +105,17 @@ def compose_page(home: str, title: str, content: str):
         return None
 
 
+
+def _tema_renkleri(raw):
+    """Temanın kendi :root renkleri (panelde 'temanın rengi' göstermek ve sıfırlamak için)."""
+    out = {}
+    m = re.search(r":root\s*\{([^}]*)\}", raw or "")
+    if m:
+        for k, v in re.findall(r"--(ac|dk|bg|ink|sf)\s*:\s*(#[0-9a-fA-F]{6})\b", m.group(1)):
+            out[k] = v.lower()
+    return out
+
+
 def register(api_router, db, deps):
     require_admin = deps["require_admin"]
     THEMES = deps.get("themes") or []
@@ -544,6 +555,36 @@ def register(api_router, db, deps):
         await db.app_settings.update_one({"_id": "site_profile"}, {"$set": prof}, upsert=True)
         keep = [x["k"] for x in prof["slides"] + prof["gallery"]] + [e["img"] for e in prof["extra_pages"] if e["img"]] + [v for blks in prof["imgedits"].values() for tx in blks.values() for v in tx.values()] + [v for mp in prof["imgmap"].values() for v in mp.values()]
         await db.site_images.delete_many({"_id": {"$nin": keep}})
+        return {"ok": True}
+
+    @api_router.get("/site/nav-design")
+    async def nav_design_get(_: dict = Depends(require_admin)):
+        """Üst menü, mobil menü, mobil alt çubuk ve tüm tema tasarım ayarları + temadaki gerçek öğeler (düğme, bağlantı...)."""
+        import navtasarim
+        need_firm()
+        prof = await db.app_settings.find_one({"_id": "site_profile"}, {"_id": 0}) or {}
+        ctx = await build_ctx()
+        og = {"cta": None, "bar": [], "drw": {"chips": False, "cta": False}}
+        if ctx:
+            ctx2 = dict(ctx, p=dict(ctx["p"], nav={}, tw={}, layout={"_all": True}))
+            parts = sitegen.split_blocks(sitegen.apply_profile(raw_theme(ctx["th"]["slug"]), ctx["th"], ctx2))
+            bl = {b[0]: b[1] for b in (parts[1] if parts else [])}
+            og = navtasarim.ogrenme(bl.get("Menü", ""), bl.get("Mobil menü", ""), bl.get("Mobil bar", ""))
+        return {"nav": navtasarim.clean(prof.get("nav") or {}), "tw": navtasarim.tw_clean(prof.get("tw") or {}), "tema": og,
+                "has_theme": bool(ctx), "fonts": sitegen.FONTS, "icons": navtasarim.ICON_AD,
+                "tema_renk": _tema_renkleri(raw_theme(ctx["th"]["slug"])) if ctx else {}}
+
+    @api_router.put("/site/nav-design")
+    async def nav_design_put(payload: dict, _: dict = Depends(require_admin)):
+        import navtasarim
+        need_firm()
+        up = {}
+        if "nav" in payload:
+            up["nav"] = navtasarim.clean(payload.get("nav"))
+        if "tw" in payload:
+            up["tw"] = navtasarim.tw_clean(payload.get("tw"))
+        if up:
+            await db.app_settings.update_one({"_id": "site_profile"}, {"$set": up}, upsert=True)
         return {"ok": True}
 
     @api_router.post("/site/image")

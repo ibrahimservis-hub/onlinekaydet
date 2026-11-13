@@ -508,6 +508,9 @@ def apply_profile(raw, th, ctx):
     if ctx["p"].get("slides"):
         k = next((i for i, b in enumerate(blocks) if b[0] == "Ana görsel"), 2)
         blocks.insert(k, ["Slider", slider_html(ctx)])
+    if ctx["p"].get("nav"):
+        import navtasarim
+        blocks = navtasarim.apply(blocks, ctx["p"]["nav"])
     ek = ctx.get("tema_ek") or []
     if ek:                                     # bölüm kütüphanesinden eklenenler: alt bilginin hemen önüne, sırası paneldeki sıradan gelir
         k = next((i for i, b in enumerate(blocks) if b[0] in FIXED_BOTTOM), len(blocks))
@@ -529,6 +532,9 @@ def apply_profile(raw, th, ctx):
     out = yp_book(out, ctx["p"])
     out = apply_promo(out, ctx)
     out = out.replace("</head>", blockstyle_html(ctx) + "</head>", 1) if "</head>" in out else out
+    if ctx["p"].get("tw") and "</head>" in out:
+        import navtasarim
+        out = out.replace("</head>", navtasarim.tw_html(ctx["p"]["tw"]) + "</head>", 1)
     out = out.replace("</head>", CSS + "</head>", 1)
     if ctx["p"].get("slides"):
         out = out.replace("</body>", SLIDER_JS + "</body>", 1) if "</body>" in out else out + SLIDER_JS
