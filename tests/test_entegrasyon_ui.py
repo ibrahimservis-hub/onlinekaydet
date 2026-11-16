@@ -37,7 +37,7 @@ with sync_playwright() as pw:
     pg.click("#lb"); pg.wait_for_selector("#app:not([hidden])", timeout=15000); pg.wait_for_timeout(500)
 
     def a():
-        pg.click("#nav a[data-r=entegrasyon]"); pg.wait_for_selector("#elist .e", timeout=8000)
+        pg.click("a[data-r=entegrasyon]"); pg.wait_for_selector("#elist .e", timeout=8000)
         assert pg.eval_on_selector_all(".egrp .c", "a=>a.length") >= 6, "tür kartları"
         tx = pg.inner_text("#main")
         for x in ("iyzico", "Aras Kargo", "Paraşüt", "Nebim V3", "Trendyol"):

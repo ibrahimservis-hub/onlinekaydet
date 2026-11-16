@@ -42,7 +42,8 @@ with sync_playwright() as pw:
                 return f.evaluate(js)
     def nav():
         pg.reload(); pg.wait_for_selector("#app:not([hidden])", timeout=15000); pg.wait_for_timeout(600)
-        txt = pg.locator("nav, #nav, .nav, aside").first.inner_text()
+        pg.evaluate("location.hash='#urun'"); pg.wait_for_timeout(800)
+        txt = pg.locator("#nav").inner_text() + " " + pg.locator("#tabs").inner_text()
         for w in ("Ürünler", "Siparişler", "Kampanyalar", "Pazaryerleri", "İadeler"):
             assert w in txt, (w, txt)
         pg.evaluate("location.hash='#pazaryeri'"); pg.wait_for_timeout(1500)

@@ -125,7 +125,7 @@ with sync_playwright() as pw:
     pg.click("#lb"); pg.wait_for_selector("#app:not([hidden])", timeout=15000); pg.wait_for_timeout(500)
 
     def i():
-        pg.click("#nav a[data-r=urun]"); pg.wait_for_selector("#ulist tbody tr", timeout=8000)
+        pg.click("a[data-r=urun]"); pg.wait_for_selector("#ulist tbody tr", timeout=8000)
         assert not pg.is_visible("#selbar-urun"), "seçim yokken çubuk görünmemeli"
         pg.check("#ulist tbody tr:nth-child(1) input[data-sel=urun]")
         pg.check("#ulist tbody tr:nth-child(2) input[data-sel=urun]")
@@ -145,7 +145,7 @@ with sync_playwright() as pw:
     t("toplu stok güncelleme panelden uygulanıyor", k)
 
     def l():
-        pg.click("#nav a[data-r=siparis]"); pg.wait_for_selector("#slist tbody tr", timeout=8000)
+        pg.click("a[data-r=siparis]"); pg.wait_for_selector("#slist tbody tr", timeout=8000)
         pg.check("input[data-selall=siparis]"); pg.wait_for_selector(".selbar", timeout=4000)
         assert "4 sipariş seçildi" in pg.inner_text(".selbar")
         opts = pg.eval_on_selector_all("#sbkargo option", "o=>o.length")

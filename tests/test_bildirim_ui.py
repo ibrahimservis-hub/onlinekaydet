@@ -45,7 +45,7 @@ with sync_playwright() as pw:
     pg.click("#lb"); pg.wait_for_selector("#app:not([hidden])", timeout=15000); pg.wait_for_timeout(500)
 
     def a():
-        pg.click("#nav a[data-r=bildirim]"); pg.wait_for_selector("#blist .n", timeout=8000)
+        pg.click("a[data-r=bildirim]"); pg.wait_for_selector("#blist .n", timeout=8000)
         tx = pg.inner_text("#main")
         assert "Kargoya verildi" in tx and "Stoğa gelince haber ver" in tx, tx[:300]
         assert "SMS sağlayıcısı bağlı değil" in tx, "bağlı değilken uyarı"

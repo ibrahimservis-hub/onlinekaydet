@@ -39,7 +39,7 @@ with sync_playwright() as pw:
     def a():
         nav = pg.eval_on_selector_all("#nav a[data-r]", "a=>a.map(x=>x.dataset.r)")
         assert "is" in nav and "destek" in nav, nav
-        pg.click("#nav a[data-r=is]"); pg.wait_for_selector(".bosluk", timeout=8000)
+        pg.click("a[data-r=is]"); pg.wait_for_selector(".bosluk", timeout=8000)
         assert "Servis formu" in pg.inner_text("#main")
     t("teknik serviste İş kayıtları menüsü açılıyor", a)
 
@@ -109,7 +109,7 @@ with sync_playwright() as pw:
 
     def h():
         pg.evaluate("closeM()"); pg.wait_for_timeout(300)
-        pg.click("#nav a[data-r=destek]"); pg.wait_for_selector(".bosluk", timeout=8000)
+        pg.click("a[data-r=destek]"); pg.wait_for_selector(".bosluk", timeout=8000)
         pg.click("[data-a=dt-yeni]"); pg.wait_for_selector("#dtf", timeout=6000)
         ek = pg.eval_on_selector_all("#dtf [name=screen] option", "a=>a.map(x=>x.value)")
         assert "Siparişler" in ek and "Kasa" in ek, ek[:5]

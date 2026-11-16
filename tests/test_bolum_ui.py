@@ -46,8 +46,8 @@ with sync_playwright() as pw:
         pg.wait_for_selector("#bxl .row", timeout=10000)
 
     def menu():
-        assert pg.locator('#nav a[data-r=bolum]').count() == 0, "ayrı 'Sayfa bölümleri' menüsü kalmamalı"
-        n = pg.locator('#nav a[data-r=site]')
+        assert pg.locator('a[data-r=bolum]').count() == 0, "ayrı 'Sayfa bölümleri' menüsü kalmamalı"
+        n = pg.locator('a[data-r=site]')
         assert n.count() == 1 and "Web Sitem" in n.inner_text(), "tek giriş Web Sitem olmalı"
         n.click(); pg.wait_for_selector(".stabs button", timeout=10000)
         adlar = pg.locator(".stabs button").all_inner_texts()

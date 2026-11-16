@@ -39,7 +39,7 @@ with sync_playwright() as pw:
     pg.click("#lb"); pg.wait_for_selector("#app:not([hidden])", timeout=15000); pg.wait_for_timeout(500)
 
     def a():
-        pg.click("#nav a[data-r=icerik]"); pg.wait_for_selector("#iclist .r4", timeout=8000)
+        pg.click("a[data-r=icerik]"); pg.wait_for_selector("#iclist .r4", timeout=8000)
         tx = pg.inner_text(".ictab")
         assert "Müşteri yorumları" in tx and "3 onay bekliyor" in tx, tx[:200]
         assert "Blog yazıları" in tx and "Sık sorulanlar" in tx

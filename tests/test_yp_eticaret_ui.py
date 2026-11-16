@@ -54,13 +54,13 @@ with sync_playwright() as p:
     pg.click("#lb"); pg.wait_for_selector("#app:not([hidden])", timeout=15000); pg.wait_for_timeout(600)
 
     def a():
-        nav = pg.eval_on_selector_all("#nav a[data-r]", "a=>a.map(x=>x.dataset.r)")
+        nav = pg.eval_on_selector_all("#nav a[data-rs]", "a=>a.flatMap(x=>x.dataset.rs.split(','))")
         assert "urun" in nav and "siparis" in nav and "kampanya" in nav, nav
         assert "randevu" not in nav, "e-ticarette randevu menüsü görünmemeli: %s" % nav
     t("e-ticaret paketinde menü ürün/sipariş/kampanya gösteriyor, randevuyu gizliyor", a)
 
     def bb():
-        pg.click("#nav a[data-r=urun]"); pg.wait_for_selector("#ulist table tbody tr", timeout=8000)
+        pg.click("a[data-r=urun]"); pg.wait_for_selector("#ulist table tbody tr", timeout=8000)
         rows = pg.eval_on_selector_all("#ulist tbody tr", "r=>r.length")
         assert rows == 3, rows
         txt = pg.inner_text("#ulist")
@@ -87,7 +87,7 @@ with sync_playwright() as p:
     t("ürün arama ve az stok süzgeci çalışıyor", e)
 
     def f():
-        pg.click("#nav a[data-r=siparis]"); pg.wait_for_selector("#slist table tbody tr", timeout=8000)
+        pg.click("a[data-r=siparis]"); pg.wait_for_selector("#slist table tbody tr", timeout=8000)
         assert "Mehmet Yıldız" in pg.inner_text("#slist")
         assert "Trendyol" in pg.inner_text("#slist")
         assert "Ciro" in pg.inner_text("#sfig") and "Net kâr" in pg.inner_text("#sfig")
@@ -117,7 +117,7 @@ with sync_playwright() as p:
     t("iade talebi alınıyor (2 adetten 1 adet), onayda stok geri dönüyor", h)
 
     def i():
-        pg.click("#nav a[data-r=urun]"); pg.wait_for_selector("#useg button", timeout=8000)
+        pg.click("a[data-r=urun]"); pg.wait_for_selector("#useg button", timeout=8000)
         pg.click('#useg button[data-v=""]'); pg.wait_for_timeout(700)
         pg.fill("#uq", "keten"); pg.wait_for_timeout(900)
         pg.wait_for_selector("#ulist tbody tr", timeout=8000)
@@ -126,7 +126,7 @@ with sync_playwright() as p:
     t("stok sipariş ve iadeye göre doğru: 12 − 2 + 1 = 11", i)
 
     def k():
-        pg.click("#nav a[data-r=kampanya]")
+        pg.click("a[data-r=kampanya]")
         pg.wait_for_function("()=>{var h=document.querySelector('#main h1');return h&&h.textContent==='Kampanyalar'}", timeout=8000)
         pg.wait_for_selector("#main [data-a=kmp-ac]", timeout=8000)
         tx = pg.inner_text("#main")

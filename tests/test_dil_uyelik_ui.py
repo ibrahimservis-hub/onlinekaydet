@@ -39,7 +39,7 @@ with sync_playwright() as pw:
     pg.fill("#lf input[name=email]", EMAIL); pg.fill("#lf input[name=password]", PW)
     pg.click("#lb"); pg.wait_for_selector("#app:not([hidden])", timeout=15000); pg.wait_for_timeout(400)
     def uy():
-        pg.click('#nav a[data-r=uyelik]'); pg.wait_for_selector('[data-a="uy-tog"]', timeout=10000)
+        pg.click('a[data-r=uyelik]'); pg.wait_for_selector('[data-a="uy-tog"]', timeout=10000)
         assert "Hesabım bölümleri" in pg.inner_text("#main")
         pg.click('[data-k="on"]'); pg.wait_for_timeout(600)
         assert pg.locator('[data-k="on"]').get_attribute("aria-checked") == "true"
@@ -53,7 +53,7 @@ with sync_playwright() as pw:
         assert pg.input_value('#uyg input[name=gid]').startswith("abc-1")
     t("Google istemci kimliği girilir, SMS bağlı değilse uyarı çıkar", gg)
     def dl():
-        pg.click('#nav a[data-r=dil]'); pg.wait_for_selector('[data-a="dl-dil"]', timeout=10000)
+        pg.click('a[data-r=dil]'); pg.wait_for_selector('[data-a="dl-dil"]', timeout=10000)
         assert pg.locator('[data-a="dl-dil"][data-id="en"]').get_attribute("aria-pressed") == "true"   # kuaför için İngilizce hazır gelir
         pg.click('[data-a="dl-dil"][data-id="de"]'); pg.wait_for_timeout(700)
         assert pg.locator('[data-a="dl-dil"][data-id="de"]').get_attribute("aria-pressed") == "true"
@@ -72,14 +72,14 @@ with sync_playwright() as pw:
     t("katalogda Önizle örnek fotoğraflı bölümü gösterir", onz)
     pg.evaluate("document.getElementById('ov').hidden=true")
     def uy2():
-        pg.click('#nav a[data-r=uyelik]'); pg.wait_for_selector('[data-a="uy-sms"]', timeout=10000)
+        pg.click('a[data-r=uyelik]'); pg.wait_for_selector('[data-a="uy-sms"]', timeout=10000)
         assert pg.locator('[data-a="uy-xlsx"]').count() == 1 and pg.locator('[data-k="cuzdan_on"]').count() == 1
         pg.click('[data-a="uy-sms"]'); pg.wait_for_selector('#uysf', timeout=8000); pg.wait_for_timeout(600)
         assert "üyeye gidecek" in pg.inner_text("#uysn")
         pg.evaluate("document.getElementById(\"ov\").hidden=true")
     t("Üyelik: toplu SMS penceresi ve Excel düğmesi", uy2)
     def dl2():
-        pg.click('#nav a[data-r=dil]'); pg.wait_for_selector('#dl-ana', timeout=10000)
+        pg.click('a[data-r=dil]'); pg.wait_for_selector('#dl-ana', timeout=10000)
         pg.fill('#dl-kor', "OnlineKaydet, Servis Plus"); pg.click('[data-a="dl-kor"]'); pg.wait_for_timeout(600)
         pg.select_option('#dl-gor', 'kod'); pg.wait_for_timeout(600)
         c2 = c.get("/api/yp/dil", headers=H).json()["cfg"]
@@ -87,7 +87,7 @@ with sync_playwright() as pw:
         assert pg.locator('[data-a="dl-csv"]').count() == 1
     t("Diller: ana dil, görünüm, sözlük ve CSV", dl2)
     def du():
-        pg.click('#nav a[data-r=duyuru]'); pg.wait_for_selector('#duf', timeout=10000)
+        pg.click('a[data-r=duyuru]'); pg.wait_for_selector('#duf', timeout=10000)
         pg.fill('#duf textarea[name=text]', "Bayram indirimi başladı"); pg.click('#duf button[type=submit]'); pg.wait_for_timeout(600)
         pg.click('[data-a="du-tog"]'); pg.wait_for_timeout(700)
         d = c.get("/api/yp/duyuru", headers=H).json()

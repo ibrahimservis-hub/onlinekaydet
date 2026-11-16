@@ -44,7 +44,7 @@ with sync_playwright() as pw:
     pg.click("#lb"); pg.wait_for_selector("#app:not([hidden])", timeout=15000); pg.wait_for_timeout(500)
 
     def a():
-        pg.click("#nav a[data-r=rapor]"); pg.wait_for_selector(".rpl .ri", timeout=8000)
+        pg.click("a[data-r=rapor]"); pg.wait_for_selector(".rpl .ri", timeout=8000)
         tx = pg.inner_text(".rpl")
         assert "Günlük ciro" in tx and "Satış kanalları" in tx and "Stok durumu" in tx, tx[:200]
         assert "Doluluk" not in tx, "e-ticarette randevu raporu listelenmemeli"
