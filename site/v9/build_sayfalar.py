@@ -10,6 +10,31 @@ pos=[src.index(m) for m in marks]+[src.index('<div class="mbar">')]
 P={}
 KEYS=['hero','dort','tema','etc','edt','yon','pak','sek','ent','guv','sss','son','footer']
 for i,k in enumerate(KEYS): P[k]=src[pos[i]:pos[i+1]]
+
+# --- metin düzeltmeleri (daha sade, konuşur gibi)
+METIN=[
+('Web siteniz, <em>mağazanız</em>, randevunuz ve <span>iş takibiniz</span> tek yerde.','Sitenizi açın, <em>siparişi</em> alın, <span>işi buradan</span> takip edin.'),
+('Hazır temayı seçin, ürünlerinizi ekleyin, siparişi ve randevuyu aynı panelden yönetin. Kasa, personel ve raporlar da orada.','Sektörünüze uygun hazır temayı seçin, ürünlerinizi girin. Sipariş, randevu, kasa ve personel aynı ekranda.'),
+('Hazır tema, alan adı bağlama ve SSL web sitesi paketine dahildir.','Hazır tema, alan adı bağlama ve SSL web sitesi paketinin içindedir.'),
+('Temanızı seçin. Yarın yayında olun.','Tema seçin, yarın sitenizi yayınlayın.'),
+('Aşağıdakiler çizim değil, temaların kendi ekran görüntüleri: masaüstü ve telefon yan yana. Her temada metni, yazı tipini ve görseli panelden siz değiştirirsiniz.','Aşağıdakiler çizim değil, gerçek tema ekran görüntüleri: bilgisayar ve telefon yan yana. Yazıyı, yazı tipini ve resmi panelden kendiniz değiştirirsiniz.'),
+('Mağazanız sitenizin içinde. Hepsi tek stoktan.','Mağaza sitenizin içinde, stok tek yerde.'),
+('Sitenizden, pazaryerinden, telefondan ya da tezgâhtan gelen sipariş aynı listeye düşer. Aşağıdaki ekranlar panelin kendisidir.','Siteden, pazaryerinden, telefonla ya da tezgâhta gelen sipariş aynı listeye girer. Aşağıdaki ekranlar panelin kendisi.'),
+('Sitenizin her bölümü sizin elinizde.','Siteyi değiştirmek için kimseye ihtiyacınız yok.'),
+('Mağazanın arkasındaki iş de aynı panelde.','Mağazanın arkasındaki iş de aynı yerde yürür.'),
+('Randevu, kasa, personel ve evrak ayrı programlara dağılmaz. Panel, seçtiğiniz sektörün terimleriyle açılır: kuaförde uzman ve randevu, serviste usta ve servis kaydı.','Randevu, kasa, personel ve evrak ayrı programlara dağılmaz. Panel mesleğinizin diliyle açılır: kuaförde uzman ve randevu, serviste usta ve servis kaydı.'),
+('Dört paket. Ne aldığınız satır satır belli.','Dört paket; içinde ne var, satır satır yazıyor.'),
+('Panel sizin işinizin diliyle konuşur.','Panelde sizin mesleğinizin kelimeleri geçer.'),
+('Zaten kullandığınız hesaplara bağlanır.','Kullandığınız hesaplarla birlikte çalışır.'),
+('Kime emanet ettiğinizi bilin.','Verileriniz kimde duruyor, açıkça yazıyoruz.'),
+('Karar vermeden önce','Sık sorulanlar'),
+('Temanızı bugün seçin, mağazanızı bu hafta açın.','Numaranızı bırakın, sizi arayalım.'),
+]
+for k in list(P):
+    for a,c in METIN: P[k]=P[k].replace(a,c)
+import re as _re
+P['guv']=_re.sub(r'<div class="yorum">.*?</div>','',P['guv'],flags=_re.S)
+
 head_raw=src[:src.index('<script type="application/ld+json">')]
 jsonld=src[src.index('<script type="application/ld+json">'):src.index('</script>',src.index('<script type="application/ld+json">'))+9]
 mbar=src[src.index('<div class="mbar">'):src.index('<script src="/v9/v9.js"')]
@@ -96,19 +121,19 @@ t=t.replace('<main>','<main id="icerik">',1); open(S+'/index.html','w',encoding=
 # ---- iç sayfalar
 B=banner
 page('temalar.html','Hazır Web Sitesi Temaları | OnlineKaydet','Sektörünüze göre hazır web sitesi temaları. Seçin, metin ve görselleri panelden düzenleyin, alan adınızı bağlayın.',
- B('t','Temalar','Sektörünüze göre hazır temalar','Temayı seçin, metinleri ve görselleri panelden düzenleyin. Menü, mobil çubuk ve alt bilgi hazır gelir.',('tema-1-kombi-d','Kombi servisi teması'))+P['tema']+P['sek']+SON)
+ B('t','Temalar','Mesleğinize uygun hazır temalar','Birini seçin; yazıları ve resimleri panelden değiştirin. Menü, mobil alt çubuk ve alt bilgi hazır gelir.',('tema-1-kombi-d','Kombi servisi teması'))+P['tema']+P['sek']+SON)
 page('e-ticaret.html','E-Ticaret Modülü: Ürün, Sipariş, Pazaryeri, B2B | OnlineKaydet','Ürün ve stok, sipariş ve kargo, kampanya, pazaryeri, iade, ortaklık ve bayi (B2B) tek panelde. Sitenizin içinde çalışan mağaza.',
- B('e','E-ticaret','Sitenizin içinde çalışan mağaza','Ürünleriniz, siparişleriniz, kampanyalarınız ve pazaryeri satışlarınız aynı panelden yönetilir.',('panel-d-urun','Ürün yönetimi ekranı'))+P['etc']+SON)
+ B('e','E-ticaret','Sitenizin içinde çalışan mağaza','Ürün, sipariş, kampanya ve pazaryeri satışı aynı panelden yürür.',('panel-d-urun','Ürün yönetimi ekranı'))+P['etc']+SON)
 page('web-sitesi.html','Kodsuz Web Sitesi Editörü | OnlineKaydet','Web sitenizin her bölümünü panelden düzenleyin: metin, yazı tipi, görsel, menü. Alan adı ve SSL dahil.',
- B('w','Web sitesi','Her bölümü kendiniz düzenleyin','Metin, yazı tipi, görsel ve menüyü panelden değiştirin. Alan adı bağlama ve SSL pakete dahildir.',('panel-d-site','Web sitesi editörü ekranı'))+P['edt']+P['guv']+SON)
+ B('w','Web sitesi','Sitenizi kendiniz düzenleyin','Yazı, yazı tipi, resim ve menü panelden değişir. Alan adı bağlama ve SSL pakete dahil.',('panel-d-site','Web sitesi editörü ekranı'))+P['edt']+P['guv']+SON)
 page('is-takibi.html','Randevu, Muhasebe, Personel ve Evrak Takibi | OnlineKaydet','Randevu takvimi, kasa ve muhasebe, personel takibi, evrak takibi ve raporlar tek panelde.',
- B('i','İş takibi','Randevu, muhasebe, personel ve evrak takibi','Günlük işinizi tek panelde yürütün: takvim, kasa, personel ve raporlar.',('panel-k-takvim','Randevu takvimi ekranı'))+P['yon']+P['ent']+SON)
+ B('i','İş takibi','Randevu, muhasebe, personel ve evrak takibi','Günlük işiniz tek ekranda: takvim, kasa, ekip ve raporlar.',('panel-k-takvim','Randevu takvimi ekranı'))+P['yon']+P['ent']+SON)
 page('fiyatlar.html','Paketler ve Fiyatlar | OnlineKaydet','Web sitesi, mağaza ve iş takibi paketlerini ve içeriklerini karşılaştırın. E-ticaret modülü teklifle eklenir.',
- B('p','Paketler','Paketler ve içerikleri','Hangi pakette neler olduğunu satır satır görün. E-ticaret modülü teklifle eklenir.',('panel-k-kasa','Kasa ekranı'))+P['pak']+P['sss']+SON)
+ B('p','Paketler','Paketler ve içindekiler','Hangi pakette ne olduğu satır satır yazıyor. E-ticaret modülü teklifle eklenir.',('panel-k-kasa','Kasa ekranı'))+P['pak']+P['sss']+SON)
 page('sektorler.html','Sektörlere Hazır Çözümler | OnlineKaydet','Teknik servis, kuaför, güzellik, oto servis ve diğer iş kolları için hazır tema ve panel.',
- B('s','Sektörler','Sektörünüze hazır gelir','Teknik servisten kuaföre kadar her iş kolunun terimleri ve ekranları hazırdır.',('tema-k6-butik-kuafor-d','Kuaför teması'))+P['sek']+P['ent']+P['tema']+SON)
+ B('s','Sektörler','Mesleğinize göre hazır','Teknik servisten kuaföre her iş kolunun kelimeleri ve ekranları hazır.',('tema-k6-butik-kuafor-d','Kuaför teması'))+P['sek']+P['ent']+P['tema']+SON)
 page('sss.html','Sık Sorulan Sorular | OnlineKaydet','Deneme, veri taşıma, pazaryeri, paketler ve kurulum hakkında sık sorulan sorular.',
- B('sss','Sık sorulan sorular','Aklınıza takılanlar','Kurulum, paketler, pazaryeri ve veri taşıma hakkında kısa cevaplar.')+P['sss']+SON)
+ B('sss','Sık sorulan sorular','Sık sorulanlar','Kurulum, paketler, pazaryeri ve veri taşıma hakkında kısa cevaplar.')+P['sss']+SON)
 ozel=(sec_baslik('Özellikler','Panelde neler var?','Aşağıdaki başlıkların her biri kendi sayfasında anlatılır.')+'<div class="fg">'
  +kart('01','Randevu ve takvim','Günlük işleri takvimde toplayın.','/is-takibi.html')
  +kart('02','Kasa ve muhasebe','Tahsilat, gider ve raporlar.','/is-takibi.html')
@@ -121,7 +146,7 @@ ozel=(sec_baslik('Özellikler','Panelde neler var?','Aşağıdaki başlıkların
  +kart('09','Hazır temalar','Sektörünüze göre başlayın.','/temalar.html')
  +'</div></div>')
 page('ozellikler.html','Özellikler | Panelin Tüm Modülleri | OnlineKaydet','Randevu, kasa, muhasebe, personel, evrak, web sitesi editörü, e-ticaret, pazaryeri ve B2B modülleri.',
- B('o','Özellikler','Tek panel, tüm modüller','Web sitesi, mağaza ve iş takibi aynı panelde çalışır.',('panel-d-ekip','Ekip ve yetki ekranı'))+'<section class="sec">'+ozel+'</section>'+P['dort']+SON)
+ B('o','Özellikler','Tek panel, bütün işler','Web sitesi, mağaza ve iş takibi aynı panelde çalışır.',('panel-d-ekip','Ekip ve yetki ekranı'))+'<section class="sec">'+ozel+'</section>'+P['dort']+SON)
 hk=('<section class="sec"><div class="w"><div class="yz"><h2 style="margin-top:0">Ne yapıyoruz?</h2><p>OnlineKaydet; web sitesi, e-ticaret, randevu ve iş takibini tek panelde toplar. Her firma sektörüne uygun hazır bir temayla başlar, metin ve görselleri panelden kendisi düzenler.</p>'
  '<h2>Kimler için?</h2><p>Kendi ekibiyle çalışan küçük ve orta ölçekli işletmeler için: teknik servisler, kuaför ve güzellik salonları, oto servisler, mağazalar ve bayiler.</p>'
  '<h2>Şirket</h2><p><b>Moda Ekru E-Ticaret Hizmetleri Tekstil Sanayi ve Ticaret Ltd. Şti.</b><br>Etimesgut, Ankara<br>Telefon: <a href="tel:+905444444004">0544 444 40 04</a></p></div></div></section>')
