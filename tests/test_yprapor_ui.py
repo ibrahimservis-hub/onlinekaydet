@@ -48,7 +48,7 @@ with sync_playwright() as pw:
         tx = pg.inner_text(".rpl")
         assert "Günlük ciro" in tx and "Satış kanalları" in tx and "Stok durumu" in tx, tx[:200]
         assert "Doluluk" not in tx, "e-ticarette randevu raporu listelenmemeli"
-        assert pg.eval_on_selector_all(".rpl .gh", "a=>a.length") >= 2, "rapor kümeleri"
+        assert pg.eval_on_selector_all(".rpl .ri", "a=>a.length") >= 4, "rapor sekmeleri"
     t("rapor listesi pakete göre kuruluyor", a)
 
     def b():

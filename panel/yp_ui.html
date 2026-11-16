@@ -459,6 +459,11 @@ label.f>input,label.f>select,label.f>textarea{min-height:34px;font-size:13px;bor
 @media(max-width:720px){.tlogo{display:block}.tbar{padding:0 14px}.tbar #gt{display:none}main{padding:12px 12px 96px}.figs{grid-template-columns:1fr 1fr}.figs .fig:first-child{grid-column:1/-1}.fig{border-left:0;border-top:1px solid var(--line)}.figs .fig:first-child{border-top:0}
  .mbar{padding:6px 4px 10px}.mbar a{font-size:10.5px;font-weight:500}.mbar a.on{color:var(--blue);font-weight:600}}
 .dwc{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:18px;align-items:start}.dwr{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line)}.dwr label{flex:1;display:flex;gap:8px;align-items:center;cursor:pointer}.dwr .dwm{display:flex;gap:4px}@media(max-width:700px){.dwf{grid-template-columns:1fr 1fr!important}}
+/* iç sayfalar: menü üstte */
+.rpw{display:block}.rpw .rpl{display:flex;gap:2px;border:0;border-bottom:1px solid var(--line);border-radius:0;background:none;overflow-x:auto;margin:0 0 16px}
+.rpl .ri{width:auto;flex:none;border:0;background:none;padding:0 14px 11px;min-height:38px;font-weight:600;font-size:14.5px;color:var(--mut);position:relative;white-space:nowrap;box-shadow:none!important}
+.rpl .ri:hover{color:var(--ink2)}.rpl .ri.on{color:var(--ink);background:none}.rpl .ri.on:after{content:"";position:absolute;left:10px;right:10px;bottom:-1px;height:2.5px;background:var(--blue);border-radius:2px}
+.uegrid{grid-template-columns:minmax(0,1fr) 290px!important}.uenav{display:flex!important;flex-direction:row!important;grid-column:1/-1;top:52px!important;z-index:4;background:var(--bg,#fff);border-bottom:1px solid var(--line);overflow-x:auto;gap:2px;padding-top:2px}.uenav a{flex:none;white-space:nowrap;border-radius:0!important;padding:10px 12px!important}@media(max-width:800px){.uegrid{grid-template-columns:1fr!important}}
 </style></head><body>
 <div id="login" hidden>
  <form id="lf" autocomplete="on"><img src="/salon/logo.png" alt="OnlineKaydet"><h1>Yönetim Paneli</h1><p class="s">E-posta ve şifrenizle girin</p>
@@ -3056,13 +3061,11 @@ V.rapor=async function(){var F=CUR.rf=CUR.rf||{rid:'',k:'30',frm:'',to:''};
  if(!F.rid)F.rid=CUR.raps[0].id;
  var liste='';
  CUR.rapg.forEach(function(g){
-  liste+='<div class="gh">'+esc(g.name)+'</div>'
-   +CUR.raps.filter(function(x){return x.group===g.id}).map(function(x){
-    return '<button class="ri '+(x.id===F.rid?'on':'')+'" data-a="rap-sec" data-v="'+x.id+'">'
-     +'<b>'+esc(x.name)+'</b><small>'+esc(x.desc)+'</small></button>'}).join('')});
+  liste+=CUR.raps.filter(function(x){return x.group===g.id}).map(function(x){
+    return '<button class="ri '+(x.id===F.rid?'on':'')+'" data-a="rap-sec" data-v="'+x.id+'" title="'+esc(x.desc)+'">'+esc(x.name)+'</button>'}).join('')});
  var h=head('Raporlar','İşletmenize uyan raporlar',
   '<button class="btn" data-a="rap-csv">Excel\'e aktar</button><button class="btn" data-a="rap-yazdir">Yazdır</button>');
- h+='<div class="rpw"><div class="rpl">'+liste+'</div><div id="rapgov"><div class="empty">Yükleniyor…</div></div></div>';
+ h+='<div class="rpw"><div class="rpl stabs" role="tablist">'+liste+'</div><div id="rapgov"><div class="empty">Yükleniyor…</div></div></div>';
  $('#main').innerHTML=h;await V.rapor.load()};
 V.rapor.load=async function(){var F=CUR.rf,g=F.frm?[F.frm,F.to]:rapGun(F.k);
  var r=await api('/yp/rapor/'+F.rid+'?frm='+g[0]+'&to='+g[1]);CUR.rapcur=r;
