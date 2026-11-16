@@ -512,6 +512,11 @@ def register(api_router, db, deps):
 # =================================================================== kuyruk çekirdeği
 async def _enqueue(db, product_ids, markets=None, kinds=("stock",)):
     """Ürün(ler)in açık ve bağlı pazaryerlerine gidecek stok/fiyat işi ekler (aynı ürün+pazaryeri için bekleyen varsa tekrar eklemez)."""
+    try:                                                       # panel ürünü ise düşen/artan stoğu panele de yaz
+        import urun_ayna
+        await urun_ayna.geri(db, list(product_ids or []))
+    except Exception:                                          # noqa: BLE001
+        pass
     n = 0
     for pid in dict.fromkeys(product_ids or []):
         p = await db.shop_products.find_one({"id": pid}, {"_id": 0, "channels": 1, "market_sync": 1})

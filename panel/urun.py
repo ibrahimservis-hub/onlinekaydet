@@ -72,13 +72,33 @@ def profit(price, cost, vat=20.0, commission=0.0, ship=0.0):
             "margin": round(net / price * 100, 1) if price else 0.0}
 
 
+FIYAT_MOD = {"ayni": "Sitedeki fiyatla", "oran": "Yüzde ekleyerek", "sabit": "Bu kanala özel fiyat"}
+
+
+def kanal_fiyat(p, key):
+    """(liste fiyatı, satış fiyatı) — kanal ayarına göre. Site her zaman ürünün kendi fiyatıdır."""
+    price = _num(p.get("price"))
+    sale = _num(p.get("sale_price")) or price
+    c = (p.get("ch_price") or {}).get(key) or {}
+    m = c.get("mod")
+    if key == "site" or m not in ("oran", "sabit"):
+        return price, sale
+    if m == "oran":
+        k = 1 + _num(c.get("oran")) / 100.0
+        return round(price * k, 2), round(sale * k, 2)
+    f = _num(c.get("fiyat")) or price
+    return f, (_num(c.get("indirimli")) or f)
+
+
 def channel_profit(p, chans=None):
     out = []
-    sale = _num(p.get("sale_price")) or _num(p.get("price"))
     for key in (chans or [k for k, v in (p.get("channels") or {}).items() if v]):
         name, comm = CHANNELS.get(key, (key, 0.0))
-        r = profit(sale, p.get("cost"), p.get("vat", 20), comm)
-        out.append(dict(r, channel=key, channel_name=name, commission_rate=comm))
+        cc = _num(((p.get("ch_price") or {}).get(key) or {}).get("komisyon")) or comm
+        liste, sale = kanal_fiyat(p, key)
+        r = profit(sale, p.get("cost"), p.get("vat", 20), cc, _num((p.get("ship") or {}).get("maliyet")))
+        out.append(dict(r, channel=key, channel_name=name, commission_rate=cc, list_price=liste,
+                        mod=((p.get("ch_price") or {}).get(key) or {}).get("mod") or "ayni"))
     return out
 
 
@@ -208,18 +228,67 @@ def clean(p, old=None):
     imgs = [_t(u, 400) for u in (p.get("images") or [])[:20] if _t(u, 400)]
     specs = [{"k": _t(s.get("k"), 60), "v": _t(s.get("v"), 200)} for s in (p.get("specs") or [])[:40]
              if isinstance(s, dict) and _t(s.get("k"), 60)]
+    chp = {}
+    for k, c in (p.get("ch_price") or {}).items():
+        if k in CHANNELS and k != "site" and isinstance(c, dict):
+            m = c.get("mod") if c.get("mod") in FIYAT_MOD else "ayni"
+            r = {"mod": m, "komisyon": min(max(_num(c.get("komisyon")), 0.0), 60.0)}
+            if m == "oran":
+                r["oran"] = min(max(_num(c.get("oran")), -50.0), 300.0)
+            elif m == "sabit":
+                r["fiyat"] = _num(c.get("fiyat"))
+                r["indirimli"] = _num(c.get("indirimli"))
+                if r["fiyat"] <= 0:
+                    raise HTTPException(422, "%s için özel fiyat yazın" % CHANNELS[k][0])
+                if r["indirimli"] and r["indirimli"] > r["fiyat"]:
+                    raise HTTPException(422, "%s indirimli fiyatı, kanal fiyatından yüksek olamaz" % CHANNELS[k][0])
+            chp[k] = r
+    sh = p.get("ship") or {}
+    en, boy, yuk = _num(sh.get("en")), _num(sh.get("boy")), _num(sh.get("yuk"))
+    desi = _num(p.get("desi"))
+    if not desi and en and boy and yuk:
+        desi = round(max(en * boy * yuk / 3000.0, 1.0), 2)
+    ship = {"en": en, "boy": boy, "yuk": yuk, "hs": _t(sh.get("hs"), 12), "gun": min(max(_int(sh.get("gun"), 2), 0), 60),
+            "ucretsiz": bool(sh.get("ucretsiz")), "maliyet": _num(sh.get("maliyet"))}
+    cats = []
+    for c in (p.get("cats") or [])[:10]:
+        c = _t(c, 80)
+        if c and c not in cats:
+            cats.append(c)
+    main_cat = _t(p.get("cat"), 80) or (cats[0] if cats else "")
+    if main_cat and main_cat not in cats:
+        cats.insert(0, main_cat)
+    so = p.get("seo") or {}
+    canon = _t(so.get("canonical"), 300)
+    if canon and not re.match(r"^(https?://|/)", canon):
+        raise HTTPException(422, "Canonical adres http(s):// ya da / ile başlamalı")
+    seo = {"title": _t(so.get("title"), 70), "desc": _t(so.get("desc"), 320), "keywords": _t(so.get("keywords"), 250),
+           "canonical": canon, "noindex": bool(so.get("noindex")), "alt": _t(so.get("alt"), 125)}
+    tags = []
+    for x in (p.get("tags") or [])[:20]:
+        x = _t(x, 30)
+        if x and x not in tags:
+            tags.append(x)
+    vid = _t(p.get("video"), 300)
+    if vid and not re.match(r"^https://(www\.)?(youtube\.com|youtu\.be|vimeo\.com)/", vid):
+        raise HTTPException(422, "Video için YouTube veya Vimeo bağlantısı yapıştırın")
     out = {"name": name, "slug": slug(p.get("slug") or name), "sku": _t(p.get("sku"), 60),
            "barcode": _t(p.get("barcode"), 40), "gtin": _t(p.get("gtin"), 20),
-           "cat": _t(p.get("cat"), 80), "brand": _t(p.get("brand"), 60),
+           "cat": main_cat, "cats": cats, "brand": _t(p.get("brand"), 60), "model": _t(p.get("model"), 60),
+           "tags": tags, "supplier": _t(p.get("supplier"), 80), "unit": _t(p.get("unit"), 15) or "Adet",
+           "google_cat": _t(p.get("google_cat"), 160), "ch_price": chp, "ship": ship, "video": vid,
+           "backorder": bool(p.get("backorder")), "featured": bool(p.get("featured")), "badge": _t(p.get("badge"), 24),
+           "short": _t(p.get("short"), 240),
+           "related": [_t(i, 24) for i in (p.get("related") or [])[:12] if _t(i, 24)],
            "desc": str(p.get("desc") or "")[:12000], "specs": specs,
            "cost": _num(p.get("cost")), "price": price, "sale_price": sale, "vat": vat,
            "stock": _int(p.get("stock")), "track_stock": False if p.get("track_stock") is False else True,
            "low_at": _int(p.get("low_at"), _int(old.get("low_at"), 5)),
            "variants": vr, "images": imgs,
-           "weight": _num(p.get("weight")), "desi": _num(p.get("desi")),
+           "weight": _num(p.get("weight")), "desi": desi,
            "warranty": _t(p.get("warranty"), 60), "min_qty": max(_int(p.get("min_qty"), 1), 1),
            "max_qty": _int(p.get("max_qty")), "channels": ch,
-           "seo": {"title": _t((p.get("seo") or {}).get("title"), 70), "desc": _t((p.get("seo") or {}).get("desc"), 300)},
+           "seo": seo,
            "status": "draft" if p.get("status") == "draft" else "live",
            "source": _t(p.get("source"), 400)}
     if vr:
@@ -236,6 +305,14 @@ def view(p):
                 low=bool(p.get("track_stock", True) and 0 < _int(p.get("stock")) <= _int(p.get("low_at"), 5)),
                 out=bool(p.get("track_stock", True) and _int(p.get("stock")) <= 0),
                 channels_on=[k for k, v in (p.get("channels") or {}).items() if v])
+
+
+async def _ayna(db, pid):
+    try:
+        import urun_ayna
+        await urun_ayna.ayna(db, pid)
+    except Exception:                                              # noqa: BLE001
+        pass
 
 
 def register(api_router, db, deps):
@@ -321,6 +398,7 @@ def register(api_router, db, deps):
         o.update({"id": uuid.uuid4().hex[:12], "low_at": _int(payload.get("low_at"), 5),
                   "created_at": _now(), "updated_at": _now(), "by": user.get("name", "")})
         await db.yp_products.insert_one(dict(o))
+        await _ayna(db, o["id"])
         return view(o)
 
     @api_router.get("/yp/products/{pid}")
@@ -338,12 +416,14 @@ def register(api_router, db, deps):
         if "low_at" in payload:
             o["low_at"] = _int(payload["low_at"], 5)
         await db.yp_products.update_one({"id": pid}, {"$set": o})
+        await _ayna(db, pid)
         return view(dict(p, **o))
 
     @api_router.delete("/yp/products/{pid}")
     async def delete(pid: str, _: dict = Depends(adm)):
         await one(pid)
         await db.yp_products.delete_one({"id": pid})
+        await _ayna(db, pid)
         return {"ok": True}
 
     @api_router.post("/yp/products/bulk")
@@ -399,6 +479,7 @@ def register(api_router, db, deps):
             else:
                 up["updated_at"] = _now()
                 await db.yp_products.update_one({"id": pid}, {"$set": up})
+            await _ayna(db, pid)
             n += 1
         return {"ok": True, "n": n}
 

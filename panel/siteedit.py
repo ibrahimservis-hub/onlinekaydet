@@ -1055,15 +1055,34 @@ def register(api_router, db, deps):
             if p.startswith("magaza/urun/"):
                 try:
                     from urllib.parse import unquote
-                    pr = await db.shop_products.find_one({"$or": [{"slug": unquote(p[12:])}, {"id": unquote(p[12:])}], "active": True}, {"_id": 0, "name": 1})
+                    pr = await db.shop_products.find_one({"$or": [{"slug": unquote(p[12:])}, {"id": unquote(p[12:])}], "active": True},
+                                                         {"_id": 0, "name": 1, "seo_title": 1, "seo_desc": 1, "short": 1, "canonical": 1, "noindex": 1, "seo_keywords": 1, "images": 1})
                 except Exception:                                             # noqa: BLE001
                     pr = None
                 if not pr:
                     return None
                 ttl = pr["name"]
-            h = compose_page(await themed_home(ctx), ttl + " · " + ctx["name"], body)
+            h = compose_page(await themed_home(ctx), ((pr or {}).get("seo_title") or (ttl + " · " + ctx["name"])) if p.startswith("magaza/urun/") else (ttl + " · " + ctx["name"]), body)
             if not h:
                 return None
+            if p.startswith("magaza/urun/") and pr:
+                import html as _hh
+                ds = (pr.get("seo_desc") or pr.get("short") or "").strip()
+                ek = ""
+                if ds:
+                    h = re.sub(r'<meta name="description"[^>]*>', "", h)
+                    ek += '<meta name="description" content="%s"><meta property="og:description" content="%s">' % (_hh.escape(ds), _hh.escape(ds))
+                if pr.get("seo_keywords"):
+                    ek += '<meta name="keywords" content="%s">' % _hh.escape(pr["seo_keywords"])
+                if pr.get("canonical"):
+                    h = re.sub(r'<link rel="canonical"[^>]*>', "", h)
+                    ek += '<link rel="canonical" href="%s">' % _hh.escape(pr["canonical"])
+                if pr.get("noindex"):
+                    ek += '<meta name="robots" content="noindex,follow">'
+                ek += '<meta property="og:title" content="%s">' % _hh.escape(pr.get("seo_title") or pr["name"])
+                if (pr.get("images") or [""])[0]:
+                    ek += '<meta property="og:image" content="%s">' % _hh.escape(pr["images"][0])
+                h = h.replace("</head>", ek + "</head>", 1)
             h = h.replace("</head>", '<meta name="robots" content="noindex,follow"></head>', 1) if p == "hesabim" else h
         elif p in ("kurslar", "rezervasyon") and ctx and (("/" + p) in [h for h, _ in sektor_mod.site_links(ctx.get("sector") or "")] or await getattr(db, "programs" if p == "kurslar" else "resources").count_documents({}) > 0):
             items = await sektor_mod.public_items(db, "programs" if p == "kurslar" else "resources")

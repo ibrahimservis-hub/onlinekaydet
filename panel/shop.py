@@ -249,7 +249,8 @@ async def stock_changed(db, ids):
 
 def public_product(d: dict) -> dict:
     out = {k: d.get(k) for k in ("id", "slug", "name", "brand", "model", "category", "price", "old_price", "short", "description",
-                                 "specs", "images", "badge", "featured")}
+                                 "specs", "images", "badge", "featured", "sku", "gtin", "barcode", "img_alt", "video", "free_ship",
+                                 "delivery_days", "unit", "seo_title", "min_qty", "max_qty")}
     st = d.get("stock", 0)
     out["in_stock"] = (not d.get("track_stock", True)) or st > 0
     out["stock_left"] = st if d.get("track_stock", True) and 0 < st <= 5 else None
@@ -831,7 +832,13 @@ def register(api_router, db, deps):
         sim = sorted([r for r in same_cat], key=lambda r: (0 if r.get("brand") == d.get("brand") else 1, abs((r.get("price", 0) or 0) - p0)))[:n]
         seen = {r["id"] for r in sim}
         other = [r for r in same_brand if r["id"] not in seen][:n]
-        return {"similar": [lite(r) for r in sim], "same_brand": [lite(r) for r in other]}
+        sec = []
+        if d.get("related"):
+            by = {r["id"]: r for r in await db.shop_products.find({"active": True, "id": {"$in": list(d["related"])}}, proj).to_list(20)}
+            sec = [lite(by[i]) for i in d["related"] if i in by]
+            seen |= {r["id"] for r in sec}
+            sim = [r for r in sim if r["id"] not in {x["id"] for x in sec}]
+        return {"picked": sec, "similar": [lite(r) for r in sim], "same_brand": [lite(r) for r in other]}
 
     @api_router.get("/public/shop/sitemap")
     async def pub_sitemap():

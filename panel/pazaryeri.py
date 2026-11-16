@@ -30,6 +30,14 @@ def _now():
 
 
 # ---------------------------------------------------------------- stok (paylaşılan çekirdek)
+async def _ayna(db, pid):
+    try:
+        import urun_ayna
+        await urun_ayna.ayna(db, pid)
+    except Exception:                                              # noqa: BLE001
+        pass
+
+
 async def queue_push(db, pid, channel, kind="stock", ref=""):
     await db.yp_sync.insert_one({"id": uuid.uuid4().hex[:12], "product": pid, "channel": channel,
                                  "kind": kind, "state": "bekliyor", "tries": 0, "ref": ref,
@@ -57,6 +65,7 @@ async def take_stock(db, pid, qty, source, ref):
     await db.yp_stock_log.insert_one({"id": uuid.uuid4().hex[:12], "key": key, "product": pid, "delta": -qty,
                                       "before": before, "after": after, "source": source, "ref": ref,
                                       "at": _now(), "seq": time.time()})
+    await _ayna(db, pid)
     for k, on in (p.get("channels") or {}).items():
         if on and k != source and k in MARKETS:
             await queue_push(db, pid, k, "stock", ref)
@@ -80,6 +89,7 @@ async def give_stock(db, pid, qty, source, ref):
         return {"ok": False, "given": 0, "err": "Ürün bulunamadı"}
     before = _int(p.get("stock"))
     await db.yp_products.update_one({"id": pid}, {"$inc": {"stock": qty}})
+    await _ayna(db, pid)
     await db.yp_stock_log.insert_one({"id": uuid.uuid4().hex[:12], "key": key, "product": pid, "delta": qty,
                                       "before": before, "after": before + qty, "source": source, "ref": ref,
                                       "at": _now(), "seq": time.time()})
@@ -227,6 +237,7 @@ def register(api_router, db, deps):
         n = max(_int(payload.get("stock")), 0)
         before = _int(p.get("stock"))
         await db.yp_products.update_one({"id": pid}, {"$set": {"stock": n, "updated_at": _now()}})
+        await _ayna(db, pid)
         await db.yp_stock_log.insert_one({"id": uuid.uuid4().hex[:12], "key": "", "product": pid, "delta": n - before,
                                           "before": before, "after": n, "source": "elle", "ref": "", "at": _now(), "seq": time.time()})
         for k, on in (p.get("channels") or {}).items():

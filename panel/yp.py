@@ -139,6 +139,13 @@ def register(api_router, db, deps):
             mods, _sec, eshop = await blocks.firma_modulleri(db)
         except Exception:                                          # noqa: BLE001
             mods, eshop = list(pk.get("modules") or []), False
+        if eshop and not await db.app_settings.find_one({"_id": "urun_ayna_v1"}, {"_id": 1}):
+            try:                                                   # panel ürünlerini bir kez mağazaya aktar (önceden eklenenler)
+                import urun_ayna
+                n = await urun_ayna.ayna_hepsi(db)
+                await db.app_settings.update_one({"_id": "urun_ayna_v1"}, {"$set": {"n": n}}, upsert=True)
+            except Exception:                                      # noqa: BLE001
+                pass
         try:
             import isakis
             psec = pk.get("sector") or key
