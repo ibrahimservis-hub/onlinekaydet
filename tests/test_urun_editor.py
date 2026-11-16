@@ -88,6 +88,30 @@ with sync_playwright() as pw:
         pg.evaluate("location.hash='#bugun'"); pg.wait_for_timeout(600)
         assert pg.evaluate("UE") is None
     t("Düzenleyici: başka sayfaya geçince durum temizlenir", d)
+    PAGE = '<html><head><title>Kombi Pompası | Magaza</title><meta property="og:title" content="Kombi Pompası"><meta property="og:description" content="Sessiz pompa"><meta property="og:image" content="https://x.test/a.jpg"></head><body></body></html>'
+    def m():
+        pg.evaluate("V.urun().catch(function(){})"); pg.wait_for_selector("[data-a=um-ac]", timeout=8000)
+        pg.click("[data-a=um-ac]"); pg.wait_for_selector("#umenu", timeout=3000)
+        assert pg.locator("#umenu [role=menuitem]").count() >= 4
+        pg.click("#umenu [data-a=um-hizli]"); pg.wait_for_selector("#hdz", timeout=4000)
+        pg.fill("#hdz input[name=price]", "1777"); pg.fill("#hdz input[name=stock]", "9")
+        pg.click("#hdz button.p"); pg.wait_for_selector("#hdz", state="detached", timeout=5000)
+        it = (c.get("/api/yp/products/" + PID, headers=TK()).json())
+        it = it.get("item") or it
+        assert it["price"] == 1777 and it["stock"] == 9, (it["price"], it["stock"])
+        pg.wait_for_selector("[data-a=um-ac]"); pg.click("[data-a=um-ac]"); pg.click("#umenu [data-a=um-yayin]"); pg.wait_for_timeout(700)
+        it = c.get("/api/yp/products/" + PID, headers=TK()).json(); it = it.get("item") or it
+        assert it["status"] == "draft", it["status"]
+        pg.click("[data-a=um-ac]"); pg.keyboard.press("Escape"); assert pg.locator("#umenu").count() == 0
+    t("Ürün satırı menüsü: fiyat/stok, yayından kaldır, Esc", m)
+    def h():
+        pg.evaluate("V.urun().catch(function(){})"); pg.wait_for_selector("[data-a=urun-hizli]", timeout=8000)
+        pg.click("[data-a=urun-hizli]"); pg.wait_for_selector("#hzf", timeout=4000)
+        pg.click("#hzf summary"); pg.fill("#hzf textarea[name=html]", PAGE); pg.click("#hzf button.p")
+        pg.wait_for_selector("#uef", timeout=6000)
+        assert pg.input_value("#uef input[name=name]").startswith("Kombi Pompası")
+        assert pg.evaluate("UE.images.length") == 1
+    t("Bağlantıdan ürün ekle: kaynak yapıştır → düzenleyici dolu açılır", h)
     assert not errs, errs
     br.close()
 for n in ok: print("  ✓", n)

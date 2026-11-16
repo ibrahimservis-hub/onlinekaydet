@@ -2896,13 +2896,35 @@ uyelik.register(api_router, db, {"require_admin": require_admin, "JWT_SECRET": J
 import urun  # e-ticaret ürün modülü
 
 
+def _fetch_sync(u):
+    import urllib.request, gzip, zlib, re as _re
+    rq = urllib.request.Request(u, headers={
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept-Language": "tr-TR,tr;q=0.9,en;q=0.7", "Accept-Encoding": "gzip, deflate"})
+    with urllib.request.urlopen(rq, timeout=15) as r:
+        raw = r.read(1500000)
+        enc = (r.headers.get("Content-Encoding") or "").lower()
+        cs = r.headers.get_content_charset()
+    if enc == "gzip":
+        raw = gzip.decompress(raw)
+    elif enc == "deflate":
+        try:
+            raw = zlib.decompress(raw)
+        except zlib.error:
+            raw = zlib.decompress(raw, -zlib.MAX_WBITS)
+    if not cs:
+        m = _re.search(rb'charset=["\']?([A-Za-z0-9_-]+)', raw[:4000])
+        cs = m.group(1).decode() if m else "utf-8"
+    try:
+        return raw.decode(cs, "replace")[:900000]
+    except LookupError:
+        return raw.decode("utf-8", "replace")[:900000]
+
+
 async def _fetch_url(u):                                               # hızlı ürün ekleme: sayfayı indir
-    import httpx
-    async with httpx.AsyncClient(timeout=12, follow_redirects=True,
-                                 headers={"User-Agent": "Mozilla/5.0 (compatible; OnlineKaydet/1.0)"}) as cl:
-        r = await cl.get(u)
-        r.raise_for_status()
-        return r.text[:900000]
+    import asyncio
+    return await asyncio.to_thread(_fetch_sync, u)
 
 
 urun.register(api_router, db, {"require_admin": require_admin, "fetch_url": _fetch_url})

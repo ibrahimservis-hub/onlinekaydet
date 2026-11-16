@@ -396,8 +396,10 @@ table.gr .r{text-align:right}
 .uechk{display:flex;flex-direction:column;gap:4px;margin:8px 0}.uechk .ok{color:var(--ok)}.uechk .no{color:var(--warn)}
 .uefoot{display:flex;align-items:center;gap:8px;padding:12px 0;flex-wrap:wrap}.uefoot .sp{flex:1}
 .uepzr{display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid var(--line);font-size:13px}
-@media(max-width:1100px){.uegrid{grid-template-columns:minmax(0,1fr) 260px}.uenav{display:none}}
+#uehaz a{display:block;color:var(--warn);font-size:13px;text-decoration:none;padding:3px 0}.uepzr{flex-wrap:wrap}.uepzr span:last-child{flex-basis:100%}.uetb td,.uetb th{padding:7px 5px}.uetb select{min-width:110px}.uetb td{white-space:nowrap}.uetb td .num{white-space:nowrap}
+@media(max-width:1560px){.uegrid{grid-template-columns:minmax(0,1fr) 270px}.uenav{display:none}}
 @media(max-width:800px){.uegrid{grid-template-columns:1fr}.ueside{position:static;order:-1}.g4,.g3{grid-template-columns:1fr 1fr}.uespec{grid-template-columns:1fr}.uetop{position:static}}
+#umenu{position:fixed;z-index:60;min-width:190px;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 10px 30px rgba(11,23,48,.18);padding:5px;display:flex;flex-direction:column}#umenu button,#umenu a{display:block;text-align:left;border:0;background:none;padding:10px 12px;border-radius:7px;font:inherit;font-size:13.5px;color:var(--tx);cursor:pointer;text-decoration:none;min-height:40px}#umenu button:hover,#umenu a:hover,#umenu :focus-visible{background:var(--blue-s);outline:0}#umenu .bad{color:var(--bad)}.umb{min-width:36px;font-weight:700;letter-spacing:1px}
 </style></head><body>
 <div id="login" hidden>
  <form id="lf" autocomplete="on"><img src="/salon/logo.png" alt="OnlineKaydet"><h1>Yönetim Paneli</h1><p class="s">E-posta ve şifrenizle girin</p>
@@ -1223,7 +1225,7 @@ V.urun.load=async function(){var F=CUR.uf;
     +'<td>'+stokBar(p)+'</td>'
     +'<td class="r num" style="color:'+((p.margin||0)>0?'var(--ok)':'var(--bad)')+';font-weight:650">'+(p.margin!=null?'%'+Number(p.margin).toFixed(0):'—')+'</td>'
     +'<td><span class="tag '+st[1]+'">'+st[0]+'</span></td>'
-    +'<td class="r"><button class="btn s" data-a="urun-ac" data-id="'+esc(p.id)+'">Düzenle</button></td></tr>'}).join('')
+    +'<td class="r" style="white-space:nowrap"><button class="btn s" data-a="urun-ac" data-id="'+esc(p.id)+'">Düzenle</button> <button class="btn s umb" data-a="um-ac" data-id="'+esc(p.id)+'" data-d="'+(p.status==='draft'?'1':'')+'" data-s="'+esc(p.slug||'')+'" aria-label="Diğer işlemler" aria-haspopup="menu">⋯</button></td></tr>'}).join('')
   +'</tbody></table><div class="sumline"><span><b style="color:var(--tx)">'+(r.total||rows.length)+'</b> ürün</span>'
   +'<span>Stok değeri <b style="color:var(--tx)">'+tl((r.sum||{}).stock_value||0)+'</b></span>'
   +'<span>Ortalama kâr <b style="color:var(--tx)">%'+((r.sum||{}).margin||0)+'</b></span>'
@@ -1468,6 +1470,30 @@ document.addEventListener('click',function(ev){if(UE&&ev.target.closest&&ev.targ
  else if(fig&&UE.drag!=null){ev.preventDefault();if(t==='drop'){var to=+fig.dataset.ui,fr=UE.drag;if(to!==fr){var x=UE.images.splice(fr,1)[0];UE.images.splice(to,0,x);UEDIRTY=true;ueImgs();ueCalc()}UE.drag=null}}})});
 document.addEventListener('dragstart',function(ev){var f=ev.target.closest&&ev.target.closest('#ueimgs figure');if(f&&UE){UE.drag=+f.dataset.ui;ev.dataTransfer.effectAllowed='move'}});
 window.addEventListener('beforeunload',function(ev){if(UE&&UEDIRTY){ev.preventDefault();ev.returnValue=''}});
+/* ---------------- ÜRÜN SATIRI: küçük işlem menüsü ---------------- */
+function umKapat(){var m=$('#umenu');if(m)m.remove()}
+document.addEventListener('click',function(ev){var b=ev.target.closest&&ev.target.closest('[data-a]');var a=b&&b.dataset.a;
+ if(a!=='um-ac'){if(!ev.target.closest||!ev.target.closest('#umenu'))umKapat()}
+ if(!a||a.indexOf('um-')!==0)return;var id=b.dataset.id;
+ if(a==='um-ac'){var had=$('#umenu')&&$('#umenu').dataset.id===id;umKapat();if(had)return;var r=b.getBoundingClientRect(),m=document.createElement('div');m.id='umenu';m.dataset.id=id;m.setAttribute('role','menu');
+  m.innerHTML='<button role="menuitem" data-a="um-hizli" data-id="'+esc(id)+'">Fiyat ve stok</button><button role="menuitem" data-a="um-kopya" data-id="'+esc(id)+'">Kopyasını oluştur</button>'
+   +'<button role="menuitem" data-a="um-yayin" data-id="'+esc(id)+'" data-d="'+(b.dataset.d||'')+'">'+(b.dataset.d?'Yayına al':'Yayından kaldır')+'</button>'
+   +(b.dataset.s?'<a role="menuitem" target="_blank" rel="noopener" href="/magaza/urun/'+encodeURIComponent(b.dataset.s)+'">Mağazada gör</a>':'')
+   +'<button role="menuitem" class="bad" data-a="urun-sil" data-id="'+esc(id)+'">Sil</button>';
+  document.body.appendChild(m);var w=m.offsetWidth,h=m.offsetHeight;m.style.left=Math.max(8,Math.min(innerWidth-w-8,r.right-w))+'px';m.style.top=(r.bottom+h+12>innerHeight&&r.top>h+12?r.top-h-4:r.bottom+4)+'px';var f=m.querySelector('button,a');if(f)f.focus();return}
+ umKapat();
+ if(a==='um-hizli'){api('/yp/products/'+id).then(function(r){var p=r.item||r;
+  modal('Fiyat ve stok · '+(p.name||''),'<form id="hdz" data-id="'+esc(id)+'"><div class="g2"><label class="f">Satış fiyatı (KDV dâhil)<input name="price" type="number" step="0.01" min="0" required value="'+esc(p.price)+'"></label>'
+   +'<label class="f">İndirimli fiyat<input name="sale_price" type="number" step="0.01" min="0" value="'+esc(p.sale_price||'')+'"></label></div>'
+   +'<div class="g2"><label class="f">Stok<input name="stock" type="number" step="1" min="0" value="'+esc(p.stock||0)+'"></label>'
+   +'<label class="f">Durum<select name="status"><option value="live"'+(p.status!=='draft'?' selected':'')+'>Yayında</option><option value="draft"'+(p.status==='draft'?' selected':'')+'>Taslak</option></select></label></div>'
+   +'<p class="note">Pazaryeri fiyatları ve diğer ayarlar için “Düzenle”yi kullanın.</p>'
+   +'<div class="mf"><button type="button" class="btn" data-a="close">Vazgeç</button><button class="btn p">Kaydet</button></div></form>')}).catch(fail)}
+ else if(a==='um-kopya'){api('/yp/products/'+id).then(function(r){return urunEditor(r.item||r,true)}).catch(fail)}
+ else if(a==='um-yayin'){var d=b.dataset.d;api('/yp/products/'+id,{method:'PUT',body:{status:d?'live':'draft'}}).then(function(){toast(d?'Ürün yayına alındı':'Ürün yayından kaldırıldı');V.urun.load()}).catch(fail)}});
+document.addEventListener('keydown',function(ev){if(ev.key==='Escape')umKapat()});
+document.addEventListener('submit',function(ev){var f=ev.target;if(!f||f.id!=='hdz')return;ev.preventDefault();var btn=f.querySelector('button.p');btn.disabled=true;
+ api('/yp/products/'+f.dataset.id,{method:'PUT',body:{price:+f.price.value||0,sale_price:+f.sale_price.value||0,stock:+f.stock.value||0,status:f.status.value}}).then(function(){closeM();toast('Ürün güncellendi');V.urun.load()}).catch(function(e){btn.disabled=false;fail(e)})});
 /* ---------------- SİPARİŞLER ve İADELER ---------------- */
 var OST={yeni:['Yeni','y'],onaylandi:['Onaylandı','b'],hazirlaniyor:['Hazırlanıyor','b'],kargoda:['Kargoda','b'],teslim:['Teslim edildi','g'],iptal:['İptal','r']};
 var OFLOW=['yeni','onaylandi','hazirlaniyor','kargoda','teslim'];
@@ -1783,7 +1809,8 @@ document.addEventListener('click',function(ev){var b=ev.target.closest('[data-a]
    api('/yp/products/'+b.dataset.id,{method:'DELETE'}).then(function(){closeM();toast('Ürün silindi');V.urun.load()}).catch(fail)})}
  else if(a==='urun-hizli'){modal('Bağlantıdan ürün ekle',
    '<p class="note" style="margin:0 0 10px">Bir ürün sayfasının bağlantısını yapıştırın; ad, açıklama, görsel ve fiyat kendiliğinden gelsin.</p>'
-   +'<form id="hzf"><label>Ürün sayfası bağlantısı<input name="url" type="url" required placeholder="https://…"></label>'
+   +'<form id="hzf"><label>Ürün sayfası bağlantısı<input name="url" type="url" placeholder="https://…"></label>'
+   +'<details style="margin:-4px 0 12px"><summary class="note" style="cursor:pointer">Bağlantı açılmazsa: sayfa kaynağını yapıştır</summary><p class="note" style="margin:6px 0">Ürün sayfasında sağ tık → “Sayfa kaynağını görüntüle” → tümünü kopyalayıp buraya yapıştırın.</p><textarea name="html" rows="4" style="width:100%" placeholder="<html>…"></textarea></details>'
    +'<div class="mf"><button type="button" class="btn" data-a="close">Vazgeç</button><button class="btn p">Getir</button></div></form>')}
  /* sipariş */
  else if(a==='sseg'){CUR.sf.status=b.dataset.v;CUR.sf.off=0;V.siparis.load().catch(fail)}
@@ -1858,8 +1885,8 @@ document.addEventListener('submit',function(ev){var f=ev.target;
   var id=f.dataset.id;
   api('/yp/products'+(id?'/'+id:''),{method:id?'PUT':'POST',body:body}).then(function(){closeM();toast(id?'Ürün güncellendi':'Ürün eklendi');V.urun.load()}).catch(fail)}
  else if(fid(f)==='hzf'){ev.preventDefault();var btn=f.querySelector('button.p');btn.disabled=true;
-  api('/yp/products/parse',{method:'POST',body:{url:f.url.value}}).then(function(r){
-   closeM();urunEditor(r.item||r);toast('Bilgiler sayfadan alındı, fiyat ve stoğu kontrol edin')}).catch(function(e){btn.disabled=false;fail(e)})}
+  (f.url.value||f.html.value.trim()?api('/yp/products/parse',{method:'POST',body:{url:f.url.value,html:f.html.value}}):Promise.reject(new Error('Bağlantıyı yapıştırın'))).then(function(r){
+   closeM();urunEditor(r.item||r).catch(fail);toast('Bilgiler sayfadan alındı, fiyat ve stoğu kontrol edin')}).catch(function(e){btn.disabled=false;fail(e)})}
  else if(fid(f)==='cgf'){ev.preventDefault();
   api('/yp/orders/'+CUR.sip.id,{method:'PUT',body:{market_no:f.market_no.value,
    cargo:{firm:f.firm.value,code:f.code.value,barcode:f.barcode.value}}})

@@ -383,8 +383,10 @@ def register(api_router, db, deps):
                 raise HTTPException(503, "Bağlantıdan çekme şu an kapalı")
             try:
                 raw = await fetch(url)
-            except Exception:                                      # noqa: BLE001
-                raise HTTPException(502, "Sayfaya ulaşılamadı; bilgileri elle girebilirsiniz")
+            except Exception as e:                                 # noqa: BLE001
+                code = getattr(e, "code", None) or getattr(getattr(e, "response", None), "status_code", None)
+                raise HTTPException(502, "Sayfaya ulaşılamadı" + (" (%s)" % code if code else "")
+                                    + ". Site otomatik okumayı engelliyor olabilir; “Sayfa kaynağını yapıştır” ile deneyin")
         d = parse_product(raw, url)
         if not d["name"]:
             raise HTTPException(422, "Sayfada ürün bilgisi bulunamadı; elle girebilirsiniz")
