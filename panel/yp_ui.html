@@ -493,6 +493,39 @@ function seg(items,cur,act){return '<div class="seg">'+items.map(function(i){ret
 function svc(v){return (v.items||[]).map(function(i){return esc(i.name)}).join(' + ')||esc(v.want||'—')}
 function mayRetry(fn){return fn().catch(function(e){fail(e)})}
 /* modal */
+var IM=null;
+function iceAdim1(){modal('Excel / CSV ile ürün yükle',
+ '<p class="note" style="margin:0 0 10px">Önce şablonu indirip doldurun ya da kendi dosyanızı seçin; sütunları sonraki adımda eşlersiniz. Aynı «Ana stok kodu» taşıyan satırlar tek ürünün renk/beden seçenekleri olur.</p>'
+ +'<p style="margin:0 0 12px"><button type="button" class="btn s" data-a="ice-sablon">Şablonu indir</button></p>'
+ +'<label>Dosya (.xlsx veya .csv, en çok 5000 satır)<input id="icef" type="file" accept=".xlsx,.csv,.txt"></label>'
+ +'<div id="icem" class="note" style="margin-top:8px"></div>'
+ +'<div class="mf"><button type="button" class="btn" data-a="close">Vazgeç</button></div>',true)}
+function iceAdim2(){var h=IM.headers,mp=IM.mapping,o='<option value="">— kullanma —</option>';
+ var opt=function(sel){return o+h.map(function(x){return '<option'+(x===sel?' selected':'')+'>'+esc(x)+'</option>'}).join('')};
+ var rows=IM.fields.map(function(f){return '<tr><td>'+esc(f.baslik)+'</td><td><select data-ice="'+f.alan+'">'+opt(mp[f.alan])+'</select></td></tr>'}).join('');
+ modal('Sütunları eşle · '+IM.count+' satır',
+ '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:10px"><label>Ne yapılsın<select id="icemod"><option value="ikisi">Yeni ekle, varsa güncelle</option><option value="ekle">Yalnız yeni ekle</option><option value="guncelle">Yalnız mevcutları güncelle</option></select></label>'
+ +'<label>Ürünü neyle eşle<select id="icekey"><option value="sku">Stok kodu</option><option value="barcode">Barkod</option></select></label></div>'
+ +'<div style="max-height:46vh;overflow:auto"><table class="uetb"><thead><tr><th>Alan</th><th>Dosyadaki sütun</th></tr></thead><tbody>'+rows+'</tbody></table></div>'
+ +'<p class="note" style="margin:8px 0 0">Boş bırakılan hücreler mevcut ürün bilgisini silmez.</p>'
+ +'<div class="mf"><button type="button" class="btn" data-a="close">Vazgeç</button><button type="button" class="btn p" data-a="ice-onizle">Önizle</button></div>',true)}
+function iceEsle(){var m={};A('[data-ice]').forEach(function(s){if(s.value)m[s.getAttribute('data-ice')]=s.value});
+ IM.mapping=m;IM.mode=$('#icemod').value;IM.key=$('#icekey').value;return m}
+function iceOnizle(){var m=iceEsle();api('/yp/products/import/preview',{method:'POST',body:{job:IM.job,mapping:m,mode:IM.mode,key:IM.key}}).then(function(r){
+ IM.prev=r;var er=r.errors.map(function(e){return '<li>Satır '+e.satir+': '+esc(e.hata)+'</li>'}).join('');
+ modal('Önizleme',
+ '<p><b>'+r.ekle+'</b> yeni ürün eklenecek, <b>'+r.guncelle+'</b> ürün güncellenecek'+(r.hata?', <b>'+r.hata+'</b> satır atlanacak':'')+'.</p>'
+ +(er?'<ul class="note" style="max-height:30vh;overflow:auto;padding-left:18px">'+er+'</ul>'+(r.hata>r.errors.length?'<p class="note">…ve '+(r.hata-r.errors.length)+' hata daha (hata dosyasında).</p>':''):'')
+ +'<div class="mf"><button type="button" class="btn" data-a="urun-ice-geri">Geri</button><button type="button" class="btn p" data-a="ice-calistir"'+((r.ekle+r.guncelle)?'':' disabled')+'>Yükle</button></div>')}).catch(fail)}
+function iceCalistir(btn){if(btn)btn.disabled=true;api('/yp/products/import/run',{method:'POST',body:{job:IM.job}}).then(function(r){
+ modal('Yükleme bitti','<p><b>'+r.ekle+'</b> ürün eklendi, <b>'+r.guncelle+'</b> ürün güncellendi'+(r.hata?', <b>'+r.hata+'</b> satır atlandı':'')+'.</p>'
+ +'<div class="mf">'+(r.hata?'<button type="button" class="btn" data-a="ice-hata">Hata dosyasını indir</button>':'')+'<button type="button" class="btn p" data-a="close">Tamam</button></div>');
+ if(V.urun&&V.urun.load)V.urun.load()}).catch(function(e){if(btn)btn.disabled=false;fail(e)})}
+document.addEventListener('change',function(ev){var f=ev.target;if(!f||f.id!=='icef'||!f.files[0])return;var file=f.files[0],m=$('#icem');
+ if(file.size>5*1024*1024){m.textContent='Dosya 5 MB’ı aşıyor.';return}
+ m.textContent='Okunuyor…';var rd=new FileReader();rd.onload=function(){var d=String(rd.result).split(',')[1]||'';
+  api('/yp/products/import/parse',{method:'POST',body:{name:file.name,data:d}}).then(function(r){IM=r;iceAdim2()}).catch(function(e){m.textContent=(e&&e.message)||'Dosya okunamadı'})};
+ rd.readAsDataURL(file)});
 function modal(title,body,wide){var o=$('#ov');o.innerHTML='<div class="md'+(wide?' wide':'')+'" role="dialog" aria-modal="true" aria-label="'+esc(title)+'"><div class="mh"><h3>'+esc(title)+'</h3><button data-a="close" aria-label="Kapat">×</button></div><div class="mb">'+body+'</div></div>';o.hidden=false;var f=$('input:not([type=hidden]),select',o);if(f&&innerWidth>900)f.focus()}
 function closeM(){var o=$('#ov');o.hidden=true;o.innerHTML=''}
 function ask(msg,yes){return new Promise(function(res){modal('Emin misiniz?','<p style="margin:6px 0 16px">'+esc(msg)+'</p><div class="mf"><button class="btn" data-a="close">Vazgeç</button><button class="btn p" id="askok">'+esc(yes||'Evet')+'</button></div>');$('#askok').onclick=function(){closeM();res(true)};$('#ov').dataset.cancel='1'})}
@@ -1194,7 +1227,7 @@ function stokBar(p){var pct=Math.max(0,Math.min(100,(p.stock||0)/Math.max(p.low_
  return '<span class="stokbar"><i style="width:'+pct+'%;background:'+c+'"></i></span><b class="num">'+(p.stock||0)+'</b>'}
 V.urun=async function(){var F=CUR.uf=CUR.uf||{q:'',cat:'',brand:'',channel:'',seg:'',sort:'yeni',n:40,off:0};
  var h=head('Ürünler','Stok tüm satış kanallarında ortaktır; bir kanalda satılan ürün diğerlerinde de düşer.',
-  '<button class="btn" data-a="usel-disa">Excel\'e aktar</button><button class="btn" data-a="urun-hizli">Bağlantıdan ürün ekle</button><button class="btn p" data-a="urun-yeni"><svg class="i"><use href="#plus"/></svg>Ürün ekle</button>');
+  '<button class="btn" data-a="usel-disa">Excel\'e aktar</button><button class="btn" data-a="urun-ice">Excel\'den yükle</button><button class="btn" data-a="urun-hizli">Bağlantıdan ürün ekle</button><button class="btn p" data-a="urun-yeni"><svg class="i"><use href="#plus"/></svg>Ürün ekle</button>');
  h+='<div class="card"><div class="fbar"><input type="search" id="uq" placeholder="Ürün adı, stok kodu, barkod veya marka ara" value="'+esc(F.q)+'">'
   +'<select id="ucat"></select><select id="ubrand"></select>'
   +'<select id="usort"><option value="yeni">En yeni</option><option value="ad">İsme göre</option><option value="fiyat">Fiyat (artan)</option><option value="fiyat_d">Fiyat (azalan)</option><option value="stok">Stok (az → çok)</option><option value="kar">Kâr (yüksek → düşük)</option></select>'
@@ -1879,6 +1912,13 @@ document.addEventListener('click',function(ev){var b=ev.target.closest('[data-a]
    +'<form id="hzf"><label>Ürün sayfası bağlantısı<input name="url" type="url" placeholder="https://…"></label>'
    +'<details style="margin:-4px 0 12px"><summary class="note" style="cursor:pointer">Bağlantı açılmazsa: sayfa kaynağını yapıştır</summary><p class="note" style="margin:6px 0">Ürün sayfasında sağ tık → “Sayfa kaynağını görüntüle” → tümünü kopyalayıp buraya yapıştırın.</p><textarea name="html" rows="4" style="width:100%" placeholder="<html>…"></textarea></details>'
    +'<div class="mf"><button type="button" class="btn" data-a="close">Vazgeç</button><button class="btn p">Getir</button></div></form>')}
+
+ else if(a==='urun-ice'){IM=null;iceAdim1()}
+ else if(a==='ice-sablon')api('/yp/products/import/template').then(function(r){csvIndir(r.name,r.csv)}).catch(fail);
+ else if(a==='ice-onizle')iceOnizle();
+ else if(a==='urun-ice-geri'&&IM)iceAdim2();
+ else if(a==='ice-calistir')iceCalistir(b);
+ else if(a==='ice-hata'&&IM)api('/yp/products/import/'+IM.job+'/errors').then(function(r){csvIndir(r.name,r.csv)}).catch(fail);
  /* sipariş */
  else if(a==='sseg'){CUR.sf.status=b.dataset.v;CUR.sf.off=0;V.siparis.load().catch(fail)}
  else if(a==='sip-ac'){sipAc(b.dataset.id).catch(fail)}

@@ -2987,6 +2987,8 @@ collab.register(api_router, db, {"require_admin": require_admin, "get_current_us
 ai.register(api_router, db, {"require_admin": require_admin, "get_current_user": get_current_user})
 import urun_yaz
 urun_yaz.register(api_router, db, {"require_admin": require_admin})
+import urun_ice
+urun_ice.register(api_router, db, {"require_admin": require_admin})
 speed.register(api_router, db)
 governance.register(api_router, db, {"require_admin": require_admin, "get_current_user": get_current_user, "verify_password": verify_password, "hash_password": hash_password})
 shop.register(api_router, db, {"require_admin": require_admin, "hash_password": hash_password, "verify_password": verify_password,
