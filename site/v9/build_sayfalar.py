@@ -43,7 +43,7 @@ def page(slug,title,desc,body,ld=None,home=False):
     h=re.sub(r'(<meta property="og:url" content=")[^"]*','\\g<1>'+url,h)
     h=re.sub(r'(<meta property="og:title" content=")[^"]*','\\g<1>'+html.escape(title,quote=True),h)
     h=re.sub(r'(<meta property="og:description" content=")[^"]*','\\g<1>'+html.escape(desc,quote=True),h)
-    h=h.replace('<link rel="stylesheet" href="/v9/v9.css">','<link rel="stylesheet" href="/v9/v9.css"><link rel="stylesheet" href="/v9/v10.css">')
+    h=h.replace('<link rel="stylesheet" href="/v9/v9.css">','<link rel="stylesheet" href="/v9/v9.css"><link rel="stylesheet" href="/v9/v10.css"><link rel="stylesheet" href="/v9/v11.css">')
     import json as _j
     _all=_j.loads(jsonld[jsonld.index('>')+1:-9])
     if home: lj='<script type="application/ld+json">'+_j.dumps(_all[:3],ensure_ascii=False)+'</script>'

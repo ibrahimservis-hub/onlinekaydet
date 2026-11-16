@@ -1,0 +1,58 @@
+/* v11: yalnız beyaz tema, bol hareket. v9/v10 üzerine biner. */
+:root{--murekkep:#2b3340;--metin2:#5b6573;--sahne:#fff;--sahne2:#f5f6f8;--cam-koyu:#f5f6f8;--cizgi-k:#e6e9ee;--acik-k:#5b6573;--cam:#2b3340;--filiz:#2b3340;--kagit:#fff;--zemin:#f5f6f8;--cizgi:#e4e7ec;--kiremit:#7a8494;--kiremit-acik:#f1f3f6;--cam-acik:#f1f3f6;--gol:rgba(43,51,64,.08)}
+body{background:#fff}
+/* üst çubuk */
+.duy{background:#f5f6f8;color:var(--murekkep);border-bottom:1px solid var(--cizgi)}.duy a{border-color:var(--murekkep)}
+.ust{background:rgba(255,255,255,.94);backdrop-filter:none;color:var(--murekkep);border-bottom:1px solid var(--cizgi)}
+.ust.kay{box-shadow:0 10px 30px -22px rgba(43,51,64,.5)}
+.nav,.nav a,.ust .gir{color:var(--metin2)}.nav a:hover,.nav a[aria-current],.ust .gir:hover{color:var(--murekkep)}
+.logo img{content:url(/logo-renkli-s.png)}
+.btn.bos{color:var(--murekkep);border-color:rgba(43,51,64,.35)}.btn.bos:hover{border-color:var(--murekkep);background:#f5f6f8}
+.btn.duz{color:var(--murekkep);text-decoration-color:var(--murekkep)}
+.btn.fil{background:#2b3340;border-color:#2b3340;color:#fff}.btn.fil:hover{background:#3b4656}
+.btn.fil:after{background:linear-gradient(100deg,transparent,rgba(255,255,255,.35),transparent)}
+.ust .mnu i{background:var(--murekkep)}
+.cek{background:#fff}.cek a.m{color:var(--murekkep);border-color:var(--cizgi)}.cek a.m:after{color:var(--murekkep)}.cek a.m[aria-current]{color:var(--metin2)}
+.mbar{background:#fff;border-top:1px solid var(--cizgi)}.mbar a{color:var(--murekkep);border-color:rgba(43,51,64,.3)}.mbar a.f{background:#2b3340;color:#fff;border-color:#2b3340}
+/* hero ve sayfa bandı: beyaz, hareketli nokta ızgarası */
+.hero,.pb{background:#fff;color:var(--murekkep);background-image:radial-gradient(rgba(43,51,64,.16) 1.2px,transparent 1.4px);background-size:32px 32px;animation:izg 24s linear infinite}
+@keyframes izg{to{background-position:32px 32px}}
+.hero:before{background:radial-gradient(520px 320px at var(--mx,70%) var(--my,30%),rgba(43,51,64,.09),transparent 70%),linear-gradient(180deg,transparent 60%,#fff)!important;transition:background .2s}
+.hero:after{background:radial-gradient(circle,rgba(43,51,64,.08),transparent 65%)}
+.pb:before{background:radial-gradient(600px 360px at 85% 20%,rgba(43,51,64,.08),transparent 70%),linear-gradient(180deg,transparent 55%,#fff)}
+.hero h1,.pb h1,.hero .et,.pb .kr{color:var(--murekkep)}.hero .et:before{background:var(--murekkep)}
+.hero .lead,.pb .lead,.hero .not,.hero .sayi span,.dort span{color:var(--metin2)}
+.hero h1 em{background:linear-gradient(100deg,#2b3340 20%,#9aa4b2 50%,#2b3340 80%);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;color:transparent}
+.pb .kr a{opacity:1;color:var(--metin2)}.pb .cip2{background:#fff;border:1px solid var(--cizgi);box-shadow:0 20px 40px -22px rgba(43,51,64,.4)}.pb .cip2 b{color:var(--murekkep)}
+.tar{box-shadow:0 30px 60px -34px rgba(43,51,64,.45);border-color:var(--cizgi)}
+.sayi b,.sayi div{color:var(--murekkep)}
+/* şerit */
+.ser{background:#fff;color:var(--murekkep);border-color:var(--cizgi)}.ser span:after{color:var(--metin2)}
+/* koyu bloklar açık oldu */
+.one-tema,.y4,.pk.one,.edt{background:#f5f6f8;color:var(--murekkep);border:1px solid var(--cizgi)}.edt{border-width:1px 0}
+.edt h2,.edt h3,.edt p,.edt li,.one-tema h2,.one-tema h3,.one-tema p,.y4 *,.pk.one *{color:inherit}
+.edt .lead,.edt p,.one-tema p{color:var(--metin2)}.edt .et{color:var(--metin2)}
+.pk.one .btn,.pk.one .btn.fil{background:#2b3340;color:#fff}
+.sek .lst a.hep{background:#2b3340;color:#fff}.flt button.on{background:#2b3340;color:#fff;border-color:#2b3340}
+.telf{background:#e8ebf0}
+.pin{color:var(--murekkep)}
+/* teklif ve alt bilgi */
+.son{background:#f5f6f8;color:var(--murekkep);border-top:1px solid var(--cizgi)}.son h2,.son .et{color:var(--murekkep)}.son .kucuk{color:var(--metin2)}
+.son form{background:#fff;border:1px solid var(--cizgi);box-shadow:0 30px 60px -36px rgba(43,51,64,.4)}
+footer{background:#fff;color:var(--metin2);border-top:1px solid var(--cizgi)}footer a,footer b,footer p{color:var(--metin2)}footer a:hover{color:var(--murekkep)}footer img{filter:none}
+.kp:hover,.fk:hover{border-color:#2b3340}.kp:hover{box-shadow:0 30px 50px -30px rgba(43,51,64,.35)}
+.kp .im:after{background:#eef0f4}.kp .ok,.fk a{color:var(--murekkep)}
+.js .sec .b1.in h2:after,.js .sec h2.in:after,.js .sec .b1 h2:after{background:var(--murekkep)}
+/* ek hareketler */
+.k{display:inline-block;overflow:hidden;vertical-align:top}.k>i{display:inline-block;font-style:normal;transform:translateY(105%);opacity:0;animation:kel .8s var(--yum) forwards;animation-delay:calc(var(--w)*70ms + 120ms)}
+@keyframes kel{to{transform:none;opacity:1}}
+.mg{transition:transform .25s var(--yum)}
+.dort .d,.tk,.kp,.fk{will-change:transform}
+.js .gor{transition-duration:.8s}
+.ser div{animation-duration:30s}
+.ser.ter div{animation-direction:reverse}
+.hero .sahne .s1{animation:gir .9s var(--yum) both,yuz 8s ease-in-out 1.2s infinite}
+@media(prefers-reduced-motion:reduce){.hero,.pb{animation:none}.k>i{animation:none;transform:none;opacity:1}}
+.hero h1 em{background:none;-webkit-background-clip:border-box;background-clip:border-box;color:inherit;animation:none}
+.hero h1 em .k>i{background:linear-gradient(100deg,#2b3340 20%,#a3acb9 50%,#2b3340 80%);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:kel .8s var(--yum) forwards,par 5s linear 1s infinite;animation-delay:calc(var(--w)*70ms + 120ms),0s}
+@media(prefers-reduced-motion:reduce){.hero h1 em .k>i{animation:none;color:var(--murekkep);background:none}}

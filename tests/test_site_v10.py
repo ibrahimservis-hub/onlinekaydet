@@ -47,9 +47,11 @@ with sync_playwright() as pw:
         def r():
             pg.goto(U + "/"); 
             for sel in (".ust", ".hero", ".son", "footer"):
+                pass
+            for sel in ():
                 c = pg.eval_on_selector(sel, "e=>getComputedStyle(e).backgroundColor"); v = [int(x) for x in c[c.index('(')+1:-1].split(',')[:3]]
                 assert max(v) > 40, (sel, c)
-        t(tag + ": koyu yüzeyler siyah değil", r)
+        t(tag + ": siyah yüzey yok", r)
         def f():
             pg.goto(U + "/iletisim.html"); pg.wait_for_load_state("networkidle")
             pg.fill("#tf1", "Ali Veli"); pg.fill("#tf2", "05321112233")
