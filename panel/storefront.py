@@ -60,7 +60,7 @@ var PL={kart:'Kredi / banka kartı',havale:'Havale / EFT',kapida_nakit:'Kapıda 
 """
 
 SHOP_JS = r"""(function(){""" + COMMON + r"""
-var KEY='okcart-live',C=[],INFO=null,F={q:'',category:'',brand:'',sort:'pop',min:'',max:'',in_stock:false,discount:false,page:1},ACC=null,ADR=[],PM='',SELA='',NEWA=false,BUSY=false,VIEW='shop',EM='';
+var KEY='okcart-live',C=[],INFO=null,F={q:'',category:'',brand:'',sort:'pop',min:'',max:'',in_stock:false,discount:false,page:1},ACC=null,ADR=[],PM='',SELA='',NEWA=false,BUSY=false,VIEW='shop',EM='',BY=null,BYF=null;
 try{C=JSON.parse(localStorage.getItem(KEY)||'[]')}catch(e){C=[]}
 var CT=0;function sync(){if(!tok())return;clearTimeout(CT);CT=setTimeout(function(){api('PUT','/public/shop/sepet',{items:C.map(function(x){return{id:x.id,q:x.q,v:x.v||''}})}).catch(function(){})},1500)}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(C))}catch(e){}cnt();sync()}
@@ -99,15 +99,15 @@ function compareView(){var v=$('#okm-v'),a=cmps(),DF=false;cmpBar();
   draw()}).catch(function(e){v.innerHTML='<div class="empty">'+E(e.message)+'</div>'})}
 function sub(){return C.reduce(function(a,x){return a+x.price*x.q},0)}
 function ship(){var s=sub();return INFO&&INFO.free_shipping_over&&s>=INFO.free_shipping_over?0:(INFO?INFO.shipping_fee:0)}
-function pmeth(){return INFO.payment_methods.filter(function(m){return m.id===PM})[0]}
+function pmeth(){return pmList().filter(function(m){return m.id===PM})[0]}
 function fee(){var m=pmeth();return m&&m.fee?m.fee:0}
 function total(){return sub()+ship()+fee()}
 var root=$('#okm-root');
 root.innerHTML='<div class="w"><div id="okm-msg"></div><div id="okm-v"></div></div><div class="ov" id="okm-pv"><div class="pn c" id="okm-pvb"></div></div>';
 function msg(h,k){$('#okm-msg').innerHTML=h?'<div class="msg '+(k||'ok')+'">'+h+'</div>':''}
 function go(v){VIEW=v;history.replaceState(null,'','/magaza'+(v==='shop'?'':'#'+v));window.scrollTo(0,0);render()}
-function render(){cmpBar();if(VIEW==='karsilastir')return compareView();if(VIEW==='product')return productView();if(VIEW==='cart')return cartView();if(VIEW==='checkout')return checkoutView();if(VIEW==='done')return;shopView()}
-function head(t,s){return '<div class="top"><div><h1>'+t+'</h1>'+(s?'<p class="sub">'+s+'</p>':'')+'</div><div class="acts"><a class="bt o" href="/hesabim" id="okm-acc">'+(ACC?'Hesabım · '+E(ACC.name.split(' ')[0]):'Giriş yap / Üye ol')+'</a><button class="bt" data-go="cart" type="button"><span>Sepetim · <span data-cc>0</span></span></button></div></div>'}
+function render(){cmpBar();if(VIEW==='karsilastir')return compareView();if(VIEW==='product')return productView();if(VIEW==='bayi')return bayiView();if(VIEW==='cart')return cartView();if(VIEW==='checkout')return checkoutView();if(VIEW==='done')return;shopView()}
+function head(t,s){return '<div class="top"><div><h1>'+t+'</h1>'+(s?'<p class="sub">'+s+'</p>':'')+'</div><div class="acts"><a class="bt o" href="/hesabim" id="okm-acc">'+(ACC?'Hesabım · '+E(ACC.name.split(' ')[0]):'Giriş yap / Üye ol')+'</a><button class="bt" data-go="cart" type="button"><span>Sepetim · <span data-cc>0</span></span></button></div></div>'+byBand()}
 function shopView(){$('#okm-v').innerHTML=head(E(INFO.title||'Mağaza'),E(INFO.subtitle||'')+(INFO.min_order?(INFO.subtitle?' · ':'')+'Minimum sipariş '+TL(INFO.min_order):''))+
  '<div class="lay"><aside class="flt" id="okm-f"></aside><div><div class="bar"><input id="okm-q" type="search" placeholder="Ürün, marka veya stok kodu ara…" aria-label="Ürün ara" value="'+E(F.q)+'"><select id="okm-so" aria-label="Sırala"><option value="pop">Önerilen sıra</option><option value="asc">Fiyat: düşükten yükseğe</option><option value="desc">Fiyat: yüksekten düşüğe</option><option value="new">En yeni</option><option value="name">Ada göre</option></select></div><div class="grid" id="okm-g"></div><div class="pg" id="okm-pg"></div></div></div>';
  $('#okm-so').value=F.sort;cnt();var qt;$('#okm-q').addEventListener('input',function(e){clearTimeout(qt);qt=setTimeout(function(){F.q=e.target.value.trim();F.page=1;load()},300)});$('#okm-so').addEventListener('change',function(e){F.sort=e.target.value;F.page=1;load()});
@@ -206,7 +206,7 @@ function cartView(){$('#okm-v').innerHTML='<div class="top"><div><h1>Sepetim</h1
 function checkoutView(){
  if(!C.length)return go('cart');
  if(!ACC){$('#okm-v').innerHTML='<div class="auth card"><h1 style="font-size:1.3rem">Giriş yap veya üye ol</h1><p class="sub">Siparişinizi tamamlamak için hesabınıza giriş yapın. Sepetiniz korunur.</p><a class="bt" href="/hesabim?donus=magaza" style="width:100%">Giriş yap / Üye ol</a><p style="margin-top:12px"><button class="bt o sm" data-go="cart" type="button">Sepete dön</button></p></div>';return}
- var ms=INFO.payment_methods;if(!PM||!pmeth())PM=ms[0]?ms[0].id:'';
+ var ms=pmList();if(!PM||!pmeth())PM=ms[0]?ms[0].id:'';
  var ad=ADR.length&&!NEWA?'<div class="two3">'+ADR.map(function(a){return '<label class="opt '+(a.id===SELA?'on':'')+'"><input type="radio" name="ad" value="'+a.id+'" '+(a.id===SELA?'checked':'')+'><span><b>'+E(a.title)+'</b>'+(a.default?' <span class="tag">Varsayılan</span>':'')+'<small>'+E(a.name)+' · '+E(a.phone)+'<br>'+E(a.address)+' '+E(a.district)+'/'+E(a.city)+'</small></span></label>'}).join('')+'<button class="opt add" data-newa type="button">+ Yeni adres ekle</button></div>'
   :'<div class="two"><div class="fld"><label>Adres başlığı</label><input id="n_t" placeholder="Ev, İş…" value="'+(ADR.length?'':'Evim')+'"></div><div class="fld"><label>Alıcı adı soyadı *</label><input id="n_n" value="'+E(ACC.name)+'" autocomplete="name"></div></div><div class="two"><div class="fld"><label>Telefon *</label><input id="n_p" type="tel" value="'+E(ACC.phone)+'" autocomplete="tel"></div><div class="fld"><label>İl *</label><input id="n_c" value="'+E(ACC.city)+'" autocomplete="address-level1"></div></div><div class="two"><div class="fld"><label>İlçe *</label><input id="n_d" value="'+E(ACC.district)+'" autocomplete="address-level2"></div><div class="fld"><label>&nbsp;</label><label class="ck" style="margin:0"><input type="checkbox" id="n_s" checked> Adresimi kaydet</label></div></div><div class="fld"><label>Açık adres *</label><textarea id="n_a" rows="3" autocomplete="street-address">'+E(ACC.address)+'</textarea></div>'+(ADR.length?'<button class="bt o sm" data-olda type="button">Kayıtlı adreslerime dön</button>':'');
  var pay=ms.length?ms.map(function(m){return '<label class="opt '+(m.id===PM?'on':'')+'"><input type="radio" name="pm" value="'+m.id+'" '+(m.id===PM?'checked':'')+'><span><b>'+E(m.label)+'</b>'+(m.fee?' <em style="font-style:normal;color:var(--m)">+'+TL(m.fee)+'</em>':'')+'<small>'+E(m.desc||'')+'</small></span></label>'}).join(''):'<div class="msg er">Şu an ödeme alınamıyor. Lütfen firmayla iletişime geçin.</div>';
@@ -225,6 +225,7 @@ function order(){if(BUSY)return;if(!$('#o_ok').checked)return err('Sözleşme ve
  Promise.resolve(a).then(function(ad){return api('POST','/public/shop/orders',{customer:{name:ad.name,phone:ad.phone,email:em,city:ad.city,district:ad.district,address:ad.address+' '+ad.district+'/'+ad.city},items:C.map(function(x){return{variant_id:x.v||'',product_id:x.id,qty:x.q}}),payment_method:PM,accept_terms:true,note:nt,ref:refCode()}).then(function(r){r._ph=ad.phone;return r})}).then(function(r){C=[];save();BUSY=false;done(r)}).catch(function(e){BUSY=false;bt.disabled=false;bt.textContent='Siparişi tamamla';if(e.status===401){setTok('');ACC=null;return go('checkout')}err(e.message)})}
 function done(r){VIEW='done';var h='<div class="auth card" style="text-align:center;max-width:620px"><h1 style="font-size:1.4rem">Siparişiniz alındı</h1><div style="color:var(--m)">Sipariş numaranız</div><div style="font:800 1.5rem monospace;margin:6px 0">'+E(r.order_no)+'</div><b>Toplam '+TL(r.total)+'</b>';
  if(r.next==='iyzico')h+='<p style="margin-top:14px">Güvenli ödeme sayfasına yönlendiriliyorsunuz…</p>';
+ else if(r.next==='cari')h+='<div class="msg ok" style="margin-top:14px">Siparişiniz cari hesabınıza işlendi. Ödemeyi vade tarihinde firmayla yaptığınız düzene göre yapacaksınız.</div>';
  else if(r.next==='havale')h+='<div class="msg wa" style="margin-top:14px;text-align:left">Ödemeyi aşağıdaki hesaba yapın; açıklamaya sipariş numaranızı yazın. Ödemeniz kontrol edilince siparişiniz hazırlanır.</div>'+(r.bank_accounts||[]).map(function(a){return '<div class="card" style="text-align:left"><b>'+E(a.bank)+'</b><div>'+E(a.holder)+'</div><div class="iban">'+E(a.iban)+'</div></div>'}).join('')+'<div class="fld" style="text-align:left"><label>Ödemeyi yaptıysanız gönderen adı</label><input id="o_snd"></div><button class="bt" id="okm-pd" type="button">Ödemeyi yaptım</button>';
  else h+='<div class="msg ok" style="margin-top:14px">Siparişiniz onaylandı. Ödemeyi teslimatta yapacaksınız'+(r.cod_fee?' (kapıda ödeme bedeli '+TL(r.cod_fee)+' dahildir)':'')+'.</div>';
  h+='<p style="margin-top:14px"><a class="bt o" href="/hesabim">Siparişlerim</a> <button class="bt" data-go="shop" type="button">Alışverişe devam et</button></p></div>';$('#okm-v').innerHTML=h;
@@ -246,13 +247,34 @@ root.addEventListener('click',function(e){var t=e.target,x;
  if(t.closest('#okm-go'))return order()});
 root.addEventListener('change',function(e){var t=e.target;if(t.name==='pm'){PM=t.value;var ok=$('#o_ok').checked,nt=$('#o_nt').value;checkoutView();$('#o_ok').checked=ok;$('#o_nt').value=nt}if(t.name==='ad'){SELA=t.value;A('input[name=ad]').forEach(function(r){r.closest('.opt').classList.toggle('on',r.checked)})}});
 var qs=new URLSearchParams(location.search),od=qs.get('odeme');
-function me(){if(!tok())return Promise.resolve();return Promise.all([api('GET','/public/customer/me'),api('GET','/public/customer/addresses')]).then(function(r){ACC=r[0];ADR=r[1];var d=ADR.filter(function(a){return a.default})[0]||ADR[0];SELA=d?d.id:''}).catch(function(){setTok('')})}
+function byLoad(){if(!tok())return Promise.resolve();
+ return api('GET','/public/b2b/me').then(function(b){BY=b;return byReprice()}).catch(function(){BY=null})}
+function lpReset(){if(byOk()||!C.some(function(x){return x.bd}))return Promise.resolve();
+ return Promise.all(C.map(function(x){if(!x.bd)return 0;return api('GET','/public/shop/products/'+encodeURIComponent(x.id)).then(function(p){var v=(p.variants||[]).filter(function(y){return y.id===x.v})[0];x.price=(v&&v.price)||p.price;x.bd=0}).catch(function(){})})).then(save)}
+function byOk(){return BY&&BY.status==='approved'}
+function byReprice(){if(!C.length)return Promise.resolve();
+ return api('POST','/public/b2b/quote',{items:C.map(function(x){return{id:x.id,v:x.v||'',q:x.q}})}).then(function(r){r.items.forEach(function(q){C.forEach(function(x){if(x.id===q.id&&(x.v||'')===(q.v||'')){x.price=q.price;x.bd=q.price<q.list?1:0}})});save()}).catch(function(){})}
+function pmList(){var ms=INFO.payment_methods.slice();if(byOk()&&BY.kullanilabilir>0)ms.unshift({id:'cari',label:'Cari hesaba yaz (vadeli)',fee:0,desc:'Kullanılabilir limitiniz: '+TL(BY.kullanilabilir)+(BY.bakiye?' · güncel borcunuz '+TL(BY.bakiye):'')});return ms}
+function byBand(){if(!ACC||!BY)return '';
+ if(byOk())return '<div class="msg ok" style="margin-top:12px"><b>Bayi hesabı · '+E(BY.company)+'</b>'+(BY.group?' · '+E(BY.group):'')+(BY.discount_pct?' · %'+BY.discount_pct+' iskonto':'')+'<br><small>Fiyatlar bayi fiyatıdır (üstü çizili tutar liste fiyatı). Cari limitiniz: '+TL(BY.kullanilabilir)+(BY.min_order?' · asgari sipariş '+TL(BY.min_order):'')+'</small></div>';
+ if(BY.status==='pending')return '<div class="msg wa" style="margin-top:12px">Bayi başvurunuz inceleniyor. Onaylanınca toptan fiyatları burada göreceksiniz.</div>';
+ if(BY.status==='none')return '<p class="sub" style="margin-top:8px"><button class="bt o sm" data-go="bayi" type="button">Bayi (toptan) başvurusu</button></p>';
+ return ''}
+function bayiView(){var v=$('#okm-v');
+ if(!ACC){v.innerHTML='<div class="auth card"><h1 style="font-size:1.3rem">Bayi başvurusu</h1><p class="sub">Başvurmak için önce hesabınıza giriş yapın.</p><a class="bt" href="/hesabim?donus=magaza" style="width:100%">Giriş yap / Üye ol</a><p style="margin-top:12px"><button class="bt o sm" data-go="shop" type="button">Mağazaya dön</button></p></div>';return}
+ if(BY&&BY.status!=='none'){v.innerHTML='<div class="auth card"><h1 style="font-size:1.3rem">Bayi başvurusu</h1>'+byBand()+'<p style="margin-top:12px"><button class="bt" data-go="shop" type="button">Mağazaya dön</button></p></div>';return}
+ v.innerHTML='<div class="auth card" style="max-width:560px"><h1 style="font-size:1.3rem">Bayi (toptan) başvurusu</h1><p class="sub">Onaylanan bayiler toptan fiyatları görür, sepeti cari hesaba yazdırabilir.</p>'
+ +'<div class="fld"><label>Firma unvanı *</label><input id="b_c" autocomplete="organization"></div><div class="two"><div class="fld"><label>Vergi no / TC kimlik no *</label><input id="b_t" inputmode="numeric" maxlength="11"></div><div class="fld"><label>Vergi dairesi</label><input id="b_o"></div></div>'
+ +'<div class="two"><div class="fld"><label>İl</label><input id="b_i"></div><div class="fld"></div></div><div class="fld"><label>Teslimat adresi *</label><textarea id="b_a" rows="3"></textarea></div>'
+ +'<div class="msg er" id="b_er" style="display:none"></div><button class="bt" id="b_go" style="width:100%" type="button">Başvuruyu gönder</button><p style="margin-top:12px"><button class="bt o sm" data-go="shop" type="button">Vazgeç</button></p></div>';
+ $('#b_go').onclick=function(){var b=this;b.disabled=true;api('POST','/public/b2b/apply',{company:$('#b_c').value,tax_no:$('#b_t').value,tax_office:$('#b_o').value,city:$('#b_i').value,address:$('#b_a').value}).then(byLoad).then(function(){toast('Başvurunuz alındı');bayiView()}).catch(function(e){b.disabled=false;var x=$('#b_er');x.style.display='block';x.textContent=e.message})}}
+function me(){if(!tok())return Promise.resolve();return Promise.all([api('GET','/public/customer/me'),api('GET','/public/customer/addresses')]).then(function(r){ACC=r[0];ADR=r[1];var d=ADR.filter(function(a){return a.default})[0]||ADR[0];SELA=d?d.id:''}).then(byLoad).catch(function(){setTok('')})}
 api('GET','/public/shop/info').then(function(i){INFO=i;
  if(od==='ok'){C=[];save();msg('Ödemeniz alındı. Sipariş numaranız: <b>'+E(qs.get('no')||'')+'</b>. Siparişinizi <a href="/hesabim">hesabınızdan</a> takip edebilirsiniz.','ok')}
  else if(od==='kontrol')msg('Ödemeniz alındı ancak tutar kontrolü gerekiyor. Siparişiniz ('+E(qs.get('no')||'')+') firmamız tarafından kontrol edilecek, sizinle iletişime geçilecek.','wa');
  else if(od==='hata')msg('Ödeme tamamlanamadı. Siparişlerim sayfasından ödemeyi tekrar deneyebilirsiniz.','er');
- var h=location.hash.replace('#','');if(h==='sepet'||h==='cart')VIEW='cart';if(h==='checkout')VIEW='checkout';if(h==='karsilastir'&&!PSLUG)VIEW='karsilastir';
- return me().then(render)}).catch(function(e){root.innerHTML='<div class="w"><div class="empty">Mağaza şu an kapalı.</div></div>'});
+ var h=location.hash.replace('#','');if(h==='sepet'||h==='cart')VIEW='cart';if(h==='checkout')VIEW='checkout';if(h==='bayi')VIEW='bayi';if(h==='karsilastir'&&!PSLUG)VIEW='karsilastir';
+ return me().then(lpReset).then(render)}).catch(function(e){root.innerHTML='<div class="w"><div class="empty">Mağaza şu an kapalı.</div></div>'});
 })();"""
 
 ACC_JS = r"""(function(){""" + COMMON + r"""

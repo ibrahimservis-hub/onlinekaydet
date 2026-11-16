@@ -769,12 +769,12 @@ def register(api_router, db, deps):
         return {"products": [public_product(r) for r in rows], "categories": cats}
 
     @api_router.get("/public/shop/products/{slug}")
-    async def pub_product(slug: str):
+    async def pub_product(slug: str, request: Request):
         await require_shop()
         d = await db.shop_products.find_one({"$or": [{"slug": slug}, {"id": slug}], "active": True}, {"_id": 0})
         if not d:
             raise HTTPException(404, "Ürün bulunamadı")
-        return public_product(d)
+        return await b2b.uygula(db, await b2b.dealer_req(request), public_product(d), True)
 
     # ---- gelişmiş mağaza: sayfalı arama, facet, benzer ürünler, sitemap (additive)
     def lite(r):
@@ -785,7 +785,7 @@ def register(api_router, db, deps):
                 "has_var": bool([v for v in (r.get("variants") or []) if v.get("active", True)])}
 
     @api_router.get("/public/shop/search")
-    async def pub_search(brand: str = "", category: str = "", q: str = "", sort: str = "pop", max: float = 0, page: int = 1, per: int = 24, min: float = 0, in_stock: bool = False, discount: bool = False):
+    async def pub_search(brand: str = "", category: str = "", q: str = "", sort: str = "pop", max: float = 0, page: int = 1, per: int = 24, min: float = 0, in_stock: bool = False, request: Request = None, discount: bool = False):
         await require_shop()
         per = builtins.min(60, builtins.max(6, per))
         page = builtins.max(1, page)
@@ -829,13 +829,14 @@ def register(api_router, db, deps):
                 cc[c] = cc.get(c, 0) + 1
             if (not category or c == category) and b:
                 bc[slugify(b)] = bc.get(slugify(b), 0) + 1
-        return {"items": [lite(r) for r in rows], "total": total, "page": page, "per": per,
+        bd = await b2b.dealer_req(request)
+        return {"items": [await b2b.uygula(db, bd, lite(r)) for r in rows], "total": total, "page": page, "per": per,
                 "categories": sorted([{"name": k, "count": v} for k, v in cc.items()], key=lambda x: -x["count"]),
                 "brands": sorted([{"slug": k, "name": bmap.get(k, k), "count": v} for k, v in bc.items()], key=lambda x: x["name"]),
                 "brand_name": bmap.get(brand, "")}
 
     @api_router.get("/public/shop/related/{slug}")
-    async def pub_related(slug: str, n: int = 12):
+    async def pub_related(slug: str, request: Request, n: int = 12):
         await require_shop()
         d = await db.shop_products.find_one({"$or": [{"slug": slug}, {"id": slug}], "active": True}, {"_id": 0})
         if not d:
@@ -853,7 +854,9 @@ def register(api_router, db, deps):
             sec = [lite(by[i]) for i in d["related"] if i in by]
             seen |= {r["id"] for r in sec}
             sim = [r for r in sim if r["id"] not in {x["id"] for x in sec}]
-        return {"picked": sec, "similar": [lite(r) for r in sim], "same_brand": [lite(r) for r in other]}
+        bd = await b2b.dealer_req(request)
+        return {"picked": [await b2b.uygula(db, bd, x) for x in sec], "similar": [await b2b.uygula(db, bd, lite(r)) for r in sim],
+                "same_brand": [await b2b.uygula(db, bd, lite(r)) for r in other]}
 
     @api_router.get("/public/shop/sitemap")
     async def pub_sitemap():

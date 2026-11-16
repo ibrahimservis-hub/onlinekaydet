@@ -42,6 +42,32 @@ async def dealer_of(db, acc):
     return d
 
 
+_DEALER_REQ = None
+
+
+async def dealer_req(request):
+    """İstekteki müşteri belirteci onaylı bayiye aitse bayi kaydı, değilse None (hata fırlatmaz)."""
+    if _DEALER_REQ is None or request is None:
+        return None
+    return await _DEALER_REQ(request)
+
+
+async def uygula(db, d, item, tam=False):
+    """Vitrin ürün/satırındaki fiyatları bayi fiyatına çevirir (liste fiyatı eski fiyat olarak kalır)."""
+    if not d or not item:
+        return item
+    lp = item.get("price") or 0
+    p = {"id": item["id"], "price": lp}
+    item["price"] = await fiyat(db, d, p, None, lp)
+    if item["price"] < lp:
+        item["old_price"] = lp
+        item["bayi"] = True
+    for v in item.get("variants") or []:
+        if v.get("price"):
+            v["price"] = await fiyat(db, d, p, v, v["price"])
+    return item
+
+
 async def bakiye(db, dealer_id):
     b = 0.0
     for e in await db.yp_b2b_ledger.find({"dealer_id": dealer_id}, {"_id": 0, "tur": 1, "tutar": 1}).to_list(100000):
@@ -114,6 +140,15 @@ def register(api_router, db, deps):
         if not acc:
             raise HTTPException(401, "Giriş yapmanız gerekiyor")
         return acc
+
+    async def _dealer_opt(request):
+        try:
+            return await dealer_of(db, await hesap(request))
+        except HTTPException:
+            return None
+
+    global _DEALER_REQ
+    _DEALER_REQ = _dealer_opt
 
     # ------------------------------------------------------------------ gruplar
     @api_router.get("/yp/b2b/groups")
@@ -283,6 +318,20 @@ def register(api_router, db, deps):
                                             "email": acc.get("email", ""), "address": address, "city": _t(payload.get("city"), 60), "status": "pending",
                                             "group_id": "", "credit_limit": 0.0, "admin_note": "", "created_at": _now(), "updated_at": _now()})
         return {"ok": True, "status": "pending"}
+
+    @api_router.post("/public/b2b/quote")
+    async def quote(payload: dict, request: Request):
+        """Sepetteki satırların bayi birim fiyatları (sipariş anında sunucu yine kendisi hesaplar)."""
+        d = await dealer_of(db, await hesap(request))
+        out = []
+        for it in (payload.get("items") or [])[:100]:
+            p = await db.shop_products.find_one({"id": str(it.get("id") or ""), "active": True}, {"_id": 0})
+            if not p:
+                continue
+            v = next((x for x in (p.get("variants") or []) if x.get("id") == it.get("v")), None) if it.get("v") else None
+            unit = (v.get("price") if v and v.get("price") else None) or p.get("price", 0)
+            out.append({"id": p["id"], "v": it.get("v") or "", "price": await fiyat(db, d, p, v, unit), "list": unit})
+        return {"items": out}
 
     @api_router.get("/public/b2b/products")
     async def pub_products(request: Request, q: str = "", page: int = 1):
