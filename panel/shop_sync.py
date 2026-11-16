@@ -350,6 +350,70 @@ def register(api_router, db, deps):
         per = max(10, min(per, 200))
         return {"total": len(rows), "counts": counts, "rows": rows[(page - 1) * per: page * per], "page": page, "per": per}
 
+    @api_router.post("/yp/products/bulk-market")
+    async def bulk_market(payload: dict, request: Request, _: dict = adm):
+        """Seçili panel ürünleri için toplu pazaryeri işlemi.
+        send: seçili pazaryerlerini açar, eksikleri raporlar, hazır ürünleri (Trendyol bağlıysa) gönderir.
+        close: ürünü tüm kanallarda satışa kapatır ve yayındaki pazaryerlerine stok 0 bildirir.  open: sitede yeniden açar."""
+        import urun_ayna
+        ids = [str(i) for i in (payload.get("ids") or [])][:500]
+        op = payload.get("op")
+        mks = [m for m in (payload.get("markets") or []) if m in ch.MARKETS and ch.MARKETS[m]["live"]]
+        if not ids or op not in ("send", "close", "open"):
+            raise HTTPException(422, "Ürünleri ve işlemi seçin")
+        if op == "send" and not mks:
+            raise HTTPException(422, "En az bir pazaryeri seçin")
+        prods = [p async for p in db.yp_products.find({"id": {"$in": ids}}, {"_id": 0})]
+        if not prods:
+            raise HTTPException(404, "Ürün bulunamadı")
+        now = _now()
+        for p in prods:
+            chs = dict(p.get("channels") or {})
+            up = {}
+            if op == "send":
+                for m in mks:
+                    chs[m] = True
+                up["status"] = "live"
+            elif op == "close":
+                chs = {k: False for k in list(chs) + ["site"]}
+            else:
+                chs["site"] = True
+                up["status"] = "live"
+            up.update(channels=chs, updated_at=now)
+            await db.yp_products.update_one({"id": p["id"]}, {"$set": up})
+            await urun_ayna.ayna(db, p["id"])
+        pids = [p["id"] for p in prods]
+        if op == "open":
+            return {"ok": True, "op": op, "n": len(pids)}
+        if op == "close":
+            n = await _enqueue(db, pids, kinds=("stock",), force=True)
+            res = await process_queue(db) if n else {"sent": 0, "failed": 0}
+            return {"ok": True, "op": op, "n": len(pids), "queued": n, "sent": res["sent"], "failed": res["failed"]}
+        out = []
+        for mk in mks:
+            cm, bm = await catmaps(mk), await brandmap(mk)
+            ready, blocked = [], []
+            async for sp in db.shop_products.find({"id": {"$in": pids}}, {"_id": 0}):
+                iss = ch.issues(sp, mk, cm.get(sp.get("category_id", "")), bm)
+                (blocked if iss else ready).append((sp, iss))
+            r = {"market": mk, "name": ch.MARKETS[mk]["name"], "enabled": len(pids), "ready": len(ready), "sent": 0, "note": "",
+                 "blocked": [{"id": sp["id"], "name": sp["name"], "issues": [i["msg"] for i in iss][:4]} for sp, iss in blocked[:20]],
+                 "blocked_n": len(blocked)}
+            if ready:
+                if mk == "trendyol":
+                    try:
+                        x = await create_listing(mk, {"ids": [sp["id"] for sp, _i in ready], "dry_run": False}, request, None)
+                        r["sent"] = x.get("sent", 0)
+                    except HTTPException as e:
+                        r["note"] = str(e.detail)
+                else:
+                    r["note"] = "Bu pazaryerine ürün açma otomatik değil; hazır ürünleri Pazaryerleri ekranındaki dışa aktarma dosyasıyla yükleyin"
+            elif not blocked:
+                r["note"] = "Gönderilecek ürün yok"
+            out.append(r)
+        await _enqueue(db, pids, markets=mks, kinds=("stock",))
+        return {"ok": True, "op": op, "n": len(pids), "markets": out}
+
     @api_router.put("/shop/channels/{mk}/products/{pid}")
     async def chan_product_set(mk: str, pid: str, payload: dict, _: dict = adm):
         check_mk(mk)
@@ -510,7 +574,7 @@ def register(api_router, db, deps):
 
 
 # =================================================================== kuyruk çekirdeği
-async def _enqueue(db, product_ids, markets=None, kinds=("stock",)):
+async def _enqueue(db, product_ids, markets=None, kinds=("stock",), force=False):
     """Ürün(ler)in açık ve bağlı pazaryerlerine gidecek stok/fiyat işi ekler (aynı ürün+pazaryeri için bekleyen varsa tekrar eklemez)."""
     try:                                                       # panel ürünü ise düşen/artan stoğu panele de yaz
         import urun_ayna
@@ -523,7 +587,7 @@ async def _enqueue(db, product_ids, markets=None, kinds=("stock",)):
         if not p:
             continue
         for mk, c in (p.get("channels") or {}).items():
-            if mk == "site" or not c.get("enabled") or (markets and mk not in markets):
+            if mk == "site" or (not c.get("enabled") and not force) or (markets and mk not in markets):
                 continue
             if not ((p.get("market_sync") or {}).get(mk) or {}).get("listed"):
                 continue                       # pazaryerinde henüz yayında olmayan ürüne stok gönderilmez

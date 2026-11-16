@@ -112,6 +112,20 @@ with sync_playwright() as pw:
         assert pg.input_value("#uef input[name=name]").startswith("Kombi Pompası")
         assert pg.evaluate("UE.images.length") == 1
     t("Bağlantıdan ürün ekle: kaynak yapıştır → düzenleyici dolu açılır", h)
+    def tp():
+        H2 = TK()
+        for n in range(2): c.post("/api/yp/products", headers=H2, json={"name": "Toplu %d" % n, "price": 300, "cost": 100, "stock": 5, "sku": "TP%d" % n})
+        pg.evaluate("V.urun().catch(function(){})"); pg.wait_for_selector(".gr tbody input[type=checkbox]", timeout=8000)
+        pg.locator(".gr tbody input[type=checkbox]").nth(0).check(); pg.locator(".gr tbody input[type=checkbox]").nth(1).check()
+        pg.click("[data-a=usel-pgonder]"); pg.wait_for_selector("#ubm", timeout=4000)
+        pg.check("#ubm input[value=trendyol]"); pg.click("#ubm button.p")
+        pg.wait_for_selector("#ubr", timeout=8000)
+        assert "Trendyol" in pg.inner_text("#ubr") and "eksikli" in pg.inner_text("#ubr")
+        pg.click("#ubr ~ .mf .btn.p"); pg.wait_for_selector("#ubr", state="detached", timeout=3000)
+        pg.wait_for_selector(".gr tbody input[type=checkbox]"); pg.locator(".gr tbody input[type=checkbox]").nth(0).check()
+        pg.click("[data-a=usel-kapat]"); pg.wait_for_selector("#ubm", timeout=4000); pg.click("#ubm button.p")
+        pg.wait_for_selector("#ubm", state="detached", timeout=6000)
+    t("Toplu: pazaryerlerine gönder sonucu, satışa kapat", tp)
     assert not errs, errs
     br.close()
 for n in ok: print("  ✓", n)

@@ -87,6 +87,8 @@ def channel_stock(p: dict, mk: str) -> int:
     if not p.get("track_stock", True):
         return 0
     ch = (p.get("channels") or {}).get(mk) or {}
+    if ch.get("enabled") is False or p.get("active") is False:      # kanal ya da ürün kapalı: pazaryerinde satışa kapat
+        return 0
     return max(0, int(p.get("stock") or 0) - int(ch.get("buffer") or 0))
 
 

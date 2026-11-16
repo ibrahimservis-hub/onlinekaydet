@@ -400,6 +400,7 @@ table.gr .r{text-align:right}
 @media(max-width:1560px){.uegrid{grid-template-columns:minmax(0,1fr) 270px}.uenav{display:none}}
 @media(max-width:800px){.uegrid{grid-template-columns:1fr}.ueside{position:static;order:-1}.g4,.g3{grid-template-columns:1fr 1fr}.uespec{grid-template-columns:1fr}.uetop{position:static}}
 #umenu{position:fixed;z-index:60;min-width:190px;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 10px 30px rgba(11,23,48,.18);padding:5px;display:flex;flex-direction:column}#umenu button,#umenu a{display:block;text-align:left;border:0;background:none;padding:10px 12px;border-radius:7px;font:inherit;font-size:13.5px;color:var(--tx);cursor:pointer;text-decoration:none;min-height:40px}#umenu button:hover,#umenu a:hover,#umenu :focus-visible{background:var(--blue-s);outline:0}#umenu .bad{color:var(--bad)}.umb{min-width:36px;font-weight:700;letter-spacing:1px}
+.ubm{border-bottom:1px solid var(--line);padding:9px 0}.ubm b{margin-right:8px}#ubr{max-height:60vh;overflow:auto}
 </style></head><body>
 <div id="login" hidden>
  <form id="lf" autocomplete="on"><img src="/salon/logo.png" alt="OnlineKaydet"><h1>Yönetim Paneli</h1><p class="s">E-posta ve şifrenizle girin</p>
@@ -1494,6 +1495,17 @@ document.addEventListener('click',function(ev){var b=ev.target.closest&&ev.targe
 document.addEventListener('keydown',function(ev){if(ev.key==='Escape')umKapat()});
 document.addEventListener('submit',function(ev){var f=ev.target;if(!f||f.id!=='hdz')return;ev.preventDefault();var btn=f.querySelector('button.p');btn.disabled=true;
  api('/yp/products/'+f.dataset.id,{method:'PUT',body:{price:+f.price.value||0,sale_price:+f.sale_price.value||0,stock:+f.stock.value||0,status:f.status.value}}).then(function(){closeM();toast('Ürün güncellendi');V.urun.load()}).catch(function(e){btn.disabled=false;fail(e)})});
+document.addEventListener('submit',function(ev){var f=ev.target;if(!f||f.id!=='ubm')return;ev.preventDefault();var btn=f.querySelector('button.p');
+ var op=f.op?f.op.value:'send',mk=A('input[name=mk]:checked',f).map(function(x){return x.value});
+ if(op==='send'&&!mk.length)return toast('En az bir pazaryeri seçin',true);
+ btn.disabled=true;btn.textContent='Çalışıyor…';
+ api('/yp/products/bulk-market',{method:'POST',body:{ids:SEL.urun,op:op,markets:mk}}).then(function(r){
+  if(op==='open'){closeM();toast(r.n+' ürün sitede satışa açıldı');return V.urun.load()}
+  if(op==='close'){closeM();toast(r.n+' ürün satışa kapatıldı'+(r.queued?(r.failed?' · pazaryerlerine bildirilemedi (bağlantıyı kontrol edin)':' · pazaryerlerine stok 0 bildirildi'):''),!!r.failed);return V.urun.load()}
+  modal('Gönderim sonucu','<div id="ubr">'+(r.markets||[]).map(function(m){return '<div class="ubm"><b>'+esc(m.name)+'</b><span class="tag '+(m.blocked_n?'y':'g')+'">'+m.ready+' hazır'+(m.blocked_n?' · '+m.blocked_n+' eksikli':'')+'</span>'
+   +(m.sent?'<div class="note" style="color:var(--ok)">'+m.sent+' ürün pazaryerine gönderildi</div>':'')+(m.note?'<div class="note">'+esc(m.note)+'</div>':'')
+   +(m.blocked||[]).map(function(x){return '<div class="note"><a href="#" data-a="urun-ac" data-id="'+esc(x.id)+'">'+esc(x.name)+'</a> — '+esc(x.issues.join(', '))+'</div>'}).join('')+'</div>'}).join('')
+   +'</div><div class="mf"><div class="sp"></div><button class="btn p" data-a="close">Tamam</button></div>');V.urun.load()}).catch(function(e){btn.disabled=false;btn.textContent='Tekrar dene';fail(e)})});
 /* ---------------- SİPARİŞLER ve İADELER ---------------- */
 var OST={yeni:['Yeni','y'],onaylandi:['Onaylandı','b'],hazirlaniyor:['Hazırlanıyor','b'],kargoda:['Kargoda','b'],teslim:['Teslim edildi','g'],iptal:['İptal','r']};
 var OFLOW=['yeni','onaylandi','hazirlaniyor','kargoda','teslim'];
@@ -1804,7 +1816,7 @@ document.addEventListener('click',function(ev){var b=ev.target.closest('[data-a]
  /* ürün */
  if(a==='useg'){CUR.uf.seg=b.dataset.v;CUR.uf.off=0;V.urun.load().catch(fail)}
  else if(a==='urun-yeni'){urunEditor({}).catch(fail)}
- else if(a==='urun-ac'){api('/yp/products/'+b.dataset.id).then(function(r){return urunEditor(r.item||r)}).catch(fail)}
+ else if(a==='urun-ac'){ev.preventDefault();closeM();api('/yp/products/'+b.dataset.id).then(function(r){return urunEditor(r.item||r)}).catch(fail)}
  else if(a==='urun-sil'){ask('Ürün silinsin mi? Stok geçmişi kalır.','Sil').then(function(){
    api('/yp/products/'+b.dataset.id,{method:'DELETE'}).then(function(){closeM();toast('Ürün silindi');V.urun.load()}).catch(fail)})}
  else if(a==='urun-hizli'){modal('Bağlantıdan ürün ekle',
@@ -1936,7 +1948,9 @@ function selBar(k){if(!SEL[k].length)return '<span id="selbar-'+k+'" hidden></sp
   +'<button class="btn s" data-a="usel-indirim">İndirim uygula</button>'
   +'<button class="btn s" data-a="usel-stok">Stok güncelle</button>'
   +'<button class="btn s" data-a="usel-kategori">Kategori / marka</button>'
-  +'<button class="btn s" data-a="usel-kanal">Pazaryerine aç / kapat</button>'
+  +'<button class="btn s" data-a="usel-pgonder">Pazaryerlerine gönder</button>'
+  +'<button class="btn s" data-a="usel-kapat">Satışa kapat / aç</button>'
+  +'<button class="btn s" data-a="usel-kanal">Tek kanalda aç / kapat</button>'
   +'<button class="btn s" data-a="usel-durum">Yayına al / gizle</button>'
   +'<button class="btn s" data-a="usel-disa">Excel\'e aktar</button>'
   +'<span class="sp"></span><button class="btn s" data-a="usel-sil">Sil</button>'
@@ -2002,6 +2016,13 @@ document.addEventListener('click',function(ev){var b=ev.target.closest('[data-a]
   +(CUR.kanallar||[]).map(function(c){return '<option value="'+c.id+'">'+esc(c.name)+'</option>'}).join('')+'</select></label>'
   +'<label class="f">İşlem<select name="on"><option value="1">Kanalda satışa aç</option><option value="0">Kanaldan kaldır</option></select></label>'
   +'<div class="mf"><button type="button" class="btn" data-a="close">Vazgeç</button><button class="btn p">Uygula</button></div></form>');
+ else if(a==='usel-pgonder'){var PK=(CUR.kanallar||[]).filter(function(c){return ['trendyol','hepsiburada','n11','ciceksepeti','pazarama','pttavm'].indexOf(c.id)>-1});
+  modal(SEL.urun.length+' ürünü pazaryerlerine gönder','<form id="ubm" data-op="send"><p class="note" style="margin:0 0 10px">Seçili pazaryerleri ürünlerde açılır; kategori, marka, barkod gibi eksikler ürün ürün raporlanır. Hazır ürünler gönderilir.</p>'
+   +PK.map(function(c){return '<label class="ueck" style="margin:0 0 8px"><input type="checkbox" name="mk" value="'+c.id+'"> '+esc(c.name)+'</label>'}).join('')
+   +'<div class="mf"><button type="button" class="btn" data-a="close">Vazgeç</button><button class="btn p">Gönder</button></div></form>')}
+ else if(a==='usel-kapat')modal(SEL.urun.length+' ürünün satış durumu','<form id="ubm" data-op="close"><label class="f">İşlem<select name="op"><option value="close">Tüm kanallarda satışa kapat</option><option value="open">Sitede yeniden satışa aç</option></select></label>'
+   +'<p class="note">Kapatınca ürün sitede görünmez, pazaryerlerinde stok 0 olarak bildirilir. Yeniden açınca yalnız site açılır; pazaryerleri için “Pazaryerlerine gönder”i kullanın.</p>'
+   +'<div class="mf"><button type="button" class="btn" data-a="close">Vazgeç</button><button class="btn p">Uygula</button></div></form>');
  else if(a==='usel-durum')modal(SEL.urun.length+' ürünün durumu',
   '<form id="ubf" data-op="status"><label>Durum<select name="status"><option value="live">Yayında</option><option value="draft">Taslak (sitede görünmez)</option></select></label>'
   +'<div class="mf"><button type="button" class="btn" data-a="close">Vazgeç</button><button class="btn p">Uygula</button></div></form>');
