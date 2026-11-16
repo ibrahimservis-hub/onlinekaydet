@@ -9,6 +9,9 @@ icons = re.search(r"const P=\{.*?\};", open(os.path.join(H, "icons.js")).read(),
 src = open(os.path.join(H, "src.html")).read().replace("/*ICONS*/", icons)
 src = src.replace('const LOGO="/*LOGO*/";', 'const LOGO_D="%s",LOGO_L="%s";' % (small("ok-logo-acik.png"), small("ok-logo-renkli.png")))
 src = src.replace('<img src="${LOGO}" alt="OnlineKaydet">', '<img src="${LOGO_D}" alt="OnlineKaydet">').replace('<img class="lgl" src="${LOGO}"', '<img class="lgl" src="${LOGO_D}"')
+_y=open(os.path.join(H,"..","yp_ui.html"),encoding="utf-8").read()
+_m=re.search(r'<div class="logo"><img src="(data:image/png;base64,[^"]+)"',_y)
+src = src.replace("const LOGO_D=","const LOGO_I=\"%s\",LOGO_D=" % (_m.group(1) if _m else small("ok-logo-renkli.png")),1)
 import io as _io
 _b=_io.BytesIO(); _im=Image.open(os.path.join(A,"giris-gorsel.webp")).convert("RGB"); _im.save(_b,"WEBP",quality=80)
 src = src.replace("/*LOGINBG*/", "data:image/webp;base64,"+base64.b64encode(_b.getvalue()).decode())

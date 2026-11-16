@@ -60,6 +60,27 @@ table{width:100%;border-collapse:collapse}th{text-align:left;font-size:11px;lett
 .ck{display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid #f4f5f7}.ck.ok{color:#0b7a43}
 .cb{width:16px;height:16px}
 .mx td,.mx th{text-align:center}.mx td:first-child,.mx th:first-child{text-align:left}
+/* yeni görünüm: ince ikon rayı + üst çubuk + grup sekmeleri */
+:root{--bl:#1650b0;--bl-l:#edf2fb;--ln:#e1e4e9;--bg:#f4f5f7;--r:6px}
+.app{grid-template-columns:84px minmax(0,1fr)}
+.side{background:#fff;color:#5d6675;border-right:1px solid var(--ln);padding:0;position:sticky;top:0;height:100vh;overflow-y:auto}
+.brand{height:52px;display:grid;place-items:center;border-bottom:1px solid var(--ln);padding:0}.brand img{width:auto;height:32px}
+.side nav{display:flex;flex-direction:column;padding:8px 0}
+.n{position:relative;flex-direction:column;justify-content:center;gap:3px;padding:10px 4px 9px;border-radius:0;color:#5d6675;font-size:10.5px;font-weight:500;line-height:1.2;text-align:center;border-left:0}
+.n i{width:20px;height:20px}.n i svg{stroke-width:1.5}
+.n:hover{background:#fafbfc;color:#141820}.n.on{background:var(--bl-l);color:var(--bl);font-weight:600}.n.on:before{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--bl)}
+.bodyw{min-width:0;display:flex;flex-direction:column}
+.tbar{height:52px;background:#fff;border-bottom:1px solid var(--ln);display:flex;align-items:center;gap:12px;padding:0 24px;position:sticky;top:0;z-index:5}.tbar #gt{font-size:13px;font-weight:600}.tbar .sp{flex:1}
+.tfirm{display:flex;flex-direction:column;align-items:flex-end;line-height:1.25}.tfirm b{font-weight:600}.tfirm small{font-size:11px;color:var(--mu)}
+.tav{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:#1f242e;color:#fff;font-size:11px;font-weight:600}
+.tout{border:0;background:none;color:var(--mu);font-size:12px;padding:6px 8px;border-radius:6px;cursor:pointer;font-family:inherit}.tout:hover{background:#eceef1}
+.gtabs{height:42px;background:#fff;border-bottom:1px solid var(--ln);margin:0;padding:0 20px;gap:4px;align-items:stretch;overflow-x:auto}
+.gtabs a{display:flex;align-items:center;padding:0 10px;font-weight:500;color:var(--mu);border-bottom:2px solid transparent;margin-bottom:-1px}.gtabs a:hover{color:#141820}.gtabs a.on{color:#141820;font-weight:600;border-color:var(--bl)}
+.main{padding:16px 24px 32px}.hd h1{font-size:16px;font-weight:600}.hd p{font-size:12px}
+.bt.o,.bt.b{background:var(--bl);border-color:var(--bl);color:#fff}.bt.sm{min-height:0}
+.cd{border-radius:8px}.kp{border:1px solid var(--ln);border-radius:8px;background:#fff;gap:0;overflow:hidden}.kp>div{border:0;border-left:1px solid var(--ln);border-radius:0}.kp>div:first-child{border-left:0;background:var(--bl)}.kp>div:first-child span{color:#ffffffd9}.kp>div:first-child b{color:#fff}
+.toast{background:#1f242e}
+@media(max-width:900px){.app{grid-template-columns:1fr}.side{position:fixed;left:0;right:0;bottom:0;top:auto;height:auto;z-index:8;border-right:0;border-top:1px solid var(--ln);overflow:visible}.brand{display:none}.side nav{flex-direction:row;padding:0}.n{flex:1;padding:8px 2px}.main{padding:12px 12px 90px}.tfirm{display:none}.kp>div{border-left:0;border-top:1px solid var(--ln)}}
 </style></head><body><div id="root"></div>
 <script>
 /*ICONS*/
@@ -79,7 +100,10 @@ const daysLeft=s=>s?Math.ceil((new Date(s)-Date.now())/864e5):null;
 function pass(){const a="abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789";let s="";const b=new Uint32Array(12);crypto.getRandomValues(b);b.forEach(x=>s+=a[x%a.length]);return s}
 
 const NAV=[["Genel Bakış","grid","genel"],["g","Satış"],["Satış Hattı","layout","satis"],["Yeni Kurulum","plus","yeni"],["Talepler","chat","talepler"],["g","Firmalar"],["Firmalar","building","firmalar"],["Kurulum Adımları","check","kurulum"],["Toplu İşlemler","bolt","toplu"],["Yetki ve Roller","shield","yetki"],["g","Finans"],["Abonelik & Tahsilat","card","abonelik"],["Paketler & Fiyatlar","box","paketler"],["g","Sistem"],["Alan Adları","globe","alanadlari"],["Kurulum Hazırlığı","globe","hazirlik"],["Sistem Durumu","pulse","sistem"]];
-function shell(active,body,title,sub,right){return `<div class="app"><aside class="side"><div class="brand"><img src="${LOGO}" alt="OnlineKaydet"><small>Sahip Paneli</small></div>${NAV.map(n=>n[0]==="g"?`<div class="g">${n[1]}</div>`:`<a class="n${n[2]===active?" on":""}" href="#${n[2]}"><i data-i="${n[1]}"></i>${n[0]}</a>`).join("")}<div class="usr"><span>SK</span><div>Sahip<small>tüm yetkiler</small></div></div><a class="n" style="margin-top:10px" onclick="logout()"><i data-i="arrow"></i>Çıkış</a></aside><main class="main"><div class="hd"><div><h1>${title}</h1>${sub?`<p>${sub}</p>`:""}</div><div class="r">${right||""}</div></div>${CACHE.tb||""}${body}</main></div>`}
+const GR=[["Genel Bakış","grid",["genel"]],["Satış","layout",["satis","yeni","talepler"]],["Firmalar","building",["firmalar","kurulum","toplu","yetki"]],["Finans","card",["abonelik","paketler"]],["Sistem","pulse",["alanadlari","hazirlik","sistem"]]];
+const NAMEOF={};NAV.forEach(n=>{if(n[0]!=="g")NAMEOF[n[2]]=n[0]});
+function shell(active,body,title,sub,right){const g=GR.find(x=>x[2].includes(active))||GR[0];
+ return `<div class="app"><aside class="side"><div class="brand"><img src="${LOGO_I}" alt="OnlineKaydet"></div><nav>${GR.map(x=>`<a class="n${x===g?" on":""}" href="#${x[2][0]}"><i data-i="${x[1]}"></i><span>${x[0]}</span></a>`).join("")}</nav></aside><div class="bodyw"><header class="tbar"><b id="gt">${g[0]}</b><span class="sp"></span><div class="tfirm"><b>OnlineKaydet Yönetim</b><small>Sahip</small></div><span class="tav">SK</span><button class="tout" onclick="logout()">Çıkış</button></header>${g[2].length>1?`<div class="tabs gtabs">${g[2].map(k=>`<a href="#${k}"${k===active?' class="on"':""}>${NAMEOF[k]}</a>`).join("")}</div>`:""}<main class="main"><div class="hd"><div><h1>${title}</h1>${sub?`<p>${sub}</p>`:""}</div><div class="r">${right||""}</div></div>${CACHE.tb||""}${body}</main></div></div>`}
 function logout(){TOKEN="";sessionStorage.removeItem("ok_t");render()}
 function loginView(){return `<div class="lgw"><div class="lgc"><img class="lgl" src="${LOGO}" alt="OnlineKaydet"><h2>Giriş</h2><p class="mu" style="margin-bottom:22px">E-posta ve şifrenizi girin.</p><form onsubmit="doLogin();return false"><div class="fd"><label for="le">E-posta</label><input id="le" class="in" type="email" autocomplete="username"></div><div class="fd"><label for="lp">Şifre</label><input id="lp" type="password" class="in" autocomplete="current-password"></div><div id="lerr" class="note er" style="display:none"></div><button class="bt o" type="submit" style="width:100%;justify-content:center">Giriş yap</button></form></div></div>`}
 async function doLogin(){try{const r=await api("/auth/login",{method:"POST",body:{email:$("#le").value,password:$("#lp").value}});if(!r.user||r.user.role!=="admin")throw new Error("E-posta veya şifre hatalı");TOKEN=r.token;sessionStorage.setItem("ok_t",TOKEN);render()}catch(e){const b=$("#lerr");b.style.display="block";b.textContent=e.message}}
