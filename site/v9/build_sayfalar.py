@@ -76,7 +76,7 @@ def page(slug,title,desc,body,ld=None,home=False):
     else:
         lj='<script type="application/ld+json">'+__import__('json').dumps({"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Ana sayfa","item":BASE+"/"},{"@type":"ListItem","position":2,"name":title.split(' | ')[0],"item":url}]},ensure_ascii=False)+'</script>'
     cur='/' if home else '/'+slug
-    full=h+lj+'\n</head><body>\n<a class="skip" href="#icerik">İçeriğe geç</a>'+hdr(cur)+'\n<main>'+body+'</main>\n'+foot+'\n'+mbar+'<script src="/v9/v9.js" defer></script><script src="/v9/v10.js" defer></script><script src="/lead.js" defer></script></body></html>'
+    full=h+lj+'\n</head><body>\n<a class="skip" href="#icerik">İçeriğe geç</a>'+hdr(cur)+'\n<main>'+body+'</main>\n'+foot+'\n'+mbar+'<script src="/v9/v9.js" defer></script><script src="/v9/v10.js" defer></script>'+('<script src="/v9/dunya.js" defer></script>' if home else '')+'<script src="/lead.js" defer></script></body></html>'
     for k,v in SEC.items():
         if 'id="%s"'%k not in full: full=full.replace('href="#%s"'%k,'href="%s"'%v)
     if 'id="e-urun"' not in full: full=full.replace('href="#e-','href="/e-ticaret.html#e-')
@@ -111,8 +111,15 @@ ETC_KISA=('<section class="sec etc" id="eticaret"><div class="w"><div class="g b
  +kart('05','Bayi (B2B)','Bayiye özel fiyat ve cari hesap.','/e-ticaret.html#e-bayi')
  +kart('06','Sepet ve ödeme','Kapıda ödeme, havale ve cari seçenekleri.','/e-ticaret.html#e-sepet')
  +'</div><p class="ka"><a class="btn dolu" href="/e-ticaret.html">Tüm e-ticaret özellikleri</a></p></div></section>')
+
+DUNYA=('<section class="dnya" id="dunya-bolum"><div class="w"><div class="bs"><p class="et">Her yerden gelen iş</p><h2>Siteniz dünyaya açık, gelen iş tek panelde.</h2>'
+ '<p class="lead">Siteden, pazaryerinden, telefonla ya da WhatsApp\'tan gelen sipariş ve randevu aynı listeye girer.</p></div>'
+ '<div class="sh"><canvas id="dunya" role="img" aria-label="Dünyanın her yerinden gelen siparişler OnlineKaydet paneline akıyor"></canvas>'
+ '<div class="dk" id="dunyakart"><div class="dh"><img src="/logo-renkli-s.png" alt="OnlineKaydet" width="140" height="28"><span class="mo2">Bugün</span></div>'
+ '<ul><li><b>Yeni sipariş</b><span>Kendi sitem · 5.400 ₺</span></li><li><b>Randevu</b><span>Cuma 14:30 · Sitenizden</span></li><li><b>Pazaryeri</b><span>Trendyol siparişi</span></li><li><b>Telefon</b><span>Servis kaydı açıldı</span></li></ul></div></div>'
+ '<ul class="kn2"><li>Web sitesi</li><li>Pazaryeri</li><li>Telefon</li><li>WhatsApp</li><li>Randevu</li></ul></div></section>')
 home=duy+'' 
-home_body=P['hero']+P['dort']+SERIT()+KAPI+P['tema']+ETC_KISA+P['edt']+P['yon']+P['guv']+SON
+home_body=P['hero']+P['dort']+SERIT()+DUNYA+KAPI+P['tema']+ETC_KISA+P['edt']+P['yon']+P['guv']+SON
 body=home_body
 page('index.html','Web Sitesi, E-Ticaret, Randevu ve İş Takip Programı | OnlineKaydet','Hazır tema seçin, mağazanızı açın; randevu, muhasebe, personel ve iş takibini tek panelde yönetin. 70 sektör, e-ticaret ve pazaryeri entegrasyonu. Teklif alın.',body,home=True)
 # duyuru çubuğunu ana sayfaya ekle
