@@ -614,7 +614,7 @@ function navDraw(){groupsBuild();
  $('#nav').innerHTML=GR.map(function(g){return '<a href="#'+g.rs[0][0]+'" data-r="'+g.rs[0][0]+'" data-g="'+g.id+'" data-rs="'+rsOf(g)+'"><svg class="i"><use href="#'+g.ik+'"/></svg>'+g.ad+'<span class="bd" hidden></span></a>'}).join('')+'<a href="/admin" class="old">Eski panel</a>';
  var mb=['bugun','takvim','satis','kasa'].map(function(id){return GR.filter(function(g){return g.id===id})[0]}).filter(Boolean);
  $('#mbar').innerHTML=mb.map(function(g){return '<a href="#'+g.rs[0][0]+'" data-rs="'+rsOf(g)+'"><svg class="i"><use href="#'+g.ik+'"/></svg>'+g.ad+'</a>'}).join('')+'<a href="#" data-a="more"><svg class="i"><use href="#more"/></svg>Diğer</a>'}
-function route(){var h=(location.hash||'#bugun').slice(1)||'bugun';if(!NAV.some(function(i){return i[0]===h})&&EXTRA.indexOf(h)<0)h=NAV[0][0];ROUTE=h;UE=null;UEDIRTY=false;
+function route(){var h=(location.hash||'#bugun').slice(1)||'bugun';if(!NAV.some(function(i){return i[0]===h})&&EXTRA.indexOf(h)<0)h=NAV[0][0];ROUTE=h;UE=null;UEDIRTY=false;var pvo=document.getElementById('bxpvo');if(pvo)pvo.hidden=true;
  document.querySelectorAll('[data-rs]').forEach(function(a){var on=a.dataset.rs.split(',').indexOf(h)>-1;a.classList.toggle('on',on);if(on&&a.dataset.g)a.setAttribute('href','#'+h)});scrollTo(0,0);
  var g=grOf(h),tb=$('#tabs');$('#gt').textContent=g?g.ad:'';if(g&&g.rs.length>1){tb.hidden=false;tb.innerHTML=g.rs.map(function(r){return '<a href="#'+r[0]+'" data-r="'+r[0]+'"'+(r[0]===h?' class="on"':'')+'>'+esc(r[1])+'</a>'}).join('')}else{tb.hidden=true;tb.innerHTML=''}
  var m=$('#main');m.innerHTML='<div class="empty">Yükleniyor…</div>';(V[h]||V.bugun)().catch(fail)}

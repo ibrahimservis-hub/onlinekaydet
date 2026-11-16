@@ -69,12 +69,15 @@ with sync_playwright() as p:
     t("ürün listesi fiyat, stok ve az stok uyarısıyla doluyor", bb)
 
     def d():
-        pg.click("[data-a=urun-yeni]"); pg.wait_for_selector("#uf", timeout=5000)
-        pg.fill("#uf input[name=name]", "Termal İçlik")
-        pg.fill("#uf input[name=price]", "249"); pg.fill("#uf input[name=cost]", "90")
-        pg.fill("#uf input[name=stock]", "25"); pg.fill("#uf input[name=cat]", "İç Giyim")
-        assert "Kâr" in pg.inner_text("#ukar"), "kârlılık anında hesaplanmalı"
-        pg.click("#uf button.p"); pg.wait_for_timeout(900)
+        pg.click("[data-a=urun-yeni]"); pg.wait_for_selector("#uef", timeout=5000)
+        pg.fill("#uef input[name=name]", "Termal İçlik")
+        pg.fill("#uef input[name=price]", "249"); pg.fill("#uef input[name=cost]", "90")
+        pg.fill("#uef input[name=stock]", "25")
+        pg.fill("#uecat", "İç Giyim"); pg.click("[data-a=ue-cat]")
+        assert "Kâr" in pg.inner_text("#uekar"), "kârlılık anında hesaplanmalı"
+        pg.click("[data-a=ue-kaydet][data-v=publish]") if pg.locator("[data-a=ue-kaydet][data-v=publish]").count() else pg.click("[data-a=ue-kaydet].p")
+        pg.wait_for_timeout(1500)
+        pg.goto(pg.url.split("#")[0] + "#urun"); pg.wait_for_selector("#ulist", timeout=8000); pg.wait_for_timeout(800)
         assert "Termal İçlik" in pg.inner_text("#ulist")
     t("ürün ekleme formu kaydediyor, kârı anında gösteriyor", d)
 
@@ -117,7 +120,7 @@ with sync_playwright() as p:
     t("iade talebi alınıyor (2 adetten 1 adet), onayda stok geri dönüyor", h)
 
     def i():
-        pg.click("a[data-r=urun]"); pg.wait_for_selector("#useg button", timeout=8000)
+        pg.evaluate("location.hash='#urun'"); pg.wait_for_selector("#useg button", timeout=8000)
         pg.click('#useg button[data-v=""]'); pg.wait_for_timeout(700)
         pg.fill("#uq", "keten"); pg.wait_for_timeout(900)
         pg.wait_for_selector("#ulist tbody tr", timeout=8000)
