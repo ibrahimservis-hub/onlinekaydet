@@ -219,7 +219,7 @@
 .ds-badge.info{background:var(--ds-info-bg);border-color:var(--ds-info-line);color:var(--ds-info)}
 
 /* ---------- grafik (sütun) ---------- */
-.ds-chart-hd{display:flex;align-items:center;gap:var(--ds-s-4);flex-wrap:wrap;padding:0 var(--ds-s-4) var(--ds-s-2);font-size:var(--ds-fs-12);color:var(--ds-text-2);font-variant-numeric:tabular-nums}
+.ds-chart-hd{display:flex;align-items:center;gap:6px var(--ds-s-4);flex-wrap:wrap;padding:0 var(--ds-s-4) var(--ds-s-2);font-size:var(--ds-fs-12);color:var(--ds-text-2);font-variant-numeric:tabular-nums}
 .ds-chart-hd b{color:var(--ds-text);font-weight:600}
 .ds-chart-hd .net{color:var(--ds-ok);font-weight:600}
 .ds-chart-hd .sp{flex:1}
@@ -264,6 +264,7 @@
 .ds-table th:last-child,.ds-table td:last-child{padding-right:var(--ds-s-4)}
 .ds-table .r{text-align:right} .ds-table .num{font-variant-numeric:tabular-nums;white-space:nowrap}
 .ds-table .chk{width:36px}
+.ds-table .ds-btn{vertical-align:middle}
 .ds-table input[type=checkbox]{width:14px;height:14px;margin:0;accent-color:var(--ds-ac);vertical-align:middle}
 .ds-cell{display:flex;align-items:center;gap:10px;min-width:0}
 .ds-cell b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -358,7 +359,13 @@
   .ds-toolbar .sp{display:none}
   .ds-toolbar .ds-select{flex:1}
   .ds-chart-hd .sp{flex-basis:100%;height:0}
-  .ds-table .opt{display:none}
+  .ds-table .opt,.ds-table .chk{display:none}
+  .ds-table{table-layout:fixed}
+  .ds-table th.r:not(.opt){width:98px}
+  .ds-table th.st{width:100px}
+  .ds-table .ds-cell b{white-space:normal;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2}
+  .ds-table td{height:auto;padding-top:9px;padding-bottom:9px}
+  .ds-bar h1+.ds-muted{display:none}
   .ds-table th,.ds-table td{padding-left:8px;padding-right:8px}
   .ds-table th:first-child,.ds-table td:first-child{padding-left:var(--ds-s-3)}
   .ds-table th:last-child,.ds-table td:last-child{padding-right:var(--ds-s-3)}
