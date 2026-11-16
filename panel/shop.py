@@ -18,6 +18,7 @@ import jwt
 from fastapi import Depends, HTTPException, Request
 
 import notify
+import ortak
 import shop_legal
 import eticaret_plus
 import shop_channels
@@ -1011,6 +1012,7 @@ def register(api_router, db, deps):
             order["risk"] = None
         await db.shop_orders.insert_one(dict(order))
         await b2b.kaydet(db, dealer, order)
+        await ortak.kaydet(db, order, payload.get("ref"), dealer)
         try:
             await db.shop_carts.delete_one({"account_id": acc0["id"]})
         except Exception:      # noqa: BLE001

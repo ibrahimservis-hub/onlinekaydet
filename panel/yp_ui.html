@@ -516,6 +516,7 @@ function buildNav(){var m=(B&&B.modules)||[],ins=[];
  if(m.indexOf('shop')>-1)ins.push(['eplus','Fiyat ve güvenlik','chart']);
  if(m.indexOf('shop')>-1)ins.push(['popvitrin','Popup vitrin','store']);
  if(m.indexOf('shop')>-1)ins.push(['bayi','Bayiler','users']);
+ if(m.indexOf('shop')>-1)ins.push(['ortak','Ortaklar','users']);
  if(m.indexOf('iade')>-1)ins.push(['iade','İadeler','truck']);
  if(m.indexOf('pazaryeri')>-1)ins.push(['pazaryeri','Pazaryerleri','plug']);
  NAV=BASE_NAV.slice();
@@ -604,7 +605,7 @@ async function loadBoot(){B=await api('/yp/boot');$('#fn').textContent=B.firm||'
 async function start(){
  try{await loadBoot()}catch(e){if(e.status===403){toast('Bu panel yalnızca yönetici hesabıyla açılır',true);logout(true)}else if(e.status!==401){fail(e);}showLogin();return}
  $('#login').hidden=true;$('#app').hidden=false;buildNav();navDraw();route()}
-var NAVG=[['bugun','Genel','home',['bugun','bildirim','duyuru']],['takvim','Takvim','cal',['takvim','randevu','is']],['musteri','Müşteri','users',['musteri','uyelik']],['satis','Satış','store',['urun','siparis','kampanya','iade','pazaryeri','eplus','bayi']],['kasa','Kasa','wallet',['kasa']],['ekip','Ekip','team',['ekip']],['rapor','Rapor','chart',['rapor']],['site','Web Sitem','web',['site','icerik','popvitrin','dil','yonlendir']],['entegrasyon','Bağlantı','plug',['entegrasyon']],['ayar','Ayarlar','gear',['ayar']],['destek','Destek','life',['destek']]],GR=[],GLAST={};
+var NAVG=[['bugun','Genel','home',['bugun','bildirim','duyuru']],['takvim','Takvim','cal',['takvim','randevu','is']],['musteri','Müşteri','users',['musteri','uyelik']],['satis','Satış','store',['urun','siparis','kampanya','iade','pazaryeri','eplus','bayi','ortak']],['kasa','Kasa','wallet',['kasa']],['ekip','Ekip','team',['ekip']],['rapor','Rapor','chart',['rapor']],['site','Web Sitem','web',['site','icerik','popvitrin','dil','yonlendir']],['entegrasyon','Bağlantı','plug',['entegrasyon']],['ayar','Ayarlar','gear',['ayar']],['destek','Destek','life',['destek']]],GR=[],GLAST={};
 function groupsBuild(){var have={},used={};NAV.forEach(function(i){have[i[0]]=i});GR=[];
  NAVG.forEach(function(g){var rs=g[3].filter(function(r){return have[r]});rs.forEach(function(r){used[r]=1});if(rs.length)GR.push({id:g[0],ad:g[1],ik:g[2],rs:rs.map(function(r){return[r,have[r][1]]})})});
  var rest=NAV.filter(function(i){return !used[i[0]]});if(rest.length)GR.push({id:'diger',ad:'Diğer',ik:'more',rs:rest.map(function(i){return[i[0],i[1]]})})}
@@ -1817,6 +1818,37 @@ V.bayi=async function(){var d=await api('/yp/b2b/dealers'+(BY.st?'?status='+BY.s
    +'<td class="r"><button class="btn s" data-a="by-duzenle" data-id="'+esc(x.id)+'">'+(x.status==='pending'?'İncele':'Düzenle')+'</button> <button class="btn s" data-a="by-ekstre" data-id="'+esc(x.id)+'">Ekstre</button></td></tr>'}).join('')+'</tbody></table>'
   :'<div class="empty">Henüz bayi başvurusu yok. Mağazada giriş yapmış bir müşteri “Bayi ol” başvurusu gönderdiğinde burada görünür.</div>';
  $('#main').innerHTML=h+'</div>'};
+/* ---------------- ORTAKLAR (affiliate) ---------------- */
+var OR={rows:[],tot:{}};
+function orLink(c){return location.origin.replace('/salon','')+'/magaza?ref='+c}
+V.ortak=async function(){var r=await api('/yp/ortak');OR.rows=r.rows;OR.tot=r.total||{};
+ var h=head('Ortaklar','Blog, influencer ve satış ortaklarınıza kendi linkini verin; getirdikleri teslim edilen siparişlerden komisyon hesaplanır.','<button class="btn p" data-a="or-yeni"><svg class="i"><use href="#plus"/></svg>Ortak ekle</button>');
+ h+='<div class="figs"><div class="fig"><small>Teslim bekleyen komisyon</small><b class="num">'+tl(OR.tot.pending||0)+'</b><span>sipariş teslim edilince onaylanır</span></div>'
+  +'<div class="fig"><small>Ödenecek (onaylı)</small><b class="num" style="color:'+((OR.tot.approved||0)?'var(--warn)':'inherit')+'">'+tl(OR.tot.approved||0)+'</b><span>ortaklara borcunuz</span></div>'
+  +'<div class="fig"><small>Ödenen</small><b class="num">'+tl(OR.tot.paid||0)+'</b><span>toplam</span></div>'
+  +'<div class="fig"><small>Ortak</small><b class="num">'+OR.rows.length+'</b><span>'+OR.rows.filter(function(x){return x.status==='active'}).length+' aktif</span></div></div>';
+ h+='<div class="card">'+(OR.rows.length?'<table class="gr"><thead><tr><th>Ortak</th><th>Kod / link</th><th class="r">Oran</th><th class="r">Tıklama</th><th class="r">Sipariş</th><th class="r">Bekleyen</th><th class="r">Ödenecek</th><th class="r">Ödenen</th><th></th></tr></thead><tbody>'
+  +OR.rows.map(function(x){return '<tr'+(x.status==='passive'?' style="opacity:.55"':'')+'><td><b>'+esc(x.name)+'</b><div class="note">'+esc(x.phone||x.email||'')+(x.status==='passive'?' · pasif':'')+'</div></td>'
+   +'<td><b class="num">'+esc(x.code)+'</b><div><button class="btn s" data-a="or-kopya" data-c="'+esc(x.code)+'">Linki kopyala</button></div></td><td class="r num">%'+x.pct+'</td><td class="r num">'+(x.clicks||0)+'</td><td class="r num">'+x.orders+'</td>'
+   +'<td class="r num">'+tl(x.pending)+'</td><td class="r"><b class="num">'+tl(x.approved)+'</b></td><td class="r num">'+tl(x.paid)+'</td>'
+   +'<td class="r" style="white-space:nowrap"><button class="btn s" data-a="or-detay" data-id="'+esc(x.id)+'">Komisyonlar</button> <button class="btn s" data-a="or-duzenle" data-id="'+esc(x.id)+'">Düzenle</button></td></tr>'}).join('')+'</tbody></table>'
+  :'<div class="empty">Henüz ortak yok. “Ortak ekle” ile ilk ortağınızı oluşturun; sistem ona özel kod ve link üretir.</div>')+'</div>'
+  +'<p class="note" style="margin-top:10px">Komisyon sepet tutarı (kargo hariç) üzerinden hesaplanır. Bayi/cari siparişlerinde ve ortağın kendi siparişinde komisyon oluşmaz; iptal edilen siparişin komisyonu iptal olur.</p>';
+ $('#main').innerHTML=h};
+function orForm(x){x=x||{};modal(x.id?'Ortağı düzenle':'Yeni ortak','<form id="orf" data-id="'+esc(x.id||'')+'"><label>Ad / unvan<input name="name" required maxlength="120" value="'+esc(x.name||'')+'"></label>'
+ +'<div class="g2"><label>Telefon<input name="phone" value="'+esc(x.phone||'')+'"></label><label>E-posta<input name="email" type="email" value="'+esc(x.email||'')+'"></label></div>'
+ +'<div class="g2"><label>Komisyon oranı %<input name="pct" inputmode="decimal" required value="'+esc(x.pct||10)+'"></label>'+(x.id?'<label>Durum<select name="status"><option value="active"'+(x.status==='active'?' selected':'')+'>Aktif</option><option value="passive"'+(x.status==='passive'?' selected':'')+'>Pasif (yeni sipariş getirmez)</option></select></label>':'<label>Özel kod (boşsa otomatik)<input name="code" maxlength="16" placeholder="AYSE10"></label>')+'</div>'
+ +'<label>IBAN (ödeme için)<input name="iban" maxlength="40" value="'+esc(x.iban||'')+'"></label><label>Not<input name="note" maxlength="300" value="'+esc(x.note||'')+'"></label>'
+ +'<div class="mf"><button type="button" class="btn" data-a="close">Vazgeç</button><button class="btn p">Kaydet</button></div></form>')}
+function orDetay(id){var x=OR.rows.filter(function(r){return r.id===id})[0];if(!x)return;api('/yp/ortak/'+id+'/komisyon').then(function(r){var T={pending:['Teslim bekliyor','y'],approved:['Ödenecek','b'],paid:['Ödendi','g'],cancelled:['İptal','r']};
+ modal('Komisyonlar · '+x.name,'<p style="margin:0 0 10px">Ödenecek: <b class="num">'+tl(x.approved)+'</b> · Link: <span class="num">'+esc(orLink(x.code))+'</span></p>'
+  +(r.rows.length?'<div style="max-height:36vh;overflow:auto"><table class="gr"><thead><tr><th>Sipariş</th><th>Tarih</th><th class="r">Sepet</th><th class="r">Oran</th><th class="r">Komisyon</th><th>Durum</th></tr></thead><tbody>'+r.rows.map(function(e){var t=T[e.status]||['',''];
+   return '<tr><td class="num">'+esc(e.order_no)+'</td><td>'+esc((e.created_at||'').slice(0,10))+'</td><td class="r num">'+tl(e.base)+'</td><td class="r num">%'+e.pct+'</td><td class="r num">'+tl(e.amount)+'</td><td><span class="tag '+t[1]+'">'+t[0]+'</span></td></tr>'}).join('')+'</tbody></table></div>':'<div class="empty">Bu ortak henüz sipariş getirmedi.</div>')
+  +(r.payouts.length?'<h3 style="margin:14px 0 6px;font-size:13px">Ödeme geçmişi</h3>'+r.payouts.map(function(p){return '<div class="row" style="grid-template-columns:90px 1fr auto"><span class="num">'+esc((p.at||'').slice(0,10))+'</span><span>'+esc(p.note||'')+' · '+p.count+' komisyon</span><b class="num">'+tl(p.amount)+'</b></div>'}).join(''):'')
+  +'<div class="mf"><button type="button" class="btn" data-a="close">Kapat</button>'+(x.approved>0?'<button type="button" class="btn p" data-a="or-ode" data-id="'+esc(id)+'">'+tl(x.approved)+' ödendi olarak işaretle</button>':'')+'</div>',true)}).catch(fail)}
+document.addEventListener('submit',function(ev){var f=ev.target;if(!f||fid(f)!=='orf')return;ev.preventDefault();var id=f.dataset.id,e=f.elements,b={name:e.name.value,phone:e.phone.value,email:e.email.value,pct:e.pct.value,iban:e.iban.value,note:e.note.value};
+ if(id){b.status=e.status.value}else if(e.code.value){b.code=e.code.value}
+ api('/yp/ortak'+(id?'/'+id:''),{method:'POST',body:b}).then(function(){closeM();toast(id?'Ortak güncellendi':'Ortak eklendi');V.ortak()}).catch(fail)});
 function byDuzenle(id){var x=BY.rows.filter(function(r){return r.id===id})[0];if(!x)return;
  modal('Bayi · '+x.company,'<p class="note" style="margin:0 0 10px">'+esc(x.contact||'')+' · '+esc(x.phone||'')+' · '+esc(x.email||'')+'<br>Vergi: '+esc(x.tax_no||'')+' '+esc(x.tax_office||'')+'<br>Adres: '+esc(x.address||'')+'</p>'
  +'<form id="byf" data-id="'+esc(id)+'"><label>Durum<select name="status"><option value="pending"'+(x.status==='pending'?' selected':'')+'>Onay bekliyor</option><option value="approved"'+(x.status==='approved'?' selected':'')+'>Onaylı</option><option value="blocked"'+(x.status==='blocked'?' selected':'')+'>Engelli</option></select></label>'
@@ -2068,6 +2100,9 @@ document.addEventListener('click',function(ev){var b=ev.target.closest('[data-a]
    +'<div class="mf"><button type="button" class="btn" data-a="close">Vazgeç</button><button class="btn p">Getir</button></div></form>')}
 
  else if(a==='urun-ice'){IM=null;iceAdim1()}
+ else if(a==='or-yeni'){orForm()}else if(a==='or-duzenle'){orForm(OR.rows.filter(function(r){return r.id===b.dataset.id})[0])}else if(a==='or-detay'){orDetay(b.dataset.id)}
+ else if(a==='or-kopya'){var lk=orLink(b.dataset.c);var fb=function(){modal('Ortak linki','<p class="num" style="word-break:break-all">'+esc(lk)+'</p>')};try{navigator.clipboard.writeText(lk).then(function(){toast('Link kopyalandı')},fb)}catch(e){fb()}}
+ else if(a==='or-ode'){var oid=b.dataset.id;ask('Onaylı komisyonların tamamı ödendi olarak işaretlensin mi? Bu işlem geri alınamaz.','Ödendi işaretle').then(function(){return api('/yp/ortak/'+oid+'/odeme',{method:'POST',body:{}})}).then(function(){closeM();toast('Ödeme kaydedildi');V.ortak()}).catch(fail)}
  else if(a==='by-seg'){BY.st=b.dataset.v;V.bayi().catch(fail)}
  else if(a==='by-duzenle')byDuzenle(b.dataset.id);
  else if(a==='by-ekstre')byEkstre(b.dataset.id);
