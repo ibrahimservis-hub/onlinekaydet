@@ -36,7 +36,7 @@ def banner(slug,ad,h1,lead,gorsel=None,chip=None):
      '<div class="cta"><a class="btn fil" href="/demo.html">Ücretsiz deneyin</a><a class="btn bos" href="#teklif">Teklif alın</a><a class="btn duz" href="tel:+905444444004">Hemen arayın</a></div></div>%s</div></section>')%(ad,h1,lead,yan)
 def page(slug,title,desc,body,ld=None,home=False):
     url=BASE+('/' if home else '/'+slug)
-    h=head_raw
+    h=head_raw.replace('content="#0A6847"','content="#15284B"')
     h=re.sub(r'<title>.*?</title>','<title>%s</title>'%html.escape(title),h,flags=re.S)
     h=re.sub(r'(<meta name="description" content=")[^"]*','\\g<1>'+html.escape(desc,quote=True),h)
     h=re.sub(r'(<link rel="canonical" href=")[^"]*','\\g<1>'+url,h)
