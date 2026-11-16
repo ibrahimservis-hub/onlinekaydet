@@ -126,6 +126,19 @@ with sync_playwright() as pw:
         pg.click("[data-a=usel-kapat]"); pg.wait_for_selector("#ubm", timeout=4000); pg.click("#ubm button.p")
         pg.wait_for_selector("#ubm", state="detached", timeout=6000)
     t("Toplu: pazaryerlerine gönder sonucu, satışa kapat", tp)
+    def yz():
+        pg.evaluate("V.urun().catch(function(){})"); pg.wait_for_selector("[data-a=urun-yeni]", timeout=8000)
+        pg.click("[data-a=urun-yeni]"); pg.wait_for_selector("#uef")
+        pg.fill("#uef input[name=name]", "Baxi Eco Plaka Eşanjör"); pg.fill("#uef input[name=short]", "Elle yazılmış kısa metin")
+        pg.click("[data-a=ue-yaz][data-v=gen]"); pg.wait_for_selector("#uyf", timeout=6000)
+        assert pg.locator("#uyf input[name=short]").is_checked() is False, "dolu alan varsayılan değişmemeli"
+        assert pg.locator("#uyf input[name=desc]").is_checked()
+        pg.click("[data-a=ue-yaz-uygula]"); pg.wait_for_selector("#uyf", state="detached")
+        assert pg.input_value("#uef input[name=short]") == "Elle yazılmış kısa metin"
+        assert "Baxi Eco Plaka" in pg.input_value("#uef textarea[name=desc]")
+        pg.click("[data-a=ue-yaz][data-v=seo]"); pg.wait_for_selector("#uyf"); pg.click("[data-a=ue-yaz-uygula]")
+        assert pg.input_value("#uef input[name=seo_title]").startswith("Baxi")
+    t("Düzenleyici: yazı öner (dolu alan korunur, boş alan dolar)", yz)
     assert not errs, errs
     br.close()
 for n in ok: print("  ✓", n)

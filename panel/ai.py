@@ -74,6 +74,8 @@ def register(api_router, db, deps):
                     break
         raise HTTPException(502, str(last)[:250])
 
+    api_router.ai_helpers = {"cfg": cfg, "guard": guard, "chat": chat}   # diğer modüller (ürün yazımı) kullanır
+
     @api_router.get("/ai/settings")
     async def get_ai(_: dict = Depends(require_admin)):
         c = await cfg()

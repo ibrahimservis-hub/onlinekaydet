@@ -1286,6 +1286,7 @@ function ueRender(){var p=UE.p,y=function(k,d){return p[k]==null?(d==null?'':d):
  +ueSec('genel','Genel bilgiler','','<label class="f">Ürün adı<input name="name" required maxlength="200" value="'+esc(y('name'))+'" placeholder="Örn. Vaillant ecoTEC Pure 24 kW kombi sirkülasyon pompası"><small class="cnt" data-c="name" data-m="100"></small></label>'
   +'<label class="f">Kısa açıklama <span class="note">(ürün adının altında ve listelerde görünür)</span><input name="short" maxlength="240" value="'+esc(y('short'))+'" placeholder="Tek cümleyle ürünün en önemli faydası"></label>'
   +'<label class="f">Ürün açıklaması<textarea name="desc" rows="8" placeholder="Ne işe yarar, kimler için, ölçüler, kullanım, kutu içeriği, garanti…">'+esc(y('desc'))+'</textarea><small class="cnt" data-c="desc" data-m="0"></small></label>'
+  +'<div class="uebar" style="margin-top:-6px"><button type="button" class="btn s" data-a="ue-yaz" data-v="gen">Açıklama için yazı öner</button><span class="note">Ürün bilgilerinden öneri hazırlar; siz onaylamadan hiçbir şey değişmez.</span></div>'
   +'<div class="g3"><label class="f">Durum<select name="status"><option value="live"'+(p.status!=='draft'?' selected':'')+'>Yayında</option><option value="draft"'+(p.status==='draft'?' selected':'')+'>Taslak (görünmez)</option></select></label>'
   +'<label class="f">Ürün rozeti<input name="badge" maxlength="24" list="uebadge" value="'+esc(y('badge'))+'" placeholder="Örn. Yeni, Çok satan"></label>'
   +'<label class="f ueck"><input type="checkbox" name="featured"'+(p.featured?' checked':'')+'> Vitrinde öne çıkar</label></div>'
@@ -1340,7 +1341,7 @@ function ueRender(){var p=UE.p,y=function(k,d){return p[k]==null?(d==null?'':d):
   +'<label class="f">Görsel alt metni<input name="seo_alt" maxlength="125" value="'+esc(so.alt||'')+'" placeholder="Görme engelliler ve Google Görseller için"></label></div>'
   +'<details class="uedet"><summary>Gelişmiş</summary><label class="f" style="margin-top:10px">Canonical adres <span class="note">(satıştan kalkan ürünün değerini başka ürüne aktarmak için)</span><input name="canonical" maxlength="300" value="'+esc(so.canonical||'')+'" placeholder="/magaza/urun/yeni-model"></label>'
   +'<label class="ueck"><input type="checkbox" name="noindex"'+(so.noindex?' checked':'')+'> Arama motorlarında gösterme (noindex)</label></details>'
-  +'<div class="uechk" id="ueseochk"></div><button type="button" class="btn s" data-a="ue-seo-doldur">Boş SEO alanlarını üründen doldur</button>')
+  +'<div class="uechk" id="ueseochk"></div><button type="button" class="btn s" data-a="ue-seo-doldur">Boş SEO alanlarını üründen doldur</button> <button type="button" class="btn s" data-a="ue-yaz" data-v="seo">Yazı öner</button>')
  // ilgili
  +ueSec('ilgili','Birlikte satılacak ürünler','Ürün sayfasında “Bununla birlikte alınanlar” olarak çıkar','<div id="uerel"></div><label class="f" style="margin-top:8px">Ürün ara ve ekle<input id="uerelq" autocomplete="off" placeholder="Ürün adı veya stok kodu"></label><div id="uerelh"></div>')
  +'<div class="uefoot"><span class="note" id="ue-durum2"></span><div class="sp"></div><button type="button" class="btn" data-a="ue-kaydet" data-v="draft">Taslak kaydet</button><button type="button" class="btn p" data-a="ue-kaydet" data-v="live">Kaydet ve yayınla</button></div>'
@@ -1447,6 +1448,17 @@ document.addEventListener('click',async function(ev){var b=ev.target.closest&&ev
  else if(a==='ue-yansit-hepsi'){Object.keys(UE.ch).forEach(function(q){if(q!=='site'&&UE.ch[q].on&&ueN(UE.ch[q].komisyon)>0){var o2=ueOran(q);if(o2!=null){UE.ch[q].mod='oran';UE.ch[q].oran=o2}}})}
  else if(a==='ue-allo'){var pc=ueN($('#ueallo').value);Object.keys(UE.ch).forEach(function(q){if(q!=='site'&&UE.ch[q].on){UE.ch[q].mod=pc?'oran':'ayni';UE.ch[q].oran=pc||''}})}
  else if(a==='ue-sku'){var f=$('#uef'),bn=(f.elements.brand.value||f.elements.name.value||'URN').replace(/[^A-Za-zÇĞİÖŞÜçğıöşü0-9]/g,'').slice(0,3).toLocaleUpperCase('tr');f.elements.sku.value=ueSlug(bn).toUpperCase()+'-'+String(Date.now()).slice(-6)}
+ else if(a==='ue-yaz'){var bd=ueBody(UE.p.status||'live');if(!bd.name.trim())return toast('Önce ürün adını yazın',true);b.disabled=true;
+  var al=b.dataset.v==='seo'?['seo_title','seo_desc','seo_keywords','alt']:['short','desc'];
+  api('/yp/products/ai-text',{method:'POST',body:{product:bd,alanlar:al}}).then(function(r){b.disabled=false;
+   var AD={short:['short','Kısa açıklama'],desc:['desc','Açıklama'],seo_title:['seo_title','SEO başlığı'],seo_desc:['seo_desc','Meta açıklama'],seo_keywords:['seo_keywords','Anahtar kelimeler'],alt:['seo_alt','Görsel alt metni']},f3=$('#uef');
+   modal('Önerilen metin','<form id="uyf"><p class="note" style="margin:0 0 10px">'+(r.kaynak==='ai'?'Yapay zekâ yazdı; içeriği kontrol edin.':'Ürün bilgilerinden hazırlandı'+(r.uyari?' ('+esc(r.uyari)+')':'')+'.')+' Dolu alanlar varsayılan olarak değişmez.</p>'
+    +al.filter(function(k){return r.oneri[k]}).map(function(k){var el=f3.elements[AD[k][0]],dolu=el&&el.value.trim();return '<label class="f ueck" style="align-items:flex-start;margin:0 0 10px"><input type="checkbox" name="'+k+'"'+(dolu?'':' checked')+'><span><b>'+AD[k][1]+(dolu?' <small>(şu an dolu)</small>':'')+'</b><br><span style="font-weight:400;white-space:pre-wrap;color:var(--tx)">'+esc(r.oneri[k])+'</span></span></label>'}).join('')
+    +'<div class="mf"><button type="button" class="btn" data-a="close">Vazgeç</button><button type="button" class="btn p" data-a="ue-yaz-uygula">Seçilenleri uygula</button></div></form>');
+   UE.oneri=r.oneri}).catch(function(e){b.disabled=false;fail(e)});return}
+ else if(a==='ue-yaz-uygula'){var f4=$('#uef'),mp={short:'short',desc:'desc',seo_title:'seo_title',seo_desc:'seo_desc',seo_keywords:'seo_keywords',alt:'seo_alt'},n4=0;
+  A('#uyf input[type=checkbox]:checked').forEach(function(x){var el=f4.elements[mp[x.name]];if(el&&UE.oneri[x.name]){el.value=UE.oneri[x.name];n4++}});
+  closeM();UEDIRTY=true;ueCalc();toast(n4+' alan uygulandı');return}
  else if(a==='ue-seo-doldur'){var f2=$('#uef'),E2=f2.elements,nm=E2.name.value.trim(),ds=E2.desc.value.replace(/\s+/g,' ').trim();
   if(!E2.slug.value.trim())E2.slug.value=ueSlug(nm);if(!E2.seo_title.value.trim())E2.seo_title.value=(nm+(E2.brand.value&&nm.toLowerCase().indexOf(E2.brand.value.toLowerCase())<0?' — '+E2.brand.value:'')).slice(0,60);
   if(!E2.seo_desc.value.trim()){var t3=(E2.short.value.trim()||ds);E2.seo_desc.value=t3.length>155?t3.slice(0,152).replace(/\s+\S*$/,'')+'…':t3}
