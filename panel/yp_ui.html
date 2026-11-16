@@ -629,12 +629,13 @@ var LXRULES=null;
 function lxBuild(t){LXRULES=[];if(!t)return;
  var salon=t.salon||'salon';
  if(t.is&&t.is!=='Randevu')LXRULES.push({rx:/(^|[^A-Za-zÇĞİÖŞÜçğıöşü])(randevu)(lar|ler)?([a-zçğıöşü]*)(?![A-Za-zÇĞİÖŞÜçğıöşü])/gi,sg:t.is,pl:t.isler||t.is,ov:true,lc:true});
+ if(t.musteri&&t.musteri!=='Müşteri')LXRULES.push({rx:/(?<![Mm]ağaza)(^|[^A-Za-zÇĞİÖŞÜçğıöşü])(müşteri)(lar|ler)?([a-zçğıöşü]*)(?![A-Za-zÇĞİÖŞÜçğıöşü])/gi,sg:t.musteri,pl:t.musteriler||t.musteri,ov:true,lc:true});
  if(salon!=='salon')LXRULES.push({rx:/(^|[^A-Za-zÇĞİÖŞÜçğıöşü])(salon)()([a-zçğıöşü]*)(?![A-Za-zÇĞİÖŞÜçğıöşü])/gi,sg:salon,pl:salon+'ler',ov:false,lc:true})}
 function lxText(s){if(!LXRULES||!LXRULES.length||!s)return s;
  LXRULES.forEach(function(r){s=s.replace(r.rx,function(m,pre,stem,plr,rest){
   if(stem===stem.toUpperCase()&&stem.length>1&&stem!==stem.charAt(0)+stem.slice(1).toLowerCase())return m;
   var up=stem.charAt(0)===stem.charAt(0).toLocaleUpperCase('tr')&&stem.charAt(0)!==stem.charAt(0).toLowerCase();
-  var base=plr?r.pl:r.sg,nv=base;
+  var base=plr?r.pl:r.sg,nv=base;if(plr&&/^[ıiuü][nm]/.test(rest)&&/(leri|ları)$/.test(base))base=base.slice(0,-1);
   if(rest&&rest.length>5)return m;                         /* uzun türemiş kelimeler (randevulaştırma…) dokunulmaz */
   var ov=plr?true:r.ov;
   var fitted=lxFit(base,rest,plr?false:ov);
@@ -642,7 +643,7 @@ function lxText(s){if(!LXRULES||!LXRULES.length||!s)return s;
   if(!up)fitted=fitted.toLocaleLowerCase('tr');else fitted=lxCase(fitted,true);
   return pre+fitted})});return s}
 function lxWalk(root){if(!LXRULES||!LXRULES.length||!root)return;
- var w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode:function(n){var p=n.parentNode;if(!p||/^(SCRIPT|STYLE|TEXTAREA|OPTION)$/.test(p.nodeName))return NodeFilter.FILTER_REJECT;return NodeFilter.FILTER_ACCEPT}}),n,L=[];
+ var w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode:function(n){var p=n.parentNode;if(!p||/^(SCRIPT|STYLE|TEXTAREA|OPTION)$/.test(p.nodeName)||(p.closest&&p.closest('[data-nolx="1"]')))return NodeFilter.FILTER_REJECT;return NodeFilter.FILTER_ACCEPT}}),n,L=[];
  while(n=w.nextNode())L.push(n);
  L.forEach(function(n){var v=lxText(n.nodeValue);if(v!==n.nodeValue)n.nodeValue=v});
  if(root.querySelectorAll)root.querySelectorAll('[placeholder],[title],[aria-label]').forEach(function(e){['placeholder','title','aria-label'].forEach(function(a){var v=e.getAttribute(a);if(v){var x=lxText(v);if(x!==v)e.setAttribute(a,x)}})})}
@@ -661,7 +662,7 @@ function navDraw(){groupsBuild();
  $('#nav').innerHTML=GR.map(function(g){return '<a href="#'+g.rs[0][0]+'" data-r="'+g.rs[0][0]+'" data-g="'+g.id+'" data-rs="'+rsOf(g)+'"><svg class="i"><use href="#'+g.ik+'"/></svg>'+g.ad+'<span class="bd" hidden></span></a>'}).join('')+'<a href="/admin" class="old">Eski panel</a>';
  var mb=['bugun','takvim','satis','kasa'].map(function(id){return GR.filter(function(g){return g.id===id})[0]}).filter(Boolean);
  $('#mbar').innerHTML=mb.map(function(g){return '<a href="#'+g.rs[0][0]+'" data-rs="'+rsOf(g)+'"><svg class="i"><use href="#'+g.ik+'"/></svg>'+g.ad+'</a>'}).join('')+'<a href="#" data-a="more"><svg class="i"><use href="#more"/></svg>Diğer</a>'}
-function route(){var h=(location.hash||'#bugun').slice(1)||'bugun';if(!NAV.some(function(i){return i[0]===h})&&EXTRA.indexOf(h)<0)h=NAV[0][0];ROUTE=h;UE=null;UEDIRTY=false;var pvo=document.getElementById('bxpvo');if(pvo)pvo.hidden=true;
+function route(){var h=(location.hash||'#bugun').slice(1)||'bugun';var mm=document.getElementById('main');if(mm)mm.setAttribute('data-nolx',['urun','siparis','kampanya','eplus','popvitrin','bayi','ortak','iade','pazaryeri'].indexOf(h)>-1?'1':'');if(!NAV.some(function(i){return i[0]===h})&&EXTRA.indexOf(h)<0)h=NAV[0][0];ROUTE=h;UE=null;UEDIRTY=false;var pvo=document.getElementById('bxpvo');if(pvo)pvo.hidden=true;
  document.querySelectorAll('[data-rs]').forEach(function(a){var on=a.dataset.rs.split(',').indexOf(h)>-1;a.classList.toggle('on',on);if(on&&a.dataset.g)a.setAttribute('href','#'+h)});scrollTo(0,0);
  var g=grOf(h),tb=$('#tabs');$('#gt').textContent=g?g.ad:'';if(g&&g.rs.length>1){tb.hidden=false;tb.innerHTML=g.rs.map(function(r){return '<a href="#'+r[0]+'" data-r="'+r[0]+'"'+(r[0]===h?' class="on"':'')+'>'+esc(r[1])+'</a>'}).join('')}else{tb.hidden=true;tb.innerHTML=''}
  var m=$('#main');m.innerHTML='<div class="empty">Yükleniyor…</div>';(V[h]||V.bugun)().catch(fail)}
@@ -678,14 +679,14 @@ var DW=[
  ['sira','Sıradaki randevular','Liste','card'],['talepler','Siteden gelen talepler','Liste','card'],['doluluk','Ekip doluluğu','Liste','card']];
 var DWDEF=['kasa','randevu','tahsil','talep','sira','talepler','doluluk'];
 function dwAvail(){return DW.filter(function(w){return !w[4]||NAV.some(function(i){return i[0]===w[4]})})}
-function dwGet(){var l=null;try{l=JSON.parse(ld('ypdash')||'null')}catch(e){}var av=dwAvail().map(function(w){return w[0]});
+function dwGet(){var l=Array.isArray(B.dash)?B.dash:null;if(!l){try{l=JSON.parse(ld('ypdash')||'null')}catch(e){}}var av=dwAvail().map(function(w){return w[0]});
  if(!Array.isArray(l))l=DWDEF.slice();return l.filter(function(k){return av.indexOf(k)>-1})}
-function dwSave(l){sv('ypdash',JSON.stringify(l))}
+function dwSave(l){B.dash=l;sv('ypdash',JSON.stringify(l));api('/yp/dash',{method:'PUT',body:{list:l}}).catch(function(){})}
 function dwForm(){var on=dwGet(),av=dwAvail(),rest=av.filter(function(w){return on.indexOf(w[0])<0}).map(function(w){return w[0]});
  var order=on.concat(rest);
  var row=function(k){var w=DW.filter(function(x){return x[0]===k})[0];
   return '<div class="dwr" data-k="'+k+'"><label><input type="checkbox" '+(on.indexOf(k)>-1?'checked':'')+'> <b>'+esc(w[1])+'</b> <span class="note">'+w[2]+(w[3]==='fig'?' · küçük kutu':' · büyük kutu')+'</span></label><span class="dwm"><button type="button" class="btn s" data-a="dw-yuk" aria-label="Yukarı">↑</button><button type="button" class="btn s" data-a="dw-asa" aria-label="Aşağı">↓</button></span></div>'};
- modal('Ana paneli düzenle','<p class="note">Görmek istediğiniz kutuları işaretleyin, okla sırasını değiştirin. Seçim bu tarayıcıda saklanır.</p><div id="dwl">'+order.map(row).join('')+'</div>'
+ modal('Ana paneli düzenle','<p class="note">Görmek istediğiniz kutuları işaretleyin, okla sırasını değiştirin. Seçiminiz hesabınıza kaydedilir, her cihazda aynı görünür.</p><div id="dwl">'+order.map(row).join('')+'</div>'
   +'<div class="mf"><button type="button" class="btn" data-a="dw-sifir">Varsayılana dön</button><button type="button" class="btn p" data-a="dw-kaydet">Kaydet</button></div>')}
 function dwMove(b,d){var r=b.closest('.dwr'),n=d<0?r.previousElementSibling:r.nextElementSibling;if(!n)return;d<0?r.parentNode.insertBefore(r,n):r.parentNode.insertBefore(n,r)}
 function dwSaveForm(){var l=[];document.querySelectorAll('#dwl .dwr').forEach(function(r){if(r.querySelector('input').checked)l.push(r.dataset.k)});dwSave(l);closeM();route()}
@@ -1273,7 +1274,7 @@ document.addEventListener('click',async function(ev){
  else if(a==='pick'){var f=$('#af')||$('#wf');f.name.value=t.dataset.n;f.phone.value=t.dataset.p;$('#sug').innerHTML=t.dataset.i?'<div class="note" style="margin:-6px 0 10px">'+esc(t.dataset.i)+'</div>':''}
  else if(a==='finish'){var vf=await api('/yp/appts/'+id+'/stage',{method:'POST',body:{to:'tamamlandi'}});closeM();refresh();if(vf.balance>0)payForm(vf);else toast('Tamamlandı')}
  else if(a==='kr'||a==='er'||a==='rr'){CUR[a]=t.dataset.v;refresh()}
- else if(a==='dw-ac'){dwForm()}else if(a==='dw-yuk'){dwMove(t,-1)}else if(a==='dw-asa'){dwMove(t,1)}else if(a==='dw-kaydet'){dwSaveForm()}else if(a==='dw-sifir'){sv('ypdash','');closeM();route()}
+ else if(a==='dw-ac'){dwForm()}else if(a==='dw-yuk'){dwMove(t,-1)}else if(a==='dw-asa'){dwMove(t,1)}else if(a==='dw-kaydet'){dwSaveForm()}else if(a==='dw-sifir'){sv('ypdash','');B.dash=null;api('/yp/dash',{method:'PUT',body:{list:null}}).catch(function(){});closeM();route()}
  else if(a==='cashnew'){cashForm(t.dataset.t||'in')}
  else if(a==='cashdel'){if(await ask('Bu kasa kaydı silinsin mi? Randevudan alınan ödemeyse randevudan da düşer.','Sil')){await api('/yp/cash/'+id,{method:'DELETE'});toast('Silindi');refresh()}}
  else if(a==='staffnew'){staffForm()}

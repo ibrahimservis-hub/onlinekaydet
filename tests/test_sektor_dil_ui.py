@@ -54,6 +54,9 @@ with sync_playwright() as pw:
         if EXP[1]:
             assert EXP[1].lower() not in tx.lower(), "sabit 'randevu' kalmamalı: " + tx[:700]
         pg.screenshot(path="/tmp/sek_%s.png" % SEK)
+        if SEK == "avukat":
+            pg.evaluate("location.hash='#musteri'"); pg.wait_for_timeout(1500); mt = pg.inner_text("#app")
+            assert "Müvekkil" in mt and "Müşteri" not in mt.replace("Mağaza müşteri", ""), mt[:600]
         pg.evaluate("location.hash='#bugun'"); pg.wait_for_timeout(1500)
         tx = pg.inner_text("#app")
         if EXP[1]: assert EXP[1].lower() not in tx.lower() and (SEK == "fitness" or "salon" not in tx.lower()), tx[:700]

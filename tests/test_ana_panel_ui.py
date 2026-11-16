@@ -62,7 +62,7 @@ with sync_playwright() as pw:
         assert pg.locator(".fig").count() == 5
     t("seç, kaldır, sırala, kaydet", b)
     def c2():
-        pg.reload(); pg.wait_for_selector(".figs", timeout=8000); pg.wait_for_timeout(500)
+        pg.evaluate("Object.keys(localStorage).filter(k=>k.indexOf('ypdash')>-1).forEach(k=>localStorage.removeItem(k))"); pg.reload(); pg.wait_for_selector(".figs", timeout=8000); pg.wait_for_timeout(500)
         assert pg.locator(".fig").count() == 5
         pg.click("[data-a=dw-ac]"); pg.click("[data-a=dw-sifir]"); pg.wait_for_timeout(900)
         assert pg.locator(".fig").count() == 4

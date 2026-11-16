@@ -73,6 +73,13 @@ def _phone(v):
 # Panelde seçilen sektör paketi (16 paket) -> terim tablosundaki (70 sektör) karşılığı
 PACKMAP = {"oto": "oto_servis", "emlak": "emlakci", "surucu": "surucu_kursu", "kurs": "etut_merkezi", "fitness": "spor_salonu",
            "saglik": "dis_klinigi", "organizasyon": "dugun_salonu"}
+# Müşteriye ne denir (yalnız farklı olanlar; yoksa "Müşteri") ve çoğulu
+MUSTERI = {"avukat": ("Müvekkil", "Müvekkiller"), "dis_klinigi": ("Hasta", "Hastalar"), "fizyoterapi": ("Hasta", "Hastalar"),
+           "veteriner": ("Hasta Sahibi", "Hasta Sahipleri"), "psikolog": ("Danışan", "Danışanlar"), "diyetisyen": ("Danışan", "Danışanlar"),
+           "aile_danisman": ("Danışan", "Danışanlar"), "surucu_kursu": ("Kursiyer", "Kursiyerler"), "src_kursu": ("Kursiyer", "Kursiyerler"),
+           "dil_okulu": ("Öğrenci", "Öğrenciler"), "muzik_kursu": ("Öğrenci", "Öğrenciler"), "etut_merkezi": ("Öğrenci", "Öğrenciler"),
+           "ozel_ders": ("Öğrenci", "Öğrenciler"), "bilgisayar_kursu": ("Öğrenci", "Öğrenciler"), "yuzme_kursu": ("Öğrenci", "Öğrenciler"),
+           "anaokulu": ("Veli", "Veliler"), "spor_salonu": ("Üye", "Üyeler"), "yoga_dans": ("Üye", "Üyeler"), "lokanta": ("Misafir", "Misafirler")}
 SALONLU = {"spor_salonu", "dugun_salonu", "kuafor", "guzellik", "tirnak_studyo", "estetik_merkezi", "spa_hamam", "dovme_studyo"}
 
 
@@ -97,7 +104,8 @@ def terms(key):
         i2 = {"Randevu": "Randevular", "Seans": "Seanslar"}.get(i1, i1 + "ler")
     if i1 == "Sipariş":                                            # mağaza/yemek gibi işlerde randevu = görüşme/teslimat/rezervasyon (siparişle karışmasın)
         i1, i2 = {"market": ("Teslimat", "Teslimatlar"), "lokanta": ("Rezervasyon", "Rezervasyonlar")}.get(key, ("Görüşme", "Görüşmeler"))
-    return {"kisi": a, "kisiler": b or a, "yer": (r.get("yer") or "Koltuk Takibi").replace(" Takibi", ""),
+    m1, m2 = MUSTERI.get(key, ("Müşteri", "Müşteriler"))
+    return {"musteri": m1, "musteriler": m2, "kisi": a, "kisiler": b or a, "yer": (r.get("yer") or "Koltuk Takibi").replace(" Takibi", ""),
             "is": i1, "isler": i2 or i1 + "lar", "salon": "salon" if (key in SALONLU or not r) else "işletme"}
 
 
@@ -146,6 +154,19 @@ def register(api_router, db, deps):
         except Exception:                                          # noqa: BLE001
             return {}
 
+    @api_router.put("/yp/dash")
+    async def dash_put(p: dict, user: dict = Depends(adm)):
+        """Ana panelde hangi kutuların hangi sırayla görüneceği (kullanıcıya özel, her cihazda aynı). Boş liste = hepsi kapalı; null = varsayılan."""
+        l = p.get("list")
+        key = "yp_dash:" + str(user.get("id") or user.get("email") or "")
+        if l is None:
+            await db.app_settings.delete_one({"_id": key})
+            return {"ok": True}
+        if not isinstance(l, list) or len(l) > 40 or not all(isinstance(x, str) and 0 < len(x) <= 20 for x in l):
+            raise HTTPException(422, "Geçersiz liste")
+        await db.app_settings.update_one({"_id": key}, {"$set": {"list": list(dict.fromkeys(l))}}, upsert=True)
+        return {"ok": True}
+
     @api_router.get("/yp/boot")
     async def boot(user: dict = Depends(adm)):
         st = await staff_all()
@@ -177,7 +198,8 @@ def register(api_router, db, deps):
                 "user": user.get("name") or user.get("email") or "", "staff": st, "services": sv,
                 "hours": {"start": B.get("start") or "09:00", "end": B.get("end") or "19:00", "closed": B.get("closed_weekdays") or [], "online": bool(B.get("enabled")),
                           "slot": int(B.get("slot_minutes") or 30)},
-                "today": _now().date().isoformat(), "now": _now().strftime("%H:%M")}
+                "today": _now().date().isoformat(), "now": _now().strftime("%H:%M"),
+                "dash": (await db.app_settings.find_one({"_id": "yp_dash:" + str(user.get("id") or user.get("email") or "")}, {"_id": 0}) or {}).get("list")}
 
     # ------------------------------------------------------------------ ekip
     def clean_staff(p, old=None):
