@@ -66,3 +66,5 @@ footer{background:#fff;color:var(--metin2);border-top:1px solid var(--cizgi)}foo
 .dk li.yn{background:#f1f3f6;transform:translateX(-6px)}
 .kn2{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}.kn2 li{border:1px solid var(--cizgi);border-radius:999px;padding:8px 16px;font-size:15px;color:var(--metin2);background:#fff}
 @media(max-width:760px){.dnya{padding-top:72px}.sh{height:640px}.dk{top:auto;bottom:0;right:auto;left:0;right:0;transform:none;width:auto}.dk li.yn{transform:none}}
+.dk{transition:box-shadow .5s}.dk.gel{animation:gel .9s var(--yum)}@keyframes gel{0%{box-shadow:0 0 0 0 rgba(43,51,64,.22),0 30px 60px -34px rgba(43,51,64,.5)}100%{box-shadow:0 0 0 22px rgba(43,51,64,0),0 30px 60px -34px rgba(43,51,64,.5)}}
+@media(prefers-reduced-motion:reduce){.dk.gel{animation:none}}
