@@ -1,0 +1,31 @@
+/* ek sayfalar: gen_sayfalar.py */
+.eski .g5{grid-template-columns:1.5fr repeat(4,1fr)!important}
+.eski footer .fp{font-weight:800;font-size:18px;color:#ffffff;margin-top:6px}
+@media(max-width:900px){.eski .g5{grid-template-columns:1fr 1fr!important}.eski .g5>div:first-child{grid-column:1/-1}}
+.eski .ctg{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.eski .cc{display:block;background:#ffffff;border:1px solid var(--l);border-radius:12px;padding:26px;transition:transform .15s,box-shadow .15s}
+.eski .cc:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(58,67,80,.08)}
+.eski .cc b{display:block;font-size:17px;margin:12px 0 4px;color:var(--n)}.eski .cc .cbig{display:block;font-size:22px;font-weight:800;color:var(--o);margin-bottom:6px}.eski .cc p{color:#5c6b80}
+.eski .fc2{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start}.eski .fc2 h2{font-size:30px;color:var(--n);margin-bottom:10px}
+.eski .tick{list-style:none;padding:0;margin:16px 0 0}.eski .tick li{padding:6px 0 6px 26px;position:relative}.eski .tick li:before{content:"";position:absolute;left:0;top:11px;width:14px;height:8px;border-left:3px solid var(--g);border-bottom:3px solid var(--g);transform:rotate(-45deg)}
+.eski .tg{font-size:20px;color:var(--n);margin:28px 0 12px}
+.eski .tmg{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.eski .tm{display:block;background:#ffffff;border:1px solid var(--l);border-radius:12px;padding:18px;transition:transform .15s,box-shadow .15s}
+.eski .tm:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(58,67,80,.08)}
+.eski .tm .sw{display:flex;height:54px;border-radius:8px;overflow:hidden;margin-bottom:12px}.eski .tm .sw i{flex:1}.eski .tm .sw i+i{flex:.35}
+.eski .tm b{display:block;color:var(--n)}.eski .tm small{color:#5c6b80}.eski .tm .go{display:block;margin-top:10px;color:var(--o);font-weight:700;font-size:14px}
+.eski .blg{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.eski .bl{display:block;background:#ffffff;border:1px solid var(--l);border-radius:12px;padding:24px;transition:transform .15s,box-shadow .15s}
+.eski .bl:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(58,67,80,.08)}.eski .bl b{display:block;font-size:18px;color:var(--n);margin-bottom:8px}.eski .bl p{color:#5c6b80}.eski .bl .go{display:block;margin-top:12px;color:var(--o);font-weight:700}
+.eski .art{max-width:760px;margin:0 auto;font-size:17px;line-height:1.7}.eski .art h2{font-size:24px;color:var(--n);margin:28px 0 8px}.eski .art p,.eski .art ul{margin:0 0 14px}.eski .art ul{padding-left:22px}.eski .art li{margin-bottom:6px}.eski .art a{color:var(--b);text-decoration:underline}
+.eski .calc{display:grid;grid-template-columns:1.2fr 1fr;gap:28px;align-items:start}.eski .calc .note2{grid-column:1/-1}
+.eski .cin{display:grid;grid-template-columns:1fr 1fr;gap:14px}.eski .cin label{display:block;font-size:13px;font-weight:600;margin-bottom:4px;color:var(--n)}
+.eski .cin input{width:100%;padding:12px;border:1px solid #d7dce2;border-radius:8px;font:inherit}.eski .cin input:focus{outline:2px solid var(--b);border-color:var(--b)}
+.eski .cout{background:var(--n);color:#ffffff;border-radius:12px;padding:22px;display:grid;grid-template-columns:1fr auto;gap:10px 16px;margin:0}.eski .cout dt{opacity:.8}.eski .cout dd{margin:0;font-weight:800;text-align:right}
+@media(max-width:900px){.eski .ctg,.eski .blg{grid-template-columns:1fr}.eski .tmg{grid-template-columns:1fr 1fr}.eski .fc2,.eski .calc{grid-template-columns:1fr}.eski .cin{grid-template-columns:1fr}}
+@media(max-width:480px){.eski .tmg{grid-template-columns:1fr}}
+.eski .ctg.c4{grid-template-columns:repeat(4,1fr)}.eski .cc .go{display:block;margin-top:10px;color:var(--o);font-weight:700;font-size:14px}
+@media(max-width:900px){.eski .ctg.c4{grid-template-columns:1fr 1fr}}@media(max-width:480px){.eski .ctg.c4{grid-template-columns:1fr}}
+.eski #daha{padding:56px 0;background:#f5f6f8}.eski #daha .sh h2{font-size:30px;color:var(--n);margin-bottom:22px}
+.eski #daha .ib{display:none}.eski #daha .cc{border-top:4px solid var(--o);padding:24px}.eski #daha .cc:nth-child(2){border-top-color:var(--b)}.eski #daha .cc:nth-child(3){border-top-color:var(--g)}.eski #daha .cc:nth-child(4){border-top-color:var(--p)}
+.eski #daha .cc b{margin-top:0;font-size:19px}

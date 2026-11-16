@@ -59,7 +59,7 @@ def banner(slug,ad,h1,lead,gorsel=None,chip=None):
         yan='<div class="yan" data-tilt><div class="tar"><div class="tb"><i></i><i></i><i></i></div>%s</div>%s</div>'%(img(n,1400,875,alt,True),'<div class="cip2"><b>%s</b>%s</div>'%chip if chip else '')
     return ('<section class="pb" id="icerik"><div class="w"><div><p class="kr"><a href="/">Ana sayfa</a> / %s</p><h1>%s</h1><p class="lead">%s</p>'
      '<div class="cta"><a class="btn fil" href="/demo.html">Ücretsiz deneyin</a><a class="btn bos" href="#teklif">Teklif alın</a><a class="btn duz" href="tel:+905444444004">Hemen arayın</a></div></div>%s</div></section>')%(ad,h1,lead,yan)
-def page(slug,title,desc,body,ld=None,home=False):
+def page(slug,title,desc,body,ld=None,home=False,robots=None,extra_head='',extra_js='',ld_raw=None):
     url=BASE+('/' if home else '/'+slug)
     h=head_raw.replace('content="#0A6847"','content="#3034FF"')
     h=re.sub(r'<title>.*?</title>','<title>%s</title>'%html.escape(title),h,flags=re.S)
@@ -75,8 +75,10 @@ def page(slug,title,desc,body,ld=None,home=False):
     elif slug=='sss.html': lj='<script type="application/ld+json">'+_j.dumps([x for x in _all if x['@type']=='FAQPage'],ensure_ascii=False)+'</script>'
     else:
         lj='<script type="application/ld+json">'+__import__('json').dumps({"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Ana sayfa","item":BASE+"/"},{"@type":"ListItem","position":2,"name":title.split(' | ')[0],"item":url}]},ensure_ascii=False)+'</script>'
+    if robots: h=re.sub(r'(<meta name="robots" content=")[^"]*',lambda m:m.group(1)+robots,h)
+    if ld_raw is not None: lj=ld_raw
     cur='/' if home else '/'+slug
-    full=h+lj+'\n</head><body>\n<a class="skip" href="#icerik">İçeriğe geç</a>'+hdr(cur)+'\n<main>'+body+'</main>\n'+foot+'\n'+mbar+'<script src="/v9/v9.js" defer></script><script src="/v9/v10.js" defer></script>'+('<script src="/v9/dunya.js" defer></script>' if home else '')+'<script src="/lead.js" defer></script></body></html>'
+    full=h+extra_head+lj+'\n</head><body>\n<a class="skip" href="#icerik">İçeriğe geç</a>'+hdr(cur)+'\n<main>'+body+'</main>\n'+foot+'\n'+mbar+'<script src="/v9/v9.js" defer></script><script src="/v9/v10.js" defer></script>'+('<script src="/v9/dunya.js" defer></script>' if home else '')+'<script src="/lead.js" defer></script>'+extra_js+'</body></html>'
     for k,v in SEC.items():
         if 'id="%s"'%k not in full: full=full.replace('href="#%s"'%k,'href="%s"'%v)
     if 'id="e-urun"' not in full: full=full.replace('href="#e-','href="/e-ticaret.html#e-')
@@ -166,3 +168,24 @@ ic=(sec_baslik('İletişim','Bize ulaşın','Aşağıdaki formu doldurun, sizi a
  '</div></div>')
 page('iletisim.html','İletişim | OnlineKaydet','OnlineKaydet iletişim: telefon, WhatsApp ve teklif formu. Etimesgut, Ankara.',
  B('c','İletişim','Sizi arayalım','Formu doldurun, sektörünüzü not alalım, kurulum için sizi arayalım.')+'<section class="sec">'+ic+'</section>'+SON)
+
+# ---- eski sayfalar: içerik yeni kabuğa taşınır
+import glob
+ESKI_CSS={'mobil.css':'eski-mobil.css','yeni.css':'eski-yeni.css','ic1.css':'eski-ic1.css','ic2.css':'eski-ic2.css','sayfalar.css':'eski-sayfalar.css','sektor.css':'eski-sektor.css'}
+for f in sorted(glob.glob(H+'/kaynak/eski/*.html')):
+    nm=os.path.basename(f);o=open(f,encoding='utf-8').read()
+    m=re.search(r'<main[^>]*>(.*)</main>',o,re.S)
+    if not m: continue
+    main=m.group(1)
+    sp=re.search(r'<svg[^>]*(?:display:none|hidden|width="0")[^>]*>.*?</svg>',o,re.S)
+    spr=sp.group(0) if sp and sp.group(0) not in main else ''
+    t=re.search(r'<title>(.*?)</title>',o,re.S).group(1)
+    dsc=(re.search(r'<meta name="description" content="([^"]*)"',o) or [0,''])[1]
+    rb=(re.search(r'<meta name="robots" content="([^"]*)"',o) or [0,'index,follow'])[1]
+    lds=''.join(re.findall(r'<script type="application/ld\+json">.*?</script>',o,re.S))
+    css=''.join('<link rel="stylesheet" href="/v9/%s">'%ESKI_CSS[c] for c in re.findall(r'href="([^"]+\.css)"',o) if c in ESKI_CSS)
+    main=main.replace('index.html#kayit','/iletisim.html#teklif')
+    body=spr+'<div class="eski"><div id="icerik">'+main+'</div></div>'
+    # <main> etiketi kabukta zaten var; içerik id'si çakışmasın
+    body=body.replace('id="icerik"','',1) if False else body
+    page(nm,html.unescape(t),html.unescape(dsc),body,robots=rb,extra_head=css,ld_raw=lds or None,extra_js='<script src="/site.js" defer></script>' if 'src="site.js"' in o else '')

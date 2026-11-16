@@ -1,0 +1,139 @@
+/* ic1.css - iç sayfalar (fiyatlar, özellikler, paket ayrıntıları); yeni.css üstüne */
+.eski main>section{padding:34px 0}
+.eski main h2{font-size:28px;line-height:1.15;font-weight:800;letter-spacing:-.015em;color:var(--n)}
+.eski .tint{background:linear-gradient(180deg,#f9f9fa,#e8ebef 55%,#f9f9fa)}
+.eski .bandb{background:linear-gradient(180deg,#f9f9fa,#e8ebef)}
+.eski .sh.one{margin-bottom:20px}
+.eski header nav.m a[aria-current]{color:#505c6e}
+.eski .vb .p2{background:linear-gradient(100deg,#3e4855,#414b59)}
+.eski .mn-l a svg{opacity:1}
+/* sayfa başlığı bandı */
+.eski .pgh .acts,.eski .pgh .jump{display:flex;gap:12px;flex-wrap:wrap}
+.eski .pgh .jump a{border:1.5px solid #ffffff80;color:#2b3340;border-radius:999px;padding:8px 18px;font-weight:700;font-size:14px;background:#ffffff14}
+.eski .pgh .jump a:hover{background:#ffffff;color:var(--n)}
+.eski .pga{display:grid;grid-template-columns:repeat(2,minmax(0,118px));gap:14px;justify-content:end}
+.eski .pga svg{width:100%;height:auto;aspect-ratio:1;background:#ffffff;border-radius:22px;padding:16px;box-shadow:0 16px 34px #373f4c70;display:block}
+.eski .pga svg:nth-child(even){transform:translateY(18px)}
+/* ozellikler: kartlar */
+.eski .fgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.eski .fgrid>div{background:#ffffff;border-radius:16px;padding:22px;box-shadow:0 10px 26px #59677b33;display:flex;flex-direction:column}
+.eski .ib{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;margin-bottom:14px;color:#ffffff;background:linear-gradient(135deg,#5d6c81,#728299)}
+.eski .ib svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.eski .fgrid>div:nth-child(4n+2) .ib{background:linear-gradient(135deg,#515d6f,#546275);color:#ffffff}
+.eski .fgrid>div:nth-child(4n+3) .ib{background:linear-gradient(135deg,#3e4855,#465160)}
+.eski .fgrid>div:nth-child(4n) .ib{background:linear-gradient(135deg,#647389,#8291a5)}
+.eski .fgrid h3{font-size:18px;color:var(--n);margin-bottom:6px}
+.eski .fgrid p{color:#424c5b;margin-bottom:12px;flex:1}
+.eski .fgrid a{font-weight:700;color:#505c6e}.eski .fgrid a:after{content:" →"}.eski .fgrid a:hover{text-decoration:underline;text-underline-offset:3px}
+.eski .set{display:grid;grid-template-columns:1.1fr .9fr;gap:48px;align-items:center}.eski .set>*{min-width:0}
+.eski .set p{color:#424c5b;max-width:520px;margin:12px 0 16px}
+.eski .set .fis{background:#ffffff;box-shadow:0 14px 34px #59677b38;max-width:400px;width:100%;justify-self:center;font-size:15px}
+/* ortak listeler ve fiş kartı */
+.eski .ticks{list-style:none;padding:0;display:grid;gap:0;align-content:start}
+.eski .ticks li{position:relative;padding:8px 0 8px 32px;font-size:14.5px;line-height:1.4;border-bottom:1px solid #f2f3f5;font-weight:500}
+.eski .ticks li:before{content:"✓";position:absolute;left:0;top:8px;width:21px;height:21px;border-radius:50%;background:#3e4855;color:#ffffff;font-size:12px;font-weight:800;display:grid;place-items:center;margin:0}
+.eski .ticks.two{grid-template-columns:1fr 1fr;column-gap:28px}
+.eski .set .ticks li{font-size:15px}
+.eski .fis{background:#f8f9fa;border:1px solid #e5e8ed;border-radius:14px;padding:16px 18px;font-size:14px}
+.eski .fis .top{display:flex;justify-content:space-between;gap:12px;font-weight:800;color:var(--n);padding-bottom:9px;margin-bottom:10px;border-bottom:2px solid var(--o)}
+.eski .fis .top span:last-child{font-weight:600;color:#515e70;font-size:12.5px}
+.eski .fis p{margin:0 0 9px;color:#424c5b}.eski .fis p b{display:block;font-size:12.5px;color:#515e70;font-weight:700}
+.eski .fis dl{display:grid;grid-template-columns:1fr auto;gap:8px 14px;margin:0}.eski .fis dt{color:#515e70}.eski .fis dd{margin:0;font-weight:700;text-align:right;color:var(--n)}
+/* paket bantları ve modül kartları */
+.eski .pkh{padding:26px 0;color:#2b3340;background:#f5f6f8}
+.eski main>.pkh{padding:26px 0}
+.eski .pkh .w{display:grid;grid-template-columns:minmax(0,1fr) 230px;gap:28px;align-items:center}
+.eski .pkh h2{color:#2b3340;font-size:34px}
+.eski .pkh p{margin-top:8px;max-width:640px;color:#2b3340}
+.eski .pkh .pr{display:block;grid-template-columns:none;font-size:42px;font-weight:800;line-height:1}
+.eski .pkh .pr small{font-size:14px;font-weight:600;margin-left:4px}
+.eski .pkh .pill{width:100%;margin-top:12px;background:#ffffff;color:var(--n);box-shadow:none}
+.eski #paket-profesyonel{background:#f5f6f8}
+.eski #paket-tam{background:#f5f6f8}
+.eski #paket-kurumsal{background:#f5f6f8}
+.eski .mods{padding:6px 0 30px}
+.eski .mod{background:#ffffff;border-radius:18px;box-shadow:0 10px 28px #59677b2e;padding:26px 28px;display:grid;grid-template-columns:.85fr 1.15fr;gap:32px;margin-top:18px;scroll-margin-top:84px}
+.eski .mod>*{min-width:0}
+.eski .mod h3{font-size:22px;line-height:1.2;color:var(--n)}
+.eski .mod .lede{font-weight:700;color:#5d6c81;margin:8px 0 4px}
+.eski .mod .ds{color:#424c5b;font-size:14.5px}
+.eski .mod .nt{font-size:13px;color:#515e70;margin-top:10px}
+.eski .mod .fis{margin-top:18px;max-width:340px}
+/* üç lü bilgi kartları */
+.eski .lt{background:linear-gradient(180deg,#f9f9fa,#e8ebef)}
+.eski .three{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.eski .three>div{background:#ffffff;border-radius:16px;padding:20px 22px;box-shadow:0 10px 26px #59677b33}
+.eski .three>div:before{content:"✓";width:38px;height:38px;border-radius:12px;display:grid;place-items:center;font-weight:800;font-size:18px;color:#ffffff;background:linear-gradient(135deg,#5d6c81,#728299);margin-bottom:12px}
+.eski .three>div:nth-child(4n+2):before{background:linear-gradient(135deg,#515d6f,#546275);color:#ffffff}
+.eski .three>div:nth-child(4n+3):before{background:linear-gradient(135deg,#3e4855,#465160)}
+.eski .three>div:nth-child(4n):before{background:linear-gradient(135deg,#647389,#8291a5)}
+.eski .three b{display:block;font-size:17px;color:var(--n);margin-bottom:4px}.eski .three p{color:#424c5b;font-size:14px}
+/* karşılaştırma tabloları */
+.eski .fy,.eski .cmp{background:#ffffff;border-radius:18px;overflow:hidden;box-shadow:0 14px 34px #59677b38}
+.eski .fy .r,.eski .cmp .r{display:grid;grid-template-columns:minmax(0,1.8fr) repeat(4,minmax(0,1fr))}
+.eski .fy .r>*,.eski .cmp .r>*{display:flex;align-items:center;border-top:1px solid #eff1f3}
+.eski .fy .r>*{padding:13px 18px;font-size:14.5px}.eski .cmp .r>*{padding:11px 16px;font-size:14.5px}
+.eski .fy .r>*:first-child,.eski .cmp .r>*:first-child{font-weight:500}
+.eski .fy .r:not(.hd):not(.cta)>*:nth-child(3),.eski .cmp .r:not(.hd):not(.g)>*:nth-child(3){background:#f2f3f5}
+.eski .fy .cta>*:nth-child(3){background:#f2f3f5}
+.eski .fy .hd>*,.eski .cmp .hd>*{border-top:0;color:#ffffff}
+.eski .fy .hd>*{display:block;padding:20px 18px 16px;text-align:center}
+.eski .fy .hd>*:nth-child(2),.eski .cmp .hd>*:nth-child(2){background:var(--n)}
+.eski .fy .hd>*:nth-child(3),.eski .cmp .hd>*:nth-child(3){background:linear-gradient(135deg,#515d6f,#546275);color:#ffffff}
+.eski .fy .hd>*:nth-child(4),.eski .cmp .hd>*:nth-child(4){background:linear-gradient(135deg,#5d6c81,#728299)}
+.eski .fy .hd>*:nth-child(5),.eski .cmp .hd>*:nth-child(5){background:linear-gradient(135deg,#647389,#8291a5)}
+.eski .fy .hd b{display:block;font-size:18px;font-weight:800}
+.eski .fy .hd .pr{display:block;grid-template-columns:none;font-size:30px;font-weight:800;line-height:1.1;margin-top:6px}
+.eski .fy .hd .pr small{font-size:13px;font-weight:600}
+.eski .fy .hd em{display:inline-block;font-style:normal;font-weight:800;font-size:11px;background:#ffffff;color:#414b5a;border-radius:999px;padding:2px 10px;margin-bottom:6px}
+.eski .cmp .hd>*{font-weight:800;font-size:15px;justify-content:center;text-align:center;padding:14px 8px}
+.eski .cmp .r.g{display:block}
+.eski .cmp .gr{display:block;background:#eff1f3;color:var(--n);font-weight:800;font-size:14px;padding:9px 16px;border-top:1px solid #e2e5ea}
+.eski .fy .y,.eski .fy .n,.eski .cmp .y,.eski .cmp .n{justify-content:center;font-size:0;font-weight:800}
+.eski .fy .y:before,.eski .cmp .y:before{content:"✓";width:24px;height:24px;border-radius:50%;background:#3e4855;color:#ffffff;font-size:13px;display:grid;place-items:center}
+.eski .fy .n:before,.eski .cmp .n:before{content:"–";font-size:18px;color:#59687c}
+.eski .fy .cta>*{padding:16px 14px}.eski .fy .cta .pill{width:100%;padding:11px 8px;font-size:13px}
+.eski .cmp .s{display:none}
+.eski .note2{margin:14px 0 0;font-weight:700;color:var(--n)}
+.eski .fy-m{display:none}
+.eski .fp{background:#ffffff;border-radius:14px;overflow:hidden;box-shadow:0 10px 26px #59677b38;display:flex;flex-direction:column}
+.eski .fy-m .ph{position:static;width:auto;display:flex;justify-content:space-between;align-items:baseline;gap:10px;border:0;border-radius:0;padding:15px 16px;background:var(--n);color:#ffffff;box-shadow:none}
+.eski .fy-m .ph b{font-size:18px}.eski .fy-m .pr{display:block;grid-template-columns:none;font-size:24px;font-weight:800}.eski .fy-m .pr small{font-size:13px;font-weight:600}
+.eski .fp:nth-child(3) .ph{background:linear-gradient(135deg,#5d6c81,#728299)}
+.eski .fp:nth-child(4) .ph{background:linear-gradient(135deg,#647389,#8291a5)}
+.eski .fp.hot .ph{background:linear-gradient(135deg,#515d6f,#546275);color:#ffffff}
+.eski .fp.hot{box-shadow:0 14px 34px #6a7b9255}
+.eski .fp.hot:before{content:"En çok tercih edilen";background:#f2f3f5;color:#414b5a;font-weight:800;font-size:12px;padding:6px 16px}
+.eski .fp ul{list-style:none;padding:14px 16px;display:grid;gap:8px;flex:1;font-size:14px}
+.eski .fp li:before{content:"✓";color:#576477;font-weight:800;margin-right:8px}
+.eski .fp .pill{margin:0 14px 14px}
+/* sss */
+.eski .sss{display:grid;grid-template-columns:260px 1fr;gap:28px;align-items:start}.eski .sss>*{min-width:0}
+.eski .sss>div{display:grid;gap:8px}
+/* kombi bandı */
+.eski .k2{padding:6px 0}
+.eski .cta2{background:#f5f6f8;border-radius:18px;color:#2b3340;padding:26px 34px;display:grid;grid-template-columns:1fr auto;gap:28px;align-items:center}
+.eski .cta2 h2{color:#2b3340;font-size:26px}.eski .cta2 p{color:#2b3340;margin-top:6px;max-width:560px}
+/* form */
+.eski .dkk{margin-top:10px}
+@media(max-width:1060px){.eski .pga{display:none}.eski .fgrid,.eski .three{grid-template-columns:1fr 1fr}.eski .set,.eski .sss{grid-template-columns:1fr}.eski .set{gap:28px}}
+@media(max-width:900px){
+ .eski .fy{display:none}.eski .fy-m{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+ .eski .mod{grid-template-columns:1fr;gap:16px;padding:22px 20px}
+ .eski .cmp .r{grid-template-columns:minmax(0,1.9fr) repeat(4,minmax(0,.62fr))}.eski .cmp .r>*{padding:10px 4px}.eski .cmp .r>*:first-child{padding-left:12px;font-size:13.5px;line-height:1.3}
+ .eski .cmp .hd>*{font-size:12px}.eski .cmp .hd .f{display:none}.eski .cmp .hd .s{display:inline}.eski .cmp .gr{padding:9px 12px;font-size:13px}
+ .eski .cmp .y:before{width:22px;height:22px;font-size:12px}
+}
+@media(max-width:700px){
+ .eski main h2{font-size:24px}.eski .pkh h2{font-size:28px}
+ .eski .pkh .w,.eski .cta2{grid-template-columns:1fr}.eski .cta2{padding:22px 20px}
+ .eski .ticks.two{grid-template-columns:1fr}
+ .eski .fgrid,.eski .three{grid-template-columns:1fr}
+}
+@media(max-width:600px){.eski .fy-m{grid-template-columns:1fr}.eski main>section{padding:28px 0}.eski .mods{padding:2px 0 24px}}
+.eski .dkk h2{color:#2b3340}
+.eski .pgh p,.eski .crumb{color:#2b3340}
+.eski #paket-tam{background:#f5f6f8}
+.eski #paket-kurumsal{background:#f5f6f8}
+.eski .fy .r.cta{display:grid;gap:0;flex-wrap:nowrap}
+.eski #paket-baslangic{margin-top:30px}
