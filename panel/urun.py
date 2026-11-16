@@ -215,16 +215,50 @@ def clean(p, old=None):
         if k in CHANNELS:
             ch[k] = bool(v)
     ch.setdefault("site", True)
-    vr = []
+    vr, axes = [], []
+    for a in (p.get("var_axes") or [])[:3]:
+        if isinstance(a, dict) and _t(a.get("ad"), 30):
+            vals = []
+            for x in (a.get("degerler") or [])[:40]:
+                x = _t(x, 40)
+                if x and x not in vals:
+                    vals.append(x)
+            if vals and not any(z["ad"] == _t(a.get("ad"), 30) for z in axes):
+                axes.append({"ad": _t(a.get("ad"), 30), "degerler": vals})
+    seen_sku, seen_bc, seen_opt = set(), set(), set()
     for v in (p.get("variants") or [])[:200]:
         if not isinstance(v, dict):
             continue
-        opts = {_t(a, 30): _t(b, 40) for a, b in list((v.get("opts") or {}).items())[:4] if _t(a, 30)}
+        opts = {_t(a, 30): _t(b, 40) for a, b in list((v.get("opts") or {}).items())[:3] if _t(a, 30) and _t(b, 40)}
         if not opts:
             continue
-        vr.append({"id": _t(v.get("id"), 20) or uuid.uuid4().hex[:8], "opts": opts,
-                   "sku": _t(v.get("sku"), 60), "barcode": _t(v.get("barcode"), 40),
-                   "stock": _int(v.get("stock")), "price": _num(v.get("price")) or 0.0})
+        key = "|".join("%s=%s" % kv for kv in sorted(opts.items()))
+        if key in seen_opt:
+            raise HTTPException(422, "Aynı seçenek iki kez var: " + " / ".join(opts.values()))
+        seen_opt.add(key)
+        sku, bc = _t(v.get("sku"), 60), _t(v.get("barcode"), 40)
+        for val, seen, ad in ((sku, seen_sku, "stok kodu"), (bc, seen_bc, "barkod")):
+            if val:
+                if val in seen:
+                    raise HTTPException(422, "Seçeneklerde aynı %s birden fazla: %s" % (ad, val))
+                seen.add(val)
+        vp, vs = _num(v.get("price")), _num(v.get("sale_price"))
+        if vs and vp and vs > vp:
+            raise HTTPException(422, "Seçenek indirimli fiyatı, fiyatından yüksek olamaz")
+        vr.append({"id": _t(v.get("id"), 20) or uuid.uuid4().hex[:8], "opts": opts, "sku": sku, "barcode": bc,
+                   "stock": max(_int(v.get("stock")), 0), "price": vp or 0.0, "sale_price": vs or 0.0,
+                   "image": _t(v.get("image"), 400), "active": v.get("active") is not False})
+    if vr and not axes:                       # eksen verilmediyse seçeneklerden türet
+        order = []
+        for v in vr:
+            for a, b in v["opts"].items():
+                z = next((x for x in order if x["ad"] == a), None)
+                if not z:
+                    z = {"ad": a, "degerler": []}
+                    order.append(z)
+                if b not in z["degerler"]:
+                    z["degerler"].append(b)
+        axes = order[:3]
     imgs = [_t(u, 400) for u in (p.get("images") or [])[:20] if _t(u, 400)]
     specs = [{"k": _t(s.get("k"), 60), "v": _t(s.get("v"), 200)} for s in (p.get("specs") or [])[:40]
              if isinstance(s, dict) and _t(s.get("k"), 60)]
@@ -284,7 +318,7 @@ def clean(p, old=None):
            "cost": _num(p.get("cost")), "price": price, "sale_price": sale, "vat": vat,
            "stock": _int(p.get("stock")), "track_stock": False if p.get("track_stock") is False else True,
            "low_at": _int(p.get("low_at"), _int(old.get("low_at"), 5)),
-           "variants": vr, "images": imgs,
+           "variants": vr, "var_axes": axes if vr else [], "images": imgs,
            "weight": _num(p.get("weight")), "desi": desi,
            "warranty": _t(p.get("warranty"), 60), "min_qty": max(_int(p.get("min_qty"), 1), 1),
            "max_qty": _int(p.get("max_qty")), "channels": ch,
@@ -292,7 +326,7 @@ def clean(p, old=None):
            "status": "draft" if p.get("status") == "draft" else "live",
            "source": _t(p.get("source"), 400)}
     if vr:
-        out["stock"] = sum(v["stock"] for v in vr)
+        out["stock"] = sum(v["stock"] for v in vr if v["active"])
     return out
 
 
@@ -304,7 +338,8 @@ def view(p):
                 discount=round(d / _num(p["price"]) * 100) if d > 0 and _num(p.get("price")) else 0,
                 low=bool(p.get("track_stock", True) and 0 < _int(p.get("stock")) <= _int(p.get("low_at"), 5)),
                 out=bool(p.get("track_stock", True) and _int(p.get("stock")) <= 0),
-                channels_on=[k for k, v in (p.get("channels") or {}).items() if v])
+                channels_on=[k for k, v in (p.get("channels") or {}).items() if v],
+                variant_count=len(p.get("variants") or []))
 
 
 async def _rozet(db, rows):
@@ -480,8 +515,17 @@ def register(api_router, db, deps):
                 up["price"] = round(_num(p["price"]) * (1 + pct / 100.0), 2)
                 if _num(p.get("sale_price")):
                     up["sale_price"] = round(_num(p["sale_price"]) * (1 + pct / 100.0), 2)
+                if p.get("variants"):
+                    up["variants"] = [dict(v, price=round(_num(v.get("price")) * (1 + pct / 100.0), 2),
+                                           sale_price=round(_num(v.get("sale_price")) * (1 + pct / 100.0), 2)) for v in p["variants"]]
             elif op == "stock":
-                up["stock"] = max(_int(p.get("stock")) + _int(payload.get("add")), 0) if payload.get("add") is not None else _int(payload.get("set"))
+                if p.get("variants"):                  # varyantlı ürün: her seçeneğe uygulanır, toplam varyantlardan türer
+                    vs = [dict(v, stock=(max(_int(v.get("stock")) + _int(payload.get("add")), 0) if payload.get("add") is not None
+                                         else max(_int(payload.get("set")), 0))) for v in p["variants"]]
+                    up["variants"] = vs
+                    up["stock"] = sum(v["stock"] for v in vs if v.get("active", True))
+                else:
+                    up["stock"] = max(_int(p.get("stock")) + _int(payload.get("add")), 0) if payload.get("add") is not None else _int(payload.get("set"))
             elif op == "channel":
                 k = payload.get("channel")
                 if k not in CHANNELS:

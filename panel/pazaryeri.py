@@ -44,26 +44,37 @@ async def queue_push(db, pid, channel, kind="stock", ref=""):
                                  "at": _now(), "err": ""})
 
 
-async def take_stock(db, pid, qty, source, ref):
+async def take_stock(db, pid, qty, source, ref, vid=""):
     """Stoğu koşullu düş. Yetersizse hiç düşmez. Aynı `ref` ikinci kez işlenmez."""
     qty = _int(qty)
     if qty <= 0:
         raise HTTPException(422, "Adet 1 veya daha fazla olmalı")
-    key = "%s|%s|%s" % (source, ref, pid)
+    key = "%s|%s|%s" % (source, ref, pid) + ("|" + vid if vid else "")
     if ref and await db.yp_stock_log.find_one({"key": key}, {"_id": 1}):
         return {"ok": True, "repeat": True, "taken": 0}
     p = await db.yp_products.find_one({"id": pid}, {"_id": 0})
     if not p:
         raise HTTPException(404, "Ürün bulunamadı")
-    before = _int(p.get("stock"))
+    vs = p.get("variants") or []
+    if vs and not vid:
+        return {"ok": False, "repeat": False, "taken": 0, "stock": _int(p.get("stock")), "err": "Seçenek (renk/beden vb.) seçilmeli"}
+    v = next((x for x in vs if x.get("id") == vid), None) if vid else None
+    if vid and not v:
+        return {"ok": False, "repeat": False, "taken": 0, "stock": _int(p.get("stock")), "err": "Seçenek bulunamadı"}
+    before = _int((v or p).get("stock"))
     if p.get("track_stock", True):
-        r = await db.yp_products.update_one({"id": pid, "stock": {"$gte": qty}}, {"$inc": {"stock": -qty}})
+        if v:
+            r = await db.yp_products.update_one(
+                {"id": pid, "variants": {"$elemMatch": {"id": vid, "stock": {"$gte": qty}}}},
+                {"$inc": {"variants.$.stock": -qty, "stock": -qty}})
+        else:
+            r = await db.yp_products.update_one({"id": pid, "stock": {"$gte": qty}}, {"$inc": {"stock": -qty}})
         if not r.modified_count:
             return {"ok": False, "repeat": False, "taken": 0, "stock": before,
                     "err": "Stok yetersiz: %d adet var, %d istendi" % (before, qty)}
     after = max(before - qty, 0)
     await db.yp_stock_log.insert_one({"id": uuid.uuid4().hex[:12], "key": key, "product": pid, "delta": -qty,
-                                      "before": before, "after": after, "source": source, "ref": ref,
+                                      "before": before, "after": after, "source": source, "ref": ref, "variant": vid,
                                       "at": _now(), "seq": time.time()})
     await _ayna(db, pid)
     for k, on in (p.get("channels") or {}).items():
@@ -76,22 +87,26 @@ async def take_stock(db, pid, qty, source, ref):
     return {"ok": True, "repeat": False, "taken": qty, "stock": after}
 
 
-async def give_stock(db, pid, qty, source, ref):
+async def give_stock(db, pid, qty, source, ref, vid=""):
     """İptal/iade: stoğu geri ekle ve kanallara bildir. Aynı `ref` ikinci kez eklenmez."""
     qty = _int(qty)
     if qty <= 0:
         return {"ok": True, "given": 0}
-    key = "iade|%s|%s" % (ref, pid)
+    key = "iade|%s|%s" % (ref, pid) + ("|" + vid if vid else "")
     if ref and await db.yp_stock_log.find_one({"key": key}, {"_id": 1}):
         return {"ok": True, "repeat": True, "given": 0}
     p = await db.yp_products.find_one({"id": pid}, {"_id": 0})
     if not p:
         return {"ok": False, "given": 0, "err": "Ürün bulunamadı"}
-    before = _int(p.get("stock"))
-    await db.yp_products.update_one({"id": pid}, {"$inc": {"stock": qty}})
+    v = next((x for x in (p.get("variants") or []) if x.get("id") == vid), None) if vid else None
+    before = _int((v or p).get("stock"))
+    if v:
+        await db.yp_products.update_one({"id": pid, "variants.id": vid}, {"$inc": {"variants.$.stock": qty, "stock": qty}})
+    else:
+        await db.yp_products.update_one({"id": pid}, {"$inc": {"stock": qty}})
     await _ayna(db, pid)
     await db.yp_stock_log.insert_one({"id": uuid.uuid4().hex[:12], "key": key, "product": pid, "delta": qty,
-                                      "before": before, "after": before + qty, "source": source, "ref": ref,
+                                      "before": before, "after": before + qty, "source": source, "ref": ref, "variant": vid,
                                       "at": _now(), "seq": time.time()})
     for k, on in (p.get("channels") or {}).items():
         if on and k in MARKETS:
@@ -223,7 +238,7 @@ def register(api_router, db, deps):
         out = []
         for it in (payload.get("items") or [])[:200]:
             out.append(dict(await take_stock(db, _t((it or {}).get("product"), 24), it.get("qty", 1), src,
-                                             _t(payload.get("ref"), 60)), product=it.get("product")))
+                                             _t(payload.get("ref"), 60), _t((it or {}).get("variant_id"), 20)), product=it.get("product")))
         bad = [o for o in out if not o["ok"]]
         return {"ok": not bad, "rows": out, "queued": await db.yp_sync.count_documents({"state": "bekliyor"})}
 
@@ -235,11 +250,21 @@ def register(api_router, db, deps):
         if not p:
             raise HTTPException(404, "Ürün bulunamadı")
         n = max(_int(payload.get("stock")), 0)
-        before = _int(p.get("stock"))
-        await db.yp_products.update_one({"id": pid}, {"$set": {"stock": n, "updated_at": _now()}})
+        vid = _t(payload.get("variant_id"), 20)
+        if p.get("variants"):
+            v = next((x for x in p["variants"] if x.get("id") == vid), None)
+            if not v:
+                raise HTTPException(422, "Bu üründe seçenek var; hangi seçeneğin stoğu olduğunu belirtin")
+            before = _int(v.get("stock"))
+            await db.yp_products.update_one({"id": pid, "variants.id": vid}, {"$set": {"variants.$.stock": n, "updated_at": _now()}})
+            tot = sum((n if x.get("id") == vid else _int(x.get("stock"))) for x in p["variants"] if x.get("active", True))
+            await db.yp_products.update_one({"id": pid}, {"$set": {"stock": tot}})
+        else:
+            before = _int(p.get("stock"))
+            await db.yp_products.update_one({"id": pid}, {"$set": {"stock": n, "updated_at": _now()}})
         await _ayna(db, pid)
         await db.yp_stock_log.insert_one({"id": uuid.uuid4().hex[:12], "key": "", "product": pid, "delta": n - before,
-                                          "before": before, "after": n, "source": "elle", "ref": "", "at": _now(), "seq": time.time()})
+                                          "before": before, "after": n, "source": "elle", "ref": "", "variant": vid, "at": _now(), "seq": time.time()})
         for k, on in (p.get("channels") or {}).items():
             if on and k in MARKETS:
                 await queue(pid, k, "stock", "elle")

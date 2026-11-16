@@ -75,7 +75,7 @@ def clean_items(rows):
             raise HTTPException(422, "%s: fiyat girilmeli" % name)
         out.append({"product": pid, "name": name, "sku": _t(it.get("sku"), 40),
                     "barcode": _t(it.get("barcode"), 40),
-                    "variant": _t(it.get("variant"), 60), "qty": qty, "price": price,
+                    "variant": _t(it.get("variant"), 60), "variant_id": _t(it.get("variant_id"), 20), "qty": qty, "price": price,
                     "cost": _num(it.get("cost")), "vat": _num(it.get("vat"), 20.0),
                     "cat": _t(it.get("cat"), 40), "brand": _t(it.get("brand"), 40)})
     if not out:
@@ -325,10 +325,10 @@ def register(api_router, db, deps):
         for it in calc["items"]:
             if not it.get("product"):
                 continue
-            r = await take_stock(db, it["product"], it["qty"], ch, no)
+            r = await take_stock(db, it["product"], it["qty"], ch, no, it.get("variant_id", ""))
             if not r.get("ok"):
                 for t in taken:
-                    await give_stock(db, t["product"], t["qty"], "geri_al", no + "-geri-" + t["product"])
+                    await give_stock(db, t["product"], t["qty"], "geri_al", no + "-geri-" + t["product"], t.get("variant_id", ""))
                 raise HTTPException(409, "%s: %s" % (it["name"], r.get("err") or "stok düşülemedi"))
             taken.append(it)
         o = {"id": oid, "no": no, "channel": ch, "at": _now(), "seq": n + 1, "status": "yeni",
@@ -370,7 +370,7 @@ def register(api_router, db, deps):
         if new == "iptal":
             for it in o.get("items") or []:
                 if it.get("product"):
-                    await give_stock(db, it["product"], it["qty"], "iptal", o["no"] + "-iptal")
+                    await give_stock(db, it["product"], it["qty"], "iptal", o["no"] + "-iptal", it.get("variant_id", ""))
             for c in o.get("camps") or []:
                 if c.get("id"):
                     await db.yp_camps.update_one({"id": c["id"], "limit.used": {"$gt": 0}},
@@ -452,7 +452,7 @@ def register(api_router, db, deps):
                 if new == "iptal":
                     for it in o.get("items") or []:
                         if it.get("product"):
-                            await give_stock(db, it["product"], it["qty"], "iptal", no + "-iptal")
+                            await give_stock(db, it["product"], it["qty"], "iptal", no + "-iptal", it.get("variant_id", ""))
                     for c in o.get("camps") or []:
                         if c.get("id"):
                             await db.yp_camps.update_one({"id": c["id"], "limit.used": {"$gt": 0}},
@@ -593,7 +593,7 @@ def register(api_router, db, deps):
             # onayda ürün rafa döner: stok geri eklenir ve açık pazaryerlerine bildirilir
             for it in r.get("items") or []:
                 if it.get("product"):
-                    await give_stock(db, it["product"], it["qty"], "iade", r["no"])
+                    await give_stock(db, it["product"], it["qty"], "iade", r["no"], it.get("variant_id", ""))
         st = {"state": new}
         if new == "tamam":
             st["refund_at"] = _now()

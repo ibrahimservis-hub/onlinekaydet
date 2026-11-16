@@ -22,6 +22,7 @@ import shop_legal
 import eticaret_plus
 import shop_channels
 import shop_sync
+import shop_var
 
 CUSTOMER_TOKEN_DAYS = 30
 
@@ -253,6 +254,16 @@ def public_product(d: dict) -> dict:
                                  "delivery_days", "unit", "seo_title", "min_qty", "max_qty")}
     st = d.get("stock", 0)
     out["in_stock"] = (not d.get("track_stock", True)) or st > 0
+    vs = [v for v in (d.get("variants") or []) if v.get("active", True)]
+    if vs:
+        out["var_axes"] = d.get("var_axes") or []
+        out["variants"] = [{"id": v["id"], "opts": v.get("opts") or {}, "label": v.get("label", ""), "price": v.get("price") or d.get("price"),
+                            "old_price": v.get("old_price") or 0, "image": v.get("image", ""),
+                            "in_stock": (not d.get("track_stock", True)) or v.get("stock", 0) > 0,
+                            "stock_left": v["stock"] if d.get("track_stock", True) and 0 < v.get("stock", 0) <= 5 else None} for v in vs]
+        pr = [v["price"] for v in out["variants"]]
+        out["price_min"] = min(pr) if pr else d.get("price")
+        out["in_stock"] = any(v["in_stock"] for v in out["variants"])
     out["stock_left"] = st if d.get("track_stock", True) and 0 < st <= 5 else None
     return out
 
@@ -559,7 +570,7 @@ def register(api_router, db, deps):
 
     async def restock(order):
         for it in order.get("items", []):
-            await db.shop_products.update_one({"id": it["product_id"], "track_stock": True}, {"$inc": {"stock": it["qty"], "sold": -it["qty"]}})
+            await shop_var.ver(db, it["product_id"], it["qty"], it.get("variant_id", ""))
         await stock_changed(db, [it["product_id"] for it in order.get("items", [])])
 
     @api_router.put("/shop/orders/{oid}")
@@ -576,7 +587,7 @@ def register(api_router, db, deps):
                 await restock(o)
             if o["status"] == "iptal" and st != "iptal" and not o.get("external"):
                 for it in o["items"]:
-                    await db.shop_products.update_one({"id": it["product_id"], "track_stock": True}, {"$inc": {"stock": -it["qty"], "sold": it["qty"]}})
+                    await shop_var.ver(db, it["product_id"], -it["qty"], it.get("variant_id", ""))
                 await stock_changed(db, [it["product_id"] for it in o["items"]])
             upd["status"] = st
             upd["history"] = (o.get("history") or []) + [{"status": st, "at": _now()}]
@@ -943,12 +954,21 @@ def register(api_router, db, deps):
             p = await db.shop_products.find_one({"id": it.get("product_id"), "active": True}, {"_id": 0})
             if not p:
                 raise HTTPException(422, "Sepetteki bir ürün artık satışta değil")
-            if p.get("track_stock", True) and p.get("stock", 0) < qty:
-                raise HTTPException(422, f"'{p['name']}' için yeterli stok yok (kalan: {max(0, p.get('stock', 0))})")
-            line = round(p["price"] * qty, 2)
+            vid = str(it.get("variant_id") or "")
+            v = shop_var.sec(p, vid)
+            if p.get("variants") and not v:
+                raise HTTPException(422, f"'{p['name']}' için seçenek (renk/beden vb.) seçin")
+            if v and v.get("active") is False:
+                raise HTTPException(422, f"'{p['name']}' ({v.get('label','')}) artık satışta değil")
+            have = v["stock"] if v else p.get("stock", 0)
+            if p.get("track_stock", True) and have < qty:
+                raise HTTPException(422, f"'{p['name']}'{' (' + v['label'] + ')' if v else ''} için yeterli stok yok (kalan: {max(0, have)})")
+            unit = (v or p)["price"]
+            line = round(unit * qty, 2)
             subtotal += line
-            items.append({"product_id": p["id"], "name": p["name"], "brand": p.get("brand", ""), "model": p.get("model", ""), "price": p["price"],
-                          "qty": qty, "line_total": line, "image": (p.get("images") or [""])[0]})
+            items.append({"product_id": p["id"], "name": p["name"], "brand": p.get("brand", ""), "model": p.get("model", ""), "price": unit,
+                          "qty": qty, "line_total": line, "image": ((v or {}).get("image") or (p.get("images") or [""])[0]),
+                          "variant_id": vid, "variant": (v or {}).get("label", ""), "sku": (v or p).get("sku", ""), "track": p.get("track_stock", True)})
         shipping = 0.0 if (cfg["free_shipping_over"] and subtotal >= cfg["free_shipping_over"]) else float(cfg["shipping_fee"] or 0)
         if cfg["min_order"] and subtotal < cfg["min_order"]:
             raise HTTPException(422, "Minimum sipariş tutarı %.2f TL" % cfg["min_order"])
@@ -959,11 +979,9 @@ def register(api_router, db, deps):
         # stok düş (koşullu: yarışta eksiye düşmesin)
         done = []
         for it in items:
-            r = await db.shop_products.update_one({"id": it["product_id"], "$or": [{"track_stock": False}, {"stock": {"$gte": it["qty"]}}]},
-                                                  {"$inc": {"stock": -it["qty"], "sold": it["qty"]}})
-            if not r.modified_count:
+            if not await shop_var.al(db, it["product_id"], it["qty"], it.get("variant_id", ""), it.get("track", True)):
                 for d in done:
-                    await db.shop_products.update_one({"id": d["product_id"], "track_stock": True}, {"$inc": {"stock": d["qty"], "sold": -d["qty"]}})
+                    await shop_var.ver(db, d["product_id"], d["qty"], d.get("variant_id", ""))
                 raise HTTPException(422, f"'{it['name']}' stoğu az önce tükendi")
             done.append(it)
         await stock_changed(db, [d["product_id"] for d in done])

@@ -470,6 +470,8 @@ def register(api_router, db, deps):
             if not pr:
                 raise HTTPException(status_code=422, detail="Ürün bulunamadı")
             q = max(1, min(999, it.qty))
+            if pr.get("variants"):
+                raise HTTPException(status_code=422, detail=f"“{pr['name']}” için seçenek (renk/beden) seçilmeli; mağaza sayfasından sipariş verin")
             r = await db.shop_products.update_one({"id": pr["id"], "$or": [{"track_stock": False}, {"stock": {"$gte": q}}]}, {"$inc": {"stock": -q, "sold": q}})
             if not r.modified_count:
                 for d in done:

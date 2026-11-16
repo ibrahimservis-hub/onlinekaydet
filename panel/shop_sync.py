@@ -652,6 +652,24 @@ def _lines(mk: str, raw: dict) -> list:
     return out
 
 
+async def _bul(db, code):
+    """Pazaryeri satır kodundan (barkod/stok kodu) ürün ve varyant bul: (pid, vid) ya da (None, "")."""
+    p = await db.shop_products.find_one({"variants": {"$elemMatch": {"$or": [{"barcode": code}, {"sku": code}]}}}, {"_id": 0, "id": 1, "variants": 1})
+    if p:
+        v = next((x for x in p["variants"] if code and code in (x.get("barcode"), x.get("sku"))), None)
+        return p["id"], (v or {}).get("id", "")
+    p = await db.shop_products.find_one({"$or": [{"barcode": code}, {"sku": code}]}, {"_id": 0, "id": 1})
+    return (p["id"], "") if p else (None, "")
+
+
+async def _varyant_stok(db, pid, vid, delta):
+    """Varyant stoğunu değiştir; eksiye düşmesin; toplam stok varyantlardan yeniden hesaplanır."""
+    await db.shop_products.update_one({"id": pid, "variants.id": vid}, {"$inc": {"variants.$.stock": delta}})
+    await db.shop_products.update_one({"id": pid, "variants": {"$elemMatch": {"id": vid, "stock": {"$lt": 0}}}}, {"$set": {"variants.$.stock": 0}})
+    d = await db.shop_products.find_one({"id": pid}, {"_id": 0, "variants": 1})
+    await db.shop_products.update_one({"id": pid}, {"$set": {"stock": sum(int(v.get("stock") or 0) for v in (d or {}).get("variants", []) if v.get("active", True))}})
+
+
 async def apply_market_order(db, mk: str, key: str, raw: dict):
     """Pazaryeri siparişi bir kez stoktan düşer; iptal/iade durumuna geçerse stok geri gelir; diğer pazaryerlerine bildirilir."""
     status = str(raw.get("status") or raw.get("packageStatus") or raw.get("shipmentPackageStatus") or "").strip().lower()
@@ -663,23 +681,30 @@ async def apply_market_order(db, mk: str, key: str, raw: dict):
             r = await db.sp_market_orders.update_one({"market": mk, "key": key, "stock_restored": {"$ne": True}}, {"$set": {"stock_restored": True}})
             if r.modified_count:
                 for code, qty in _lines(mk, raw):
-                    p = await db.shop_products.find_one({"$or": [{"barcode": code}, {"sku": code}]}, {"_id": 0, "id": 1})
-                    if p:
-                        await db.shop_products.update_one({"id": p["id"], "track_stock": True}, {"$inc": {"stock": qty}})
-                        await _log(db, p["id"], "+%d" % qty, "pazaryeri iptali", mk, key)
-                        touched.append(p["id"])
+                    pid, vid = await _bul(db, code)
+                    if pid:
+                        if vid:
+                            await _varyant_stok(db, pid, vid, qty)
+                        else:
+                            await db.shop_products.update_one({"id": pid, "track_stock": True}, {"$inc": {"stock": qty}})
+                        await _log(db, pid, "+%d" % qty, "pazaryeri iptali", mk, key)
+                        touched.append(pid)
     elif not doc.get("stock_applied"):
         r = await db.sp_market_orders.update_one({"market": mk, "key": key, "stock_applied": {"$ne": True}}, {"$set": {"stock_applied": True}})
         if r.modified_count:
             for code, qty in _lines(mk, raw):
-                p = await db.shop_products.find_one({"$or": [{"barcode": code}, {"sku": code}]}, {"_id": 0, "id": 1})
-                if not p:
+                pid, vid = await _bul(db, code)
+                if not pid:
                     await db.sp_market_orders.update_one({"market": mk, "key": key}, {"$push": {"unmatched": code}})
                     continue
-                await db.shop_products.update_one({"id": p["id"], "track_stock": True}, {"$inc": {"stock": -qty, "sold": qty}})
-                await db.shop_products.update_one({"id": p["id"], "stock": {"$lt": 0}}, {"$set": {"stock": 0}})
-                await _log(db, p["id"], "-%d" % qty, "pazaryeri siparişi", mk, key)
-                touched.append(p["id"])
+                if vid:
+                    await _varyant_stok(db, pid, vid, -qty)
+                    await db.shop_products.update_one({"id": pid}, {"$inc": {"sold": qty}})
+                else:
+                    await db.shop_products.update_one({"id": pid, "track_stock": True}, {"$inc": {"stock": -qty, "sold": qty}})
+                    await db.shop_products.update_one({"id": pid, "stock": {"$lt": 0}}, {"$set": {"stock": 0}})
+                await _log(db, pid, "-%d" % qty, "pazaryeri siparişi", mk, key)
+                touched.append(pid)
     if touched:
         await _enqueue(db, touched)                            # düşen stok, siparişin geldiği pazaryeri dahil tüm kanallara yansır
     return touched

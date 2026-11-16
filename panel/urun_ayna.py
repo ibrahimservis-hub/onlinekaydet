@@ -33,7 +33,21 @@ def belge(p):
         _liste, satis = urun.kanal_fiyat(p, k)
         kanallar[k] = {"enabled": bool(on), "price": satis if satis != (sale if on_sale else price) else 0.0, "buffer": 0}
     canli = p.get("status") != "draft" and kanallar["site"]["enabled"]
+    taban = sale if on_sale else price
+    varyant = []
+    for v in (p.get("variants") or []):
+        vp, vs = urun._num(v.get("price")), urun._num(v.get("sale_price"))
+        if vp or vs:
+            liste = vp or price
+            etkin = vs if (vs and vs < liste) else liste
+        else:
+            liste, etkin = price, taban
+        varyant.append({"id": v["id"], "opts": dict(v.get("opts") or {}), "label": " / ".join((v.get("opts") or {}).values()),
+                        "sku": v.get("sku") or "", "barcode": v.get("barcode") or "", "stock": urun._int(v.get("stock")),
+                        "price": etkin, "old_price": liste if etkin < liste else 0.0,
+                        "image": v.get("image") or "", "active": v.get("active", True)})
     return {
+        "variants": varyant, "var_axes": list(p.get("var_axes") or []),
         "name": p["name"], "slug": p.get("slug") or p["id"], "brand": p.get("brand") or "", "model": p.get("model") or "",
         "category": p.get("cat") or "", "categories": p.get("cats") or ([p["cat"]] if p.get("cat") else []),
         "price": sale if on_sale else price, "old_price": price if on_sale else 0.0,
@@ -81,6 +95,14 @@ async def ayna_hepsi(db):
 async def geri(db, ids):
     """Mağaza/pazaryeri satışında düşen (ya da iadede artan) stoğu panel ürününe yaz."""
     for pid in set(ids or []):
-        d = await db.shop_products.find_one({"id": pid, "src.panel": True}, {"_id": 0, "stock": 1})
+        d = await db.shop_products.find_one({"id": pid, "src.panel": True}, {"_id": 0, "stock": 1, "variants": 1})
         if d is not None:
-            await db.yp_products.update_one({"id": pid}, {"$set": {"stock": urun._int(d.get("stock")), "updated_at": urun._now()}})
+            up = {"stock": urun._int(d.get("stock")), "updated_at": urun._now()}
+            if d.get("variants"):                  # varyantlı ürün: her seçeneğin stoğunu panele yaz, toplamı yeniden hesapla
+                yp = await db.yp_products.find_one({"id": pid}, {"_id": 0, "variants": 1})
+                st = {v["id"]: urun._int(v.get("stock")) for v in d["variants"]}
+                vs = [dict(v, stock=st.get(v["id"], urun._int(v.get("stock")))) for v in (yp or {}).get("variants", [])]
+                if vs:
+                    up["variants"] = vs
+                    up["stock"] = sum(v["stock"] for v in vs if v.get("active", True))
+            await db.yp_products.update_one({"id": pid}, {"$set": up})
