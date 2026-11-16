@@ -200,7 +200,7 @@ def register(app, api_router, db, deps):
 
         def dest(rel):
             parts = str(rel).split("/")
-            if parts[0] not in roots or ".." in parts or not parts[-1] or not parts[-1].endswith((".py", ".js", ".html", ".json", ".css", ".txt", ".svg")):
+            if parts[0] not in roots or ".." in parts or not parts[-1] or not parts[-1].endswith((".py", ".js", ".html", ".json", ".css", ".txt", ".svg", ".xml", ".webp", ".png", ".jpg", ".woff2")):
                 raise HTTPException(422, "İzin verilmeyen yol: %s" % rel)
             root = roots[parts[0]]
             path = os.path.normpath(os.path.join(root, *parts[1:]))
@@ -210,7 +210,11 @@ def register(app, api_router, db, deps):
 
         plan = []
         for rel, content in (bundle.get("files") or {}).items():
-            plan.append((dest(rel), str(content), rel))
+            if isinstance(content, dict) and "b64" in content:
+                import base64
+                plan.append((dest(rel), base64.b64decode(content["b64"]), rel))
+            else:
+                plan.append((dest(rel), str(content), rel))
         for e in bundle.get("edits") or []:
             path = dest(e["path"])
             cur = open(path, encoding="utf-8").read() if os.path.isfile(path) else ""
@@ -221,6 +225,8 @@ def register(app, api_router, db, deps):
                 raise HTTPException(409, "Değişiklik uygulanamadı (eşleşme %d): %s" % (cur.count(e["old"]), e["path"]))
             plan = [x for x in plan if x[0] != path] + [(path, cur.replace(e["old"], e["new"], 1), e["path"])]
         for path, content, rel in plan:
+            if isinstance(content, bytes):
+                continue
             if path.endswith(".py"):
                 try:
                     compile(content, path, "exec")
@@ -234,7 +240,10 @@ def register(app, api_router, db, deps):
             if os.path.isfile(path):
                 import shutil
                 shutil.copyfile(path, path + ".bak-deploy")
-            open(path, "w", encoding="utf-8").write(content)
+            if isinstance(content, bytes):
+                open(path, "wb").write(content)
+            else:
+                open(path, "w", encoding="utf-8").write(content)
             done.append(rel)
         if payload.get("restart"):
             tdir = os.path.join(here, "tmp")

@@ -38,6 +38,13 @@ with TestClient(s.app) as c:
         r = post({"files": {"app/_dep_test.txt": "yeni"}}); assert open(p).read() == "yeni" and os.path.exists(p + ".bak-deploy")
         os.remove(p); os.remove(p + ".bak-deploy")
     t("dosya yazar, düzenleme tek eşleşmeyle uygulanır, yedek alır", d)
+    def e():
+        import base64
+        raw = bytes(range(256)) * 4
+        r = post({"files": {"app/_dep_test.webp": {"b64": base64.b64encode(raw).decode()}}}); assert r.status_code == 200, r.text
+        p = os.path.join(PAN, "_dep_test.webp"); assert open(p, "rb").read() == raw; os.remove(p)
+        assert post({"files": {"app/_dep_test.exe": {"b64": "AA=="}}}).status_code == 422
+    t("ikili dosya (webp) base64 ile yazılır, izinsiz uzantı reddedilir", e)
 print("GEÇTİ", len(ok)); [print("  ✓", x) for x in ok]
 for n, e in bad: print("HATA:", n, e)
 sys.exit(1 if bad else 0)
