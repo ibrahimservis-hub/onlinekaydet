@@ -2993,6 +2993,8 @@ speed.register(api_router, db)
 governance.register(api_router, db, {"require_admin": require_admin, "get_current_user": get_current_user, "verify_password": verify_password, "hash_password": hash_password})
 shop.register(api_router, db, {"require_admin": require_admin, "hash_password": hash_password, "verify_password": verify_password,
                             "JWT_SECRET": JWT_SECRET, "JWT_ALGORITHM": JWT_ALGORITHM, "security": security})
+import b2b
+b2b.register(api_router, db, {"require_admin": require_admin, "JWT_SECRET": JWT_SECRET, "JWT_ALGORITHM": JWT_ALGORITHM})
 import firms
 firms.register(api_router, db, {"require_admin": require_admin, "get_current_user": get_current_user, "hash_password": hash_password, "verify_password": verify_password})
 import leads; leads.register(api_router, db, {"require_admin": require_admin})

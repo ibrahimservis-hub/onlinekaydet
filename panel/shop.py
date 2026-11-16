@@ -23,6 +23,7 @@ import eticaret_plus
 import shop_channels
 import shop_sync
 import shop_var
+import b2b
 
 CUSTOMER_TOKEN_DAYS = 30
 
@@ -572,6 +573,7 @@ def register(api_router, db, deps):
         for it in order.get("items", []):
             await shop_var.ver(db, it["product_id"], it["qty"], it.get("variant_id", ""))
         await stock_changed(db, [it["product_id"] for it in order.get("items", [])])
+        await b2b.iade(db, order)
 
     @api_router.put("/shop/orders/{oid}")
     async def update_order(oid: str, payload: dict, _: dict = Depends(require_admin)):
@@ -940,6 +942,9 @@ def register(api_router, db, deps):
         await expire_unpaid()
         cfg = await shop_cfg()
         avail = {m["id"]: m for m in await methods_public(cfg)}
+        dealer = await b2b.dealer_of(db, acc0)
+        if dealer:
+            avail["cari"] = {"id": "cari", "label": "Cari hesap (vadeli)", "fee": 0}
         pm_id = str(payload.get("payment_method") or "").strip()
         if pm_id not in avail:
             raise HTTPException(422, "Seçtiğiniz ödeme yöntemi şu an kullanılamıyor. Lütfen başka bir yöntem seçin.")
@@ -964,7 +969,7 @@ def register(api_router, db, deps):
             have = v["stock"] if v else p.get("stock", 0)
             if p.get("track_stock", True) and have < qty:
                 raise HTTPException(422, f"'{p['name']}'{' (' + v['label'] + ')' if v else ''} için yeterli stok yok (kalan: {max(0, have)})")
-            unit = (v or p)["price"]
+            unit = await b2b.fiyat(db, dealer, p, v, (v or p)["price"])
             line = round(unit * qty, 2)
             subtotal += line
             items.append({"product_id": p["id"], "name": p["name"], "brand": p.get("brand", ""), "model": p.get("model", ""), "price": unit,
@@ -975,6 +980,7 @@ def register(api_router, db, deps):
             raise HTTPException(422, "Minimum sipariş tutarı %.2f TL" % cfg["min_order"])
         cod_fee = float(avail[pm_id]["fee"]) if pm_id in COD_METHODS else 0.0
         total = round(subtotal + shipping + cod_fee, 2)
+        await b2b.kontrol(db, dealer, subtotal, total, pm_id)
         if pm_id in COD_METHODS and cfg["cod_max_total"] and total > cfg["cod_max_total"]:
             raise HTTPException(422, "Kapıda ödeme en fazla %.2f TL'lik siparişlerde kullanılabilir. Lütfen kart veya havale seçin." % cfg["cod_max_total"])
         # stok düş (koşullu: yarışta eksiye düşmesin)
@@ -988,12 +994,12 @@ def register(api_router, db, deps):
         await stock_changed(db, [d["product_id"] for d in done])
         acc = acc0
         order = {
-            "id": _id(), "order_no": await next_order_no(cfg["order_prefix"] or "SP"), "status": "onaylandi" if pm_id in COD_METHODS else "odeme_bekliyor",
+            "id": _id(), "order_no": await next_order_no(cfg["order_prefix"] or "SP"), "status": "onaylandi" if (pm_id in COD_METHODS or pm_id == "cari") else "odeme_bekliyor",
             "customer": {"name": name, "phone": phone, "email": email, "city": str(cu.get("city", "")).strip()[:60],
                          "district": str(cu.get("district", "")).strip()[:60], "address": address},
             "note": str(payload.get("note", "")).strip()[:500], "items": items, "subtotal": round(subtotal, 2), "shipping": shipping, "cod_fee": cod_fee, "total": total,
             "account_id": acc["id"] if acc else "", "phone_key": phone_key(phone), "admin_note": "", "tracking_no": "", "carrier": "",
-            "payment": {"method": pm_id, "label": avail[pm_id]["label"], "status": "kapida_tahsil" if pm_id in COD_METHODS else "bekliyor", "amount": total},
+            "payment": {"method": pm_id, "label": avail[pm_id]["label"], "status": "kapida_tahsil" if pm_id in COD_METHODS else ("cari" if pm_id == "cari" else "bekliyor"), "amount": total},
             "consent": {"terms": True, "at": _now(), "ip": client_ip(request), "docs": shop_legal.CHECKOUT_DOCS,
                         "version": shop_legal.version(cfg["legal"], cfg, cfg.get("legal_docs"))},
             "created_at": _now(), "updated_at": _now(),
@@ -1004,6 +1010,7 @@ def register(api_router, db, deps):
         except Exception:      # noqa: BLE001
             order["risk"] = None
         await db.shop_orders.insert_one(dict(order))
+        await b2b.kaydet(db, dealer, order)
         try:
             await db.shop_carts.delete_one({"account_id": acc0["id"]})
         except Exception:      # noqa: BLE001
@@ -1017,7 +1024,7 @@ def register(api_router, db, deps):
         except Exception:      # noqa: BLE001
             pass
         return {"ok": True, "order_no": order["order_no"], "total": total, "shipping": shipping, "subtotal": order["subtotal"], "cod_fee": cod_fee,
-                "payment_method": pm_id, "next": "iyzico" if pm_id == "kart" else ("havale" if pm_id == "havale" else "kapida"),
+                "payment_method": pm_id, "next": "iyzico" if pm_id == "kart" else ("havale" if pm_id == "havale" else ("cari" if pm_id == "cari" else "kapida")),
                 "bank_accounts": cfg["bank_accounts"] if pm_id == "havale" else [], "payment_note": cfg["payment_note"] if pm_id == "havale" else "",
                 "contact_phone": cfg["contact_phone"]}
 

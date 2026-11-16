@@ -454,6 +454,7 @@ function buildNav(){var m=(B&&B.modules)||[],ins=[];
  if(m.indexOf('kampanya')>-1)ins.push(['kampanya','Kampanyalar','tag']);
  if(m.indexOf('shop')>-1)ins.push(['eplus','Fiyat ve güvenlik','chart']);
  if(m.indexOf('shop')>-1)ins.push(['popvitrin','Popup vitrin','store']);
+ if(m.indexOf('shop')>-1)ins.push(['bayi','Bayiler','users']);
  if(m.indexOf('iade')>-1)ins.push(['iade','İadeler','truck']);
  if(m.indexOf('pazaryeri')>-1)ins.push(['pazaryeri','Pazaryerleri','plug']);
  NAV=BASE_NAV.slice();
@@ -1696,6 +1697,52 @@ V.iade=async function(){var r=await api('/yp/returns');CUR.iadeler=r.items||[];
   +'</tbody></table>':'<div class="empty">İade talebi yok.</div>';
  $('#main').innerHTML=h+'</div>'};
 
+/* ---------------- BAYİLER (B2B) ---------------- */
+var BY={st:'',gs:[],rows:[],pg:{g:'',q:'',p:1}};
+V.bayi=async function(){var d=await api('/yp/b2b/dealers'+(BY.st?'?status='+BY.st:'')),gr=await api('/yp/b2b/groups');BY.gs=gr.rows;BY.rows=d.rows;var c=d.counts||{};
+ var h=head('Bayiler','Başvuruları onaylayın, gruba bağlayın, cari limit verin. Toptan fiyat yalnız bayiye görünür.','<button class="btn" data-a="by-gruplar">Gruplar</button><button class="btn" data-a="by-fiyat">Toptan fiyatlar</button>');
+ h+='<div class="card"><div class="fbar chips">'+[['','Hepsi',(c.pending||0)+(c.approved||0)+(c.blocked||0)],['pending','Onay bekliyor',c.pending],['approved','Onaylı',c.approved],['blocked','Engelli',c.blocked]].map(function(x){
+  return '<button class="chip '+(BY.st===x[0]?'on':'')+'" data-a="by-seg" data-v="'+x[0]+'">'+x[1]+'<small>'+(x[2]||0)+'</small></button>'}).join('')+'</div>';
+ var T={pending:['Onay bekliyor','y'],approved:['Onaylı','g'],blocked:['Engelli','r']};
+ h+=BY.rows.length?'<table class="gr"><thead><tr><th>Firma</th><th>Vergi no</th><th>Grup</th><th class="r">Cari limit</th><th class="r">Bakiye</th><th>Durum</th><th></th></tr></thead><tbody>'+BY.rows.map(function(x){var t=T[x.status]||['','']
+  return '<tr><td><b>'+esc(x.company)+'</b><div class="note">'+esc(x.contact||'')+' · '+esc(x.phone||'')+'</div></td><td class="num">'+esc(x.tax_no||'')+'</td><td>'+esc(x.group_name||'—')+'</td>'
+   +'<td class="r num">'+(x.credit_limit?tl(x.credit_limit):'—')+'</td><td class="r"><b class="num">'+tl(x.bakiye||0)+'</b></td><td><span class="tag '+t[1]+'">'+t[0]+'</span></td>'
+   +'<td class="r"><button class="btn s" data-a="by-duzenle" data-id="'+esc(x.id)+'">'+(x.status==='pending'?'İncele':'Düzenle')+'</button> <button class="btn s" data-a="by-ekstre" data-id="'+esc(x.id)+'">Ekstre</button></td></tr>'}).join('')+'</tbody></table>'
+  :'<div class="empty">Henüz bayi başvurusu yok. Mağazada giriş yapmış bir müşteri “Bayi ol” başvurusu gönderdiğinde burada görünür.</div>';
+ $('#main').innerHTML=h+'</div>'};
+function byDuzenle(id){var x=BY.rows.filter(function(r){return r.id===id})[0];if(!x)return;
+ modal('Bayi · '+x.company,'<p class="note" style="margin:0 0 10px">'+esc(x.contact||'')+' · '+esc(x.phone||'')+' · '+esc(x.email||'')+'<br>Vergi: '+esc(x.tax_no||'')+' '+esc(x.tax_office||'')+'<br>Adres: '+esc(x.address||'')+'</p>'
+ +'<form id="byf" data-id="'+esc(id)+'"><label>Durum<select name="status"><option value="pending"'+(x.status==='pending'?' selected':'')+'>Onay bekliyor</option><option value="approved"'+(x.status==='approved'?' selected':'')+'>Onaylı</option><option value="blocked"'+(x.status==='blocked'?' selected':'')+'>Engelli</option></select></label>'
+ +'<label>Bayi grubu<select name="group_id"><option value="">— seçin —</option>'+BY.gs.map(function(g){return '<option value="'+esc(g.id)+'"'+(g.id===x.group_id?' selected':'')+'>'+esc(g.name)+' (%'+g.discount_pct+')</option>'}).join('')+'</select></label>'
+ +'<label>Cari (vadeli) limit, TL<input name="credit_limit" inputmode="decimal" value="'+(x.credit_limit||0)+'"></label>'
+ +'<label>Not<textarea name="note" rows="2">'+esc(x.admin_note||'')+'</textarea></label>'
+ +'<div class="mf"><button type="button" class="btn" data-a="close">Vazgeç</button><button class="btn p">Kaydet</button></div></form>')}
+function byEkstre(id){api('/yp/b2b/dealers/'+id+'/ledger').then(function(r){var x=BY.rows.filter(function(q){return q.id===id})[0]||{};
+ modal('Cari ekstre · '+(x.company||''),'<p style="margin:0 0 10px">Güncel borç: <b class="num">'+tl(r.bakiye)+'</b>'+(x.credit_limit?' · limit '+tl(x.credit_limit):'')+'</p>'
+ +'<form id="byl" data-id="'+esc(id)+'" style="display:flex;gap:8px;flex-wrap:wrap;align-items:end;margin-bottom:12px"><label>Tür<select name="tur"><option value="alacak">Tahsilat (borçtan düş)</option><option value="borc">Borç ekle</option></select></label>'
+ +'<label>Tutar, TL<input name="tutar" inputmode="decimal" required></label><label style="flex:1;min-width:140px">Açıklama<input name="aciklama" maxlength="200"></label><button class="btn p">Kaydet</button></form>'
+ +(r.rows.length?'<div style="max-height:44vh;overflow:auto"><table class="gr"><thead><tr><th>Tarih</th><th>Açıklama</th><th class="r">Borç</th><th class="r">Alacak</th></tr></thead><tbody>'+r.rows.map(function(e){return '<tr><td>'+esc((e.at||'').slice(0,10))+'</td><td>'+esc(e.aciklama)+'</td><td class="r num">'+(e.tur==='borc'?tl(e.tutar):'')+'</td><td class="r num">'+(e.tur==='alacak'?tl(e.tutar):'')+'</td></tr>'}).join('')+'</tbody></table></div>':'<div class="empty">Hareket yok.</div>'),true)}).catch(fail)}
+function byGruplar(){api('/yp/b2b/groups').then(function(r){BY.gs=r.rows;
+ modal('Bayi grupları',(r.rows.length?'<table class="gr"><thead><tr><th>Grup</th><th class="r">İskonto</th><th class="r">Asgari sipariş</th><th class="r">Bayi</th><th></th></tr></thead><tbody>'+r.rows.map(function(g){
+  return '<tr><td><b>'+esc(g.name)+'</b></td><td class="r num">%'+g.discount_pct+'</td><td class="r num">'+(g.min_order?tl(g.min_order):'—')+'</td><td class="r">'+g.dealers+'</td><td class="r"><button class="btn s" data-a="by-gedit" data-id="'+esc(g.id)+'">Düzenle</button> <button class="btn s" data-a="by-gsil" data-id="'+esc(g.id)+'">Sil</button></td></tr>'}).join('')+'</tbody></table>':'<div class="empty">Grup yok; aşağıdan ekleyin.</div>')
+ +'<form id="bygf" style="margin-top:14px"><input type="hidden" name="gid"><div style="display:flex;gap:8px;flex-wrap:wrap"><label style="flex:2;min-width:160px">Grup adı<input name="name" required maxlength="60"></label><label>İskonto %<input name="discount_pct" inputmode="decimal" value="0"></label><label>Asgari sipariş, TL<input name="min_order" inputmode="decimal" value="0"></label></div>'
+ +'<p class="note" style="margin:6px 0">İskonto liste fiyatından düşülür; “Toptan fiyatlar” ekranında ürüne özel fiyat verirseniz o geçerli olur.</p><div class="mf"><button type="button" class="btn" data-a="close">Kapat</button><button class="btn p">Kaydet</button></div></form>',true)}).catch(fail)}
+function byFiyat(){api('/yp/b2b/groups').then(function(r){BY.gs=r.rows;if(!r.rows.length){toast('Önce bir bayi grubu ekleyin',1);return byGruplar()}
+ if(!BY.pg.g||!r.rows.some(function(g){return g.id===BY.pg.g}))BY.pg.g=r.rows[0].id;byFiyatYukle()}).catch(fail)}
+function byFiyatYukle(){var g=BY.pg;api('/yp/b2b/prices?group='+encodeURIComponent(g.g)+'&q='+encodeURIComponent(g.q)+'&page='+g.p).then(function(r){
+ var np=Math.max(1,Math.ceil(r.total/50));
+ modal('Toptan fiyatlar','<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:end;margin-bottom:10px"><label>Grup<select id="byfg">'+BY.gs.map(function(x){return '<option value="'+esc(x.id)+'"'+(x.id===g.g?' selected':'')+'>'+esc(x.name)+' (%'+x.discount_pct+')</option>'}).join('')+'</select></label>'
+ +'<label style="flex:1;min-width:140px">Ara<input id="byfq" value="'+esc(g.q)+'" placeholder="ürün adı ya da stok kodu"></label><button type="button" class="btn" data-a="by-fara">Ara</button></div>'
+ +'<div style="max-height:46vh;overflow:auto"><table class="gr"><thead><tr><th>Ürün</th><th class="r">Liste fiyatı</th><th class="r">Toptan fiyat</th></tr></thead><tbody>'+(r.rows.length?r.rows.map(function(p){
+  return '<tr><td>'+esc(p.name)+'<div class="note">'+esc(p.sku||'')+'</div></td><td class="r num">'+tl(p.price)+'</td><td class="r"><input class="byp" data-id="'+esc(p.id)+'" data-o="'+(p.b2b_price||0)+'" value="'+(p.b2b_price||'')+'" inputmode="decimal" placeholder="iskonto" style="width:110px;text-align:right"></td></tr>'}).join(''):'<tr><td colspan="3"><div class="empty">Ürün bulunamadı.</div></td></tr>')+'</tbody></table></div>'
+ +'<p class="note" style="margin:8px 0 0">Boş bırakılan ürüne grubun iskontosu uygulanır. Toptan fiyat liste fiyatından yüksek olamaz.</p>'
+ +'<div class="mf" style="justify-content:space-between"><span>'+(np>1?'<button type="button" class="btn s" data-a="by-fsayfa" data-v="-1"'+(g.p<=1?' disabled':'')+'>‹</button> Sayfa '+g.p+' / '+np+' <button type="button" class="btn s" data-a="by-fsayfa" data-v="1"'+(g.p>=np?' disabled':'')+'>›</button>':'')+'</span><span><button type="button" class="btn" data-a="close">Kapat</button> <button type="button" class="btn p" data-a="by-fkaydet">Kaydet</button></span></div>',true)}).catch(fail)}
+document.addEventListener('change',function(ev){if(ev.target&&ev.target.id==='byfg'){BY.pg.g=ev.target.value;BY.pg.p=1;byFiyatYukle()}});
+document.addEventListener('submit',function(ev){var f=ev.target;if(!f)return;var fi=fid(f);
+ if(fi==='byf'){ev.preventDefault();api('/yp/b2b/dealers/'+f.dataset.id,{method:'POST',body:{status:f.status.value,group_id:f.group_id.value,credit_limit:f.credit_limit.value,note:f.note.value}}).then(function(){closeM();toast('Bayi güncellendi');V.bayi()}).catch(fail)}
+ else if(fi==='byl'){ev.preventDefault();var id=f.dataset.id;api('/yp/b2b/dealers/'+id+'/ledger',{method:'POST',body:{tur:f.tur.value,tutar:f.tutar.value,aciklama:f.aciklama.value}}).then(function(){toast('Kaydedildi');byEkstre(id);V.bayi()}).catch(fail)}
+ else if(fi==='bygf'){ev.preventDefault();api('/yp/b2b/groups',{method:'POST',body:{id:f.elements.gid.value||'',name:f.elements.name.value,discount_pct:f.discount_pct.value,min_order:f.min_order.value}}).then(function(){toast('Grup kaydedildi');byGruplar();V.bayi()}).catch(fail)}});
+
 /* ---------------- ÜYELİK ---------------- */
 function swRowD(k,ad,ac,on){return swRow(k,ad,ac,on).replace('uy-tog','dl-tog')}
 function swRow(k,ad,ac,on){return '<div class="row" style="grid-template-columns:1fr auto"><div><div class="t" style="font-size:14.5px">'+ad+'</div><div class="m">'+ac+'</div></div><button class="tog'+(on?' on':'')+'" role="switch" aria-checked="'+(!!on)+'" aria-label="'+esc(ad)+'" data-a="uy-tog" data-k="'+k+'"></button></div>'}
@@ -1914,6 +1961,17 @@ document.addEventListener('click',function(ev){var b=ev.target.closest('[data-a]
    +'<div class="mf"><button type="button" class="btn" data-a="close">Vazgeç</button><button class="btn p">Getir</button></div></form>')}
 
  else if(a==='urun-ice'){IM=null;iceAdim1()}
+ else if(a==='by-seg'){BY.st=b.dataset.v;V.bayi().catch(fail)}
+ else if(a==='by-duzenle')byDuzenle(b.dataset.id);
+ else if(a==='by-ekstre')byEkstre(b.dataset.id);
+ else if(a==='by-gruplar')byGruplar();
+ else if(a==='by-gedit'){var g0=BY.gs.filter(function(g){return g.id===b.dataset.id})[0],fm=$('#bygf');if(g0&&fm){fm.elements.gid.value=g0.id;fm.elements.name.value=g0.name;fm.elements.discount_pct.value=g0.discount_pct;fm.elements.min_order.value=g0.min_order}}
+ else if(a==='by-gsil')ask('Bu grup ve toptan fiyatları silinsin mi? (Grupta bayi varsa silinmez.)','Sil').then(function(){api('/yp/b2b/groups/'+b.dataset.id,{method:'DELETE'}).then(function(){toast('Grup silindi');byGruplar();V.bayi()}).catch(fail)});
+ else if(a==='by-fiyat'){BY.pg.q='';BY.pg.p=1;byFiyat()}
+ else if(a==='by-fara'){BY.pg.q=$('#byfq').value;BY.pg.p=1;byFiyatYukle()}
+ else if(a==='by-fsayfa'){BY.pg.p=Math.max(1,BY.pg.p+(+b.dataset.v));byFiyatYukle()}
+ else if(a==='by-fkaydet'){var its=A('.byp').filter(function(i){return String(i.value||'0')!==String(i.dataset.o)}).map(function(i){return{product_id:i.dataset.id,price:i.value}});
+  if(!its.length){toast('Değişiklik yok');return}api('/yp/b2b/prices',{method:'PUT',body:{group:BY.pg.g,items:its}}).then(function(r){toast(r.n+' ürün fiyatı kaydedildi');byFiyatYukle()}).catch(fail)}
  else if(a==='ice-sablon')api('/yp/products/import/template').then(function(r){csvIndir(r.name,r.csv)}).catch(fail);
  else if(a==='ice-onizle')iceOnizle();
  else if(a==='urun-ice-geri'&&IM)iceAdim2();
