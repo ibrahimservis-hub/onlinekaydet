@@ -65,6 +65,7 @@ with sync_playwright() as pw:
             assert pg.locator("[data-va=Beden][data-vv=L]").get_attribute("class").find("off") > -1, "stoksuz kombinasyon pasif"
             pg.click("[data-va=Beden][data-vv=M]")
             assert "900" in pg.inner_text("#okm-pp") and "Stokta" in pg.inner_text("#okm-vst")
+            import json as _j; _ld = _j.loads(pg.evaluate("document.getElementById('okm-ld').textContent")); assert _ld["offers"]["@type"] == "AggregateOffer" and _ld["offers"]["lowPrice"] <= _ld["offers"]["highPrice"] and _ld["offers"]["offerCount"] >= 2, _ld["offers"]
             pg.click("[data-va=Renk][data-vv=Mavi]")
             assert "950" in pg.inner_text("#okm-pp"), pg.inner_text("#okm-pp")
             pg.click("#okm-pa2"); pg.wait_for_timeout(300)
