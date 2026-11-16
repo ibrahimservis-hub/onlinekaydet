@@ -601,7 +601,53 @@ $('#lf').onsubmit=async function(ev){ev.preventDefault();var f=new FormData(ev.t
  catch(x){e.textContent=x.message;e.hidden=false;if(/kod/i.test(x.message))$('#otpw').hidden=false;if(window.turnstile)try{window.turnstile.reset();window.CFT=''}catch(z){}}
  $('#lb').disabled=false};
 $('#out').onclick=function(){logout()};
-async function loadBoot(){B=await api('/yp/boot');$('#fn').textContent=B.firm||'Salonum';$('#fu').textContent=(B.user||'');$('#tav').textContent=String(B.firm||'S').trim().split(/\s+/).slice(0,2).map(function(w){return w.charAt(0)}).join('').toUpperCase()}
+/* ---- Sektör terimleri: ekrandaki sabit metinleri işe göre uyarlar (Türkçe ek uyumu ile) ---- */
+var LXV='aeıioöuü',LXB='aıou',LXR='oöuü',LXH='çfhkpsşt';
+function lxLast(w){for(var i=w.length-1;i>=0;i--){if(LXV.indexOf(w[i])>-1)return w[i]}return 'e'}
+function lxFit(base,suf,ov){
+ if(!suf)return base;var lw=base.toLocaleLowerCase('tr'),words=lw.split(' '),lastw=words[words.length-1];
+ var ends=LXV.indexOf(lw.slice(-1))>-1,comp=words.length>1&&/[ıiuü]$/.test(lastw),buf='';
+ if(/^[ıiuü]m$/.test(suf))return base+(ends?'m':harm('I',lastw)+'m');
+ if(ov&&/^s[ıiuü]$/.test(suf))return comp?base:(ends?base+'s'+harm('I',lastw):base+harm('I',lastw));
+ if(ov&&/^[yns][aeıiuü]/.test(suf)){buf=suf[0];suf=suf.slice(1)}
+ var cons=/^[aeıiuüöo]/.test(suf),dt=/^[dt]/.test(suf);
+ if(comp&&(cons||dt)){buf='n'}else if(cons&&ends){buf=buf||(/^[ıiuü]n/.test(suf)?'n':'y')}else buf='';
+ var out=base;
+ if(cons&&!buf&&/[tçkp]$/.test(lw)&&lw.replace(/[^aeıioöuü]/g,'').length>1)out=out.slice(0,-1)+{t:'d','ç':'c',k:'ğ',p:'b'}[lw.slice(-1)];
+ var cur=lastw,res='';
+ var wrote=buf;res=buf;
+ var endc=buf?buf:lw.slice(-1);
+ for(var i=0;i<suf.length;i++){var c=suf[i],o;
+  if(c==='a'||c==='e'){o=harm('A',cur)}else if(LXV.indexOf(c)>-1){o=harm('I',cur)}
+  else if((c==='d'||c==='t')&&i===0){o=LXH.indexOf(endc)>-1?'t':'d'}else o=c;
+  res+=o;cur=cur+o;endc=o}
+ return out+res}
+function harm(k,w){var v=lxLast(w),back=LXB.indexOf(v)>-1,rnd=LXR.indexOf(v)>-1;
+ if(k==='A')return back?'a':'e';return back?(rnd?'u':'ı'):(rnd?'ü':'i')}
+function lxCase(s,up){return up?s.charAt(0).toLocaleUpperCase('tr')+s.slice(1):s.charAt(0).toLocaleLowerCase('tr')+s.slice(1)}
+var LXRULES=null;
+function lxBuild(t){LXRULES=[];if(!t)return;
+ var salon=t.salon||'salon';
+ if(t.is&&t.is!=='Randevu')LXRULES.push({rx:/(^|[^A-Za-zÇĞİÖŞÜçğıöşü])(randevu)(lar|ler)?([a-zçğıöşü]*)(?![A-Za-zÇĞİÖŞÜçğıöşü])/gi,sg:t.is,pl:t.isler||t.is,ov:true,lc:true});
+ if(salon!=='salon')LXRULES.push({rx:/(^|[^A-Za-zÇĞİÖŞÜçğıöşü])(salon)()([a-zçğıöşü]*)(?![A-Za-zÇĞİÖŞÜçğıöşü])/gi,sg:salon,pl:salon+'ler',ov:false,lc:true})}
+function lxText(s){if(!LXRULES||!LXRULES.length||!s)return s;
+ LXRULES.forEach(function(r){s=s.replace(r.rx,function(m,pre,stem,plr,rest){
+  if(stem===stem.toUpperCase()&&stem.length>1&&stem!==stem.charAt(0)+stem.slice(1).toLowerCase())return m;
+  var up=stem.charAt(0)===stem.charAt(0).toLocaleUpperCase('tr')&&stem.charAt(0)!==stem.charAt(0).toLowerCase();
+  var base=plr?r.pl:r.sg,nv=base;
+  if(rest&&rest.length>5)return m;                         /* uzun türemiş kelimeler (randevulaştırma…) dokunulmaz */
+  var ov=plr?true:r.ov;
+  var fitted=lxFit(base,rest,plr?false:ov);
+  if(/^(ler|lar)/.test(rest)&&!plr)fitted=lxFit(r.pl,rest.replace(/^l[ae]r/,''),false);
+  if(!up)fitted=fitted.toLocaleLowerCase('tr');else fitted=lxCase(fitted,true);
+  return pre+fitted})});return s}
+function lxWalk(root){if(!LXRULES||!LXRULES.length||!root)return;
+ var w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode:function(n){var p=n.parentNode;if(!p||/^(SCRIPT|STYLE|TEXTAREA|OPTION)$/.test(p.nodeName))return NodeFilter.FILTER_REJECT;return NodeFilter.FILTER_ACCEPT}}),n,L=[];
+ while(n=w.nextNode())L.push(n);
+ L.forEach(function(n){var v=lxText(n.nodeValue);if(v!==n.nodeValue)n.nodeValue=v});
+ if(root.querySelectorAll)root.querySelectorAll('[placeholder],[title],[aria-label]').forEach(function(e){['placeholder','title','aria-label'].forEach(function(a){var v=e.getAttribute(a);if(v){var x=lxText(v);if(x!==v)e.setAttribute(a,x)}})})}
+var LXT=0;function lxStart(t){lxBuild(t);if(window.__lxo)return;window.__lxo=new MutationObserver(function(){if(LXT)return;LXT=setTimeout(function(){LXT=0;window.__lxo.disconnect();try{lxWalk(document.getElementById('app'));lxWalk(document.getElementById('ov'))}catch(e){}window.__lxo.observe(document.body,{childList:true,subtree:true,characterData:true})},30)});window.__lxo.observe(document.body,{childList:true,subtree:true,characterData:true});lxWalk(document.getElementById('app'))}
+async function loadBoot(){B=await api('/yp/boot');$('#fn').textContent=B.firm||((B.terms||{}).salon==='işletme'?'İşletmem':'Salonum');lxStart(B.terms);$('#fu').textContent=(B.user||'');$('#tav').textContent=String(B.firm||'S').trim().split(/\s+/).slice(0,2).map(function(w){return w.charAt(0)}).join('').toUpperCase()}
 async function start(){
  try{await loadBoot()}catch(e){if(e.status===403){toast('Bu panel yalnızca yönetici hesabıyla açılır',true);logout(true)}else if(e.status!==401){fail(e);}showLogin();return}
  $('#login').hidden=true;$('#app').hidden=false;buildNav();navDraw();route()}

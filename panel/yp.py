@@ -70,15 +70,35 @@ def _phone(v):
     return d if len(d) == 10 else ""
 
 
+# Panelde seçilen sektör paketi (16 paket) -> terim tablosundaki (70 sektör) karşılığı
+PACKMAP = {"oto": "oto_servis", "emlak": "emlakci", "surucu": "surucu_kursu", "kurs": "etut_merkezi", "fitness": "spor_salonu",
+           "saglik": "dis_klinigi", "organizasyon": "dugun_salonu"}
+SALONLU = {"spor_salonu", "dugun_salonu", "kuafor", "guzellik", "tirnak_studyo", "estetik_merkezi", "spa_hamam", "dovme_studyo"}
+
+
 def terms(key):
-    """Bu işte kişiye ve yere ne denir (uzman / terapist / hekim ...)."""
+    """Bu işte kişiye, işe ve yere ne denir (uzman / terapist / hekim; randevu / sipariş / servis kaydı ...). Panel metinleri buna göre uyarlanır."""
+    key = PACKMAP.get(key, key)
     try:
         import sektor_dil
         r = sektor_dil.ROWS.get(key) or {}
+        sade = key in sektor_dil.SADE
     except Exception:                                              # noqa: BLE001
-        r = {}
+        r, sade = {}, False
+    if key in ("teknik", "otel"):
+        sade = False
+        r = {"teknik": {"kisi": "Usta/Ustalar", "is": "Servis Kaydı/Servis Kayıtları", "yer": "Servis Takibi"},
+             "otel": {"kisi": "Personel/Personel", "is": "Rezervasyon/Rezervasyonlar", "yer": "Oda Takibi"}}[key]
+    if sade and not r:
+        r = {"kisi": "Teknisyen/Teknisyenler", "is": "Servis Kaydı/Servis Kayıtları", "yer": "Atölye Takibi"}
     a, _, b = (r.get("kisi") or "Uzman/Uzmanlar").partition("/")
-    return {"kisi": a, "kisiler": b or a, "yer": (r.get("yer") or "Koltuk Takibi").replace(" Takibi", "")}
+    i1, _, i2 = (r.get("is") or "Randevu/Randevular").partition("/")
+    if i2 and i2.endswith("Defteri"):                              # "Randevu Defteri" -> çoğul ad "Randevular"
+        i2 = {"Randevu": "Randevular", "Seans": "Seanslar"}.get(i1, i1 + "ler")
+    if i1 == "Sipariş":                                            # mağaza/yemek gibi işlerde randevu = görüşme/teslimat/rezervasyon (siparişle karışmasın)
+        i1, i2 = {"market": ("Teslimat", "Teslimatlar"), "lokanta": ("Rezervasyon", "Rezervasyonlar")}.get(key, ("Görüşme", "Görüşmeler"))
+    return {"kisi": a, "kisiler": b or a, "yer": (r.get("yer") or "Koltuk Takibi").replace(" Takibi", ""),
+            "is": i1, "isler": i2 or i1 + "lar", "salon": "salon" if (key in SALONLU or not r) else "işletme"}
 
 
 def view(b):
@@ -153,7 +173,7 @@ def register(api_router, db, deps):
         except Exception:                                          # noqa: BLE001
             akis = 0
         return {"firm": g.get("company_name") or "", "sector": key, "pack": pk.get("sector") or key,
-                "terms": terms(key), "modules": list(mods), "eticaret": bool(eshop), "work_flows": akis,
+                "terms": terms(pk.get("sector") or key), "modules": list(mods), "eticaret": bool(eshop), "work_flows": akis,
                 "user": user.get("name") or user.get("email") or "", "staff": st, "services": sv,
                 "hours": {"start": B.get("start") or "09:00", "end": B.get("end") or "19:00", "closed": B.get("closed_weekdays") or [], "online": bool(B.get("enabled")),
                           "slot": int(B.get("slot_minutes") or 30)},
