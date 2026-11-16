@@ -401,6 +401,7 @@ table.gr .r{text-align:right}
 @media(max-width:800px){.uegrid{grid-template-columns:1fr}.ueside{position:static;order:-1}.g4,.g3{grid-template-columns:1fr 1fr}.uespec{grid-template-columns:1fr}.uetop{position:static}}
 #umenu{position:fixed;z-index:60;min-width:190px;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 10px 30px rgba(11,23,48,.18);padding:5px;display:flex;flex-direction:column}#umenu button,#umenu a{display:block;text-align:left;border:0;background:none;padding:10px 12px;border-radius:7px;font:inherit;font-size:13.5px;color:var(--tx);cursor:pointer;text-decoration:none;min-height:40px}#umenu button:hover,#umenu a:hover,#umenu :focus-visible{background:var(--blue-s);outline:0}#umenu .bad{color:var(--bad)}.umb{min-width:36px;font-weight:700;letter-spacing:1px}
 .ubm{border-bottom:1px solid var(--line);padding:9px 0}.ubm b{margin-right:8px}#ubr{max-height:60vh;overflow:auto}
+.mkr{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}.mkr .tag{font-size:11px;padding:1px 7px}
 </style></head><body>
 <div id="login" hidden>
  <form id="lf" autocomplete="on"><img src="/salon/logo.png" alt="OnlineKaydet"><h1>Yönetim Paneli</h1><p class="s">E-posta ve şifrenizle girin</p>
@@ -1220,7 +1221,7 @@ V.urun.load=async function(){var F=CUR.uf;
    var st=p.out?['Tükendi','r']:(p.low?['Az stok','y']:(p.status==='draft'?['Taslak','w']:['Yayında','g']));
    var im=(p.images||[])[0]||'';
    return '<tr>'+ckCell('urun',p.id)+'<td><div class="cn"><span class="pimg"'+(im?' style="background-image:url(\''+esc(im)+'\');background-size:cover"':'')+'></span>'
-    +'<span><b>'+esc(p.name)+'</b><small>'+esc(p.sku||'—')+'</small></span></div></td>'
+    +'<span><b>'+esc(p.name)+'</b><small>'+esc(p.sku||'—')+'</small>'+mkRozet(p)+'</span></div></td>'
     +'<td>'+esc(p.cat||'—')+'</td>'
     +'<td class="r"><b class="num">'+tl(p.sale)+'</b>'+(p.discount>0?'<div class="note" style="text-decoration:line-through">'+tl(p.price)+'</div>':'')+'</td>'
     +'<td>'+stokBar(p)+'</td>'
@@ -1249,6 +1250,9 @@ function urunForm(p){p=p||{};var y=function(k,d){return p[k]==null?(d||''):p[k]}
   +'<div class="mf">'+(p.id?'<button type="button" class="btn" data-a="urun-sil" data-id="'+esc(p.id)+'">Sil</button>':'')
   +'<div class="sp"></div><button type="button" class="btn" data-a="close">Vazgeç</button><button class="btn p">Kaydet</button></div></form>'
   +'<datalist id="ucats">'+((CUR.ucats||[]).map(function(c){return '<option>'+esc(c)+'</option>'}).join(''))+'</datalist>'}
+var MKT={yayinda:['g','yayında'],hazir:['b','gönderilecek'],eksik:['y','eksik'],hata:['r','hata'],kapali:['w','kapalı']};
+function mkRozet(p){var m=p.markets||[];if(!m.length)return '';return '<span class="mkr">'+m.map(function(x){var t=MKT[x.status]||MKT.kapali;
+ return '<span class="tag '+t[0]+'" title="'+esc(x.name+': '+t[1]+(x.error?' — '+x.error:(x.issues?' — '+x.issues+' eksik alan':'')))+'">'+esc(x.name)+(x.price_differs?' · '+tl(x.price):'')+'</span>'}).join('')+'</span>'}
 function urunKar(){var f=$('#uf');if(!f)return;var pr=+f.price.value||0,co=+f.cost.value||0,sa=+f.sale.value||0,vat=+f.vat.value||0;
  var p=sa>0&&sa<pr?sa:pr,base=p/(1+vat/100),net=base-co,m=p>0?net/p*100:0;
  $('#ukar').innerHTML='<div><small>Matrah (KDV hariç)</small><b>'+tl(base)+'</b></div>'

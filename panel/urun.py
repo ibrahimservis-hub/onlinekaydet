@@ -307,6 +307,35 @@ def view(p):
                 channels_on=[k for k, v in (p.get("channels") or {}).items() if v])
 
 
+async def _rozet(db, rows):
+    """Listedeki ürünlere pazaryeri durumu ekler: markets=[{id,name,status,price,price_differs}] (yalnız açık pazaryerleri)."""
+    try:
+        import shop_channels as shch
+        ids = [r["id"] for r in rows if any(k in shch.MARKETS for k in (r.get("channels_on") or []))]
+        if not ids:
+            return
+        docs = {d["id"]: d async for d in db.shop_products.find({"id": {"$in": ids}}, {"_id": 0})}
+        cms, bms = {}, {}
+        for r in rows:
+            d = docs.get(r["id"])
+            if not d:
+                continue
+            out = []
+            for mk in r.get("channels_on") or []:
+                if mk not in shch.MARKETS:
+                    continue
+                if mk not in cms:
+                    cms[mk] = {x["category_id"]: x async for x in db.market_catmap.find({"market": mk}, {"_id": 0})}
+                    bm = await db.app_settings.find_one({"_id": "brandmap_" + mk}, {"_id": 0}) or {}
+                    bms[mk] = {k.lower(): v for k, v in (bm.get("map") or {}).items()}
+                st = shch.state(d, mk, cms[mk].get(d.get("category_id", "")), bms[mk])
+                out.append({"id": mk, "name": CHANNELS.get(mk, (mk,))[0], "status": st["status"], "price": st["price"],
+                            "price_differs": st["price_differs"], "error": st["error"], "issues": len(st["issues"])})
+            r["markets"] = out
+    except Exception:                                              # noqa: BLE001
+        pass
+
+
 async def _ayna(db, pid):
     try:
         import urun_ayna
@@ -355,7 +384,9 @@ def register(api_router, db, deps):
         offset, limit = max(offset, 0), min(max(limit, 1), 200)
         tot = {"n": len(rows), "stock_value": round(sum(_num(r.get("cost")) * _int(r.get("stock")) for r in rows), 2),
                "margin": round(sum(r["margin"] for r in rows) / len(rows), 1) if rows else 0.0}
-        return {"rows": rows[offset:offset + limit], "total": len(rows), "counts": counts, "sum": tot,
+        page = rows[offset:offset + limit]
+        await _rozet(db, page)
+        return {"rows": page, "total": len(rows), "counts": counts, "sum": tot,
                 "channels": [{"id": k, "name": v[0], "commission": v[1]} for k, v in CHANNELS.items()]}
 
     @api_router.get("/yp/products/filters")

@@ -37,6 +37,13 @@ with TestClient(s.app) as c:
         assert c.post("/api/yp/products/bulk-market", headers=H, json={"ids": [], "op": "send", "markets": ["n11"]}).status_code == 422
         assert c.post("/api/yp/products/bulk-market", headers=H, json={"ids": ids, "op": "x"}).status_code == 422
     t("gönder: eksik istek reddedilir", b)
+    def rz():
+        r = c.get("/api/yp/products?limit=50", headers=H).json()
+        row = [x for x in r["rows"] if x["id"] == a1][0]
+        m = {x["id"]: x for x in row["markets"]}
+        assert "trendyol" in m and m["trendyol"]["status"] in ("eksik", "hazir", "hata"), m
+        assert "name" in m["trendyol"] and "price_differs" in m["trendyol"]
+    t("liste: açık pazaryerleri durum rozetiyle gelir", rz)
     def d():
         async def mark():
             await s.db.firm(FIRM).shop_products.update_one({"id": a1}, {"$set": {"market_sync.trendyol.listed": True}})
