@@ -92,6 +92,37 @@ def channel_stock(p: dict, mk: str) -> int:
     return max(0, int(p.get("stock") or 0) - int(ch.get("buffer") or 0))
 
 
+def units(p: dict, mk: str, cm: dict = None) -> list:
+    """Pazaryerine gidecek satış birimleri. Varyantsız ürün tek birim; varyantlıda her seçenek kendi barkod/stok kodu/stok/fiyatıyla ayrı birimdir
+    (ortak productMainId = ürünün modeli ya da stok kodu). Kategori özelliği adı eksen adıyla aynıysa (Renk, Beden…) seçenek değeri o özelliğe yazılır."""
+    vs = [v for v in (p.get("variants") or []) if v.get("active", True)]
+    if not vs:
+        return [p]
+    ana = float(p.get("price") or 0)
+    meta = {str(a.get("name") or "").strip().lower(): str(a.get("id")) for a in ((cm or {}).get("required_attrs") or []) if a.get("id") is not None}
+    out = []
+    for v in vs:
+        u = {k: val for k, val in p.items() if k not in ("variants", "var_axes")}
+        u.update(barcode=v.get("barcode") or "", sku=v.get("sku") or "", stock=int(v.get("stock") or 0), price=float(v.get("price") or ana),
+                 old_price=float(v.get("old_price") or 0), model=p.get("model") or p.get("sku") or p["id"], parent_id=p["id"], variant_id=v["id"])
+        if v.get("image"):
+            u["images"] = [v["image"]] + [x for x in (p.get("images") or []) if x != v["image"]]
+        chs = {}
+        for k, c in (p.get("channels") or {}).items():
+            c = dict(c or {})
+            if c.get("price") and ana and u["price"] != ana:       # kanala özel sabit fiyat varyant fiyatına orantılanır
+                c["price"] = round(float(c["price"]) * u["price"] / ana, 2)
+            chs[k] = c
+        u["channels"] = chs
+        ma = {a: val for a, val in ((p.get("market_attrs") or {}).get(mk) or {}).items()}
+        for ax, val in (v.get("opts") or {}).items():
+            if ax.strip().lower() in meta:
+                ma[meta[ax.strip().lower()]] = val
+        u["market_attrs"] = dict(p.get("market_attrs") or {}, **{mk: ma})
+        out.append(u)
+    return out
+
+
 def issues(p: dict, mk: str, catmap: dict = None, brandmap: dict = None, settings: dict = None) -> list:
     """Ürünün bu pazaryerine gönderilebilmesi için eksikleri döndürür: [{'field','msg'}]. Boş liste = hazır."""
     out = []
@@ -101,6 +132,11 @@ def issues(p: dict, mk: str, catmap: dict = None, brandmap: dict = None, setting
     sc = settings or {}
     for f, lbl in REQUIRED[mk]:
         bad = False
+        if f == "barcode" and [v for v in (p.get("variants") or []) if v.get("active", True)]:
+            vb = [v for v in p["variants"] if v.get("active", True) and not gtin_valid(v.get("barcode") or "")]
+            if vb:
+                out.append({"field": f, "msg": "%d seçenekte barkod eksik ya da geçersiz" % len(vb)})
+            continue
         if f == "barcode":
             bad = not gtin_valid(p.get("barcode") or "")
             if bad and p.get("barcode"):

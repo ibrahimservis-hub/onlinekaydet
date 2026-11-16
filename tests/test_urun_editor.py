@@ -139,6 +139,29 @@ with sync_playwright() as pw:
         pg.click("[data-a=ue-yaz][data-v=seo]"); pg.wait_for_selector("#uyf"); pg.click("[data-a=ue-yaz-uygula]")
         assert pg.input_value("#uef input[name=seo_title]").startswith("Baxi")
     t("Düzenleyici: yazı öner (dolu alan korunur, boş alan dolar)", yz)
+    def vr():
+        pg.evaluate("V.urun().catch(function(){})"); pg.wait_for_selector("[data-a=urun-yeni]", timeout=8000)
+        pg.click("[data-a=urun-yeni]"); pg.wait_for_selector("#uef")
+        pg.fill("#uef input[name=name]", "Varyantlı Gömlek"); pg.fill("#uef input[name=price]", "900")
+        pg.click("[data-a=ue-axekle]"); pg.fill("[data-axn=\"0\"]", "Renk"); pg.dispatch_event("[data-axn=\"0\"]", "change")
+        for v in ("Beyaz", "Mavi"):
+            pg.fill("[data-axv=\"0\"]", v); pg.press("[data-axv=\"0\"]", "Enter")
+        pg.click("[data-a=ue-axekle]"); pg.fill("[data-axn=\"1\"]", "Beden"); pg.dispatch_event("[data-axn=\"1\"]", "change")
+        for v in ("M", "L"):
+            pg.fill("[data-axv=\"1\"]", v); pg.press("[data-axv=\"1\"]", "Enter")
+        pg.click("[data-a=ue-vgen]"); pg.wait_for_selector("#uevar [data-vr=stock]")
+        assert pg.locator("#uevar .uetb tbody tr").count() == 4
+        pg.fill("#uevst", "3"); pg.click("[data-a=ue-vst]")
+        pg.locator("[data-vr=sku]").nth(0).fill("GM-B-M"); pg.locator("[data-vr=price]").nth(1).fill("950")
+        assert pg.input_value("#uef input[name=stock]") == "12" and pg.is_editable("#uef input[name=stock]") is False
+        pg.click(".uetop [data-a=ue-kaydet][data-v=live]"); pg.wait_for_selector("#uef", state="detached", timeout=6000)
+        r = c.get("/api/yp/products?q=Varyantl%C4%B1", headers=TK()).json()["rows"][0]
+        full = c.get("/api/yp/products/" + r["id"], headers=TK()).json(); full = full.get("item") or full
+        assert len(full["variants"]) == 4 and full["stock"] == 12 and [a["ad"] for a in full["var_axes"]] == ["Renk", "Beden"], full["var_axes"]
+        assert full["variants"][0]["sku"] == "GM-B-M" and full["variants"][1]["price"] == 950
+        pg.wait_for_selector("[data-a=urun-ac]"); pg.click("[data-a=urun-ac][data-id=\"%s\"]" % r["id"]); pg.wait_for_selector("#uevar .uetb tbody tr")
+        assert pg.locator("#uevar .uetb tbody tr").count() == 4
+    t("Düzenleyici: renk/beden tanımla, kombinasyon üret, stok/fiyat, kaydet", vr)
     assert not errs, errs
     br.close()
 for n in ok: print("  ✓", n)

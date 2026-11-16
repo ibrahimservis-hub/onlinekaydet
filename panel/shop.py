@@ -778,7 +778,8 @@ def register(api_router, db, deps):
         st = r.get("stock", 0)
         return {"id": r["id"], "slug": r.get("slug", r["id"]), "name": r["name"], "brand": r.get("brand", ""), "category": r.get("category", ""),
                 "price": r.get("price", 0), "old_price": r.get("old_price", 0), "short": (r.get("short") or "")[:140], "img": (r.get("images") or [""])[0],
-                "badge": r.get("badge", ""), "featured": bool(r.get("featured")), "in_stock": (not r.get("track_stock", True)) or st > 0}
+                "badge": r.get("badge", ""), "featured": bool(r.get("featured")), "in_stock": (not r.get("track_stock", True)) or st > 0,
+                "has_var": bool([v for v in (r.get("variants") or []) if v.get("active", True)])}
 
     @api_router.get("/public/shop/search")
     async def pub_search(brand: str = "", category: str = "", q: str = "", sort: str = "pop", max: float = 0, page: int = 1, per: int = 24, min: float = 0, in_stock: bool = False, discount: bool = False):

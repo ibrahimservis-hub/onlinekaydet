@@ -459,12 +459,14 @@ def register(api_router, db, deps):
         a = await musteri(request)
         items, top = [], 0.0
         for it in (payload.get("items") or [])[:30]:
-            p = await db.shop_products.find_one({"id": it.get("id") or it.get("product_id"), "active": True}, {"_id": 0, "id": 1, "name": 1, "price": 1, "images": 1})
+            p = await db.shop_products.find_one({"id": it.get("id") or it.get("product_id"), "active": True}, {"_id": 0, "id": 1, "name": 1, "price": 1, "images": 1, "variants": 1})
             if not p:
                 continue
             q = max(1, min(int(_num(it.get("q") or it.get("qty"), 1)), 20))
-            items.append({"id": p["id"], "name": p["name"], "price": p["price"], "q": q})
-            top += p["price"] * q
+            v = next((x for x in (p.get("variants") or []) if x.get("id") == it.get("v")), None) if it.get("v") else None
+            fiyat = (v or p).get("price") or p["price"]
+            items.append({"id": p["id"], "name": p["name"] + (" (%s)" % v["label"] if v and v.get("label") else ""), "price": fiyat, "q": q, "v": (v or {}).get("id", "")})
+            top += fiyat * q
         if not items:
             await db.shop_carts.delete_one({"account_id": a["id"]})
             return {"ok": True, "n": 0}

@@ -85,6 +85,20 @@ with TestClient(s.app) as c:
             import traceback; print(traceback.format_exc()[-400:]); raise
         p = G(S["p"]); assert {x["sku"]: x["stock"] for x in p["variants"]}["KG-B-M"] == 2, [x["stock"] for x in p["variants"]]
     t("pazaryeri siparişi: varyant barkoduyla doğru seçenekten düşer", f)
+    def g():
+        import shop_sync, shop_channels as ch
+        d = [x for x in (lambda r: r if isinstance(r, list) else r.get("items") or r.get("rows"))(c.get("/api/shop/products", headers=O).json()) if x["id"] == S["p"]][0]
+        us = ch.units(d, "trendyol")
+        assert len(us) == 3 and {u["sku"] for u in us} == set(S["v"])
+        assert all(u["model"] == "KG" and u["variant_id"] for u in us)
+        body = shop_sync.stock_body("trendyol", [u for u in us if u["barcode"] or u["sku"]])
+        q = {i["barcode"]: i for i in body["items"]}
+        assert q["8690000000014"]["quantity"] == 2 and q["KG-B-L"]["salePrice"] == 950, q
+        iss = ch.issues(d, "trendyol", {"ext_id": "1"}, {"": 1})
+        assert any("seçenekte barkod" in i["msg"] for i in iss), iss
+        ua = ch.units(dict(d, market_attrs={}), "trendyol", {"required_attrs": [{"id": 47, "name": "Renk"}, {"id": 338, "name": "Beden"}]})
+        mt = ua[0]["market_attrs"]["trendyol"]; assert "Beyaz" in mt.values() and "M" in mt.values(), mt
+    t("pazaryeri: seçenek başına birim, stok gövdesi, barkod eksiği, özellik eşleme", g)
 for n in ok: print("  ✓", n)
 for n, x in bad: print("  ✗", n, "\n", x)
 print("OK %d FAIL %d" % (len(ok), len(bad)))

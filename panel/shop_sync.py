@@ -131,7 +131,7 @@ def trendyol_item(p: dict, cm: dict, bm: dict, settings: dict) -> dict:
             "categoryId": int(cm["ext_id"]), "quantity": ch.channel_stock(p, "trendyol"), "stockCode": p["sku"], "dimensionalWeight": float(p.get("desi") or 1),
             "description": (p.get("description") or p.get("short") or "")[:30000], "currencyType": "TRY",
             "listPrice": max(float(p.get("old_price") or 0), ch.channel_price(p, "trendyol")), "salePrice": ch.channel_price(p, "trendyol"), "vatRate": int(p.get("kdv", 20)),
-            "images": [{"url": u} for u in (settings.get("abs_images") or {}).get(p["id"], p.get("images") or [])][:8],
+            "images": [{"url": u} for u in ([(settings["origin"] + x if str(x).startswith("/") else x) for x in (p.get("images") or [])] if settings.get("origin") else (settings.get("abs_images") or {}).get(p["id"], p.get("images") or []))][:8],
             "attributes": _attr_list(cm, attrs)}
     if settings.get("cargo_company_id"):
         item["cargoCompanyId"] = int(settings["cargo_company_id"])
@@ -489,8 +489,9 @@ def register(api_router, db, deps):
             raise HTTPException(501, "Bu pazaryerinde ürün açma, hesap doğrulaması gerektirdiği için henüz otomatik değil. Dışa aktarma dosyasını (CSV) kullanın.")
         base = {**st}
         origin = (request.headers.get("origin") or "").rstrip("/") or ("https://" + (request.headers.get("x-forwarded-host") or request.headers.get("host") or ""))
+        base["origin"] = origin
         base["abs_images"] = {p["id"]: [(origin + u if str(u).startswith("/") else u) for u in (p.get("images") or [])] for p, _i in ready}
-        items = [trendyol_item(p, cm[p["category_id"]], bm, base) for p, _i in ready]
+        items = [trendyol_item(u, cm[p["category_id"]], bm, base) for p, _i in ready for u in ch.units(p, mk, cm[p["category_id"]])]
         res = {"dry_run": dry, "ready": len(ready), "blocked": [{"id": p["id"], "name": p["name"], "issues": i} for p, i in blocked]}
         if dry:
             res["preview"] = items[:3]
@@ -612,7 +613,7 @@ async def process_queue(db, limit=100):
             part = js[i:i + limit]
             ids = list(dict.fromkeys(j["product_id"] for j in part))
             prods = [p async for p in db.shop_products.find({"id": {"$in": ids}}, {"_id": 0})]
-            prods = [p for p in prods if (p.get("barcode") or p.get("sku"))]
+            prods = [u for p in prods for u in ch.units(p, mk) if (u.get("barcode") or u.get("sku"))]
             err = ""
             if not connected(mk, c):
                 err = "Pazaryeri bağlantı bilgileri eksik"
@@ -634,8 +635,8 @@ async def process_queue(db, limit=100):
                 else:
                     att = j["attempts"] + 1
                     await db.shop_sync_queue.update_one({"id": j["id"]}, {"$set": {"attempts": att, "error": err, "status": "hata" if att >= 5 else "bekliyor"}})
-            for p in prods:
-                await db.shop_products.update_one({"id": p["id"]}, {"$set": {f"market_sync.{mk}.at": _now(), f"market_sync.{mk}.error": err}})
+            for pid_ in dict.fromkeys(p.get("parent_id") or p["id"] for p in prods):
+                await db.shop_products.update_one({"id": pid_}, {"$set": {f"market_sync.{mk}.at": _now(), f"market_sync.{mk}.error": err}})
             sent += 0 if err else len(part)
             failed += len(part) if err else 0
     return {"sent": sent, "failed": failed}
