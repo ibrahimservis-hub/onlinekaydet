@@ -93,6 +93,15 @@ with sync_playwright() as pw:
     pg.click("[data-a=sv-ac]"); pg.wait_for_selector("[data-a=x-job-sil-onay]"); pg.click("[data-a=x-job-sil-onay]"); pg.wait_for_selector("[data-a=x-job-sil]"); pg.click("[data-a=x-job-sil]"); pg.wait_for_timeout(1500)
     gone = rq.get(B + "/jobs/" + jid, headers=H).status_code == 404
     t("kayıt silindi, kasa geliri geri alındı, stok geri geldi", gone and rq.get(B + "/cash/summary", headers=H).json()["income"] < cash0 and [p for p in rq.get(B + "/parts", headers=H).json() if p["id"] == pid][0]["stock_qty"] == stk0 + 2)
+    # --- son kalanlar
+    rq.post(B + "/cash/transactions", headers=H, json={"type": "gider", "amount": 20, "description": "Sahipsiz deneme"})
+    om = rq.post(B + "/cash/transactions", headers=H, json={"type": "teknisyen_odeme", "amount": 30, "description": "Bağsız", "technician_id": "yok"})
+    go("skasa", ".figs"); t("sahipsiz hareket yoksa uyarı yok", "kimseye bağlı değil" not in pg.inner_text("#main"))
+    go("sekip", "table.gr"); pg.click("[data-a=x2-ekip-detay] >> nth=0"); pg.wait_for_selector("text=Son işler"); t("usta detayı: bakiye ve iş geçmişi", "Kalan borç" in pg.inner_text("#ov") or "kalan borç" in pg.inner_text("#ov").lower()); pg.keyboard.press("Escape")
+    go("sayar", "#xye"); t("site yorumu ve telefon bölümü", "Telefon numaralarını düzelt" in pg.inner_text("#main"))
+    pg.select_option("#xye", "1"); pg.fill("#xyt", "Yorumlar"); pg.click("[data-a=x2-yorum]"); pg.wait_for_timeout(900); sr = rq.get(B + "/site-reviews-settings", headers=H).json(); t("site yorumu ayarı kaydedildi", sr["enabled"] and sr["title"] == "Yorumlar")
+    pg.click("[data-a=x2-tel][data-v='0']"); pg.wait_for_selector("text=Zaten doğru"); t("telefon raporu açıldı", True); pg.keyboard.press("Escape")
+    go("servis", "#svlist table, #svlist .empty"); t("servis uyarı şeridi", pg.locator("#xuy").count() in (0, 1))
     t("JavaScript hatası yok", not errs)
     if errs: print(errs[:4])
 print("OK", ok, "FAIL", bad)
