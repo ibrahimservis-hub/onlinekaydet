@@ -35,10 +35,38 @@ for k in list(P):
 import re as _re
 P['guv']=_re.sub(r'<div class="yorum">.*?</div>','',P['guv'],flags=_re.S)
 
+SLUG_ONCE={'kombi','klima','beyaz_esya','bilgisayar','elektrik','elektronik','guvenlik','tesisat'}
+sys_path=__import__('sys').path;sys_path.insert(0,os.path.join(os.path.dirname(S),'panel'))
+import sitegen as _g
+SEKT=list(_g.SECTORS.items())
+def sektor_url(k): return '/sektor-%s.html'%k.replace('_','-')
+ESLE={'Teknik servis':'kombi','Kuaför ve güzellik':'kuafor','E-ticaret':'eticaret','Oto servis':'oto_servis','Avukat ve danışmanlık':'avukat','Diş, estetik ve sağlık':'dis_klinigi','Veteriner':'veteriner','Restoran ve kafe':'lokanta','Emlak':'emlakci','Sürücü kursu':'surucu_kursu','Kurs ve eğitim':'etut_merkezi','Fitness ve pilates':'spor_salonu','Market ve bakkal':'market','Temizlik hizmetleri':'temizlik','Düğün ve organizasyon':'dugun_salonu'}
+def sektor_chip(m):
+    ad=m.group(1)
+    if ad=='70 sektörün tamamı': return '<a class="hep" href="/tum-sektorler.html">%d sektörün tamamı</a>'%len(SEKT)
+    if ad in ESLE: return '<a href="%s">%s</a>'%(sektor_url(ESLE[ad]),ad)
+    if ad=='Paketleri ayrıntılı karşılaştırın': return '<a href="/fiyatlar.html">%s</a>'%ad
+    if ad=='Otel ve pansiyon': return '<a href="/tum-sektorler.html">%s</a>'%ad
+    return m.group(0)
+for k_ in list(P):
+    P[k_]=_re.sub(r'<a (?:class="hep" )?href="#">([^<]*)</a>',sektor_chip,P[k_])
+    P[k_]=P[k_].replace('70 sektör','%d sektör'%len(SEKT)).replace('70 iş kolu','%d iş kolu'%len(SEKT))
+    P[k_]=P[k_].replace('<b>Kodda doğrulanan</b>','<b>Hazır pazaryerleri</b>').replace('<b>Katalogda, bağlantısı hazırlanıyor</b>','<b>Bunlar da hazır</b>')
 head_raw=src[:src.index('<script type="application/ld+json">')]
 jsonld=src[src.index('<script type="application/ld+json">'):src.index('</script>',src.index('<script type="application/ld+json">'))+9]
 mbar=src[src.index('<div class="mbar">'):src.index('<script src="/v9/v9.js"')]
-foot=P['footer']
+foot=('<footer class="alt2"><div class="w"><div class="g">'
+ '<div class="f1"><img src="/logo-renkli-s.png" alt="OnlineKaydet" width="140" height="28"><p>Web sitesi, e-ticaret, randevu ve iş takibi tek panelde.</p>'
+ '<div class="sos"><a href="#" onclick="return false" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1" fill="currentColor" stroke="none"/></svg></a>'
+ '<a href="#" onclick="return false" aria-label="X"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4l16 16M20 4L4 20"/></svg></a>'
+ '<a href="#" onclick="return false" aria-label="YouTube"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="2.5" y="5.5" width="19" height="13" rx="4"/><path d="M10 9.2v5.6l4.8-2.8z" fill="currentColor"/></svg></a></div></div>'
+ '<div><b>Ürün</b><a href="/temalar.html">Temalar</a><a href="/e-ticaret.html">E-ticaret</a><a href="/web-sitesi.html">Web sitesi editörü</a><a href="/is-takibi.html">Randevu ve iş takibi</a><a href="/fiyatlar.html">Paketler</a></div>'
+ '<div><b>Sektörler</b><a href="/sektor-kombi.html">Teknik servis</a><a href="/sektor-kuafor.html">Kuaför</a><a href="/sektor-eticaret.html">E-ticaret</a><a href="/tum-sektorler.html">Tüm sektörler</a></div>'
+ '<div><b>Kaynak</b><a href="/blog.html">Blog</a><a href="/entegrasyonlar.html">Entegrasyonlar</a><a href="/destek.html">Destek</a><a href="/uye-girisi">Üye girişi</a></div>'
+ '<div><b>Şirket</b><a href="/hakkimizda.html">Hakkımızda</a><a href="/iletisim.html">İletişim</a><a href="/kvkk.html">KVKK</a><a href="/gizlilik.html">Gizlilik</a><a href="/cerez-politikasi.html">Çerez politikası</a><a href="/kullanim-kosullari.html">Kullanım koşulları</a><a href="/mesafeli-satis-iade.html">Mesafeli satış ve iade</a></div>'
+ '</div><div class="alt"><span>© 2026 OnlineKaydet</span><span class="kart" aria-label="Kabul edilen kartlar">'
+ '<svg viewBox="0 0 64 40" width="52" height="32" role="img" aria-label="Visa"><rect width="64" height="40" rx="6" fill="#fff" stroke="#cfd6df"/><text x="32" y="27" text-anchor="middle" font-family="Arial,sans-serif" font-weight="800" font-style="italic" font-size="19" fill="#1a3a8f">VISA</text></svg>'
+ '<svg viewBox="0 0 64 40" width="52" height="32" role="img" aria-label="Mastercard"><rect width="64" height="40" rx="6" fill="#fff" stroke="#cfd6df"/><circle cx="26" cy="20" r="11" fill="#eb001b"/><circle cx="38" cy="20" r="11" fill="#f79e1b"/><path d="M32 11.2a11 11 0 0 1 0 17.6 11 11 0 0 1 0-17.6z" fill="#ff5f00"/></svg></span></div></div></footer>')
 SEC={'temalar':'/temalar.html','eticaret':'/e-ticaret.html','editor':'/web-sitesi.html','yonetim':'/is-takibi.html','paketler':'/fiyatlar.html','sektorler':'/sektorler.html'}
 NAV=[('Temalar','/temalar.html'),('E-ticaret','/e-ticaret.html'),('Web sitesi','/web-sitesi.html'),('İş takibi','/is-takibi.html'),('Paketler','/fiyatlar.html'),('Sektörler','/sektorler.html')]
 def hdr(cur):
@@ -59,6 +87,7 @@ def banner(slug,ad,h1,lead,gorsel=None,chip=None):
         yan='<div class="yan" data-tilt><div class="tar"><div class="tb"><i></i><i></i><i></i></div>%s</div>%s</div>'%(img(n,1400,875,alt,True),'<div class="cip2"><b>%s</b>%s</div>'%chip if chip else '')
     return ('<section class="pb" id="icerik"><div class="w"><div><p class="kr"><a href="/">Ana sayfa</a> / %s</p><h1>%s</h1><p class="lead">%s</p>'
      '<div class="cta"><a class="btn fil" href="/demo.html">Ücretsiz deneyin</a><a class="btn bos" href="#teklif">Teklif alın</a><a class="btn duz" href="tel:+905444444004">Hemen arayın</a></div></div>%s</div></section>')%(ad,h1,lead,yan)
+SON_=''
 def page(slug,title,desc,body,ld=None,home=False,robots=None,extra_head='',extra_js='',ld_raw=None):
     url=BASE+('/' if home else '/'+slug)
     h=head_raw.replace('content="#0A6847"','content="#3034FF"')
@@ -78,7 +107,11 @@ def page(slug,title,desc,body,ld=None,home=False,robots=None,extra_head='',extra
     if robots: h=re.sub(r'(<meta name="robots" content=")[^"]*',lambda m:m.group(1)+robots,h)
     if ld_raw is not None: lj=ld_raw
     cur='/' if home else '/'+slug
+    body=body.replace('href="iletisim.html#form"','href="/iletisim.html#teklif"').replace('href="/iletisim.html#form"','href="/iletisim.html#teklif"')
+    NOFORM='id="teklif"' not in body
     full=h+extra_head+lj+'\n</head><body>\n<a class="skip" href="#icerik">İçeriğe geç</a>'+hdr(cur)+'\n<main>'+body+'</main>\n'+foot+'\n'+mbar+'<script src="/v9/v9.js" defer></script><script src="/v9/v10.js" defer></script>'+('<script src="/v9/dunya.js" defer></script>' if home else '')+'<script src="/lead.js" defer></script>'+extra_js+'</body></html>'
+    full=_re.sub(r'<a (class="btn[^"]*") href="#">([^<]*)</a>',lambda m:'<a %s href="%s">%s</a>'%(m.group(1),'/demo.html' if 'deneyin' in m.group(2).lower() or 'tema' in m.group(2).lower() else ('#teklif' if 'teklif' in m.group(2).lower() else '/iletisim.html'),m.group(2)),full)
+    if NOFORM: full=full.replace('href="#teklif"','href="/iletisim.html#teklif"')
     for k,v in SEC.items():
         if 'id="%s"'%k not in full: full=full.replace('href="#%s"'%k,'href="%s"'%v)
     if 'id="e-urun"' not in full: full=full.replace('href="#e-','href="/e-ticaret.html#e-')
@@ -115,6 +148,7 @@ FOTO_WEB=fbant('Kendi sitenizi yönetin','Kahvenizi alın, sitenizi güncelleyin
 FOTO_IS=fbant('Günlük iş','Not defteri yerine tek ekran.','',[('7876381','Kalem tutan eller','Randevu ve notlar'),('8296969','Masada çalışan eller','Ekip ve evrak')],'f2')
 FOTO_SEK=fbant('İş kolları','Hangi meslekteyseniz, tema hazır.','',[('33448218','Kuaför','Kuaför'),('3993310','Güzellik salonu iç mekân','Güzellik salonu'),('14656012','Çiçekçi','Çiçekçi'),('17247840','Kahve fincanları','Kafe'),('3807811','Oto servis','Oto servis'),('15372566','Restoran','Restoran'),('14554082','Fayans','Yapı malzemesi'),('3993449','Profesyonel kuaför','Güzellik')],'f4')
 FOTO_ALT=fbant('Altyapı','Verileriniz Türkiye\'deki sunucularda.','Sitenizin ve panelinizin altyapısı Türkiye\'de çalışır.',[('1054397','Sunucu rafına takılı ethernet kabloları','Sunucular'),('2881232','Ethernet bağlantı noktalarına bağlı kablolar','Ağ bağlantısı')],'f2')
+P['son']=_re.sub(r'<div class="alan"><label for="tf4">Sektörünüz</label><select id="tf4">.*?</select></div>','',P['son'],flags=_re.S)
 SON=P['son']
 # ---- ana sayfa
 ETC_KISA=('<section class="sec etc" id="eticaret"><div class="w"><div class="g bas"><div class="b1"><p class="et kir">E-ticaret</p><h2>Mağazanız sitenizin içinde. Hepsi tek stoktan.</h2></div>'
@@ -181,6 +215,49 @@ ic=(sec_baslik('İletişim','Bize ulaşın','Aşağıdaki formu doldurun, sizi a
  '</div></div>')
 page('iletisim.html','İletişim | OnlineKaydet','OnlineKaydet iletişim: telefon, WhatsApp ve teklif formu. Etimesgut, Ankara.',
  B('c','İletişim','Sizi arayalım','Formu doldurun, sektörünüzü not alalım, kurulum için sizi arayalım.')+'<section class="sec">'+ic+'</section>'+SON)
+
+
+# ---- sektör sayfaları ve yasal sayfalar
+import sektor_cok2 as _c2
+DET={r[0]:r for r in _c2.R}
+CTA=('<section class="sec"><div class="w"><div class="yz"><h2 style="margin-top:0">Hemen deneyin</h2><p>Demo hesabını 7 gün ücretsiz kullanın ya da formu doldurun, sizi arayalım.</p>'
+ '<p><a class="btn dolu" href="/demo.html">Ücretsiz deneyin</a> <a class="btn bos2" href="/iletisim.html#teklif">Teklif alın</a></p></div></div></section>')
+GEN_OZ=[('Müşteri ve iş kaydı','Her müşteri ve iş tek kayıtta durur, geçmişi görürsünüz.'),('Randevu ve takvim','Randevuları takvimden yönetir, hatırlatma mesajı gönderirsiniz.'),('Kasa ve raporlar','Gelir, gider ve borç takibi panelde, raporlar tek ekranda.'),('Web siteniz','Sektörünüze hazır tema; yazı ve resimleri panelden değiştirirsiniz.')]
+for k,ad in SEKT:
+    if k in SLUG_ONCE: continue
+    d=DET.get(k)
+    uzun=d[1] if d else ad
+    oz=d[6] if d else GEN_OZ
+    ish=d[7] if d else []
+    kart_=''.join('<div class="fk"><span class="no">%02d</span><h3>%s</h3><p>%s</p></div>'%(i+1,html.escape(a),html.escape(t)) for i,(a,t) in enumerate(oz))
+    chips=('<p style="margin-top:22px"><b>Panelde hazır işlem türleri:</b> '+' · '.join(html.escape(x) for x in ish)+'</p>') if ish else ''
+    body=B('s-'+k,uzun,'%s için web sitesi ve iş takibi'%uzun,'Sektörünüze hazır tema ve panel: kayıtlar, randevular, kasa ve web siteniz tek yerde.')+'<section class="sec"><div class="w"><div class="fg">'+kart_+'</div>'+chips+'</div></section>'+CTA+SON
+    page('sektor-%s.html'%k.replace('_','-'),'%s İçin Web Sitesi ve İş Takip Programı | OnlineKaydet'%uzun,'%s için hazır web sitesi teması, randevu, kasa ve iş takibi. Ücretsiz deneyin.'%uzun,body)
+lst=''.join('<a href="%s">%s</a>'%(sektor_url(k),html.escape(a)) for k,a in SEKT)
+page('tum-sektorler.html','Tüm Sektörler (%d iş kolu) | OnlineKaydet'%len(SEKT),'OnlineKaydet’in hazır tema ve panel sunduğu %d iş kolunun tam listesi.'%len(SEKT),
+ B('ts','Tüm sektörler','%d iş kolu için hazır'%len(SEKT),'Mesleğinizi seçin; temayı, kelimeleri ve ekranları görün.')+'<section class="sec"><div class="w"><div class="slst">'+lst+'</div></div></section>'+CTA+SON)
+FIRMA='Moda Ekru E-Ticaret Hizmetleri Tekstil Sanayi ve Ticaret Ltd. Şti.'
+def yasal(slug,ad,desc,icerik):
+    page(slug,ad+' | OnlineKaydet',desc,B('y',ad,ad,desc)+'<section class="sec"><div class="w"><div class="yz">'+icerik+'</div></div></section>'+SON)
+yasal('cerez-politikasi.html','Çerez Politikası','Sitede hangi çerezlerin kullanıldığını ve nasıl yönetebileceğinizi açıklıyoruz.',
+ '<h2 style="margin-top:0">Çerez nedir?</h2><p>Çerezler, ziyaret ettiğiniz sitenin tarayıcınıza yerleştirdiği küçük metin dosyalarıdır.</p>'
+ '<h2>Hangi çerezleri kullanıyoruz?</h2><p>Site yalnızca çalışması için gerekli çerezleri ve oturum bilgilerini kullanır (örneğin üye girişi ve form gönderimi). Reklam veya izleme amaçlı çerez kullanmıyoruz. İleride analitik bir araç eklenirse bu sayfa güncellenir ve onayınız istenir.</p>'
+ '<h2>Çerezleri nasıl yönetirsiniz?</h2><p>Tarayıcı ayarlarınızdan çerezleri silebilir veya engelleyebilirsiniz. Gerekli çerezleri engellerseniz üye girişi gibi bazı bölümler çalışmayabilir.</p>'
+ '<h2>İletişim</h2><p>%s, Etimesgut, Ankara. Telefon: <a href="tel:+905444444004">0544 444 40 04</a>. Kişisel verileriniz için <a href="/kvkk.html">KVKK aydınlatma metni</a>.</p>'%FIRMA)
+yasal('kullanim-kosullari.html','Kullanım Koşulları','OnlineKaydet web sitesini ve panelini kullanırken geçerli olan koşullar.',
+ '<h2 style="margin-top:0">Taraflar</h2><p>Bu koşullar, %s (“OnlineKaydet”) ile siteyi ve paneli kullanan kişi veya firma arasındadır.</p>'%FIRMA+
+ '<h2>Hizmet</h2><p>OnlineKaydet; web sitesi, e-ticaret, randevu ve iş takibi için bir yazılım hizmetidir. Kapsam, seçtiğiniz pakete göre belirlenir ve <a href="/fiyatlar.html">paketler sayfasında</a> yazılıdır.</p>'
+ '<h2>Hesap ve güvenlik</h2><p>Hesap bilgilerinizin gizliliğinden ve hesabınızda yapılan işlemlerden siz sorumlusunuz. Yetkisiz kullanımdan haberiniz olursa bize hemen bildirin.</p>'
+ '<h2>İçerik</h2><p>Siteye ve panele yüklediğiniz yazı, görsel ve verilerin hukuka uygunluğu size aittir. Başkasının telif hakkını ihlal eden içerik yüklenemez.</p>'
+ '<h2>Ücret ve iptal</h2><p>Ücretler paket sayfasında belirtilir. Aboneliği dilediğiniz zaman sonlandırabilirsiniz; ödenmiş dönem için koşullar <a href="/mesafeli-satis-iade.html">mesafeli satış ve iade</a> sayfasındadır.</p>'
+ '<h2>Değişiklik</h2><p>Bu koşullar güncellenebilir; güncel hâli bu sayfada yayımlanır.</p><h2>İletişim</h2><p><a href="tel:+905444444004">0544 444 40 04</a> · <a href="/iletisim.html">İletişim formu</a></p>')
+yasal('mesafeli-satis-iade.html','Mesafeli Satış ve İade Koşulları','Online satın alınan hizmetlerde cayma, iptal ve iade koşulları.',
+ '<h2 style="margin-top:0">Satıcı</h2><p>%s, Etimesgut, Ankara. Telefon: <a href="tel:+905444444004">0544 444 40 04</a>.</p>'%FIRMA+
+ '<h2>Hizmetin niteliği</h2><p>Sattığımız ürün, dijital bir yazılım hizmetidir (web sitesi, panel ve ilgili modüller). Hizmet, ödeme ve kurulumun ardından dijital ortamda sunulur; fiziksel teslimat yoktur.</p>'
+ '<h2>Cayma hakkı</h2><p>6502 sayılı Tüketicinin Korunması Hakkında Kanun ve Mesafeli Sözleşmeler Yönetmeliği uyarınca, tüketici olarak 14 gün içinde cayma hakkınızı kullanabilirsiniz. Hizmetin ifasına, cayma süresi bitmeden sizin onayınızla başlanmışsa, yönetmelikte belirtilen hâllerde cayma hakkı kullanılamaz veya yalnızca kullanılmayan kısım için iade yapılır.</p>'
+ '<h2>İade nasıl yapılır?</h2><p>İade talebinizi <a href="/iletisim.html">iletişim formundan</a> veya telefonla iletin. Onaylanan iade, ödemenizi yaptığınız yönteme geri yapılır.</p>'
+ '<h2>Ücretsiz deneme</h2><p>Demo hesabı 7 gün ücretsizdir ve satın alma yükümlülüğü doğurmaz.</p>'
+ '<h2>Uyuşmazlık</h2><p>Uyuşmazlıklarda Ticaret Bakanlığı’nca her yıl belirlenen parasal sınırlar dahilinde il ve ilçe tüketici hakem heyetleri ile tüketici mahkemeleri yetkilidir.</p>')
 
 # ---- eski sayfalar: içerik yeni kabuğa taşınır
 import glob
