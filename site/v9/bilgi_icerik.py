@@ -47,6 +47,20 @@ add('pazaryerine-gonderme','Mağaza','Ürünler pazaryerine nasıl gönderilir?'
  '<h2>Stok ve fiyatı toplu güncelleme</h2><p>Ürünleri seçtiğinizde “Fiyat güncelle”, “İndirim uygula”, “Stok güncelle”, “Kategori / marka” ve “Tek kanalda aç / kapat” işlemleri de gelir.</p>'
  +TIP('“Satışa kapat” dediğinizde ürün sitede görünmez ve pazaryerlerinde stok 0 olarak bildirilir. Yeniden açınca yalnız site açılır; pazaryerleri için “Pazaryerlerine gönder”i tekrar kullanın.'))
 
+add('xml-ile-urun-aktarma','Mağaza','XML ile tedarikçi ürünleri nasıl aktarılır?','Tedarikçinizin XML adresini yapıştırın; ürün, fiyat ve stok otomatik gelsin, kâr oranınız eklensin.',
+ '<p>Tedarikçiniz size bir XML adresi (besleme) veriyorsa ürünleri tek tek girmeniz gerekmez. Panel adresi okur, alanları kendisi bulur; yeni ürünleri ekler, mevcutların fiyat ve stoğunu günceller.</p>'
+ '<h2>İlk aktarım</h2>'+S(
+  ('Satış › XML aktarım sayfasını açın','Mağaza özelliği açık olan hesaplarda Satış menüsünün altında “XML aktarım” sekmesi görünür.'),
+  ('Adresi yapıştırıp Analiz et’e basın','Kaynağa bir ad verin, XML adresini yazın. Panel ürün listesini ve alanları otomatik bulur, kaç ürün olduğunu gösterir.',('x_analiz','Analizden sonra alan eşleşmeleri ve fiyat kuralı')),
+  ('Alan eşleşmesini kontrol edin','Ürün adı, stok kodu, barkod, fiyat, stok adedi, kategori, marka, resimler, açıklama, para birimi ve KDV oranı için önerilen alanları görürsünüz. Yanlış olanı listeden değiştirin. Ürünler stok kodu ya da barkodla tanınır; ikisinden en az biri gerekir.'),
+  ('Fiyat kuralını belirleyin','Kâr oranı (%), sabit ekleme (₺) ve yuvarlama basamağı girin. Besleme dolar ya da euro ise kuru kendiniz yazarsınız. Besleme fiyatı KDV hariçse işaretini kaldırın; KDV eklenir.'),
+  ('Seçenekleri işaretleyin','Yeni ürünü hemen yayınla, stok ve fiyatı güncelle, ad-açıklama-resimleri de güncelle, stoğu bitenleri gizle, feedde olmayanları pasif yap.'),
+  ('Kaydet ve ilk aktarımı yapın','Sonuçta kaç ürünün eklendiği, güncellendiği, atlandığı ve fiyatsız kaldığı yazar.',('x_kaynak','Kayıtlı kaynak ve son çalışma özeti')))+
+ '<h2>Güncel tutma</h2>'+S(
+  ('Şimdi çalıştır','Kaynağın yanındaki düğmeyle istediğiniz an yeniden okutursunuz. Aynı stok koduna sahip ürün tekrar eklenmez, güncellenir.'),
+  ('Otomatik güncelleme','Kaynağın yanından 6 saatte bir, 12 saatte bir ya da günde bir seçin; panel kendisi çalıştırır.'))+
+ '<h2>Bilmeniz gerekenler</h2><ul><li>Adres herkese açık olmalı; kullanıcı adı ya da şifre isteyen adresler okunamaz.</li><li>Tek seferde en çok 5.000 ürün ve 25 MB boyutunda dosya okunur.</li><li>Yerel ve özel ağ adresleri ile DOCTYPE içeren XML dosyaları güvenlik nedeniyle reddedilir.</li><li>Yalnızca kullanma yetkiniz olan beslemeleri ekleyin; içerik sorumluluğu kaynak sahibindedir.</li><li>Ters yönde de çalışır: Satış › Fiyat ve güvenlik sayfasından Akakçe ve Cimri için kendi ürünlerinizin XML çıktısını açabilirsiniz.</li></ul>')
+
 add('siparis-ve-kargo','Mağaza','Sipariş ve kargo takibi','Site, pazaryeri ve telefon siparişleri tek listede; durumu ilerletin, kargo kodunu girin.',
  '<p>Siteden, pazaryerinden, telefondan ya da WhatsApp’tan gelen bütün siparişler <b>Siparişler</b> listesinde toplanır. Sipariş kaydedildiğinde stok anında düşer; iptal ve iade onayında stok geri döner.</p>'
  '<h2>Siparişi yürütme</h2>'+S(

@@ -328,7 +328,7 @@ page('ozel-tasarim.html','Özel Tasarım Web Sitesi | OnlineKaydet','Markanıza 
 # ---- bilgi bankası
 import bilgi_icerik as _bi
 BK=_bi.A
-KAPAK={'urun-ekleme':'bilgi/u_liste','pazaryerine-gonderme':'bilgi/pz_sayfa','siparis-ve-kargo':'panel-d-siparis','randevu-ve-takvim':'panel-k-takvim','musteri-yonetimi':'bilgi/m_liste','kasa-ve-muhasebe':'panel-k-kasa','personel-ve-prim':'panel-d-ekip','web-sitesi-duzenleme':'bilgi/w_site'}
+KAPAK={'xml-ile-urun-aktarma':'bilgi/x_analiz','urun-ekleme':'bilgi/u_liste','pazaryerine-gonderme':'bilgi/pz_sayfa','siparis-ve-kargo':'panel-d-siparis','randevu-ve-takvim':'panel-k-takvim','musteri-yonetimi':'bilgi/m_liste','kasa-ve-muhasebe':'panel-k-kasa','personel-ve-prim':'panel-d-ekip','web-sitesi-duzenleme':'bilgi/w_site'}
 kart_b=''.join('<a href="/bilgi-%s.html">%s<span>%s</span><h3>%s</h3><p>%s</p></a>'%(a['slug'],('<div class="bkim"><img src="/v9/img/%s.webp" alt="" loading="lazy"></div>'%KAPAK[a['slug']]) if a['slug'] in KAPAK else '',a['kat'],html.escape(a['ad']),html.escape(a['ozet'])) for a in BK)
 page('bilgi-bankasi.html','Bilgi Bankası: Ürün Ekleme, Pazaryeri, Randevu, Kasa, İlan | OnlineKaydet','Panelin adım adım kullanım rehberi: ürün ekleme, pazaryerine gönderme, sipariş, randevu, müşteri, kasa, ekip, ilan ve web sitesi düzenleme.',
  B('b','Bilgi bankası','Paneli adım adım öğrenin','Her işlem için kısa, adım adım rehber. İstediğiniz konuyu seçin.')+'<section class="sec"><div class="w"><form action="/ara.html" role="search" class="araf araf2"><input type="search" name="q" placeholder="Rehberlerde ara: ürün ekleme, Trendyol, randevu…" aria-label="Bilgi bankasında ara"><button class="btn dolu" type="submit">Ara</button></form><div class="bk">'+kart_b+'</div></div></section>'+CTA+SON)
@@ -375,7 +375,7 @@ def metin(h):
     hs=[_re.sub(r'<[^>]+>','',x).strip() for x in _re.findall(r'<h[1-3][^>]*>(.*?)</h[1-3]>',t,_re.S)]
     t=_re.sub(r'<[^>]+>',' ',t);t=html.unescape(_re.sub(r'\s+',' ',t)).strip()
     return hs,t
-KW={'bilgi-urun-ekleme.html':'ürün yükle ürün kaydet stok barkod sku kategori excel toplu yükleme','bilgi-pazaryerine-gonderme.html':'trendyol hepsiburada n11 çiçeksepeti amazon pttavm pazarama idefix modanisa temu pazaryeri entegrasyon','bilgi-randevu-ve-takvim.html':'randevu al takvim hatırlatma sms uzman hizmet','bilgi-kasa-ve-muhasebe.html':'kasa gelir gider muhasebe ödeme tahsilat rapor','bilgi-ilan-ekleme.html':'ilan emlak satılık kiralık araç kiralama tur transfer','bilgi-personel-ve-prim.html':'personel çalışan maaş prim avans','bilgi-web-sitesi-duzenleme.html':'web sitesi düzenle tema yazı resim menü alan adı ssl'}
+KW={'bilgi-xml-ile-urun-aktarma.html':'xml feed besleme tedarikçi dropshipping toplu ürün aktarma otomatik stok fiyat güncelleme akakçe cimri','bilgi-urun-ekleme.html':'ürün yükle ürün kaydet stok barkod sku kategori excel toplu yükleme','bilgi-pazaryerine-gonderme.html':'trendyol hepsiburada n11 çiçeksepeti amazon pttavm pazarama idefix modanisa temu pazaryeri entegrasyon','bilgi-randevu-ve-takvim.html':'randevu al takvim hatırlatma sms uzman hizmet','bilgi-kasa-ve-muhasebe.html':'kasa gelir gider muhasebe ödeme tahsilat rapor','bilgi-ilan-ekleme.html':'ilan emlak satılık kiralık araç kiralama tur transfer','bilgi-personel-ve-prim.html':'personel çalışan maaş prim avans','bilgi-web-sitesi-duzenleme.html':'web sitesi düzenle tema yazı resim menü alan adı ssl'}
 idx=[]
 for f in sorted(glob.glob(S+'/*.html')):
     n=os.path.basename(f)
@@ -394,3 +394,7 @@ _sm=open(S+'/sitemap.xml',encoding='utf-8').read()
 _ek=''.join('<url><loc>%s/%s</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>\n'%(BASE,n) for n in SEO_SAYFA if '/'+n not in _sm)
 if _ek: open(S+'/sitemap.xml','w',encoding='utf-8').write(_sm.replace('</urlset>',_ek+'</urlset>'))
 print('seo sayfa',len(SEO_SAYFA))
+
+_sm=open(S+'/sitemap.xml',encoding='utf-8').read()
+_ek=''.join('<url><loc>%s/bilgi-%s.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>\n'%(BASE,a['slug']) for a in BK if '/bilgi-%s.html'%a['slug'] not in _sm)
+if _ek: open(S+'/sitemap.xml','w',encoding='utf-8').write(_sm.replace('</urlset>',_ek+'</urlset>'))

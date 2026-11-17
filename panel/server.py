@@ -2888,6 +2888,8 @@ import popvitrin
 popvitrin.register(api_router, db, {"require_admin": require_admin})
 import eticaret_plus
 eticaret_plus.register(api_router, db, {"require_admin": require_admin, "JWT_SECRET": JWT_SECRET, "JWT_ALGORITHM": JWT_ALGORITHM})
+import xml_ice
+xml_ice.register(api_router, db, {"require_admin": require_admin})
 import yorum
 yorum.register(api_router, db, {"require_admin": require_admin})
 import yonlendirme
