@@ -518,7 +518,7 @@ async def login(payload: LoginRequest, response: Response, request: Request):
             _fd = await db.main().firms.find_one({"db": _fl["db"], "status": {"$ne": "silindi"}}, {"_id": 0, "db": 1, "expires_at": 1})
     if _fd:
         if firms.expired(_fd):
-            raise HTTPException(status_code=403, detail="Kullanım süreniz doldu. Lütfen yönetici ile görüşün.")
+            raise HTTPException(status_code=403, detail="Kullanım süreniz doldu. Devam etmek için bizi arayın: 0544 444 40 04")
         tenant.set_firm(_fd["db"])                                        # bu istekte tüm okuma/yazma firmanın veritabanına gider
     if _fu:
         user = await db.users.find_one({"firm_owner": True})              # alt kullanıcı, ana hesapla aynı ekranı/veriyi kullanır
@@ -3122,7 +3122,7 @@ async def _firm_ctx(request: Request, call_next):
             if f:
                 request.state.fu = _pl.get("fu", "")
                 if firms.ACCESS and not request.url.path.endswith(("/auth/login", "/auth/logout")) and not await firms.ACCESS(f, _pl.get("fu", "")):
-                    return _JR({"detail": "Hesabınız kapalı veya kullanım süreniz doldu"}, status_code=403)
+                    return _JR({"detail": "Hesabınız kapalı veya kullanım süreniz doldu. Devam etmek için bizi arayın: 0544 444 40 04"}, status_code=403)
                 ft = tenant.set_firm(f)
                 if firms.GATE and request.url.path.startswith("/api/"):
                     _gm = await firms.GATE(f, request.url.path)

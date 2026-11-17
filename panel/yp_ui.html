@@ -535,7 +535,12 @@ function sv(k,v){try{v?localStorage.setItem(k,v):localStorage.removeItem(k)}catc
 async function api(p,o){o=o||{};var h={'Content-Type':'application/json'};if(TOK)h.Authorization='Bearer '+TOK;
  var r=await fetch('/api'+p,{method:o.method||'GET',headers:h,body:o.body?JSON.stringify(o.body):undefined});var j={};try{j=await r.json()}catch(e){}
  if(r.status===401&&p.indexOf('/auth/')!==0){logout(true);throw new Error('Oturum süresi doldu, yeniden girin')}
+ if(r.status===403&&typeof j.detail==='string'&&j.detail.indexOf('süreniz doldu')>-1){sureDoldu(j.detail)}
  if(!r.ok){var m=j.detail;if(Array.isArray(m))m=m.map(function(x){return x.msg}).join(', ');var e=new Error(typeof m==='string'?m:'İşlem yapılamadı ('+r.status+')');e.status=r.status;throw e}return j}
+function sureDoldu(m){if(document.getElementById('sureDoldu'))return;var d=document.createElement('div');d.id='sureDoldu';d.setAttribute('role','alertdialog');d.setAttribute('aria-modal','true');
+ d.style.cssText='position:fixed;inset:0;z-index:9999;background:#fff;display:grid;place-items:center;padding:24px;text-align:center;font-family:inherit';
+ d.innerHTML='<div style="max-width:420px"><h2 style="margin:0 0 10px;font-size:24px">Kullanım süreniz doldu</h2><p style="color:#555;line-height:1.5;margin:0 0 18px">Demo veya deneme süreniz sona erdi. Devam etmek için bizimle iletişime geçin, hesabınızı birlikte açalım.</p><a href="tel:05444444004" style="display:block;padding:14px;border-radius:10px;background:#1155cc;color:#fff;font-weight:600;text-decoration:none;margin-bottom:10px">Bizi arayın: 0544 444 40 04</a><a href="https://onlinekaydet.com/fiyatlar.html" style="display:block;padding:14px;border-radius:10px;border:1px solid #cfd8e4;color:#1155cc;font-weight:600;text-decoration:none">Paketleri inceleyin</a></div>';
+ document.body.appendChild(d)}
 function toast(m,bad){var t=$('#toast');t.textContent=m;t.className=bad?'bad':'';t.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(function(){t.hidden=true},bad?5000:2600)}
 function fail(e){toast(e&&e.message||'Hata',true)}
 /* tarih */
