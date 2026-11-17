@@ -289,6 +289,58 @@ def register(api_router, db, deps):
                         "values": [{"id": str(v.get("id")), "name": v.get("name", "")} for v in (a.get("attributeValues") or []) if v.get("id") is not None][:500]})
         return {"attrs": out}
 
+    _RC = {}   # Trendyol kategori ağacı önbelleği
+
+    def _leaves(nodes, path=""):
+        for n in nodes or []:
+            nm = str(n.get("name", ""))
+            sub = n.get("subCategories") or []
+            full = (path + " > " + nm) if path else nm
+            if sub:
+                yield from _leaves(sub, full)
+            else:
+                yield {"id": str(n.get("id")), "name": nm, "path": full}
+
+    @api_router.get("/shop/channels/{mk}/remote-categories")
+    async def remote_categories(mk: str, q: str = "", _: dict = adm):
+        """Pazaryerinin kategori ağacından (yaprak kategoriler) arama. Şimdilik Trendyol'da otomatik."""
+        check_mk(mk)
+        if mk != "trendyol":
+            raise HTTPException(501, "Bu pazaryerinde kategori listesi otomatik gelmez; satıcı panelindeki kategori numarasını yazın.")
+        c = await market_cfg(db, mk)
+        if not connected(mk, c):
+            raise HTTPException(400, "Önce Trendyol anahtarlarını girin (Pazaryerleri > Aç/Kapat & Ayarlar)")
+        import time as _t
+        hit = _RC.get("trendyol")
+        if not hit or _t.time() - hit[0] > 3600:
+            code, data = await http("GET", "https://apigw.trendyol.com/integration/product/product-categories", _headers(mk, c))
+            if code >= 300:
+                raise HTTPException(502, f"Trendyol yanıtı {code}: {str(data)[:160]}")
+            hit = (_t.time(), list(_leaves((data or {}).get("categories"))))
+            _RC["trendyol"] = hit
+        ql = [w for w in re.split(r"\s+", q.strip().lower()) if w]
+        rows = [r for r in hit[1] if all(w in r["path"].lower() for w in ql)] if ql else hit[1]
+        return {"categories": rows[:40], "total": len(rows)}
+
+    @api_router.get("/shop/channels/{mk}/remote-brands")
+    async def remote_brands(mk: str, name: str = "", _: dict = adm):
+        """Pazaryerinde marka adıyla arama (marka kodunu bulmak için). Şimdilik Trendyol'da otomatik."""
+        check_mk(mk)
+        if mk != "trendyol":
+            raise HTTPException(501, "Bu pazaryerinde marka listesi otomatik gelmez; marka numarasını elle yazın.")
+        name = name.strip()
+        if len(name) < 2:
+            raise HTTPException(422, "En az 2 harf yazın")
+        c = await market_cfg(db, mk)
+        if not connected(mk, c):
+            raise HTTPException(400, "Önce Trendyol anahtarlarını girin (Pazaryerleri > Aç/Kapat & Ayarlar)")
+        import urllib.parse as _u
+        code, data = await http("GET", "https://apigw.trendyol.com/integration/product/brands/by-name?name=" + _u.quote(name), _headers(mk, c))
+        if code >= 300:
+            raise HTTPException(502, f"Trendyol yanıtı {code}: {str(data)[:160]}")
+        rows = data if isinstance(data, list) else (data or {}).get("brands") or []
+        return {"brands": [{"id": str(b.get("id")), "name": b.get("name", "")} for b in rows if b.get("id") is not None][:30]}
+
     @api_router.put("/shop/channels/{mk}/brandmap")
     async def brandmap_put(mk: str, payload: dict, _: dict = adm):
         check_mk(mk)

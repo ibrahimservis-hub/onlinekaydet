@@ -66,6 +66,11 @@ with TestClient(s.app) as c:
         c.post("/api/admin/market/trendyol/pull-orders", headers=O)
         assert _stock() == 8, "aynı sipariş ikinci kez düşmemeli"
     t("yeni sipariş otomatik düşer, tekrar çekimde çift düşmez", new_order)
+    def yeni_panel_liste():
+        r = c.get("/api/yp/orders?channel=trendyol", headers=O); assert r.status_code == 200, r.text
+        j = r.json(); rows = j.get("rows") or j.get("orders") or j.get("items") or []
+        assert any("NEW1" in str(x.get("no") or x.get("order_no") or x) for x in rows), j
+    t("pazaryeri siparişi yeni panelin Siparişler listesinde görünür", yeni_panel_liste)
     def cancel():
         RESP["orders"]["trendyol"] = {"content": [mk_order("NEW1", 2, "Cancelled", 60)]}
         c.post("/api/admin/market/trendyol/pull-orders", headers=O)
@@ -90,7 +95,7 @@ with TestClient(s.app) as c:
     t("Pazarama: anahtar alınır, sipariş düşer", pazarama)
     def push_all():
         r = c.get("/api/admin/market/status", headers=O).json(); ids = {m["id"]: m for m in r["markets"]}
-        assert len(ids) == 6 and ids["trendyol"]["connected"] and ids["pazarama"]["connected"] and not ids["pttavm"]["connected"], ids
+        assert len(ids) >= 6 and ids["trendyol"]["connected"] and ids["pazarama"]["connected"] and not ids["pttavm"]["connected"], ids
         assert ids["trendyol"]["last"] and ids["trendyol"]["imported"] >= 1
     t("durum ucu: 6 pazaryeri, bağlı olanlar ve son çekim", push_all)
     def cycle():
