@@ -79,7 +79,8 @@ def connected(mk: str, c: dict) -> bool:
 def _headers(mk: str, c: dict) -> dict:
     if mk == "trendyol":
         return {"Authorization": "Basic " + base64.b64encode(f"{c['api_key']}:{c['api_secret']}".encode()).decode(),
-                "User-Agent": f"{c['seller_id']} - SelfIntegration", "Content-Type": "application/json"}
+                "User-Agent": f"{c['seller_id']} - SelfIntegration", "Content-Type": "application/json",
+                "storeFrontCode": str(c.get("store_front_code") or "TR")}
     if mk == "hepsiburada":
         return {"Authorization": "Basic " + base64.b64encode(f"{c['merchant_id']}:{c['service_key']}".encode()).decode(),
                 "User-Agent": c.get("developer") or "onlinekaydet", "Content-Type": "application/json"}
@@ -107,7 +108,7 @@ def urls(mk: str, c: dict) -> dict:
     if mk == "trendyol":
         sid = c.get("seller_id")
         return {"stock": f"https://apigw.trendyol.com/integration/inventory/sellers/{sid}/products/price-and-inventory",
-                "create": f"https://apigw.trendyol.com/integration/product/sellers/{sid}/products",
+                "create": f"https://apigw.trendyol.com/integration/product/sellers/{sid}/v2/products",
                 "batch": f"https://apigw.trendyol.com/integration/product/sellers/{sid}/products/batch-requests/"}
     if mk == "hepsiburada":
         mid = c.get("merchant_id")
@@ -146,12 +147,10 @@ def trendyol_item(p: dict, cm: dict, bm: dict, settings: dict) -> dict:
     attrs = {**(cm.get("attrs") or {}), **((p.get("market_attrs") or {}).get("trendyol") or {})}
     item = {"barcode": p["barcode"], "title": p["name"][:100], "productMainId": p.get("model") or p["sku"], "brandId": int(bm[(p.get("brand") or "").strip().lower()]),
             "categoryId": int(cm["ext_id"]), "quantity": ch.channel_stock(p, "trendyol"), "stockCode": p["sku"], "dimensionalWeight": float(p.get("desi") or 1),
-            "description": (p.get("description") or p.get("short") or "")[:30000], "currencyType": "TRY",
+            "description": (p.get("description") or p.get("short") or "")[:30000],
             "listPrice": max(float(p.get("old_price") or 0), ch.channel_price(p, "trendyol")), "salePrice": ch.channel_price(p, "trendyol"), "vatRate": int(p.get("kdv", 20)),
             "images": [{"url": u} for u in ([(settings["origin"] + x if str(x).startswith("/") else x) for x in (p.get("images") or [])] if settings.get("origin") else (settings.get("abs_images") or {}).get(p["id"], p.get("images") or []))][:8],
             "attributes": _attr_list(cm, attrs)}
-    if settings.get("cargo_company_id"):
-        item["cargoCompanyId"] = int(settings["cargo_company_id"])
     return item
 
 
