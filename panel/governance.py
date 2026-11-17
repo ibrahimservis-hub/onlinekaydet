@@ -330,6 +330,21 @@ async def audit(db, user: dict, action: str, detail: str = "", ip: str = "", **e
         "admin_role": (user or {}).get("admin_role", ""), "action": action, "detail": detail, "ip": ip, **extra})
 
 
+FU_ROL = {}   # alt kullanıcı e-postası -> (rol, zaman)
+SUB_ROL_AD = {"manager": "Müdür", "accounting": "Muhasebe", "operations": "Operasyon", "site_editor": "Site editörü", "viewer": "Yalnızca görüntüleme"}
+
+
+async def fu_rol(db, email):
+    now = time.time()
+    c = FU_ROL.get(email)
+    if c and now - c[1] < 30:
+        return c[0]
+    d = await db.main().firm_users.find_one({"email": email}, {"_id": 0, "rol": 1}) or {}
+    r = d.get("rol") or "manager"
+    FU_ROL[email] = (r, now)
+    return r
+
+
 def make_middleware(db, get_current_user):
     async def middleware(request: Request, call_next):
         path, method = request.url.path, request.method
@@ -343,6 +358,15 @@ def make_middleware(db, get_current_user):
                 user = None
             except Exception:                           # noqa: BLE001
                 user = None
+        if user and user.get("fu"):
+            # firma alt kullanıcısı: ana hesap bu kullanıcıya bir rol vermiştir (Müdür, Muhasebe, Operasyon, Site editörü, Yalnızca görüntüleme)
+            rol = await fu_rol(db, user["fu"])
+            if path.startswith("/api/auth/") or (path == "/api/yp/boot" and method == "GET"):
+                pass
+            elif (method == "DELETE" and rol != "manager") or (rol == "viewer" and method not in ("GET", "HEAD")) or (rol != "viewer" and not allowed(rol, path, method)):
+                if not (path.endswith("/auth/logout")) and rol is not None:
+                    return JSONResponse(status_code=403, content={"detail": "Bu işlem için yetkiniz yok (rol: " + SUB_ROL_AD.get(rol, rol) + ")"})
+            user = dict(user, admin_role="owner")
         if user and user.get("role") == "admin":
             # SILME YETKISI YALNIZCA SAHIP (asil admin) HESABINDADIR: diger tum yonetici rolleri (mudur, muhasebe, operasyon,
             # site editoru, ozel yetki) hicbir kaydi silemez. Tek istisna: servis kaydindaki indirimi geri alma (duzenleme sayilir).

@@ -106,6 +106,10 @@ class SubIn(BaseModel):
     name: Optional[str] = ""
     email: str
     password: str
+    rol: Optional[str] = "manager"
+
+
+SUB_ROLES = ("manager", "accounting", "operations", "site_editor", "viewer")
 
 
 class FirmSelf(BaseModel):
@@ -632,11 +636,40 @@ def register(api_router, db, deps):
                 or await db.main().firm_users.find_one({"email": em})):
             raise HTTPException(status_code=400, detail="Bu kullanıcı adı zaten kayıtlı")
         doc = {"id": uuid.uuid4().hex[:12], "firm_id": f["id"], "db": f["db"], "email": em, "name": (p.name or "").strip(),
-               "password_hash": hash_password(p.password), "active": True, "created_at": _now()}
+               "password_hash": hash_password(p.password), "active": True, "created_at": _now(),
+               "rol": p.rol if p.rol in SUB_ROLES else "manager"}
         await db.main().firm_users.insert_one(dict(doc))
         await audit(user, "FİRMA KULLANICI EKLEDİ", f["name"] + ": " + em)
         doc.pop("password_hash"); doc.pop("db"); doc.pop("firm_id")
         return doc
+
+    @api_router.put("/firm/users/{uid}")
+    async def firm_user_edit(uid: str, body: dict, request: Request, user: dict = Depends(get_current_user)):
+        f = await my_firm(request)
+        if getattr(request.state, "fu", ""):
+            raise HTTPException(status_code=403, detail="Yalnızca ana hesap değiştirebilir")
+        upd = {}
+        if body.get("rol") in SUB_ROLES:
+            upd["rol"] = body["rol"]
+        if "active" in body:
+            upd["active"] = bool(body["active"])
+        if (body.get("name") or "").strip():
+            upd["name"] = body["name"].strip()[:80]
+        if body.get("password"):
+            if len(body["password"]) < 8:
+                raise HTTPException(status_code=400, detail="Şifre en az 8 karakter olmalı")
+            upd["password_hash"] = hash_password(body["password"])
+        if not upd:
+            raise HTTPException(status_code=400, detail="Değişiklik yok")
+        r = await db.main().firm_users.update_one({"id": uid, "firm_id": f["id"]}, {"$set": upd})
+        _ACC.clear()
+        try:
+            import governance as _g
+            _g.FU_ROL.clear()
+        except Exception:                                                   # noqa: BLE001
+            pass
+        await audit(user, "FİRMA KULLANICI DEĞİŞTİRDİ", f["name"] + ": " + uid)
+        return {"ok": bool(r.matched_count)}
 
     @api_router.delete("/firm/users/{uid}")
     async def firm_user_del(uid: str, request: Request, user: dict = Depends(get_current_user)):

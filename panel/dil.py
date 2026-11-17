@@ -293,21 +293,40 @@ def register(api_router, db, deps):
         out = json.loads(r.json()["choices"][0]["message"]["content"]).get("t") or []
         return out if len(out) == len(texts) else []
 
+    def _free(lang, texts, korunan=()):
+        """Anahtarsız yedek: MyMemory ücretsiz çeviri servisi (anonim günde ~5000 karakter; MYMEMORY_EMAIL ile ~50000)."""
+        import os
+        out = []
+        for tx in texts:
+            if any(k and k.lower() in tx.lower() for k in korunan):
+                out.append("")                                   # marka/korunan sözcük içeren metin elle çevrilsin
+                continue
+            prm = {"q": tx[:480], "langpair": "tr|" + lang}
+            if os.environ.get("MYMEMORY_EMAIL"):
+                prm["de"] = os.environ["MYMEMORY_EMAIL"]
+            r = requests.get("https://api.mymemory.translated.net/get", params=prm, timeout=20)
+            r.raise_for_status()
+            j = r.json()
+            if str(j.get("responseStatus")) == "429" or "QUOTA" in str(j.get("responseDetails", "")).upper():
+                raise RuntimeError("günlük ücretsiz çeviri sınırı doldu; yarın devam edin ya da Ayarlar › Yapay zekâ bağlantısını açın")
+            t = ((j.get("responseData") or {}).get("translatedText") or "").strip()
+            out.append(t if t and "MYMEMORY WARNING" not in t.upper() and t.lower() != tx.lower() else "")
+        return out
+
     @api_router.post("/yp/dil/oto")
     async def ceviri_oto(payload: dict, _: dict = Depends(adm)):
         lang = payload.get("lang")
         if lang not in LANGS or lang == "tr":
             raise HTTPException(422, "Geçerli bir dil seçin")
         c = await db.app_settings.find_one({"_id": "ai"}, {"_id": 0}) or {}
-        if not (c.get("enabled") and c.get("api_key")):
-            raise HTTPException(400, "Otomatik çeviri için önce Ayarlar › Yapay zekâ bölümünde bağlantı anahtarını girip açın.")
+        ai = bool(c.get("enabled") and c.get("api_key"))
         c.setdefault("base_url", "https://api.openai.com/v1")
         t = await tablo(db, lang)
         todo = [x for x in await metinler() if x not in t][:200]
         done = 0
         for ch in _chunks(todo, 25):
             try:
-                out = await asyncio.to_thread(_llm, c, lang, ch, (await get_cfg(db, await sektor())).get("korunan") or [])
+                out = await asyncio.to_thread(_llm if ai else (lambda _c, *a: _free(*a)), c, lang, ch, (await get_cfg(db, await sektor(db))).get("korunan") or [])
             except Exception as e:                                 # noqa: BLE001
                 raise HTTPException(502, "Çeviri servisi yanıt vermedi: %s" % str(e)[:120])
             for src, tx in zip(ch, out):
