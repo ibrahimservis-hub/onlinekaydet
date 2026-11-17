@@ -454,7 +454,7 @@ def _owner_redirect(environ, start_response):
     return None
 
 _DOMMAP = {"t": 0.0, "m": {}}
-_PANEL_PATHS = ("/api", "/static", "/uploads", "/brand", "/fonts", "/pdfjs", "/rehber", "/giris", "/login", "/panel", "/admin", "/tech",
+_PANEL_PATHS = ("/api", "/salon", "/static", "/uploads", "/brand", "/fonts", "/pdfjs", "/rehber", "/giris", "/login", "/panel", "/admin", "/tech",
                 "/takip", "/cihaz", "/bakim", "/odeme", "/teklif", "/portal", "/uye-girisi", "/manifest.json", "/spx-sw.js", "/panel-ek.js",
                 "/giris-skin.js", "/belge.js", "/favicon.ico", "/apple-touch-icon.png", "/icon-192.png", "/icon-512.png", "/asset-manifest.json")
 
