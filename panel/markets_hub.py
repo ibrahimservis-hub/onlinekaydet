@@ -233,6 +233,8 @@ def _tgo_flat(r: dict) -> dict:
     r["customer"] = {"name": (str(cu.get("firstName") or "") + " " + str(cu.get("lastName") or "")).strip(), "phone": ad.get("phone") or "",
                      "email": cu.get("email") or "", "address": {"fullAddress": ad.get("address1") or "", "city": ad.get("city") or "", "district": ad.get("district") or ""}}
     r["status"] = r.get("packageStatus")
+    app = (r.get("userInformation") or {}).get("appName") if isinstance(r.get("userInformation"), dict) else ""
+    r["customerNote"] = ((("GetirYemek · " if app == "Galaxy" else "") + str(r.get("customerNote") or "")).strip(" ·"))   # appName=Galaxy: GetirYemek siparişi
     return r
 
 
