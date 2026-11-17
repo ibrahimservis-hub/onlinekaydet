@@ -35,10 +35,12 @@ for k in list(P):
 import re as _re
 P['guv']=_re.sub(r'<div class="yorum">.*?</div>','',P['guv'],flags=_re.S)
 
+SEKT_AD={}
 SLUG_ONCE={'kombi','klima','beyaz_esya','bilgisayar','elektrik','elektronik','guvenlik','tesisat'}
 sys_path=__import__('sys').path;sys_path.insert(0,os.path.join(os.path.dirname(S),'panel'))
 import sitegen as _g
 SEKT=list(_g.SECTORS.items())
+SEKT_AD.update({'sektor-%s.html'%k.replace('_','-'):a for k,a in SEKT})
 def sektor_url(k): return '/sektor-%s.html'%k.replace('_','-')
 ESLE={'Teknik servis':'kombi','Kuaför ve güzellik':'kuafor','E-ticaret':'eticaret','Oto servis':'oto_servis','Avukat ve danışmanlık':'avukat','Diş, estetik ve sağlık':'dis_klinigi','Veteriner':'veteriner','Restoran ve kafe':'lokanta','Emlak':'emlakci','Sürücü kursu':'surucu_kursu','Kurs ve eğitim':'etut_merkezi','Fitness ve pilates':'spor_salonu','Market ve bakkal':'market','Temizlik hizmetleri':'temizlik','Düğün ve organizasyon':'dugun_salonu'}
 def sektor_chip(m):
@@ -62,13 +64,13 @@ foot=('<footer class="alt2"><div class="w"><div class="g">'
  '<a href="#" onclick="return false" aria-label="YouTube"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="2.5" y="5.5" width="19" height="13" rx="4"/><path d="M10 9.2v5.6l4.8-2.8z" fill="currentColor"/></svg></a></div></div>'
  '<div><b>Ürün</b><a href="/temalar.html">Temalar</a><a href="/e-ticaret.html">E-ticaret</a><a href="/web-sitesi.html">Web sitesi editörü</a><a href="/is-takibi.html">Randevu ve iş takibi</a><a href="/fiyatlar.html">Paketler</a></div>'
  '<div><b>Sektörler</b><a href="/sektor-kombi.html">Teknik servis</a><a href="/sektor-kuafor.html">Kuaför</a><a href="/sektor-eticaret.html">E-ticaret</a><a href="/tum-sektorler.html">Tüm sektörler</a></div>'
- '<div><b>Kaynak</b><a href="/blog.html">Blog</a><a href="/entegrasyonlar.html">Entegrasyonlar</a><a href="/destek.html">Destek</a><a href="/uye-girisi">Üye girişi</a></div>'
+ '<div><b>Kaynak</b><a href="/blog.html">Blog</a><a href="/entegrasyonlar.html">Entegrasyonlar</a><a href="/bilgi-bankasi.html">Bilgi bankası</a><a href="/destek.html">Destek</a><a href="/uye-girisi">Üye girişi</a></div>'
  '<div><b>Şirket</b><a href="/hakkimizda.html">Hakkımızda</a><a href="/iletisim.html">İletişim</a><a href="/kvkk.html">KVKK</a><a href="/gizlilik.html">Gizlilik</a><a href="/cerez-politikasi.html">Çerez politikası</a><a href="/kullanim-kosullari.html">Kullanım koşulları</a><a href="/mesafeli-satis-iade.html">Mesafeli satış ve iade</a></div>'
  '</div><div class="alt"><span>© 2026 OnlineKaydet</span><span class="kart" aria-label="Kabul edilen kartlar">'
  '<svg viewBox="0 0 64 40" width="52" height="32" role="img" aria-label="Visa"><rect width="64" height="40" rx="6" fill="#fff" stroke="#cfd6df"/><text x="32" y="27" text-anchor="middle" font-family="Arial,sans-serif" font-weight="800" font-style="italic" font-size="19" fill="#1a3a8f">VISA</text></svg>'
  '<svg viewBox="0 0 64 40" width="52" height="32" role="img" aria-label="Mastercard"><rect width="64" height="40" rx="6" fill="#fff" stroke="#cfd6df"/><circle cx="26" cy="20" r="11" fill="#eb001b"/><circle cx="38" cy="20" r="11" fill="#f79e1b"/><path d="M32 11.2a11 11 0 0 1 0 17.6 11 11 0 0 1 0-17.6z" fill="#ff5f00"/></svg></span></div></div></footer>')
 SEC={'temalar':'/temalar.html','eticaret':'/e-ticaret.html','editor':'/web-sitesi.html','yonetim':'/is-takibi.html','paketler':'/fiyatlar.html','sektorler':'/sektorler.html'}
-NAV=[('Temalar','/temalar.html'),('E-ticaret','/e-ticaret.html'),('Web sitesi','/web-sitesi.html'),('İş takibi','/is-takibi.html'),('Paketler','/fiyatlar.html'),('Sektörler','/sektorler.html')]
+NAV=[('Temalar','/temalar.html'),('E-ticaret','/e-ticaret.html'),('Web sitesi','/web-sitesi.html'),('İş takibi','/is-takibi.html'),('Paketler','/fiyatlar.html'),('Sektörler','/sektorler.html'),('Bilgi bankası','/bilgi-bankasi.html')]
 def hdr(cur):
     a=lambda t,u,c='':'<a %shref="%s"%s>%s</a>'%(c,u,' aria-current="page"' if u==cur else '',t)
     nav=''.join(a(t,u) for t,u in NAV)
@@ -88,6 +90,7 @@ def banner(slug,ad,h1,lead,gorsel=None,chip=None):
     return ('<section class="pb" id="icerik"><div class="w"><div><p class="kr"><a href="/">Ana sayfa</a> / %s</p><h1>%s</h1><p class="lead">%s</p>'
      '<div class="cta"><a class="btn fil" href="/demo.html">Ücretsiz deneyin</a><a class="btn bos" href="#teklif">Teklif alın</a><a class="btn duz" href="tel:+905444444004">Hemen arayın</a></div></div>%s</div></section>')%(ad,h1,lead,yan)
 SON_=''
+TKB={'e-ticaret.html':('Mağazanız için teklif alın','Ürün, sipariş ve pazaryeri kurulumunu birlikte planlayalım.'),'web-sitesi.html':('Web siteniz için teklif alın','Temanızı birlikte seçelim, alan adı ve kurulum bizden.'),'is-takibi.html':('İş takibi için teklif alın','Randevu, kasa ve ekip düzeninizi işinize göre kuralım.'),'fiyatlar.html':('Paketiniz için teklif alın','İhtiyacınıza uygun paketi ve fiyatı birlikte belirleyelim.'),'temalar.html':('Seçtiğiniz tema için teklif alın','Temanızı kurup bilgilerinizi birlikte girelim.'),'sektorler.html':('İş kolunuz için teklif alın','Mesleğinize uygun temayı ve paneli birlikte hazırlayalım.')}
 def page(slug,title,desc,body,ld=None,home=False,robots=None,extra_head='',extra_js='',ld_raw=None):
     url=BASE+('/' if home else '/'+slug)
     h=head_raw.replace('content="#0A6847"','content="#3034FF"')
@@ -111,6 +114,10 @@ def page(slug,title,desc,body,ld=None,home=False,robots=None,extra_head='',extra
     NOFORM='id="teklif"' not in body
     full=h+extra_head+lj+'\n</head><body>\n<a class="skip" href="#icerik">İçeriğe geç</a>'+hdr(cur)+'\n<main>'+body+'</main>\n'+foot+'\n'+mbar+'<script src="/v9/v9.js" defer></script><script src="/v9/v10.js" defer></script>'+('<script src="/v9/dunya.js" defer></script>' if home else '')+'<script src="/lead.js" defer></script>'+extra_js+'</body></html>'
     full=_re.sub(r'<a (class="btn[^"]*") href="#">([^<]*)</a>',lambda m:'<a %s href="%s">%s</a>'%(m.group(1),'/demo.html' if 'deneyin' in m.group(2).lower() or 'tema' in m.group(2).lower() else ('#teklif' if 'teklif' in m.group(2).lower() else '/iletisim.html'),m.group(2)),full)
+    tk=TKB.get(slug)
+    if not tk and slug.startswith('sektor-') and slug in SEKT_AD: tk=('%s için teklif alın'%SEKT_AD[slug],'Sektörünüze uygun temayı ve paneli birlikte hazırlayalım.')
+    if tk and 'id="teklif"' in full:
+        full=full.replace('<h2>Temanızı bugün seçin, mağazanızı bu hafta açın.</h2>','<h2>%s</h2><p class="lead">%s</p>'%(html.escape(tk[0]),html.escape(tk[1])),1).replace('<b style="font:700 24px/1 var(--fd);letter-spacing:-.02em">Teklif alın</b>','<b style="font:700 24px/1.15 var(--fd);letter-spacing:-.02em">%s</b>'%html.escape(tk[0]),1)
     if NOFORM: full=full.replace('href="#teklif"','href="/iletisim.html#teklif"')
     for k,v in SEC.items():
         if 'id="%s"'%k not in full: full=full.replace('href="#%s"'%k,'href="%s"'%v)
@@ -258,6 +265,19 @@ yasal('mesafeli-satis-iade.html','Mesafeli Satış ve İade Koşulları','Online
  '<h2>İade nasıl yapılır?</h2><p>İade talebinizi <a href="/iletisim.html">iletişim formundan</a> veya telefonla iletin. Onaylanan iade, ödemenizi yaptığınız yönteme geri yapılır.</p>'
  '<h2>Ücretsiz deneme</h2><p>Demo hesabı 7 gün ücretsizdir ve satın alma yükümlülüğü doğurmaz.</p>'
  '<h2>Uyuşmazlık</h2><p>Uyuşmazlıklarda Ticaret Bakanlığı’nca her yıl belirlenen parasal sınırlar dahilinde il ve ilçe tüketici hakem heyetleri ile tüketici mahkemeleri yetkilidir.</p>')
+
+
+# ---- bilgi bankası
+import bilgi_icerik as _bi
+BK=_bi.A
+kart_b=''.join('<a href="/bilgi-%s.html"><span>%s</span><h3>%s</h3><p>%s</p></a>'%(a['slug'],a['kat'],html.escape(a['ad']),html.escape(a['ozet'])) for a in BK)
+page('bilgi-bankasi.html','Bilgi Bankası: Ürün Ekleme, Pazaryeri, Randevu, Kasa, İlan | OnlineKaydet','Panelin adım adım kullanım rehberi: ürün ekleme, pazaryerine gönderme, sipariş, randevu, müşteri, kasa, ekip, ilan ve web sitesi düzenleme.',
+ B('b','Bilgi bankası','Paneli adım adım öğrenin','Her işlem için kısa, adım adım rehber. İstediğiniz konuyu seçin.')+'<section class="sec"><div class="w"><div class="bk">'+kart_b+'</div></div></section>'+CTA+SON)
+for i,a in enumerate(BK):
+    diger=''.join('<a href="/bilgi-%s.html">%s</a>'%(x['slug'],html.escape(x['ad'])) for x in BK if x is not a)
+    ld='<script type="application/ld+json">'+__import__('json').dumps({'@context':'https://schema.org','@type':'HowTo','name':a['ad'],'description':a['ozet'],'inLanguage':'tr'},ensure_ascii=False)+'</script>'
+    body=B('b-'+a['slug'],'<a href="/bilgi-bankasi.html">Bilgi bankası</a> / '+html.escape(a['kat']),a['ad'],a['ozet'])+'<section class="sec"><div class="w"><div class="yz">'+a['body']+'</div></div></section><section class="sec"><div class="w"><h2 style="margin-top:0">Diğer rehberler</h2><div class="bk2">'+diger+'</div></div></section>'+CTA+SON
+    page('bilgi-%s.html'%a['slug'],a['ad']+' | Bilgi Bankası | OnlineKaydet',a['ozet'],body,ld_raw=ld)
 
 # ---- eski sayfalar: içerik yeni kabuğa taşınır
 import glob
