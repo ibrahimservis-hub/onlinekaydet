@@ -3553,17 +3553,22 @@ if _FE:
             return JSONResponse({"detail": "Bulunamadı"}, status_code=404)
         return _Resp(_sg2.credit(h), media_type="text/html", headers={"Cache-Control": "public, max-age=300", "X-Robots-Tag": "noindex"})
 
+    _MUSTERI_YOLLARI = {"teklif", "odeme", "portal", "uye-girisi", "cihaz", "bakim", "takip", "static"}
+
     @app.get("/{full_path:path}", include_in_schema=False)
     async def spa(full_path: str, request: Request):
         if full_path == "api" or full_path.startswith("api/"):
             return JSONResponse({"detail": "Bulunamadı"}, status_code=404)
         if full_path in ("", "index.html"):
             return _index_resp(request)
-        if (full_path == "admin" or full_path.startswith("admin/")) and os.environ.get("ESKI_PANEL") != "1":
-            from fastapi.responses import RedirectResponse as _RR           # eski yönetim paneli kapalı: yeni panel /salon
-            return _RR("/salon", status_code=302)
         f = (_FE / full_path).resolve()
-        if full_path and _FE in f.parents and f.is_file():
+        _dosya = bool(full_path) and _FE in f.parents and f.is_file()
+        # Eski personel paneli kapalı: müşterinin gördüğü sayfalar (teklif, ödeme, portal, üye girişi, cihaz, bakım) hariç
+        # eski arayüzün tüm yolları yeni panele (/salon) gider.
+        if not _dosya and full_path and full_path.split("/")[0] not in _MUSTERI_YOLLARI and os.environ.get("ESKI_PANEL") != "1":
+            from fastapi.responses import RedirectResponse as _RR
+            return _RR("/salon", status_code=302)
+        if _dosya:
             # G178: sürümlü ek dosyalar (panel-ek.js?v=N) her açılışta yeniden sorulmasın — sürüm değişince adres değişir
             _ver = bool(request.query_params.get("v")) and f.suffix in (".js", ".css") and f.name != "spx-sw.js"
             hdr = {"Cache-Control": "public, max-age=31536000, immutable"} if (full_path.startswith("static/") or _ver) else {"Cache-Control": "no-cache"}
