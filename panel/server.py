@@ -3555,6 +3555,9 @@ if _FE:
             return JSONResponse({"detail": "Bulunamadı"}, status_code=404)
         if full_path in ("", "index.html"):
             return _index_resp(request)
+        if (full_path == "admin" or full_path.startswith("admin/")) and os.environ.get("ESKI_PANEL") != "1":
+            from fastapi.responses import RedirectResponse as _RR           # eski yönetim paneli kapalı: yeni panel /salon
+            return _RR("/salon", status_code=302)
         f = (_FE / full_path).resolve()
         if full_path and _FE in f.parents and f.is_file():
             # G178: sürümlü ek dosyalar (panel-ek.js?v=N) her açılışta yeniden sorulmasın — sürüm değişince adres değişir

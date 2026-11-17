@@ -52,7 +52,7 @@ with sync_playwright() as pw:
     pg.click('[data-a=sv-seg][data-v=""]'); pg.fill("#svq", "Vazgeçen"); pg.wait_for_timeout(900)
     pg.click('[data-a=sv-ac]'); pg.click('[data-a=sv-iptal]'); pg.fill("#svr", "Müşteri vazgeçti"); pg.click('[data-a=sv-iptal-ok]'); pg.wait_for_timeout(1200)
     j2 = rq.get(B + "/jobs?q=Vazge", headers=H).json()[0]; t("iptal nedeniyle kaydedildi", j2["status"] == "iptal" and j2.get("cancel_reason") == "Müşteri vazgeçti")
-    t("eski panel bağlantısı servis işinde duruyor", pg.locator("a.old").count() == 1)
+    t("eski panel bağlantısı yok", pg.locator("a.old").count() == 0)
     t("JavaScript hatası yok", not errs)
     if errs: print(errs[:3])
 print("OK", ok, "FAIL", bad)
