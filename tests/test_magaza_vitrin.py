@@ -24,7 +24,7 @@ with TestClient(s.app) as c:
     def off():
         c.put("/api/site/features", headers=O, json={"shop_enabled": False, "customer_portal_enabled": False})
         assert 'id="okm-root"' not in get("/magaza").text, "mağaza kapalıyken mağaza sayfası yok"
-        assert 'spx-ab' not in get("/").text, "mağaza kapalıyken hesap simgesi yok"
+        assert 'd.className="spx-ab"' not in get("/").text, "mağaza kapalıyken hesap simgesi yok"
     t("mağaza kapalıyken /magaza açılmaz", off)
     def on():
         r = c.put("/api/site/features", headers=O, json={"shop_enabled": True}); assert r.status_code == 200
@@ -34,7 +34,7 @@ with TestClient(s.app) as c:
             assert "ServisPlus" not in r.text and "servisplus" not in r.text.lower(), "platform adı görünmemeli"
             assert "Vitrin Firma" in r.text, "firma adı temadan gelir"
         h = get("/"); assert 'href="/magaza"' in h.text and 'href="/hesabim"' in h.text, "footer/yüzen bağlantılar"
-        assert 'class="spx-ab"' in h.text or 'spx-ab{' in h.text, "üst çubukta Hesabım/Sepet simgeleri"
+        assert 'd.className="spx-ab"' in h.text, "üst çubukta Hesabım/Sepet simgeleri"
         assert 'class="spx-credit"' in h.text and 'href="https://onlinekaydet.com"' in h.text, "OnlineKaydet kredisi sabit"
     t("mağaza açılınca /magaza ve /hesabim temalı sayfa olarak gelir, bağlantılar eklenir", on)
     def js():

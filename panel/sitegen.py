@@ -1157,7 +1157,7 @@ ACCOUNT_BAR = (
 
 def account_icons(h: str) -> str:
     """Mağaza açıkken her sayfanın üst çubuğuna Hesabım (giriş/üye ol/siparişler) ve Sepet simgeleri; mobilde de görünür."""
-    if not h or "spx-ab" in h or "</body>" not in h:
+    if not h or 'd.className="spx-ab"' in h or "</body>" not in h:
         return h
     return h.replace("</body>", ACCOUNT_BAR + "</body>", 1)
 

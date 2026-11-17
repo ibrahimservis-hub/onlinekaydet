@@ -16,7 +16,7 @@ CALLS = []
 async def fake_http(method, url, headers, body=None):
     CALLS.append((method, url, body))
     if "batch-requests" in url: return 200, {"status": "COMPLETED", "failedItemCount": 0, "items": [{"status": "SUCCESS", "requestItem": {"barcode": S["bc"]}, "failureReasons": []}]}
-    if url.endswith("/products"): return 200, {"batchRequestId": "abc-123"}
+    if url.endswith("/v2/products"): return 200, {"batchRequestId": "abc-123"}
     return 200, {"ok": True}
 shop_sync.HTTP["fn"] = fake_http
 with TestClient(s.app) as c:
@@ -70,7 +70,7 @@ with TestClient(s.app) as c:
     def real():
         r = c.post("/api/shop/channels/trendyol/create", headers=O, json={"dry_run": False}); assert r.status_code == 200, r.text
         assert r.json()["batch"] == "abc-123"
-        assert CALLS[-1][0] == "POST" and CALLS[-1][1].endswith("/sellers/123/products")
+        assert CALLS[-1][0] == "POST" and CALLS[-1][1].endswith("/sellers/123/v2/products")
         r = c.post("/api/shop/channels/trendyol/batch-check", headers=O, json={"batch": "abc-123"}); assert r.status_code == 200, r.text
         row = c.get("/api/shop/channels/trendyol/products", headers=O).json()["rows"][0]; assert row["status"] == "yayinda", row
     t("ürün açılır, toplu işlem sonucu 'yayında' yapar", real)
