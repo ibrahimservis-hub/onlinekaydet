@@ -121,6 +121,11 @@ def uret(page,B,SON,CTA,SEKT,DET,sektor_url,SLUG_ONCE,BASE,SITE):
           ['%s takibi'%v['stok'],'Sipariş ve kargo durumları','Pazaryeri bağlantı kartları (Trendyol, Hepsiburada ve diğerleri)'],'/v9/img/panel-d-urun.webp','%s ürün ve stok ekranı'%ad)
         rows+=satir(7,'Raporlar','Tek ekranda sonuçlar','Ne kadar iş yaptığınızı, ne kadar kazandığınızı ve neyin beklediğini raporlardan görürsünüz.',
           ['Gelir ve gider özeti','Tamamlanan ve bekleyen işler','Ekip bazında özet'],'/v9/img/panel-d-rapor.webp','%s rapor ekranı'%ad,True)
+        if k=='lokanta':
+            rows+=satir(8,'Pazaryeri menüsü','Menünüzü pazaryerine gönderin','Ürünü bir kez girersiniz: bölüm, hazırlık süresi, alerjenler ve seçenek grupları. Trendyol Yemek’e fiyat ve satış durumu panelden gider; Yemeksepeti, Getir ve Migros için menü dosyası hazırlanır.',
+              ['Bölüm, seçenek grubu ve alerjen alanları', 'Trendyol Yemek’te yalnızca değişen fiyat gönderilir', 'Platformdaki ürünle adı aynıysa kendiliğinden eşleşir', 'Ürünü platformda açık ya da kapalı yaparsınız', 'Diğer platformlar için menü dosyası (CSV)'],'/v9/img/panel-lokanta-menu.webp','Panelde menüyü pazaryerine gönderme ekranı (örnek veriyle demo ekranı)')
+            rows+=satir(9,'Etiket tasarımı','Etiket ve fişleriniz sizin tasarımınız','Kargo etiketi, kargo şablonu ve restoran QR etiketi panelden tasarlanır. Firma adı, telefon, adres ve logo kendiliğinden gelir.',
+              ['Her türde 5 stil; renk, yazı tipi ve boyut ayarı', 'QR kartında üstte logo, altında QR', 'Yazdırmadan önce canlı önizleme', 'Kargo etiketinde barkod ve içerik listesi'],'/v9/img/panel-lokanta-etiket.webp','Panelde etiket tasarımı ekranı: restoran QR kartı (örnek veriyle demo ekranı)',True)
         pq=[('%s için %s nasıl takip edilir?'%(ad,v['is1'].lower()),'Her kayıt şu adımlardan geçer: %s. Hangi adımda olduğu listede görünür.'%', '.join(v['steps'])),
             ('Evrak ve belge takibi var mı?','Evet. Her kayıtta "%s" listesi bulunur: %s.'%(v['chk_t'],'; '.join(v['chk'][:4]))),
             ('Müşteriye bilgi mesajı gönderilebilir mi?','Evet, panelden randevu ve durum mesajı gönderilir. SMS için bağlantı kurulumu gerekir.'),

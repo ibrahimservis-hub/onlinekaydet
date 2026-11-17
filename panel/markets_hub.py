@@ -36,7 +36,7 @@ VERIFIED = {"trendyol": True, "hepsiburada": True, "n11": True, "ciceksepeti": F
 
 def _name(mk: str) -> str:
     return FOOD.get(mk) or ch.MARKETS[mk]["name"]
-INTERVAL = int(os.environ.get("MARKET_PULL_S", "300"))
+INTERVAL = int(os.environ.get("MARKET_PULL_S", "90"))
 _TOK = {}                      # Pazarama erişim anahtarı önbelleği
 
 
@@ -360,6 +360,16 @@ async def ingest(db, mk: str, rows: list, since: datetime) -> dict:
         except Exception as e:                                     # noqa: BLE001
             log.warning("sipariş işlenemedi (%s): %s", mk, e)
     return {"new": new, "historical": hist, "updated": upd}
+
+
+async def baslangic(db, mk: str):
+    """Bağlantı açıldığında sipariş sayacı başlar: ilk çekim gelene kadar düşen siparişler de alınır (2 dk pay)."""
+    if mk in ALL and not ((await _state(db)).get(mk) or {}).get("since"):
+        await _set_state(db, mk, since=(datetime.now(timezone.utc) - timedelta(minutes=2)).isoformat())
+        try:
+            await pull(db, mk)                                     # hemen bir kez çek; hata olursa döngü yeniden dener
+        except Exception:                                          # noqa: BLE001
+            pass
 
 
 async def pull(db, mk: str) -> dict:

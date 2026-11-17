@@ -144,12 +144,12 @@ CATALOG = [
     P("yemeksepeti", "pazaryeri", "Yemeksepeti", [F("webhook_key", "Bildirim anahtarı", True, ipucu="Kendiniz belirlersiniz; Yemeksepeti'ye verdiğiniz bildirim adresinde kullanılır"),
                                                   F("token", "Yemeksepeti erişim anahtarı", True, zorunlu=False, ipucu="Sipariş durumunu Yemeksepeti'ne bildirmek için"), F("komisyon", "Komisyon oranı % (kâr hesabı için)", zorunlu=False, tip="number")],
       "Gelen siparişler anında listenize düşer. Yemeksepeti'nden entegrasyon izni gerekir."),
-    P("trendyol_yemek", "pazaryeri", "Trendyol Yemek", [F("seller_id", "Mağaza numarası (ID)"), F("api_key", "API anahtarı", True), F("api_secret", "API gizli anahtarı", True), F("komisyon", "Komisyon oranı % (kâr hesabı için)", zorunlu=False, tip="number")],
-      "Siparişler 5 dakikada bir listenize gelir."),
+    P("trendyol_yemek", "pazaryeri", "Trendyol Yemek", [F("seller_id", "Mağaza numarası (ID)"), F("api_key", "API anahtarı", True), F("api_secret", "API gizli anahtarı", True), F("store_id", "Restoran numarası (birden çok şubeniz varsa)", zorunlu=False, ipucu="Boşsa tüm restoranlarınız menüye dahil edilir"), F("komisyon", "Komisyon oranı % (kâr hesabı için)", zorunlu=False, tip="number")],
+      "Siparişler 1-2 dakikada bir kendiliğinden gelir; menüde fiyat ve satış durumu panelden gönderilir."),
     P("getir_yemek", "pazaryeri", "Getir Yemek", [F("token", "Erişim anahtarı", True), F("orders_url", "Sipariş adresi", ipucu="Getir'in size verdiği sipariş adresi"), F("komisyon", "Komisyon oranı % (kâr hesabı için)", zorunlu=False, tip="number")],
-      "Siparişler 5 dakikada bir listenize gelir. Getir'den entegrasyon erişimi gerekir."),
+      "Siparişler 1-2 dakikada bir kendiliğinden listenize gelir. Getir'den entegrasyon erişimi gerekir."),
     P("migros_yemek", "pazaryeri", "Migros Yemek", [F("token", "Erişim anahtarı", True), F("orders_url", "Sipariş adresi", ipucu="Migros'un size verdiği sipariş adresi"), F("komisyon", "Komisyon oranı % (kâr hesabı için)", zorunlu=False, tip="number")],
-      "Siparişler 5 dakikada bir listenize gelir. Migros'tan entegrasyon erişimi gerekir."),
+      "Siparişler 1-2 dakikada bir kendiliğinden listenize gelir. Migros'tan entegrasyon erişimi gerekir."),
     # --- ölçüm ve reklam
     P("ga4", "olcum", "Google Analytics 4", [F("id", "Ölçüm kimliği", ipucu="G- ile başlar")],
       "Ziyaretçi ve dönüşüm ölçümü", test=False),
@@ -434,6 +434,12 @@ def register(api_router, db, deps):
                "last_ok": _now() if ok else (old.get("last_ok") or "")}
         await db.yp_integrations.update_one({"id": p["id"]}, {"$set": row}, upsert=True)
         await log(p["id"], "kaydedildi" if ok else "hata", err)
+        if ok and on and not old.get("on"):                        # açıldığı andan itibaren gelen siparişler kaçmasın
+            try:
+                import markets_hub
+                await markets_hub.baslangic(db, p["id"])
+            except Exception:                                      # noqa: BLE001
+                pass
         return {"ok": ok, "err": err, "item": view(p, row, True)}
 
     @api_router.post("/yp/integrations/{pid}/test")

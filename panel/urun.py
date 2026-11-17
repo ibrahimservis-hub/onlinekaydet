@@ -29,6 +29,49 @@ CHANNELS = {"site": ("Kendi sitem", 0.0), "trendyol": ("Trendyol", 18.0), "hepsi
             "yemeksepeti": ("Yemeksepeti", 0.0), "trendyol_yemek": ("Trendyol Yemek", 0.0),
             "getir_yemek": ("Getir Yemek", 0.0), "migros_yemek": ("Migros Yemek", 0.0)}
 FOOD_CH = ("yemeksepeti", "trendyol_yemek", "getir_yemek", "migros_yemek")
+FOOD_SEC = ("lokanta", "kafe", "pastane", "restoran")
+
+
+async def yemek_firma(db):
+    """Restoran, kafe, pastane: yemek platformları ve menü alanları yalnızca bunlarda görünür."""
+    d = await db.app_settings.find_one({"_id": "sector"}, {"_id": 0}) or {}
+    return (d.get("key") or "") in FOOD_SEC
+
+
+def kanal_listesi(yemek):
+    """Yemek firması: kendi site + yemek platformları. Diğerleri: yemek platformları hiç görünmez."""
+    return [{"id": k, "name": v[0], "commission": v[1]} for k, v in CHANNELS.items()
+            if (k == "site" or k in FOOD_CH) == bool(yemek) or k == "site"]
+
+ALERJEN = ("gluten", "süt", "yumurta", "fıstık", "kuruyemiş", "soya", "balık", "kabuklu deniz", "susam", "hardal", "kereviz", "sülfit", "acı biber")
+
+
+def food_clean(f):
+    """Yemek menüsü alanları: bölüm, hazırlık süresi, alerjenler, seçenek grupları (min/max, fiyatlı seçenekler), çıkarılabilir malzemeler."""
+    f = f if isinstance(f, dict) else {}
+    grp = []
+    for g in (f.get("gruplar") or [])[:12]:
+        if not isinstance(g, dict) or not _t(g.get("ad"), 60):
+            continue
+        ops = []
+        for o in (g.get("secenekler") or [])[:40]:
+            if isinstance(o, dict) and _t(o.get("ad"), 60):
+                ops.append({"ad": _t(o.get("ad"), 60), "fiyat": max(_num(o.get("fiyat")), 0.0)})
+        if not ops:
+            continue
+        mn = min(max(_int(g.get("min")), 0), len(ops))
+        mx = min(max(_int(g.get("max"), 1), mn, 1), len(ops))
+        if mn and not any(o["fiyat"] == 0 for o in ops):
+            raise HTTPException(422, "“%s” zorunlu seçim: en az bir seçenek 0 ₺ olmalı (platformlar zorunlu seçimde ücretsiz seçenek ister)" % _t(g.get("ad"), 60))
+        grp.append({"ad": _t(g.get("ad"), 60), "min": mn, "max": mx, "secenekler": ops})
+    ext = {k: _t(v, 40) for k, v in (f.get("ext") or {}).items() if k in FOOD_CH and _t(v, 40)}
+    return {"bolum": _t(f.get("bolum"), 60), "hazirlik": min(max(_int(f.get("hazirlik"), 15), 0), 240),
+            "porsiyon": _t(f.get("porsiyon"), 40), "kalori": max(_int(f.get("kalori")), 0),
+            "alerjen": [a for a in (f.get("alerjen") or []) if a in ALERJEN],
+            "vejetaryen": bool(f.get("vejetaryen")), "vegan": bool(f.get("vegan")), "aci": min(max(_int(f.get("aci")), 0), 3),
+            "cikarilabilir": [_t(x, 50) for x in (f.get("cikarilabilir") or [])[:20] if _t(x, 50)],
+            "gruplar": grp, "aktif": f.get("aktif") is not False, "ext": ext}
+
 VATS = (0, 1, 10, 20)
 SORTS = {"yeni": [("created_at", -1)], "ad": [("name", 1)], "fiyat": [("price", 1)], "fiyat_d": [("price", -1)],
          "stok": [("stock", 1)], "stok_d": [("stock", -1)], "kar": [("_margin", -1)]}
@@ -326,7 +369,7 @@ def clean(p, old=None):
            "weight": _num(p.get("weight")), "desi": desi,
            "warranty": _t(p.get("warranty"), 60), "min_qty": max(_int(p.get("min_qty"), 1), 1),
            "max_qty": _int(p.get("max_qty")), "channels": ch,
-           "seo": seo,
+           "seo": seo, "food": food_clean(p.get("food")),
            "status": "draft" if p.get("status") == "draft" else "live",
            "source": _t(p.get("source"), 400)}
     if vr:
@@ -426,7 +469,7 @@ def register(api_router, db, deps):
         page = rows[offset:offset + limit]
         await _rozet(db, page)
         return {"rows": page, "total": len(rows), "counts": counts, "sum": tot,
-                "channels": [{"id": k, "name": v[0], "commission": v[1]} for k, v in CHANNELS.items()]}
+                "channels": kanal_listesi(await yemek_firma(db))}
 
     @api_router.get("/yp/products/filters")
     async def filters(_: dict = Depends(adm)):

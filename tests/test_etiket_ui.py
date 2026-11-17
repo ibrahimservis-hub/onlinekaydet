@@ -18,7 +18,7 @@ for _ in range(60):
 U = "http://127.0.0.1:%d" % PORT
 L = lambda e, p: {"Authorization": "Bearer " + requests.post(U + "/api/auth/login", json={"email": e, "password": p}).json()["token"]}
 A = L("admin@servis.com", "admin123")
-F = requests.post(U + "/api/admin/firms", headers=A, json={"name": "Lezzet Evi", "email": "et@x.com", "password": "sifre12345", "package": "tam", "phone": "03120000000", "address": "Çankaya Ankara"}).json()["id"]
+F = requests.post(U + "/api/admin/firms", headers=A, json={"name": "Lezzet Evi", "email": "et@x.com", "password": "sifre12345", "package": "tam", "sector": "lokanta", "phone": "03120000000", "address": "Çankaya Ankara"}).json()["id"]
 O = L("et@x.com", "sifre12345")
 with sync_playwright() as pw:
     br = pw.chromium.launch(executable_path="/usr/bin/google-chrome", args=["--no-sandbox"])
