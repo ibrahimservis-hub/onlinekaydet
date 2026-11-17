@@ -803,6 +803,20 @@ def register(api_router, db, deps):
                                            {"_id": 0, "name": 1, "price": 1, "dur": 1, "cat": 1, "desc": 1, "img": 1}).limit(60).to_list(60)
             kasa["hizmet"] = [(x.get("name") or "", ("%s ₺" % blokgen.para(x.get("price"))) if x.get("price") else "") for x in sv]
             kasa["hizmetler"] = sv
+        if "QR menü" in gerek or "Ayarlar › Hizmetler" in gerek:
+            try:                                                   # restoran: Menü ekranındaki yemekler sitede ve QR menüde görünür
+                import urun as _urun
+                if await _urun.yemek_firma(db):
+                    mp = await db.yp_products.find({"status": {"$ne": "draft"}, "channels.site": {"$ne": False}, "food.aktif": {"$ne": False}},
+                                                   {"_id": 0}).sort("created_at", 1).limit(200).to_list(200)
+                    mi = [{"name": x.get("name") or "", "desc": x.get("short") or str(x.get("desc") or "")[:160],
+                           "price": x.get("sale_price") or x.get("price") or 0, "cat": (x.get("food") or {}).get("bolum") or x.get("cat") or "Menü",
+                           "img": (x.get("images") or [""])[0], "images": (x.get("images") or [])[:1]} for x in mp]
+                    if mi:
+                        kasa["menu_urunleri"] = mi
+                        kasa["hizmetler"] = mi
+            except Exception:                                      # noqa: BLE001
+                pass
         if "Ekip" in gerek:
             st = await db.yp_staff.find({"active": {"$ne": False}},
                                         {"_id": 0, "name": 1, "title": 1, "img": 1}).sort("order", 1).limit(24).to_list(24)
@@ -964,7 +978,7 @@ def register(api_router, db, deps):
             if mg == "Takvim › Etkinlikler":
                 d["etkinlikler"] = kasa.get("etkinlikler") or []
             if mg == "QR menü":
-                d["menu"] = kasa.get("urunler") or kasa.get("hizmetler") or []
+                d["menu"] = kasa.get("menu_urunleri") or kasa.get("urunler") or kasa.get("hizmetler") or []
             if mg == "Ürünler › Portföy":
                 d["portfoy_turleri"] = kasa.get("portfoy_turleri") or []
             if mg == "Ayarlar › Markalar":

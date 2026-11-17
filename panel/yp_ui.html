@@ -1864,10 +1864,16 @@ V.siparis=async function(){var F=CUR.sf=CUR.sf||{q:'',status:'',channel:'',cargo
   +'<select id="ssort"><option value="yeni">En yeni</option><option value="eski">En eski</option><option value="tutar">Tutar (yüksek)</option><option value="tutar_a">Tutar (düşük)</option></select>'
   +'</div><div class="fbar chips" id="sseg"></div><div id="slist"><div class="empty">Yükleniyor…</div></div></div>';
  $('#main').innerHTML=h;$('#ssort').value=F.sort;await V.siparis.load()};
+
+/* yeni sipariş kendiliğinden gelir: siparişler ekranı açıkken yarım dakikada bir bakılır */
+function yeniSiparisSes(){try{var A=window.AudioContext||window.webkitAudioContext,x=new A(),o=x.createOscillator(),g=x.createGain();o.connect(g);g.connect(x.destination);o.type='sine';o.frequency.value=880;g.gain.setValueAtTime(.12,x.currentTime);g.gain.exponentialRampToValueAtTime(.001,x.currentTime+.5);o.start();o.stop(x.currentTime+.5)}catch(e){}}
+setInterval(async function(){if(document.hidden||!TOK||location.hash!=='#siparis'||CUR.siparisSon==null)return;
+ if((window.SEL&&SEL.siparis&&SEL.siparis.length)||document.querySelector('#ov:not([hidden]) .md'))return;
+ try{var r=await api('/yp/orders?limit=1'),n=(r.counts||{}).hepsi;if(typeof n==='number'&&n>CUR.siparisSon){var k=n-CUR.siparisSon;toast(k+' yeni sipariş geldi');yeniSiparisSes();await V.siparis.load()}}catch(e){}},30000);
 V.siparis.load=async function(){var F=CUR.sf;
  var r=await api('/yp/orders?q='+encodeURIComponent(F.q)+'&status='+F.status+'&channel='+F.channel+'&cargo='+F.cargo
   +'&sort='+F.sort+'&offset='+F.off+'&limit='+F.n);
- CUR.siparisler=r.items||[];var c=r.counts||{};
+ CUR.siparisler=r.items||[];var c=r.counts||{};CUR.siparisSon=c.hepsi;
  CUR.kanallar=r.channels||CUR.kanallar;var sel=$('#sch');if(sel&&sel.options.length<2&&CUR.kanallar)sel.innerHTML+=CUR.kanallar.map(function(x){return '<option value="'+x.id+'"'+(F.channel===x.id?' selected':'')+'>'+esc(x.name)+'</option>'}).join('');
  CUR.cargos=r.cargos||CUR.cargos;var cg=$('#scg');if(cg&&cg.options.length<2)cg.innerHTML+=(r.cargos||[]).map(function(x){return '<option value="'+x.id+'"'+(F.cargo===x.id?' selected':'')+'>'+esc(x.name)+'</option>'}).join('');
  var segs=[['','Hepsi',c.hepsi],['acik','Açık',c.acik],['yeni','Yeni',c.yeni],['hazirlaniyor','Hazırlanıyor',c.hazirlaniyor],['kargoda','Kargoda',c.kargoda],['teslim','Teslim',c.teslim],['iptal','İptal',c.iptal]];
