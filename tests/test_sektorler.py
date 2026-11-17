@@ -6,6 +6,7 @@ import logging; logging.disable(logging.CRITICAL)
 from starlette.testclient import TestClient
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "panel"))
 import sektor, sektor_ek, sektor_dil, demo
+demo.GUNLUK_LIMIT = 10**6
 s = boot.server; ok, bad = [], []
 def t(n, f):
     try: f(); ok.append(n)
