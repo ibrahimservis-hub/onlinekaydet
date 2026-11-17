@@ -23,6 +23,55 @@ SSS={'servis':[('%s için servis kaydı nasıl tutulur?','Her müşteri ve cihaz
  'cekim':[('%s için rezervasyon nasıl takip edilir?','Tarih, paket ve ödeme tek kayıtta tutulur; takvimde görürsünüz.'),('Kapora takibi yapılır mı?','Kasa bölümünde tahsilat ve kalan tutar takip edilir.')],
  'urun':[('%s için stok ve sipariş nasıl takip edilir?','Ürün, stok ve sipariş panelde tek yerde durur; stok azalınca uyarı alırsınız.'),('Pazaryerine ürün gönderilebilir mi?','Panelde pazaryeri bağlantı kartları var; kullanım rehberi Bilgi Bankası’nda.')]}
 
+
+import glob, sys
+_P=os.path.join(os.path.dirname(os.path.abspath(__file__)),'..','..','panel')
+sys.path.insert(0,_P)
+import sektor_kayit as _sk, sektor_dil as _sd, sektor as _sc
+IMG=os.path.join(os.path.dirname(os.path.abspath(__file__)),'img')
+SERVIS_ADIM=['Yeni iş','Teknisyen atandı','Yolda','İşlemde','Tamamlandı']
+def tek(x): return x.split('/')[0]
+def cog(x): return x.split('/')[-1]
+def veri(k,ad,tip):
+    t=_sk.template(k);r=_sd.ROWS.get(k)
+    d={}
+    if t:
+        d.update(noun=t['noun'],plural=t['plural'],staff=t['staff_l'],steps=[x['l'] for x in t['steps']],side=[x['l'] for x in t.get('side',[])],
+          fields=[f['l'] for _,fs in t['sections'] for f in fs if f['l'] not in ('Telefon',)],items=[i['l'] for i in t['items']],
+          chk_t=t['check'][0],chk=[c[1] for c in t['check'][1]],comm=t.get('comm'),pay=t.get('pay'),hesap=[h[1] for h in t.get('hesap',[])])
+    else:
+        sc=_sc.SECTORS.get(k,{})
+        d.update(noun='Servis kaydı',plural='Servis kayıtları',staff='Teknisyen',steps=SERVIS_ADIM,side=['İptal'],fields=['Müşteri','Adres','Cihaz','Arıza','Randevu','Teknisyen'],
+          items=['Yedek parça','İşçilik'],chk_t='Servis kontrol listesi',chk=[c[0] for c in sc.get('checklist',[])],comm=None,pay=True,hesap=['İşçilik','Yedek parça'],
+          sorunlar=list(sc.get('faults',[])))
+    if r:
+        d.update(kisi=tek(r['kisi']) if False else tek(r['cihaz']) if False else None)
+    d['kisi_l']=(tek(r['cihaz']) if r and tip in('randevu','ilan','kurs') and r['cihaz'] and 'Müşteri' not in r['cihaz'] and k in('dis_klinigi','psikolog','diyetisyen','fizyoterapi','veteriner','aile_danisman','avukat','estetik_merkezi','spor_salonu','surucu_kursu','src_kursu') else 'Müşteri')
+    d['gun']=r['gun'] if r else 'Günün işleri'
+    d['yer']=r['yer'] if r else 'İş takibi'
+    d['stok']=r['stok'] if r else 'Stok'
+    d['teklif']=r['teklif'] if r else 'Teklifler'
+    d['is']=cog(r['is']) if r else d['plural']
+    d['is1']=tek(r['is']) if r else d['noun']
+    d['staff_p']=tek(r['kisi']) if r else d['staff']
+    return d
+def gorsel(k):
+    s=k.replace('_','-');d=sorted(glob.glob(IMG+'/tema-*-%s-d.webp'%s));m=sorted(glob.glob(IMG+'/tema-*-%s-m.webp'%s))
+    return [os.path.basename(x)[:-5] for x in d[:1]],[os.path.basename(x)[:-5] for x in m[:1]]
+def li(l): return ''.join('<li>%s</li>'%E_(x) for x in l)
+def satir(no,et,h,p,mad,img,alt,ters=False,neden=None):
+    return ('<section class="sec sxrow"><div class="w"><div class="sxr%s"><div class="sxt"><span class="sxn">%02d</span><p class="et">%s</p><h2>%s</h2><p>%s</p>%s</div>'
+      '<figure class="sxf"><img src="%s" alt="%s" loading="lazy"><figcaption>%s</figcaption></figure></div></div></section>')%(' ters' if ters else '',no,E_(et),E_(h),E_(p),'<ul class="sxl">%s</ul>'%li(mad) if mad else '',img,E_(alt),E_(alt))
+def adim(steps,side):
+    s=''.join('<li><b>%d</b><span>%s</span></li>'%(i+1,E_(x)) for i,x in enumerate(steps))
+    y=('<p class="sxy">Yan durumlar: %s</p>'%E_(' · '.join(side))) if side else ''
+    return '<ol class="sxs">%s</ol>%s'%(s,y)
+def seridi(l):
+    return '<div class="sxst">%s</div>'%''.join('<div><b>%s</b><span>%s</span></div>'%(E_(a),E_(b)) for a,b in l)
+def sss_html(q): return ''.join('<details class="sssd"><summary>%s</summary><p>%s</p></details>'%(E_(x),E_(y)) for x,y in q)
+def faq(q): return '<script type="application/ld+json">'+json.dumps({'@context':'https://schema.org','@type':'FAQPage','mainEntity':[{'@type':'Question','name':x,'acceptedAnswer':{'@type':'Answer','text':y}} for x,y in q]},ensure_ascii=False)+'</script>'
+def bolum(cls,h,ic): return '<section class="sec %s"><div class="w"><h2>%s</h2>%s</div></section>'%(cls,E_(h),ic)
+
 def uret(page,B,SON,CTA,SEKT,DET,sektor_url,SLUG_ONCE,BASE,SITE):
     out=[]
     ad_of={k:(DET[k][1] if k in DET else a) for k,a in SEKT}
@@ -30,42 +79,82 @@ def uret(page,B,SON,CTA,SEKT,DET,sektor_url,SLUG_ONCE,BASE,SITE):
         ad=ad_of[k];tip=MAN.get(k) or (DET[k][2] if k in DET else 'servis')
         if tip not in PROG: tip='servis'
         s=k.replace('_','-');pu=PROG[tip];tipu=URL[tip]
-        oz=DET[k][6] if k in DET else []
-        ish=DET[k][7] if k in DET else []
+        v=veri(k,ad,tip);oz=DET[k][6] if k in DET else [];ish=DET[k][7] if k in DET else []
+        dsk,mob=gorsel(k)
         sl={'prog':'%s-%s.html'%(s,tipu),'muh':'%s-muhasebe-programi.html'%s,'web':'%s-web-sitesi.html'%s}
         diger=''.join('<a href="/%s">%s %s</a>'%(sl[x],E_(ad),n) for x,n in (('prog',pu),('muh','Muhasebe ve Kasa'),('web','Web Sitesi')))
-        # benzer sektörler (aynı tip)
         ben=[(k2,a2) for k2,a2 in SEKT if k2!=k and (MAN.get(k2) or (DET[k2][2] if k2 in DET else 'servis'))==tip][:8]
         benz=''.join('<a href="/%s-%s.html">%s</a>'%(k2.replace('_','-'),URL[tip],E_(ad_of[k2])) for k2,_ in ben)
-        ana='<p><a href="%s">%s ana sayfası</a> · <a href="/tum-sektorler.html">Tüm sektörler</a> · <a href="/bilgi-bankasi.html">Bilgi bankası</a></p>'%(sektor_url(k),E_(ad))
-        def faq(q):
-            return '<script type="application/ld+json">'+json.dumps({'@context':'https://schema.org','@type':'FAQPage','mainEntity':[{'@type':'Question','name':x,'acceptedAnswer':{'@type':'Answer','text':y}} for x,y in q]},ensure_ascii=False)+'</script>'
-        def kart(l): return ''.join('<div class="fk"><span class="no">%02d</span><h3>%s</h3><p>%s</p></div>'%(i+1,E_(x),E_(y)) for i,(x,y) in enumerate(l))
-        def sss_html(q): return ''.join('<details class="sssd"><summary>%s</summary><p>%s</p></details>'%(E_(x),E_(y)) for x,y in q)
-        tq=[(SSS[tip][0][0]%ad,SSS[tip][0][1]),SSS[tip][1]]
-        # 1) program
-        liste=''.join('<li>%s</li>'%E_(x) for x in KAYIT[tip])
-        isl=('<p style="margin-top:18px"><b>%s için panelde hazır işlem türleri:</b> %s</p>'%(E_(ad),' · '.join(E_(x) for x in ish))) if ish else ''
-        body=(B('p-'+k,'<a href="%s">%s</a>'%(sektor_url(k),E_(ad)),'%s %s'%(ad,pu),'%s için kayıtları, takvimi ve kasayı tek panelde tutun. 7 gün ücretsiz deneyin.'%ad)
-         +'<section class="sec"><div class="w"><div class="yz"><h2 style="margin-top:0">%s %s ne işe yarar?</h2><p>Kayıtlar defterde, telefonda ve mesajlarda dağılınca iş takibi zorlaşır. OnlineKaydet’te %s işiniz için müşteri, iş ve ödeme bilgileri tek panelde durur. Aşağıdaki bilgileri her kayıtta tutarsınız:</p><ul>%s</ul>%s</div></div></section>'%(E_(ad),E_(pu.lower()),E_(ad.lower()),liste,isl)
-         +('<section class="sec"><div class="w"><h2>Öne çıkan özellikler</h2><div class="fg">%s</div></div></section>'%kart(oz) if oz else '')
-         +'<section class="sec"><div class="w"><div class="yz"><h2 style="margin-top:0">Sık sorulan sorular</h2>%s%s</div></div></section>'%(sss_html(tq),'')
-         +'<section class="sec"><div class="w"><h2>%s için diğer sayfalar</h2><div class="slst">%s</div>%s</div></section>'%(E_(ad),diger,ana)
-         +(('<section class="sec"><div class="w"><h2>Benzer iş kolları</h2><div class="slst">%s</div></div></section>'%benz) if benz else '')+CTA+SON)
-        page(sl['prog'],'%s %s | OnlineKaydet'%(ad,pu),'%s için %s: kayıt, takvim, kasa ve web sitesi tek panelde. 7 gün ücretsiz deneyin.'%(ad,pu.lower()),body,ld_raw=faq(tq));out.append(sl['prog'])
-        # 2) muhasebe/kasa
-        mq=[('%s için gelir gider takibi nasıl yapılır?'%ad,'Kasa bölümünde her tahsilat, gider ve borç kaydedilir; gün, hafta ve ay bazlı raporlar panelde görünür.'),('Resmi muhasebe ve e-fatura yerine geçer mi?','Hayır. Panel günlük kasa ve borç takibi içindir; resmi muhasebe ve e-fatura işlemleri için mali müşavirinizle çalışmaya devam edersiniz.')]
-        body=(B('m-'+k,'<a href="%s">%s</a>'%(sektor_url(k),E_(ad)),'%s Muhasebe ve Kasa Programı'%ad,'%s için gelir, gider, borç ve tahsilatı tek ekranda takip edin.'%ad)
-         +'<section class="sec"><div class="w"><div class="yz"><h2 style="margin-top:0">%s için kasa ve borç takibi</h2><p>%s işinde tahsilat bir yerde, gider başka yerde kalınca günün sonunda hesap tutmaz. Kasa bölümünde şunları tutarsınız:</p><ul><li>Gelir ve tahsilat (nakit, kart, havale)</li><li>Gider kayıtları</li><li>Müşteri borcu ve kalan tutar</li><li>Gün, hafta ve ay raporları</li></ul><p>Her tahsilat, ilgili müşteri ve iş kaydına bağlanır; müşteri sayfasından geçmiş ödemeleri görürsünüz.</p></div></div></section>'%(E_(ad),E_(ad))
-         +'<section class="sec"><div class="w"><div class="yz"><h2 style="margin-top:0">Sık sorulan sorular</h2>%s</div></div></section>'%sss_html(mq)
-         +'<section class="sec"><div class="w"><h2>%s için diğer sayfalar</h2><div class="slst">%s</div>%s</div></section>'%(E_(ad),diger,ana)+CTA+SON)
-        page(sl['muh'],'%s Muhasebe ve Kasa Programı | OnlineKaydet'%ad,'%s için gelir gider, borç ve tahsilat takibi. Kasa ve raporlar panelde. 7 gün ücretsiz deneyin.'%ad,body,ld_raw=faq(mq));out.append(sl['muh'])
-        # 3) web sitesi
-        wq=[('%s için web sitesi nasıl kurulur?'%ad,'Sektörünüze hazır temayı seçersiniz; yazı, resim ve iletişim bilgilerini panelden girersiniz. Alan adı ve kurulum desteği verilir.'),('Sitedeki yazı ve resimleri ben değiştirebilir miyim?','Evet, her bölümün yazısı ve görseli panelden değiştirilir.')]
+        ana='<p class="sxln"><a href="%s">%s ana sayfası</a> · <a href="/tum-sektorler.html">Tüm sektörler</a> · <a href="/bilgi-bankasi.html">Bilgi bankası</a></p>'%(sektor_url(k),E_(ad))
+        son=bolum('','%s için diğer sayfalar'%ad,'<div class="slst">%s</div>%s'%(diger,ana))+(bolum('','Benzer iş kolları','<div class="slst">%s</div>'%benz) if benz else '')+CTA+SON
+        noun=v['noun'];nl=noun.lower();pl=v['plural'].lower();staff=v['staff'].lower()
+        stats=[(str(len(v['steps'])),'adımda %s ilerler'%nl),(str(len(v['fields'])),'kayıt alanı'),(str(len(v['chk'])),'%s maddesi'%v['chk_t'].lower() if len(v['chk_t'])<22 else 'kontrol maddesi'),(str(len(set(v['items']+v['hesap']))),'hesap kalemi')]
+        # ---------- 1) PROGRAM
+        rows=''
+        rows+=satir(1,'Müşteri kaydı','%s kartı ve geçmişi'%v['kisi_l'],'Her %s tek kartta durur; aynı kişinin tüm %s birlikte görünür.'%(v['kisi_l'].lower(),pl),
+          ['Telefon, iletişim ve notlar','Geçmiş %s ve ödemeler'%pl,'Aradığınızı isim ya da telefonla bulursunuz'],'/v9/img/bilgi/m_liste.webp','%s müşteri listesi ekranı'%ad)
+        rows+=satir(2,'Randevu ve takvim',v['gun']+' takvimde','Gün ve saat takvimde görünür; %s ve %s ayrı takip edilir.'%(staff,v['yer'].lower()),
+          ['Günlük ve haftalık takvim','Müşteriye hatırlatma mesajı','%s: %s'%('Yan durumlar',' · '.join(v['side'])) if v['side'] else 'Ertelenen işler takvimde güncellenir'],'/v9/img/panel-k-takvim.webp','%s için randevu takvimi')
+        rows=rows.replace('%s için randevu takvimi','%s randevu takvimi'%ad)
+        rows+=satir(3,'Evrak ve belge takibi',v['chk_t']+' her kayıtta','Her %s için gerekli evrak ve kontroller işaretlenir; eksik olan görünür kalır.'%nl,v['chk'][:6],'/v9/img/panel-d-siparis.webp','%s kayıt listesi ekranı'%ad,True)
+        rows+=satir(4,'Kasa ve muhasebe','Tahsilat, gider ve borç','Ödemeler ilgili kayda bağlanır; günün sonunda kasa kendiliğinden tutar.',
+          (['Hesap kalemleri: '+', '.join(v['hesap'])] if v['hesap'] else [])+['Gider kayıtları ve müşteri borcu','Gün, hafta ve ay raporları']+(['Kayıt, ödeme alındıktan sonra kapatılır'] if v['pay'] else []),'/v9/img/panel-k-kasa.webp','%s kasa ve tahsilat ekranı'%ad)
+        rows+=satir(5,'Personel ve prim',v['staff_p']+' ve ekip','Ekibinizi ekler, işleri kişiye atar, kimin ne yaptığını görürsünüz.',
+          ['Ekip üyesi ekleme ve yetki','%s bazında iş dağılımı'%v['staff'],'Prim ve hakediş takibi' if v['comm'] else 'Kişi bazlı iş ve performans görünümü'],'/v9/img/panel-d-ekip.webp','%s ekip ve personel ekranı'%ad,True)
+        rows+=satir(6,'Ürün ve e-ticaret','Ürün satışı ve sipariş','İsterseniz ürün de satarsınız: stok, sipariş ve kargo aynı panelde.',
+          ['%s takibi'%v['stok'],'Sipariş ve kargo durumları','Pazaryeri bağlantı kartları (Trendyol, Hepsiburada ve diğerleri)'],'/v9/img/panel-d-urun.webp','%s ürün ve stok ekranı'%ad)
+        rows+=satir(7,'Raporlar','Tek ekranda sonuçlar','Ne kadar iş yaptığınızı, ne kadar kazandığınızı ve neyin beklediğini raporlardan görürsünüz.',
+          ['Gelir ve gider özeti','Tamamlanan ve bekleyen işler','Ekip bazında özet'],'/v9/img/panel-d-rapor.webp','%s rapor ekranı'%ad,True)
+        pq=[('%s için %s nasıl takip edilir?'%(ad,v['is1'].lower()),'Her kayıt şu adımlardan geçer: %s. Hangi adımda olduğu listede görünür.'%', '.join(v['steps'])),
+            ('Evrak ve belge takibi var mı?','Evet. Her kayıtta "%s" listesi bulunur: %s.'%(v['chk_t'],'; '.join(v['chk'][:4]))),
+            ('Müşteriye bilgi mesajı gönderilebilir mi?','Evet, panelden randevu ve durum mesajı gönderilir. SMS için bağlantı kurulumu gerekir.'),
+            ('Çalışanlarımı ekleyebilir miyim?','Evet. Ekip bölümünden %s ekler, işleri onlara atarsınız.'%staff),
+            ('Ödeme ve borç takibi nasıl yapılır?','Kasa bölümünde her tahsilat ilgili kayda bağlanır; kalan tutar ve borç ayrı görünür.'),
+            ('Denemek ücretli mi?','Hayır, demo hesabı 7 gün ücretsiz kullanılır.')]
+        body=(B('p-'+k,'<a href="%s">%s</a>'%(sektor_url(k),E_(ad)),'%s %s'%(ad,pu),'%s için kayıt, evrak, randevu, kasa, ekip ve web sitesi tek panelde. 7 gün ücretsiz deneyin.'%ad)
+          +'<section class="sec"><div class="w">'+seridi(stats)+'</div></section>'
+          +bolum('sxfl','Bir %s böyle ilerler'%nl,adim(v['steps'],v['side']))
+          +'<section class="sec"><div class="w"><div class="sxcols"><div class="sxcard"><h3>Kayıtta tuttuğunuz bilgiler</h3><ul class="sxl">%s</ul></div><div class="sxcard"><h3>%s</h3><ul class="sxl">%s</ul></div><div class="sxcard"><h3>Kayda eklenen kalemler</h3><ul class="sxl">%s</ul></div></div></div></section>'%(li(v['fields']),E_(v['chk_t']),li(v['chk']),li(list(dict.fromkeys(v['items']+v['hesap']))))
+          +(bolum('','Sık görülen işler',('<div class="sxchips">%s</div>'%''.join('<span>%s</span>'%E_(x) for x in (v.get('sorunlar') or ish)))) if (v.get('sorunlar') or ish) else '')
+          +rows
+          +(bolum('','Hazır web sitesi teması','<div class="sxtema"><figure><img src="/v9/img/%s.webp" alt="%s web sitesi teması masaüstü görünümü" loading="lazy"></figure>%s</div><p><a class="btn bos2" href="/%s">%s web sitesi sayfası</a></p>'%(dsk[0],E_(ad),('<figure class="m"><img src="/v9/img/%s.webp" alt="%s web sitesi teması mobil görünümü" loading="lazy"></figure>'%(mob[0],E_(ad))) if mob else '',sl['web'],E_(ad))) if dsk else '')
+          +'<section class="sec"><div class="w"><div class="yz"><h2 style="margin-top:0">Sık sorulan sorular</h2>%s</div></div></section>'%sss_html(pq)+son)
+        page(sl['prog'],'%s %s | OnlineKaydet'%(ad,pu),'%s için %s: %s adımlı kayıt, evrak takibi, randevu, kasa, ekip ve web sitesi. 7 gün ücretsiz.'%(ad,pu.lower(),len(v['steps'])),body,ld_raw=faq(pq));out.append(sl['prog'])
+        # ---------- 2) MUHASEBE / KASA
+        r2=satir(1,'Kasa','Her tahsilat kayda bağlı','Ödeme alındığında ilgili %s açılır, tutar ve ödeme şekli girilir; kasa kendiliğinden güncellenir.'%nl,
+          ['Nakit, kart ve havale girişi','Kalan tutar ve borç görünür']+(['Kayıt, ödeme alındıktan sonra kapatılır'] if v['pay'] else []),'/v9/img/panel-k-kasa.webp','%s kasa ekranı'%ad)
+        r2+=satir(2,'Gelir ve gider','Giderleri de girin','Kira, malzeme, maaş gibi giderleri kaydedin; kâr ve zarar tek yerde görünsün.',
+          ['Gider kalemleri ve tarihleri','Gün, hafta ve ay özeti','Kasa girdi ekranı'],'/v9/img/bilgi/k_girdi.webp','%s gelir gider girişi'%ad,True)
+        r2+=satir(3,'Hesap kalemleri','%s hesabı nasıl oluşur'%ad,'Her kaydın tutarı şu kalemlerden oluşur: %s.'%(', '.join(v['hesap'] or v['items'])),
+          v['hesap'] or v['items'],'/v9/img/panel-d-siparis.webp','%s kayıt hesabı')
+        r2=r2.replace('%s kayıt hesabı','%s kayıt hesabı'%ad)
+        r2+=satir(4,'Personel ve prim','Ekip hakedişi',('%s için prim ve hakediş takibi yapılır.'%v['staff_p']) if v['comm'] else 'Kim hangi işi yaptı, ekip bazında görünür.',
+          ['Kişi bazlı iş listesi','Tamamlanan işler','Prim ve hakediş takibi' if v['comm'] else 'Görev dağılımı'],'/v9/img/panel-d-ekip.webp','%s personel ekranı'%ad,True)
+        r2+=satir(5,'Raporlar','Sonuç tek ekranda','Gelir, gider, borç ve bekleyen işleri raporlardan izlersiniz.',['Gelir gider özeti','Müşteri borçları','Dönemsel karşılaştırma'],'/v9/img/panel-d-rapor.webp','%s rapor ekranı'%ad)
+        mq=[('%s için gelir gider takibi nasıl yapılır?'%ad,'Kasa bölümünde her tahsilat, gider ve borç kaydedilir; gün, hafta ve ay bazlı raporlar panelde görünür.'),
+            ('Resmi muhasebe ve e-fatura yerine geçer mi?','Hayır. Panel günlük kasa ve borç takibi içindir; resmi muhasebe ve e-fatura işlemleri için mali müşavirinizle çalışmaya devam edersiniz.'),
+            ('Müşteri borcunu nasıl izlerim?','Her kaydın ödenen ve kalan tutarı görünür; borçlu müşteriler listelenir.'),
+            ('Personel primi hesaplanır mı?','Ekip bölümünde prim ve hakediş takibi yapılır.' if v['comm'] else 'Ekip bölümünde kimin hangi işi yaptığını görürsünüz.'),
+            ('Deneme var mı?','Demo hesabı 7 gün ücretsiz kullanılır.')]
+        body=(B('m-'+k,'<a href="%s">%s</a>'%(sektor_url(k),E_(ad)),'%s Muhasebe ve Kasa Programı'%ad,'%s için gelir, gider, borç, tahsilat ve ekip hakedişi tek ekranda.'%ad)
+          +'<section class="sec"><div class="w">'+seridi([(str(len(v['hesap'] or v['items'])),'hesap kalemi'),('3','ödeme şekli'),('1','kasa, tüm kayıtlar'),(str(len(v['steps'])),'adım, ödeme dahil')])+'</div></section>'
+          +bolum('sxfl','Ödeme %s içinde nerede?'%nl,adim(v['steps'],v['side']))+r2
+          +'<section class="sec"><div class="w"><div class="yz"><h2 style="margin-top:0">Sık sorulan sorular</h2>%s</div></div></section>'%sss_html(mq)+son)
+        page(sl['muh'],'%s Muhasebe ve Kasa Programı | OnlineKaydet'%ad,'%s için gelir gider, borç, tahsilat ve ekip hakedişi takibi. Kasa ve raporlar panelde. 7 gün ücretsiz.'%ad,body,ld_raw=faq(mq));out.append(sl['muh'])
+        # ---------- 3) WEB
+        r3=satir(1,'Hazır tema','%s için hazır tasarım'%ad,'Sektörünüze uygun tema seçilir; hizmetler, iletişim ve harita bölümleri hazır gelir.',['Masaüstü ve telefonda düzgün görünür','Hizmet, SSS ve iletişim bölümleri','Her bölüm düzenlenebilir'],'/v9/img/panel-d-site.webp','%s site düzenleme ekranı'%ad)
+        r3+=satir(2,'Panelden düzenleme','Yazı ve resimler sizin','Yazıyı, görseli ve iletişim bilgisini panelden değiştirirsiniz; yayın anında güncellenir.',['Metin ve font değişikliği','Resim yükleme ve değiştirme','Bölüm ekleme ve kaldırma'],'/v9/img/bilgi/w_site.webp','%s site yönetim ekranı'%ad,True)
+        r3+=satir(3,'Form ve talepler','Gelen talep panele düşer','Sitedeki formdan gelen müşteri bilgisi panele düşer; %s olarak kayda çevirir, takvime işlersiniz.'%nl,[ 'Form talepleri panelde listelenir','Müşteri kartına çevirme','Randevu ve takvime işleme'],'/v9/img/bilgi/m_liste.webp','%s müşteri talepleri'%ad)
+        r3+=satir(4,'Ürün satışı','İsterseniz online satış','Ürünlerinizi sitede satar, siparişleri panelden yönetirsiniz.',['Ürün ve stok yönetimi','Sipariş ve kargo takibi','Pazaryeri bağlantı kartları'],'/v9/img/panel-d-urun.webp','%s ürün ekranı'%ad,True)
+        wq=[('%s için web sitesi nasıl kurulur?'%ad,'Sektörünüze hazır temayı seçersiniz; yazı, resim ve iletişim bilgilerini panelden girersiniz. Alan adı ve kurulum desteği verilir.'),
+            ('Sitedeki yazı ve resimleri ben değiştirebilir miyim?','Evet, her bölümün yazısı ve görseli panelden değiştirilir.'),
+            ('Sitedeki formdan gelen talepler nereye düşer?','Panele düşer; müşteri kaydına çevirip takip edersiniz.'),
+            ('Online ürün satabilir miyim?','Evet, ürün, stok ve sipariş yönetimi panelde var.'),
+            ('Deneme var mı?','Demo hesabı 7 gün ücretsiz kullanılır.')]
         body=(B('w-'+k,'<a href="%s">%s</a>'%(sektor_url(k),E_(ad)),'%s Web Sitesi'%ad,'%s için hazır tema, panelden düzenleme ve form talepleri panele düşer.'%ad)
-         +'<section class="sec"><div class="w"><div class="yz"><h2 style="margin-top:0">%s için hazır web sitesi</h2><p>Sıfırdan tasarım beklemeden, %s işine uygun hazır temayla yayına çıkarsınız. Sitedeki formdan gelen talepler panelinize düşer; müşteri kaydına çevirip takip edersiniz.</p></div></div></section>'%(E_(ad),E_(ad.lower()))
-         +('<section class="sec"><div class="w"><h2>Sitenizde yer alacak bölümler</h2><div class="fg">%s</div></div></section>'%kart(oz) if oz else '')
-         +'<section class="sec"><div class="w"><div class="yz"><h2 style="margin-top:0">Sık sorulan sorular</h2>%s</div></div></section>'%sss_html(wq)
-         +'<section class="sec"><div class="w"><h2>%s için diğer sayfalar</h2><div class="slst">%s</div>%s</div></section>'%(E_(ad),diger,ana)+CTA+SON)
+          +(bolum('','%s teması önizleme'%ad,'<div class="sxtema"><figure><img src="/v9/img/%s.webp" alt="%s web sitesi teması masaüstü görünümü" loading="lazy"></figure>%s</div>'%(dsk[0],E_(ad),('<figure class="m"><img src="/v9/img/%s.webp" alt="%s web sitesi teması mobil görünümü" loading="lazy"></figure>'%(mob[0],E_(ad))) if mob else '')) if dsk else '')
+          +r3
+          +(bolum('','Sitenizde yer alacak bölümler','<div class="fg">%s</div>'%''.join('<div class="fk"><span class="no">%02d</span><h3>%s</h3><p>%s</p></div>'%(i+1,E_(x),E_(y)) for i,(x,y) in enumerate(oz))) if oz else '')
+          +'<section class="sec"><div class="w"><div class="yz"><h2 style="margin-top:0">Sık sorulan sorular</h2>%s</div></div></section>'%sss_html(wq)+son)
         page(sl['web'],'%s Web Sitesi | Hazır Tema | OnlineKaydet'%ad,'%s için hazır web sitesi teması. Yazı ve resimleri panelden değiştirin, form talepleri panele düşsün.'%ad,body,ld_raw=faq(wq));out.append(sl['web'])
     return out
