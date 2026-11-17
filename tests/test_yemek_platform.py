@@ -13,10 +13,13 @@ def t(n, c):
 CALLS = []
 async def fake(m, u, h, b):
     CALLS.append((m, u, h, b))
+    if "tgoapis" in u and m == "GET":
+        return 200, {"page": 0, "size": 50, "content": [{"id": "a" * 64, "orderNumber": "T-1001", "orderCode": "1E1", "packageStatus": "Created", "totalPrice": 245.5, "packageCreationDate": 9999999999000,
+                      "customer": {"id": 1, "firstName": "Ayşe", "lastName": "Y."}, "address": {"address1": "Çankaya Ankara", "city": "Ankara", "district": "Çankaya", "phone": "05320000000", "floor": "TGO Yemek"},
+                      "lines": [{"price": 100, "unitSellingPrice": 100, "productId": 11, "name": "Adana Kebap", "items": [{"packageItemId": "p1", "isCancelled": False}, {"packageItemId": "p2", "isCancelled": False}]},
+                                {"price": 45.5, "unitSellingPrice": 45.5, "productId": 12, "name": "Ayran", "items": [{"packageItemId": "p3", "isCancelled": False}]}]}]}
     if "tgoapis" in u:
-        return 200, {"content": [{"orderNumber": "T-1001", "status": "Created", "totalPrice": 245.5, "createdDate": 9999999999000,
-                                   "customer": {"name": "Ayşe Y.", "phone": "05320000000"}, "address": {"fullAddress": "Çankaya Ankara", "city": "Ankara"},
-                                   "lines": [{"name": "Adana Kebap", "quantity": 2, "price": 100}, {"name": "Ayran", "quantity": 1, "price": 45.5}]}]}
+        return 200, {}
     if "getir.example" in u:
         return 200, {"orders": [{"id": "G77", "status": "NEW", "totalAmount": 120, "items": [{"name": "Lahmacun", "quantity": 3, "price": 40}]}]}
     return 200, {"ok": True}
@@ -33,10 +36,18 @@ with TestClient(s.app) as c:
     r = c.post("/api/admin/market/trendyol_yemek/pull-orders", headers=H); t("trendyol yemek çekimi çalışır: %s" % r.text[:80], r.status_code == 200)
     r = c.post("/api/admin/market/trendyol_yemek/pull-orders", headers=H)
     o = [x for x in c.get("/api/shop/admin/orders", headers=H).json().get("rows", [])] if c.get("/api/shop/admin/orders", headers=H).status_code == 200 else []
-    t("istek Trendyol Yemek adresine gitti", any("tgoapis" in x[1] and "Basic" in x[2].get("Authorization", "") for x in CALLS))
+    g = [x for x in CALLS if "tgoapis" in x[1] and x[0] == "GET"][0]
+    t("istek Trendyol Yemek adresine gitti, zorunlu başlıklar var", "Basic" in g[2].get("Authorization", "") and g[2].get("x-agentname") and g[2].get("x-executor-user") and g[2]["User-Agent"].startswith("123 - ") and "/suppliers/123/packages" in g[1])
+    rr = c.get("/api/yp/orders?limit=100", headers=H).json(); rr = rr.get("rows") or rr.get("items") or rr
+    tt = [x for x in rr if x["no"] == "TYY-T-1001"][0]
+    t("trendyol yemek: kalem adedi items sayısından, müşteri, TGO maskesi boş", len(tt["items"]) == 2 and sorted(i["qty"] for i in tt["items"]) == [1, 2] and tt["customer"]["name"] == "Ayşe Y.")
     # 2) Getir Yemek: adres + anahtar
     c.put("/api/yp/integrations/getir_yemek", headers=H, json={"on": True, "keys": {"token": "tk", "orders_url": "https://getir.example/orders"}})
     r = c.post("/api/admin/market/getir_yemek/pull-orders", headers=H); t("getir yemek çekimi", r.status_code == 200)
+    for dm, tail, body in (("kabul", "/packages/picked", {"packageId": "a" * 64, "preparationTime": 20}), ("hazir", "/packages/invoiced", None), ("yolda", "/manual-shipped", None), ("teslim", "/manual-delivered", None), ("iptal", "/packages/unsupplied", {"packageId": "a" * 64, "itemIdList": ["p1", "p2", "p3"], "reasonId": 623})):
+        n0 = len(CALLS); r = c.post("/api/admin/yemek/trendyol_yemek/siparis/TYY-T-1001/durum", headers=H, json={"durum": dm})
+        w = [x for x in CALLS[n0:] if x[0] == "PUT"]
+        t("trendyol yemek %s -> doğru uç: %s" % (dm, r.text[:60]), r.status_code == 200 and len(w) == 1 and w[0][1].endswith(tail) and (body is None or w[0][3] == body) and w[0][2].get("x-agentname"))
     # 3) Yemeksepeti: bildirim (firma numarası adreste)
     c.put("/api/yp/integrations/yemeksepeti", headers=H, json={"on": True, "keys": {"webhook_key": "gizli123", "komisyon": "20"}})
     A = {"Authorization": "Bearer " + c.post("/api/auth/login", json={"email": "admin@servis.com", "password": "admin123"}).json()["token"]}

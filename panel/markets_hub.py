@@ -81,9 +81,10 @@ async def _pazarama_token(c: dict) -> str:
 async def headers(mk: str, c: dict) -> dict:
     if mk in ("trendyol", "hepsiburada", "n11"):
         return shop_sync._headers(mk, c)
-    if mk == "trendyol_yemek":
+    if mk == "trendyol_yemek":                                     # developers.tgoapps.com/docs/authorization
         return {"Authorization": "Basic " + base64.b64encode(f"{c['api_key']}:{c['api_secret']}".encode()).decode(),
-                "User-Agent": f"{c.get('seller_id')} - SelfIntegration", "Content-Type": "application/json"}
+                "User-Agent": f"{c.get('seller_id')} - SelfIntegration", "Content-Type": "application/json",
+                "x-agentname": "onlinekaydet", "x-executor-user": c.get("executor_user") or "entegrasyon@onlinekaydet.com"}
     if mk in ("getir_yemek", "migros_yemek"):
         return {"Authorization": c.get("token") or "", "x-api-key": c.get("token") or "", "Content-Type": "application/json"}
     if mk == "yemeksepeti":
@@ -93,6 +94,12 @@ async def headers(mk: str, c: dict) -> dict:
     if mk == "pazarama":
         return {"Authorization": "Bearer " + await _pazarama_token(c), "Content-Type": "application/json"}
     return {"Api-Key": c["api_key"], "Access-Token": c["access_token"], "Content-Type": "application/json"}
+
+
+def tgo_base(c: dict) -> str:
+    """Trendyol Go Yemek sipariş servisi (PROD; ayarda env=stage ise test ortamı)."""
+    host = "stageapi.tgoapis.com" if str(c.get("env") or "").lower() in ("stage", "test") else "api.tgoapis.com"
+    return f"https://{host}/integrator/order/meal"
 
 
 def order_request(mk: str, c: dict) -> tuple:
@@ -110,7 +117,7 @@ def order_request(mk: str, c: dict) -> tuple:
     elif mk == "pazarama":
         m, u, b = "POST", "https://isortagimapi.pazarama.com/order/getOrdersForApi", {"pageSize": 50, "pageNumber": 1, "startDate": since.strftime("%Y-%m-%dT%H:%M:%S"), "endDate": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")}
     elif mk == "trendyol_yemek":
-        m, u, b = "GET", f"https://api.tgoapis.com/integrator/order/meal/suppliers/{c.get('seller_id')}/packages?size=50", None
+        m, u, b = "GET", f"{tgo_base(c)}/suppliers/{c.get('seller_id')}/packages?size=50&packageModificationStartDate={int(since.timestamp() * 1000)}", None
     elif mk in ("getir_yemek", "migros_yemek", "yemeksepeti"):
         m, u, b = "GET", "", None                                   # adres ayardan gelir (orders_url); yemeksepeti siparişleri çoğunlukla webhook ile gelir
     else:
@@ -204,9 +211,36 @@ def _ys_flat(r: dict) -> dict:
     return r
 
 
+def _tgo_flat(r: dict) -> dict:
+    """Trendyol Go Yemek paketi -> ortak alanlar (ymk-siparis-paketlerini.cekme örnek yanıtı)."""
+    if not isinstance(r, dict) or "packageStatus" not in r:
+        return r
+    r = dict(r)
+    cu = r.get("customer") if isinstance(r.get("customer"), dict) else {}
+    ad = dict(r.get("address") or {})
+    for k in list(ad):
+        if ad[k] == "TGO Yemek":                                   # Model 2: adres Trendyol kuryesinde, restorana gösterilmez
+            ad[k] = ""
+    lines = []
+    for ln in r.get("lines") or []:
+        if not isinstance(ln, dict):
+            continue
+        qty = len([i for i in (ln.get("items") or []) if not (isinstance(i, dict) and i.get("isCancelled"))]) or 0
+        if qty == 0:
+            continue                                               # tüm adetleri iptal
+        lines.append({"sku": str(ln.get("productId") or ""), "name": ln.get("name"), "quantity": qty, "price": ln.get("unitSellingPrice") or ln.get("price") or 0})
+    r["lines"] = lines
+    r["customer"] = {"name": (str(cu.get("firstName") or "") + " " + str(cu.get("lastName") or "")).strip(), "phone": ad.get("phone") or "",
+                     "email": cu.get("email") or "", "address": {"fullAddress": ad.get("address1") or "", "city": ad.get("city") or "", "district": ad.get("district") or ""}}
+    r["status"] = r.get("packageStatus")
+    return r
+
+
 def normalize(mk: str, r: dict) -> dict:
     if mk == "yemeksepeti":
         r = _ys_flat(r)
+    elif mk == "trendyol_yemek":
+        r = _tgo_flat(r)
     key = str(_first(r, "orderNumber", "orderId", "id", "packageNumber", "number", "orderCode", "orderNo") or "")
     raw_lines = _first(r, "lines", "items", "orderItems", "lineItems", "orderLines", "products", "orderDetails") or []
     lines = []
@@ -415,6 +449,37 @@ YEMEK_DURUM = {"kabul": ("onaylandi", "accepted"), "hazirlaniyor": ("hazirlaniyo
                "yolda": ("kargoda", "dispatched"), "teslim": ("teslim_edildi", "delivered"), "iptal": ("iptal", "cancelled")}
 
 
+async def _tgo_status(db, c: dict, ext: str, d: str, payload: dict):
+    """Trendyol Go Yemek durum uçları (developers.tgoapps.com): kabul=picked, hazır=invoiced, yolda=manual-shipped, teslim=manual-delivered, iptal=unsupplied."""
+    if d == "hazirlaniyor":
+        return {"ok": True, "skipped": "Trendyol'da ayrı bir 'hazırlanıyor' durumu yok"}
+    doc = await db.sp_market_orders.find_one({"market": "trendyol_yemek", "key": ext}, {"_id": 0, "raw": 1}) or {}
+    raw = doc.get("raw") or {}
+    pid = raw.get("id")
+    if not pid:
+        return {"ok": False, "message": "Paket kimliği bulunamadı (sipariş Trendyol'dan çekilmemiş)"}
+    base = f"{tgo_base(c)}/suppliers/{c.get('seller_id')}/packages"
+    h = await headers("trendyol_yemek", c)
+    now = int(datetime.now(timezone.utc).timestamp() * 1000)
+    if d == "kabul":
+        mins = int(_f(payload.get("sure") or c.get("prep_minutes"), 20)) or 20
+        req = ("PUT", base + "/picked", {"packageId": pid, "preparationTime": mins})
+    elif d == "hazir":
+        req = ("PUT", base + "/invoiced", {"packageId": pid, "actualDate": now - 1000})
+    elif d == "yolda":
+        req = ("PUT", f"{base}/{pid}/manual-shipped", {"actualDate": now - 1000})
+    elif d == "teslim":
+        req = ("PUT", f"{base}/{pid}/manual-delivered", {"actualDate": now - 1000})
+    else:                                                          # iptal: tüm kalemler, 623 = "Mağaza siparişi hazırlayamıyor"
+        ids = [str(i.get("packageItemId")) for ln in raw.get("lines") or [] for i in (ln.get("items") or []) if isinstance(i, dict) and not i.get("isCancelled")]
+        req = ("PUT", base + "/unsupplied", {"packageId": pid, "itemIdList": ids, "reasonId": int(_f(payload.get("neden"), 623)) or 623})
+    try:
+        code, data = await shop_sync.http(req[0], req[1], h, req[2])
+        return {"ok": code < 300, "status": code, "message": "" if code < 300 else str(data)[:160]}
+    except Exception as e:                                         # noqa: BLE001
+        return {"ok": False, "message": str(e)[:160]}
+
+
 def register(api_router, db, deps):
     adm = Depends(deps["require_admin"])
 
@@ -458,7 +523,9 @@ def register(api_router, db, deps):
                                       "$push": {"timeline": {"at": _now(), "by": "panel", "state": yst, "note": "durum: " + d}}})
         c = await shop_sync.market_cfg(db, mk)
         url, sent = c.get("status_url") or "", None
-        if url:
+        if mk == "trendyol_yemek" and not url:
+            sent = await _tgo_status(db, c, ext, d, payload)
+        elif url:
             try:
                 code, data = await shop_sync.http("POST", url.replace("{id}", ext), await headers(mk, c), {"orderId": ext, "status": remote})
                 sent = {"ok": code < 300, "status": code}
