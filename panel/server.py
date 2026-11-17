@@ -2946,6 +2946,8 @@ siparis.register(api_router, db, {"require_admin": require_admin})
 import entegrasyon
 import entg_probe
 entegrasyon.register(api_router, db, {"require_admin": require_admin, "probe": entg_probe.probe})
+import etiket
+etiket.register(api_router, db, {"require_admin": require_admin})
 
 import bildirim
 bildirim.register(api_router, db, {"require_admin": require_admin, "send_sms": None})

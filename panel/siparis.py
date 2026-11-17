@@ -149,7 +149,7 @@ def _esc(v):
     return (str(v or "").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;"))
 
 
-def fis_html(orders, kind, firm=""):
+def fis_html(orders, kind, firm="", cfg=None, info=None):
     """Toplu kargo fişi / sipariş fişi: tek sayfada art arda, her sipariş ayrı kâğıt.
 
     Barkod kâğıttan okunacak diye SVG basılır. Kargo fişinde sevk barkodu
@@ -216,10 +216,20 @@ def fis_html(orders, kind, firm=""):
                        % (_n(o.get("subtotal")), kamp,
                           "Bedava" if o.get("free_ship") else _n(o.get("ship_fee")) + " ₺", _n(o.get("total"))))
                     + ("<div class='nt'>Not: %s</div>" % _esc(o.get("note")) if o.get("note") else ""))
+        if cfg:
+            import etiket as _et
+            if not cfg.get("imza"):
+                body = body.replace("<div class='sg'><span>Teslim eden</span><span>Teslim alan</span></div>", "")
+            body += ("<div class='fa'>%s</div>" % _esc(cfg["alt"])) if cfg.get("alt") else ""
+            head = _et.fis_baslik(info or {"ad": firm}, cfg, "") + head
         out.append("<div class='f'>%s%s</div>" % (head, body))
+    css = _fis_css()
+    if cfg:
+        import etiket as _et
+        css += _et.fis_css(cfg)
     return ("<!doctype html><html lang='tr'><head><meta charset='utf-8'><title>%s</title><style>%s</style></head>"
             "<body>%s<script>window.onload=function(){setTimeout(function(){window.print()},250)}</script>"
-            "</body></html>" % ("Kargo fişi" if kind == "kargo" else "Sipariş fişi", _fis_css(), "".join(out)))
+            "</body></html>" % ("Kargo fişi" if kind == "kargo" else "Sipariş fişi", css, "".join(out)))
 
 
 def register(api_router, db, deps):
@@ -484,16 +494,20 @@ def register(api_router, db, deps):
     async def order_print(payload: dict, _=Depends(require_admin)):
         """Toplu kargo fişi veya sipariş fişi: yazdırmaya hazır tek sayfa."""
         ids = [_t(i, 24) for i in (payload.get("ids") or [])][:200]
-        kind = "kargo" if _t(payload.get("kind"), 10) != "siparis" else "siparis"
+        kind = _t(payload.get("kind"), 10)
+        kind = kind if kind in ("siparis", "etiket") else "kargo"
         if not ids:
             raise HTTPException(422, "Fişi yazdırılacak siparişleri seçin")
         rows = [view(o) for o in await db.yp_orders.find({"id": {"$in": ids}}, {"_id": 0}).to_list(200)]
         if not rows:
             raise HTTPException(404, "Sipariş bulunamadı")
         rows.sort(key=lambda o: ids.index(o["id"]) if o["id"] in ids else 0)
-        g = await db.app_settings.find_one({"_id": "global"}, {"_id": 0}) or {}
+        import etiket
+        info = await etiket.firma_bilgisi(db)
+        if kind == "etiket":
+            return {"ok": True, "n": len(rows), "kind": kind, "html": etiket.etiket_html(rows, await etiket.ayar_oku(db, "etiket"), info)}
         return {"ok": True, "n": len(rows), "kind": kind,
-                "html": fis_html(rows, kind, g.get("company_name") or "")}
+                "html": fis_html(rows, kind, info["ad"], await etiket.ayar_oku(db, "fis"), info)}
 
     @api_router.post("/yp/orders/export")
     async def order_export(payload: dict, _=Depends(require_admin)):

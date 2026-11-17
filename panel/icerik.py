@@ -360,34 +360,14 @@ def register(api_router, db, deps):
     @api_router.post("/yp/qr/yazdir")
     async def qr_yazdir(payload: dict, _: dict = Depends(adm)):
         """Masa kartları: A4'e dört kart, kesilip masaya konur."""
-        import qr as QR
+        import etiket
         d = await qr_liste()
         secili = [int(x) for x in (payload.get("tables") or []) if str(x).isdigit()] or \
                  [x["no"] for x in d["items"]]
-        g = await db.app_settings.find_one({"_id": "global"}, {"_id": 0}) or {}
-        firma = g.get("company_name") or ""
-        kart = []
-        for it in d["items"]:
-            if it["no"] not in secili:
-                continue
-            kart.append("<div class='k'><div class='b'>%s</div><div class='n'>%s</div>%s"
-                        "<div class='m'>Masa %d</div><div class='u'>%s</div></div>"
-                        % (_t(d["title"], 60), _t(d["note"], 160),
-                           QR.svg(it["url"], px=5), it["no"],
-                           it["url"].replace("https://", "")))
-        css = ("@page{size:A4;margin:10mm}*{box-sizing:border-box}"
-               "body{font:13px/1.45 -apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#101828;margin:0;"
-               "display:grid;grid-template-columns:1fr 1fr;gap:8mm}"
-               ".k{border:1px dashed #98a2b3;border-radius:10px;padding:8mm 6mm;text-align:center;"
-               "page-break-inside:avoid}"
-               ".k .b{font-size:17px;font-weight:700}.k .n{color:#667085;font-size:12px;margin:3px 0 8px}"
-               ".k svg{display:block;margin:0 auto}"
-               ".k .m{font-weight:700;margin-top:7px}.k .u{color:#667085;font-size:11px;margin-top:2px}")
+        kart = [it for it in d["items"] if it["no"] in secili]
+        info = await etiket.firma_bilgisi(db)
         return {"ok": True, "n": len(kart),
-                "html": ("<!doctype html><html lang='tr'><head><meta charset='utf-8'>"
-                         "<title>Masa karekodları — %s</title><style>%s</style></head><body>%s"
-                         "<script>window.onload=function(){setTimeout(function(){window.print()},300)}</script>"
-                         "</body></html>" % (firma, css, "".join(kart)))}
+                "html": etiket.qr_html(kart, await etiket.ayar_oku(db, "qr"), info)}
 
     @api_router.get("/yp/content/{tid}/bekleyen")
     async def bekleyen(tid: str, _: dict = Depends(adm)):

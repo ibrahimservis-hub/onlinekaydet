@@ -60,6 +60,11 @@ ROLE_DESC = {
 }
 
 
+def _SALT_POST(path: str) -> bool:
+    """Veri değiştirmeyen POST uçları (etiket önizlemesi): salt-okuma rolü de kullanabilir."""
+    return path.rstrip("/").endswith(("/onizleme", "/stiller")) and "/yp/etiket/" in path
+
+
 def area_of(path: str, method: str) -> str:
     p = path[5:] if path.startswith("/api/") else path.lstrip("/")
     first = p.split("/")[0]
@@ -367,7 +372,7 @@ def make_middleware(db, get_current_user):
                 pass
             elif rol == "site_editor" and path.startswith(SITE_ED_OK):
                 pass
-            elif (method == "DELETE" and rol != "manager") or (rol == "viewer" and method not in ("GET", "HEAD")) or (rol != "viewer" and not allowed(rol, path, method)):
+            elif (method == "DELETE" and rol != "manager") or (rol == "viewer" and method not in ("GET", "HEAD") and not _SALT_POST(path)) or (rol != "viewer" and not allowed(rol, path, method)):
                 if not (path.endswith("/auth/logout")) and rol is not None:
                     return JSONResponse(status_code=403, content={"detail": "Bu işlem için yetkiniz yok (rol: " + SUB_ROL_AD.get(rol, rol) + ")"})
             user = dict(user, admin_role="owner")
