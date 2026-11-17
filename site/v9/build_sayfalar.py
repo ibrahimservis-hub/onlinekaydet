@@ -76,10 +76,11 @@ def hdr(cur):
     nav=''.join(a(t,u) for t,u in NAV)
     dr=''.join('<a class="m" style="--i:%d" href="%s"%s>%s</a>'%(i,u,' aria-current="page"' if u==cur else '',t) for i,(t,u) in enumerate(NAV+[('Özellikler','/ozellikler.html'),('İletişim','/iletisim.html')]))
     return ('<header class="ust"><div class="w"><a class="logo" href="/"><img src="/logo-acik-s.png" alt="OnlineKaydet" width="160" height="32"></a>'
-     '<nav class="nav" aria-label="Ana menü">%s</nav><a class="gir" href="/uye-girisi">Üye girişi</a>'
+     '<nav class="nav" aria-label="Ana menü">%s</nav><button class="arab" type="button" data-ara aria-label="Sitede ara"><svg viewBox=\"0 0 24 24\" width=\"20\" height=\"20\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" aria-hidden=\"true\"><circle cx=\"11\" cy=\"11\" r=\"6.5\"/><path d=\"M16 16l4.5 4.5\"/></svg></button><a class="gir" href="/uye-girisi">Üye girişi</a>'
      '<a class="btn bos kc" href="#teklif">Teklif alın</a><a class="btn fil kc" href="/demo.html">Ücretsiz deneyin</a>'
-     '<button class="mnu" type="button" aria-label="Menüyü aç" aria-expanded="false" aria-controls="cekmece"><i></i><i></i></button></div>'
+     '<button class="mnu" type="button" aria-label="Menüyü aç" aria-expanded="false" aria-controls="cekmece"><i></i><i></i><i></i></button></div>'
      '<div class="cek" id="cekmece">%s<div class="bt2"><a class="btn fil" href="/demo.html">Ücretsiz deneyin</a><a class="btn bos" href="#teklif">Teklif alın</a><a class="btn bos" href="tel:+905444444004">Hemen arayın</a><a class="btn bos" href="/uye-girisi">Üye girişi</a></div></div></header>')%(nav,dr)
+ARAMA_OV=('<div class="arap" id="arap" hidden role="dialog" aria-modal="true" aria-label="Sitede ara"><div class="arak"><form action="/ara.html" role="search" class="araf"><input type="search" name="q" id="arag" placeholder="Ne arıyorsunuz? Örn. ürün ekleme, randevu, Trendyol" autocomplete="off" aria-label="Ara"><button class="btn dolu kc" type="submit">Ara</button><button class="arak2" type="button" data-arakapat aria-label="Kapat">×</button></form><div class="arasik" id="arasik"></div><div class="arasn" id="arasn" aria-live="polite"></div></div></div>')
 def img(n,w,h,alt,eager=False):
     return '<img src="/v9/img/%s.webp" width="%d" height="%d" alt="%s"%s>'%(n,w,h,html.escape(alt),'' if eager else ' loading="lazy"')
 def banner(slug,ad,h1,lead,gorsel=None,chip=None):
@@ -112,7 +113,7 @@ def page(slug,title,desc,body,ld=None,home=False,robots=None,extra_head='',extra
     cur='/' if home else '/'+slug
     body=body.replace('href="iletisim.html#form"','href="/iletisim.html#teklif"').replace('href="/iletisim.html#form"','href="/iletisim.html#teklif"')
     NOFORM='id="teklif"' not in body
-    full=h+extra_head+lj+'\n</head><body>\n<a class="skip" href="#icerik">İçeriğe geç</a>'+hdr(cur)+'\n<main>'+body+'</main>\n'+foot+'\n'+mbar+'<script src="/v9/v9.js" defer></script><script src="/v9/v10.js" defer></script>'+('<script src="/v9/dunya.js" defer></script>' if home else '')+'<script src="/lead.js" defer></script>'+extra_js+'</body></html>'
+    full=h+extra_head+lj+'\n</head><body>\n<a class="skip" href="#icerik">İçeriğe geç</a>'+hdr(cur)+'\n<main>'+body+'</main>\n'+foot+'\n'+ARAMA_OV+mbar+'<script src="/v9/arama.js" defer></script><script src="/v9/v9.js" defer></script><script src="/v9/v10.js" defer></script>'+('<script src="/v9/dunya.js" defer></script>' if home else '')+'<script src="/lead.js" defer></script>'+extra_js+'</body></html>'
     full=_re.sub(r'<a (class="btn[^"]*") href="#">([^<]*)</a>',lambda m:'<a %s href="%s">%s</a>'%(m.group(1),'/demo.html' if 'deneyin' in m.group(2).lower() or 'tema' in m.group(2).lower() else ('#teklif' if 'teklif' in m.group(2).lower() else '/iletisim.html'),m.group(2)),full)
     tk=TKB.get(slug)
     if not tk and slug.startswith('sektor-') and slug in SEKT_AD: tk=('%s için teklif alın'%SEKT_AD[slug],'Sektörünüze uygun temayı ve paneli birlikte hazırlayalım.')
@@ -270,9 +271,10 @@ yasal('mesafeli-satis-iade.html','Mesafeli Satış ve İade Koşulları','Online
 # ---- bilgi bankası
 import bilgi_icerik as _bi
 BK=_bi.A
-kart_b=''.join('<a href="/bilgi-%s.html"><span>%s</span><h3>%s</h3><p>%s</p></a>'%(a['slug'],a['kat'],html.escape(a['ad']),html.escape(a['ozet'])) for a in BK)
+KAPAK={'urun-ekleme':'bilgi/u_liste','pazaryerine-gonderme':'bilgi/pz_sayfa','siparis-ve-kargo':'panel-d-siparis','randevu-ve-takvim':'panel-k-takvim','musteri-yonetimi':'bilgi/m_liste','kasa-ve-muhasebe':'panel-k-kasa','personel-ve-prim':'panel-d-ekip','web-sitesi-duzenleme':'bilgi/w_site'}
+kart_b=''.join('<a href="/bilgi-%s.html">%s<span>%s</span><h3>%s</h3><p>%s</p></a>'%(a['slug'],('<div class="bkim"><img src="/v9/img/%s.webp" alt="" loading="lazy"></div>'%KAPAK[a['slug']]) if a['slug'] in KAPAK else '',a['kat'],html.escape(a['ad']),html.escape(a['ozet'])) for a in BK)
 page('bilgi-bankasi.html','Bilgi Bankası: Ürün Ekleme, Pazaryeri, Randevu, Kasa, İlan | OnlineKaydet','Panelin adım adım kullanım rehberi: ürün ekleme, pazaryerine gönderme, sipariş, randevu, müşteri, kasa, ekip, ilan ve web sitesi düzenleme.',
- B('b','Bilgi bankası','Paneli adım adım öğrenin','Her işlem için kısa, adım adım rehber. İstediğiniz konuyu seçin.')+'<section class="sec"><div class="w"><div class="bk">'+kart_b+'</div></div></section>'+CTA+SON)
+ B('b','Bilgi bankası','Paneli adım adım öğrenin','Her işlem için kısa, adım adım rehber. İstediğiniz konuyu seçin.')+'<section class="sec"><div class="w"><form action="/ara.html" role="search" class="araf araf2"><input type="search" name="q" placeholder="Rehberlerde ara: ürün ekleme, Trendyol, randevu…" aria-label="Bilgi bankasında ara"><button class="btn dolu" type="submit">Ara</button></form><div class="bk">'+kart_b+'</div></div></section>'+CTA+SON)
 for i,a in enumerate(BK):
     diger=''.join('<a href="/bilgi-%s.html">%s</a>'%(x['slug'],html.escape(x['ad'])) for x in BK if x is not a)
     ld='<script type="application/ld+json">'+__import__('json').dumps({'@context':'https://schema.org','@type':'HowTo','name':a['ad'],'description':a['ozet'],'inLanguage':'tr'},ensure_ascii=False)+'</script>'
@@ -299,3 +301,33 @@ for f in sorted(glob.glob(H+'/kaynak/eski/*.html')):
     # <main> etiketi kabukta zaten var; içerik id'si çakışmasın
     body=body.replace('id="icerik"','',1) if False else body
     page(nm,html.unescape(t),html.unescape(dsc),body,robots=rb,extra_head=css,ld_raw=lds or None,extra_js='<script src="/site.js" defer></script>' if 'src="site.js"' in o else '')
+
+# ---- site içi arama
+SIK=['Ürün ekleme','Pazaryerine gönderme','Randevu','Kasa','Sipariş','İlan ekleme','Fiyatlar','Demo','Temalar','Entegrasyonlar','KVKK']
+page('ara.html','Sitede Ara | OnlineKaydet','OnlineKaydet sitesinde ve bilgi bankasında arama.',
+ '<section class="sec" id="icerik"><div class="w"><p class="et">Arama</p><h1 style="font-size:clamp(30px,5vw,54px);margin:6px 0 18px">Sitede ara</h1>'
+ '<form action="/ara.html" role="search" class="araf araf2"><input type="search" name="q" id="arasy" placeholder="Ne arıyorsunuz? Örn. ürün ekleme, randevu, Trendyol" autocomplete="off" aria-label="Ara"><button class="btn dolu" type="submit">Ara</button></form>'
+ '<div class="arasik" id="arasik2">'+''.join('<a href="/ara.html?q=%s">%s</a>'%(html.escape(x),x) for x in SIK)+'</div><div id="arasonuc" class="arasonuc" aria-live="polite"></div></div></section>',robots='noindex,follow')
+import json as _j
+DISLA={'a-onizleme.html','ana-sayfa-astryx.html','yeni-ana-sayfa.html','temalar-live.html','404.html','ara.html'}
+def metin(h):
+    m=_re.search(r'<main[^>]*>(.*)</main>',h,_re.S);t=m.group(1) if m else h
+    t=_re.sub(r'<(script|style|svg)[^>]*>.*?</\1>','',t,flags=_re.S)
+    t=_re.sub(r'<section class="son".*?</section>','',t,flags=_re.S)
+    t=_re.sub(r'<section class="sec"><div class="w"><div class="yz"><h2 style="margin-top:0">Hemen deneyin</h2>.*?</section>','',t,flags=_re.S)
+    hs=[_re.sub(r'<[^>]+>','',x).strip() for x in _re.findall(r'<h[1-3][^>]*>(.*?)</h[1-3]>',t,_re.S)]
+    t=_re.sub(r'<[^>]+>',' ',t);t=html.unescape(_re.sub(r'\s+',' ',t)).strip()
+    return hs,t
+KW={'bilgi-urun-ekleme.html':'ürün yükle ürün kaydet stok barkod sku kategori excel toplu yükleme','bilgi-pazaryerine-gonderme.html':'trendyol hepsiburada n11 çiçeksepeti amazon pttavm pazarama idefix modanisa temu pazaryeri entegrasyon','bilgi-randevu-ve-takvim.html':'randevu al takvim hatırlatma sms uzman hizmet','bilgi-kasa-ve-muhasebe.html':'kasa gelir gider muhasebe ödeme tahsilat rapor','bilgi-ilan-ekleme.html':'ilan emlak satılık kiralık araç kiralama tur transfer','bilgi-personel-ve-prim.html':'personel çalışan maaş prim avans','bilgi-web-sitesi-duzenleme.html':'web sitesi düzenle tema yazı resim menü alan adı ssl'}
+idx=[]
+for f in sorted(glob.glob(S+'/*.html')):
+    n=os.path.basename(f)
+    if n in DISLA: continue
+    h=open(f,encoding='utf-8').read()
+    if 'noindex' in (_re.search(r'<meta name="robots" content="([^"]*)"',h) or [0,''])[1]: continue
+    t=html.unescape((_re.search(r'<title>(.*?)</title>',h,_re.S) or [0,n])[1]).replace(' | OnlineKaydet','')
+    d=html.unescape((_re.search(r'<meta name="description" content="([^"]*)"',h) or [0,''])[1])
+    hs,tx=metin(h)
+    idx.append({'u':'/' if n=='index.html' else '/'+n,'t':t,'d':d,'h':hs[:14],'x':tx[:2600],'k':KW.get(n,'')})
+open(H+'/arama.json','w',encoding='utf-8').write(_j.dumps(idx,ensure_ascii=False,separators=(',',':')))
+print('arama dizini',len(idx),'sayfa',os.path.getsize(H+'/arama.json')//1024,'KB')
