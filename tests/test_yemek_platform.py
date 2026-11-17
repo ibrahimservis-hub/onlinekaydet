@@ -45,6 +45,17 @@ with TestClient(s.app) as c:
     body = {"orderId": "Y1", "status": "NEW", "totalAmount": 300, "customer": {"name": "Can K.", "phone": "05331112233"}, "items": [{"name": "Döner", "quantity": 2, "price": 150}]}
     r = c.post("/api/public/%s~yemek/yemeksepeti?k=gizli123" % fid, json=body); t("yemeksepeti bildirimi kabul: %s" % r.text[:80], r.status_code == 200 and r.json()["ok"])
     c.post("/api/public/%s~yemek/yemeksepeti?k=gizli123" % fid, json=body)
+    # 3b) Yemeksepeti gerçek yük biçimi (developer.yemeksepeti.com örneği)
+    ysb = {"order_id": "7b0c6c1e-0000-4000-8000-000000000001", "order_code": "AB12", "status": "READY_FOR_PICKUP", "client": {"store_id": "S1"},
+           "customer": {"first_name": "Deniz", "last_name": "Kaya", "phone_number": "05340000000", "delivery_address": {"formattedAddress": "Kızılay Ankara", "city": "Ankara"}},
+           "items": [{"sku": "DONER1", "barcode": ["8690000000111"], "name": "Döner", "status": "IN_CART", "pricing": {"unit_price": 90, "quantity": 2, "total_price": 180}},
+                     {"sku": "X", "name": "Yok", "status": "NOT_FOUND", "pricing": {"unit_price": 10, "quantity": 1}}],
+           "payment": {"order_total": 180, "delivery_fee": 0}, "sys": {"created_at": "2999-01-01T10:00:00Z"}}
+    r = c.post("/api/public/%s~yemek/yemeksepeti" % fid, headers={"Authorization": "Basic gizli123"}, json=ysb); t("yemeksepeti gerçek yük + Basic başlığı: %s" % r.text[:60], r.status_code == 200)
+    ysb["status"] = "CANCELLED"; c.post("/api/public/%s~yemek/yemeksepeti?k=gizli123" % fid, json=ysb)
+    rows = (lambda L: L.get("rows") or L.get("items") or L)(c.get("/api/yp/orders?limit=100", headers=H).json())
+    z = [x for x in rows if x["no"].startswith("YS-7b0c6c1e")]
+    t("gerçek yük: tek kayıt, tutar 180, müşteri, bulunamayan kalem hariç, iptal", len(z) == 1 and z[0]["total"] == 180 and z[0]["customer"]["name"] == "Deniz Kaya" and len(z[0]["items"]) == 1 and z[0]["status"] == "iptal")
     # 4) müşteri panelindeki Siparişler listesi
     L = c.get("/api/yp/orders?limit=100", headers=H).json(); rows = L.get("rows") or L.get("items") or L
     ch = [x["channel"] for x in rows]

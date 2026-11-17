@@ -18,6 +18,7 @@ from datetime import datetime, timedelta, timezone
 from fastapi import Depends, HTTPException, Request
 from pymongo.errors import DuplicateKeyError
 
+import hmac
 import shop_sync
 import shop_channels as ch
 
@@ -174,7 +175,38 @@ def rows_of(data):
     return []
 
 
+def _ys_flat(r: dict) -> dict:
+    """Yemeksepeti (Delivery Hero) bildirim yükü -> ortak alanlar. Alanlar developer.yemeksepeti.com örnek yükünden."""
+    if not isinstance(r, dict) or not (r.get("order_id") or isinstance(r.get("payment"), dict) and "order_total" in r["payment"]):
+        return r
+    r = dict(r)
+    pay = r.get("payment") if isinstance(r.get("payment"), dict) else {}
+    cu = r.get("customer") if isinstance(r.get("customer"), dict) else {}
+    ad = cu.get("delivery_address") if isinstance(cu.get("delivery_address"), dict) else {}
+    r.setdefault("orderId", r.get("order_id"))
+    if pay.get("order_total") is not None:
+        r.setdefault("totalPrice", pay.get("order_total"))
+    items = []
+    for it in r.get("items") or []:
+        if not isinstance(it, dict):
+            continue
+        pr = it.get("pricing") if isinstance(it.get("pricing"), dict) else {}
+        bc = it.get("barcode")
+        bc = bc[0] if isinstance(bc, list) and bc else bc
+        if str(it.get("status") or "").upper() == "NOT_FOUND":
+            continue                                               # bulunamayan kalem satışa sayılmaz
+        items.append({"sku": it.get("sku") or bc, "barcode": bc or it.get("sku"), "name": it.get("name"),
+                      "quantity": pr.get("quantity") or 1, "price": pr.get("unit_price") or 0})
+    r["items"] = items
+    r["customer"] = {"name": (str(cu.get("first_name") or "") + " " + str(cu.get("last_name") or "")).strip(), "phone": cu.get("phone_number") or "",
+                     "address": {"fullAddress": ad.get("formattedAddress") or ad.get("street") or "", "city": ad.get("city") or "", "district": ad.get("district") or ""}}
+    r["createdAt"] = (r.get("sys") or {}).get("created_at") if isinstance(r.get("sys"), dict) else None
+    return r
+
+
 def normalize(mk: str, r: dict) -> dict:
+    if mk == "yemeksepeti":
+        r = _ys_flat(r)
     key = str(_first(r, "orderNumber", "orderId", "id", "packageNumber", "number", "orderCode", "orderNo") or "")
     raw_lines = _first(r, "lines", "items", "orderItems", "lineItems", "orderLines", "products", "orderDetails") or []
     lines = []
@@ -393,14 +425,15 @@ def register(api_router, db, deps):
             raise HTTPException(status_code=404, detail="Bilinmeyen platform")
         c = await shop_sync.market_cfg(db, mk)
         key = c.get("webhook_key") or ""
-        got = request.query_params.get("k") or request.headers.get("x-webhook-key") or request.headers.get("authorization", "").replace("Bearer ", "").replace("Basic ", "")
-        if not key or got != key:
+        hdr = request.headers.get("authorization", "")
+        cands = {request.query_params.get("k") or "", request.headers.get("x-webhook-key") or "", hdr, hdr.replace("Bearer ", "").replace("Basic ", "")} - {""}
+        if not key or not any(hmac.compare_digest(x.encode(), key.encode()) for x in cands):
             raise HTTPException(status_code=401, detail="Anahtar hatalı")
         try:
             body = await request.json()
         except Exception:                                          # noqa: BLE001
             raise HTTPException(status_code=422, detail="Geçersiz sipariş verisi")
-        rows = rows_of(body) if not (isinstance(body, dict) and (body.get("orderId") or body.get("id") or body.get("code"))) else [body]
+        rows = rows_of(body) if not (isinstance(body, dict) and (body.get("orderId") or body.get("order_id") or body.get("id") or body.get("code"))) else [body]
         res = await ingest(db, mk, rows, datetime(2000, 1, 1, tzinfo=timezone.utc))
         await _set_state(db, mk, last=_now(), error="", imported=int(((await _state(db)).get(mk) or {}).get("imported") or 0))
         return {"ok": True, **res}
