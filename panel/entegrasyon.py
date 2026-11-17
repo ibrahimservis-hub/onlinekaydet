@@ -427,6 +427,8 @@ def register(api_router, db, deps):
             raise HTTPException(422, "Çalışma modu test veya canlı olmalı")
         ok, err = check(p["id"], keys, mode)
         on = bool(payload.get("on", old.get("on", False)))
+        if ok and not old.get("ok"):
+            on = True                                              # ilk başarılı bağlantı: kendiliğinden etkin (sonradan bilerek kapatılırsa kapalı kalır)
         row = {"id": p["id"], "group": p["group"], "keys": keys, "mode": mode, "on": on,
                "ok": ok, "err": "" if ok else err, "at": _now(),
                "last_ok": _now() if ok else (old.get("last_ok") or "")}

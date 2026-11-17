@@ -31,6 +31,9 @@ with TestClient(s.app) as c:
     ids = str(L.json())
     for k in ("yemeksepeti", "trendyol_yemek", "getir_yemek", "migros_yemek"):
         t("restoranda %s var" % k, k in ids)
+    # 0) ilk başarılı bağlantı kendiliğinden etkin olur; sonra bilerek kapatılırsa kapalı kalır
+    r = c.put("/api/yp/integrations/trendyol_yemek", headers=H, json={"keys": {"seller_id": "123", "api_key": "k", "api_secret": "s"}, "on": False}); t("ilk bağlantı: on=False gönderilse de etkin", r.json()["item"]["on"] is True)
+    r = c.put("/api/yp/integrations/trendyol_yemek", headers=H, json={"on": False}); t("bilerek kapatılırsa kapalı kalır", r.json()["item"]["on"] is False)
     # 1) Trendyol Yemek: müşteri panelinden anahtar girilir -> sipariş çekilir
     r = c.put("/api/yp/integrations/trendyol_yemek", headers=H, json={"on": True, "keys": {"seller_id": "123", "api_key": "k", "api_secret": "s"}}); t("trendyol yemek anahtarı kaydedildi", r.status_code == 200 and r.json().get("ok"))
     r = c.post("/api/admin/market/trendyol_yemek/pull-orders", headers=H); t("trendyol yemek çekimi çalışır: %s" % r.text[:80], r.status_code == 200)
