@@ -35,6 +35,17 @@ async def market_cfg(db, mk: str) -> dict:
     d = await db.app_settings.find_one({"_id": "sp_modules"}, {"_id": 0}) or {}
     c = dict((d.get("config") or {}).get(mk, {}) or {})
     if not c:
+        # Müşteri panelindeki "Entegrasyonlar" ekranından girilen anahtarlar (yp_integrations) da geçerlidir
+        row = await db.yp_integrations.find_one({"id": mk, "on": True}, {"_id": 0, "keys": 1}) or {}
+        k = row.get("keys") or {}
+        if k:
+            alias = {"hepsiburada": {"merchant_id": "seller_id", "service_key": "api_secret"},
+                     "n11": {"app_key": "api_key", "app_secret": "api_secret"},
+                     "pazarama": {"client_id": "api_key", "client_secret": "api_secret"},
+                     "pttavm": {"access_token": "api_secret"}}.get(mk, {})
+            c = {a: k.get(b, "") for a, b in alias.items()}
+            c.update({x: v for x, v in k.items() if v})
+    if not c:
         ig = (await db.app_settings.find_one({"_id": "integrations"}, {"_id": 0}) or {}).get("marketplace") or {}
         if ig.get("provider") == mk:
             c = {"seller_id": ig.get("seller_id") or ig.get("merchant_id", ""), "merchant_id": ig.get("merchant_id") or ig.get("seller_id", ""),
@@ -56,6 +67,12 @@ def connected(mk: str, c: dict) -> bool:
         return bool(c.get("client_id") and c.get("client_secret"))
     if mk == "pttavm":
         return bool(c.get("api_key") and c.get("access_token"))
+    if mk == "trendyol_yemek":
+        return bool(c.get("seller_id") and c.get("api_key") and c.get("api_secret"))
+    if mk in ("getir_yemek", "migros_yemek"):
+        return bool(c.get("token") and c.get("orders_url"))
+    if mk == "yemeksepeti":
+        return bool(c.get("webhook_key"))
     return False
 
 

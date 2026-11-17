@@ -17,7 +17,7 @@ import re
 import uuid
 from datetime import datetime, timedelta, timezone
 
-from fastapi import Depends, HTTPException
+from fastapi import Depends, HTTPException, Request
 
 try:
     from zoneinfo import ZoneInfo
@@ -135,13 +135,21 @@ CATALOG = [
     P("hepsiburada", "pazaryeri", "Hepsiburada", MAGAZA, "Ürün, sipariş ve stok"),
     P("n11", "pazaryeri", "N11", MAGAZA, "Ürün, sipariş ve stok"),
     P("ciceksepeti", "pazaryeri", "Çiçeksepeti", MAGAZA, "Ürün, sipariş ve stok"),
-    P("amazon_tr", "pazaryeri", "Amazon TR", MAGAZA, "Ürün, sipariş ve stok"),
+    P("amazon_tr", "pazaryeri", "Amazon TR", MAGAZA, "Hazırlanıyor: bilgileriniz kaydedilir, otomatik bağlantı henüz açık değil."),
     P("pttavm", "pazaryeri", "PttAVM", MAGAZA, "Ürün, sipariş ve stok"),
     P("pazarama", "pazaryeri", "Pazarama", MAGAZA, "Ürün, sipariş ve stok"),
-    P("idefix", "pazaryeri", "İdefix", MAGAZA, "Ürün, sipariş ve stok"),
-    P("modanisa", "pazaryeri", "Modanisa", MAGAZA, "Ürün, sipariş ve stok"),
-    P("temu", "pazaryeri", "Temu", MAGAZA, "Ürün, sipariş ve stok"),
-    P("yemeksepeti", "pazaryeri", "Yemeksepeti", MAGAZA, "Sipariş ve menü"),
+    P("idefix", "pazaryeri", "İdefix", MAGAZA, "Hazırlanıyor: bilgileriniz kaydedilir, otomatik bağlantı henüz açık değil."),
+    P("modanisa", "pazaryeri", "Modanisa", MAGAZA, "Hazırlanıyor: bilgileriniz kaydedilir, otomatik bağlantı henüz açık değil."),
+    P("temu", "pazaryeri", "Temu", MAGAZA, "Hazırlanıyor: bilgileriniz kaydedilir, otomatik bağlantı henüz açık değil."),
+    P("yemeksepeti", "pazaryeri", "Yemeksepeti", [F("webhook_key", "Bildirim anahtarı", True, ipucu="Kendiniz belirlersiniz; Yemeksepeti'ye verdiğiniz bildirim adresinde kullanılır"),
+                                                  F("token", "Yemeksepeti erişim anahtarı", True, zorunlu=False, ipucu="Sipariş durumunu Yemeksepeti'ne bildirmek için"), F("komisyon", "Komisyon oranı % (kâr hesabı için)", zorunlu=False, tip="number")],
+      "Gelen siparişler anında listenize düşer. Yemeksepeti'nden entegrasyon izni gerekir."),
+    P("trendyol_yemek", "pazaryeri", "Trendyol Yemek", [F("seller_id", "Mağaza numarası (ID)"), F("api_key", "API anahtarı", True), F("api_secret", "API gizli anahtarı", True), F("komisyon", "Komisyon oranı % (kâr hesabı için)", zorunlu=False, tip="number")],
+      "Siparişler 5 dakikada bir listenize gelir."),
+    P("getir_yemek", "pazaryeri", "Getir Yemek", [F("token", "Erişim anahtarı", True), F("orders_url", "Sipariş adresi", ipucu="Getir'in size verdiği sipariş adresi"), F("komisyon", "Komisyon oranı % (kâr hesabı için)", zorunlu=False, tip="number")],
+      "Siparişler 5 dakikada bir listenize gelir. Getir'den entegrasyon erişimi gerekir."),
+    P("migros_yemek", "pazaryeri", "Migros Yemek", [F("token", "Erişim anahtarı", True), F("orders_url", "Sipariş adresi", ipucu="Migros'un size verdiği sipariş adresi"), F("komisyon", "Komisyon oranı % (kâr hesabı için)", zorunlu=False, tip="number")],
+      "Siparişler 5 dakikada bir listenize gelir. Migros'tan entegrasyon erişimi gerekir."),
     # --- ölçüm ve reklam
     P("ga4", "olcum", "Google Analytics 4", [F("id", "Ölçüm kimliği", ipucu="G- ile başlar")],
       "Ziyaretçi ve dönüşüm ölçümü", test=False),
@@ -324,10 +332,20 @@ def register(api_router, db, deps):
                                         "note": _t(note, 300), "at": _now()})
 
     @api_router.get("/yp/integrations")
-    async def listele(group: str = "", _: dict = Depends(adm)):
+    async def listele(request: Request, group: str = "", _: dict = Depends(adm)):
         izin = await allow_list()
         rows = {r["id"]: r for r in await db.yp_integrations.find({}, {"_id": 0}).to_list(400)}
         items = [view(p, rows.get(p["id"]), p["id"] in izin) for p in CATALOG if p["id"] in izin]
+        for i in items:
+            if i["id"] == "yemeksepeti":                          # müşteri bu adresi Yemeksepeti'ye verir
+                try:
+                    import tenant
+                    f = await db.main().firms.find_one({"db": tenant.current()}, {"_id": 0, "id": 1}) or {}
+                    key = _t(((rows.get("yemeksepeti") or {}).get("keys") or {}).get("webhook_key"), 60) or "<bildirim anahtarınız>"
+                    if f.get("id"):
+                        i["hint"] = "Yemeksepeti'ne vereceğiniz bildirim adresi: %s/api/public/%s~yemek/yemeksepeti?k=%s" % (str(request.base_url).rstrip("/").replace("http://", "https://") if "testserver" not in str(request.base_url) and "localhost" not in str(request.base_url) else str(request.base_url).rstrip("/"), f["id"], key)
+                except Exception:                                  # noqa: BLE001
+                    pass
         if group:
             items = [i for i in items if i["group"] == group]
         groups = [{"id": g, "name": n, "desc": d,

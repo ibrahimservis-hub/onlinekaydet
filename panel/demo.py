@@ -310,6 +310,19 @@ def register(api_router, db, deps):
                         "history": [{"status": stt, "at": _now(), "note": "Örnek"}], "created_at": _now(), "updated_at": _now(), "external": True})
             except Exception:
                 pass
+            # müşteri panelindeki Siparişler listesi de dolu açılsın (restoranda platform kanallarıyla)
+            try:
+                import dis_siparis
+                kanal = ("yemeksepeti", "trendyol_yemek", "getir_yemek") if key == "lokanta" else ("site", "site", "site")
+                for k, (mp, adet) in enumerate((("onaylandi", 1), ("hazirlaniyor", 2), ("teslim_edildi", 1))):
+                    if not prods:
+                        break
+                    pr, c = prods[k % len(prods)], custs[k % len(custs)]
+                    await dis_siparis.yaz(fdb, kanal[k], {"key": "ORNEK-%d" % (k + 1), "total": round(float(pr["price"]) * adet, 2), "created": None,
+                                                          "lines": [{"barcode": "", "quantity": adet, "name": pr["name"], "price": float(pr["price"])}],
+                                                          "customer": {"name": c["name"], "phone": c["phone"], "email": "", "city": c.get("city", ""), "district": c.get("district", ""), "address": c.get("address", "")}}, mp)
+            except Exception:       # noqa: BLE001
+                pass
 
         # satış listesine düş (sahip Talepler'de görür)
         try:

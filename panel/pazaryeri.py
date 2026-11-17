@@ -20,7 +20,7 @@ try:
 except Exception:                                                  # noqa: BLE001
     TR = timezone(timedelta(hours=3))
 
-MARKETS = [k for k in CHANNELS if k != "site"]
+MARKETS = [k for k in CHANNELS if k != "site" and k not in ("yemeksepeti", "trendyol_yemek", "getir_yemek", "migros_yemek")]
 STATES = ("bekliyor", "gonderildi", "hata")
 MAX_TRY = 5
 

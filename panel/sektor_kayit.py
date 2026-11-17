@@ -115,7 +115,17 @@ SX = {
     "spor_salonu": dict(title="Üyelik / ders", extra=[F("membership", "Üyelik paketi")]),
     "tekstil": dict(title="Toptan sipariş", extra=[F("season", "Sezon / koleksiyon")], hesap_note="KDV ve toplu alım indirimi hesaba yansır"),
     "eticaret": dict(title="Sipariş"), "market": dict(title="Sipariş", extra=[F("slot", "Teslimat saati aralığı")]),
-    "lokanta": dict(title="Rezervasyon / sipariş", extra=[F("table", "Masa no"), F("guests", "Kişi sayısı", "num")]),
+    "lokanta": dict(title="Sipariş", staff_l="Hazırlayan",
+                    steps=S(("yeni", "Yeni sipariş"), ("onaylandi", "Onaylandı"), ("hazirlaniyor", "Hazırlanıyor"), ("yolda", "Yolda / servis"), ("teslim", "Teslim edildi")),
+                    side=S(("iptal", "İptal")),
+                    sections=[("Müşteri ve teslimat", [F("customer_name", "Müşteri", req=1), F("customer_phone", "Telefon"), F("when", "Sipariş zamanı", "dt"),
+                                                       F("channel", "Nereden geldi", "select", opts=[("salon", "Salon / masa"), ("tel", "Telefon / WhatsApp"), ("site", "Web sitesi"),
+                                                                                                    ("yemeksepeti", "Yemeksepeti"), ("trendyol_yemek", "Trendyol Yemek"),
+                                                                                                    ("getir_yemek", "Getir Yemek"), ("migros_yemek", "Migros Yemek")]),
+                                                       F("table", "Masa no"), F("guests", "Kişi sayısı", "num"), F("address", "Teslimat adresi", "area"),
+                                                       F("shipping", "Paket servis ücreti (₺)", "num")])],
+                    check=("Hazırlık kontrolü", [("alerjen", "Alerjen ve özel istek kontrol edildi"), ("paket", "Paket kapatıldı"), ("sos", "Sos, çatal-bıçak, peçete eklendi"), ("fis", "Fiş pakete konuldu")]),
+                    extra_lines=[("shipping", "Paket servis ücreti")], next_l=""),
     "pastane": dict(title="Özel sipariş", extra=[F("deadline", "Teslim günü / saati"), F("note_cake", "Yazı / tasarım notu", "area")]),
     "cicekci": dict(title="Çiçek siparişi", extra=[F("card_text", "Kart yazısı", "area")]),
     "catering": dict(title="Organizasyon", extra=[F("guests", "Kişi sayısı", "num"), F("event_date", "Etkinlik günü", "date")]),
@@ -172,6 +182,14 @@ def template(key):
     if sx.get("next_l") is not None:
         t["next_l"] = sx["next_l"]
     secs = [(a, list(b)) for a, b in t["sections"]]
+    if sx.get("sections"):                                       # sektör kendi alanlarını tamamen belirleyebilir (ör. restoranda kargo yok)
+        secs = [(a, list(b)) for a, b in sx["sections"]]
+    if sx.get("side"):
+        t["side"] = sx["side"]
+    if sx.get("staff_l"):
+        t["staff_l"] = sx["staff_l"]
+    if sx.get("extra_lines") is not None:
+        t["extra_lines"] = sx["extra_lines"]
     if sx.get("extra"):
         secs.append(("Detaylar", sx["extra"]))
     t["sections"] = secs

@@ -13,6 +13,7 @@ def t(n, f):
 with TestClient(s.app) as c:
     j = c.post("/api/public/demo", json={"name": "Ayşe Kaya", "phone": "05524165755", "sector": "Kuaför"}).json()
     H = {"Authorization": "Bearer " + c.post("/api/auth/login", json={"email": j["email"], "password": j["password"]}).json()["token"]}
+    import _temiz; _temiz.bos(c, s, j)
     D = date.today() + timedelta(days=1)
     while D.weekday() == 6: D += timedelta(days=1)
     D = D.isoformat()

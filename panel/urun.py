@@ -24,7 +24,11 @@ except Exception:                                                  # noqa: BLE00
 CHANNELS = {"site": ("Kendi sitem", 0.0), "trendyol": ("Trendyol", 18.0), "hepsiburada": ("Hepsiburada", 14.0),
             "n11": ("N11", 13.0), "ciceksepeti": ("Çiçeksepeti", 15.0), "amazon_tr": ("Amazon TR", 15.0),
             "pttavm": ("PttAVM", 10.0), "pazarama": ("Pazarama", 12.0), "idefix": ("İdefix", 15.0),
-            "modanisa": ("Modanisa", 20.0), "temu": ("Temu", 10.0)}
+            "modanisa": ("Modanisa", 20.0), "temu": ("Temu", 10.0),
+            # yemek platformları: komisyon firmaya göre değişir; entegrasyon ayarından girilir (boşsa 0)
+            "yemeksepeti": ("Yemeksepeti", 0.0), "trendyol_yemek": ("Trendyol Yemek", 0.0),
+            "getir_yemek": ("Getir Yemek", 0.0), "migros_yemek": ("Migros Yemek", 0.0)}
+FOOD_CH = ("yemeksepeti", "trendyol_yemek", "getir_yemek", "migros_yemek")
 VATS = (0, 1, 10, 20)
 SORTS = {"yeni": [("created_at", -1)], "ad": [("name", 1)], "fiyat": [("price", 1)], "fiyat_d": [("price", -1)],
          "stok": [("stock", 1)], "stok_d": [("stock", -1)], "kar": [("_margin", -1)]}

@@ -85,7 +85,7 @@ def clean_items(rows):
 
 def order_profit(o):
     """Siparişin net kârı: satır bazında matrah − alış − komisyon, kargo gideri düşülür."""
-    comm = dict(CHANNELS).get(o.get("channel"), ("", 0.0))[1]
+    comm = o["comm"] if o.get("comm") is not None else dict(CHANNELS).get(o.get("channel"), ("", 0.0))[1]
     net = 0.0
     for it in o.get("items") or []:
         line = _num(it.get("price")) * _int(it.get("qty"), 1) - _num(it.get("discount"))

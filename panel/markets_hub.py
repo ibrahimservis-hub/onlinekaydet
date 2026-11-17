@@ -15,7 +15,7 @@ import time
 import uuid
 from datetime import datetime, timedelta, timezone
 
-from fastapi import Depends, HTTPException
+from fastapi import Depends, HTTPException, Request
 from pymongo.errors import DuplicateKeyError
 
 import shop_sync
@@ -24,8 +24,17 @@ import shop_channels as ch
 log = logging.getLogger("markets_hub")
 
 ALL = ["trendyol", "hepsiburada", "n11", "ciceksepeti", "pazarama", "pttavm"]
-PREFIX = {"trendyol": "TY", "hepsiburada": "HB", "n11": "N11", "ciceksepeti": "CS", "pazarama": "PZ", "pttavm": "PTT"}
-VERIFIED = {"trendyol": True, "hepsiburada": True, "n11": True, "ciceksepeti": False, "pazarama": False, "pttavm": False}
+# Yemek platformları (restoran/lokanta): siparişler aynı sipariş listesine düşer; ürün listesi/stok gönderimi yoktur.
+FOOD = {"yemeksepeti": "Yemeksepeti", "trendyol_yemek": "Trendyol Yemek", "getir_yemek": "Getir Yemek", "migros_yemek": "Migros Yemek"}
+ALL = ALL + list(FOOD)
+PREFIX = {"trendyol": "TY", "hepsiburada": "HB", "n11": "N11", "ciceksepeti": "CS", "pazarama": "PZ", "pttavm": "PTT",
+          "yemeksepeti": "YS", "trendyol_yemek": "TYY", "getir_yemek": "GY", "migros_yemek": "MY"}
+VERIFIED = {"trendyol": True, "hepsiburada": True, "n11": True, "ciceksepeti": False, "pazarama": False, "pttavm": False,
+            "yemeksepeti": False, "trendyol_yemek": False, "getir_yemek": False, "migros_yemek": False}
+
+
+def _name(mk: str) -> str:
+    return FOOD.get(mk) or ch.MARKETS[mk]["name"]
 INTERVAL = int(os.environ.get("MARKET_PULL_S", "300"))
 _TOK = {}                      # Pazarama erişim anahtarı önbelleği
 
@@ -71,6 +80,13 @@ async def _pazarama_token(c: dict) -> str:
 async def headers(mk: str, c: dict) -> dict:
     if mk in ("trendyol", "hepsiburada", "n11"):
         return shop_sync._headers(mk, c)
+    if mk == "trendyol_yemek":
+        return {"Authorization": "Basic " + base64.b64encode(f"{c['api_key']}:{c['api_secret']}".encode()).decode(),
+                "User-Agent": f"{c.get('seller_id')} - SelfIntegration", "Content-Type": "application/json"}
+    if mk in ("getir_yemek", "migros_yemek"):
+        return {"Authorization": c.get("token") or "", "x-api-key": c.get("token") or "", "Content-Type": "application/json"}
+    if mk == "yemeksepeti":
+        return {"Authorization": "Bearer " + (c.get("token") or ""), "Content-Type": "application/json"}
     if mk == "ciceksepeti":
         return {"x-api-key": c["api_key"], "Content-Type": "application/json"}
     if mk == "pazarama":
@@ -92,6 +108,10 @@ def order_request(mk: str, c: dict) -> tuple:
         m, u, b = "POST", "https://apis.ciceksepeti.com/api/v1/Order/GetOrders", {"PageSize": 50, "Page": 0}
     elif mk == "pazarama":
         m, u, b = "POST", "https://isortagimapi.pazarama.com/order/getOrdersForApi", {"pageSize": 50, "pageNumber": 1, "startDate": since.strftime("%Y-%m-%dT%H:%M:%S"), "endDate": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")}
+    elif mk == "trendyol_yemek":
+        m, u, b = "GET", f"https://api.tgoapis.com/integrator/order/meal/suppliers/{c.get('seller_id')}/packages?size=50", None
+    elif mk in ("getir_yemek", "migros_yemek", "yemeksepeti"):
+        m, u, b = "GET", "", None                                   # adres ayardan gelir (orders_url); yemeksepeti siparişleri çoğunlukla webhook ile gelir
     else:
         m, u, b = "GET", "https://integration-api.pttavm.com/api/orders?page=1&size=50", None
     return (c.get("orders_method") or m).upper(), (c.get("orders_url") or u), b
@@ -117,9 +137,9 @@ def map_status(s: str) -> str:
         return "iptal"
     if any(k in low for k in ("deliver", "teslim")):
         return "teslim_edildi"
-    if any(k in low for k in ("ship", "kargo", "transit")):
+    if any(k in low for k in ("ship", "kargo", "transit", "yolda", "ontheway", "on_the_way", "dispatch", "picked")):
         return "kargoda"
-    if any(k in low for k in ("pick", "invoic", "hazir", "prepar", "fatura")):
+    if any(k in low for k in ("pick", "invoic", "hazir", "prepar", "fatura", "ready", "cook")):
         return "hazirlaniyor"
     return "onaylandi"
 
@@ -165,9 +185,15 @@ def normalize(mk: str, r: dict) -> dict:
         qty = int(_f(_first(ln, "quantity", "qty", "count", "piece", "adet"), 1)) or 1
         price = _f(_first(ln, "price", "salePrice", "unitPrice", "amount", "totalPrice"))
         lines.append({"barcode": code, "quantity": qty, "name": str(_first(ln, "productName", "name", "title", "productTitle") or code)[:200], "price": price})
-    total = _f(_first(r, "totalPrice", "totalAmount", "grossAmount", "total", "orderTotal", "payableAmount")) or round(sum(x["price"] * x["quantity"] for x in lines), 2)
+    total = _f(_first(r, "totalPrice", "totalAmount", "grossAmount", "total", "orderTotal", "payableAmount", "grandTotal", "totalPayment")) or round(sum(x["price"] * x["quantity"] for x in lines), 2)
     adr = _first(r, "shipmentAddress", "shippingAddress", "deliveryAddress", "address") or {}
     adr = adr if isinstance(adr, dict) else {"fullAddress": str(adr)}
+    cu = r.get("customer") if isinstance(r.get("customer"), dict) else {}
+    if cu:                                                          # yemek platformları müşteriyi iç içe verir
+        r = dict(r, customerName=_first(cu, "name", "fullName", "firstName") or "", customerPhone=_first(cu, "phone", "mobile", "gsm") or "")
+        if not adr or not _first(adr, "fullAddress", "address", "address1", "addressDetail"):
+            adr = _first(cu, "address", "deliveryAddress") or adr
+            adr = adr if isinstance(adr, dict) else {"fullAddress": str(adr or "")}
     name = (str(_first(r, "customerFirstName", "firstName") or "") + " " + str(_first(r, "customerLastName", "lastName") or "")).strip() or \
         str(_first(r, "customerName", "buyerName", "receiverName", "fullName") or _first(adr, "fullName", "name") or "")
     created = _ts(_first(r, "orderDate", "createdDate", "createDate", "createdAt", "packageCreationDate", "orderCreatedDate", "creationDate", "date"))
@@ -190,6 +216,8 @@ async def _set_state(db, mk: str, **kw):
 
 async def fetch(mk: str, c: dict) -> list:
     m, u, b = order_request(mk, c)
+    if not u:                                                       # yalnızca webhook ile sipariş alan platform (Yemeksepeti)
+        return []
     code, data = await shop_sync.http(m, u, await headers(mk, c), b)
     if code >= 300:
         raise RuntimeError(f"{mk} yanıtı {code}: {str(data)[:200]}")
@@ -225,6 +253,12 @@ async def ingest(db, mk: str, rows: list, since: datetime) -> dict:
                 hist += 1
             else:
                 await shop_sync.apply_market_order(db, mk, n["key"], {"status": "cancelled" if mapped == "iptal" else n["status_raw"], "lines": n["lines"]})
+            try:                                                       # müşteri panelindeki Siparişler listesi
+                import dis_siparis
+                kom = (await shop_sync.market_cfg(db, mk)).get("komisyon")
+                await dis_siparis.yaz(db, mk, n, mapped, comm=_f(kom) if kom not in (None, "") else None)
+            except Exception as e:                             # noqa: BLE001
+                log.warning("panel sipariş kaydı (%s): %s", mk, e)
             # sipariş listesi kaydı
             no = f"{PREFIX[mk]}-{n['key']}"[:40]
             cur = await db.shop_orders.find_one({"order_no": no}, {"_id": 0, "id": 1, "status": 1})
@@ -238,7 +272,7 @@ async def ingest(db, mk: str, rows: list, since: datetime) -> dict:
             for ln in n["lines"]:
                 items.append({"product_id": await _product_id(db, cache, ln["barcode"]), "name": ln["name"], "sku": ln["barcode"], "qty": ln["quantity"],
                               "price": ln["price"], "line_total": round(ln["price"] * ln["quantity"], 2)})
-            name = ch.MARKETS[mk]["name"]
+            name = _name(mk)
             order = {"id": str(uuid.uuid4()), "order_no": no, "status": mapped, "customer": n["customer"], "note": f"{name} siparişi", "items": items,
                      "subtotal": n["total"], "shipping": 0, "cod_fee": 0, "total": n["total"], "account_id": "", "phone_key": "", "admin_note": "", "tracking_no": "", "carrier": "",
                      "payment": {"method": "pazaryeri", "label": name, "status": "odendi", "amount": n["total"]}, "source": mk, "external": True, "historical": bool(old),
@@ -264,7 +298,7 @@ async def pull(db, mk: str) -> dict:
     """Tek pazaryeri: siparişleri çek, işle, durumu kaydet. Hata olursa durum kaydına yazılır ve yeniden fırlatılır."""
     c = await shop_sync.market_cfg(db, mk)
     if not connected(mk, c):
-        raise HTTPException(status_code=400, detail=f"{ch.MARKETS[mk]['name']} bağlantı bilgileri eksik (Aç/Kapat & Ayarlar)")
+        raise HTTPException(status_code=400, detail=f"{_name(mk)} bağlantı bilgileri eksik (Aç/Kapat & Ayarlar)")
     st = (await _state(db)).get(mk) or {}
     since = _ts(st.get("since"))
     first = since is None
@@ -282,13 +316,14 @@ async def pull(db, mk: str) -> dict:
 
 
 async def pull_all(db) -> int:
-    d = await db.app_settings.find_one({"_id": "sp_modules"}, {"_id": 0, "config": 1, "flags": 1}) or {}
-    cfgs = d.get("config") or {}
+    d = await db.app_settings.find_one({"_id": "sp_modules"}, {"_id": 0, "flags": 1}) or {}
     n = 0
     for mk in ALL:
-        c = cfgs.get(mk) or {}
+        c = await shop_sync.market_cfg(db, mk)                     # yönetim ayarı ya da müşteri panelindeki Entegrasyonlar
         if not c or not connected(mk, c) or (d.get("flags") or {}).get(mk) is False:
             continue
+        if mk == "yemeksepeti" and not c.get("orders_url"):
+            continue                                               # bildirimle (webhook) çalışır
         try:
             await pull(db, mk)
             n += 1
@@ -344,8 +379,59 @@ async def auto_loop(db, firms_mod, tenant, first_delay=150):
 
 
 # =================================================================== uçlar
+YEMEK_DURUM = {"kabul": ("onaylandi", "accepted"), "hazirlaniyor": ("hazirlaniyor", "preparing"), "hazir": ("hazirlaniyor", "ready"),
+               "yolda": ("kargoda", "dispatched"), "teslim": ("teslim_edildi", "delivered"), "iptal": ("iptal", "cancelled")}
+
+
 def register(api_router, db, deps):
     adm = Depends(deps["require_admin"])
+
+    @api_router.post("/public/yemek/{mk}")
+    async def yemek_webhook(mk: str, request: Request):
+        """Yemeksepeti gibi siparişi kendisi gönderen platformlar için. Adres: /api/public/<firma_no>~yemek/<platform>?k=<anahtar>"""
+        if mk not in FOOD:
+            raise HTTPException(status_code=404, detail="Bilinmeyen platform")
+        c = await shop_sync.market_cfg(db, mk)
+        key = c.get("webhook_key") or ""
+        got = request.query_params.get("k") or request.headers.get("x-webhook-key") or request.headers.get("authorization", "").replace("Bearer ", "").replace("Basic ", "")
+        if not key or got != key:
+            raise HTTPException(status_code=401, detail="Anahtar hatalı")
+        try:
+            body = await request.json()
+        except Exception:                                          # noqa: BLE001
+            raise HTTPException(status_code=422, detail="Geçersiz sipariş verisi")
+        rows = rows_of(body) if not (isinstance(body, dict) and (body.get("orderId") or body.get("id") or body.get("code"))) else [body]
+        res = await ingest(db, mk, rows, datetime(2000, 1, 1, tzinfo=timezone.utc))
+        await _set_state(db, mk, last=_now(), error="", imported=int(((await _state(db)).get(mk) or {}).get("imported") or 0))
+        return {"ok": True, **res}
+
+    @api_router.post("/admin/yemek/{mk}/siparis/{no}/durum")
+    async def yemek_durum(mk: str, no: str, payload: dict, _: dict = adm):
+        """Sipariş durumunu panelde günceller; ayarda status_url varsa platforma da bildirir (kabul, hazır, yolda, teslim, iptal)."""
+        if mk not in FOOD:
+            raise HTTPException(status_code=404, detail="Bilinmeyen platform")
+        d = str(payload.get("durum") or "")
+        if d not in YEMEK_DURUM:
+            raise HTTPException(status_code=422, detail="Durum: " + ", ".join(YEMEK_DURUM))
+        loc, remote = YEMEK_DURUM[d]
+        o = await db.shop_orders.find_one({"order_no": no, "source": mk}, {"_id": 0, "id": 1})
+        if not o:
+            raise HTTPException(status_code=404, detail="Sipariş bulunamadı")
+        await db.shop_orders.update_one({"id": o["id"]}, {"$set": {"status": loc, "updated_at": _now()},
+                                                          "$push": {"history": {"status": loc, "at": _now(), "by": "panel"}}})
+        ext = no.split("-", 1)[-1]
+        yst = "teslim" if loc == "teslim_edildi" else loc
+        await db.yp_orders.update_one({"channel": mk, "market_no": ext}, {"$set": {"status": yst},
+                                      "$push": {"timeline": {"at": _now(), "by": "panel", "state": yst, "note": "durum: " + d}}})
+        c = await shop_sync.market_cfg(db, mk)
+        url, sent = c.get("status_url") or "", None
+        if url:
+            try:
+                code, data = await shop_sync.http("POST", url.replace("{id}", ext), await headers(mk, c), {"orderId": ext, "status": remote})
+                sent = {"ok": code < 300, "status": code}
+            except Exception as e:                                 # noqa: BLE001
+                sent = {"ok": False, "message": str(e)[:160]}
+        return {"ok": True, "status": loc, "platform": sent}
 
     @api_router.get("/admin/market/status")
     async def status(_: dict = adm):
@@ -355,6 +441,6 @@ def register(api_router, db, deps):
         for mk in ALL:
             c = cfgs.get(mk) or {}
             s = st.get(mk) or {}
-            out.append({"id": mk, "name": ch.MARKETS[mk]["name"], "connected": connected(mk, c), "enabled": flags.get(mk) is not False and connected(mk, c),
+            out.append({"id": mk, "name": _name(mk), "connected": connected(mk, c), "enabled": flags.get(mk) is not False and connected(mk, c),
                         "verified": VERIFIED[mk], "last": s.get("last") or "", "error": s.get("error") or "", "imported": int(s.get("imported") or 0), "since": s.get("since") or ""})
         return {"markets": out, "auto_every_min": max(1, INTERVAL // 60)}

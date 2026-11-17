@@ -394,7 +394,7 @@ SECTOR_PACKS = {
                    _BASE_REP + ["hasta_rapor", "asi_rapor"], "muayene", 8),
     "lokanta": S("lokanta", "Restoran ve kafe", {"kisi": "Garson", "kisiler": "Personel", "yer": "Masa", "is": "Sipariş"},
                  _BASE_BLOCKS + ["qr_menu", "menu_karti", "rezervasyon", "instagram", "story", "dil"],
-                 ["qr", "menu", "rezervasyon", "siparis", "kasa", "personel"], _BASE_INT + ["iyzico", "paytr", "yemeksepeti"],
+                 ["qr", "menu", "rezervasyon", "siparis", "kasa", "personel"], _BASE_INT + ["iyzico", "paytr", "yemeksepeti", "trendyol_yemek", "getir_yemek", "migros_yemek"],
                  _BASE_REP + ["masa_rapor", "menu_rapor"], "siparis", 10),
     "otel": S("otel", "Otel ve pansiyon", {"kisi": "Personel", "kisiler": "Personel", "yer": "Oda", "is": "Rezervasyon"},
               _BASE_BLOCKS + ["oda", "rezervasyon", "galeri_kayan", "dil", "uyelik"],
