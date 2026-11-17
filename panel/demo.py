@@ -188,8 +188,6 @@ def register(api_router, db, deps):
         company = f"Demo {n}"
         import sektor_dil as _sdm
         mods = list(firms.ALL_MODS)
-        if _sdm.family(key) == "siparis" or key == "eticaret":      # mağaza/sipariş işlerinde e-ticaret ekranları demoda da açık gelsin
-            mods.append("eticaret")
         f = {"id": fid, "db": db.firm_db_name(fid), "name": company, "login_email": email, "contact_name": name, "phone": phone, "address": "",
              "tax_no": "", "tax_office": "", "features": {}, "status": "aktif", "created_at": _now(), "logo": "",
              "expires_at": (datetime.now(timezone.utc) + timedelta(days=DEMO_DAYS)).isoformat(), "package": "kurumsal", "modules": list(mods),

@@ -129,7 +129,7 @@ def verify_password(plain: str, hashed: str) -> bool:
     except Exception:
         return False
 
-def create_access_token(user_id: str, email: str, role: str, firm: str = "", fu: str = "") -> str:
+def create_access_token(user_id: str, email: str, role: str, firm: str = "", fu: str = "", sup: bool = False) -> str:
     payload = {
         "sub": user_id,
         "email": email,
@@ -142,6 +142,8 @@ def create_access_token(user_id: str, email: str, role: str, firm: str = "", fu:
         payload["firm"] = firm
     if fu:
         payload["fu"] = fu
+    if sup:
+        payload["sup"] = True            # sahibin destek girişi: askıdaki / süresi dolmuş firmada da açılır
     return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
 
 async def get_current_user(request: Request) -> dict:
@@ -165,7 +167,7 @@ async def get_current_user(request: Request) -> dict:
                 speed.user_cache_put(payload["sub"], user)
         if not user:
             raise HTTPException(status_code=401, detail="Kullanıcı bulunamadı")
-        if not user.get("is_active", True):
+        if not user.get("is_active", True) and not payload.get("sup"):
             raise HTTPException(status_code=403, detail="Hesap pasifleştirilmiş")
         if user.get("tokens_valid_after") and payload.get("iat", 0) < user["tokens_valid_after"]:
             raise HTTPException(status_code=401, detail="Oturum sonlandırıldı")
@@ -3129,7 +3131,7 @@ async def _firm_ctx(request: Request, call_next):
             f = _pl.get("firm")
             if f:
                 request.state.fu = _pl.get("fu", "")
-                if firms.ACCESS and not request.url.path.endswith(("/auth/login", "/auth/logout")) and not await firms.ACCESS(f, _pl.get("fu", "")):
+                if firms.ACCESS and not _pl.get("sup") and not request.url.path.endswith(("/auth/login", "/auth/logout")) and not await firms.ACCESS(f, _pl.get("fu", "")):
                     return _JR({"detail": "Hesabınız kapalı veya kullanım süreniz doldu. Devam etmek için bizi arayın: 0544 444 40 04"}, status_code=403)
                 ft = tenant.set_firm(f)
                 if firms.GATE and request.url.path.startswith("/api/"):

@@ -33,7 +33,7 @@ MODULE_PREFIX = {"muhasebe": ("finance", "cash", "accounting", "receivables", "p
                  "qr": ("qr",), "atama": ("autoassign",), "takip": ("admin/tech-locations",),
                  "odeme": ("pay",), "efatura": ("einvoice",), "portal": ("portal-admin",), "arayan": ("caller",), "randevu": ("growth/bookings", "growth/settings")}
 ALL_MODS = ["servis", "personel", "muhasebe", "rapor", "sms", "magaza", "site", "pazarlama",
-            "bakim", "teklif", "bayi", "qr", "atama", "takip", "odeme", "efatura", "portal", "arayan", "randevu"]
+            "bakim", "teklif", "bayi", "qr", "atama", "takip", "odeme", "efatura", "portal", "arayan", "randevu", "eticaret"]
 DEFAULT_PACKAGES = {
     "baslangic": {"name": "Başlangıç", "price": 0, "modules": ["servis", "personel"]},
     "profesyonel": {"name": "Profesyonel", "price": 0, "modules": ["servis", "personel", "muhasebe", "rapor", "sms"]},
@@ -173,13 +173,18 @@ def register(api_router, db, deps):
         items = d.get("items")
         if not items:
             return DEFAULT_PACKAGES
-        return {**items, **{k: v for k, v in DEFAULT_PACKAGES.items() if k == "kurumsal" and k not in items}}
+        out = {**items, **{k: v for k, v in DEFAULT_PACKAGES.items() if k == "kurumsal" and k not in items}}
+        if "kurumsal" in out:                              # Kurumsal paket her zaman tüm modülleri içerir; ek modül yoktur
+            out["kurumsal"] = {**out["kurumsal"], "modules": list(ALL_MODS)}
+        return out
 
     def clean_modules(v):
         out = ["servis"] + [m for m in (v or []) if m in MODULES and m != "servis"]
         return list(dict.fromkeys(out))
 
     async def resolve_modules(package, modules):
+        if package == "kurumsal":
+            return list(ALL_MODS)
         if modules is not None:
             return clean_modules(modules)
         pk = (await packages_get()).get(package or "")
@@ -199,7 +204,7 @@ def register(api_router, db, deps):
         for k, v in (body.get("packages") or {}).items():
             if not re.match(r"^[a-z0-9_]{2,30}$", k):
                 raise HTTPException(status_code=400, detail="Paket anahtarı geçersiz")
-            items[k] = {"name": str(v.get("name") or k)[:40], "price": float(v.get("price") or 0), "modules": clean_modules(v.get("modules"))}
+            items[k] = {"name": str(v.get("name") or k)[:40], "price": float(v.get("price") or 0), "modules": list(ALL_MODS) if k == "kurumsal" else clean_modules(v.get("modules"))}
         if not items:
             raise HTTPException(status_code=400, detail="En az bir paket olmalı")
         await db.main().app_settings.update_one({"_id": "packages"}, {"$set": {"items": items}}, upsert=True)
@@ -212,8 +217,8 @@ def register(api_router, db, deps):
         import time as _t
         e = _MOD.get(dbname)
         if not e or _t.monotonic() - e[0] > 30:
-            f = await db.main().firms.find_one({"db": dbname}, {"_id": 0, "modules": 1})
-            e = (_t.monotonic(), (f or {}).get("modules"))
+            f = await db.main().firms.find_one({"db": dbname}, {"_id": 0, "modules": 1, "package": 1})
+            e = (_t.monotonic(), list(ALL_MODS) if (f or {}).get("package") == "kurumsal" else (f or {}).get("modules"))
             _MOD[dbname] = e
         mods = e[1]
         if mods is None:
@@ -234,7 +239,7 @@ def register(api_router, db, deps):
     @api_router.get("/firm/package")
     async def firm_package(request: Request, user: dict = Depends(get_current_user)):
         f = await my_firm(request)
-        mods = f.get("modules") or list(MODULES)
+        mods = list(ALL_MODS) if f.get("package") == "kurumsal" else (f.get("modules") or list(MODULES))
         exp = f.get("expires_at") or ""
         days = None
         if exp:
@@ -347,7 +352,11 @@ def register(api_router, db, deps):
     async def firms_list(me: dict = Depends(require_admin)):
         need_main()
         out = []
+        doms = {}
+        async for d in db.main().firm_domains.find({}, {"_id": 0, "firm_id": 1, "domain": 1, "status": 1}):
+            doms.setdefault(d.get("firm_id"), []).append({"domain": d.get("domain"), "status": d.get("status", "")})
         for f in await db.main().firms.find({"status": {"$ne": "silindi"}}, {"_id": 0}).sort("created_at", -1).to_list(500):
+            f["domains"] = doms.get(f["id"], [])
             f["stats"] = await stats(f)
             try:
                 import sektor_dil
@@ -360,6 +369,41 @@ def register(api_router, db, deps):
             f.pop("db", None)
             out.append(f)
         return {"firms": out, "feature_labels": FEATURE_LABELS}
+
+    @api_router.post("/admin/firms/sil")
+    async def firms_delete(body: dict, me: dict = Depends(require_admin)):
+        """Firmaları tek tek ya da toplu siler. Varsayılan: giriş ve alan adı kapanır, veri saklanır. kalici=true: firma veritabanı da silinir."""
+        need_main()
+        ids = [str(x) for x in (body.get("ids") or []) if x][:300]
+        kalici = bool(body.get("kalici"))
+        if not ids:
+            raise HTTPException(status_code=400, detail="Silinecek firma seçin")
+        n, adlar = 0, []
+        for fid in ids:
+            f = await db.main().firms.find_one({"id": fid, "status": {"$ne": "silindi"}}, {"_id": 0})
+            if not f:
+                continue
+            await db.main().firm_domains.delete_many({"firm_id": fid})
+            await db.main().firm_users.delete_many({"firm_id": fid})
+            if kalici:
+                try:
+                    await db._client.drop_database(f["db"])
+                except Exception:                          # noqa: BLE001
+                    pass
+                await db.main().firms.delete_one({"id": fid})
+            else:
+                await db.main().firms.update_one({"id": fid}, {"$set": {"status": "silindi", "deleted_at": _now()}})
+            n += 1
+            adlar.append(f.get("name", ""))
+        try:
+            import domains as _dm
+            await _dm.write_map(db)
+        except Exception:                                  # noqa: BLE001
+            pass
+        _ACC.clear()
+        _MOD.clear()
+        await audit(me, "FİRMA KALICI SİLDİ" if kalici else "FİRMA SİLDİ", ", ".join(adlar)[:300])
+        return {"ok": True, "silinen": n}
 
     @api_router.post("/admin/firms")
     async def firms_create(p: FirmIn, me: dict = Depends(require_admin)):

@@ -335,7 +335,7 @@ async def audit(db, user: dict, action: str, detail: str = "", ip: str = "", **e
         "admin_role": (user or {}).get("admin_role", ""), "action": action, "detail": detail, "ip": ip, **extra})
 
 
-SITE_ED_OK = ("/api/brand", "/api/firm/", "/api/yp/content", "/api/yp/dil", "/api/yp/site", "/api/yp/popup", "/api/yp/redirect",
+SITE_ED_OK = ("/api/brand", "/api/firm/", "/api/yp/content", "/api/yp/dil", "/api/yp/site", "/api/yp/popup", "/api/yp/popvitrin", "/api/yp/redirect",
               "/api/yp/yonlendir", "/api/yp/duyuru", "/api/yp/destek", "/api/yp/logo", "/api/yp/media", "/api/yp/promo", "/api/yp/book")
 FU_ROL = {}   # alt kullanıcı e-postası -> (rol, zaman)
 SUB_ROL_AD = {"manager": "Müdür", "accounting": "Muhasebe", "operations": "Operasyon", "site_editor": "Site editörü", "viewer": "Yalnızca görüntüleme"}

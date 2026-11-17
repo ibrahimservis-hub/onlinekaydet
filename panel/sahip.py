@@ -461,7 +461,7 @@ def register(app, api_router, db, deps):
         u = await db.firm(f["db"]).users.find_one({"firm_owner": True})
         if not u:
             raise HTTPException(status_code=404, detail="Firma yöneticisi bulunamadı")
-        token = deps["create_access_token"](u["id"], u["email"], u["role"], firm=f["db"])
+        token = deps["create_access_token"](u["id"], u["email"], u["role"], firm=f["db"], sup=True)
         from fastapi.responses import HTMLResponse
         r = HTMLResponse('<!doctype html><meta charset="utf-8"><meta name="robots" content="noindex"><title>Açılıyor…</title><script>try{localStorage.setItem("token",%s);localStorage.setItem("ypt",%s);localStorage.removeItem("spx_firm")}catch(e){}location.replace(%s)</script>' % (__import__("json").dumps(token), __import__("json").dumps(token), __import__("json").dumps(("/salon" + ("#" + d["h"] if d.get("h") else "")) if d.get("to") == "salon" else "/admin")),
                          headers={"Cache-Control": "no-store"})

@@ -21,7 +21,7 @@ with TestClient(s.app) as c:
         assert {j["status"] for j in jobs} >= {"yeni", "atandi", "yolda", "basladi", "tamamlandi"}
         assert len(c.get("/api/customers", headers=H).json()) == 5 and len(c.get("/api/technicians", headers=H).json()) == 2
         assert c.get("/api/dashboard/admin", headers=H).json()["total_revenue"] > 0
-        pk = c.get("/api/firm/package", headers=H).json(); assert pk["package"] == "kurumsal" and pk["locked"] == ["eticaret"]
+        pk = c.get("/api/firm/package", headers=H).json(); assert pk["package"] == "kurumsal" and pk["locked"] == [] and "eticaret" in pk["modules"]
     t("yönetici girişi: 7 servis kaydı, 5 müşteri, 2 usta, tam paket", b)
     def d():
         r = c.post("/api/auth/login", json={"email": S["tech_email"], "password": S["password"]}); assert r.status_code == 200, r.text
