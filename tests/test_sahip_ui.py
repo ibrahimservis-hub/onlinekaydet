@@ -32,10 +32,10 @@ with sync_playwright() as pw:
         assert pg.locator(".gtabs").count() == 0  # Genel Bakış tek sayfa
     t("rayda 6 grup, genel bakışta sekme yok", a)
     def b():
-        pg.click(".side nav a:nth-child(3)"); pg.wait_for_selector(".gtabs", timeout=5000)
+        pg.click(".side nav a:nth-child(2)"); pg.wait_for_selector(".gtabs", timeout=5000)
         tabs = pg.locator(".gtabs a").all_inner_texts()
-        assert tabs == ["Firmalar", "Kurulum Adımları", "Toplu İşlemler", "Yetki ve Roller"], tabs
-        pg.click(".gtabs a:nth-child(3)"); pg.wait_for_timeout(600)
+        assert tabs == ["Firmalar", "Yeni Kurulum", "Kurulum Takibi", "Toplu İşlemler"], tabs
+        pg.click(".gtabs a:nth-child(4)"); pg.wait_for_timeout(600)
         assert "toplu" in pg.evaluate("location.hash") and pg.locator(".gtabs a.on").inner_text() == "Toplu İşlemler"
     t("Firmalar grubu sekmeleri çalışıyor", b)
     def c3():

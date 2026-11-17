@@ -440,6 +440,8 @@ body{font-size:13px}
 .tout{border:0;background:none;color:var(--mut);font-size:12px;padding:6px 8px;border-radius:6px}.tout:hover{background:var(--n100)}
 .tabs{height:42px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:stretch;gap:4px;padding:0 20px;overflow-x:auto;scrollbar-width:none;flex:none}
 .tabs::-webkit-scrollbar{display:none}
+.tabs{overflow:visible}.tmore{position:relative;display:flex;align-items:center}.tmore summary{list-style:none;cursor:pointer;padding:0 10px;color:var(--mut);font-weight:500;white-space:nowrap;display:flex;align-items:center;gap:6px;height:100%}.tmore summary::-webkit-details-marker{display:none}.tmore summary b{background:#eef1f6;border-radius:9px;padding:1px 7px;font-size:12px}.tmore[open] summary{color:var(--tx)}.tmore>div{position:absolute;top:42px;right:0;min-width:220px;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 28px -12px rgba(15,23,42,.3);padding:6px;z-index:30;display:grid}.tmore>div a{padding:10px 12px;border-bottom:0;margin:0;border-radius:6px}.tmore>div a:hover{background:#f4f6fa}.tmore>div a.on{background:#eef3fc}
+
 .tabs a{display:flex;align-items:center;padding:0 10px;color:var(--mut);font-weight:500;white-space:nowrap;text-decoration:none;border-bottom:2px solid transparent;margin-bottom:-1px}
 .tabs a:hover{color:var(--tx)}.tabs a.on{color:var(--tx);font-weight:600;border-bottom-color:var(--blue)}
 main{padding:16px 24px 32px}
@@ -707,7 +709,10 @@ function navDraw(){groupsBuild();
  $('#mbar').innerHTML=mb.map(function(g){return '<a href="#'+g.rs[0][0]+'" data-rs="'+rsOf(g)+'"><svg class="i"><use href="#'+g.ik+'"/></svg>'+g.ad+'</a>'}).join('')+'<a href="#" data-a="more"><svg class="i"><use href="#more"/></svg>Diğer</a>'}
 function route(){closeM();var h=(location.hash||'#bugun').slice(1)||'bugun';var mm=document.getElementById('main');if(mm)mm.setAttribute('data-nolx',['urun','siparis','kampanya','eplus','xml','popvitrin','bayi','ortak','iade','pazaryeri'].indexOf(h)>-1?'1':'');if(!NAV.some(function(i){return i[0]===h})&&EXTRA.indexOf(h)<0)h=NAV[0][0];ROUTE=h;UE=null;UEDIRTY=false;var pvo=document.getElementById('bxpvo');if(pvo)pvo.hidden=true;
  document.querySelectorAll('[data-rs]').forEach(function(a){var on=a.dataset.rs.split(',').indexOf(h)>-1;a.classList.toggle('on',on);if(on&&a.dataset.g)a.setAttribute('href','#'+h)});scrollTo(0,0);
- var g=grOf(h),tb=$('#tabs');$('#gt').textContent=g?g.ad:'';if(g&&g.rs.length>1){tb.hidden=false;tb.innerHTML=g.rs.map(function(r){return '<a href="#'+r[0]+'" data-r="'+r[0]+'"'+(r[0]===h?' class="on"':'')+'>'+esc(r[1])+'</a>'}).join('')}else{tb.hidden=true;tb.innerHTML=''}
+ var g=grOf(h),tb=$('#tabs');$('#gt').textContent=g?g.ad:'';if(g&&g.rs.length>1){tb.hidden=false;var rs=g.rs,LM=7,lnk=function(r){return '<a href="#'+r[0]+'" data-r="'+r[0]+'"'+(r[0]===h?' class="on"':'')+'>'+esc(r[1])+'</a>'};
+  if(rs.length>LM+1){var ana=rs.slice(0,LM),ek=rs.slice(LM);var ai=ek.filter(function(r){return r[0]===h});if(ai.length){ana=rs.slice(0,LM-1).concat(ai);ek=rs.filter(function(r){return ana.indexOf(r)<0})}
+   tb.innerHTML=ana.map(lnk).join('')+'<details class="tmore"><summary>Daha fazla <b>'+ek.length+'</b></summary><div>'+ek.map(lnk).join('')+'</div></details>'}
+  else tb.innerHTML=rs.map(lnk).join('')}else{tb.hidden=true;tb.innerHTML=''}
  var m=$('#main');m.innerHTML='<div class="empty">Yükleniyor…</div>';(V[h]||V.bugun)().catch(fail)}
 window.addEventListener('hashchange',function(){if(B)route()});
 function refresh(){if(B)(V[ROUTE]||V.bugun)().catch(fail)}
