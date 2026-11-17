@@ -9,7 +9,7 @@ for rel in ('index.html', 'temalar.html', 'e-ticaret.html', 'web-sitesi.html', '
 import glob
 for f in sorted(glob.glob(S + '/v9/eski-*.css')): txt('v9/' + os.path.basename(f))
 for f in sorted(glob.glob(S + '/v9/kaynak/eski/*.html')): txt(os.path.basename(f))
-for n in ['altyapi-ve-teknoloji.html','bilgi-ve-veri-guvenligi.html','hesap-guvenligi.html','yedekleme-ve-denetim.html','ozel-tasarim.html','tum-sektorler.html','cerez-politikasi.html','kullanim-kosullari.html','mesafeli-satis-iade.html']: txt(n)
+for n in ['altyapi-ve-teknoloji.html','bilgi-ve-veri-guvenligi.html','hesap-guvenligi.html','yedekleme-ve-denetim.html','ozel-tasarim.html','muhasebe-ve-stok.html','cek-senet-takip-programi.html','barkodlu-hizli-satis-programi.html','stok-sayim-lot-skt-takibi.html','mali-musavir-paneli.html','e-ihracat-proforma.html','acik-api-ve-entegrasyon.html','hesaplama-araclari.html','sikayet-ve-oneri.html','tum-sektorler.html','cerez-politikasi.html','kullanim-kosullari.html','mesafeli-satis-iade.html']: txt(n)
 for f in sorted(glob.glob(S + '/sektor-*.html')) + sorted(glob.glob(S + '/bilgi-*.html')) + sorted(glob.glob(S + '/*-programi.html')) + sorted(glob.glob(S + '/*-web-sitesi.html')): txt(os.path.basename(f))
 for d, ext in (('v9/img', '.webp'), ('v9/img/bilgi', '.webp'), ('v9/fonts', '.woff2')):
     for f in sorted(os.listdir(S + '/' + d)):

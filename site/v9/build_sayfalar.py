@@ -70,10 +70,10 @@ foot=('<footer class="alt2"><div class="w"><div class="g">'
  '<div class="sos"><a href="#" onclick="return false" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1" fill="currentColor" stroke="none"/></svg></a>'
  '<a href="#" onclick="return false" aria-label="X"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4l16 16M20 4L4 20"/></svg></a>'
  '<a href="#" onclick="return false" aria-label="YouTube"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="2.5" y="5.5" width="19" height="13" rx="4"/><path d="M10 9.2v5.6l4.8-2.8z" fill="currentColor"/></svg></a></div></div>'
- '<div><b>Ürün</b><a href="/temalar.html">Temalar</a><a href="/e-ticaret.html">E-ticaret</a><a href="/web-sitesi.html">Web sitesi editörü</a><a href="/is-takibi.html">Randevu ve iş takibi</a><a href="/fiyatlar.html">Paketler</a></div>'
+ '<div><b>Ürün</b><a href="/temalar.html">Temalar</a><a href="/e-ticaret.html">E-ticaret</a><a href="/web-sitesi.html">Web sitesi editörü</a><a href="/is-takibi.html">Randevu ve iş takibi</a><a href="/muhasebe-ve-stok.html">Muhasebe ve stok</a><a href="/fiyatlar.html">Paketler</a></div>'
  '<div><b>Sektörler</b><a href="/sektor-kombi.html">Teknik servis</a><a href="/sektor-kuafor.html">Kuaför</a><a href="/sektor-eticaret.html">E-ticaret</a><a href="/tum-sektorler.html">Tüm sektörler</a></div>'
- '<div><b>Kaynak</b><a href="/blog.html">Blog</a><a href="/entegrasyonlar.html">Entegrasyonlar</a><a href="/bilgi-bankasi.html">Bilgi bankası</a><a href="/destek.html">Destek</a><a href="/uye-girisi">Üye girişi</a></div>'
- '<div><b>Şirket</b><a href="/hakkimizda.html">Hakkımızda</a><a href="/iletisim.html">İletişim</a><a href="/bayilik.html">Bayilik</a><a href="/ozel-tasarim.html">Özel tasarım</a></div>'
+ '<div><b>Kaynak</b><a href="/blog.html">Blog</a><a href="/entegrasyonlar.html">Entegrasyonlar</a><a href="/bilgi-bankasi.html">Bilgi bankası</a><a href="/destek.html">Destek</a><a href="/hesaplama-araclari.html">Hesaplama araçları</a><a href="/uye-girisi">Üye girişi</a></div>'
+ '<div><b>Şirket</b><a href="/hakkimizda.html">Hakkımızda</a><a href="/iletisim.html">İletişim</a><a href="/bayilik.html">Bayilik</a><a href="/ozel-tasarim.html">Özel tasarım</a><a href="/sikayet-ve-oneri.html">Şikayet ve öneri</a></div>'
  '<div><b>Teknoloji ve güvenlik</b><a href="/altyapi-ve-teknoloji.html">Altyapı ve teknoloji</a><a href="/bilgi-ve-veri-guvenligi.html">Bilgi ve veri güvenliği</a><a href="/hesap-guvenligi.html">Hesap güvenliği</a><a href="/yedekleme-ve-denetim.html">Yedekleme ve denetim kaydı</a></div>'
  '</div>'+STORE+'<div class="yas"><a href="/kvkk.html">KVKK aydınlatma metni</a><a href="/gizlilik.html">Gizlilik</a><a href="/cerez-politikasi.html">Çerez politikası</a><a href="/kullanim-kosullari.html">Kullanım koşulları</a><a href="/mesafeli-satis-iade.html">Mesafeli satış ve iade</a></div><div class="alt"><span>© 2026 OnlineKaydet</span><span class="kart" aria-label="Kabul edilen kartlar">'
  '<svg viewBox="0 0 64 40" width="52" height="32" role="img" aria-label="Visa"><rect width="64" height="40" rx="6" fill="#fff" stroke="#cfd6df"/><text x="32" y="27" text-anchor="middle" font-family="Arial,sans-serif" font-weight="800" font-style="italic" font-size="19" fill="#1a3a8f">VISA</text></svg>'
@@ -85,9 +85,9 @@ def hdr(cur):
     nav=''.join(a(t,u) for t,u in NAV)
     def _g(ad,L,acik=False):
         return '<details class="mg"%s><summary>%s</summary>%s</details>'%(' open' if acik else '',ad,''.join('<a class="m" href="%s"%s>%s</a>'%(u,' aria-current="page"' if u==cur else '',x) for x,u in L))
-    dr=(_g('Ürün',[('Temalar','/temalar.html'),('E-ticaret','/e-ticaret.html'),('Web sitesi','/web-sitesi.html'),('İş takibi','/is-takibi.html'),('Özellikler','/ozellikler.html')],True)
+    dr=(_g('Ürün',[('Temalar','/temalar.html'),('E-ticaret','/e-ticaret.html'),('Web sitesi','/web-sitesi.html'),('İş takibi','/is-takibi.html'),('Özellikler','/ozellikler.html'),('Muhasebe ve stok','/muhasebe-ve-stok.html')],True)
        +_g('Sektörler',[('Tüm sektörler','/tum-sektorler.html'),('Servis takip programı','/servis-takip-programi.html'),('Randevu programı','/randevu-programi.html'),('Stok ve sipariş programı','/stok-siparis-programi.html')])
-       +_g('Öğrenin',[('Bilgi bankası','/bilgi-bankasi.html'),('Blog','/blog.html'),('Entegrasyonlar','/entegrasyonlar.html'),('Sitede ara','/ara.html')])
+       +_g('Öğrenin',[('Bilgi bankası','/bilgi-bankasi.html'),('Blog','/blog.html'),('Entegrasyonlar','/entegrasyonlar.html'),('Hesaplama araçları','/hesaplama-araclari.html'),('Sitede ara','/ara.html')])
        +_g('Fiyat ve destek',[('Paketler','/fiyatlar.html'),('Destek','/destek.html'),('İletişim','/iletisim.html'),('Bayilik','/bayilik.html')]))
     return ('<header class="ust"><div class="w"><a class="logo" href="/"><img src="/logo-acik-s.png" alt="OnlineKaydet" width="160" height="32"></a>'
      '<nav class="nav" aria-label="Ana menü">%s</nav><button class="arab" type="button" data-ara aria-label="Sitede ara"><svg viewBox=\"0 0 24 24\" width=\"20\" height=\"20\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" aria-hidden=\"true\"><circle cx=\"11\" cy=\"11\" r=\"6.5\"/><path d=\"M16 16l4.5 4.5\"/></svg></button><a class="gir" href="/uye-girisi">Üye girişi</a>'
@@ -224,7 +224,7 @@ ozel=(sec_baslik('Özellikler','Panelde neler var?','Aşağıdaki başlıkların
  +kart('09','Hazır temalar','Sektörünüze göre başlayın.','/temalar.html')
  +'</div></div>')
 page('ozellikler.html','Özellikler | Panelin Tüm Modülleri | OnlineKaydet','Randevu, kasa, muhasebe, personel, evrak, web sitesi editörü, e-ticaret, pazaryeri ve B2B modülleri.',
- B('o','Özellikler','Tek panel, bütün işler','Web sitesi, mağaza ve iş takibi aynı panelde çalışır.',('panel-d-ekip','Ekip ve yetki ekranı'))+'<section class="sec">'+ozel+'</section>'+P['dort']+SON)
+ B('o','Özellikler','Tek panel, bütün işler','Web sitesi, mağaza ve iş takibi aynı panelde çalışır.',('panel-d-ekip','Ekip ve yetki ekranı'))+'<section class="sec">'+ozel+'</section>'+'<section class="sec"><div class="w"><div class="yz"><h2 style="margin-top:0">Yeni: muhasebe, stok ve satış araçları</h2><p>Çek-senet takibi, barkodlu hızlı satış, depo ve son kullanma takibi, mali müşavir erişimi, e-ihracat proforma ve açık API. <a href="/muhasebe-ve-stok.html">Hepsini görün</a> · <a href="/hesaplama-araclari.html">Hesaplama araçları</a></p></div></div></section>'+P['dort']+SON)
 hk=('<section class="sec"><div class="w"><div class="yz"><h2 style="margin-top:0">Ne yapıyoruz?</h2><p>OnlineKaydet; web sitesi, e-ticaret, randevu ve iş takibini tek panelde toplar. Her firma sektörüne uygun hazır bir temayla başlar, metin ve görselleri panelden kendisi düzenler.</p>'
  '<h2>Kimler için?</h2><p>Kendi ekibiyle çalışan küçük ve orta ölçekli işletmeler için: teknik servisler, kuaför ve güzellik salonları, oto servisler, mağazalar ve bayiler.</p>'
  '<h2>Şirket</h2><p><b>Moda Ekru E-Ticaret Hizmetleri Tekstil Sanayi ve Ticaret Ltd. Şti.</b><br>Etimesgut, Ankara<br>Telefon: <a href="tel:+905444444004">0544 444 40 04</a></p></div></div></section>')
@@ -325,6 +325,9 @@ page('ozel-tasarim.html','Özel Tasarım Web Sitesi | OnlineKaydet','Markanıza 
  +'<section class="sec"><div class="w"><div class="fg">'+kart([('Marka uyumu','Logo, renk ve yazı tipi markanıza göre belirlenir.'),('Gerçek fotoğraf','Telifli ve gerçek fotoğraflar kullanılır; çizim ya da yapay görsel kullanılmaz.'),('Her bölüm düzenlenebilir','Yazı, yazı tipi ve görseller panelden değişir; her seferinde bize yazmanız gerekmez.'),('Panel ile bağlantı','Formdan gelen talepler müşteri kaydına döner; randevu ve kasa aynı panelde.')])+'</div></div></section>'
  +'<section class="sec"><div class="w"><div class="yz"><h2 style="margin-top:0">Sık sorulan sorular</h2>'+ssd(Q5)+'</div></div></section>'+CTA+SON,ld_raw=ldq(Q5))
 
+# ---- muhasebe, stok ve satış özellik sayfaları
+import ozellik_sayfalar as _oz
+OZ_SAYFA=_oz.uret(page,B,SON,CTA)
 # ---- bilgi bankası
 import bilgi_icerik as _bi
 BK=_bi.A
@@ -394,6 +397,9 @@ _sm=open(S+'/sitemap.xml',encoding='utf-8').read()
 _ek=''.join('<url><loc>%s/%s</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>\n'%(BASE,n) for n in SEO_SAYFA if '/'+n not in _sm)
 if _ek: open(S+'/sitemap.xml','w',encoding='utf-8').write(_sm.replace('</urlset>',_ek+'</urlset>'))
 print('seo sayfa',len(SEO_SAYFA))
+_sm=open(S+'/sitemap.xml',encoding='utf-8').read()
+_ek=''.join('<url><loc>%s/%s</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>\n'%(BASE,n) for n in OZ_SAYFA if '/'+n not in _sm)
+if _ek: open(S+'/sitemap.xml','w',encoding='utf-8').write(_sm.replace('</urlset>',_ek+'</urlset>'))
 
 _sm=open(S+'/sitemap.xml',encoding='utf-8').read()
 _ek=''.join('<url><loc>%s/bilgi-%s.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>\n'%(BASE,a['slug']) for a in BK if '/bilgi-%s.html'%a['slug'] not in _sm)

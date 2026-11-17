@@ -3,7 +3,7 @@
 var API=(window.OK_API||'')+'/api/public/lead';
 function utm(){try{var q=new URLSearchParams(location.search),o=JSON.parse(sessionStorage.getItem('ok_src')||'{}');['utm_source','utm_medium','utm_campaign','ref'].forEach(function(k){if(q.get(k))o[k]=q.get(k)});if(!o.ref&&document.referrer)try{o.ref=new URL(document.referrer).hostname}catch(e){}sessionStorage.setItem('ok_src',JSON.stringify(o));return o}catch(e){return{}}}
 window.OKLead={send:function(p){p.src=Object.assign({page:location.pathname.split('/').pop()||'/'},utm());return fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(p)}).then(function(r){return r.json().catch(function(){return{}}).then(function(j){if(!r.ok)throw new Error(j.detail||'Gönderilemedi, lütfen tekrar deneyin');return j})})}};
-function val(box,label){var ls=box.querySelectorAll('label');for(var i=0;i<ls.length;i++){if(ls[i].textContent.trim().toLowerCase().indexOf(label)===0){var f=ls[i].parentNode.querySelector('input,select');return f?f.value.trim():''}}return''}
+function val(box,label){var ls=box.querySelectorAll('label');for(var i=0;i<ls.length;i++){if(ls[i].textContent.trim().toLowerCase().indexOf(label)===0){var f=ls[i].parentNode.querySelector('input,select,textarea');return f?f.value.trim():''}}return''}
 function wire(box){
  if(box.dataset.w)return;box.dataset.w=1;
  var hp=document.createElement('input');hp.name='website';hp.tabIndex=-1;hp.autocomplete='off';hp.setAttribute('aria-hidden','true');hp.style.cssText='position:absolute;left:-9999px;width:1px;height:1px;opacity:0';box.appendChild(hp);
@@ -12,7 +12,7 @@ function wire(box){
  var form=(box.closest('section')&&box.closest('section').id)||(location.pathname.split('/').pop().replace('.html','')||'ana-sayfa');
  btn.addEventListener('click',function(e){e.preventDefault();if(btn.dataset.busy)return;
   var sec=val(box,'sektör'),d={name:val(box,'ad soyad'),phone:val(box,'telefon'),firm:val(box,'firma'),sector:sec==='Seçiniz'?'':sec,form:form,website:hp.value,extra:{}};
-  var us=val(box,'ustanız');if(us)d.extra.usta=us;if(window.OK_CTX)for(var k in window.OK_CTX)d.extra[k]=window.OK_CTX[k];
+  var us=val(box,'ustanız');if(us)d.extra.usta=us;var ms=val(box,'mesajınız');if(ms)d.extra.mesaj=ms;var tu=val(box,'türü');if(tu)d.extra.tur=tu;if(window.OK_CTX)for(var k in window.OK_CTX)d.extra[k]=window.OK_CTX[k];
   var old=btn.textContent;btn.dataset.busy=1;btn.textContent='Gönderiliyor…';msg.style.color='';msg.textContent='';
   OKLead.send(d).then(function(){msg.style.color='#0f9d58';msg.textContent='✓ Talebiniz alındı. Sizi kısa süre içinde arayacağız.';btn.textContent='Gönderildi';
    try{(window.dataLayer=window.dataLayer||[]).push({event:'lead',form:form})}catch(e){}

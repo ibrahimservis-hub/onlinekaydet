@@ -60,7 +60,7 @@ def register(api_router, db, deps):
             "firm": str(payload.get("firm") or "")[:100], "sector": str(payload.get("sector") or "")[:40],
             "city": str(payload.get("city") or "")[:60], "form": str(payload.get("form") or "")[:40],
             "src": {k: str(src.get(k) or "")[:120] for k in ("utm_source", "utm_medium", "utm_campaign", "ref", "page")},
-            "extra": {str(k)[:30]: (v if isinstance(v, (int, float, bool)) else str(v)[:120]) for k, v in list(extra.items())[:12]},
+            "extra": {str(k)[:30]: (v if isinstance(v, (int, float, bool)) else str(v)[:(1000 if k == "mesaj" else 120)]) for k, v in list(extra.items())[:12]},
             "status": "yeni", "note": "", "created_at": datetime.now(timezone.utc).isoformat(),
         }
         await main().leads.insert_one(doc)
