@@ -539,6 +539,8 @@ def register(api_router, db, deps: dict):
                 inc_key = "conv_call"
             elif label == "whatsapp_click":
                 inc_key = "conv_whatsapp"
+            elif label == "form_submit":
+                inc_key = "conv_form"
             upd["$push"] = {"events": {"$each": [{"type": label, "ts": now_s, "path": (payload.path or "")[:200]}],
                                        "$slice": -40}}
             if inc_key:

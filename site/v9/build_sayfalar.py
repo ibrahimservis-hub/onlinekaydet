@@ -127,7 +127,7 @@ def page(slug,title,desc,body,ld=None,home=False,robots=None,extra_head='',extra
     cur='/' if home else '/'+slug
     body=body.replace('href="iletisim.html#form"','href="/iletisim.html#teklif"').replace('href="/iletisim.html#form"','href="/iletisim.html#teklif"')
     NOFORM='id="teklif"' not in body
-    full=h+extra_head+lj+'\n</head><body>\n<a class="skip" href="#icerik">İçeriğe geç</a>'+hdr(cur)+'\n<main>'+body+'</main>\n'+foot+'\n'+ARAMA_OV+mbar+'<script src="/v9/arama.js" defer></script><script src="/v9/v9.js" defer></script><script src="/v9/v10.js" defer></script>'+('<script src="/v9/dunya.js" defer></script>' if home else '')+'<script src="/lead.js" defer></script>'+extra_js+'</body></html>'
+    full=h+extra_head+lj+'\n</head><body>\n<a class="skip" href="#icerik">İçeriğe geç</a>'+hdr(cur)+'\n<main>'+body+'</main>\n'+foot+'\n'+ARAMA_OV+mbar+'<script src="/v9/arama.js" defer></script><script src="/v9/v9.js" defer></script><script src="/v9/v10.js" defer></script>'+('<script src="/v9/dunya.js" defer></script>' if home else '')+'<script src="/lead.js" defer></script><script src="/izle.js" defer></script>'+extra_js+'</body></html>'
     full=_re.sub(r'<a (class="btn[^"]*") href="#">([^<]*)</a>',lambda m:'<a %s href="%s">%s</a>'%(m.group(1),'/demo.html' if 'deneyin' in m.group(2).lower() or 'tema' in m.group(2).lower() else ('#teklif' if 'teklif' in m.group(2).lower() else '/iletisim.html'),m.group(2)),full)
     tk=TKB.get(slug)
     if not tk and slug.startswith('sektor-') and slug in SEKT_AD: tk=('%s için teklif alın'%SEKT_AD[slug],'Sektörünüze uygun temayı ve paneli birlikte hazırlayalım.')

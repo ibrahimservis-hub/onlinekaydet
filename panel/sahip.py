@@ -438,11 +438,15 @@ def register(app, api_router, db, deps):
 
     # ------------------------------------------------------------------ sahip müdahalesi: destek girişi, şifre, kayıt, günlük
     @api_router.post("/admin/firms/{fid}/support-link")
-    async def support_link(fid: str, me: dict = Depends(require_admin)):
+    async def support_link(fid: str, body: dict = None, me: dict = Depends(require_admin)):
         main_only()
         f = await get_firm(fid)
         code = uuid.uuid4().hex
-        await db.main().support_codes.insert_one({"code": code, "firm_id": fid, "at": _now(), "ts": datetime.now(timezone.utc).timestamp()})
+        import re as _re
+        body = body or {}
+        to = "salon" if body.get("to") == "salon" else "admin"
+        h = body.get("h") if _re.fullmatch(r"[a-z0-9/_-]{0,40}", str(body.get("h") or "")) else ""
+        await db.main().support_codes.insert_one({"code": code, "firm_id": fid, "at": _now(), "ts": datetime.now(timezone.utc).timestamp(), "to": to, "h": h})
         await audit(me, "DESTEK GİRİŞİ", f["name"])
         return {"url": "/api/admin/support-enter?c=" + code}
 
@@ -459,7 +463,7 @@ def register(app, api_router, db, deps):
             raise HTTPException(status_code=404, detail="Firma yöneticisi bulunamadı")
         token = deps["create_access_token"](u["id"], u["email"], u["role"], firm=f["db"])
         from fastapi.responses import HTMLResponse
-        r = HTMLResponse('<!doctype html><meta charset="utf-8"><meta name="robots" content="noindex"><title>Açılıyor…</title><script>try{localStorage.setItem("token",%s);localStorage.removeItem("spx_firm")}catch(e){}location.replace("/admin")</script>' % __import__("json").dumps(token),
+        r = HTMLResponse('<!doctype html><meta charset="utf-8"><meta name="robots" content="noindex"><title>Açılıyor…</title><script>try{localStorage.setItem("token",%s);localStorage.setItem("ypt",%s);localStorage.removeItem("spx_firm")}catch(e){}location.replace(%s)</script>' % (__import__("json").dumps(token), __import__("json").dumps(token), __import__("json").dumps(("/salon" + ("#" + d["h"] if d.get("h") else "")) if d.get("to") == "salon" else "/admin")),
                          headers={"Cache-Control": "no-store"})
         r.set_cookie(key="access_token", value=token, httponly=True, secure=False, samesite="lax", max_age=6 * 3600, path="/")
         return r

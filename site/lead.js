@@ -15,7 +15,7 @@ function wire(box){
   var us=val(box,'ustanız');if(us)d.extra.usta=us;var ms=val(box,'mesajınız');if(ms)d.extra.mesaj=ms;var tu=val(box,'türü');if(tu)d.extra.tur=tu;if(window.OK_CTX)for(var k in window.OK_CTX)d.extra[k]=window.OK_CTX[k];
   var old=btn.textContent;btn.dataset.busy=1;btn.textContent='Gönderiliyor…';msg.style.color='';msg.textContent='';
   OKLead.send(d).then(function(){msg.style.color='#0f9d58';msg.textContent='✓ Talebiniz alındı. Sizi kısa süre içinde arayacağız.';btn.textContent='Gönderildi';
-   try{(window.dataLayer=window.dataLayer||[]).push({event:'lead',form:form})}catch(e){}
+   try{(window.dataLayer=window.dataLayer||[]).push({event:'lead',form:form})}catch(e){}try{window.OKTrack&&OKTrack.event('form_submit')}catch(e){}
   }).catch(function(x){msg.style.color='#b42318';msg.textContent=x.message;btn.textContent=old;delete btn.dataset.busy})
  })}
 function init(){utm();document.querySelectorAll('.cb .box,.frm').forEach(wire)}
