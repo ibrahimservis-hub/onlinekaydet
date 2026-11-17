@@ -1,0 +1,54 @@
+/* v12: ortak "şablon" izlerini kaldırır. Renkler logodan: lacivert + turuncu; beyaz zemin; düz, çerçeveli, sıkı. */
+:root{--murekkep:#10213d;--metin2:#4a5568;--cizgi:#dde1e8;--zemin:#f4f5f7;--kagit:#fff;--sahne:#fff;--sahne2:#f4f5f7;--cam:#00265b;--filiz:#00265b;--kiremit:#fe6d02;--kiremit-acik:#fff3ea;--cam-acik:#eef2f8;--gol:rgba(0,38,91,.08);--fd:"IBM Plex Sans",system-ui,sans-serif;--fm:"IBM Plex Sans",system-ui,sans-serif}
+html{scroll-behavior:auto}
+body{font-family:"IBM Plex Sans",system-ui,sans-serif}
+h1,h2,h3,h4{font-family:"IBM Plex Sans",system-ui,sans-serif;font-weight:600;letter-spacing:0;color:var(--murekkep)}
+h1,.hero h1{font-size:clamp(32px,4.2vw,52px);line-height:1.12}
+h2{font-size:clamp(26px,3vw,36px);line-height:1.2}
+h3{font-size:19px;line-height:1.3}
+/* üst etiketler: tek renk, düz yazı; nokta, mono, büyük harf yok */
+.et,.kr{font:600 14px/1.3 "IBM Plex Sans",system-ui,sans-serif;letter-spacing:0;text-transform:none;color:#c25400;margin-bottom:10px}
+.et:before{display:none !important}
+.hero .et,.son .et{color:#c25400}
+/* başlık altı çizgisi ve nokta desenleri */
+h2:after{display:none !important}
+.hero:before,.pb:before,[class*="nokta"]{background-image:none !important}
+.hero:before{background:#fff;opacity:1}
+.hero,.pb{background:#fff !important}
+/* kutular: ince çerçeve, küçük yarıçap, gölgesiz */
+.btn,.bt,button.bt,a.bt{border-radius:6px !important;box-shadow:none !important;font-weight:600}
+.btn.fil,.btn.dolu,.btn.dolu.kc,.btn.fil.kc,.son .frm button.bt,.son .frm a.bt{background:#00265b !important;border-color:#00265b !important;color:#fff !important}
+.btn.fil:hover,.btn.dolu:hover,.son .frm button.bt:hover{background:#fe6d02 !important;border-color:#fe6d02 !important}
+.btn.bos{background:#fff !important;border:1.5px solid #00265b !important;color:#00265b !important}
+.btn.duz{color:#00265b}
+.d,.kp,.sah,.kk,.ek,.kt .kk,figure.tar,.frm,.cd,.pf,.eband{border-radius:6px !important;box-shadow:none !important}
+.son .frm{border-radius:8px !important;border:1px solid var(--cizgi) !important}
+.son .frm:before{display:none}
+.son .frm .alan input,.son .frm .alan select{border-radius:6px;border-width:1px}
+/* sahte tarayıcı çerçevesi (üç nokta + yazı): düz çerçeve */
+.tar .tb{display:none !important}
+.tar,.tar .vp{border-radius:4px !important}
+.tar{border:1px solid #cfd5df;box-shadow:none !important;background:#fff}
+/* süs: yüzen bildirim kartları, tilt, cam efekti */
+.cip,.dnya,#dunya-bolum{display:none !important}
+.hero .sahne{display:block}
+.hero .sahne .s1,.hero .sahne .s3{display:none !important}
+.hero .sahne .s2{position:static !important;transform:none !important;width:100% !important;margin:0 !important}
+.hero .sahne{position:relative;height:auto !important}
+/* numaralı kart etiketleri */
+.dort .d>span,.kp .no,.sah .no,.kpl .no{display:none !important}
+/* her karta fade-in kalktı; yalnızca ilk ekran girişi kalır */
+.gor,.rz,[data-r]{opacity:1 !important;transform:none !important;transition:none !important}
+/* bağlantılar: altı çizili, hoverda renk */
+.dort .d:hover,.kp:hover{border-color:#00265b}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #fe6d02;outline-offset:2px}
+@media(prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important}}
+.hero .sahne .s2 .vp{height:auto !important;aspect-ratio:1400/875;overflow:hidden}
+.hero .sahne .s2 .vp img{position:static !important;width:100% !important;height:100% !important;max-width:none;transform:none !important;object-fit:cover}
+.hero .g{align-items:center}
+.hero .sahne .s2 .vp img{margin:0 !important}
+.hero h1 em,.hero h1 em .k>i{background:none !important;-webkit-text-fill-color:#fe6d02 !important;color:#fe6d02 !important;font-style:normal}
+.mbar a.f{background:#00265b !important;color:#fff !important}
+.bk2 a,.arasik a,.btn.bos2,.flt button,.sek .lst a,.fbant li,[class*="chip"]{border-radius:6px !important}
+.kp,.bk a,.slst a,.arasn-k{border-radius:6px !important}
+@media(max-width:900px){.hero .sahne{display:block !important;margin-top:24px}.hero .sahne .s2{display:block !important}}
