@@ -176,3 +176,7 @@ footer.alt2 .yas{display:flex;flex-wrap:wrap;gap:6px 20px;margin-top:18px;paddin
 .cek .mg{border-bottom:1px solid #e4e7ec;padding:4px 0}.cek .mg summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;padding:16px 0;font-size:20px;font-weight:700;color:#0f172a;min-height:48px}.cek .mg summary::-webkit-details-marker{display:none}.cek .mg summary:after{content:"";width:10px;height:10px;border-right:2px solid #0f172a;border-bottom:2px solid #0f172a;transform:rotate(45deg);transition:transform .25s;margin-right:6px}.cek .mg[open] summary:after{transform:rotate(-135deg)}.cek .mg a.m{padding:12px 4px 12px 14px;font-size:17px;border-bottom:0}.cek .mg[open]{padding-bottom:10px}
 @media(min-width:981px){footer.alt2 .g{display:grid;grid-template-columns:1.6fr repeat(5,1fr);column-gap:22px}footer.alt2 .g>div,footer.alt2 .g>.f1{grid-column:auto}}
 .rz b,.rz small{font-family:inherit}
+
+/* logo oranı: width özniteliği yüksekliği ezip logoyu geriyordu */
+img[src*="/logo-"]{width:auto!important;max-width:100%;object-fit:contain}
+.alt2 img[src*="/logo-"]{height:28px}

@@ -224,4 +224,24 @@ def register(api_router, db, deps):
                                               "created_at": _now(), "updated_at": _now()})
         except Exception:               # noqa: BLE001
             pass
-        return {"ok": True, "login_url": "/giris", "email": email, "password": pw, "tech_email": techs[0]["email"], "days": DEMO_DAYS, "company": company}
+        import sektor_dil as _sd
+        if _sd.family(key) == "randevu":
+            # randevulu sektörlerde takvim boş görünmesin: bugün ve yarın için örnek randevular (müşteri adları demo müşterileri)
+            try:
+                import yp as _yp
+                svs = (_yp.SEED.get(key) or [])[:6]
+                if svs:
+                    d0 = datetime.now(timezone(timedelta(hours=3))).date()
+                    slots = [(0, "10:00", 0), (0, "11:30", 1), (0, "14:00", 0), (0, "16:00", 1), (1, "10:30", 0), (1, "13:00", 1)]
+                    for k, (gun, saat, ti) in enumerate(slots):
+                        sn, sd, sp = svs[k % len(svs)]
+                        c = custs[k % len(custs)]
+                        await fdb.bookings.insert_one({"id": uuid.uuid4().hex, "no": "RD-%d" % (1001 + k), "yp": True, "status": "onaylandi", "stage": "bekliyor",
+                                                       "name": c["name"], "phone": c["phone"], "date": (d0 + timedelta(days=gun)).isoformat(), "time": saat,
+                                                       "staff_id": techs[ti]["id"], "items": [{"name": sn, "price": float(sp), "dur": int(sd)}], "dur": int(sd),
+                                                       "discount": 0.0, "note": "Örnek kayıt (demo)", "source": "telefon", "payments": [], "job_id": "",
+                                                       "created_at": _now(), "created_by": "demo"})
+                    await fdb.app_settings.update_one({"_id": "yp_no"}, {"$set": {"n": len(slots)}}, upsert=True)
+            except Exception:
+                pass
+        return {"ok": True, "login_url": "/giris", "panel": "/salon" if _sd.family(key) == "randevu" else "/admin", "email": email, "password": pw, "tech_email": techs[0]["email"], "days": DEMO_DAYS, "company": company}
