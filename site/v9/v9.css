@@ -213,3 +213,12 @@ footer .g{display:grid;grid-template-columns:1fr 1fr;gap:28px 16px}footer .g>div
 }
 
 .q:not(.ac) p{display:none}.q h3{cursor:pointer}.q:focus-visible{outline:2px solid var(--cam);outline-offset:2px}.son form .alan{margin-top:12px}.son form .alan label{display:block;font-size:13px;color:var(--metin2)}.son form .alan input,.son form .alan select{width:100%;border:1px solid #b9beb6;height:46px;margin-top:5px;border-radius:6px;padding:0 14px;font:inherit;font-size:15px;background:#fff;color:var(--murekkep)}.son form button.bt{width:100%;margin-top:16px;background:var(--cam);border:1.5px solid var(--cam);color:#fff;height:52px;border-radius:2px;font:600 16px/1 var(--fb);cursor:pointer}.son form button.bt:disabled{opacity:.7}.skip{position:absolute;left:-999px}.skip:focus{left:8px;top:8px;background:#fff;padding:8px 12px;z-index:99}
+/* tema vitrini: dört mağaza teması sırayla belirir, hiçbir an boş kalmaz */
+.ot-g.sl{display:grid;align-items:start}
+.ot-g.sl .sl-i{grid-area:1/1;position:relative;display:block;opacity:0;pointer-events:none;animation:slx 20s ease-in-out infinite;animation-delay:calc(var(--i)*5s - 1.2s)}
+.ot-g.sl .sl-i:first-child{opacity:1;pointer-events:auto}
+.ot-g.sl .tar .vp{height:430px}.ot-g.sl .tar img{height:100%;width:100%;object-fit:cover;object-position:left top}
+.ot-g.sl .tar{width:112%}
+@keyframes slx{0%{opacity:0;pointer-events:none}6%,22%{opacity:1;pointer-events:auto}28%,100%{opacity:0;pointer-events:none}}
+@media(max-width:760px){.ot-g.sl .tar{width:100%}.ot-g.sl .tar .vp{height:240px}}
+@media(prefers-reduced-motion:reduce){.ot-g.sl .sl-i{animation:none}.ot-g.sl .sl-i:not(:first-child){display:none}}

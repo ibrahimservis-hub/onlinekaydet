@@ -43,7 +43,7 @@ def _read(name, ovr=True):
 def _leaf_nodes(soup):
     out = []
     for el in soup.find_all(TAGS):
-        if el.find_parent(["script", "style", "noscript"]):
+        if el.find_parent(["script", "style", "noscript"]) or el.find_parent(class_="duy"):
             continue
         if any(getattr(c, "name", None) for c in el.children):
             continue
@@ -51,6 +51,66 @@ def _leaf_nodes(soup):
         if t:
             out.append(el)
     return out
+
+
+_LINK_OK = re.compile(r"^(/[\w\-./%?=&#]{0,200}|#[\w-]{1,60}|https://[^\s\"'<>]{4,300}|tel:[+\d]{5,20}|mailto:[^\s\"'<>]{3,120})$")
+
+
+def _serit_parts(d):
+    sp = d.find("span")
+    b = sp.find("b") if sp else None
+    a = d.find("a")
+    t = ""
+    if sp:
+        t = "".join(str(c) for c in sp.children if not (getattr(c, "name", None) == "b")).strip()
+        t = BeautifulSoup(t, "html.parser").get_text().strip()
+    return sp, b, a, t
+
+
+def _serit_items(soup):
+    """Sayfanın üstündeki duyuru şeridi (.duy): açık/kapalı, kalın başlık, yazı, bağlantı yazısı ve adresi."""
+    d = soup.find(class_="duy")
+    if not d:
+        return []
+    sp, b, a, t = _serit_parts(d)
+    return [
+        {"k": "duy_on", "tip": "serit", "ad": "Şerit görünsün mü", "v": "0" if d.has_attr("hidden") else "1", "sec": True},
+        {"k": "duy_b", "tip": "serit", "ad": "Kalın başlık", "v": b.get_text().strip() if b else ""},
+        {"k": "duy_t", "tip": "serit", "ad": "Yazı", "v": t},
+        {"k": "duy_lt", "tip": "serit", "ad": "Bağlantı yazısı", "v": a.get_text().strip() if a else ""},
+        {"k": "duy_lu", "tip": "serit", "ad": "Bağlantı adresi (/sayfa, #bolum, https://…, tel:…)", "v": (a.get("href") or "") if a else ""},
+    ]
+
+
+def _serit_apply(soup, edits):
+    d = soup.find(class_="duy")
+    if not d or not any(k.startswith("duy_") for k in edits):
+        return
+    sp, b, a, t = _serit_parts(d)
+    nb = edits.get("duy_b", b.get_text().strip() if b else "")
+    nt = edits.get("duy_t", t)
+    if sp is not None and ("duy_b" in edits or "duy_t" in edits):
+        sp.clear()
+        if nb.strip():
+            nb_tag = soup.new_tag("b")
+            nb_tag.string = nb.strip()
+            sp.append(nb_tag)
+            sp.append(" ")
+        sp.append(nt.strip())
+    if a is not None:
+        if "duy_lt" in edits:
+            a.string = edits["duy_lt"].strip()
+        if "duy_lu" in edits and _LINK_OK.match(edits["duy_lu"].strip()):
+            a["href"] = edits["duy_lu"].strip()
+    if "duy_on" in edits:
+        if edits["duy_on"] == "0":
+            d["hidden"] = ""
+            d["style"] = "display:none"
+        else:
+            if d.has_attr("hidden"):
+                del d["hidden"]
+            if d.has_attr("style"):
+                del d["style"]
 
 
 def items(html):
@@ -61,6 +121,7 @@ def items(html):
     md = soup.find("meta", attrs={"name": "description"})
     if md:
         res.append({"k": "desc", "tip": "baslik", "ad": "Arama sonucu açıklaması", "v": md.get("content", "")})
+    res.extend(_serit_items(soup))
     for i, el in enumerate(_leaf_nodes(soup)):
         res.append({"k": "t%d" % i, "tip": "metin", "ad": el.name, "v": el.get_text().strip()})
     for i, im in enumerate(soup.find_all("img")):
@@ -73,6 +134,7 @@ def apply(html, edits):
     soup = BeautifulSoup(html, "html.parser")
     nodes = _leaf_nodes(soup)
     imgs = soup.find_all("img")
+    _serit_apply(soup, {k: v for k, v in (edits or {}).items() if isinstance(v, str) and len(v) <= 400 and k.startswith("duy_")})
     for k, v in (edits or {}).items():
         if not isinstance(v, str) or len(v) > 4000:
             continue

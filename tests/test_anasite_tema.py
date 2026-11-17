@@ -35,6 +35,19 @@ with sync_playwright() as pw:
             e = pg.locator("#anaf [data-k^=t]").first; v = e.input_value(); e.fill(v + " DENEME"); pg.click("button.bt.o:has-text(\"Kaydet\")"); pg.wait_for_timeout(900)
             assert "düzenli" in pg.inner_text(".side") + pg.inner_text("body")
         t("%d: ana site metni düzenlenip kaydedilir" % W, a)
+        def sr():
+            import requests as rq
+            pg.evaluate("location.hash='#anasite'"); pg.wait_for_selector("#anaf [data-k=duy_b]", timeout=8000)
+            pg.fill("#anaf [data-k=duy_b]", "Kampanya"); pg.fill("#anaf [data-k=duy_t]", "bu ay kurulum ücretsiz"); pg.fill("#anaf [data-k=duy_lt]", "Teklif al"); pg.fill("#anaf [data-k=duy_lu]", "/demo.html")
+            pg.click("button.bt.o:has-text(\"Kaydet\")"); pg.wait_for_timeout(900)
+            h = open(os.path.join(__import__("anasite").ovr_dir(), "index.html"), encoding="utf-8").read()
+            assert "<b>Kampanya</b> bu ay kurulum ücretsiz" in h and 'href="/demo.html">Teklif al' in h, h[h.find('class="duy"'):][:300]
+            pg.wait_for_selector("#anaf [data-k=duy_on]"); pg.select_option("#anaf [data-k=duy_on]", "0"); pg.click("button.bt.o:has-text(\"Kaydet\")"); pg.wait_for_timeout(900)
+            h = open(os.path.join(__import__("anasite").ovr_dir(), "index.html"), encoding="utf-8").read()
+            assert 'class="duy" hidden' in h, h[h.find('class="duy"'):][:200]
+            pg.wait_for_selector("#anaf [data-k=duy_on]"); pg.select_option("#anaf [data-k=duy_on]", "1"); pg.click("button.bt.o:has-text(\"Kaydet\")"); pg.wait_for_timeout(900)
+            assert 'class="duy" hidden' not in open(os.path.join(__import__("anasite").ovr_dir(), "index.html"), encoding="utf-8").read()
+        t("%d: üst şerit yazısı, bağlantısı ve görünürlüğü panelden değişir" % W, sr)
         t("%d: JS hatası yok" % W, lambda: (_ for _ in ()).throw(AssertionError(errs)) if errs else None)
         pg.close()
     br.close()
