@@ -127,6 +127,30 @@ def register(api_router, db, deps):
         await M().leads.update_one({"id": lid}, {"$pull": {"notlar": {"id": nid}}})
         return {"ok": True}
 
+    @api_router.get("/admin/firms/{fid}/notlar")
+    async def firma_notlar(fid: str, _: dict = adm):
+        need_main()
+        return await M().firm_notes.find({"fid": fid}, {"_id": 0}).sort("at", -1).to_list(200)
+
+    @api_router.post("/admin/firms/{fid}/notlar")
+    async def firma_not_ekle(fid: str, p: dict, me: dict = adm):
+        need_main()
+        if not await M().firms.find_one({"id": fid}):
+            raise HTTPException(404, "Firma bulunamadı")
+        t = str(p.get("metin") or "").strip()[:500]
+        if not t:
+            raise HTTPException(422, "Not boş olamaz")
+        n = {"id": uuid.uuid4().hex[:10], "fid": fid, "metin": t, "adim": str(p.get("adim") or "")[:60],
+             "at": _now(), "kim": me.get("name") or me.get("email") or ""}
+        await M().firm_notes.insert_one(dict(n))
+        return n
+
+    @api_router.delete("/admin/firms/{fid}/notlar/{nid}")
+    async def firma_not_sil(fid: str, nid: str, _: dict = adm):
+        need_main()
+        await M().firm_notes.delete_one({"id": nid, "fid": fid})
+        return {"ok": True}
+
     @api_router.delete("/admin/talepler/{lid}")
     async def talep_sil(lid: str, _: dict = adm):
         need_main()
