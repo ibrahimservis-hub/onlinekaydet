@@ -181,7 +181,9 @@ def content_sec(faq_fn):
     out = {}
     for k, s in S.items():
         sub = HEAD_SUB[s["arche"]]
-        h = [(t, sub) for t in s["h"]] + [("Sorularınız mı var? Bize yazın", "Formdan ulaşın, size en kısa sürede dönüş yapalım."), ("Bilgileriniz kayıt altında", "Talebiniz kaydedilir, onay ve hatırlatma mesajı gönderilir.")]
+        import sektor_baslik as _sb
+        if k in _sb.B: h = [(t, _sb.B[k][1]) for t in _sb.B[k][0]]
+        else: h = [(t, sub) for t in s["h"]] + [("Sorularınız mı var? Bize yazın", "Formdan ulaşın, size en kısa sürede dönüş yapalım."), ("Bilgileriniz kayıt altında", "Talebiniz kaydedilir, onay ve hatırlatma mesajı gönderilir.")]
         out[k] = dict(label=s["name"].split(" &")[0], ico=s["ico"], img=k, cihaz=s["prob"][:4], brands=s["prob"][:6],
                       services=[(t, d, ["cal", "us", "cl", "pl", "st"][i % 5]) for i, (t, d) in enumerate(s["svc"])], faq=faq_fn(k),
                       h=h, steps=list(s["steps"]), rev=[("Örnek müşteri", "Randevu süreci ve bilgilendirme çok net, tekrar tercih ederim."), ("Örnek müşteri", "Hatırlatma mesajı sayesinde randevumu kaçırmadım."),

@@ -60,7 +60,7 @@ content.SEC.update(content_ek.SEC)
 tools.TOOLS.update(tools_ek.TOOLS)
 tools.TOOLS.update(tools_cok.TOOLS)
 shop.PRODUCTS.update(content_ek.PRODUCTS)
-gen3.TOOL_LABEL.update({'hazirlik': 'Randevuya hazırlık', 'soru': 'Hangi hizmet?', 'bakim': 'Bakım takvimi', 'kontrol': 'Acil mi?', 'varis': 'Varış süresi', 'acil': 'Yolda kaldım', 'sure': 'Süre hesabı', 'rehber': 'Bakım rehberi', 'hacim': 'Taşıma hesabı',
+gen3.TOOL_LABEL.update({'hazirlik': 'Hazırlık listesi', 'soru': 'Hangi hizmet?', 'bakim': 'Bakım takvimi', 'kontrol': 'Acil mi?', 'varis': 'Varış süresi', 'acil': 'Yolda kaldım', 'sure': 'Süre hesabı', 'rehber': 'Bakım rehberi', 'hacim': 'Taşıma hesabı',
                         'liste': 'Hazırlık listesi', 'metraj': 'Kumaş metrajı', 'surec': 'Sipariş süreci', 'kargo': 'Kargo eşiği', 'iade': 'İade rehberi', 'paket': 'Seans takibi', 'cilt': 'Cilt rehberi'})
 
 NEW = list(content_ek.SEC)
@@ -135,7 +135,7 @@ def recipes():
             slug = f'n{n * 6 + i + 1:02d}-{dr}-{sec.replace("_", "-")}'
             out.append(mk(slug=slug, sector=sec, nm=NAMES[sec][i], city=recipes_p.CITIES[(n * 2 + i * 3) % 10], pal=pal, fd=fd, fb=fb, r=d['r'], btn=d['btn'], card=d['card'], field=d['field'],
                           logo=['sq', 'ci', 'ol', 'bar', 'tx'][(k + i) % 5] if dr != 'lux' else 'tx', em=(fd in ('playfair', 'newsreader') and dr in ('edit', 'lux')),
-                          nav='premium', dir=dr, hero='p_' + dr, mbar=recipes_p.MBAR[(i + n) % 8], ft=recipes_p.FT[(k + i) % 4], hidx=(i + n) % 5, tools=tl, tv0='abcd'[(i + n) % 4], tv1='abcd'[(i + 1) % 4],
+                          nav='premium', dir=dr, hero='p_' + dr, mbar=recipes_p.MBAR[(i + n) % 8], ft=recipes_p.FT[(k + i) % 4], hidx=(i + n) % 3, tools=tl, tv0='abcd'[(i + n) % 4], tv1='abcd'[(i + 1) % 4],
                           svc=recipes_p.SVC[dr][k % 3], proc=['line', 'cards', 'big', 'vert'][(i + k) % 4], proof=['cards', 'quote', 'wall'][(i + 2 * k) % 3], br=['wall', 'pills', 'ticker'][i % 3],
                           faq=['side', 'stack'][i % 2], book=['split', 'card', 'wizard', 'strip'][(i + k) % 4], order=order, hw=d['hw'], ht=d['ht'], dark=d['dark'], premium=True,
                           cta='Teklif alın', imv=['im', 'im2', 'im3'][(i + n) % 3], shopplain=sec in PLAIN, shopt='Ürünler',

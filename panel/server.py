@@ -3037,6 +3037,8 @@ import siteedit
 siteedit.register(api_router, db, {"require_admin": require_admin, "themes": _kur.THEMES, "portal_chip": domains.portal_chip})
 import temafoto
 temafoto.register(api_router)
+import anasite
+anasite.register(api_router, db, {"require_admin": require_admin})
 import sahip
 sahip.register(app, api_router, db, {"require_admin": require_admin, "get_current_user": get_current_user, "create_access_token": create_access_token, "hash_password": hash_password})
 gsc_auto.register(api_router, db, {"require_admin": require_admin, "JWT_SECRET": JWT_SECRET})

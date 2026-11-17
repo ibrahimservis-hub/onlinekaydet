@@ -414,10 +414,31 @@ def _site_file(path):
     return None
 
 
+_OVR = os.environ.get("ANASITE_DIR") or os.path.join(os.path.dirname(os.path.abspath(__file__)), "anasite_ozel")
+
+
+def _ovr_file(path):
+    """Yönetim panelinden düzenlenen ana site sayfası / yüklenen görsel."""
+    if path.startswith("/anasite-gorsel/"):
+        fn = os.path.basename(path)
+        fp = os.path.join(_OVR, "img", fn)
+        return fp if os.path.isfile(fp) else None
+    if path.startswith(_RESERVED):
+        return None
+    cand = "index.html" if path in ("/", "") else path.lstrip("/")
+    cand = os.path.basename(cand)
+    for c in (cand, cand + ".html"):
+        fp = os.path.join(_OVR, c)
+        if c.endswith(".html") and os.path.isfile(fp):
+            return fp
+    return None
+
+
 def _serve_site(environ, start_response):
     if environ.get("REQUEST_METHOD") not in ("GET", "HEAD"):
         return None
-    fp = _site_file(environ.get("PATH_INFO", "/") or "/")
+    _p = environ.get("PATH_INFO", "/") or "/"
+    fp = _ovr_file(_p) or _site_file(_p)
     if not fp:
         return None
     ctype = _mt.guess_type(fp)[0] or "application/octet-stream"
