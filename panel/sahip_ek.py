@@ -151,6 +151,32 @@ def register(api_router, db, deps):
         await M().firm_notes.delete_one({"id": nid, "fid": fid})
         return {"ok": True}
 
+    DEMO_ORNEK = ("customers", "devices", "service_jobs", "cash_transactions", "bookings", "yp_customers", "yp_staff", "shop_products", "shop_categories", "yp_products")
+
+    @api_router.post("/admin/firms/{fid}/demo-donustur")
+    async def demo_donustur(fid: str, p: dict, me: dict = adm):
+        """Demo firmayı gerçek müşteriye çevirir: 'demo' işareti kalkar (demo temizliği silmesin), isteğe bağlı örnek veriler silinir.
+        Paket, süre, ad, giriş bilgisi bu uçtan önce firma güncelleme ucuyla ayarlanır."""
+        need_main()
+        f = await M().firms.find_one({"id": fid}, {"_id": 0})
+        if not f:
+            raise HTTPException(404, "Firma bulunamadı")
+        if not f.get("demo"):
+            raise HTTPException(409, "Bu firma zaten demo değil")
+        fdb = db.firm(f["db"])
+        silinen = {}
+        if p.get("temizle"):
+            for col in DEMO_ORNEK:
+                r = await getattr(fdb, col).delete_many({})
+                silinen[col] = getattr(r, "deleted_count", 0)
+            demo_ustalar = await fdb.users.find({"role": "technician", "email": {"$regex": r"@demo\.onlinekaydet\.com$"}}, {"_id": 0, "email": 1}).to_list(50)
+            for u in demo_ustalar:
+                await M().firm_logins.delete_many({"email": u["email"]})
+            r = await fdb.users.delete_many({"role": "technician", "email": {"$regex": r"@demo\.onlinekaydet\.com$"}})
+            silinen["users"] = getattr(r, "deleted_count", 0)
+        await M().firms.update_one({"id": fid}, {"$set": {"demo": False, "converted_at": _now(), "converted_from_demo": True}})
+        return {"ok": True, "silinen": silinen}
+
     @api_router.delete("/admin/talepler/{lid}")
     async def talep_sil(lid: str, _: dict = adm):
         need_main()

@@ -39,6 +39,13 @@ with sync_playwright() as pw:
     pg.locator("button:has-text('Örnek randevu ekle')").click(); pg.wait_for_timeout(2500)
     n = pg.evaluate("fapi('%s','/yp/boot').then(b=>fapi('%s','/yp/appts?a='+b.today+'&b='+b.today)).then(r=>r.rows.length)" % (ids[0], ids[0]))
     print("örnek randevu", n, "| toast:", pg.inner_text("body")[-120:].replace("\n"," "))
+    # demo firmayı satın almaya çevir (arayüz)
+    pg.evaluate("fetch('/api/public/demo',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:'Cevir Test',phone:'05325550044',sector:'kuafor'})})"); pg.wait_for_timeout(2500)
+    did = pg.evaluate("api('/admin/firms').then(d=>d.firms.filter(f=>f.demo).map(f=>f.id)[0])")
+    pg.evaluate("location.hash='#firma/%s'" % did); pg.wait_for_timeout(1800)
+    pg.locator("button:has-text('Satın almaya çevir')").click(); pg.fill("#dd_n", "Çevrilen Firma"); pg.fill("#dd_d", "45"); pg.click("[data-ok]"); pg.wait_for_timeout(2500)
+    fz = pg.evaluate("api('/admin/firms').then(d=>d.firms.find(f=>f.id=='%s'))" % did)
+    if fz.get("demo") or fz.get("name") != "Çevrilen Firma": bad.append(("çevirme", fz.get("demo"), fz.get("name")))
     # kurulum adımlarında not ekle / sil
     pg.evaluate("location.hash='#kurulum'"); pg.wait_for_timeout(1500)
     pg.locator("details summary").first.click(); pg.locator("button:has-text('Not ekle')").first.click(); pg.fill("#m_t", "Logo bekleniyor"); pg.click("[data-ok]"); pg.wait_for_timeout(1500)

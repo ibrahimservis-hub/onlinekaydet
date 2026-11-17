@@ -190,7 +190,7 @@ def register(api_router, db, deps):
         f = {"id": fid, "db": db.firm_db_name(fid), "name": company, "login_email": email, "contact_name": name, "phone": phone, "address": "",
              "tax_no": "", "tax_office": "", "features": {}, "status": "aktif", "created_at": _now(), "logo": "",
              "expires_at": (datetime.now(timezone.utc) + timedelta(days=DEMO_DAYS)).isoformat(), "package": "kurumsal", "modules": list(mods),
-             "sector": key, "demo": True, "demo_phone": phone}
+             "sector": key, "demo": True, "demo_phone": phone, "demo_firma": " ".join(str(payload.get("firm") or "").split())[:80]}
         fdb = db.firm(f["db"])
         await fdb.users.insert_one({"id": str(uuid.uuid4()), "email": email, "password_hash": hash_password(pw), "name": name, "phone": phone,
                                     "role": "admin", "commission_percent": 0.0, "is_active": True, "firm_owner": True, "created_at": _now()})
