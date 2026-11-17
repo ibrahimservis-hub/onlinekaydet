@@ -74,7 +74,7 @@ def _phone(v):
 PACKMAP = {"oto": "oto_servis", "emlak": "emlakci", "surucu": "surucu_kursu", "kurs": "etut_merkezi", "fitness": "spor_salonu",
            "saglik": "dis_klinigi", "organizasyon": "dugun_salonu"}
 # Müşteriye ne denir (yalnız farklı olanlar; yoksa "Müşteri") ve çoğulu
-MUSTERI = {"avukat": ("Müvekkil", "Müvekkiller"), "dis_klinigi": ("Hasta", "Hastalar"), "fizyoterapi": ("Hasta", "Hastalar"),
+MUSTERI = {"avukat": ("Müvekkil", "Müvekkiller"), "muhasebe": ("Mükellef", "Mükellefler"), "dis_klinigi": ("Hasta", "Hastalar"), "fizyoterapi": ("Hasta", "Hastalar"),
            "veteriner": ("Hasta Sahibi", "Hasta Sahipleri"), "psikolog": ("Danışan", "Danışanlar"), "diyetisyen": ("Danışan", "Danışanlar"),
            "aile_danisman": ("Danışan", "Danışanlar"), "surucu_kursu": ("Kursiyer", "Kursiyerler"), "src_kursu": ("Kursiyer", "Kursiyerler"),
            "dil_okulu": ("Öğrenci", "Öğrenciler"), "muzik_kursu": ("Öğrenci", "Öğrenciler"), "etut_merkezi": ("Öğrenci", "Öğrenciler"),

@@ -127,6 +127,22 @@ def register(api_router, db, deps):
         await M().leads.update_one({"id": lid}, {"$pull": {"notlar": {"id": nid}}})
         return {"ok": True}
 
+    @api_router.get("/admin/firms/{fid}/terimler")
+    async def firma_terimler(fid: str, _: dict = adm):
+        """Firmanın sektörüne göre kişi/iş/müşteri adları (yönetim sekmeleri müşterinin kendi dilini kullansın)."""
+        need_main()
+        f = await M().firms.find_one({"id": fid}, {"_id": 0, "sector": 1})
+        if not f:
+            raise HTTPException(404, "Firma bulunamadı")
+        import sektor_dil
+        import yp
+        sec = f.get("sector") or ""
+        r = sektor_dil.ROWS.get(sec) or {}
+        t = yp.terms(sec) if sec else {}
+        is2 = (r.get("is") or "").partition("/")[2] or (r.get("is") or "")
+        return {"family": sektor_dil.family(sec) or "servis", "isler": is2 or "Servis Kayıtları", "musteriler": t.get("musteriler") or "Müşteriler",
+                "kisiler": (r.get("kisi") or "").partition("/")[2] or t.get("kisiler") or "Teknisyenler"}
+
     @api_router.get("/admin/firms/{fid}/notlar")
     async def firma_notlar(fid: str, _: dict = adm):
         need_main()

@@ -293,8 +293,39 @@ def register(api_router, db, deps):
             raise HTTPException(status_code=404, detail="Firma bulunamadı")
         return f
 
+    async def stats_randevu(fdb):
+        """Randevuyla çalışan işlerde (kuaför, klinik...) sayılar servis kaydından değil randevu defterinden gelir."""
+        by, cust, rev, rev_m, jobs_m, last = {}, set(), 0.0, 0.0, 0, ""
+        ay = datetime.now(timezone(timedelta(hours=3))).date().isoformat()[:7]
+        for b in await fdb.bookings.find({}, {"_id": 0}).to_list(200000):
+            st = b.get("stage") or {"bekliyor": "talep", "onaylandi": "bekliyor", "tamamlandi": "tamamlandi"}.get(b.get("status"), "iptal")
+            by[st] = by.get(st, 0) + 1
+            if b.get("phone"):
+                cust.add(b["phone"])
+            last = max(last, str(b.get("created_at") or ""))
+            for p in b.get("payments") or []:
+                try:
+                    a = float(p.get("amount") or 0)
+                except (TypeError, ValueError):
+                    a = 0.0
+                rev += a
+                if str(p.get("at") or "")[:7] == ay:
+                    rev_m += a
+            if st == "tamamlandi" and str(b.get("date") or "")[:7] == ay:
+                jobs_m += 1
+        done = by.get("tamamlandi", 0)
+        return {"by_status": by, "open": by.get("bekliyor", 0) + by.get("talep", 0), "done": done, "total": sum(by.values()), "customers": len(cust),
+                "last_activity": last, "revenue_total": round(rev, 2), "revenue_month": round(rev_m, 2), "jobs_month": jobs_m,
+                "avg_ticket": round(rev / done, 2) if done else 0, "cancelled": by.get("iptal", 0) + by.get("gelmedi", 0)}
+
     async def stats(f):
         fdb = db.firm(f["db"])
+        try:
+            import sektor_dil
+            if sektor_dil.family(f.get("sector") or "") == "randevu":
+                return await stats_randevu(fdb)
+        except Exception:                                  # noqa: BLE001
+            pass
         by = {}
         async for r in fdb.service_jobs.aggregate([{"$group": {"_id": "$status", "n": {"$sum": 1}}}]):
             by[r["_id"] or "yeni"] = r["n"]
@@ -314,6 +345,11 @@ def register(api_router, db, deps):
         out = []
         for f in await db.main().firms.find({"status": {"$ne": "silindi"}}, {"_id": 0}).sort("created_at", -1).to_list(500):
             f["stats"] = await stats(f)
+            try:
+                import sektor_dil
+                f["family"] = sektor_dil.family(f.get("sector") or "") or "servis"
+            except Exception:                              # noqa: BLE001
+                f["family"] = "servis"
             f["has_logo"] = bool(f.pop("logo", ""))
             f["expired"] = expired(f)
             f["users"] = await db.main().firm_users.find({"firm_id": f["id"]}, {"_id": 0, "password_hash": 0}).sort("created_at", 1).to_list(10)

@@ -186,7 +186,10 @@ def register(api_router, db, deps):
         email = f"demo{n}@demo.onlinekaydet.com"
         pw = "".join(random.choice("abcdefghjkmnpqrstuvwxyz23456789") for _ in range(8))
         company = f"Demo {n}"
-        mods = firms.ALL_MODS
+        import sektor_dil as _sdm
+        mods = list(firms.ALL_MODS)
+        if _sdm.family(key) == "siparis" or key == "eticaret":      # mağaza/sipariş işlerinde e-ticaret ekranları demoda da açık gelsin
+            mods.append("eticaret")
         f = {"id": fid, "db": db.firm_db_name(fid), "name": company, "login_email": email, "contact_name": name, "phone": phone, "address": "",
              "tax_no": "", "tax_office": "", "features": {}, "status": "aktif", "created_at": _now(), "logo": "",
              "expires_at": (datetime.now(timezone.utc) + timedelta(days=DEMO_DAYS)).isoformat(), "package": "kurumsal", "modules": list(mods),
@@ -211,6 +214,9 @@ def register(api_router, db, deps):
         await fdb.app_settings.update_one({"_id": "firm_logo"}, {"$set": {"data": ""}}, upsert=True)
         await fdb.app_settings.update_one({"_id": "firm"}, {"$set": {"firm_id": fid, "name": company, "features": {}}}, upsert=True)
         await db.main().firms.insert_one(dict(f))
+        if "eticaret" in mods:
+            await fdb.app_settings.update_one({"_id": "firm"}, {"$set": {"modules": list(mods)}}, upsert=True)
+            await fdb.app_settings.update_one({"_id": "site_features"}, {"$set": {"shop_enabled": True}}, upsert=True)
         await sektor.apply(fdb, key)
 
         # --- örnek veri: 2 usta, 5 müşteri, cihaz, 7 servis kaydı
@@ -283,6 +289,28 @@ def register(api_router, db, deps):
         except Exception:               # noqa: BLE001
             pass
 
+        if _sdm.family(key) == "siparis":
+            # mağaza/sipariş işlerinde Siparişler ekranı boş açılmasın: 3 örnek sipariş (demo müşterileriyle)
+            try:
+                prods = await fdb.shop_products.find({}, {"_id": 0}).sort("sort", 1).to_list(6)
+                for k, (stt, adet) in enumerate((("onaylandi", 1), ("kargoda", 2), ("teslim_edildi", 1))):
+                    if not prods:
+                        break
+                    pr, c = prods[k % len(prods)], custs[k % len(custs)]
+                    line = round(float(pr["price"]) * adet, 2)
+                    ship = 49.9
+                    await fdb.shop_orders.insert_one({
+                        "id": uuid.uuid4().hex[:12], "order_no": "SP-%d" % (1001 + k), "status": stt,
+                        "customer": {"name": c["name"], "phone": c["phone"], "email": "", "city": c.get("city", ""), "district": c.get("district", ""), "address": c.get("address", "")},
+                        "note": "Örnek sipariş (demo)", "items": [{"product_id": pr["id"], "name": pr["name"], "brand": pr.get("brand", ""), "model": "", "price": float(pr["price"]), "qty": adet,
+                                                                    "line_total": line, "image": (pr.get("images") or [""])[0], "variant_id": ""}],
+                        "subtotal": line, "shipping": ship, "cod_fee": 0.0, "total": round(line + ship, 2), "account_id": "", "phone_key": c["phone"][-10:],
+                        "admin_note": "", "tracking_no": "" if stt == "onaylandi" else "DEMO%06d" % (k + 1), "carrier": "" if stt == "onaylandi" else "Yurtiçi Kargo",
+                        "payment": {"method": "havale", "label": "Havale / EFT", "status": "odendi", "amount": round(line + ship, 2)},
+                        "history": [{"status": stt, "at": _now(), "note": "Örnek"}], "created_at": _now(), "updated_at": _now(), "external": True})
+            except Exception:
+                pass
+
         # satış listesine düş (sahip Talepler'de görür)
         try:
             await db.main().leads.insert_one({"id": str(uuid.uuid4()), "name": name, "phone": phone, "firm": company, "sector": sec["name"], "form": "demo-hesabi",
@@ -292,6 +320,7 @@ def register(api_router, db, deps):
             pass
         import sektor_dil as _sd
         if _sd.family(key) == "randevu":
+            await fdb.app_settings.update_one({"_id": "growth"}, {"$set": {"booking.enabled": True}}, upsert=True)   # demo sitesinden online randevu denenebilsin
             # randevulu sektörlerde takvim boş görünmesin: bugün ve yarın için örnek randevular (müşteri adları demo müşterileri)
             try:
                 import yp as _yp

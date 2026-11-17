@@ -202,3 +202,25 @@ DEMO_URUN = {
 
 for _k, _v in _cok.demo_meta().items():
     DEMO_META.setdefault(_k, _v)
+
+
+# Mağaza/sipariş işlerinin demo hesabı boş vitrinle açılmasın: her sektöre 6 örnek ürün (ad, marka, kategori, fiyat, eski fiyat, stok).
+# Hepsi örnektir; ürünün açıklaması "Örnek ürün" der, firma kendi ürününü yükleyince silinir.
+DEMO_URUN.update({
+    "market": [("Zeytinyağı 1 lt", "Örnek", "Kahvaltılık", 289, 0, 40), ("Tam buğday ekmeği", "Örnek", "Fırın", 22, 0, 60), ("Süt 1 lt", "Örnek", "Süt ürünleri", 34, 0, 80),
+               ("Çay 500 gr", "Örnek", "İçecek", 165, 189, 35), ("Makarna 500 gr", "Örnek", "Bakliyat", 29, 0, 90), ("Deterjan 2 kg", "Örnek", "Temizlik", 245, 289, 25)],
+    "pastane": [("Çikolatalı pasta", "Örnek", "Pastalar", 650, 0, 8), ("Cheesecake dilim", "Örnek", "Tatlılar", 120, 0, 24), ("Kuru pasta 500 gr", "Örnek", "Kuru pasta", 280, 0, 30),
+                ("Doğum günü pastası", "Örnek", "Pastalar", 950, 1100, 6), ("Baklava 1 kg", "Örnek", "Tatlılar", 1250, 0, 12), ("Sütlü kurabiye", "Örnek", "Kuru pasta", 190, 0, 40)],
+    "cicekci": [("Kırmızı gül buketi", "Örnek", "Buketler", 750, 0, 15), ("Orkide saksı", "Örnek", "Saksı çiçekleri", 890, 990, 10), ("Mevsim çiçekleri", "Örnek", "Buketler", 520, 0, 20),
+                ("Kutuda papatya", "Örnek", "Çiçek kutuları", 640, 0, 12), ("Sukulent set", "Örnek", "Saksı çiçekleri", 360, 0, 25), ("Çiçek ve çikolata", "Örnek", "Hediye setleri", 980, 0, 9)],
+    "mobilya": [("Tekli koltuk", "Örnek", "Oturma grubu", 7900, 8900, 6), ("Yemek masası", "Örnek", "Yemek odası", 12500, 0, 4), ("Kitaplık", "Örnek", "Depolama", 4300, 0, 9),
+                ("TV ünitesi", "Örnek", "Oturma grubu", 5800, 6400, 7), ("Baza ve yatak", "Örnek", "Yatak odası", 16900, 0, 3), ("Çalışma masası", "Örnek", "Ofis", 3900, 0, 11)],
+    "lokanta": [("Karışık ızgara", "Örnek", "Ana yemek", 420, 0, 99), ("Mercimek çorbası", "Örnek", "Çorba", 85, 0, 99), ("Mevsim salata", "Örnek", "Salata", 120, 0, 99),
+                ("Künefe", "Örnek", "Tatlı", 160, 0, 99), ("Ayran", "Örnek", "İçecek", 35, 0, 99), ("Lahmacun", "Örnek", "Ana yemek", 150, 0, 99)],
+    "catering": [("Kokteyl menüsü (kişi)", "Örnek", "Menüler", 520, 0, 99), ("Toplantı ikram paketi", "Örnek", "Paketler", 340, 0, 99), ("Açık büfe (kişi)", "Örnek", "Menüler", 780, 850, 99),
+                 ("Tatlı standı", "Örnek", "Ek hizmetler", 4200, 0, 99), ("Servis personeli (saat)", "Örnek", "Ek hizmetler", 280, 0, 99), ("Kahve molası paketi", "Örnek", "Paketler", 190, 0, 99)],
+    "matbaa": [("Kartvizit 1000 adet", "Örnek", "Kartvizit", 650, 0, 99), ("Broşür 5000 adet", "Örnek", "Broşür", 2900, 3300, 99), ("Katalog 32 sayfa", "Örnek", "Katalog", 5400, 0, 99),
+               ("Afiş 50x70", "Örnek", "Afiş", 95, 0, 99), ("Dijital baskı kupa", "Örnek", "Promosyon", 120, 0, 99), ("Etiket rulo", "Örnek", "Etiket", 780, 0, 99)],
+    "kuyumcu_saat": [("Çelik kordonlu saat", "Örnek", "Saat", 3400, 3900, 7), ("Pırlanta tektaş", "Örnek", "Yüzük", 18500, 0, 3), ("Altın bileklik", "Örnek", "Bileklik", 9800, 0, 5),
+                     ("Gümüş kolye", "Örnek", "Kolye", 950, 0, 14), ("Saat pili değişimi", "Örnek", "Servis", 150, 0, 99), ("Çocuk saati", "Örnek", "Saat", 780, 0, 10)],
+})
