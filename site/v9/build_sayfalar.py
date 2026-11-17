@@ -250,7 +250,7 @@ for k,ad in SEKT:
     page('sektor-%s.html'%k.replace('_','-'),'%s İçin Web Sitesi ve İş Takip Programı | OnlineKaydet'%uzun,'%s için hazır web sitesi teması, randevu, kasa ve iş takibi. Ücretsiz deneyin.'%uzun,body)
 lst=''.join('<a href="%s">%s</a>'%(sektor_url(k),html.escape(a)) for k,a in SEKT)
 page('tum-sektorler.html','Tüm Sektörler (%d iş kolu) | OnlineKaydet'%len(SEKT),'OnlineKaydet’in hazır tema ve panel sunduğu %d iş kolunun tam listesi.'%len(SEKT),
- B('ts','Tüm sektörler','%d iş kolu için hazır'%len(SEKT),'Mesleğinizi seçin; temayı, kelimeleri ve ekranları görün.')+'<section class="sec"><div class="w"><div class="slst">'+lst+'</div></div></section>'+CTA+SON)
+ B('ts','Tüm sektörler','%d iş kolu için hazır'%len(SEKT),'Mesleğinizi seçin; temayı, kelimeleri ve ekranları görün.')+'<section class="sec"><div class="w"><div class="slst">'+lst+'</div></div></section>'+'<section class="sec"><div class="w"><h2>Program türüne göre</h2><div class="slst"><a href="/servis-takip-programi.html">Servis takip programı</a><a href="/randevu-programi.html">Randevu programı</a><a href="/kayit-takip-programi.html">Kayıt ve ders takip programı</a><a href="/musteri-takip-programi.html">Müşteri ve iş takip programı</a><a href="/siparis-rezervasyon-programi.html">Sipariş ve rezervasyon programı</a><a href="/rezervasyon-programi.html">Rezervasyon programı</a><a href="/stok-siparis-programi.html">Stok ve sipariş programı</a></div></div></section>'+CTA+SON)
 FIRMA='Moda Ekru E-Ticaret Hizmetleri Tekstil Sanayi ve Ticaret Ltd. Şti.'
 def yasal(slug,ad,desc,icerik):
     page(slug,ad+' | OnlineKaydet',desc,B('y',ad,ad,desc)+'<section class="sec"><div class="w"><div class="yz">'+icerik+'</div></div></section>'+SON)
