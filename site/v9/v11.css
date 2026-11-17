@@ -180,3 +180,6 @@ footer.alt2 .yas{display:flex;flex-wrap:wrap;gap:6px 20px;margin-top:18px;paddin
 /* logo oranı: width özniteliği yüksekliği ezip logoyu geriyordu */
 img[src*="/logo-"]{width:auto!important;max-width:100%;object-fit:contain}
 .alt2 img[src*="/logo-"]{height:28px}
+footer.alt2 .sos a{background:#fff}
+footer.alt2 .sos a svg{width:20px;height:20px;max-width:20px;display:block}
+.sos svg{width:20px;height:20px}
