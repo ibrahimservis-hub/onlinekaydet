@@ -258,7 +258,13 @@ CSS = """<style data-spx-auto>
 .spx-ph{background:var(--sf);border-bottom:1px solid var(--ln);padding:clamp(44px,7vw,92px) 0 clamp(28px,4vw,52px)}
 .spx-ph h1{margin:10px 0 0;font-family:var(--fd);font-weight:var(--hw);letter-spacing:var(--ht);font-size:clamp(30px,5vw,54px);line-height:1.1;color:var(--hc,var(--ink))}
 .spx-ph p{margin:14px 0 0;max-width:660px;color:var(--mut);font-size:1.05rem}
-.spx-c{max-width:960px}
+.spx-ph .w.hi{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:clamp(24px,4vw,64px);align-items:center}
+.spx-hi{margin:0;border-radius:var(--r);overflow:hidden;aspect-ratio:4/3;background:var(--sf)}.spx-hi img{width:100%;height:100%;object-fit:cover;display:block}
+.spx-ab{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:clamp(22px,4vw,56px);align-items:start}.spx-ab figure{margin:0;display:grid;gap:14px}.spx-ab img{width:100%;border-radius:var(--r);display:block;aspect-ratio:4/3;object-fit:cover}
+.spx-ki{padding:0;overflow:hidden}.spx-ki img{width:100%;aspect-ratio:16/10;object-fit:cover;display:block}.spx-ki b,.spx-ki span{padding-left:22px;padding-right:22px}.spx-ki b{margin-top:18px}.spx-ki span{padding-bottom:22px}
+.spx-sv{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.8fr);gap:clamp(22px,4vw,56px);align-items:start}.spx-sv img{width:100%;border-radius:var(--r);display:block;aspect-ratio:4/3;object-fit:cover;position:sticky;top:96px}
+@media(max-width:800px){.spx-ph .w.hi,.spx-ab,.spx-sv{grid-template-columns:1fr}.spx-hi{order:-1;aspect-ratio:16/10}.spx-sv img{position:static}}
+.spx-c{max-width:960px}.spx-c.wide{max-width:1180px}
 .spx-c p{margin:0 0 16px;line-height:1.75;font-size:1.05rem}
 .spx-c h2{font-family:var(--fd);font-weight:var(--hw);letter-spacing:var(--ht);font-size:clamp(22px,3vw,30px);margin:34px 0 12px}
 .spx-g{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:18px}
@@ -1275,6 +1281,14 @@ def _cta(ctx):
     return '<div class="spx-cta"><b>Bize ulaşın, size dönelim</b><div class="row">%s</div></div>' % "".join(btn)
 
 
+def _imgs(ctx):
+    try:
+        import temafoto
+        return temafoto.sector_imgs(ctx.get("sector"))
+    except Exception:                                               # noqa: BLE001
+        return []
+
+
 def _page_body(ctx, pg, idx):
     p, name, noun = ctx["p"], ctx["name"], ctx["p"]["noun"]
     city = (ctx.get("city") or "").strip()
@@ -1283,9 +1297,13 @@ def _page_body(ctx, pg, idx):
     if k == "about":
         txt = p.get("about") or ("%s, %s alanında hizmet veren bir servis firmasıdır. Arızayı önce yerinde tespit eder, yapılacak işlemi ve ücreti size anlatır, onayınızla başlarız.\n\n"
                                  "Aradığınızda bilgi verir, uygun saati birlikte belirleriz. Yaptığımız işlerin kaydı tutulur; sorunuz olursa bize her zaman ulaşabilirsiniz." % (name, noun.lower() + (" (" + city + ")" if city else "")))
+        im = _imgs(ctx)
+        if im:
+            return "", '<div class="spx-ab"><div>%s</div><figure><img src="%s" alt="%s" loading="lazy"><img src="%s" alt="%s" loading="lazy"></figure></div>' % (paras(txt), E(im[1]), E(name), E(im[2]), E(name))
         return "", paras(txt)
     if k == "services":
-        cards = "".join('<a class="spx-k" href="/%s"><b>%s</b><span>%s</span></a>' % (sv_links[i]["slug"], E(s["t"]), E(s.get("d") or "")) for i, s in enumerate(p["services"]) if i in sv_links)
+        im = _imgs(ctx)
+        cards = "".join('<a class="spx-k%s" href="/%s">%s<b>%s</b><span>%s</span></a>' % (" spx-ki" if im else "", sv_links[i]["slug"], ('<img src="%s" alt="" loading="lazy">' % E(im[i % 3])) if im else "", E(s["t"]), E(s.get("d") or "")) for i, s in enumerate(p["services"]) if i in sv_links)
         return "Hizmetlerimiz", '<div class="spx-g">%s</div>' % cards
     if k == "gallery":
         return "Çalışmalarımızdan", '<div class="spx-gal">%s</div>' % "".join('<img src="%s" alt="%s" loading="lazy">' % (E(ctx["img"](g["k"])), E(name)) for g in p["gallery"])
@@ -1328,6 +1346,9 @@ def _page_body(ctx, pg, idx):
         body += paras("%s olarak %s için arayabilir veya WhatsApp'tan yazabilirsiniz. Önce sorunu dinler, gerekiyorsa yerinde inceler, yapılacak işlemi ve ücreti onayınızla başlamadan söyleriz." % (name, s["t"].lower()))
         if city:
             body += paras("%s ve çevresinde hizmet veriyoruz." % city)
+        im = _imgs(ctx)
+        if im:
+            body = '<div class="spx-sv"><div>%s</div><img src="%s" alt="%s" loading="lazy"></div>' % (body, E(im[pg["idx"] % 3]), E(s["t"]))
         return "", body + ('<h2>Diğer hizmetlerimiz</h2><div class="spx-rl">%s</div>' % others if others else "")
     if k == "region":
         r = p["regions"][pg["idx"]]
@@ -1354,8 +1375,12 @@ def render_page(home_html, ctx, slug):
 
 def assemble(home_html, ctx, title, content, kind="page", slug="", extra=""):
     """Ana sayfanın menü + alt bilgi + mobil çubuğuyla, verilen içerikten sayfa kurar."""
-    main = ('<div class="ed" data-nm="İçerik"><section class="spx-ph"><div class="w"><span class="eyebrow">%s</span><h1>%s</h1></div></section>'
-            '<section class="sec"><div class="w spx-c">%s%s</div></section></div>' % (E(ctx["name"]), E(title), content, _cta(ctx)))
+    im = _imgs(ctx)
+    hi = im[sum(map(ord, slug or title)) % 3] if im and kind in ("about", "services", "process", "faq", "regions", "region", "service", "contact", "gallery") else ""
+    main = ('<div class="ed" data-nm="İçerik"><section class="spx-ph"><div class="w%s"><div><span class="eyebrow">%s</span><h1>%s</h1></div>%s</div></section>'
+            '<section class="sec"><div class="w spx-c%s">%s%s</div></section></div>'
+            % (" hi" if hi else "", E(ctx["name"]), E(title), ('<figure class="spx-hi"><img src="%s" alt="%s" loading="eager"></figure>' % (E(hi), E(title))) if hi else "",
+               " wide" if kind in ("about", "services", "service") else "", content, _cta(ctx)))
     return assemble_mid(home_html, ctx, title, [["İçerik", main]], kind, slug, extra)
 
 

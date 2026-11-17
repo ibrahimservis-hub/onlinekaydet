@@ -153,6 +153,9 @@ def build(r):
     html = (f'<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>{x.nm} · {x.c["label"]} servisi · {x.city}</title>'
             f'<meta name="description" content="{desc}"><meta name="theme-color" content="{dk}"><style>{css}</style></head><body class="{body_cls}"><input type="checkbox" id="mn" class="hid" aria-hidden="true">'
             + ''.join(parts) + f'<script>{js}</script></body></html>')
+    if r.get('premium') and os.environ.get('OK_ATOLYE','1')=='1':
+        import atolye_hero
+        html, _ = atolye_hero.apply(html)
     return html, x
 
 
