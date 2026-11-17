@@ -148,3 +148,5 @@ footer.alt2 .kart{display:flex;gap:8px}
 .bk a .bkim{aspect-ratio:16/9;overflow:hidden;border-radius:10px;margin:-6px -6px 12px;background:#e9edf2}
 .bk a .bkim img{width:100%;height:100%;object-fit:cover;object-position:top left;display:block}
 .bk{margin-top:26px}
+
+.sssd{border:1px solid #e4e7ec;border-radius:12px;padding:14px 18px;margin:10px 0;background:#fff}.sssd summary{cursor:pointer;font-weight:700;color:#0f172a}.sssd p{margin:10px 0 0}

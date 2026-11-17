@@ -231,6 +231,13 @@ DET={r[0]:r for r in _c2.R}
 CTA=('<section class="sec"><div class="w"><div class="yz"><h2 style="margin-top:0">Hemen deneyin</h2><p>Demo hesabını 7 gün ücretsiz kullanın ya da formu doldurun, sizi arayalım.</p>'
  '<p><a class="btn dolu" href="/demo.html">Ücretsiz deneyin</a> <a class="btn bos2" href="/iletisim.html#teklif">Teklif alın</a></p></div></div></section>')
 GEN_OZ=[('Müşteri ve iş kaydı','Her müşteri ve iş tek kayıtta durur, geçmişi görürsünüz.'),('Randevu ve takvim','Randevuları takvimden yönetir, hatırlatma mesajı gönderirsiniz.'),('Kasa ve raporlar','Gelir, gider ve borç takibi panelde, raporlar tek ekranda.'),('Web siteniz','Sektörünüze hazır tema; yazı ve resimleri panelden değiştirirsiniz.')]
+import seo_uret as _seo
+def _seo_link(k,ad,d):
+    t=_seo.MAN.get(k) or (d[2] if d else 'servis')
+    if t not in _seo.PROG: t='servis'
+    s=k.replace('_','-')
+    L=[('/%s-%s.html'%(s,_seo.URL[t]),'%s %s'%(ad,_seo.PROG[t])),('/%s-muhasebe-programi.html'%s,'%s Muhasebe ve Kasa Programı'%ad),('/%s-web-sitesi.html'%s,'%s Web Sitesi'%ad)]
+    return '<section class="sec"><div class="w"><h2>%s için detaylı sayfalar</h2><div class="slst">%s</div></div></section>'%(html.escape(ad),''.join('<a href="%s">%s</a>'%(u,html.escape(x)) for u,x in L))
 for k,ad in SEKT:
     if k in SLUG_ONCE: continue
     d=DET.get(k)
@@ -239,7 +246,7 @@ for k,ad in SEKT:
     ish=d[7] if d else []
     kart_=''.join('<div class="fk"><span class="no">%02d</span><h3>%s</h3><p>%s</p></div>'%(i+1,html.escape(a),html.escape(t)) for i,(a,t) in enumerate(oz))
     chips=('<p style="margin-top:22px"><b>Panelde hazır işlem türleri:</b> '+' · '.join(html.escape(x) for x in ish)+'</p>') if ish else ''
-    body=B('s-'+k,uzun,'%s için web sitesi ve iş takibi'%uzun,'Sektörünüze hazır tema ve panel: kayıtlar, randevular, kasa ve web siteniz tek yerde.')+'<section class="sec"><div class="w"><div class="fg">'+kart_+'</div>'+chips+'</div></section>'+CTA+SON
+    body=B('s-'+k,uzun,'%s için web sitesi ve iş takibi'%uzun,'Sektörünüze hazır tema ve panel: kayıtlar, randevular, kasa ve web siteniz tek yerde.')+'<section class="sec"><div class="w"><div class="fg">'+kart_+'</div>'+chips+'</div></section>'+_seo_link(k,uzun,d)+CTA+SON
     page('sektor-%s.html'%k.replace('_','-'),'%s İçin Web Sitesi ve İş Takip Programı | OnlineKaydet'%uzun,'%s için hazır web sitesi teması, randevu, kasa ve iş takibi. Ücretsiz deneyin.'%uzun,body)
 lst=''.join('<a href="%s">%s</a>'%(sektor_url(k),html.escape(a)) for k,a in SEKT)
 page('tum-sektorler.html','Tüm Sektörler (%d iş kolu) | OnlineKaydet'%len(SEKT),'OnlineKaydet’in hazır tema ve panel sunduğu %d iş kolunun tam listesi.'%len(SEKT),
@@ -268,6 +275,7 @@ yasal('mesafeli-satis-iade.html','Mesafeli Satış ve İade Koşulları','Online
  '<h2>Uyuşmazlık</h2><p>Uyuşmazlıklarda Ticaret Bakanlığı’nca her yıl belirlenen parasal sınırlar dahilinde il ve ilçe tüketici hakem heyetleri ile tüketici mahkemeleri yetkilidir.</p>')
 
 
+SEO_SAYFA=_seo.uret(page,B,SON,CTA,SEKT,DET,sektor_url,SLUG_ONCE,BASE,S)
 # ---- bilgi bankası
 import bilgi_icerik as _bi
 BK=_bi.A
@@ -309,7 +317,7 @@ page('ara.html','Sitede Ara | OnlineKaydet','OnlineKaydet sitesinde ve bilgi ban
  '<form action="/ara.html" role="search" class="araf araf2"><input type="search" name="q" id="arasy" placeholder="Ne arıyorsunuz? Örn. ürün ekleme, randevu, Trendyol" autocomplete="off" aria-label="Ara"><button class="btn dolu" type="submit">Ara</button></form>'
  '<div class="arasik" id="arasik2">'+''.join('<a href="/ara.html?q=%s">%s</a>'%(html.escape(x),x) for x in SIK)+'</div><div id="arasonuc" class="arasonuc" aria-live="polite"></div></div></section>',robots='noindex,follow')
 import json as _j
-DISLA={'a-onizleme.html','ana-sayfa-astryx.html','yeni-ana-sayfa.html','temalar-live.html','404.html','ara.html'}
+DISLA=set(SEO_SAYFA)|{'a-onizleme.html','ana-sayfa-astryx.html','yeni-ana-sayfa.html','temalar-live.html','404.html','ara.html'}
 def metin(h):
     m=_re.search(r'<main[^>]*>(.*)</main>',h,_re.S);t=m.group(1) if m else h
     t=_re.sub(r'<(script|style|svg)[^>]*>.*?</\1>','',t,flags=_re.S)
@@ -331,3 +339,9 @@ for f in sorted(glob.glob(S+'/*.html')):
     idx.append({'u':'/' if n=='index.html' else '/'+n,'t':t,'d':d,'h':hs[:14],'x':tx[:2600],'k':KW.get(n,'')})
 open(H+'/arama.json','w',encoding='utf-8').write(_j.dumps(idx,ensure_ascii=False,separators=(',',':')))
 print('arama dizini',len(idx),'sayfa',os.path.getsize(H+'/arama.json')//1024,'KB')
+
+# ---- sitemap: SEO sayfaları
+_sm=open(S+'/sitemap.xml',encoding='utf-8').read()
+_ek=''.join('<url><loc>%s/%s</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>\n'%(BASE,n) for n in SEO_SAYFA if '/'+n not in _sm)
+if _ek: open(S+'/sitemap.xml','w',encoding='utf-8').write(_sm.replace('</urlset>',_ek+'</urlset>'))
+print('seo sayfa',len(SEO_SAYFA))
