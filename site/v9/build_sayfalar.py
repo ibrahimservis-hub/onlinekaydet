@@ -57,6 +57,14 @@ for k_ in list(P):
 head_raw=src[:src.index('<script type="application/ld+json">')]
 jsonld=src[src.index('<script type="application/ld+json">'):src.index('</script>',src.index('<script type="application/ld+json">'))+9]
 mbar=src[src.index('<div class="mbar">'):src.index('<script src="/v9/v9.js"')]
+APP_STORE_URL='';PLAY_URL=''   # mobil uygulama yayınlanınca buraya bağlantıyı yazın
+def _rozet(ad,alt,url,svg):
+    ic='<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">%s</svg>'%svg
+    ic_=('<a class="rz" href="%s" rel="noopener" target="_blank">%s<span><small>%s</small><b>%s</b></span></a>'%(url,ic,alt,ad)) if url else ('<span class="rz yak" aria-label="%s, yakında">%s<span><small>Yakında</small><b>%s</b></span></span>'%(ad,ic,ad))
+    return ic_
+STORE=('<div class="mag"><span class="mgb">Mobil uygulama</span>'
+ +_rozet('App Store','İndirin',APP_STORE_URL,'<rect x="6" y="2.5" width="12" height="19" rx="3"/><path d="M10.5 18.5h3"/>')
+ +_rozet('Google Play','Edinin',PLAY_URL,'<rect x="6" y="2.5" width="12" height="19" rx="3"/><path d="M10.5 18.5h3"/>')+'</div>')
 foot=('<footer class="alt2"><div class="w"><div class="g">'
  '<div class="f1"><img src="/logo-renkli-s.png" alt="OnlineKaydet" width="140" height="28"><p>Web sitesi, e-ticaret, randevu ve iş takibi tek panelde.</p>'
  '<div class="sos"><a href="#" onclick="return false" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1" fill="currentColor" stroke="none"/></svg></a>'
@@ -65,8 +73,9 @@ foot=('<footer class="alt2"><div class="w"><div class="g">'
  '<div><b>Ürün</b><a href="/temalar.html">Temalar</a><a href="/e-ticaret.html">E-ticaret</a><a href="/web-sitesi.html">Web sitesi editörü</a><a href="/is-takibi.html">Randevu ve iş takibi</a><a href="/fiyatlar.html">Paketler</a></div>'
  '<div><b>Sektörler</b><a href="/sektor-kombi.html">Teknik servis</a><a href="/sektor-kuafor.html">Kuaför</a><a href="/sektor-eticaret.html">E-ticaret</a><a href="/tum-sektorler.html">Tüm sektörler</a></div>'
  '<div><b>Kaynak</b><a href="/blog.html">Blog</a><a href="/entegrasyonlar.html">Entegrasyonlar</a><a href="/bilgi-bankasi.html">Bilgi bankası</a><a href="/destek.html">Destek</a><a href="/uye-girisi">Üye girişi</a></div>'
- '<div><b>Şirket</b><a href="/hakkimizda.html">Hakkımızda</a><a href="/iletisim.html">İletişim</a><a href="/kvkk.html">KVKK</a><a href="/gizlilik.html">Gizlilik</a><a href="/cerez-politikasi.html">Çerez politikası</a><a href="/kullanim-kosullari.html">Kullanım koşulları</a><a href="/mesafeli-satis-iade.html">Mesafeli satış ve iade</a></div>'
- '</div><div class="alt"><span>© 2026 OnlineKaydet</span><span class="kart" aria-label="Kabul edilen kartlar">'
+ '<div><b>Şirket</b><a href="/hakkimizda.html">Hakkımızda</a><a href="/iletisim.html">İletişim</a><a href="/bayilik.html">Bayilik</a><a href="/ozel-tasarim.html">Özel tasarım</a></div>'
+ '<div><b>Teknoloji ve güvenlik</b><a href="/altyapi-ve-teknoloji.html">Altyapı ve teknoloji</a><a href="/bilgi-ve-veri-guvenligi.html">Bilgi ve veri güvenliği</a><a href="/hesap-guvenligi.html">Hesap güvenliği</a><a href="/yedekleme-ve-denetim.html">Yedekleme ve denetim kaydı</a></div>'
+ '</div>'+STORE+'<div class="yas"><a href="/kvkk.html">KVKK aydınlatma metni</a><a href="/gizlilik.html">Gizlilik</a><a href="/cerez-politikasi.html">Çerez politikası</a><a href="/kullanim-kosullari.html">Kullanım koşulları</a><a href="/mesafeli-satis-iade.html">Mesafeli satış ve iade</a></div><div class="alt"><span>© 2026 OnlineKaydet</span><span class="kart" aria-label="Kabul edilen kartlar">'
  '<svg viewBox="0 0 64 40" width="52" height="32" role="img" aria-label="Visa"><rect width="64" height="40" rx="6" fill="#fff" stroke="#cfd6df"/><text x="32" y="27" text-anchor="middle" font-family="Arial,sans-serif" font-weight="800" font-style="italic" font-size="19" fill="#1a3a8f">VISA</text></svg>'
  '<svg viewBox="0 0 64 40" width="52" height="32" role="img" aria-label="Mastercard"><rect width="64" height="40" rx="6" fill="#fff" stroke="#cfd6df"/><circle cx="26" cy="20" r="11" fill="#eb001b"/><circle cx="38" cy="20" r="11" fill="#f79e1b"/><path d="M32 11.2a11 11 0 0 1 0 17.6 11 11 0 0 1 0-17.6z" fill="#ff5f00"/></svg></span></div></div></footer>')
 SEC={'temalar':'/temalar.html','eticaret':'/e-ticaret.html','editor':'/web-sitesi.html','yonetim':'/is-takibi.html','paketler':'/fiyatlar.html','sektorler':'/sektorler.html'}
@@ -74,7 +83,12 @@ NAV=[('Temalar','/temalar.html'),('E-ticaret','/e-ticaret.html'),('Web sitesi','
 def hdr(cur):
     a=lambda t,u,c='':'<a %shref="%s"%s>%s</a>'%(c,u,' aria-current="page"' if u==cur else '',t)
     nav=''.join(a(t,u) for t,u in NAV)
-    dr=''.join('<a class="m" style="--i:%d" href="%s"%s>%s</a>'%(i,u,' aria-current="page"' if u==cur else '',t) for i,(t,u) in enumerate(NAV+[('Özellikler','/ozellikler.html'),('İletişim','/iletisim.html')]))
+    def _g(ad,L,acik=False):
+        return '<details class="mg"%s><summary>%s</summary>%s</details>'%(' open' if acik else '',ad,''.join('<a class="m" href="%s"%s>%s</a>'%(u,' aria-current="page"' if u==cur else '',x) for x,u in L))
+    dr=(_g('Ürün',[('Temalar','/temalar.html'),('E-ticaret','/e-ticaret.html'),('Web sitesi','/web-sitesi.html'),('İş takibi','/is-takibi.html'),('Özellikler','/ozellikler.html')],True)
+       +_g('Sektörler',[('Tüm sektörler','/tum-sektorler.html'),('Servis takip programı','/servis-takip-programi.html'),('Randevu programı','/randevu-programi.html'),('Stok ve sipariş programı','/stok-siparis-programi.html')])
+       +_g('Öğrenin',[('Bilgi bankası','/bilgi-bankasi.html'),('Blog','/blog.html'),('Entegrasyonlar','/entegrasyonlar.html'),('Sitede ara','/ara.html')])
+       +_g('Fiyat ve destek',[('Paketler','/fiyatlar.html'),('Destek','/destek.html'),('İletişim','/iletisim.html'),('Bayilik','/bayilik.html')]))
     return ('<header class="ust"><div class="w"><a class="logo" href="/"><img src="/logo-acik-s.png" alt="OnlineKaydet" width="160" height="32"></a>'
      '<nav class="nav" aria-label="Ana menü">%s</nav><button class="arab" type="button" data-ara aria-label="Sitede ara"><svg viewBox=\"0 0 24 24\" width=\"20\" height=\"20\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" aria-hidden=\"true\"><circle cx=\"11\" cy=\"11\" r=\"6.5\"/><path d=\"M16 16l4.5 4.5\"/></svg></button><a class="gir" href="/uye-girisi">Üye girişi</a>'
      '<a class="btn bos kc" href="#teklif">Teklif alın</a><a class="btn fil kc" href="/demo.html">Ücretsiz deneyin</a>'
@@ -276,6 +290,41 @@ yasal('mesafeli-satis-iade.html','Mesafeli Satış ve İade Koşulları','Online
 
 
 SEO_SAYFA=_seo.uret(page,B,SON,CTA,SEKT,DET,sektor_url,SLUG_ONCE,BASE,S)
+# ---- altyapı, güvenlik ve özel tasarım sayfaları (yalnız footer bağlantılı)
+def kart(l): return ''.join('<div class="fk"><span class="no">%02d</span><h3>%s</h3><p>%s</p></div>'%(i+1,html.escape(a),html.escape(b)) for i,(a,b) in enumerate(l))
+def ul(l): return '<ul class="sxl">%s</ul>'%''.join('<li>%s</li>'%html.escape(x) for x in l)
+def ssd(q): return ''.join('<details class="sssd"><summary>%s</summary><p>%s</p></details>'%(html.escape(a),html.escape(b)) for a,b in q)
+def ldq(q):
+    import json as j
+    return '<script type="application/ld+json">'+j.dumps({'@context':'https://schema.org','@type':'FAQPage','mainEntity':[{'@type':'Question','name':a,'acceptedAnswer':{'@type':'Answer','text':b}} for a,b in q]},ensure_ascii=False)+'</script>'
+GNOT='<p class="sxy" style="margin-top:18px">Bu sayfa teknik bir özettir; hukuki taahhüt değildir. Panelin gerçek ayarlarına dayanır. ISO gibi bir sertifika iddiamız yoktur. Soru için <a href="/iletisim.html">bize yazın</a>.</p>'
+Q1=[('Panel hangi teknolojiyle çalışıyor?','Sunucu tarafı Python ve FastAPI ile yazıldı, veriler MongoDB’de tutulur. Panel tarayıcıdan açılır, kurulum gerekmez.'),('Tanıtım sitesi nasıl üretiliyor?','Sayfalar önceden üretilen HTML dosyalarıdır; bu yüzden hızlı açılır ve arama motorları kolay tarar.')]
+page('altyapi-ve-teknoloji.html','Altyapı ve Teknoloji | OnlineKaydet','OnlineKaydet’in kullandığı yazılım dilleri, veritabanı, entegrasyonlar ve çalışma şekli.',
+ B('at','<a href="/hakkimizda.html">Şirket</a> / Teknoloji','Altyapı ve teknoloji','Panelin ve sitenin hangi teknolojiyle çalıştığını açıkça yazıyoruz.')
+ +'<section class="sec"><div class="w"><div class="fg">'+kart([('Sunucu yazılımı','Python ve FastAPI ile yazılmış arka uç. İstekler REST arayüzünden geçer.'),('Veritabanı','Kayıtlar MongoDB’de tutulur. Toplu veri ve dosya içe aktarma desteklenir.'),('Arayüz','Panel ve site tarayıcıda çalışır. Telefon, tablet ve bilgisayarda aynı hesapla açılır.'),('Tanıtım sitesi','Önceden üretilen HTML sayfalar. JavaScript yalnızca arama, menü ve formlar için kullanılır.'),('Entegrasyonlar','SMS sağlayıcıları, pazaryerleri, kargo ve ödeme kuruluşları için bağlantı kartları. Hangilerinin hazır olduğu Entegrasyonlar sayfasında.'),('Raporlar ve belgeler','PDF belge, Excel dışa aktarma ve barkod/QR üretimi panelde yerleşiktir.')])+'</div>'+ul(['Dil ve çatı: Python, FastAPI','Veritabanı: MongoDB','Kimlik: bcrypt ile şifre, JWT oturum','Hata izleme: Sentry uyumlu','Bildirim: SMS ve e-posta sağlayıcı bağlantıları'])+GNOT+'</div></section>'
+ +'<section class="sec"><div class="w"><div class="yz"><h2 style="margin-top:0">Sık sorulan sorular</h2>'+ssd(Q1)+'</div></div></section>'+CTA+SON,ld_raw=ldq(Q1))
+Q2=[('Şifreler nasıl saklanıyor?','Şifreler bcrypt ile özetlenerek saklanır; düz metin olarak tutulmaz.'),('Veriler yedekleniyor mu?','Panelde elle ve otomatik yedek alma bulunur; sıkıştırılmış dosya olarak saklanır. Ayrıntı Yedekleme ve denetim kaydı sayfasında.'),('Güvenlik sertifikanız var mı?','Hayır, ISO gibi bir sertifika iddiamız yok. Panelde bulunan koruma özelliklerini yazıyoruz.')]
+page('bilgi-ve-veri-guvenligi.html','Bilgi ve Veri Güvenliği | OnlineKaydet','OnlineKaydet’te şifre, oturum, yetki, yedekleme ve kişisel veri güvenliği için uygulanan önlemler.',
+ B('bg','<a href="/hakkimizda.html">Şirket</a> / Güvenlik','Bilgi ve veri güvenliği','Hangi önlemlerin panelde gerçekten bulunduğunu sade bir dille anlatıyoruz.')
+ +'<section class="sec"><div class="w"><div class="fg">'+kart([('Şifre koruması','Şifreler bcrypt ile özetlenir. Panel şifrenizi düz metin olarak görmez.'),('Oturum','Girişten sonra imzalı oturum anahtarı (JWT) kullanılır.'),('Yetki ve roller','Yönetici rolleri ayrıdır; her rol yalnızca kendi bölümlerine girer.'),('Giriş koruma','Kısa sürede çok sayıda hatalı denemede hesap geçici kilitlenir.'),('İki adımlı doğrulama','Yönetici hesapları için TOTP tabanlı iki adımlı doğrulama açılabilir.'),('Denetim kaydı','Önemli işlemlerin kim tarafından yapıldığı kayıt altında tutulur.'),('Çöp kutusu','Silinen kayıtlar hemen yok olmaz, çöp kutusundan geri alınabilir.'),('Çerez ve KVKK','Çerez onay bandı, ölçüm betiklerini ziyaretçi onayına bağlar. Aydınlatma metni KVKK sayfasında.'.replace('<a>','').replace('</a>',''))])+'</div>'+GNOT+'</div></section>'
+ +'<section class="sec"><div class="w"><div class="yz"><h2 style="margin-top:0">Sık sorulan sorular</h2>'+ssd(Q2)+'<p><a href="/hesap-guvenligi.html">Hesap güvenliği</a> · <a href="/yedekleme-ve-denetim.html">Yedekleme ve denetim kaydı</a> · <a href="/kvkk.html">KVKK</a></p></div></div></section>'+CTA+SON,ld_raw=ldq(Q2))
+Q3=[('Hatalı şifre girersem ne olur?','Kısa sürede art arda hatalı deneme olursa hesap bir süre kilitlenir. Süre ve deneme sayısı panelde tanımlıdır.'),('Başka cihazdan giriş yapılırsa haber verilir mi?','Yeni cihaz ve yeni IP girişleri için güvenlik uyarısı oluşur; gece saatlerinde giriş de uyarı üretir.')]
+page('hesap-guvenligi.html','Hesap Güvenliği | OnlineKaydet','Giriş koruma, yeni cihaz uyarısı, kilitleme ve iki adımlı doğrulama.',
+ B('hg','<a href="/hakkimizda.html">Şirket</a> / Güvenlik','Hesap güvenliği','Hesabınızı korumak için panelde bulunan önlemler.')
+ +'<section class="sec"><div class="w"><div class="fg">'+kart([('Hatalı deneme kilidi','15 dakika içinde 5 hatalı denemeden sonra hesap 15 dakika kilitlenir (varsayılan ayar).'),('Yeni cihaz kontrolü','Teknisyen yeni cihazdan girerken kayıtlı telefon doğrulanır; yönetici isterse yeni cihazı onaya bağlar.'),('Yeni IP ve gece girişi uyarısı','Alışılmadık IP ya da gece girişinde yöneticiye uyarı düşer.'),('İki adımlı doğrulama','Doğrulama uygulamasından 6 haneli kod istenir; yedek kodlar verilir.')])+'</div>'+ul(['Giriş kayıtlarında cihaz ve IP bilgisi görünür','Şifre değişikliği denetim kaydına işlenir'])+GNOT+'</div></section>'
+ +'<section class="sec"><div class="w"><div class="yz"><h2 style="margin-top:0">Sık sorulan sorular</h2>'+ssd(Q3)+'</div></div></section>'+CTA+SON,ld_raw=ldq(Q3))
+Q4=[('Yedekler nerede tutulur?','Yedekler sunucuda sıkıştırılmış dosya olarak saklanır. Geri yükleme yapılırken önce mevcut verinin ayrıca yedeği alınır.'),('Yanlışlıkla sildim, geri gelir mi?','Çöp kutusundaki kayıtlar geri alınabilir.')]
+page('yedekleme-ve-denetim.html','Yedekleme ve Denetim Kaydı | OnlineKaydet','Otomatik yedek, çöp kutusu, denetim kaydı ve sistem sağlığı izleme.',
+ B('yd','<a href="/hakkimizda.html">Şirket</a> / Güvenlik','Yedekleme ve denetim kaydı','Verinizin korunması ve yapılan işlemlerin izlenmesi.')
+ +'<section class="sec"><div class="w"><div class="fg">'+kart([('Elle ve otomatik yedek','Yönetici yedek alabilir; otomatik yedek zamanlayıcı da çalışır.'),('Çöp kutusu','Silinen kayıtlar geri alınabilir şekilde bekler.'),('Denetim kaydı','Kim hangi işlemi yaptı, hangi saatte: kayıt altında tutulur.'),('Sağlık ve hata izleme','Sistem sağlığı ve hatalar izlenir; sorunlar yöneticiye görünür.')])+'</div>'+GNOT+'</div></section>'
+ +'<section class="sec"><div class="w"><div class="yz"><h2 style="margin-top:0">Sık sorulan sorular</h2>'+ssd(Q4)+'</div></div></section>'+CTA+SON,ld_raw=ldq(Q4))
+Q5=[('Özel tasarım ne demek?','Hazır temayı alıp markanıza göre renk, yazı tipi, düzen ve bölümleri değiştirmek ya da sıfırdan sayfa tasarlamak.'),('Tasarımı sonra ben değiştirebilir miyim?','Evet, her bölümün yazısı, yazı tipi ve görseli panelden değiştirilir.'),('Ücret nasıl belirlenir?','Kapsam netleşince ücret yazılı olarak bildirilir; talep bırakmak bağlayıcı değildir.')]
+page('ozel-tasarim.html','Özel Tasarım Web Sitesi | OnlineKaydet','Markanıza özel web sitesi tasarımı: önce görsel taslak, onaydan sonra yapım. Her bölüm panelden düzenlenir.',
+ B('ot','<a href="/hakkimizda.html">Şirket</a> / Özel tasarım','Markanıza özel tasarım','Hazır tema yetmiyorsa sitenizi işinize ve markanıza göre birlikte tasarlayalım.')
+ +'<section class="sec"><div class="w"><h2>Nasıl ilerler?</h2>'+'<ol class="sxs">'+''.join('<li><b>%d</b><span>%s</span><small>%s</small></li>'%(i+1,a,b) for i,(a,b) in enumerate([('Görüşme','İşinizi, hedefinizi ve beğendiğiniz siteleri dinleriz.'),('Taslak görsel','Yapmadan önce tasarımı görsel olarak size göndeririz.'),('Onay','Beğendiğiniz ya da değişmesini istediğiniz yeri yazarsınız.'),('Yapım','Onaylanan tasarım siteye dönüştürülür; bölümler panelden düzenlenir.'),('Yayın','Alan adı ve yayın kurulumu yapılır.')]))+'</ol></div></section>'
+ +'<section class="sec"><div class="w"><div class="fg">'+kart([('Marka uyumu','Logo, renk ve yazı tipi markanıza göre belirlenir.'),('Gerçek fotoğraf','Telifli ve gerçek fotoğraflar kullanılır; çizim ya da yapay görsel kullanılmaz.'),('Her bölüm düzenlenebilir','Yazı, yazı tipi ve görseller panelden değişir; her seferinde bize yazmanız gerekmez.'),('Panel ile bağlantı','Formdan gelen talepler müşteri kaydına döner; randevu ve kasa aynı panelde.')])+'</div></div></section>'
+ +'<section class="sec"><div class="w"><div class="yz"><h2 style="margin-top:0">Sık sorulan sorular</h2>'+ssd(Q5)+'</div></div></section>'+CTA+SON,ld_raw=ldq(Q5))
+
 # ---- bilgi bankası
 import bilgi_icerik as _bi
 BK=_bi.A
