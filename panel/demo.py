@@ -352,4 +352,4 @@ def register(api_router, db, deps):
                     await fdb.app_settings.update_one({"_id": "yp_no"}, {"$set": {"n": len(slots)}}, upsert=True)
             except Exception:
                 pass
-        return {"ok": True, "login_url": "/giris", "panel": "/salon" if _sd.family(key) == "randevu" else "/admin", "email": email, "password": pw, "tech_email": techs[0]["email"], "days": DEMO_DAYS, "company": company}
+        return {"ok": True, "login_url": "/giris", "panel": "/salon" if _sd.family(key) in ("randevu", "siparis") else "/admin", "email": email, "password": pw, "tech_email": techs[0]["email"], "days": DEMO_DAYS, "company": company}
