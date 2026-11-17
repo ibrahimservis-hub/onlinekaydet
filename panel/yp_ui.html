@@ -85,6 +85,7 @@ label.f>textarea{min-height:70px;resize:vertical}
 .md.wide{max-width:720px}
 .md .mh{display:flex;align-items:center;padding:16px 20px 6px}.md .mh h3{font-size:17px;font-weight:700;flex:1}.md .mh button{border:0;background:none;font-size:24px;line-height:1;color:var(--mut);width:40px;height:40px}
 .md .mb{padding:8px 20px 20px}.md .mf{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;padding-top:6px}
+.g2 .w2{grid-column:1/-1}.dgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px 16px}.dr small{display:block;color:var(--mut);font-size:12px;margin-bottom:2px}.dr b{font-weight:600}
 .kv{display:grid;grid-template-columns:110px 1fr;gap:6px 12px;margin:8px 0 14px}.kv dt{color:var(--mut)}.kv dd{margin:0;font-weight:600}
 #toast{position:fixed;left:50%;bottom:120px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:11px 18px;border-radius:10px;z-index:80;font-weight:600;max-width:90vw}
 #toast.bad{background:var(--bad)}
@@ -527,7 +528,8 @@ function buildNav(){var m=(B&&B.modules)||[],ins=[['cek','Çek-senet / banka','w
  if(!ins.length)return;
  var at=NAV.map(function(x){return x[0]}).indexOf('kasa');
  if(m.indexOf('randevu')<0){NAV=NAV.filter(function(x){return ['takvim','randevu'].indexOf(x[0])<0});at=NAV.map(function(x){return x[0]}).indexOf('kasa')}
- NAV=NAV.slice(0,at+1).concat(ins,NAV.slice(at+1));}
+ NAV=NAV.slice(0,at+1).concat(ins,NAV.slice(at+1));
+ if(B&&B.eski_panel)NAV.splice(1,0,['servis',(B.terms&&B.terms.isler)||'Servis kayıtları','wrench'])}
 var STG={talep:['Onay bekliyor','y'],bekliyor:['Bekliyor','w'],geldi:['Geldi','b'],islemde:['İşlemde','b'],tamamlandi:['Tamamlandı','g'],gelmedi:['Gelmedi','r'],iptal:['İptal','r']};
 var GUN=['Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi','Pazar'];
 function ld(k){try{return localStorage.getItem(k)||''}catch(e){return ''}}
@@ -660,7 +662,7 @@ async function loadBoot(){B=await api('/yp/boot');$('#fn').textContent=B.firm||(
 async function start(){
  try{await loadBoot()}catch(e){if(e.status===403){toast('Bu panel yalnızca yönetici hesabıyla açılır',true);logout(true)}else if(e.status!==401){fail(e);}showLogin();return}
  $('#login').hidden=true;$('#app').hidden=false;buildNav();navDraw();route()}
-var NAVG=[['bugun','Genel','home',['bugun','bildirim','duyuru']],['takvim','Takvim','cal',['takvim','randevu','is']],['musteri','Müşteri','users',['musteri','uyelik']],['satis','Satış','store',['urun','hizli','siparis','kampanya','iade','pazaryeri','eplus','xml','stokek','ihracat','bayi','ortak']],['kasa','Kasa','wallet',['kasa','cek','musavir']],['ekip','Ekip','team',['ekip']],['rapor','Rapor','chart',['rapor']],['site','Web Sitem','web',['site','icerik','popvitrin','dil','yonlendir']],['entegrasyon','Bağlantı','plug',['entegrasyon','apiek']],['ayar','Ayarlar','gear',['ayar']],['destek','Destek','life',['destek','gbildirim']]],GR=[],GLAST={};
+var NAVG=[['bugun','Genel','home',['bugun','bildirim','duyuru']],['servis','Servis','wrench',['servis']],['takvim','Takvim','cal',['takvim','randevu','is']],['musteri','Müşteri','users',['musteri','uyelik']],['satis','Satış','store',['urun','hizli','siparis','kampanya','iade','pazaryeri','eplus','xml','stokek','ihracat','bayi','ortak']],['kasa','Kasa','wallet',['kasa','cek','musavir']],['ekip','Ekip','team',['ekip']],['rapor','Rapor','chart',['rapor']],['site','Web Sitem','web',['site','icerik','popvitrin','dil','yonlendir']],['entegrasyon','Bağlantı','plug',['entegrasyon','apiek']],['ayar','Ayarlar','gear',['ayar']],['destek','Destek','life',['destek','gbildirim']]],GR=[],GLAST={};
 function groupsBuild(){var have={},used={};NAV.forEach(function(i){have[i[0]]=i});GR=[];
  NAVG.forEach(function(g){var rs=g[3].filter(function(r){return have[r]});rs.forEach(function(r){used[r]=1});if(rs.length)GR.push({id:g[0],ad:g[1],ik:g[2],rs:rs.map(function(r){return[r,have[r][1]]})})});
  var rest=NAV.filter(function(i){return !used[i[0]]});if(rest.length)GR.push({id:'diger',ad:'Diğer',ik:'more',rs:rest.map(function(i){return[i[0],i[1]]})})}
@@ -3336,6 +3338,99 @@ document.addEventListener('change',function(ev){var el=ev.target;
   else{CUR.rf.k=el.value;CUR.rf.frm='';CUR.rf.to=''}V.rapor.load().catch(fail)}
  if(el.id==='rapa'||el.id==='rapb'){CUR.rf.frm=$('#rapa').value;CUR.rf.to=$('#rapb').value;
   V.rapor.load().catch(fail)}});
+
+/* ---------------- SERVİS KAYITLARI (servis, yol ve proje işleri) ---------------- */
+var SVST={yeni:['Yeni','y'],atandi:['Usta atandı','b'],yolda:['Yolda','b'],basladi:['İşlemde','b'],tamamlandi:['Tamamlandı','g'],faturalandi:['Faturalandı','g'],iptal:['İptal','r']};
+var SVNEXT={atandi:[['yolda','Yola çıktı'],['basladi','İşe başladı']],yolda:[['basladi','İşe başladı']]};
+var SVPR={dusuk:'Düşük',normal:'Normal',yuksek:'Yüksek',acil:'Acil'};
+var SVOPEN=['yeni','atandi','yolda','basladi'];
+function svTel(v){var d=String(v||'').replace(/\D/g,'');if(d.length===12&&d.indexOf('90')===0)d='0'+d.slice(2);return ftel(d)}
+function svIs(){return (B&&B.terms&&B.terms.is)||'Servis kaydı'}
+function svIsler(){return (B&&B.terms&&B.terms.isler)||'Servis kayıtları'}
+function svKisi(){return (B&&B.terms&&B.terms.kisi)||'Usta'}
+function svTechOpts(sel,bos){return '<option value="">'+esc(bos||'Seçin')+'</option>'+(CUR.svtech||[]).map(function(t){return '<option value="'+esc(t.id)+'"'+(sel===t.id?' selected':'')+'>'+esc(t.name)+'</option>'}).join('')}
+V.servis=async function(){var F=CUR.svf=CUR.svf||{q:'',st:'acik'};
+ var h=head(svIsler(),'Müşterinin çağrısından tamamlanmasına kadar her kayıt burada: kim, ne zaman, hangi '+svKisi().toLowerCase()+', ne kadar.',
+  '<button class="btn p" data-a="sv-yeni"><svg class="i"><use href="#plus"/></svg>Yeni '+esc(svIs().toLowerCase())+'</button>');
+ h+='<div id="svfig" class="figs"></div><div class="card"><div class="fbar"><input type="search" id="svq" placeholder="Numara, müşteri, telefon, adres veya arıza ara" value="'+esc(F.q)+'"></div>'
+  +'<div class="fbar chips" id="svseg"></div><div id="svlist"><div class="empty">Yükleniyor…</div></div></div>';
+ $('#main').innerHTML=h;
+ if(!CUR.svtech){try{CUR.svtech=(await api('/technicians'))||[]}catch(e){CUR.svtech=[]}}
+ await V.servis.load()};
+V.servis.load=async function(){var F=CUR.svf;
+ var rows=await api('/jobs?days=90&keep_open=true'+(F.q?'&q='+encodeURIComponent(F.q):''));CUR.svrows=rows=Array.isArray(rows)?rows:[];
+ var n=function(f){return rows.filter(f).length};
+ var acik=n(function(r){return SVOPEN.indexOf(r.status)>-1}),bugun=new Date().toISOString().slice(0,10);
+ var fg=$('#svfig');if(fg)fg.innerHTML='<div class="fig"><small>Açık</small><b class="num">'+acik+'</b><span>'+n(function(r){return r.status==='yeni'})+' yeni, '+n(function(r){return !r.assigned_technician_id&&SVOPEN.indexOf(r.status)>-1})+' '+esc(svKisi().toLowerCase())+' bekliyor</span></div>'
+  +'<div class="fig"><small>Bugün planlı</small><b class="num">'+n(function(r){return SVOPEN.indexOf(r.status)>-1&&String(r.scheduled_at||'').slice(0,10)===bugun})+'</b><span>bugüne atanmış</span></div>'
+  +'<div class="fig"><small>Tamamlanan</small><b class="num">'+n(function(r){return r.status==='tamamlandi'||r.status==='faturalandi'})+'</b><span>son 90 gün</span></div>'
+  +'<div class="fig"><small>Tamamlanan ciro</small><b class="num">'+tl(rows.filter(function(r){return r.status==='tamamlandi'||r.status==='faturalandi'}).reduce(function(a,r){return a+Number(r.total_amount||0)},0))+'</b><span>son 90 gün</span></div>';
+ var segs=[['acik','Açık',acik],['','Hepsi',rows.length],['yeni','Yeni',n(function(r){return r.status==='yeni'})],['atandi','Atandı',n(function(r){return r.status==='atandi'})],['yolda','Yolda',n(function(r){return r.status==='yolda'})],['basladi','İşlemde',n(function(r){return r.status==='basladi'})],['tamamlandi','Tamamlandı',n(function(r){return r.status==='tamamlandi'||r.status==='faturalandi'})],['iptal','İptal',n(function(r){return r.status==='iptal'})]];
+ var sg=$('#svseg');if(sg)sg.innerHTML=segs.map(function(x){return '<button class="chip '+(F.st===x[0]?'on':'')+'" data-a="sv-seg" data-v="'+x[0]+'">'+x[1]+'<small>'+x[2]+'</small></button>'}).join('');
+ var list=rows.filter(function(r){return !F.st||(F.st==='acik'?SVOPEN.indexOf(r.status)>-1:F.st==='tamamlandi'?(r.status==='tamamlandi'||r.status==='faturalandi'):r.status===F.st)});
+ var el=$('#svlist');if(!el)return;
+ if(!list.length){el.innerHTML='<div class="empty">Bu süzgece uyan kayıt yok.</div>';return}
+ el.innerHTML='<table class="gr"><thead><tr><th>Kayıt</th><th>Müşteri</th><th>Cihaz ve arıza</th><th>'+esc(svKisi())+'</th><th>Durum</th><th>Planlanan</th><th class="r">Tutar</th><th></th></tr></thead><tbody>'
+  +list.map(function(r){var st=SVST[r.status]||[r.status||'?','w'];
+   return '<tr><td><span class="onum">'+esc(r.job_number)+'</span><div class="note">'+esc(String(r.created_at||'').slice(0,16).replace('T',' '))+'</div></td>'
+    +'<td><b>'+esc(r.customer_name||'—')+'</b><div class="note">'+esc(svTel(r.customer_phone))+'</div></td>'
+    +'<td>'+esc([r.device_brand_name,r.device_model].filter(Boolean).join(' ')||r.device_type||'—')+'<div class="note">'+esc(String(r.fault_description||'').slice(0,70))+'</div></td>'
+    +'<td>'+(r.assigned_technician_name?esc(r.assigned_technician_name):'<span class="note">Atanmadı</span>')+'</td>'
+    +'<td><span class="tag '+st[1]+'">'+esc(st[0])+'</span>'+(r.priority==='acil'?' <span class="tag r">Acil</span>':'')+'</td>'
+    +'<td>'+(r.scheduled_at?esc(String(r.scheduled_at).slice(0,16).replace('T',' ')):'<span class="note">—</span>')+'</td>'
+    +'<td class="r"><b class="num">'+(r.total_amount?tl(r.total_amount):'—')+'</b></td>'
+    +'<td class="r"><button class="btn s" data-a="sv-ac" data-id="'+esc(r.id)+'">Aç</button></td></tr>'}).join('')+'</tbody></table>'};
+function svForm(){var br=CUR.svbrand||[];
+ return '<div class="g2"><label>Müşteri adı<input id="svn" placeholder="Ad soyad"></label><label>Telefon<input id="svt" placeholder="05xx xxx xx xx" inputmode="tel"></label>'
+  +'<label class="w2">Adres<input id="sva" placeholder="Mahalle, sokak, kapı no, ilçe"></label>'
+  +'<label>Marka<select id="svb"><option value="">Seçin (isteğe bağlı)</option>'+br.map(function(b){return '<option value="'+esc(b.id)+'">'+esc(b.name)+'</option>'}).join('')+'</select></label>'
+  +'<label>Cihaz türü<input id="svc" placeholder="Örn. kombi, klima"></label><label>Model<input id="svm" placeholder="Model"></label>'
+  +'<label>Öncelik<select id="svp"><option value="normal">Normal</option><option value="yuksek">Yüksek</option><option value="acil">Acil</option><option value="dusuk">Düşük</option></select></label>'
+  +'<label class="w2">Arıza / yapılacak iş<textarea id="svf" rows="3" placeholder="Müşterinin anlattığı sorun"></textarea></label>'
+  +'<label>Planlanan zaman<input id="svs" type="datetime-local"></label><label>'+esc(svKisi())+'<select id="svu">'+svTechOpts('','Sonra atayacağım')+'</select></label></div>'}
+document.addEventListener('click',async function(ev){var b=ev.target.closest&&ev.target.closest('[data-a]');if(!b||!b.dataset.a||b.dataset.a.indexOf('sv-')!==0)return;var a=b.dataset.a;
+ try{
+  if(a==='sv-seg'){CUR.svf.st=b.dataset.v;await V.servis.load()}
+  else if(a==='sv-yeni'){if(!CUR.svbrand){try{CUR.svbrand=(await api('/brands'))||[]}catch(e){CUR.svbrand=[]}}
+   modal('Yeni '+svIs().toLowerCase(),svForm()+'<div class="mf"><button class="btn" data-a="close">Vazgeç</button><button class="btn p" data-a="sv-kaydet">Kaydet</button></div>',true)}
+  else if(a==='sv-kaydet'){var ad=$('#svn').value.trim(),tel=$('#svt').value.trim(),ar=$('#svf').value.trim();
+   if(!ad||!tel){toast('Müşteri adı ve telefon gerekli',true);return}if(!ar){toast('Arıza veya yapılacak işi yazın',true);return}
+   var body={customer_name:ad,customer_phone:tel,customer_address:$('#sva').value.trim(),brand_id:$('#svb').value,device_type:$('#svc').value.trim()||undefined,device_model:$('#svm').value.trim(),
+    fault_description:ar,priority:$('#svp').value,scheduled_at:$('#svs').value||'',assigned_technician_id:$('#svu').value,source_channel:'panel'};
+   await api('/jobs/quick',{method:'POST',body:body});closeM();toast(svIs()+' açıldı');await V.servis.load()}
+  else if(a==='sv-ac'){var r=(CUR.svrows||[]).filter(function(x){return x.id===b.dataset.id})[0];if(!r)return;svDetay(r)}
+  else if(a==='sv-durum'){await api('/jobs/'+b.dataset.id,{method:'PUT',body:{status:b.dataset.v}});closeM();toast('Durum güncellendi');await V.servis.load()}
+  else if(a==='sv-ata'){var u=$('#svu2').value;if(!u){toast(svKisi()+' seçin',true);return}await api('/jobs/'+b.dataset.id,{method:'PUT',body:{assigned_technician_id:u}});closeM();toast(svKisi()+' atandı');await V.servis.load()}
+  else if(a==='sv-iptal'){modal('İptal nedeni','<label>Neden iptal ediliyor?<input id="svr" placeholder="Örn. müşteri vazgeçti"></label><div class="mf"><button class="btn" data-a="close">Vazgeç</button><button class="btn p" data-a="sv-iptal-ok" data-id="'+esc(b.dataset.id)+'">İptal et</button></div>')}
+  else if(a==='sv-iptal-ok'){var nd=$('#svr').value.trim();if(!nd){toast('İptal nedenini yazın',true);return}await api('/jobs/'+b.dataset.id,{method:'PUT',body:{status:'iptal',cancel_reason:nd}});closeM();toast('Kayıt iptal edildi');await V.servis.load()}
+  else if(a==='sv-kapat'){var j=(CUR.svrows||[]).filter(function(x){return x.id===b.dataset.id})[0];if(!j)return;svKapanis(j)}
+  else if(a==='sv-parca'){var t=$('#svpt');t.insertAdjacentHTML('beforeend',svParcaSatir())}
+  else if(a==='sv-kapat-ok'){var rows=[].slice.call(document.querySelectorAll('#svpt .svpr')).map(function(r){return{name:r.querySelector('.pn').value.trim(),qty:Number(r.querySelector('.pq').value||1),unit_price:Number(r.querySelector('.pu').value||0)}}).filter(function(p){return p.name});
+   rows.forEach(function(p){p.total=Math.round(p.qty*p.unit_price*100)/100});
+   var yok=$('#svpy').checked;if(!rows.length&&!yok){toast('Parça yazın ya da "parça kullanılmadı" seçin',true);return}
+   var yap=$('#svw').value.trim();if(!yap){toast('Yapılan işi yazın',true);return}
+   await api('/jobs/'+b.dataset.id,{method:'PUT',body:{status:'tamamlandi',work_done:yap,parts_used:rows,parts_none:yok&&!rows.length,labor_fee:Number($('#svl').value||0)}});closeM();toast('Kayıt tamamlandı');await V.servis.load()}
+ }catch(e){fail(e)}});
+document.addEventListener('input',function(ev){if(ev.target.id!=='svq')return;clearTimeout(V.servis.t);V.servis.t=setTimeout(function(){CUR.svf.q=ev.target.value.trim();V.servis.load().catch(fail)},300)});
+function svParcaSatir(){return '<div class="svpr" style="display:grid;grid-template-columns:2fr 70px 110px;gap:8px;margin-top:6px"><input class="pn" placeholder="Parça adı"><input class="pq" type="number" min="0" step="1" value="1" aria-label="Adet"><input class="pu" type="number" min="0" step="0.01" placeholder="Birim fiyat" aria-label="Birim fiyat"></div>'}
+function svKapanis(j){modal('Kaydı tamamla — '+j.job_number,'<label>Yapılan iş<textarea id="svw" rows="3" placeholder="Ne yapıldı?">'+esc(j.work_done||'')+'</textarea></label>'
+  +'<div style="margin-top:10px"><b>Kullanılan parçalar</b><div id="svpt">'+svParcaSatir()+'</div><button class="btn s" data-a="sv-parca" style="margin-top:8px">Parça ekle</button><label style="display:flex;gap:8px;align-items:center;margin-top:8px"><input type="checkbox" id="svpy"> Parça kullanılmadı</label></div>'
+  +'<label style="margin-top:10px">İşçilik ücreti (₺)<input id="svl" type="number" min="0" step="0.01" value="'+esc(j.labor_fee||0)+'"></label>'
+  +'<div class="mf"><button class="btn" data-a="close">Vazgeç</button><button class="btn p" data-a="sv-kapat-ok" data-id="'+esc(j.id)+'">Tamamla</button></div>',true)}
+function svDetay(r){var st=SVST[r.status]||[r.status,'w'],kapali=['tamamlandi','faturalandi','iptal'].indexOf(r.status)>-1;
+ var satir=function(k,v){return v?'<div class="dr"><small>'+k+'</small><b>'+esc(v)+'</b></div>':''};
+ var h='<div style="display:flex;gap:8px;align-items:center;margin-bottom:10px"><span class="tag '+st[1]+'">'+esc(st[0])+'</span>'+(r.priority&&r.priority!=='normal'?'<span class="tag '+(r.priority==='acil'?'r':'w')+'">'+esc(SVPR[r.priority]||r.priority)+'</span>':'')+'<span class="note">'+esc(String(r.created_at||'').slice(0,16).replace('T',' '))+'</span></div>'
+  +'<div class="dgrid">'+satir('Müşteri',r.customer_name)+satir('Telefon',svTel(r.customer_phone))+satir('Adres',r.customer_address)
+  +satir('Cihaz',[r.device_brand_name,r.device_model,r.device_type].filter(Boolean).join(' · '))+satir('Seri no',r.device_serial)
+  +satir('Planlanan',String(r.scheduled_at||'').slice(0,16).replace('T',' '))+satir(svKisi(),r.assigned_technician_name)+'</div>'
+  +'<div class="dr" style="margin-top:8px"><small>Arıza / iş</small><b>'+esc(r.fault_description||'—')+'</b></div>'
+  +(r.work_done?'<div class="dr" style="margin-top:8px"><small>Yapılan iş</small><b>'+esc(r.work_done)+'</b></div>':'')
+  +(r.cancel_reason?'<div class="dr" style="margin-top:8px"><small>İptal nedeni</small><b>'+esc(r.cancel_reason)+'</b></div>':'')
+  +((r.total_amount||r.labor_fee)?'<div class="dr" style="margin-top:8px"><small>Tutar</small><b>'+tl(r.total_amount)+' <span class="note">(parça '+tl(r.parts_total)+' + işçilik '+tl(r.labor_fee)+')</span></b></div>':'');
+ if(!kapali){h+='<div style="margin-top:14px;display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end"><label style="display:grid;gap:4px">'+esc(svKisi())+' ata / değiştir<select id="svu2" style="width:100%">'+svTechOpts(r.assigned_technician_id,'Seçin')+'</select></label><button class="btn" data-a="sv-ata" data-id="'+esc(r.id)+'">Ata</button></div>';
+  h+='<div class="mf" style="margin-top:14px;flex-wrap:wrap">'+(SVNEXT[r.status]||[]).map(function(x){return '<button class="btn" data-a="sv-durum" data-v="'+x[0]+'" data-id="'+esc(r.id)+'">'+x[1]+'</button>'}).join('')
+   +'<button class="btn p" data-a="sv-kapat" data-id="'+esc(r.id)+'">Tamamla</button><button class="btn" data-a="sv-iptal" data-id="'+esc(r.id)+'" style="color:var(--bad)">İptal et</button></div>'}
+ modal(svIs()+' '+r.job_number,h,true)}
 
 /* başlangıç */
 (async function(){TOK=ld('ypt')||ld('token');if(!TOK){showLogin();return}await start()})();
