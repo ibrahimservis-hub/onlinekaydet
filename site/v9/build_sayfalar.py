@@ -102,6 +102,19 @@ def kart(no,ad,tx,u='',yk=False):
     return '<div class="fk"><span class="no">%s</span><h3>%s%s</h3><p>%s</p>%s</div>'%(no,ad,'<span class="yk">Yakında</span>' if yk else '',tx,('<a href="%s">Ayrıntılar</a>'%u) if u else '')
 def sec_baslik(et,h2,lead=''):
     return '<div class="w"><div class="bs" style="max-width:720px;margin-bottom:36px"><p class="et">%s</p><h2>%s</h2>%s</div>'%(et,h2,('<p class="lead" style="margin-top:14px">%s</p>'%lead) if lead else '')
+
+def px(i,alt,w=900):
+    return '<img src="https://images.pexels.com/photos/%s/pexels-photo-%s.jpeg?auto=compress&cs=tinysrgb&w=%d" alt="%s" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.closest(\'figure\').style.display=\'none\'">'%(i,i,w,html.escape(alt))
+def fbant(et,h2,lead,items,cls='f3',link=None):
+    fs=''.join('<figure><div class="fi">%s</div><figcaption>%s</figcaption></figure>'%(px(i,a),c) for i,a,c in items)
+    ln='<a class="btn dolu kc" href="%s">%s</a>'%link if link else ''
+    return '<section class="sec fbant"><div class="w"><div class="bs"><p class="et">%s</p><h2>%s</h2>%s</div><div class="fg2 %s">%s</div>%s</div></section>'%(et,h2,('<p class="lead">%s</p>'%lead) if lead else '',cls,fs,ln)
+FOTO_ANA=fbant('Her iş koluna uyar','Kuaförden kafeye, oto servisten butiğe.','Sektörünüzü seçin, kelimeleri ve ekranları hazır gelsin.',[('33448218','Kuaför müşterinin saçını kesiyor','Kuaför'),('14656012','Çiçekçi','Çiçekçi'),('36643337','Barista latte art yapıyor','Kafe'),('3807811','Aracın altında çalışan usta','Oto servis'),('6667684','Gönderi için paketlenen kolilier'.replace('kolilier','koliler'),'Kargo ve paket'),('6539022','Butik','Butik')],'f6',('/sektorler.html','Tüm sektörleri görün'))
+FOTO_ETC=fbant('Online satış','Telefondan sipariş, kapınıza kargo.','',[('6214382','Akıllı telefonla çevrimiçi alışveriş','Siparişler telefondan gelir'),('6667684','Paketleme ve teslimat','Paketle ve kargoya ver'),('6539022','Butik ürünü','Mağazanız sitenizin içinde')])
+FOTO_WEB=fbant('Kendi sitenizi yönetin','Kahvenizi alın, sitenizi güncelleyin.','',[('36072623','Kahve ve dizüstü bilgisayarın bulunduğu çalışma alanı','Yazıyı siz değiştirirsiniz'),('6207729','Ellerde dizüstü bilgisayar','Resmi siz yüklersiniz')],'f2')
+FOTO_IS=fbant('Günlük iş','Not defteri yerine tek ekran.','',[('7876381','Kalem tutan eller','Randevu ve notlar'),('8296969','Masada çalışan eller','Ekip ve evrak')],'f2')
+FOTO_SEK=fbant('İş kolları','Hangi meslekteyseniz, tema hazır.','',[('33448218','Kuaför','Kuaför'),('3993310','Güzellik salonu iç mekân','Güzellik salonu'),('14656012','Çiçekçi','Çiçekçi'),('17247840','Kahve fincanları','Kafe'),('3807811','Oto servis','Oto servis'),('15372566','Restoran','Restoran'),('14554082','Fayans','Yapı malzemesi'),('3993449','Profesyonel kuaför','Güzellik')],'f4')
+FOTO_ALT=fbant('Altyapı','Verileriniz Türkiye\'deki sunucularda.','Sitenizin ve panelinizin altyapısı Türkiye\'de çalışır.',[('1054397','Sunucu rafına takılı ethernet kabloları','Sunucular'),('2881232','Ethernet bağlantı noktalarına bağlı kablolar','Ağ bağlantısı')],'f2')
 SON=P['son']
 # ---- ana sayfa
 ETC_KISA=('<section class="sec etc" id="eticaret"><div class="w"><div class="g bas"><div class="b1"><p class="et kir">E-ticaret</p><h2>Mağazanız sitenizin içinde. Hepsi tek stoktan.</h2></div>'
@@ -121,7 +134,7 @@ DUNYA=('<section class="dnya" id="dunya-bolum"><div class="w"><div class="bs"><p
  '<ul><li><b>Yeni sipariş</b><span>Kendi sitem · 5.400 ₺</span></li><li><b>Randevu</b><span>Cuma 14:30 · Sitenizden</span></li><li><b>Pazaryeri</b><span>Trendyol siparişi</span></li><li><b>Telefon</b><span>Servis kaydı açıldı</span></li></ul></div></div>'
  '<ul class="kn2"><li>Web sitesi</li><li>Pazaryeri</li><li>Telefon</li><li>WhatsApp</li><li>Randevu</li></ul></div></section>')
 home=duy+'' 
-home_body=P['hero']+P['dort']+SERIT()+DUNYA+KAPI+P['tema']+ETC_KISA+P['edt']+P['yon']+P['guv']+SON
+home_body=P['hero']+P['dort']+SERIT()+DUNYA+KAPI+FOTO_ANA+P['tema']+ETC_KISA+P['edt']+P['yon']+P['guv']+SON
 body=home_body
 page('index.html','Web Sitesi, E-Ticaret, Randevu ve İş Takip Programı | OnlineKaydet','Hazır tema seçin, mağazanızı açın; randevu, muhasebe, personel ve iş takibini tek panelde yönetin. 70 sektör, e-ticaret ve pazaryeri entegrasyonu. Teklif alın.',body,home=True)
 # duyuru çubuğunu ana sayfaya ekle
@@ -132,15 +145,15 @@ B=banner
 page('temalar.html','Hazır Web Sitesi Temaları | OnlineKaydet','Sektörünüze göre hazır web sitesi temaları. Seçin, metin ve görselleri panelden düzenleyin, alan adınızı bağlayın.',
  B('t','Temalar','Mesleğinize uygun hazır temalar','Birini seçin; yazıları ve resimleri panelden değiştirin. Menü, mobil alt çubuk ve alt bilgi hazır gelir.',('tema-1-kombi-d','Kombi servisi teması'))+P['tema']+P['sek']+SON)
 page('e-ticaret.html','E-Ticaret Modülü: Ürün, Sipariş, Pazaryeri, B2B | OnlineKaydet','Ürün ve stok, sipariş ve kargo, kampanya, pazaryeri, iade, ortaklık ve bayi (B2B) tek panelde. Sitenizin içinde çalışan mağaza.',
- B('e','E-ticaret','Sitenizin içinde çalışan mağaza','Ürün, sipariş, kampanya ve pazaryeri satışı aynı panelden yürür.',('panel-d-urun','Ürün yönetimi ekranı'))+P['etc']+SON)
+ B('e','E-ticaret','Sitenizin içinde çalışan mağaza','Ürün, sipariş, kampanya ve pazaryeri satışı aynı panelden yürür.',('panel-d-urun','Ürün yönetimi ekranı'))+FOTO_ETC+P['etc']+SON)
 page('web-sitesi.html','Kodsuz Web Sitesi Editörü | OnlineKaydet','Web sitenizin her bölümünü panelden düzenleyin: metin, yazı tipi, görsel, menü. Alan adı ve SSL dahil.',
- B('w','Web sitesi','Sitenizi kendiniz düzenleyin','Yazı, yazı tipi, resim ve menü panelden değişir. Alan adı bağlama ve SSL pakete dahil.',('panel-d-site','Web sitesi editörü ekranı'))+P['edt']+P['guv']+SON)
+ B('w','Web sitesi','Sitenizi kendiniz düzenleyin','Yazı, yazı tipi, resim ve menü panelden değişir. Alan adı bağlama ve SSL pakete dahil.',('panel-d-site','Web sitesi editörü ekranı'))+FOTO_WEB+P['edt']+P['guv']+SON)
 page('is-takibi.html','Randevu, Muhasebe, Personel ve Evrak Takibi | OnlineKaydet','Randevu takvimi, kasa ve muhasebe, personel takibi, evrak takibi ve raporlar tek panelde.',
- B('i','İş takibi','Randevu, muhasebe, personel ve evrak takibi','Günlük işiniz tek ekranda: takvim, kasa, ekip ve raporlar.',('panel-k-takvim','Randevu takvimi ekranı'))+P['yon']+P['ent']+SON)
+ B('i','İş takibi','Randevu, muhasebe, personel ve evrak takibi','Günlük işiniz tek ekranda: takvim, kasa, ekip ve raporlar.',('panel-k-takvim','Randevu takvimi ekranı'))+FOTO_IS+P['yon']+P['ent']+SON)
 page('fiyatlar.html','Paketler ve Fiyatlar | OnlineKaydet','Web sitesi, mağaza ve iş takibi paketlerini ve içeriklerini karşılaştırın. E-ticaret modülü teklifle eklenir.',
  B('p','Paketler','Paketler ve içindekiler','Hangi pakette ne olduğu satır satır yazıyor. E-ticaret modülü teklifle eklenir.',('panel-k-kasa','Kasa ekranı'))+P['pak']+P['sss']+SON)
 page('sektorler.html','Sektörlere Hazır Çözümler | OnlineKaydet','Teknik servis, kuaför, güzellik, oto servis ve diğer iş kolları için hazır tema ve panel.',
- B('s','Sektörler','Mesleğinize göre hazır','Teknik servisten kuaföre her iş kolunun kelimeleri ve ekranları hazır.',('tema-k6-butik-kuafor-d','Kuaför teması'))+P['sek']+P['ent']+P['tema']+SON)
+ B('s','Sektörler','Mesleğinize göre hazır','Teknik servisten kuaföre her iş kolunun kelimeleri ve ekranları hazır.',('tema-k6-butik-kuafor-d','Kuaför teması'))+FOTO_SEK+P['sek']+P['ent']+P['tema']+SON)
 page('sss.html','Sık Sorulan Sorular | OnlineKaydet','Deneme, veri taşıma, pazaryeri, paketler ve kurulum hakkında sık sorulan sorular.',
  B('sss','Sık sorulan sorular','Sık sorulanlar','Kurulum, paketler, pazaryeri ve veri taşıma hakkında kısa cevaplar.')+P['sss']+SON)
 ozel=(sec_baslik('Özellikler','Panelde neler var?','Aşağıdaki başlıkların her biri kendi sayfasında anlatılır.')+'<div class="fg">'
@@ -160,7 +173,7 @@ hk=('<section class="sec"><div class="w"><div class="yz"><h2 style="margin-top:0
  '<h2>Kimler için?</h2><p>Kendi ekibiyle çalışan küçük ve orta ölçekli işletmeler için: teknik servisler, kuaför ve güzellik salonları, oto servisler, mağazalar ve bayiler.</p>'
  '<h2>Şirket</h2><p><b>Moda Ekru E-Ticaret Hizmetleri Tekstil Sanayi ve Ticaret Ltd. Şti.</b><br>Etimesgut, Ankara<br>Telefon: <a href="tel:+905444444004">0544 444 40 04</a></p></div></div></section>')
 page('hakkimizda.html','Hakkımızda | OnlineKaydet','OnlineKaydet; web sitesi, e-ticaret, randevu ve iş takibini tek panelde toplayan, Ankara merkezli bir yazılımdır.',
- B('h','Hakkımızda','İşinizi tek panelde toplayan yazılım','Ankara merkezli ekibimiz web sitesi, mağaza ve iş takibini birlikte sunar.')+hk+P['guv']+SON)
+ B('h','Hakkımızda','İşinizi tek panelde toplayan yazılım','Ankara merkezli ekibimiz web sitesi, mağaza ve iş takibini birlikte sunar.')+hk+FOTO_ALT+P['guv']+SON)
 ic=(sec_baslik('İletişim','Bize ulaşın','Aşağıdaki formu doldurun, sizi arayalım. Hemen konuşmak isterseniz arayın.')+'<div class="fg">'
  '<div class="fk"><span class="no">Telefon</span><h3>0544 444 40 04</h3><p>Satış ve kurulum için doğrudan arayın.</p><a href="tel:+905444444004">Hemen arayın</a></div>'
  '<div class="fk"><span class="no">WhatsApp</span><h3>Mesaj yazın</h3><p>Soru sorun, ekran görüntüsü gönderin.</p><a href="https://wa.me/905444444004">WhatsApp\'ta yazın</a></div>'

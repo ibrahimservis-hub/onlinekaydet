@@ -16,6 +16,7 @@ with sync_playwright() as pw:
     for vw in ({"width": 1440, "height": 900}, {"width": 390, "height": 844}):
         tag = "%dpx" % vw["width"]
         pg = br.new_page(viewport=vw); errs = []; fails = []
+        pg.route("**/images.pexels.com/**", lambda r: r.fulfill(status=200, content_type="image/gif", body=bytes.fromhex("47494638396101000100800000ffffff00000021f90401000000002c00000000010001000002024401003b")))  # Pexels kum havuzundan erişilemez; yerine 1px gif
         pg.on("pageerror", lambda e: errs.append(str(e))); pg.on("console", lambda m: m.type == "error" and errs.append(m.text))
         pg.on("response", lambda r: r.status >= 400 and fails.append("%s %s" % (r.status, r.url)))
         pg.route("**/api/public/lead", lambda r: (posted.append(json.loads(r.request.post_data)), r.fulfill(status=200, content_type="application/json", body='{"ok":true}')))
