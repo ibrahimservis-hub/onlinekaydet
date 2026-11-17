@@ -205,3 +205,6 @@ footer.alt2 .sos a svg{width:20px;height:20px;max-width:20px;display:block}
 .son .frm small{display:block;font-size:12.5px;line-height:1.5;color:var(--metin2);margin-top:14px !important}
 .son .frm small a{color:var(--murekkep);text-decoration:underline}
 @media(max-width:980px){.son .frm{grid-column:auto !important;margin-top:28px !important;padding:24px 20px 22px !important}.son .frm:before{left:20px}.son .frm>b{font-size:22px !important}}
+
+/* editör görselindeki balonlar: koyu zeminde açık yazı */
+.pin{color:#fff !important}
