@@ -18,6 +18,6 @@ function wire(box){
    try{(window.dataLayer=window.dataLayer||[]).push({event:'lead',form:form})}catch(e){}try{window.OKTrack&&OKTrack.event('form_submit')}catch(e){}
   }).catch(function(x){msg.style.color='#b42318';msg.textContent=x.message;btn.textContent=old;delete btn.dataset.busy})
  })}
-function init(){utm();document.querySelectorAll('.cb .box,.frm').forEach(wire)}
+function init(){utm();document.querySelectorAll('.cb .box,.frm').forEach(function(b){if(!b.closest('.dform'))wire(b)})}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();

@@ -3,6 +3,7 @@
 
 Firma tam pakettedir (Kurumsal), örnek müşteri/usta/servis kaydı hazır gelir. Talep ayrıca satış listesine (leads) 'demo' olarak düşer.
 """
+import hashlib
 import json
 import os
 import random
@@ -15,11 +16,14 @@ from datetime import datetime, timedelta, timezone
 from fastapi import HTTPException, Request
 
 import firms
+import notify
 import sektor
 import tenant
 
 _RATE = {}
 DEMO_DAYS = 7
+GUNLUK_LIMIT = int(os.environ.get("DEMO_GUNLUK_LIMIT", "60"))   # bir günde açılabilecek toplam demo
+KOD_SURE = 600                                                    # SMS kodu geçerlilik süresi (sn)
 SECTOR_MAP = {"kombi": "kombi", "klima": "klima", "beyaz eşya": "beyaz_esya", "beyaz esya": "beyaz_esya", "elektronik": "elektronik",
               "bilgisayar": "bilgisayar", "tesisat": "tesisat", "elektrik": "elektrik", "güvenlik": "guvenlik", "guvenlik": "guvenlik"}
 import sektor_ek
@@ -85,6 +89,63 @@ async def rename_old_demos(db):
 def register(api_router, db, deps):
     hash_password = deps["hash_password"]
 
+    def _ip(request):
+        return (request.headers.get("x-forwarded-for", "").split(",")[0].strip() or (request.client.host if request.client else ""))
+
+    def _kh(phone, code):
+        return hashlib.sha256(("%s|%s|%s" % (phone, code, os.environ.get("SECRET_KEY", "demo"))).encode()).hexdigest()
+
+    async def sms_acik():
+        try:
+            return (await notify.get_settings(db.main())).get("provider") != "none"
+        except Exception:      # noqa: BLE001
+            return False
+
+    @api_router.get("/public/demo/ayar")
+    async def demo_ayar():
+        """Site formu telefon doğrulaması isteyip istemediğini buradan öğrenir (SMS ayarı kapalıysa doğrulama yok)."""
+        return {"kod": await sms_acik(), "sektorler": sorted(({"k": k, "ad": v.get("name") or k} for k, v in sektor.SECTORS.items()), key=lambda x: x["ad"])}
+
+    @api_router.post("/public/demo/kod")
+    async def demo_kod(payload: dict, request: Request):
+        if str(payload.get("website") or "").strip():
+            return {"ok": True}
+        phone = _norm_phone(payload.get("phone"))
+        if not phone:
+            raise HTTPException(422, "Telefon numarası geçersiz (05xx xxx xx xx)")
+        if not await sms_acik():
+            return {"ok": True, "kod": False}
+        now = time.time()
+        ip = _ip(request)
+        hist = [t for t in _RATE.get("kod:" + ip, []) if now - t < 3600]
+        if len(hist) >= 6:
+            raise HTTPException(429, "Çok fazla deneme, biraz sonra tekrar deneyin")
+        if await db.main().demo_codes.count_documents({"phone": phone, "at": {"$gte": now - 3600}}) >= 3:
+            raise HTTPException(429, "Bu telefona saatte en fazla 3 kod gönderilir")
+        if await db.main().demo_codes.count_documents({"phone": phone, "at": {"$gte": now - 45}}):
+            raise HTTPException(429, "Kod az önce gönderildi, birkaç saniye bekleyin")
+        code = "".join(random.choice("0123456789") for _ in range(6))
+        await db.main().demo_codes.insert_one({"phone": phone, "h": _kh(phone, code), "at": now, "exp": now + KOD_SURE, "tries": 0})
+        hist.append(now)
+        _RATE["kod:" + ip] = hist
+        r = await notify.send(db.main(), "sms", phone, "OnlineKaydet demo doğrulama kodunuz: %s (10 dakika geçerli)" % code, kind="demo_kod", ref=phone,
+                              store_text="OnlineKaydet demo doğrulama kodu: ******")
+        if r.get("status") == "failed":
+            raise HTTPException(502, "SMS gönderilemedi, lütfen tekrar deneyin veya bizi arayın: 0544 444 40 04")
+        return {"ok": True, "kod": True}
+
+    async def kod_dogrula(phone, code):
+        now = time.time()
+        d = await db.main().demo_codes.find_one({"phone": phone, "exp": {"$gte": now}, "used": {"$ne": True}}, {"_id": 0}, sort=[("at", -1)])
+        if not d:
+            raise HTTPException(422, "Doğrulama kodu bulunamadı veya süresi doldu, yeni kod isteyin")
+        if d.get("tries", 0) >= 5:
+            raise HTTPException(429, "Çok fazla yanlış deneme, yeni kod isteyin")
+        if not secrets.compare_digest(d["h"], _kh(phone, re.sub(r"\D", "", str(code or "")))):
+            await db.main().demo_codes.update_one({"phone": phone, "at": d["at"]}, {"$inc": {"tries": 1}})
+            raise HTTPException(422, "Doğrulama kodu hatalı")
+        await db.main().demo_codes.update_one({"phone": phone, "at": d["at"]}, {"$set": {"used": True}})
+
     @api_router.post("/public/demo")
     async def open_demo(payload: dict, request: Request):
         if str(payload.get("website") or "").strip():
@@ -100,10 +161,15 @@ def register(api_router, db, deps):
             raise HTTPException(422, "Lütfen adınızı yazın")
         if not phone:
             raise HTTPException(422, "Telefon numarası geçersiz (05xx xxx xx xx)")
-        key = SECTOR_MAP.get(str(payload.get("sector") or "").strip().lower(), "")
+        _raw = str(payload.get("sector") or "").strip().lower()
+        key = SECTOR_MAP.get(_raw, "") or (_raw if _raw in sektor.SECTORS else "")
         if key not in sektor.SECTORS:
             raise HTTPException(422, "Sektör seçin")
         since = (datetime.now(timezone.utc) - timedelta(days=1)).isoformat()
+        if await db.main().firms.count_documents({"demo": True, "created_at": {"$gte": since}}) >= GUNLUK_LIMIT:
+            raise HTTPException(429, "Bugünkü demo kontenjanı doldu. Bizi arayın, birlikte açalım: 0544 444 40 04")
+        if await sms_acik():
+            await kod_dogrula(phone, payload.get("code"))
         if await db.main().firms.count_documents({"demo_phone": phone, "created_at": {"$gte": since}}) >= 2:
             raise HTTPException(429, "Bu telefonla bugün demo açıldı. Giriş bilgilerinizi kaybettiyseniz bizi arayın: 0544 444 40 04")
         hist.append(now)
