@@ -28,8 +28,8 @@ with sync_playwright() as pw:
     def ekle():
         pg.evaluate("location.hash='#ayar'"); pg.wait_for_selector("#fucard:not([hidden])", timeout=8000)
         pg.click("[data-a=fu-new]"); pg.fill("#fuf input[name=name]", "Muhasebeci Ayşe"); pg.fill("#fuf input[name=email]", "ayse@deneme.com"); pg.fill("#fuf input[name=password]", "Sifre12345")
-        pg.select_option("#fuf select[name=rol]", "accounting"); pg.click("#fuf button.p"); pg.wait_for_selector("#fu td:has-text('ayse@deneme.com')", timeout=6000)
-        assert "Muhasebe" in pg.inner_text("#fu")
+        pg.select_option("#fuf select[name=rol]", "accounting"); pg.click("#fuf button.p"); pg.wait_for_selector("#fusub td:has-text('ayse@deneme.com')", timeout=6000)
+        assert "Muhasebe" in pg.inner_text("#fusub")
     t("panelden kullanıcı eklenir ve listelenir", ekle)
     r, H = login("ayse@deneme.com", "Sifre12345")
     t("eklenen kullanıcı giriş yapar", lambda: (r.status_code == 200 or (_ for _ in ()).throw(AssertionError(r.text))))
@@ -41,18 +41,18 @@ with sync_playwright() as pw:
         assert requests.post(U + "/api/firm/users", headers=H, json={"email": "x@deneme.com", "password": "Sifre12345"}).status_code == 403
     t("muhasebe rolü kasayı yönetir, diğerini yalnız okur, kullanıcı ekleyemez", yetki)
     def duzenle():
-        pg.click("[data-a=fu-edit]"); pg.select_option("#fuf select[name=rol]", "viewer"); pg.click("#fuf button.p"); pg.wait_for_selector("#fu td:has-text('Yalnızca görüntüleme')", timeout=6000)
+        pg.click("[data-a=fu-edit]"); pg.select_option("#fuf select[name=rol]", "viewer"); pg.click("#fuf button.p"); pg.wait_for_selector("#fusub td:has-text('Yalnızca görüntüleme')", timeout=6000)
         time.sleep(31)
         r2, H2 = login("ayse@deneme.com", "Sifre12345")
         assert requests.post(U + "/api/customers", headers={"Authorization": "Bearer " + r2.json()["token"]}, json={"name": "T", "phone": "05551112233"}).status_code == 403
         assert requests.get(U + "/api/customers", headers={"Authorization": "Bearer " + r2.json()["token"]}).status_code == 200
     t("rol değişince yetki değişir (görüntüleme: yazamaz)", duzenle)
     def pasif():
-        pg.click("[data-a=fu-edit]"); pg.uncheck("#fuf input[name=active]"); pg.click("#fuf button.p"); pg.wait_for_selector("#fu td:has-text('Pasif')", timeout=6000)
+        pg.click("[data-a=fu-edit]"); pg.uncheck("#fuf input[name=active]"); pg.click("#fuf button.p"); pg.wait_for_selector("#fusub td:has-text('Pasif')", timeout=6000)
         assert login("ayse@deneme.com", "Sifre12345")[0].status_code in (401, 403)
     t("pasif kullanıcı giriş yapamaz", pasif)
     def sil():
-        pg.once("dialog", lambda dl: dl.accept()); pg.click("[data-a=fu-del]"); pg.wait_for_selector("#fu .empty", timeout=6000)
+        pg.once("dialog", lambda dl: dl.accept()); pg.click("[data-a=fu-del]"); pg.wait_for_selector("#fusub .empty", timeout=6000)
     t("kullanıcı silinir", sil)
     t("JS hatası yok", lambda: (_ for _ in ()).throw(AssertionError(errs)) if errs else None)
     br.close()

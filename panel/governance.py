@@ -330,6 +330,8 @@ async def audit(db, user: dict, action: str, detail: str = "", ip: str = "", **e
         "admin_role": (user or {}).get("admin_role", ""), "action": action, "detail": detail, "ip": ip, **extra})
 
 
+SITE_ED_OK = ("/api/brand", "/api/firm/", "/api/yp/content", "/api/yp/dil", "/api/yp/site", "/api/yp/popup", "/api/yp/redirect",
+              "/api/yp/yonlendir", "/api/yp/duyuru", "/api/yp/destek", "/api/yp/logo", "/api/yp/media", "/api/yp/promo", "/api/yp/book")
 FU_ROL = {}   # alt kullanıcı e-postası -> (rol, zaman)
 SUB_ROL_AD = {"manager": "Müdür", "accounting": "Muhasebe", "operations": "Operasyon", "site_editor": "Site editörü", "viewer": "Yalnızca görüntüleme"}
 
@@ -361,7 +363,9 @@ def make_middleware(db, get_current_user):
         if user and user.get("fu"):
             # firma alt kullanıcısı: ana hesap bu kullanıcıya bir rol vermiştir (Müdür, Muhasebe, Operasyon, Site editörü, Yalnızca görüntüleme)
             rol = await fu_rol(db, user["fu"])
-            if path.startswith("/api/auth/") or (path == "/api/yp/boot" and method == "GET"):
+            if path.startswith("/api/auth/") or (path in ("/api/yp/boot", "/api/firm/users") and method == "GET"):
+                pass
+            elif rol == "site_editor" and path.startswith(SITE_ED_OK):
                 pass
             elif (method == "DELETE" and rol != "manager") or (rol == "viewer" and method not in ("GET", "HEAD")) or (rol != "viewer" and not allowed(rol, path, method)):
                 if not (path.endswith("/auth/logout")) and rol is not None:

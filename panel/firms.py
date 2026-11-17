@@ -618,7 +618,12 @@ def register(api_router, db, deps):
     async def firm_users(request: Request, user: dict = Depends(get_current_user)):
         f = await my_firm(request)
         rows = await db.main().firm_users.find({"firm_id": f["id"]}, {"_id": 0, "password_hash": 0, "firm_id": 0, "db": 0}).sort("created_at", 1).to_list(10)
-        return {"users": rows, "max": MAX_SUB, "can_manage": not getattr(request.state, "fu", ""), "owner": f.get("login_email", "")}
+        fu = getattr(request.state, "fu", "")
+        rol = ""
+        if fu:
+            import governance as _g
+            rol = await _g.fu_rol(db, fu)
+        return {"users": rows, "max": MAX_SUB, "can_manage": not fu, "owner": f.get("login_email", ""), "rol": rol}
 
     @api_router.post("/firm/users")
     async def firm_user_add(p: SubIn, request: Request, user: dict = Depends(get_current_user)):

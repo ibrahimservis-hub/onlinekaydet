@@ -533,7 +533,12 @@ function fval(f,k){var el=f.elements?f.elements[k]:null;return el?el.value:''}
 var TOK='',B=null,ROUTE='bugun',CUR={};
 var BASE_NAV=[['bugun','Bugün','home'],['takvim','Takvim','cal'],['randevu','Randevular','list'],['musteri','Müşteriler','users'],['uyelik','Üyelik','users'],['kasa','Kasa','wallet'],['ekip','Ekip','team'],['rapor','Raporlar','chart'],['site','Web Sitem','web'],['dil','Diller','web'],['duyuru','Duyuru','bell'],['yonlendir','Yönlendirmeler','web'],['alanadi','Alan adı','web'],['is','İş kayıtları','wrench'],['icerik','İçerikler','docs'],['bildirim','Bildirimler','bell'],['entegrasyon','Entegrasyonlar','plug'],['ayar','Ayarlar','gear'],['destek','Destek','life']];
 var NAV=BASE_NAV.slice(),EXTRA=['iade','bolum'];
-function buildNav(){var m=(B&&B.modules)||[],ins=[['cek','Çek-senet / banka','wallet'],['musavir','Mali müşavir','users'],['apiek','API anahtarları','plug'],['gbildirim','Şikayet / öneri','life']];
+var ROL_NAV={accounting:['bugun','bildirim','duyuru','kasa','skasa','cek','musavir','rapor','srapor','musteri','smusteri','ekip','sekip','destek','gbildirim'],
+ operations:['bugun','bildirim','duyuru','servis','stakvim','steklif','srandevu','satolye','takvim','randevu','is','musteri','uyelik','smusteri','ekip','sekip','skonum','sstok','rapor','srapor','destek','gbildirim'],
+ site_editor:['site','icerik','popvitrin','dil','yonlendir','alanadi','duyuru','destek']};
+function rolNavFilter(){var ok=ROL_NAV[CUR.rol||''];if(!ok)return;var f=NAV.filter(function(x){return ok.indexOf(x[0])>-1});if(f.length)NAV=f}
+function buildNav(){try{buildNav0()}finally{rolNavFilter()}}
+function buildNav0(){var m=(B&&B.modules)||[],ins=[['cek','Çek-senet / banka','wallet'],['musavir','Mali müşavir','users'],['apiek','API anahtarları','plug'],['gbildirim','Şikayet / öneri','life']];
  if(m.indexOf('shop')>-1||m.indexOf('stok')>-1){ins.push(['hizli','Hızlı satış','store']);ins.push(['stokek','Depo ve sayım','list'])}
  if(m.indexOf('shop')>-1)ins.push(['ihracat','E-ihracat','truck']);
  if(m.indexOf('shop')>-1||m.indexOf('stok')>-1)ins.push(['urun','Ürünler','store']);
@@ -683,7 +688,7 @@ function lxWalk(root){if(!LXRULES||!LXRULES.length||!root)return;
  L.forEach(function(n){var v=lxText(n.nodeValue);if(v!==n.nodeValue)n.nodeValue=v});
  if(root.querySelectorAll)root.querySelectorAll('[placeholder],[title],[aria-label]').forEach(function(e){['placeholder','title','aria-label'].forEach(function(a){var v=e.getAttribute(a);if(v){var x=lxText(v);if(x!==v)e.setAttribute(a,x)}})})}
 var LXT=0;function lxStart(t){lxBuild(t);if(window.__lxo)return;window.__lxo=new MutationObserver(function(){if(LXT)return;LXT=setTimeout(function(){LXT=0;window.__lxo.disconnect();try{lxWalk(document.getElementById('app'));lxWalk(document.getElementById('ov'))}catch(e){}window.__lxo.observe(document.body,{childList:true,subtree:true,characterData:true})},30)});window.__lxo.observe(document.body,{childList:true,subtree:true,characterData:true});lxWalk(document.getElementById('app'))}
-async function loadBoot(){B=await api('/yp/boot');$('#fn').textContent=B.firm||((B.terms||{}).salon==='işletme'?'İşletmem':'Salonum');lxStart(B.terms);$('#fu').textContent=(B.user||'');$('#tav').textContent=String(B.firm||'S').trim().split(/\s+/).slice(0,2).map(function(w){return w.charAt(0)}).join('').toUpperCase()}
+async function loadBoot(){B=await api('/yp/boot');try{var fr0=await api('/firm/users');CUR.rol=fr0.can_manage?'':(fr0.rol||'')}catch(e0){CUR.rol=CUR.rol||''}$('#fn').textContent=B.firm||((B.terms||{}).salon==='işletme'?'İşletmem':'Salonum');lxStart(B.terms);$('#fu').textContent=(B.user||'');$('#tav').textContent=String(B.firm||'S').trim().split(/\s+/).slice(0,2).map(function(w){return w.charAt(0)}).join('').toUpperCase()}
 async function start(){
  try{await loadBoot()}catch(e){if(e.status===403){toast('Bu panel yalnızca yönetici hesabıyla açılır',true);logout(true)}else if(e.status!==401){fail(e);}showLogin();return}
  $('#login').hidden=true;$('#app').hidden=false;buildNav();navDraw();route()}
@@ -1268,7 +1273,7 @@ V.ayar=async function(){var h=head('Ayarlar','Hizmet listesi, çalışma saatler
  var sv=(await api('/yp/boot')).services;B.services=sv;
  h+='<div class="cols" style="grid-template-columns:1fr 1fr"><div class="card" style="grid-column:1/-1"><div class="hd"><h2>Hizmet ve fiyat listesi</h2><div class="sp"></div><button class="btn s p" data-a="svnew">Hizmet ekle</button></div><div class="tw"><table><tr><th>Hizmet</th><th class="r">Süre</th><th class="r">Fiyat</th><th></th></tr>'
  +(sv.map(function(s){return '<tr style="'+(s.active===false?'opacity:.55':'')+'"><td><b>'+esc(s.name)+'</b></td><td class="r num">'+s.dur+' dk</td><td class="r num">'+tl(s.price)+'</td><td class="r" style="white-space:nowrap"><button class="btn s" data-a="svedit" data-id="'+s.id+'">Düzenle</button> <button class="btn s d" data-a="svdel" data-id="'+s.id+'">Sil</button></td></tr>'}).join('')||'<tr><td colspan="4"><div class="empty">Henüz hizmet yok.</div></td></tr>')+'</table></div></div>';
- h+='<div class="card" style="grid-column:1/-1"><div class="hd"><h2>Online randevu ve çalışma saatleri</h2></div><div id="bk" class="pad"><div class="note">Yükleniyor…</div></div></div></div><div class="card" style="grid-column:1/-1" id="fucard" hidden><div class="hd"><h2>Kullanıcılar ve yetkiler</h2><div class="sp"></div><button class="btn s p" data-a="fu-new">Kullanıcı ekle</button></div><div id="fu" class="pad"><div class="note">Yükleniyor…</div></div></div></div>';
+ h+='<div class="card" style="grid-column:1/-1"><div class="hd"><h2>Online randevu ve çalışma saatleri</h2></div><div id="bk" class="pad"><div class="note">Yükleniyor…</div></div></div></div><div class="card" style="grid-column:1/-1" id="fucard" hidden><div class="hd"><h2>Kullanıcılar ve yetkiler</h2><div class="sp"></div><button class="btn s p" data-a="fu-new">Kullanıcı ekle</button></div><div id="fusub" class="pad"><div class="note">Yükleniyor…</div></div></div></div>';
  $('#main').innerHTML=h;
  fuLoad();
  try{var c=await api('/growth/settings');CUR.gcfg=c;var b=c.booking;
@@ -1276,7 +1281,7 @@ V.ayar=async function(){var h=head('Ayarlar','Hizmet listesi, çalışma saatler
  catch(e){$('#bk').innerHTML='<div class="note">'+esc(e.message)+'</div>'}};
 
 var FU_ROL=[['manager','Müdür','Her bölüm; kullanıcı yönetimi hariç'],['accounting','Muhasebe','Kasa ve muhasebe; diğerlerini salt okur'],['operations','Operasyon','Servis, müşteri, ekip; kasa ve site yok'],['site_editor','Site editörü','Yalnızca web sitesi'],['viewer','Yalnızca görüntüleme','Her şeyi görür, hiçbir şeyi değiştiremez']];
-async function fuLoad(){var el=$('#fu');if(!el)return;try{var r=await api('/firm/users');CUR.fu=r;var cd=$('#fucard');if(cd)cd.hidden=!r.can_manage;if(!r.can_manage)return;
+async function fuLoad(){var el=$('#fusub');if(!el)return;try{var r=await api('/firm/users');CUR.fu=r;var cd=$('#fucard');if(cd)cd.hidden=!r.can_manage;if(!r.can_manage)return;
  el.innerHTML='<div class="note" style="margin-bottom:10px">Ana hesap: <b>'+esc(r.owner)+'</b> · en fazla '+r.max+' ek kullanıcı. Her kullanıcı kendi kullanıcı adı ve şifresiyle aynı panele girer; görebildiği bölümleri rolü belirler.</div>'
   +'<div class="tw"><table><tr><th>Ad</th><th>Kullanıcı adı</th><th>Rol</th><th>Durum</th><th></th></tr>'
   +(r.users.map(function(u){var ro=FU_ROL.filter(function(x){return x[0]===(u.rol||'manager')})[0]||FU_ROL[0];return '<tr style="'+(u.active===false?'opacity:.55':'')+'"><td><b>'+esc(u.name||'-')+'</b></td><td>'+esc(u.email)+'</td><td>'+esc(ro[1])+'</td><td>'+(u.active===false?'Pasif':'Aktif')+'</td><td class="r" style="white-space:nowrap"><button class="btn s" data-a="fu-edit" data-id="'+esc(u.id)+'">Düzenle</button> <button class="btn s d" data-a="fu-del" data-id="'+esc(u.id)+'">Sil</button></td></tr>'}).join('')||'<tr><td colspan="5"><div class="empty">Henüz ek kullanıcı yok.</div></td></tr>')+'</table></div>'}
