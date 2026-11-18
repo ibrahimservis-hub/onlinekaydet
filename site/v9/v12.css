@@ -65,3 +65,16 @@ footer.alt2 .alt{display:flex;flex-direction:column;align-items:flex-start;gap:1
 footer.alt2 .kart{display:flex;gap:10px}
 }
 footer.alt2 .kart svg{display:block;overflow:visible;height:32px;width:52px}footer.alt2 .kart{overflow:visible;line-height:0}
+.sayi{grid-template-columns:repeat(3,1fr) !important}
+.sade .sg{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:start}
+.sade h2{margin-bottom:14px}
+.sade p{color:var(--metin2);max-width:520px}
+.sade .kod{background:#0f1a2e;color:#e6ecf5;font:500 13.5px/1.7 ui-monospace,Menlo,Consolas,monospace;padding:18px 20px;border-radius:6px;margin:18px 0;white-space:pre-wrap;overflow-x:auto}
+.sade .sssd{border-top:1px solid var(--cizgi);padding:2px 0}
+.sade .sssd:last-of-type{border-bottom:1px solid var(--cizgi);margin-bottom:16px}
+.sade .sssd summary{cursor:pointer;font-weight:600;padding:14px 0;color:var(--murekkep)}
+.sade .sssd p{margin:0 0 14px}
+@media(max-width:800px){.sade .sg{grid-template-columns:1fr;gap:36px}.sayi{grid-template-columns:1fr !important}}
+#temalar .tkg>*:nth-child(n+10){display:none !important}
+#temalar .flt{display:none}
+@media(max-width:700px){#temalar .tkg>*:nth-child(n+7){display:none !important}.fbant .fg2>*:nth-child(n+4){display:none}}
