@@ -143,7 +143,7 @@ duy=src[src.index('<div class="duy">'):src.index('</div></div>',src.index('<div 
 def karti(no,ad,tx,u,im,alt,cls=''):
     return '<a class="kp %s" href="%s"><div class="im">%s</div><div class="ic"><span class="no">%s</span><h3>%s</h3><p>%s</p><span class="ok">İncele</span></div></a>'%(cls,u,img(im[0],im[1],im[2],alt),no,ad,tx)
 KAPI=('<section class="kpl" id="kapilar"><div class="w"><div class="bs"><p class="et">Siteyi gezin</p><h2>Her konu kendi sayfasında, ayrıntısıyla.</h2></div><div class="kg">'
- +karti('01','Hazır temalar','Sektörünüze göre hazır gelen web sitesi temaları.','/temalar.html',('tema-1-kombi-d',1280,800),'Hazır tema örneği','gen')
+ +karti('01','Hazır temalar','Sektörünüze göre hazır gelen web sitesi temaları.','/temalar.html',('tema-n15-lux-kuafor-d',1280,800),'Hazır tema örneği','gen')
  +karti('02','E-ticaret','Ürün, sipariş, kampanya, pazaryeri ve iade tek panelde.','/e-ticaret.html',('panel-d-urun',1400,875),'E-ticaret ürün ekranı')
  +karti('03','Web sitesi','Metni, görseli ve bölümleri panelden değiştirin.','/web-sitesi.html',('panel-d-site',1400,875),'Web sitesi editörü')
  +karti('04','Randevu ve iş takibi','Takvim, kasa, muhasebe, personel ve evrak takibi.','/is-takibi.html',('panel-k-takvim',1400,875),'Randevu takvimi')
@@ -197,7 +197,7 @@ t=t.replace('<main>','<main id="icerik">',1); open(S+'/index.html','w',encoding=
 # ---- iç sayfalar
 B=banner
 page('temalar.html','Hazır Web Sitesi Temaları | OnlineKaydet','Sektörünüze göre hazır web sitesi temaları. Seçin, metin ve görselleri panelden düzenleyin, alan adınızı bağlayın.',
- B('t','Temalar','Mesleğinize uygun hazır temalar','Birini seçin; yazıları ve resimleri panelden değiştirin. Menü, mobil alt çubuk ve alt bilgi hazır gelir.',('tema-1-kombi-d','Kombi servisi teması'))+P['tema']+P['sek']+SON)
+ B('t','Temalar','Mesleğinize uygun hazır temalar','Birini seçin; yazıları ve resimleri panelden değiştirin. Menü, mobil alt çubuk ve alt bilgi hazır gelir.',('tema-n15-lux-kuafor-d','Kombi servisi teması'))+P['tema']+P['sek']+SON)
 page('e-ticaret.html','E-Ticaret Modülü: Ürün, Sipariş, Pazaryeri, B2B | OnlineKaydet','Ürün ve stok, sipariş ve kargo, kampanya, pazaryeri, iade, ortaklık ve bayi (B2B) tek panelde. Sitenizin içinde çalışan mağaza.',
  B('e','E-ticaret','Sitenizin içinde çalışan mağaza','Ürün, sipariş, kampanya ve pazaryeri satışı aynı panelden yürür.',('panel-d-urun','Ürün yönetimi ekranı'))+FOTO_ETC+P['etc']+SON)
 page('web-sitesi.html','Kodsuz Web Sitesi Editörü | OnlineKaydet','Web sitenizin her bölümünü panelden düzenleyin: metin, yazı tipi, görsel, menü. Alan adı ve SSL dahil.',
