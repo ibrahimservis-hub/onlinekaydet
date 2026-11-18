@@ -78,3 +78,12 @@ footer.alt2 .kart svg{display:block;overflow:visible;height:32px;width:52px}foot
 #temalar .tkg>*:nth-child(n+10){display:none !important}
 #temalar .flt{display:none}
 @media(max-width:700px){#temalar .tkg>*:nth-child(n+7){display:none !important}.fbant .fg2>*:nth-child(n+4){display:none}}
+
+/* sektör sayfası zengin bölümler */
+#neler-degisir h2,#isinizi-gelistirin h2,#kayit-akisi h2,#sss h2{margin-bottom:22px;max-width:none}
+#neler-degisir .lead{max-width:760px;margin-bottom:28px}
+#isinizi-gelistirin .sxy{margin-top:22px}
+.sxtb thead th{position:static!important}
+.sxtb table th:first-child{width:22%}
+@media(max-width:700px){.sxtb table th:first-child{width:auto}}
+#sektor-tema h2{max-width:none;margin-bottom:14px}#sektor-tema .lead{margin-bottom:22px}
