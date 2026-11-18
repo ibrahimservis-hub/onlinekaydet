@@ -56,6 +56,14 @@ def _norm_phone(s):
     return d if len(d) == 10 and d.startswith("5") else ""
 
 
+def _demo_img(key, i):
+    """Örnek ürünlere sektörün fotoğrafı: themes/img/<sektor>[2|3].jpg varsa."""
+    import os
+    d = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "themes", "img")
+    nm = key + ("" if i % 3 == 0 else str(i % 3 + 1))
+    return ["/demo-foto/%s.jpg" % nm] if os.path.isfile(os.path.join(d, nm + ".jpg")) else []
+
+
 async def rename_old_demos(db):
     """Demo firmaları 'Demo 1', 'Demo 2'... adlarında tutar: biçimi bozuk veya tekrar eden adları düzeltir, firma ayarındaki adı eşitler."""
     import re as _re
@@ -282,7 +290,7 @@ def register(api_router, db, deps):
                     _cats[_c] = _cid
                 _slug = re.sub(r"[^a-z0-9]+", "-", _n.lower().translate(str.maketrans("çğıöşüİ", "cgiosui"))).strip("-")
                 await fdb.shop_products.insert_one({"id": uuid.uuid4().hex[:12], "slug": _slug, "name": _n, "brand": _b, "category": _c, "category_id": _cats[_c], "category_ids": [_cats[_c]],
-                                                    "price": float(_pr), "old_price": float(_old), "stock": _st, "track_stock": True, "active": True, "featured": _i < 3, "images": [], "sort": _i,
+                                                    "price": float(_pr), "old_price": float(_old), "stock": _st, "track_stock": True, "active": True, "featured": _i < 3, "images": _demo_img(key, _i), "sort": _i,
                                                     "short": "Örnek ürün; fiyat, stok ve fotoğrafı panelden değiştirin.", "created_at": _now(), "updated_at": _now(), "sold": 0})
         except Exception:               # noqa: BLE001
             pass

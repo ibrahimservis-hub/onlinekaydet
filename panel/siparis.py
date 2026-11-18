@@ -280,6 +280,18 @@ def register(api_router, db, deps):
         rows.sort(key=lambda r: r.get(key) or 0, reverse=rev < 0)
         total = len(rows)
         page = [view(o) for o in rows[max(_int(offset), 0):max(_int(offset), 0) + min(max(_int(limit), 1), 200)]]
+        try:                                    # liste için ilk ürünün küçük resmi
+            ids = {i.get("product") for o in page for i in (o.get("items") or [])[:1] if i.get("product")}
+            names = {i.get("name") for o in page for i in (o.get("items") or [])[:1] if i.get("name")}
+            pr = await db.shop_products.find({"$or": [{"id": {"$in": list(ids)}}, {"name": {"$in": list(names)}}]},
+                                             {"_id": 0, "id": 1, "name": 1, "images": 1}).to_list(400)
+            byid = {x["id"]: (x.get("images") or [""])[0] for x in pr}
+            byname = {x["name"]: (x.get("images") or [""])[0] for x in pr}
+            for o in page:
+                f1 = (o.get("items") or [{}])[0]
+                o["thumb"] = byid.get(f1.get("product")) or byname.get(f1.get("name")) or ""
+        except Exception:                       # noqa: BLE001
+            pass
         allr = await db.yp_orders.find({}, {"_id": 0, "status": 1, "total": 1}).to_list(8000)
         return {"items": page, "total": total, "offset": _int(offset),
                 "sum": round(sum(_num(r.get("total")) for r in rows), 2),

@@ -3526,6 +3526,15 @@ if _FE:
             return JSONResponse({"detail": "Bulunamadı"}, status_code=404)
         return _Resp(p.read_bytes(), media_type="image/jpeg", headers={"Cache-Control": "public, max-age=604800"})
 
+    @app.get("/demo-foto/{name}.jpg", include_in_schema=False)
+    async def demo_foto(name: str):
+        """Demo firmalardaki örnek ürünlerin küçük resimleri (tema fotoğraf deposundan)."""
+        import re as _r3
+        p = Path(__file__).resolve().parent.parent / "themes" / "img" / (name + ".jpg")
+        if not _r3.fullmatch(r"[a-z_]{3,30}[23]?", name) or not p.is_file():
+            return JSONResponse({"detail": "Bulunamadı"}, status_code=404)
+        return _Resp(p.read_bytes(), media_type="image/jpeg", headers={"Cache-Control": "public, max-age=86400"})
+
     @app.get("/tema-onizleme/{slug}.html", include_in_schema=False)
     async def tema_onizleme(slug: str):
         """Satış sitesindeki tema vitrini: statik dosyası olmayan temalar doğrudan tema deposundan gösterilir (yeni sekmede canlı önizleme)."""
