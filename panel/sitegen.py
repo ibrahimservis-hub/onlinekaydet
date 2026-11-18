@@ -443,6 +443,9 @@ def _linked(h, base="/", suffix=""):
 def apply_profile(raw, th, ctx):
     """Ham tema HTML'ine firma bilgilerini yerleştirir (ana sayfa). Boş bırakılan bilgi temadan da kalkar."""
     h = raw.replace("__API_URL__", "/api").replace("__PORTAL_URL__", "#")
+    if not ctx.get("demo"):
+        h = re.sub(r'<span class="lm lm-tx lm-demo"[^>]*>.*?</span>', "", h)
+        h = h.replace(" lm-demo", "")          # örnek logo yalnız tema vitrininde görünür; firma sitesinde harf işareti kalır
     h = re.sub(r"©\s*\d{4}\s[^<]*?·\s*Bu site OnlineKaydet ile yayınlanır", '<a href="https://onlinekaydet.com" target="_blank" rel="noopener" style="color:inherit">Bu site OnlineKaydet ile yayınlanır</a>', h)
     name = ctx["name"]
     if th and th.get("name") and name:
@@ -1208,7 +1211,7 @@ def _preview_module(h, ctx, page):
 def preview_html(raw, th, slug, page=""):
     """Tema vitrini: örnek firma bilgisiyle ana sayfa ya da iç sayfa. Menü bağlantıları önizleme sayfalarına gider."""
     ctx = {"th": th, "name": th.get("name") or "Örnek Firma", "tel": "05320000000", "p": effective({}, th.get("sector") or ""), "sector": th.get("sector") or "",
-           "logo": "", "city": "", "legal": [], "shop_on": True, "img": (lambda k: ""), "logo_abs": ""}
+           "logo": "", "city": "", "legal": [], "shop_on": True, "img": (lambda k: ""), "logo_abs": "", "demo": True}
     ctx["p"]["address"] = ""
     h = apply_profile(raw, th, ctx)
     if page in ("ilanlar", "kurslar", "rezervasyon"):

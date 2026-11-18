@@ -9,14 +9,25 @@ def ed(nm, h, off=False):
     return f'<div class="ed" data-nm="{nm}"' + (' data-dflt="off"' if off else '') + f'>{h}</div>'
 
 
+import json as _json, os as _os
+_DM = None
+
+
+def _demo_mark(nm):
+    global _DM
+    if _DM is None:
+        _DM = _json.load(open(_os.path.join(_os.path.dirname(_os.path.abspath(__file__)), 'demo_marks.json')))
+    return _DM[sum(map(ord, nm)) % len(_DM)]
+
+
 def logo(X, cls=''):
     r = X.r
     mk = r.get('logo', 'sq')
     ini = X.nm[0]
     if mk == 'tx':
-        m = ''
+        m = f'<span class="lm lm-tx lm-demo" style="--dl:url(data:image/webp;base64,{_demo_mark(X.nm)});width:34px;height:34px">{ini}</span>'
     else:
-        m = f'<span class="lm lm-{mk}">{ini}</span>'
+        m = f'<span class="lm lm-{mk} lm-demo" style="--dl:url(data:image/webp;base64,{_demo_mark(X.nm)})">{ini}</span>'
     return f'<a class="lg {cls}" href="#top">{m}<span class="ln">{X.nm}</span></a>'
 
 
@@ -29,6 +40,7 @@ NAVCSS = {
  'base': """.lg{display:inline-flex;align-items:center;gap:11px;font:700 1.15rem/1 var(--fd);letter-spacing:var(--lgt,-.02em);color:inherit;white-space:nowrap}
 .lm{flex:none;width:38px;height:38px;display:grid;place-items:center;font:800 1.1rem/1 var(--fd);background:var(--ac);color:var(--on-ac);border-radius:calc(var(--r)*.7)}
 .lm-ci{border-radius:50%}.lm-ol{background:transparent;color:var(--ac);border:2px solid var(--ac)}.lm-bar{border-radius:0;background:transparent;color:var(--ac);border-left:4px solid var(--ac);width:auto;padding-left:10px;font-size:1.5rem}
+.lm-demo{background:#fff var(--dl) center/80% no-repeat !important;color:transparent !important;font-size:0 !important;border:1px solid rgba(0,0,0,.12) !important;border-radius:calc(var(--r)*.7) !important;transform:none !important}
 .lm-dm{transform:rotate(45deg);border-radius:6px}.lm-dm{font-size:0}.lm-dm:after{content:"";}
 .nv{z-index:60}.nv nav{display:flex;gap:clamp(16px,2.2vw,32px);font:600 .93rem/1 var(--fb)}.nv nav a{position:relative;padding:6px 0;opacity:.82;transition:.15s}.nv nav a:hover{opacity:1;color:var(--ac)}
 @media(max-width:900px){.nv nav,.nv .nv-cta,.nv .nv-tel{display:none!important}}""",
