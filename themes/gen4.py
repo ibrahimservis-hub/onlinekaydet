@@ -15,7 +15,7 @@ from g3 import base as _base
 import base64 as _b64
 try:   # sunucuda internet varsa gerçek fotoğrafları otomatik indir
     import os as _os, fetch_photos as _fp
-    if not _os.path.exists(_os.path.join(_fp.OUT, '.real')):
+    if not _os.path.exists(_os.path.join(_fp.OUT, 'real.txt')):
         _fp.main()
 except Exception as _e:
     print('foto indirme atlandı:', _e)
@@ -31,7 +31,7 @@ def _img64(name):        # gerçek fotoğraf (fetch_photos.py ile indirilmiş) v
     import os
     for ext in ('.jpg',):
         f = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'img', name + ext)
-        if os.path.exists(f) and os.path.exists(os.path.join(os.path.dirname(f), '.real')):
+        if os.path.exists(f) and os.path.exists(os.path.join(os.path.dirname(f), 'real.txt')):
             return _b64.b64encode(open(f, 'rb').read()).decode()
     try:
         return _b64.b64encode(make_ill.svg_for(name).encode()).decode()
