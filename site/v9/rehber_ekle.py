@@ -5,7 +5,10 @@ sayfalarının "Diğer rehberler" listesini, bilgi-bankasi.html kartlarını ve 
 import re, os, json, html
 S = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 def rd(n): return open(os.path.join(S, n), encoding="utf-8").read()
-def wr(n, t): open(os.path.join(S, n), "w", encoding="utf-8").write(t)
+def wr(n, t):
+    if n.startswith("bilgi-") and n != "bilgi-bankasi.html" and "aria-current" not in t:
+        t = t.replace('<a href="/bilgi-bankasi.html">Bilgi bankası</a></nav>', '<a href="/bilgi-bankasi.html" aria-current="page">Bilgi bankası</a></nav>', 1)
+    open(os.path.join(S, n), "w", encoding="utf-8").write(t)
 E = html.escape
 
 def steps(items):
