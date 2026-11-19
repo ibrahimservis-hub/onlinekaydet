@@ -1,7 +1,7 @@
 /* Canlı demo formu: sektör seç, (SMS açıksa) telefon kodunu doğrula, örnek verili demo hesabını aç. */
 (function(){
 var box=document.querySelector('.dform .frm');if(!box)return;
-var btn=box.querySelector('a.bt'),$=function(i){return document.getElementById(i)};
+var btn0=box.querySelector('a.bt'),btn=btn0.cloneNode(true);btn0.parentNode.replaceChild(btn,btn0);var $=function(i){return document.getElementById(i)};
 var msg=document.createElement('div');msg.setAttribute('role','status');msg.style.cssText='grid-column:1/-1;font-weight:600;font-size:14px;margin-top:8px';box.appendChild(msg);
 var hp=document.createElement('input');hp.name='website';hp.tabIndex=-1;hp.autocomplete='off';hp.setAttribute('aria-hidden','true');hp.style.cssText='position:absolute;left:-9999px;width:1px;height:1px;opacity:0';box.appendChild(hp);
 var sel=document.createElement('div');sel.innerHTML='<label for="d4">Sektör</label><select id="d4"><option value="">Seçiniz</option></select>';box.insertBefore(sel,btn);
@@ -35,6 +35,6 @@ btn.addEventListener('click',function(e){e.preventDefault();if(btn.dataset.busy)
  function fin(){delete btn.dataset.busy}
  if(need&&!sent){btn.textContent='Kod gönderiliyor…';
   post('demo/kod',{phone:p}).then(function(){sent=true;kod.hidden=false;$('d5').focus();msg.style.color='#0f9d58';msg.textContent='Telefonunuza 6 haneli kod gönderdik. Kodu girip demoyu açın.';btn.textContent='Kodu doğrula ve demoyu aç';fin()}).catch(function(x){msg.textContent=x.message;btn.textContent=old;fin()});return}
- btn.textContent='Demo hesabınız hazırlanıyor…';
+ btn.textContent='Hesabınız açılıyor…';msg.style.color='#1a4fb8';msg.textContent='Lütfen bekleyin, demo hesabınız açılıyor. Bu işlem birkaç saniye sürer, sayfayı kapatmayın.';
  post('demo',{name:n,phone:p,sector:s,firm:$('d3').value.trim(),code:need?$('d5').value.trim():''}).then(done).catch(function(x){msg.textContent=x.message;btn.textContent=need?'Kodu doğrula ve demoyu aç':old;fin()})
 })})();
