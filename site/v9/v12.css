@@ -87,3 +87,12 @@ footer.alt2 .kart svg{display:block;overflow:visible;height:32px;width:52px}foot
 .sxtb table th:first-child{width:22%}
 @media(max-width:700px){.sxtb table th:first-child{width:auto}}
 #sektor-tema h2{max-width:none;margin-bottom:14px}#sektor-tema .lead{margin-bottom:22px}
+
+/* demo hesabı bilgi kutusu */
+.dcred{display:grid;gap:10px;margin:14px 0}
+.dsat b{display:block;font-size:12px;font-weight:600;color:#5b6577;margin-bottom:4px}
+.dsv{display:flex;gap:8px;align-items:stretch}
+.dsv code{flex:1;min-width:0;padding:11px 12px;background:#f3f5f9;border:1px solid #e1e6ee;border-radius:6px;font:600 14px/1.3 ui-monospace,Menlo,Consolas,monospace;overflow-wrap:anywhere;color:#0f1b33}
+.dkop{min-height:44px;padding:0 14px;border:1px solid #00265b;border-radius:6px;background:#fff;color:#00265b;font:600 13px/1 inherit;cursor:pointer;white-space:nowrap}
+.dkop:hover{background:#00265b;color:#fff}.dkop.ok{background:#127a3d;border-color:#127a3d;color:#fff}
+.dkop.dhep{width:100%;margin-bottom:6px}

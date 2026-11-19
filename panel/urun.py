@@ -43,6 +43,15 @@ def kanal_listesi(yemek):
     return [{"id": k, "name": v[0], "commission": v[1]} for k, v in CHANNELS.items()
             if (k == "site" or k in FOOD_CH) == bool(yemek) or k == "site"]
 
+async def _kanallar_aktif(db):
+    """Kanal listesi + 'aktif': kendi site her zaman; pazaryeri/yemek platformu yalnız Entegrasyonlar'dan açıksa."""
+    out = kanal_listesi(await yemek_firma(db))
+    on = {r["id"] for r in await db.yp_integrations.find({"on": True}, {"_id": 0, "id": 1}).to_list(400)}
+    for k in out:
+        k["aktif"] = k["id"] == "site" or k["id"] in on
+    return out
+
+
 ALERJEN = ("gluten", "süt", "yumurta", "fıstık", "kuruyemiş", "soya", "balık", "kabuklu deniz", "susam", "hardal", "kereviz", "sülfit", "acı biber")
 
 
@@ -469,7 +478,7 @@ def register(api_router, db, deps):
         page = rows[offset:offset + limit]
         await _rozet(db, page)
         return {"rows": page, "total": len(rows), "counts": counts, "sum": tot,
-                "channels": kanal_listesi(await yemek_firma(db))}
+                "channels": await _kanallar_aktif(db)}
 
     @api_router.get("/yp/products/filters")
     async def filters(_: dict = Depends(adm)):
