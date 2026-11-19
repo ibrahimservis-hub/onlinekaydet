@@ -486,6 +486,12 @@ label.f>input,label.f>select,label.f>textarea{min-height:34px;font-size:13px;bor
 .mmenu{display:grid;gap:16px}.mg .mgt{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;letter-spacing:.02em;text-transform:uppercase;color:var(--mut);margin-bottom:8px}
 .mg .mgl{display:grid;grid-template-columns:1fr 1fr;gap:8px}.mg .mgl a{display:flex;align-items:center;min-height:46px;padding:0 14px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);text-decoration:none;font-weight:600;font-size:14.5px}.mg .mgl a:active{background:#eef3fc}
 .mmenu #out2{min-height:46px;justify-content:center}
+.svbk{margin-top:14px;padding:12px;border:1px solid var(--n300,#d9dee7);border-radius:10px;background:#f8fafc}
+.svbt{font-weight:700;font-size:13.5px;margin-bottom:8px}.svbt small{font-weight:500;color:var(--mut);margin-left:6px}
+.svpr{display:grid;grid-template-columns:minmax(0,1fr) 64px 96px 36px;gap:8px;margin-bottom:8px;align-items:center}
+.svpr .ps{grid-column:1/-1}.svpr input,.svpr select{width:100%;min-width:0;min-height:40px;border:1px solid #d0d5dd;border-radius:8px;padding:0 10px;background:#fff;font-size:14.5px}
+.svpr .svx{min-height:40px;border:1px solid #d0d5dd;border-radius:8px;background:#fff;font-size:18px;line-height:1;color:var(--mut);cursor:pointer}.svpr .svx:hover{color:var(--bad);border-color:var(--bad)}
+@media(max-width:520px){.svpr{grid-template-columns:minmax(0,1fr) 56px 84px 36px}}
 .dwc{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(340px,100%),1fr));gap:18px;align-items:start}.dwr{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line)}.dwr label{flex:1;display:flex;gap:8px;align-items:center;cursor:pointer}.dwr .dwm{display:flex;gap:4px}@media(max-width:700px){.dwf{grid-template-columns:1fr 1fr!important}}
 /* iç sayfalar: menü üstte */
 .rpw{display:block}.rpw .rpl{display:flex;gap:2px;border:0;border-bottom:1px solid var(--line);border-radius:0;background:none;overflow-x:auto;margin:0 0 16px}
@@ -3644,17 +3650,17 @@ document.addEventListener('click',async function(ev){var b=ev.target.closest&&ev
   else if(a==='sv-iptal-ok'){var nd=$('#svr').value.trim();if(!nd){toast('İptal nedenini yazın',true);return}await api('/jobs/'+b.dataset.id,{method:'PUT',body:{status:'iptal',cancel_reason:nd}});closeM();toast('Kayıt iptal edildi');await V.servis.load()}
   else if(a==='sv-kapat'){if(!CUR.svparts){try{CUR.svparts=((await api('/parts'))||[]).filter(function(p){return p.is_active!==false})}catch(e){CUR.svparts=[]}}var j=(CUR.svrows||[]).filter(function(x){return x.id===b.dataset.id})[0];if(!j)return;svKapanis(j)}
   else if(a==='sv-parca'){var t=$('#svpt');t.insertAdjacentHTML('beforeend',svParcaSatir())}
+  else if(a==='sv-parca-sil'){var r0=b.closest('.svpr');if(r0)r0.remove()}
   else if(a==='sv-kapat-ok'){var rows=[].slice.call(document.querySelectorAll('#svpt .svpr')).map(function(r){return{part_id:r.dataset.pid||'',name:r.querySelector('.pn').value.trim(),qty:Number(r.querySelector('.pq').value||1),unit_price:Number(r.querySelector('.pu').value||0)}}).filter(function(p){return p.name});
    rows.forEach(function(p){p.total=Math.round(p.qty*p.unit_price*100)/100});
-   var yok=$('#svpy').checked;if(!rows.length&&!yok){toast('Parça yazın ya da "parça kullanılmadı" seçin',true);return}
    var yap=$('#svw').value.trim();if(!yap){toast('Yapılan işi yazın',true);return}
-   await api('/jobs/'+b.dataset.id,{method:'PUT',body:{status:'tamamlandi',work_done:yap,parts_used:rows,parts_none:yok&&!rows.length,labor_fee:Number($('#svl').value||0)}});closeM();toast('Kayıt tamamlandı');await V.servis.load()}
+   await api('/jobs/'+b.dataset.id,{method:'PUT',body:{status:'tamamlandi',work_done:yap,parts_used:rows,parts_none:!rows.length,labor_fee:Number($('#svl').value||0)}});closeM();toast('Kayıt tamamlandı');await V.servis.load()}
  }catch(e){fail(e)}});
 document.addEventListener('input',function(ev){if(ev.target.id!=='svq')return;clearTimeout(V.servis.t);V.servis.t=setTimeout(function(){CUR.svf.q=ev.target.value.trim();V.servis.load().catch(fail)},300)});
-function svParcaSatir(){var st=CUR.svparts&&CUR.svparts.length?'<select class="ps" aria-label="Stoktan seç" style="grid-column:1/-1"><option value="">Stoktan seç (isteğe bağlı)</option>'+CUR.svparts.map(function(p){return '<option value="'+esc(p.id)+'">'+esc(p.name)+' · stok '+p.stock_qty+'</option>'}).join('')+'</select>':'';return '<div class="svpr" style="display:grid;grid-template-columns:2fr 70px 110px;gap:8px;margin-top:6px">'+st+'<input class="pn" placeholder="Parça adı"><input class="pq" type="number" min="0" step="1" value="1" aria-label="Adet"><input class="pu" type="number" min="0" step="0.01" placeholder="Birim fiyat" aria-label="Birim fiyat"></div>'}
-function svKapanis(j){modal('Kaydı tamamla — '+j.job_number,'<label>Yapılan iş<textarea id="svw" rows="3" placeholder="Ne yapıldı?">'+esc(j.work_done||'')+'</textarea></label>'
-  +'<div style="margin-top:10px"><b>Kullanılan parçalar</b><div id="svpt">'+svParcaSatir()+'</div><button class="btn s" data-a="sv-parca" style="margin-top:8px">Parça ekle</button><label style="display:flex;gap:8px;align-items:center;margin-top:8px"><input type="checkbox" id="svpy"> Parça kullanılmadı</label></div>'
-  +'<label style="margin-top:10px">İşçilik ücreti (₺)<input id="svl" type="number" min="0" step="0.01" value="'+esc(j.labor_fee||0)+'"></label>'
+function svParcaSatir(){var st=CUR.svparts&&CUR.svparts.length?'<select class="ps" aria-label="Stoktan seç"><option value="">Stoktan seç (isteğe bağlı)</option>'+CUR.svparts.map(function(p){return '<option value="'+esc(p.id)+'">'+esc(p.name)+' · stok '+p.stock_qty+'</option>'}).join('')+'</select>':'';return '<div class="svpr">'+st+'<input class="pn" placeholder="Parça adı" aria-label="Parça adı"><input class="pq" type="number" min="0" step="1" value="1" aria-label="Adet" inputmode="numeric"><input class="pu" type="number" min="0" step="0.01" placeholder="Fiyat ₺" aria-label="Birim fiyat" inputmode="decimal"><button type="button" class="svx" data-a="sv-parca-sil" aria-label="Satırı sil">×</button></div>'}
+function svKapanis(j){modal('Kaydı tamamla — '+j.job_number,'<label class="f">Yapılan iş<textarea id="svw" rows="3" placeholder="Ne yapıldı?">'+esc(j.work_done||'')+'</textarea></label>'
+  +'<div class="svbk"><div class="svbt">Kullanılan parçalar <small>isteğe bağlı</small></div><div id="svpt"></div><button type="button" class="btn s" data-a="sv-parca">+ Parça ekle</button></div>'
+  +'<label class="f" style="margin-top:14px">İşçilik ücreti (₺)<input id="svl" type="number" min="0" step="0.01" inputmode="decimal" value="'+esc(j.labor_fee||0)+'"></label>'
   +'<div class="mf"><button class="btn" data-a="close">Vazgeç</button><button class="btn p" data-a="sv-kapat-ok" data-id="'+esc(j.id)+'">Tamamla</button></div>',true)}
 function svDetay(r){var st=SVST[r.status]||[r.status,'w'],kapali=['tamamlandi','faturalandi','iptal'].indexOf(r.status)>-1;
  var satir=function(k,v){return v?'<div class="dr"><small>'+k+'</small><b>'+esc(v)+'</b></div>':''};
