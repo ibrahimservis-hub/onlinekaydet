@@ -170,7 +170,7 @@ def register(api_router, db, deps):
         if not phone:
             raise HTTPException(422, "Telefon numarası geçersiz (05xx xxx xx xx)")
         _raw = str(payload.get("sector") or "").strip().lower()
-        key = SECTOR_MAP.get(_raw, "") or (_raw if _raw in sektor.SECTORS else "")
+        key = _raw if _raw in sektor.SECTORS else SECTOR_MAP.get(_raw, "")      # tam sektör anahtarı önce ("bilgisayar" kelime eşlemesi bilgisayar_kursu'na kayıyordu)
         if key not in sektor.SECTORS:
             raise HTTPException(422, "Sektör seçin")
         since = (datetime.now(timezone.utc) - timedelta(days=1)).isoformat()
