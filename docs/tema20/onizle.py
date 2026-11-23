@@ -2,7 +2,7 @@
 """20 temanın fotoğraflı ana sayfa önizlemesi -> onizleme/NN.html + onizleme/index.html"""
 import os, html, re
 from pano import T, LBL
-from foto import F, url
+from foto import F, url, video
 from icerik import C, SSS
 E_ = html.escape
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "onizleme"); os.makedirs(OUT, exist_ok=True)
@@ -23,6 +23,8 @@ def page(i, t, c):
     P = F[i]
     ph = lambda k, w=1200, h=None: url(P[k % len(P)], w, h)
     cta = CTA[fam]
+    vsrc, vpos = video(i)
+    vid = lambda cls='': '<video class="bgv %s" autoplay muted loop playsinline preload="metadata" poster="%s"><source src="%s" type="video/mp4"></video>' % (cls, vpos, vsrc)
     phone = "0532 000 00 00"
     fonts = "&".join("family=" + GF[f] for f in dict.fromkeys([fh, fb]) if f in GF)
     out = []
@@ -41,18 +43,19 @@ def page(i, t, c):
         code, label = s.split(":", 1)
         if code in ("hf",):
             f = c.get("form")
-            out.append('<section class="hf" style="background-image:linear-gradient(90deg,rgba(0,0,0,.72),rgba(0,0,0,.25)),url(%s)"><div class="w"><span class="ey l">%s</span><h1>%s</h1><p class="lead">%s</p>%s</div></section>' % (
-                ph(0, 1800), E_(sec), E_(c["h1"]), E_(c["sub"]), form(f, c.get("fbtn", cta), True) if f else '<div class="row">%s%s</div>' % (btn(cta), btn("Menüyü gör" if fam == "yemek" else "Paketler", "o l"))))
+            out.append('<section class="hf">%s<div class="shade"></div><div class="w in"><span class="ey l">%s</span><h1>%s</h1><p class="lead">%s</p>%s</div></section>' % (
+                vid(), E_(sec), E_(c["h1"]), E_(c["sub"]), form(f, c.get("fbtn", cta), True) if f else '<div class="row">%s%s</div>' % (btn(cta), btn("Menüyü gör" if fam == "yemek" else "Paketler", "o l"))))
         elif code in ("hs", "hq", "hb"):
             f = c.get("form")
-            right = '<div class="hpic"><img src="%s" alt="%s"><div class="fcard">%s</div></div>' % (ph(0, 1100, 1300), E_(sec), form(f, c.get("fbtn", cta))) if f else '<div class="hpic"><img src="%s" alt=""></div>' % ph(0, 1100, 1300)
-            out.append('<section class="hs"><div class="w g2"><div class="htx"><span class="ey">%s</span><h1>%s</h1><p class="lead">%s</p><div class="row">%s%s</div><div class="trust"><b>★ 4.9</b> Google puanı · <b>Aynı gün</b> dönüş</div></div>%s</div></section>' % (
+            right = '<div class="hpic">%s<span class="live">● Canlı görüntü</span><div class="fcard">%s</div></div>' % (vid(), form(f, c.get("fbtn", cta))) if f else '<div class="hpic">%s</div>' % vid()
+            out.append('<section class="hs"><div class="w g2"><div class="htx in"><span class="ey">%s</span><h1>%s</h1><p class="lead">%s</p><div class="row">%s%s</div><div class="trust"><b>★ 4.9</b> Google puanı · <b>Aynı gün</b> dönüş</div></div>%s</div></section>' % (
                 E_(sec), E_(c["h1"]), E_(c["sub"]), btn(cta), '<a class="b o" href="tel:+905320000000">%s</a>' % phone, right))
         elif code == "hp":
-            out.append('<section class="hp"><div class="w hpg"><a class="big" style="background-image:linear-gradient(0deg,rgba(0,0,0,.6),rgba(0,0,0,0) 60%%),url(%s)"><span class="ey l">Yeni sezon</span><h1>%s</h1><p>%s</p><span class="b p">%s</span></a><a class="sm" style="background-image:linear-gradient(0deg,rgba(0,0,0,.55),transparent 70%%),url(%s)"><b>Çok satanlar</b><span>Keşfet →</span></a><a class="sm" style="background-image:linear-gradient(0deg,rgba(0,0,0,.55),transparent 70%%),url(%s)"><b>Kampanya</b><span>%%20 indirim →</span></a></div></section>' % (
-                ph(0, 1400), E_(c["h1"]), E_(c["sub"]), cta, ph(1, 700), ph(2, 700)))
+            out.append('<section class="hp"><div class="w hpg"><a class="big">%s<div class="shade b"></div><div class="bt in"><span class="ey l">Yeni sezon</span><h1>%s</h1><p>%s</p><span class="b p">%s</span></div></a><a class="sm" style="background-image:linear-gradient(0deg,rgba(0,0,0,.55),transparent 70%%),url(%s)"><b>Çok satanlar</b><span>Keşfet →</span></a><a class="sm" style="background-image:linear-gradient(0deg,rgba(0,0,0,.55),transparent 70%%),url(%s)"><b>Kampanya</b><span>%%20 indirim →</span></a></div></section>' % (
+                vid(), E_(c["h1"]), E_(c["sub"]), cta, ph(1, 700), ph(2, 700)))
         elif code == "br":
-            out.append('<section class="br"><div class="w"><span>%s</span>%s</div></section>' % ("Servis verdiğimiz markalar" if fam == "servis" else "Çalıştığımız markalar", "".join("<b>%s</b>" % E_(b) for b in c.get("brands", []))))
+            bb = "".join("<b>%s</b>" % E_(b) for b in c.get("brands", []))
+            out.append('<section class="br"><div class="w"><span>%s</span><div class="mq"><div class="mqi">%s%s</div></div></div></section>' % ("Servis verdiğimiz markalar" if fam == "servis" else "Çalıştığımız markalar", bb, bb))
         elif code in ("c3", "c4", "sv"):
             cards = c["cards"][:6 if code == "sv" else (3 if code == "c3" else 4)]
             out.append('<section class="sec"><div class="w">%s<div class="cards n%d">%s</div></div></section>' % (head(label.split("(")[0].strip().split(" + ")[0], {"servis": "Ne yapıyoruz?", "randevu": "Hizmetlerimiz", "kurs": "Kurslarımız"}.get(fam, "Hizmetler"), "Fiyatlar başlangıç fiyatıdır; kesin tutarı işe başlamadan söyleriz." if any(x[2] for x in cards) else ""), min(len(cards), 3 if len(cards) in (3, 6) else 4),
@@ -70,7 +73,7 @@ def page(i, t, c):
             st = {"servis": ["Talebinizi bırakın", "15 dk içinde arıyoruz", "Usta kapınızda", "Ödeme ve garanti belgesi"], "randevu": ["Hizmeti seçin", "Saati ayırın", "SMS hatırlatma", "Gelin, hazırız"], "kurs": ["Ön kayıt", "Sağlık raporu ve evrak", "Teorik + direksiyon", "Sınav ve ehliyet"]}.get(fam, ["Seçin", "Onaylayın", "Takip edin", "Teslim"])
             out.append('<section class="sec"><div class="w">%s<ol class="st">%s</ol></div></section>' % (head("Süreç", "Nasıl çalışıyoruz?"), "".join("<li><b>%d</b><h3>%s</h3></li>" % (k + 1, E_(x)) for k, x in enumerate(st))))
         elif code == "nm":
-            out.append('<section class="nm"><div class="w">%s</div></section>' % "".join("<div><b>%s</b><span>%s</span></div>" % (E_(a), E_(b)) for a, b in c.get("stats", [("12+", "yıl"), ("4.8", "puan"), ("3.000+", "müşteri"), ("7/24", "destek")])))
+            out.append('<section class="nm">%s<div class="shade"></div><div class="w">%s</div></section>' % (vid("dim"), "".join("<div class=\"rv1\"><b data-n=\"%s\">%s</b><span>%s</span></div>" % (E_(a), E_(a), E_(b)) for a, b in c.get("stats", [("12+", "yıl"), ("4.8", "puan"), ("3.000+", "müşteri"), ("7/24", "destek")]))))
         elif code in ("gl", "ba"):
             if code == "ba":
                 out.append('<section class="sec"><div class="w">%s<div class="ba"><figure><img loading="lazy" src="%s" alt=""><figcaption>Önce</figcaption></figure><figure><img loading="lazy" src="%s" alt=""><figcaption>Sonra</figcaption></figure></div></div></section>' % (head("İşlerimiz", "Önce ve sonra"), ph(5, 900, 640), ph(6, 900, 640)))
@@ -79,7 +82,7 @@ def page(i, t, c):
         elif code == "tm":
             out.append('<section class="sec sf"><div class="w">%s<div class="tm">%s</div></div></section>' % (head("Ekip", "Uzmanlarımız", "Randevunuzu dilediğiniz uzmana alabilirsiniz."), "".join('<div><i>%s</i><h3>%s</h3><span>%s</span><a href="#iletisim">Randevu al →</a></div>' % (E_("".join(w[0] for w in p.split(" · ")[0].replace("Dt. ", "").replace("Dr. ", "").split()[:2])), E_(p.split(" · ")[0]), E_(p.split(" · ")[1] if " · " in p else "")) for p in c.get("team", ["Usta 1 · kesim", "Usta 2 · renk"]))))
         elif code == "rv":
-            out.append('<section class="sec"><div class="w">%s<div class="rv">%s</div><p class="note">Örnek yorumlar · firmanın kendi Google yorumları burada gösterilir.</p></div></section>' % (head("Yorumlar", "Müşterilerimiz ne diyor?"), "".join('<blockquote><span class="stars">★★★★★</span><p>%s</p><cite>%s</cite></blockquote>' % (E_(a), E_(b)) for a, b in [("Söylenen saatte geldiler, fiyatı başta söylediler. Çok memnun kaldık.", "A. K. · Google"), ("Randevu almak çok kolaydı, hatırlatma mesajı da geldi.", "S. T. · Google"), ("Temiz ve özenli iş. Tekrar tercih ederim.", "M. D. · Google")])))
+            out.append('<section class="sec"><div class="w">%s<div class="rv sl1">%s</div><p class="note">Örnek yorumlar · firmanın kendi Google yorumları burada gösterilir.</p></div></section>' % (head("Yorumlar", "Müşterilerimiz ne diyor?"), "".join('<blockquote><span class="stars">★★★★★</span><p>%s</p><cite>%s</cite></blockquote>' % (E_(a), E_(b)) for a, b in [("Söylenen saatte geldiler, fiyatı başta söylediler. Çok memnun kaldık.", "A. K. · Google"), ("Randevu almak çok kolaydı, hatırlatma mesajı da geldi.", "S. T. · Google"), ("Temiz ve özenli iş. Tekrar tercih ederim.", "M. D. · Google")])))
         elif code == "fq":
             out.append('<section class="sec sf"><div class="w nar">%s%s</div></section>' % (head("SSS", "Sık sorulan sorular"), "".join("<details><summary>%s</summary><p>%s</p></details>" % (E_(q), E_(a)) for q, a in SSS.get(fam, SSS["servis"]))))
         elif code == "mp":
@@ -110,16 +113,21 @@ def page(i, t, c):
 
     navs = [p for p in pages if not p.startswith(("Sepet", "Ödeme", "Hesabım", "Yasal", "Ürün detay", "Hizmet detay", "Cihaz detay", "Uygulama detay", "Tedavi detay", "İlan detay"))][:5]
     shop = fam == "magaza" or any("mağaza" in w.lower() or "sepet" in w.lower() for w in works)
-    hdr = '<header class="top"><div class="w"><a class="lg" href="#">%s</a><nav>%s</nav><div class="hr">%s<a class="b p s" href="#iletisim">%s</a></div></div></header>' % (
-        E_(nm), "".join('<a href="#">%s</a>' % E_(p.split(" (")[0]) for p in navs), '<a class="cart" href="#" aria-label="Sepet">Sepet <b id="sbc">0</b></a>' if shop else '<a class="tel" href="tel:+905320000000">%s</a>' % phone, cta)
+    items = [x[0] for x in c.get("cards", [])][:6]
+    mega = '<div class="mega"><div class="w mg"><div><b>%s</b>%s</div><div><b>Hızlı erişim</b>%s</div><a class="mgp" style="background-image:linear-gradient(0deg,rgba(0,0,0,.6),transparent 60%%),url(%s)"><span>Kampanya</span><b>%s</b></a></div></div>' % (
+        E_(navs[0].split(" (")[0]), "".join('<a href="#">%s</a>' % E_(x) for x in items), "".join('<a href="#">%s</a>' % E_(p.split(" (")[0]) for p in navs[1:]), ph(3, 600, 400), E_({"servis": "Kış öncesi bakımda %15 indirim", "randevu": "İlk randevuya özel %10", "magaza": "Sezon sonu indirimi", "yemek": "Hafta içi öğle menüsü"}.get(fam, "Bu ay ücretsiz danışmanlık")))
+    drawer = '<div class="drw" id="drw"><div class="dh"><b>%s</b><button onclick="document.body.classList.remove(\'mo\')" aria-label="Kapat">✕</button></div>%s<a class="b p" href="#iletisim" onclick="document.body.classList.remove(\'mo\')">%s</a><a class="tl" href="tel:+905320000000">%s</a></div>' % (
+        E_(nm), "".join('<a href="#" onclick="document.body.classList.remove(\'mo\')">%s<span>›</span></a>' % E_(p.split(" (")[0]) for p in navs + ["İletişim"]), cta, phone)
+    hdr = drawer + '<header class="top"><div class="w"><button class="bur" onclick="document.body.classList.add(\'mo\')" aria-label="Menü"><i></i><i></i><i></i></button><a class="lg" href="#">%s</a><nav><span class="hasm">%s ▾%s</span>%s</nav><div class="hr">%s<a class="b p s" href="#iletisim">%s</a></div></div></header>' % (
+        E_(nm), E_(navs[0].split(" (")[0]), mega, "".join('<a href="#">%s</a>' % E_(p.split(" (")[0]) for p in navs[1:]), '<a class="cart" href="#" aria-label="Sepet">Sepet <b id="sbc">0</b></a>' if shop else '<a class="tel" href="tel:+905320000000">%s</a>' % phone, cta)
     ftr = '<footer><div class="w fg"><div><b class="lg">%s</b><p>%s · %s</p></div><div><b>Sayfalar</b>%s</div><div><b>Kurumsal</b><a>Hakkımızda</a><a>KVKK</a><a>Çerez politikası</a>%s</div><div><b>İletişim</b><a>%s</a><a>Bornova / İzmir</a></div></div><div class="w cp">© 2026 %s · onlinekaydet ile yapıldı</div></footer>' % (
         E_(nm), E_(sec), E_(LBL[fam]), "".join("<a>%s</a>" % E_(p.split(" (")[0]) for p in pages[:6]), "<a>Mesafeli satış sözleşmesi</a><a>İade koşulları</a>" if shop else "", phone, E_(nm))
     mbar = '<div class="mb"><a href="tel:+905320000000">Ara</a><a href="#">WhatsApp</a><a class="p" href="#iletisim">%s</a></div>' % cta
     fhf, fbf = FAMN.get(fh, fh), FAMN.get(fb, fb)
     css = CSS.replace("--DK", dk).replace("--AC", ac).replace("--SF", sf).replace("--FH", "'%s'" % fhf).replace("--FB", "'%s'" % fbf).replace("--RR", "%dpx" % RAD[i])
     upper = "text-transform:uppercase;letter-spacing:.01em;" if fh in ("Oswald", "Anton", "Barlow Condensed") else ""
-    return '<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>%s · %s</title><link rel="preconnect" href="https://fonts.gstatic.com"><link href="https://fonts.googleapis.com/css2?%s&display=swap" rel="stylesheet"><style>%s h1,h2{%s}</style></head><body>%s%s%s%s<a class="back" href="index.html">← Tüm temalar</a></body></html>' % (
-        E_(nm), E_(sec), fonts, css, upper, hdr, "".join(out), ftr, mbar)
+    return '<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>%s · %s</title><link rel="preconnect" href="https://fonts.gstatic.com"><link href="https://fonts.googleapis.com/css2?%s&display=swap" rel="stylesheet"><style>%s h1,h2{%s}</style></head><body>%s%s%s%s<a class="back" href="index.html">← Tüm temalar</a><script>%s</script></body></html>' % (
+        E_(nm), E_(sec), fonts, css, upper, hdr, "".join(out), ftr, mbar, JS)
 
 
 CSS = """:root{--dk:--DK;--ac:--AC;--sf:--SF;--r:--RR;--ink:#16181c;--mut:#5d636c;--ln:rgba(0,0,0,.1)}
@@ -130,8 +138,8 @@ h1,h2,h3{font-family:--FH,serif;line-height:1.1;color:var(--dk)}h1{font-size:cla
 .lead{font-size:18px;color:var(--mut);margin:18px 0 26px;max-width:560px}.row{display:flex;gap:12px;flex-wrap:wrap}
 .b{display:inline-flex;align-items:center;justify-content:center;min-height:50px;padding:0 24px;border-radius:var(--r);font-weight:700;font-size:15px;border:0;cursor:pointer;font-family:inherit;transition:transform .15s,box-shadow .15s}
 .b:hover{transform:translateY(-2px);box-shadow:0 8px 20px -10px rgba(0,0,0,.4)}.b.p{background:var(--ac);color:#fff}.b.o{border:1.5px solid var(--ln);background:#fff;color:var(--ink)}.b.l{background:#fff;color:var(--dk)}.b.o.l{background:transparent;color:#fff;border-color:rgba(255,255,255,.6)}.b.s{min-height:40px;padding:0 16px;font-size:14px}
-.top{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.94);backdrop-filter:blur(10px);border-bottom:1px solid var(--ln)}.top .w{display:flex;align-items:center;gap:26px;height:72px}
-.lg{font:700 22px --FH,serif;color:var(--dk)}.top nav{display:flex;gap:22px;font-weight:600;font-size:15px;color:#3b3f45}.top nav a:hover{color:var(--ac)}.hr{margin-left:auto;display:flex;align-items:center;gap:16px}.tel{font-weight:700;color:var(--dk)}
+.top{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.94);backdrop-filter:blur(10px);border-bottom:1px solid var(--ln)}.top>.w{display:flex;align-items:center;gap:26px;height:72px}
+.lg{font:700 22px --FH,serif;color:var(--dk)}.top nav{display:flex;align-items:center;gap:22px;font-weight:600;font-size:15px;color:#3b3f45}.top nav a:hover{color:var(--ac)}.hr{margin-left:auto;display:flex;align-items:center;gap:16px}.tel{font-weight:700;color:var(--dk)}
 .cart{font-weight:700}.cart b{background:var(--ac);color:#fff;border-radius:99px;padding:1px 8px;font-size:13px;margin-left:4px}
 .hf{min-height:600px;display:flex;align-items:center;background-size:cover;background-position:center;color:#fff;padding:80px 0}.hf h1{color:#fff;max-width:760px}.hf .lead{color:rgba(255,255,255,.88)}
 .hs{background:var(--sf);padding:56px 0 64px}.g2{display:grid;grid-template-columns:1.05fr 1fr;gap:48px;align-items:center}.hpic{position:relative}.hpic img{width:100%;aspect-ratio:5/5.4;min-height:0;object-fit:cover;border-radius:calc(var(--r)*1.6)}
@@ -170,10 +178,39 @@ footer{background:var(--dk);color:rgba(255,255,255,.78);padding:60px 0 0;font-si
 .mb{display:none}.back{position:fixed;right:14px;bottom:14px;z-index:50;background:#111;color:#fff;font:600 13px system-ui;padding:10px 14px;border-radius:99px;box-shadow:0 8px 24px -8px #000}
 @media(max-width:900px){.top nav,.tel{display:none}.g2,.tb{grid-template-columns:1fr}.cards.n3,.cards.n4,.pk,.rv,.tm,.st,.nm .w,.perk .w,.mp2{grid-template-columns:1fr 1fr}.prg,.cat{grid-template-columns:repeat(2,1fr)}.fg{grid-template-columns:1fr 1fr}
 .fcard{position:static;margin-top:-60px;margin-inline:12px}.hpg{grid-template-columns:1fr;grid-template-rows:420px 180px 180px;height:auto}.hpg .big{grid-row:auto}.gl{grid-template-columns:1fr 1fr;grid-template-rows:200px 140px 140px}.gl img:first-child{grid-column:span 2;grid-row:auto}.pkc.on{transform:none}}
-@media(max-width:600px){.hpic img{aspect-ratio:4/3}.sec{padding:58px 0}.cards.n3,.cards.n4,.pk,.rv,.st,.mp2,.ba{grid-template-columns:1fr}.hf{min-height:540px}.top .w{height:62px;gap:12px}.hr .b{display:none}
+@media(max-width:600px){.hpic img{aspect-ratio:4/3}.sec{padding:58px 0}.cards.n3,.cards.n4,.pk,.rv,.st,.mp2,.ba{grid-template-columns:1fr}.hf{min-height:540px}.top>.w{height:62px;gap:12px}.hr .b{display:none}
 .mb{display:grid;grid-template-columns:1fr 1fr 1.4fr;position:sticky;bottom:0;z-index:30;background:#fff;border-top:1px solid var(--ln)}.mb a{min-height:56px;display:grid;place-items:center;font-weight:700;font-size:15px}.mb a.p{background:var(--ac);color:#fff}.back{bottom:70px}}
-@media(prefers-reduced-motion:reduce){*{transition:none!important}}"""
+.bgv{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.shade{position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,.75),rgba(0,0,0,.2))}.shade.b{background:linear-gradient(0deg,rgba(0,0,0,.7),transparent 65%)}
+.hf{position:relative;overflow:hidden}.hf .w{position:relative;z-index:1;width:100%}
+.hpic{position:relative;aspect-ratio:5/5.4;border-radius:calc(var(--r)*1.6);overflow:visible}.hpic .bgv{border-radius:calc(var(--r)*1.6)}.live{position:absolute;left:16px;top:16px;background:rgba(0,0,0,.55);color:#fff;font-size:12px;font-weight:700;padding:5px 10px;border-radius:99px;backdrop-filter:blur(4px)}
+.hpg .big{position:relative;overflow:hidden}.hpg .big .bt{position:relative;z-index:1;display:flex;flex-direction:column}
+.in>*{opacity:0;transform:translateY(22px);transition:opacity .8s cubic-bezier(.2,.7,.2,1),transform .8s cubic-bezier(.2,.7,.2,1)}.in.go>*{opacity:1;transform:none}.in.go>*:nth-child(2){transition-delay:.12s}.in.go>*:nth-child(3){transition-delay:.24s}.in.go>*:nth-child(4){transition-delay:.36s}.in.go>*:nth-child(5){transition-delay:.48s}
+.rv0{opacity:0;transform:translateY(26px);transition:opacity .7s ease,transform .7s cubic-bezier(.2,.7,.2,1)}.rv0.vis{opacity:1;transform:none}
+.card img,.pc img,.cat a,.gl img{transition:transform .6s cubic-bezier(.2,.7,.2,1)}.card{overflow:hidden}.card:hover img,.pc:hover img{transform:scale(1.06)}.pc{overflow:hidden}.pc img{will-change:transform}
+.mq{overflow:hidden;flex:1;mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}.mqi{display:flex;gap:46px;width:max-content;animation:mq 26s linear infinite}.mq:hover .mqi{animation-play-state:paused}@keyframes mq{to{transform:translateX(-50%)}}
+.nm{position:relative;overflow:hidden}.nm .w{position:relative;z-index:1}.nm .shade{background:rgba(0,0,0,.62)}.bgv.dim{filter:saturate(.8)}
+.top{transition:box-shadow .3s,background .3s}.top.sm{box-shadow:0 8px 30px -18px rgba(0,0,0,.4)}.top>.w{transition:height .3s}.top.sm>.w{height:60px}
+.hasm{position:relative;cursor:pointer;padding:24px 0}.mega{position:fixed;left:0;right:0;top:72px;background:#fff;border-top:1px solid var(--ln);box-shadow:0 30px 50px -30px rgba(0,0,0,.35);opacity:0;visibility:hidden;transform:translateY(-8px);transition:all .25s}.top.sm .mega{top:60px}
+.hasm:hover .mega{opacity:1;visibility:visible;transform:none}.mg{display:grid;grid-template-columns:1fr 1fr 1.2fr;gap:30px;padding:28px 20px}.mg b{display:block;color:var(--dk);margin-bottom:10px;font-size:14px}.mg a{display:block;padding:6px 0;color:#3b3f45;font-weight:500}.mg a:hover{color:var(--ac);padding-left:4px}.mg .mgp{padding:18px;border-radius:var(--r);background-size:cover;background-position:center;min-height:170px;color:#fff;padding:18px;display:flex!important;flex-direction:column;justify-content:flex-end}.mgp span{font-size:12px;opacity:.85}.mgp b{color:#fff;font:700 20px --FH;margin:0}
+.bur{display:none;flex-direction:column;gap:5px;background:none;border:0;padding:10px;cursor:pointer}.bur i{display:block;width:22px;height:2px;background:var(--dk);border-radius:2px}
+.drw{position:fixed;inset:0;z-index:60;background:var(--dk);color:#fff;padding:20px;transform:translateX(-100%);transition:transform .4s cubic-bezier(.2,.7,.2,1);display:flex;flex-direction:column;gap:2px}.mo .drw{transform:none}
+.dh{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;font:700 22px --FH}.dh button{background:rgba(255,255,255,.1);border:0;color:#fff;width:44px;height:44px;border-radius:50%;font-size:18px}
+.drw>a:not(.b){display:flex;justify-content:space-between;padding:15px 4px;border-bottom:1px solid rgba(255,255,255,.12);font-size:19px;font-weight:600}.drw .b{margin-top:22px}.drw .tl{text-align:center;padding:14px;color:var(--ac);font-weight:700}
+.sl1{overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}.sl1::-webkit-scrollbar{display:none}.sl1>*{scroll-snap-align:start}
+@media(max-width:900px){.bur{display:flex}.hpic{aspect-ratio:4/3}.rv.sl1{display:flex}.rv.sl1>*{min-width:85%}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}.in>*,.rv0{opacity:1;transform:none}}"""
 
+
+JS = r"""(function(){var R=matchMedia('(prefers-reduced-motion:reduce)').matches;
+var h=document.querySelector('.top');addEventListener('scroll',function(){h.classList.toggle('sm',scrollY>40)},{passive:true});
+document.querySelectorAll('.in').forEach(function(e){e.classList.add('go')});
+if(R){document.querySelectorAll('video').forEach(function(v){v.pause()});return}
+var io=new IntersectionObserver(function(es){es.forEach(function(x){if(!x.isIntersecting)return;var t=x.target;io.unobserve(t);t.classList.add('vis');
+ if(t.dataset.n!==undefined){var raw=t.dataset.n,m=raw.match(/[\d.,]+/);if(!m)return;var n=parseFloat(m[0].replace(/\./g,'').replace(',','.')),dec=m[0].indexOf(',')>-1||/^\d\.\d$/.test(m[0]),k=0,st=performance.now();
+  (function f(now){var p=Math.min(1,(now-st)/1400),v=n*(1-Math.pow(1-p,3));var s=dec?v.toFixed(1):Math.round(v).toLocaleString('tr-TR');t.textContent=raw.replace(m[0],s);if(p<1)requestAnimationFrame(f)})(st)}})},{threshold:.25});
+document.querySelectorAll('.hd,.cards .card,.pkc,.st li,.prg .pc,.cat a,.tm>div,.gl img,b[data-n]').forEach(function(e,i){e.classList.add('rv0');e.style.transitionDelay=(i%4)*70+'ms';io.observe(e)});
+document.querySelectorAll('.sl1').forEach(function(s){var k=0;setInterval(function(){k=(k+1)%s.children.length;s.scrollTo({left:s.children[k].offsetLeft-s.offsetLeft,behavior:'smooth'})},4200)});
+})();"""
 
 INDEX = """<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>20 yeni tema · önizleme</title>
 <style>*{box-sizing:border-box;margin:0}body{font:15px/1.5 system-ui,sans-serif;background:#f1f0ec;color:#17191d;padding:28px 18px}h1{font-size:28px;max-width:1200px;margin:0 auto 6px}p.s{max-width:1200px;margin:0 auto 24px;color:#666}

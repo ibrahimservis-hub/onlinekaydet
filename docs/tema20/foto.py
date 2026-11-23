@@ -25,3 +25,14 @@ F = [
 def url(i, w=1200, h=None):
     q = "auto=compress&cs=tinysrgb&w=%d" % w + ("&h=%d&fit=crop" % h if h else "")
     return "https://images.pexels.com/photos/%d/pexels-photo-%d.jpeg?%s" % (i, i, q)
+# Pexels ücretsiz videolar (tema sırasıyla): (video id, dosya adı)
+V = [(7647713, "7647713-uhd_2560_1440_24fps.mp4"), (4119968, "4119968-hd_1920_1080_30fps.mp4"), (28886877, "12504681_1920_1080_30fps.mp4"),
+     (14514790, "14514790-uhd_2560_1440_25fps.mp4"), (6196255, "6196255-uhd_1440_2560_25fps.mp4"), (7463923, "7463923-hd_1080_1920_30fps.mp4"),
+     (4177954, "4177954-hd_1920_1080_30fps.mp4"), (4264878, "4264878-uhd_2560_1440_30fps.mp4"), (5356416, "5356416-uhd_2560_1440_25fps.mp4"),
+     (11247812, "11247812-uhd_2560_1440_24fps.mp4"), (7267563, "7267563-uhd_1440_2560_24fps.mp4"), (7525383, "7525383-hd_1920_1080_25fps.mp4"),
+     (6023188, "6023188-uhd_2560_1440_25fps.mp4"), (8322393, "8322393-uhd_1440_2732_25fps.mp4"), (3805783, "3805783-hd_1920_1080_25fps.mp4"),
+     (5930359, "5930359-uhd_1440_2560_30fps.mp4"), (6755161, "6755161-uhd_2560_1440_25fps.mp4"), (34774892, "14742601_1080_1920_24fps.mp4"),
+     (7533207, "7533207-uhd_2560_1440_30fps.mp4"), (9518190, "9518190-uhd_2732_1440_25fps.mp4")]
+def video(i):
+    vid, f = V[i]
+    return "https://videos.pexels.com/video-files/%d/%s" % (vid, f), "https://images.pexels.com/videos/%d/pexels-photo-%d.jpeg?auto=compress&cs=tinysrgb&w=1600" % (vid, vid)
