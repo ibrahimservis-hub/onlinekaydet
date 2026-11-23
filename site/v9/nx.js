@@ -26,5 +26,8 @@ function akis(){var L=$$('#kod li');if(RM){L.forEach(function(l){l.classList.add
 if(kod){if(io&&!RM)io.observe(kod);else akis()}
 // sayaç
 function say(box){$$('[data-say]',box).forEach(function(b){var n=+b.dataset.say;if(RM){b.textContent=n;return}var t0=null;(function f(t){if(!t0)t0=t;var p=Math.min(1,(t-t0)/1400);b.textContent=Math.round(n*(1-Math.pow(1-p,3)));if(p<1)requestAnimationFrame(f)})(performance.now())})}
+// çözüm videoları: görünürken oynar
+var vio='IntersectionObserver' in window?new IntersectionObserver(function(es){es.forEach(function(e){var v=e.target;if(e.isIntersecting&&!RM){try{v.play()}catch(x){}}else v.pause()})},{threshold:.35}):null;
+$$('.vk video').forEach(function(v){if(vio)vio.observe(v)});
 var sb=$('.say');if(sb&&!(io&&!RM))say(sb);
 })();
