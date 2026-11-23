@@ -19,7 +19,7 @@ for rel in ('logo-acik-s.png', 'logo-renkli-s.png', 'og-kart.png'): bin_(rel)
 TASLAK = {'ana-sayfa-yeni.html', 'a-onizleme.html', 'ana-sayfa-astryx.html', 'yeni-ana-sayfa.html', 'temalar-live.html', 'tasarim-kuafor5.html', 'yon4.html', 'yon5.html', 'yon6.html', 'yon7.html'}
 for f in sorted(glob.glob(S + '/*.html')):
     if os.path.basename(f) not in TASLAK: txt(os.path.basename(f))
-for rel in ('v9/nx.css', 'v9/nx.js', 'v9/nx-ic.css', 'v9/nx-ic.js', 'izle.js'):
+for rel in ('v9/nx.css', 'v9/nx.js', 'v9/nx-ic.css', 'v9/nx-ic.js', 'v9/paket.js', 'izle.js'):
     if os.path.exists(S + '/' + rel): txt(rel)
 for d, exts in (('v9/img/nx', ('.webp', '.jpg')), ('v9/img/vid', ('.mp4',))):
     for f in sorted(os.listdir(S + '/' + d)):
