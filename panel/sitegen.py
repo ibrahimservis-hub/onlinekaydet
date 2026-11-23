@@ -991,6 +991,16 @@ def edit_nodes(soup):
         if not _own_text(el):
             continue
         out.append(el)
+    root = soup.find(True)
+    if root is not None and root.get("data-nm") == "Duyuru çubuğu":      # duyuru metni sade bir span/b: sona eklenir (eski düzenleme sıraları kaymaz)
+        have = {id(x) for x in out}
+        for el in soup.find_all(["span", "b", "strong", "a"]):
+            cl = " ".join(el.get("class") or [])
+            if id(el) in have or el.has_attr("data-end") or "cd" in cl or not _own_text(el) or any(id(p) in have for p in el.parents):
+                continue
+            if any(c.name in ("span", "b", "strong", "a") and _own_text(c) for c in el.find_all(True)):
+                continue
+            out.append(el)
     return out
 
 
@@ -1000,11 +1010,14 @@ def _own_text(el):
     return " ".join(t.split())
 
 
-def block_texts(html, edits=None):
+def block_texts(html, edits=None, shop_off=False):
+    """Yazı listesi. shop_off: mağaza kapalıyken yayından kalkan mağaza bağlantıları listeden çıkar (sıra numaraları korunur)."""
     from bs4 import BeautifulSoup
     soup = BeautifulSoup(html, "html.parser")
     res = []
     for i, el in enumerate(edit_nodes(soup)):
+        if shop_off and SHOP_LINK.fullmatch(str(el)):
+            continue
         res.append({"i": i, "tag": el.name, "text": _own_text(el)})
     return res
 

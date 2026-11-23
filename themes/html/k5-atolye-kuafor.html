@@ -385,9 +385,9 @@ footer{padding-bottom:40px}.mbar{display:none}
 <h4>Bilgileriniz</h4><div class="fld"><label>Ad soyad<input class="inp" id="f-n" autocomplete="name" placeholder="Ayşe Yılmaz"></label><label>Telefon<input class="inp" id="f-p" type="tel" autocomplete="tel" placeholder="05xx xxx xx xx"></label></div>
 <label data-mod="pazarlama" style="display:none">Kupon kodu (varsa)<input id="f-c" autocomplete="off" placeholder="KUPON"></label><div id="f-msg" role="alert" style="display:none;margin-top:12px;color:#e11d48;font-size:14px;font-weight:600"></div><button class="btn go" id="go">Randevuyu kaydet</button></div>
 <div class="ok"><div class="tick"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div><h3>Randevunuz alındı</h3><p id="okp">Salonun paneline düştü. Onaylanınca size mesaj gelecek.</p><button class="btn o" style="color:var(--dk);border-color:#d7c8b8" id="okx">Tamam</button></div>
-</div></div></div><script>window.__OKLIVE=true;
+</div></div></div><script>window.__OKLIVE=true;window.__NUL={addEventListener:function(){},removeEventListener:function(){},classList:{add:function(){},remove:function(){},toggle:function(){},contains:function(){return false}},style:{},dataset:{},firstChild:{},setAttribute:function(){},getAttribute:function(){return null},querySelector:function(){return null},querySelectorAll:function(){return[]},closest:function(){return null},focus:function(){},click:function(){},value:''};
 (function(){
-var $=function(s,r){return(r||document).querySelector(s)},A=function(s,r){return[].slice.call((r||document).querySelectorAll(s))};
+var $=function(s,r){return(r||document).querySelector(s)||window.__NUL},A=function(s,r){return[].slice.call((r||document).querySelectorAll(s))};
 var PX=function(i,w){return'https://images.pexels.com/photos/'+i+'/pexels-photo-'+i+'.jpeg?auto=compress&cs=tinysrgb&w='+(w||1400)};
 function paint(root){A('[data-p]',root).forEach(function(e){if(!e.style.backgroundImage)e.style.backgroundImage='url("'+PX(e.dataset.p)+'")'})}
 paint();

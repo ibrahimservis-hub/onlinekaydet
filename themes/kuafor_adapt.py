@@ -175,7 +175,16 @@ def build_theme(t):
         if tag == "main":
             inner = children(raw, raw.index(">") + 1, raw.rindex("</main>"))
             names = [classify(tg, x, False) or ("Ana görsel" if "hero" in attr(x, "class") else None) for (_, _, tg, x) in inner]
-            if all(n is None for n in names) or t["n"] == 10:
+            if t["n"] == 10:
+                # bento ızgara: her karo kendi bölümü olur (panelde ayrı gizle / sırala / yazı düzenle); ızgara <body> üzerinde kurulur
+                o = raw.index('<div class="bt">') + len('<div class="bt">')
+                BT = {"hero": "Ana görsel", "live": "Boş saatler", "cd": "Geri sayım", "st": "Takvim özeti", "sv": "Hizmetler", "gal": "Galeri", "pk": "Paketler",
+                      "ex": "Ekip", "ig": "Instagram", "gift": "Hediye çeki", "mp": "İletişim", "faq": "Sık sorulanlar"}
+                for (a2, b2, tg, x) in children(raw, o, raw.rindex("</div></main>")):
+                    k = re.search(r'class="t ([a-z]+)', x).group(1)
+                    blocks.append([BT.get(k, "Bölüm"), raw[a2:b2]])
+                continue
+            if all(n is None for n in names):
                 blocks.append(["Ana içerik", raw])
                 continue
             for (a2, b2, tg, x), nm in zip(inner, names):
@@ -195,6 +204,8 @@ def build_theme(t):
         prev = next((m for m in merged if m[0] == nm), None)
         if prev and nm in ("Menü", "Mobil bar", "Mobil menü", "Duyuru çubuğu", "Alt bilgi"):
             prev[1] += raw
+        elif prev and nm == "Hizmetler" and t["n"] == 10:
+            prev[1] += raw
         else:
             merged.append([nm, raw])
     # sabitler kendi yerlerinde: Menü/Mobil menü/Duyuru başta, Alt bilgi/Mobil bar sonda
@@ -207,8 +218,6 @@ def build_theme(t):
         k = next((i for i, b in enumerate(ordered) if b[0] == "Alt bilgi"), len(ordered))
         ordered[k:k] = [["Ürünler", SHOP], ["Kampanyalar", CAMP]]
     else:
-        raw = next(b for b in ordered if b[0] == "Ana içerik")
-        raw[1] = raw[1].replace("</main>", "</main>", 1)
         k = next(i for i, b in enumerate(ordered) if b[0] == "Alt bilgi")
         ordered[k:k] = [["Ürünler", SHOP], ["Kampanyalar", CAMP]]
     used = {}
@@ -245,7 +254,20 @@ BRIDGE = """<style data-kbridge>
 BRIDGE = BRIDGE + KX_CSS + "@media(max-width:900px){.spx-fab{bottom:92px!important}}.pg{display:block!important;scroll-margin-top:84px}@media(max-width:900px){nav>a[href^=\"/\"]:not([href*=\"#\"]):not([class]){display:none!important}}</style>"
 
 
+NUL_JS = ("window.__NUL={addEventListener:function(){},removeEventListener:function(){},classList:{add:function(){},remove:function(){},toggle:function(){},contains:function(){return false}},"
+          "style:{},dataset:{},firstChild:{},setAttribute:function(){},getAttribute:function(){return null},querySelector:function(){return null},querySelectorAll:function(){return[]},"
+          "closest:function(){return null},focus:function(){},click:function(){},value:''};")
+
+
 def finish(html, t):
+    # müşteri bir bölümü gizleyince / sildiğinde betik "null" yüzünden durmasın: bulunamayan öğe için etkisiz bir yedek nesne döner
+    html = html.replace("var $=function(s,r){return(r||document).querySelector(s)}", "var $=function(s,r){return(r||document).querySelector(s)||window.__NUL}")
+    html = html.replace("var $=function(s){return document.querySelector(s)}", "var $=function(s){return document.querySelector(s)||window.__NUL}")
+    html = html.replace("<script>", "<script>" + NUL_JS, 1) if "window.__NUL=" not in html else html
+    if t["n"] == 10:               # bento: ızgara gövdede; bölüm sarmalayıcıları görünmez, karolar ızgaraya girer, diğer bölümler tam genişlik
+        html = html.replace("</head>", "<style data-bt>body{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;max-width:1240px;margin:0 auto;padding:78px 12px 20px;align-content:start;overflow-x:hidden}"
+                            "body>.ed{display:contents}body>.ed>:not(.t){grid-column:1/-1}footer{padding-left:0;padding-right:0;width:100%}"
+                            "@media(min-width:900px){body{grid-template-columns:repeat(6,1fr);gap:12px;padding-top:92px}}</style></head>", 1)
     for rx, to in CLEAN.get(t["n"], []):
         html = re.sub(rx, lambda m, to=to: to, html)
     html = re.sub(r'<a[^>]*href="mailto:[^"]*\.example"[^>]*>[^<]*</a>', "", html)

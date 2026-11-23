@@ -641,6 +641,9 @@ def register(api_router, db, deps):
             raise HTTPException(400, "Önce bir tema seçin")
         blocks, names = await base_blocks(ctx, True)
         org_, _nn = await base_blocks(ctx, False)
+        _lst = [[n, blocks[n]] for n in names]
+        kilit = {n: "magaza" for n in sitegen.shop_names(_lst, ctx)}          # mağaza kapalıyken yayınlanmayan bölümler
+        kilit.update({n: "paket" for n in sitegen.mod_off(_lst, ctx) if n not in kilit})   # paketinde olmayan modülün bölümleri
         lay = ctx["p"].get("layout") or {}
         ph = (ctx["p"].get("phone") or {}) if ctx.get("dev") == "phone" else {}
         ayri = bool(ph.get("layout"))                      # telefon sırası bilgisayardan ayrı mı
@@ -655,7 +658,10 @@ def register(api_router, db, deps):
             soup = BeautifulSoup(blocks[n], "html.parser")
             hd = soup.find(["h1", "h2", "h3"])
             out.append({"name": n, "hidden": n in (lay.get("hidden") or []) or (sitegen.dflt_off(blocks[n]) and n not in (lay.get("order") or [])), "title": " ".join(hd.get_text().split())[:70] if hd else "", "n": len(sitegen.edit_nodes(soup)), "ni": len(sitegen.block_images(org_[n])) if n in org_ else 0,
-                        "own": bool(ped.get(n)) or bool(pie.get(n)), "ek": (ctx.get("tema_ek_iid") or {}).get(n, "")})     # telefona özel yazı/resim var mı
+                        "own": bool(ped.get(n)) or bool(pie.get(n)), "ek": (ctx.get("tema_ek_iid") or {}).get(n, ""), "kilit": kilit.get(n, "")})
+        for x in out:
+            if x["kilit"]:
+                x["hidden"] = True     # telefona özel yazı/resim var mı
         for x in out:
             if x["ek"] and not x["title"]:
                 x["title"] = x["name"].split(" · ")[1] if x["name"].count(" · ") >= 2 else x["name"]
@@ -672,7 +678,8 @@ def register(api_router, db, deps):
         org, _n2 = await base_blocks(ctx, False, True)
         if name not in cur:
             raise HTTPException(404, "Bölüm yok")
-        a, b = sitegen.block_texts(cur[name]), sitegen.block_texts(org[name])
+        so = not ctx.get("shop_on")
+        a, b = sitegen.block_texts(cur[name], shop_off=so), sitegen.block_texts(org[name])
         for x in a:
             x["orig"] = b[x["i"]]["text"] if x["i"] < len(b) else x["text"]
         if ctx.get("dev") == "phone":                     # telefonda: bilgisayardaki hâli ve hangisi telefona özel
