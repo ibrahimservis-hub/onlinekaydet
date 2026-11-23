@@ -254,9 +254,7 @@ BRIDGE = """<style data-kbridge>
 BRIDGE = BRIDGE + KX_CSS + "@media(max-width:900px){.spx-fab{bottom:92px!important}}.pg{display:block!important;scroll-margin-top:84px}@media(max-width:900px){nav>a[href^=\"/\"]:not([href*=\"#\"]):not([class]){display:none!important}}</style>"
 
 
-NUL_JS = ("window.__NUL={addEventListener:function(){},removeEventListener:function(){},classList:{add:function(){},remove:function(){},toggle:function(){},contains:function(){return false}},"
-          "style:{},dataset:{},firstChild:{},setAttribute:function(){},getAttribute:function(){return null},querySelector:function(){return null},querySelectorAll:function(){return[]},"
-          "closest:function(){return null},focus:function(){},click:function(){},value:''};")
+NUL_JS = "window.__NUL=(function(){var d=document.createElement('div');d.appendChild(document.createTextNode(''));return d})();"
 
 
 def finish(html, t):
@@ -264,6 +262,8 @@ def finish(html, t):
     html = html.replace("var $=function(s,r){return(r||document).querySelector(s)}", "var $=function(s,r){return(r||document).querySelector(s)||window.__NUL}")
     html = html.replace("var $=function(s){return document.querySelector(s)}", "var $=function(s){return document.querySelector(s)||window.__NUL}")
     html = html.replace("<script>", "<script>" + NUL_JS, 1) if "window.__NUL=" not in html else html
+    html = html.replace("setInterval(function(){ws[wi].classList.remove('on')", "setInterval(function(){if(!ws.length)return;ws[wi].classList.remove('on')")      # k5: kayan sözcükler (ana görsel gizliyse)
+    html = html.replace("setInterval(function(){var o=w[i];o.classList.remove('on')", "setInterval(function(){var o=w[i];if(!o)return;o.classList.remove('on')")        # k7: aynısı
     if t["n"] == 10:               # bento: ızgara gövdede; bölüm sarmalayıcıları görünmez, karolar ızgaraya girer, diğer bölümler tam genişlik
         html = html.replace("</head>", "<style data-bt>body{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;max-width:1240px;margin:0 auto;padding:78px 12px 20px;align-content:start;overflow-x:hidden}"
                             "body>.ed{display:contents}body>.ed>:not(.t){grid-column:1/-1}footer{padding-left:0;padding-right:0;width:100%}"
