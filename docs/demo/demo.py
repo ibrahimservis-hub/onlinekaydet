@@ -4,10 +4,11 @@ Görseller Pexels (ücretsiz, ticari kullanım serbest) bağlantılarıdır; vid
 import os, sys, json, html as H
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'tema20'))
 import foto
+import common
 R = os.path.dirname(os.path.abspath(__file__))
 
 SITES = [
- dict(slug='makas', idx=6, name='MAKAS', sub='BERBER KULÜBÜ', title='Makas Berber Kulübü | Demo',
+ dict(slug='makas', idx=6, name='MAKAS', sub='BERBER KULÜBÜ', title='Makas Berber Kulübü',
   bg='#0b0908', ink='#f4efe8', mut='#a89e92', ac='#e0572a', ac2='#8c1d18', paper='#f3eee4', hf='Anton', mono='Space Mono', bf='Manrope', dark=True,
   caps=[('HOŞ GELDİN.', 'Kapıdan içeri gir'), ('USTALIK.', 'Her kesim ölçülü'), ('FARKLI ÇIK.', 'Koltuğun hazır')],
   hero_cta='Koltuğunu ayır', mq=['Klasik kesim', 'Skin fade', 'Sakal şekli', 'Sıcak havlu', 'Randevusuz gelen de olur', 'Her gün 21.00’e kadar'],
@@ -17,26 +18,6 @@ SITES = [
   team_h='USTALARLA TANIŞ.', team=[('Alper', 'Usta berber', 0), ('Cem', 'Fade uzmanı', 1), ('Murat', 'Kıdemli usta', 2)],
   gal_h='KANIT.', gal=[1, 3, 4, 5, 6, 7], book_h=('KOLTUĞUN', 'SENİ BEKLİYOR.'), book_p='İyi kesim tesadüf değildir.', unit='usta', fin=('BİR TÜRLÜ GİR.', 'BAŞKA TÜRLÜ ÇIK.'), fin_cta='Randevu al',
   nav=['Kulüp', 'Hizmetler', 'Ustalar', 'Galeri'], addr='Örnek Mah., Örnek Sk. · Ankara', hrs='Her gün 10.00 – 21.00', tl='₺'),
- dict(slug='motor', idx=3, name='MOTOR ATÖLYE', sub='OTO SERVİS', title='Motor Atölye Oto Servis | Demo',
-  bg='#0e1013', ink='#eceff2', mut='#99a1ab', ac='#e4262f', ac2='#5b0f14', paper='#eef0f2', hf='Oswald', mono='IBM Plex Mono', bf='Inter', dark=True,
-  caps=[('ARAÇ GİRER.', 'Plaka okunur, kayıt açılır'), ('USTA BAKAR.', 'Her adım fotoğraflı'), ('SORUNSUZ ÇIKAR.', 'Teslim saati bellidir')],
-  hero_cta='Randevu al', mq=['Periyodik bakım', 'Fren', 'Motor', 'Lastik', 'Akü', 'Klima bakımı', 'Yazılı teklif, sürpriz fatura yok'],
-  stmt='Aracın ne zaman gireceği, neye bakılacağı ve ne kadar tutacağı baştan yazılı olsun.',
-  svc_h=('PAKETİ SEÇ.', 'FİŞE YAZALIM.'), svc_p='İşlemlere dokun, toplam anında hesaplansın.', paper_t='SERVİS FİŞİ', paper_s='oto servis',
-  svc=[('Yağ + filtre değişimi', 1800, '45 dk'), ('Fren balata değişimi', 2400, '90 dk'), ('Periyodik bakım', 3600, '3 saat'), ('Lastik değişimi (4)', 700, '40 dk'), ('Rot balans', 900, '60 dk'), ('Akü değişimi', 600, '20 dk'), ('Klima gazı', 1500, '60 dk'), ('Arıza tespiti', 500, '30 dk'), ('Kapsamlı kontrol', 1200, '90 dk')],
-  team_h='USTALAR.', team=[('Serkan', 'Motor ustası', 0), ('Volkan', 'Elektrik / elektronik', 1), ('Emre', 'Fren ve süspansiyon', 2)],
-  gal_h='ATÖLYE.', gal=[1, 2, 4, 5, 6, 7], book_h=('ARACINI', 'GETİR.'), book_p='Gün ve saati sen seç, gerisi bizde.', unit='usta', fin=('ARAÇ GİRER.', 'GÜVENLE ÇIKAR.'), fin_cta='Randevu al',
-  nav=['Atölye', 'Hizmetler', 'Ustalar', 'Galeri'], addr='Örnek Sanayi Sitesi · Ankara', hrs='Hafta içi 08.30 – 18.30, Cumartesi 09.00 – 15.00', tl='₺'),
- dict(slug='firin', idx=15, name='FIRIN 1923', sub='PASTANE · FIRIN', title='Fırın 1923 Pastane | Demo',
-  bg='#f6efe4', ink='#2a1810', mut='#6b5648', ac='#c4721a', ac2='#3a2418', paper='#fffaf1', hf='DM Serif Display', mono='DM Mono', bf='Figtree', dark=False,
-  caps=[('SABAH FIRINDAN.', 'Kapı açılmadan hamur hazır'), ('ELLE ŞEKİL.', 'Her pasta tek tek'), ('SICAK TESLİM.', 'Gel al ya da kapına gelsin')],
-  hero_cta='Siparişini ver', mq=['Günlük ekmek', 'Kurabiye', 'Börek', 'Doğum günü pastası', 'Gel-al, saat seç', 'Özel yazı hizmeti'],
-  stmt='Her sabah aynı fırın, aynı tarif, yeni bir tepsi.',
-  svc_h=('SEPETİNİ', 'DOLDUR.'), svc_p='Ürüne dokun, sepete girsin; toplamı fişte gör.', paper_t='SİPARİŞ FİŞİ', paper_s='pastane',
-  svc=[('Köy ekmeği', 60, 'sıcak'), ('Simit (6’lı)', 90, 'sıcak'), ('Su böreği (dilim)', 120, 'günlük'), ('Tereyağlı kurabiye (500 g)', 320, 'taze'), ('Profiterol (porsiyon)', 150, 'taze'), ('Cheesecake (dilim)', 140, 'taze'), ('Baklava (kutu)', 480, 'taze'), ('Doğum günü pastası (8 kişilik)', 1450, '1 gün önce'), ('Özel yazılı pasta (12 kişilik)', 2100, '2 gün önce')],
-  team_h='USTALAR.', team=[('Hatice', 'Pasta şefi', 0), ('Ramazan', 'Fırın ustası', 1), ('Selin', 'Tatlı atölyesi', 2)],
-  gal_h='VİTRİN.', gal=[1, 2, 3, 4, 6, 7], book_h=('TESLİM', 'SAATİNİ SEÇ.'), book_p='Gel-al ya da adrese teslim.', unit='teslim şekli', fin=('SICAK GELİR.', 'TATLI GİDER.'), fin_cta='Sipariş ver',
-  nav=['Ürünler', 'Sepet', 'Ustalar', 'Vitrin'], addr='Örnek Cd., Örnek Mah. · Ankara', hrs='Her gün 07.00 – 22.00', tl='₺'),
 ]
 
 CSS = r'''
@@ -207,16 +188,16 @@ function ready(){gsap.registerPlugin(ScrollTrigger);
   if(s===1){h+='<h3>2 · '+C.l2+'</h3><div class="opts">'+C.team.map(function(x){return '<button type="button" class="op" aria-pressed="'+(W.who===x[0])+'" data-w="'+x[0]+'"><span>'+x[0]+'</span><span>'+x[1]+'</span></button>'}).join('')+'<button type="button" class="op" aria-pressed="'+(W.who==='Fark etmez')+'" data-w="Fark etmez"><span>Fark etmez</span><span>ilk boş</span></button></div>'}
   if(s===2){h+='<h3>3 · Gün ve saat</h3><div class="days">'+days.map(function(d,i){var off=d.getDay()===0&&C.sundayClosed;return '<button type="button" class="op" '+(off?'disabled':'')+' aria-pressed="'+(W.day===i)+'" data-d="'+i+'"><span>'+tn[d.getDay()]+'</span><b>'+d.getDate()+'</b></button>'}).join('')+'</div>'+(W.day===null?'<p class="lb" style="margin-top:14px">Önce bir gün seçin</p>':'<div class="hrs">'+hrs.map(function(t,i){var off=((W.day*7+i*3)%5===0);return '<button type="button" class="op" '+(off?'disabled':'')+' aria-pressed="'+(W.hr===t)+'" data-h="'+t+'">'+t+'</button>'}).join('')+'</div>')}
   if(s===3){h+='<h3>4 · Bilgileriniz</h3><label for="wn">Ad soyad</label><input id="wn" autocomplete="name"><label for="wp">Telefon</label><input id="wp" type="tel" autocomplete="tel" inputmode="tel">'}
-  if(s===4){var d=days[W.day];h+='<h3>5 · Onay</h3><div class="sum"><div><span>İşlem</span><span>'+(W.svc.join(', ')||'—')+'</span></div><div><span>'+C.unit+'</span><span>'+W.who+'</span></div><div><span>Zaman</span><span>'+d.getDate()+'.'+(d.getMonth()+1)+' · '+W.hr+'</span></div><div><span>Toplam</span><span>'+money(W.sum)+'</span></div></div><p class="ok">Bu bir demo: talep gönderilmez. Gerçek sitede randevu panele düşer ve SMS gider.</p>'}
+  if(s===4){var d=days[W.day];h+='<h3>5 · Onay</h3><div class="sum"><div><span>İşlem</span><span>'+(W.svc.join(', ')||'—')+'</span></div><div><span>'+C.unit+'</span><span>'+W.who+'</span></div><div><span>Zaman</span><span>'+d.getDate()+'.'+(d.getMonth()+1)+' · '+W.hr+'</span></div><div><span>Toplam</span><span>'+money(W.sum)+'</span></div></div>'}
   var can=(s===0&&W.svc.length)||(s===1&&W.who)||(s===2&&W.day!==null&&W.hr)||(s===3)||(s===4);
-  h+='<div class="act"><button type="button" class="back" '+(s?'':'style="visibility:hidden"')+' data-b="1">Geri</button>'+(s<4?'<button type="button" class="btn" data-n="1" '+(can?'':'disabled style="opacity:.4;cursor:not-allowed"')+'>Devam</button>':'<button type="button" class="btn" data-n="1">Demo: Onayla</button>')+'</div>';
+  h+='<div class="act"><button type="button" class="back" '+(s?'':'style="visibility:hidden"')+' data-b="1">Geri</button>'+(s<4?'<button type="button" class="btn" data-n="1" '+(can?'':'disabled style="opacity:.4;cursor:not-allowed"')+'>Devam</button>':'<button type="button" class="btn" data-n="1">Randevuyu onayla</button>')+'</div>';
   wz.innerHTML=h;
   $$('[data-s]',wz).forEach(function(b){b.onclick=function(){var n=C.svc[b.dataset.s][0],i=W.svc.indexOf(n);if(i>-1)W.svc.splice(i,1);else W.svc.push(n);W.sum=0;W.svc.forEach(function(x){C.svc.forEach(function(y){if(y[0]===x)W.sum+=y[1]})});draw()}});
   $$('[data-w]',wz).forEach(function(b){b.onclick=function(){W.who=b.dataset.w;draw()}});
   $$('[data-d]',wz).forEach(function(b){b.onclick=function(){W.day=+b.dataset.d;W.hr=null;draw()}});
   $$('[data-h]',wz).forEach(function(b){b.onclick=function(){W.hr=b.dataset.h;draw()}});
   var bk=$('[data-b]',wz);if(bk)bk.onclick=function(){W.step--;draw()};
-  var nx=$('[data-n]',wz);if(nx)nx.onclick=function(){if(nx.disabled)return;if(W.step<4){W.step++;draw()}else{wz.innerHTML=head()+'<h3>Teşekkürler</h3><p class="ok">Demo tamamlandı. Gerçek sitede bu talep panelinize düşerdi.</p>'}}}
+  var nx=$('[data-n]',wz);if(nx)nx.onclick=function(){if(nx.disabled)return;if(W.step<4){W.step++;draw()}else{wz.innerHTML=head()+'<h3>Teşekkürler</h3><p class="ok">Randevu talebiniz alındı. Size kısa süre içinde dönüş yapacağız.</p>'}}}
  window._wz={sync:function(a,sum){W.svc=a;W.sum=sum;if(W.step===0)draw()},pick:function(n){W.who=n}};
  draw();
  $$('[data-pick]').forEach(function(b){b.addEventListener('click',function(e){W.who=b.dataset.pick;if(W.step<1)W.step=Math.max(W.step,0);draw()})});
@@ -242,7 +223,7 @@ def render(s):
     mq = ''.join('<span>%s</span>' % H.escape(x) for x in s['mq'])
     tl = s['tl']
     lis = ''.join('<li><button type="button" aria-pressed="false" data-i="%d"><span>%s</span><span>%s %s</span></button></li>' % (i, H.escape(a), format(p, ',').replace(',', '.'), tl) for i, (a, p, _t) in enumerate(s['svc']))
-    team = ''.join('<article class="cd" data-p="1"><img src="%s" alt="%s, %s (demo)" loading="lazy" width="660" height="880"><div class="in"><span>%s</span><b>%s</b><a class="btn" href="#randevu" data-pick="%s">%s ile randevu</a></div></article>' % (ph(t[2] + 2, 700), H.escape(t[0]), H.escape(t[1]), H.escape(t[1]), H.escape(t[0]), H.escape(t[0]), H.escape(t[0])) for t in s['team'])
+    team = ''.join('<article class="cd" data-p="1"><img src="%s" alt="%s, %s" loading="lazy" width="660" height="880"><div class="in"><span>%s</span><b>%s</b><a class="btn" href="#randevu" data-pick="%s">%s ile randevu</a></div></article>' % (ph(t[2] + 2, 700), H.escape(t[0]), H.escape(t[1]), H.escape(t[1]), H.escape(t[0]), H.escape(t[0]), H.escape(t[0])) for t in s['team'])
     gal = ''.join('<figure><img src="%s" alt="%s galeri %d" loading="lazy"></figure>' % (ph(k, 900), H.escape(s['name'].title()), i + 1) for i, k in enumerate(s['gal']))
     nav = ''.join('<li><a href="#%s">%s</a></li>' % (a, H.escape(b)) for a, b in zip(['stm', 'fis', 'ekip', 'galeri'], s['nav']))
     cfg = dict(tl=tl, svc=s['svc'], team=s['team'], unit=s['unit'], l1='İşlem seçin' if s['slug'] != 'firin' else 'Ürün seçin', l2='Usta seçin' if s['slug'] != 'firin' else 'Teslim şekli',
@@ -252,26 +233,26 @@ def render(s):
     if s['slug'] == 'motor': cfg['hours'] = ['08:30', '09:30', '10:30', '11:30', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '', ''][:10]
     c = json.dumps(cfg, ensure_ascii=False)
     return '''<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>%(title)s</title>
-<meta name="description" content="%(name)s için sinematik, kaydırmayla ilerleyen demo site. Hizmet fişi, ekip ve adım adım randevu penceresi."><meta name="robots" content="noindex">
+<meta name="description" content="%(name)s için sinematik, kaydırmayla ilerleyen site. Hizmet fişi, ekip ve adım adım randevu penceresi."><meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?%(fams)s&display=swap">
-<style>%(css)s</style></head><body>
+<style>%(css)s</style><style>%(mcss)s</style></head><body>
 <div id="pre" role="status"><div><b>%(name)s</b><i><span id="pn">0</span>%%</i></div></div>
 <nav class="top"><a class="lg" href="#" aria-label="%(name)s ana sayfa">%(name)s<small>%(sub)s</small></a><ul>%(nav)s</ul><a class="btn" href="#randevu">Randevu</a></nav>
 <main><section id="hero" aria-label="Açılış"><div class="stage"><img class="poster" src="%(poster)s" alt="" fetchpriority="high"><video id="hv" muted playsinline preload="auto" poster="%(poster)s" src="%(vurl)s" aria-hidden="true"></video>%(cap)s<a class="btn" href="#fis">%(hcta)s</a><div class="hint">KAYDIR</div><div class="prog"><i></i></div></div></section>
 <div class="mq" aria-hidden="true"><div>%(mq)s%(mq)s</div></div>
 <section class="st" id="stm"><p>%(stmt)s</p></section>
 <section class="sv" id="fis"><div class="l"><h2 class="rv">%(h1)s <em>%(h2)s</em></h2><p>%(svcp)s</p><div class="sel" aria-live="polite"><span class="lb">Seçilen</span><b id="nm">—</b><output id="out">0 %(tl)s</output><a class="btn" href="#randevu" id="goBook">Randevuya geç</a></div></div>
-<div class="paper" role="group" aria-label="%(pt)s"><h3>%(pt)s</h3><i>%(ps)s</i><ul>%(lis)s</ul><div class="tot"><span>TOPLAM</span><span id="tot">0 %(tl)s</span></div><div class="bar" aria-hidden="true"></div><small>@%(slug)s · demo fiyatlar örnektir</small></div></section>
+<div class="paper" role="group" aria-label="%(pt)s"><h3>%(pt)s</h3><i>%(ps)s</i><ul>%(lis)s</ul><div class="tot"><span>TOPLAM</span><span id="tot">0 %(tl)s</span></div><div class="bar" aria-hidden="true"></div><small>@%(slug)s</small></div></section>
 <section class="tm" id="ekip"><h2 class="rv">%(teamh)s</h2><div class="car" aria-label="Ekip: ok tuşlarıyla gezin">%(team)s</div><div class="cn"><button type="button" id="pv" aria-label="Önceki">←</button><button type="button" id="nx" aria-label="Sonraki">→</button></div></section>
 <section class="gl" id="galeri"><h2 class="rv">%(galh)s</h2><div class="gg">%(gal)s</div></section>
-<section class="bk" id="randevu"><div class="l"><h2 class="rv">%(bh1)s %(bh2)s</h2><p>%(bp)s</p><p class="note">Demo: bu form talep göndermez. Gerçek sitede randevular panele düşer, boş saatler canlı hesaplanır.</p></div><div class="wz" id="wz" aria-live="polite"></div></section>
+<section class="bk" id="randevu"><div class="l"><h2 class="rv">%(bh1)s %(bh2)s</h2><p>%(bp)s</p></div><div class="wz" id="wz" aria-live="polite"></div></section>
 <section class="fin"><div><h2 class="rv">%(f1)s <span>%(f2)s</span></h2><a class="btn" href="#randevu">%(fcta)s</a></div></section></main>
-<footer><div><b>%(name)s</b><p>%(sub)s</p></div><div><p class="lb">Adres</p><p>%(addr)s</p></div><div><p class="lb">Saatler</p><p>%(hrs)s</p></div><p class="dm">Demo içeriği: isimler, fiyatlar ve adres örnektir. Fotoğraf ve video: Pexels (ücretsiz lisans).</p></footer>
+<footer><div><b>%(name)s</b><p>%(sub)s</p></div><div class="cl"><p class="lb">Menü</p><a href="#stm">Kulüp</a><a href="#fis">Hizmetler</a><a href="#ekip">Ustalar</a><a href="#galeri">Galeri</a></div><div class="cl"><p class="lb">İletişim</p><a href="tel:+905320000000">Ara</a><a href="https://wa.me/905320000000">WhatsApp</a><p>%(addr)s</p></div><div><p class="lb">Saatler</p><p>%(hrs)s</p></div><p class="cr">© 2026 %(name)s</p></footer>
 <noscript><style>#pre{display:none}.st .w{opacity:1}.gg figure{clip-path:none}.gg img{transform:none}</style></noscript>
-<script>const C=%(c)s;</script><script src="../lib/gsap.min.js"></script><script src="../lib/ScrollTrigger.min.js"></script><script src="../lib/lenis.min.js"></script><script>%(js)s</script></body></html>''' % dict(
+<script>const C=%(c)s;</script><script src="../lib/gsap.min.js"></script><script src="../lib/ScrollTrigger.min.js"></script><script src="../lib/lenis.min.js"></script><script>%(js)s</script><script>window.MOB=%(mob)s;%(mjs)s</script></body></html>''' % dict(
         title=s['title'], name=s['name'], sub=s['sub'], fams=fams, css=css, nav=nav, poster=poster, vurl=vurl, cap=cap, hcta=H.escape(s['hero_cta']), mq=mq, stmt=H.escape(s['stmt']),
         h1=H.escape(s['svc_h'][0]), h2=H.escape(s['svc_h'][1]), svcp=H.escape(s['svc_p']), tl=tl, pt=s['paper_t'], ps=s['paper_s'], lis=lis, slug=s['slug'], teamh=s['team_h'], team=team, galh=s['gal_h'], gal=gal,
-        bh1=H.escape(s['book_h'][0]), bh2=H.escape(s['book_h'][1]), bp=H.escape(s['book_p']), f1=H.escape(s['fin'][0]), f2=H.escape(s['fin'][1]), fcta=H.escape(s['fin_cta']), addr=s['addr'], hrs=s['hrs'], c=c, js=JS)
+        bh1=H.escape(s['book_h'][0]), bh2=H.escape(s['book_h'][1]), bp=H.escape(s['book_p']), f1=H.escape(s['fin'][0]), f2=H.escape(s['fin'][1]), fcta=H.escape(s['fin_cta']), addr=s['addr'], hrs=s['hrs'], c=c, js=JS, mcss=common.MOB_CSS, mjs=common.MOB_JS, mob=json.dumps(dict(cta=[s['hero_cta'],'#randevu'], addr=s['addr']), ensure_ascii=False))
 
 if __name__ == '__main__':
     for s in SITES:
