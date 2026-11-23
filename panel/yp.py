@@ -167,6 +167,59 @@ def register(api_router, db, deps):
         await db.app_settings.update_one({"_id": key}, {"$set": {"list": list(dict.fromkeys(l))}}, upsert=True)
         return {"ok": True}
 
+    @api_router.get("/yp/rehber")
+    async def rehber(user: dict = Depends(adm)):
+        """Yeni firma için sektöre göre kurulum adımları; her adımın bitip bitmediği gerçek veriden hesaplanır."""
+        key = await sector()
+        pk0 = await db.app_settings.find_one({"_id": "yp_pack"}, {"_id": 0}) or {}
+        fam = __import__("sektor_dil").family_of(key, pk0.get("sector") or "")
+        st = await db.app_settings.find_one({"_id": "yp_rehber"}, {"_id": 0}) or {}
+        if fam not in ("randevu", "siparis"):
+            return {"steps": [], "gizli": True, "bitti": True}
+        g = await db.app_settings.find_one({"_id": "global"}, {"_id": 0}) or {}
+        B = await cfg()
+        prof = await db.app_settings.find_one({"_id": "site_profile"}, {"_id": 0}) or {}
+        steps = [{"id": "firma", "ad": "Firma bilgilerini yazın", "ac": "Telefon, adres ve çalışma saatleri belgelerde ve sitede görünür.",
+                  "git": "ayar", "btn": "Bilgileri yaz",
+                  "bitti": bool((g.get("company_name") or "").strip() and (g.get("company_phone") or "").strip())}]
+        if fam == "randevu":
+            steps += [
+                {"id": "hizmet", "ad": "Hizmetlerinizi ve fiyatlarını girin", "ac": "Müşteri randevu alırken bunlardan seçer.", "git": "ayar", "btn": "Hizmet ekle",
+                 "bitti": await db.yp_services.count_documents({}) > 0},
+                {"id": "ekip", "ad": "Çalışanlarınızı ekleyin",
+                 "ac": "Takvim ve prim hesabı çalışana göre tutulur.", "git": "ekip", "btn": "Çalışan ekle",
+                 "bitti": await db.yp_staff.count_documents({"active": {"$ne": False}}) > 0},
+                {"id": "online", "ad": "Online randevuyu açın", "ac": "Sitenizden gelen randevular takvime düşer.", "git": "ayar", "btn": "Ayarı aç",
+                 "bitti": bool(B.get("enabled"))},
+                {"id": "site", "ad": "Sitenizi gözden geçirin", "ac": "Slogan, hakkında yazısı ve fotoğrafları kendi işinize göre düzenleyin.", "git": "site", "btn": "Siteyi düzenle",
+                 "bitti": bool((prof.get("slogan") or "").strip() or (prof.get("about") or "").strip())},
+                {"id": "ilk", "ad": "İlk randevunuzu oluşturun", "ac": "Telefonla gelen bir müşteriyi takvime ekleyin.", "git": "takvim", "btn": "Takvimi aç",
+                 "bitti": await db.bookings.count_documents({}) > 0},
+            ]
+        else:
+            ent = await db.yp_integrations.find({"state": "bagli"}, {"_id": 0, "id": 1}).to_list(50)
+            ent_ids = {e["id"] for e in ent}
+            odeme = {"iyzico", "paytr", "param", "sipay", "craftgate", "banka_pos", "havale", "kapida"}
+            steps += [
+                {"id": "urun", "ad": "İlk ürününüzü ekleyin", "ac": "Fotoğraf, fiyat ve stok girin; ürün mağazanıza kendiliğinden düşer.", "git": "urun", "btn": "Ürün ekle",
+                 "bitti": await db.yp_products.count_documents({}) > 0},
+                {"id": "odeme", "ad": "Ödeme yöntemini bağlayın", "ac": "Kartla ödeme, havale ya da kapıda ödeme.", "git": "entegrasyon", "btn": "Bağlan",
+                 "bitti": bool(ent_ids & odeme)},
+                {"id": "kargo", "ad": "Kargo firmanızı bağlayın", "ac": "Gönderi oluşturma ve takip numarası için.", "git": "entegrasyon", "btn": "Bağlan",
+                 "bitti": bool(ent_ids & {"aras", "yurtici", "mng", "ptt", "surat", "ups", "sendeo", "hepsijet", "kolaygelsin"})},
+                {"id": "site", "ad": "Mağaza sayfanızı gözden geçirin", "ac": "Slogan, hakkında yazısı ve fotoğrafları düzenleyin.", "git": "site", "btn": "Siteyi düzenle",
+                 "bitti": bool((prof.get("slogan") or "").strip() or (prof.get("about") or "").strip())},
+                {"id": "ilk", "ad": "İlk siparişinizi alın", "ac": "Mağazadan gelen ya da telefonla verilen ilk sipariş burada görünür.", "git": "siparis", "btn": "Siparişleri aç",
+                 "bitti": await db.yp_orders.count_documents({}) > 0},
+            ]
+        n_bitti = len([x for x in steps if x["bitti"]])
+        return {"steps": steps, "gizli": bool(st.get("gizli")), "bitti": n_bitti == len(steps), "n": n_bitti, "toplam": len(steps)}
+
+    @api_router.post("/yp/rehber/gizle")
+    async def rehber_gizle(payload: dict, user: dict = Depends(adm)):
+        await db.app_settings.update_one({"_id": "yp_rehber"}, {"$set": {"gizli": bool(payload.get("gizli", True))}}, upsert=True)
+        return {"ok": True}
+
     @api_router.get("/yp/boot")
     async def boot(user: dict = Depends(adm)):
         st = await staff_all()
@@ -195,7 +248,7 @@ def register(api_router, db, deps):
             akis = 0
         return {"firm": g.get("company_name") or "", "sector": key, "pack": pk.get("sector") or key,
                 "terms": terms(pk.get("sector") or key), "modules": list(mods), "eticaret": bool(eshop), "work_flows": akis,
-                "family": __import__("sektor_dil").family(key), "eski_panel": __import__("sektor_dil").family(key) not in ("randevu", "siparis"),   # randevu ve sipariş işlerinde eski panel kapalı
+                "family": __import__("sektor_dil").family_of(key, pk.get("sector") or ""), "eski_panel": __import__("sektor_dil").family_of(key, pk.get("sector") or "") not in ("randevu", "siparis"),   # randevu ve sipariş işlerinde eski panel kapalı
                 "user": user.get("name") or user.get("email") or "", "staff": st, "services": sv,
                 "hours": {"start": B.get("start") or "09:00", "end": B.get("end") or "19:00", "closed": B.get("closed_weekdays") or [], "online": bool(B.get("enabled")),
                           "slot": int(B.get("slot_minutes") or 30)},

@@ -10,8 +10,12 @@ def t(n, f):
     except Exception:
         import traceback; bad.append((n, traceback.format_exc()[-800:]))
 with TestClient(s.app) as c:
-    j = c.post("/api/public/demo", json={"name": "Ayşe", "phone": "05524165755", "sector": "Kuaför"}).json()
-    H = {"Authorization": "Bearer " + c.post("/api/auth/login", json={"email": j["email"], "password": j["password"]}).json()["token"]}
+    # demo "Kurumsal" olduğundan tüm modül ve kataloğu açar (bilinçli); paket kısıtını sınamak için başlangıç paketli firma
+    A = {"Authorization": "Bearer " + c.post("/api/auth/login", json={"email": "admin@servis.com", "password": "admin123"}).json()["token"]}
+    rf = c.post("/api/admin/firms", headers=A, json={"name": "Kuaför Ent", "email": "ent@x.com", "password": "sifre12345", "package": "baslangic"}); assert rf.status_code == 200, rf.text
+    j = {"email": "ent@x.com", "password": "sifre12345"}
+    H = {"Authorization": "Bearer " + c.post("/api/auth/login", json=j).json()["token"]}
+    c.post("/api/yp/sectors/kuafor", headers=H, json={})
 
     def a():
         r = c.get("/api/yp/integrations", headers=H).json()

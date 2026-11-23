@@ -193,6 +193,15 @@ label.f>textarea{min-height:70px;resize:vertical}
 .varl .vr{border:1px dashed var(--line);border-radius:7px;padding:4px 9px;font-size:12.5px;color:var(--mut);
  font-family:ui-monospace,Menlo,monospace;background:#fff;cursor:pointer}
 .varl .vr:hover{border-style:solid;border-color:var(--blue);color:var(--blue)}
+.rh{margin-bottom:14px;padding:16px}
+.rhh{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.rhh b{font-size:16px}.rhh small{display:block;color:var(--mut);margin-top:2px;font-size:13px}
+.rhb{height:6px;border-radius:3px;background:#e8edf5;margin:12px 0 8px;overflow:hidden}.rhb i{display:block;height:100%;background:var(--ok);border-radius:3px;transition:width .3s}
+.rhl{list-style:none;margin:0;padding:0}.rhl li{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid var(--line);min-height:48px}.rhl li:first-child{border-top:0}
+.rhd{flex:none;width:24px;height:24px;border-radius:50%;border:2px solid #c6cfdd;display:grid;place-items:center;color:#fff}.rhl li.ok .rhd{background:var(--ok);border-color:var(--ok)}.rhl li.ok .rhd svg{width:14px;height:14px}
+.rhl li.cur .rhd{border-color:var(--blue)}
+.rht{flex:1;min-width:0}.rht b{font-size:14.5px;font-weight:600}.rht small{display:block;color:var(--mut);font-size:13px;margin-top:2px}.rhl li.ok .rht b{color:var(--mut);text-decoration:line-through}
+.rhl .btn{flex:none;text-decoration:none;white-space:nowrap}
+@media(max-width:700px){.rhl li{flex-wrap:wrap}.rht{flex:1 1 calc(100% - 40px)}.rhl .btn{margin-left:36px}}
 .egrp{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-bottom:16px}
 .egrp .c{background:#fff;border:1px solid var(--line);border-radius:6px;padding:12px 14px;text-align:left;font:inherit;cursor:pointer}
 .egrp .c b{display:block;font-size:14px;font-weight:650}
@@ -796,6 +805,16 @@ function dwForm(){var on=dwGet(),av=dwAvail(),rest=av.filter(function(w){return 
   +'<div class="mf"><button type="button" class="btn" data-a="dw-sifir">Varsayılana dön</button><button type="button" class="btn p" data-a="dw-kaydet">Kaydet</button></div>')}
 function dwMove(b,d){var r=b.closest('.dwr'),n=d<0?r.previousElementSibling:r.nextElementSibling;if(!n)return;d<0?r.parentNode.insertBefore(r,n):r.parentNode.insertBefore(n,r)}
 function dwSaveForm(){var l=[];document.querySelectorAll('#dwl .dwr').forEach(function(r){if(r.querySelector('input').checked)l.push(r.dataset.k)});dwSave(l);closeM();route()}
+function rehberHtml(R){if(!R||R.gizli||R.bitti||!(R.steps||[]).length)return '';
+ var n=R.n||0,t=R.toplam||R.steps.length,pct=Math.round(n/t*100),ilk=null;
+ R.steps.forEach(function(x){if(!x.bitti&&!ilk)ilk=x});
+ return '<div class="card rh"><div class="rhh"><div><b>Kurulumu tamamlayın</b><small>'+n+' / '+t+' adım hazır · önce işaretli olanı yapın</small></div>'
+  +'<button class="btn s" data-a="rh-gizle" title="Rehberi kapat">Gizle</button></div>'
+  +'<div class="rhb"><i style="width:'+pct+'%"></i></div>'
+  +'<ol class="rhl">'+R.steps.map(function(x){var cur=ilk&&ilk.id===x.id;
+   return '<li class="'+(x.bitti?'ok':'')+(cur?' cur':'')+'"><span class="rhd">'+(x.bitti?'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>':'')+'</span>'
+    +'<div class="rht"><b>'+esc(x.ad)+'</b>'+(cur?'<small>'+esc(x.ac)+'</small>':'')+'</div>'
+    +(x.bitti?'':'<a class="btn s'+(cur?' p':'')+'" href="#'+x.git+'">'+esc(x.btn)+'</a>')+'</li>'}).join('')+'</ol></div>'}
 V.bugun=async function(){
  var t=B.today,on=dwGet(),has=function(k){return on.indexOf(k)>-1};
  var need=function(){for(var i=0;i<arguments.length;i++)if(has(arguments[i]))return true;return false};
@@ -808,6 +827,7 @@ V.bugun=async function(){
   has('ay')?api('/yp/cash?a='+rm[0]+'&b='+rm[1]):Z(null),
   has('siparis')?api('/yp/orders/report/ozet').catch(function(){return null}):Z(null),
   has('azstok')?api('/yp/products?limit=1').catch(function(){return null}):Z(null)]);
+ var RH=null;try{RH=await api('/yp/rehber')}catch(e){}
  var all=r[0].rows,req=r[1].rows,cash=r[2];CUR.requests=req;
  var mine=all.filter(function(x){return x.stage!=='iptal'&&x.stage!=='talep'});
  var done=mine.filter(function(x){return x.stage==='tamamlandi'}).length;
@@ -835,6 +855,7 @@ V.bugun=async function(){
  var kind=function(k){return DW.filter(function(w){return w[0]===k})[0][3]};
  var figs=on.filter(function(k){return kind(k)==='fig'}),cards=on.filter(function(k){return kind(k)==='card'});
  var h=head('Bugün',fd(t)+' · '+open,'<button class="btn" data-a="dw-ac">Paneli düzenle</button><button class="btn" data-a="cashnew">Para girdi / çıktı</button>'+NEWB);
+ h+=rehberHtml(RH);
  if(!on.length)h+='<div class="card"><div class="empty">Ana panelde gösterilecek kutu seçilmedi. “Paneli düzenle” ile istediklerinizi ekleyin.</div></div>';
  if(figs.length)h+='<div class="figs dwf" style="grid-template-columns:repeat('+Math.min(4,figs.length)+',1fr)">'+figs.map(function(k){return W[k]()}).join('')+'</div>';
  if(cards.length)h+='<div class="dwc">'+cards.map(function(k){return W[k]()}).join('')+'</div>';
@@ -3103,6 +3124,7 @@ async function entKayit(){var r=await api('/yp/integrations/log/son');
 /* ---------------- entegrasyon olayları ---------------- */
 document.addEventListener('click',function(ev){var b=ev.target.closest('[data-a]');if(!b)return;var a=b.dataset.a;
  if(a==='eseg'){CUR.ef.state=b.dataset.v;entCiz()}
+ else if(a==='rh-gizle'){api('/yp/rehber/gizle',{method:'POST',body:{gizli:true}}).then(function(){toast('Rehber gizlendi');refresh()}).catch(fail)}
  else if(a==='eg-ac'){var gid=b.dataset.v,ac=b.getAttribute('aria-expanded')==='true';CUR.ef.open=CUR.ef.open||{};CUR.ef.open[gid]=!ac;entCiz()}
  else if(a==='eg-hepsi'){CUR.ef.open=CUR.ef.open||{};(CUR.egroups||[]).forEach(function(g){CUR.ef.open[g.id]=b.dataset.v==='1'});entCiz()}
  else if(a==='eseg-g'){CUR.ef.group=CUR.ef.group===b.dataset.v?'':b.dataset.v;V.entegrasyon().catch(fail)}

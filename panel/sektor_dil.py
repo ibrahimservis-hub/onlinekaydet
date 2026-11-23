@@ -222,6 +222,17 @@ def family(key):
     return FAMILY.get(key, "")
 
 
+# sektör anahtarı yokken (firma yalnız bir sektör paketi seçtiyse) paket anahtarından aile
+PACK_FAMILY = {"fitness": "randevu", "saglik": "randevu", "emlak": "proje", "organizasyon": "proje"}
+
+
+def family_of(key, pack=""):
+    """Sektör anahtarı varsa onun ailesi; yoksa seçilen paketin ailesi."""
+    if key:
+        return FAMILY.get(key, "")
+    return FAMILY.get(pack) or PACK_FAMILY.get(pack, "")
+
+
 # aile bazında ek gizlemeler: o işte karşılığı olmayan teknik servis ekranları ve kartları (eşleşme tam metin)
 HIDE_FAM = {
     "randevu": ("Talep Rehberi", "Atölye (Hizmet Teslim)", "Atölye (Cihaz Teslim)", "Bayi Portalı", "Uzmandan Para Aldım", "Uzmanların Borç Durumu", "Geciken Uzman Borçları",
