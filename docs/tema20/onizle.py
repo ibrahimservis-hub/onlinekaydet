@@ -26,6 +26,10 @@ def page(i, t, c):
     vsrc, vpos = video(i)
     vid = lambda cls='': '<video class="bgv %s" autoplay muted loop playsinline preload="metadata" poster="%s"><source src="%s" type="video/mp4"></video>' % (cls, vpos, vsrc)
     phone = "0532 000 00 00"
+    _w = [x for x in re.split(r"[\s&]+", nm) if x and x[0].isalpha()]
+    _ini = (_w[0][0] + _w[1][0]) if len(_w) > 1 else nm[:2]
+    _shape = ["", "r", "h", "d"][i % 4]
+    logo = lambda: '<span class="lm"><i class="%s">%s</i><span>%s</span></span>' % (_shape, E_(_ini.upper()), E_(nm))
     fonts = "&".join("family=" + GF[f] for f in dict.fromkeys([fh, fb]) if f in GF)
     out = []
 
@@ -117,11 +121,11 @@ def page(i, t, c):
     mega = '<div class="mega"><div class="w mg"><div><b>%s</b>%s</div><div><b>Hızlı erişim</b>%s</div><a class="mgp" style="background-image:linear-gradient(0deg,rgba(0,0,0,.6),transparent 60%%),url(%s)"><span>Kampanya</span><b>%s</b></a></div></div>' % (
         E_(navs[0].split(" (")[0]), "".join('<a href="#">%s</a>' % E_(x) for x in items), "".join('<a href="#">%s</a>' % E_(p.split(" (")[0]) for p in navs[1:]), ph(3, 600, 400), E_({"servis": "Kış öncesi bakımda %15 indirim", "randevu": "İlk randevuya özel %10", "magaza": "Sezon sonu indirimi", "yemek": "Hafta içi öğle menüsü"}.get(fam, "Bu ay ücretsiz danışmanlık")))
     drawer = '<div class="drw" id="drw"><div class="dh"><b>%s</b><button onclick="document.body.classList.remove(\'mo\')" aria-label="Kapat">✕</button></div>%s<a class="b p" href="#iletisim" onclick="document.body.classList.remove(\'mo\')">%s</a><a class="tl" href="tel:+905320000000">%s</a></div>' % (
-        E_(nm), "".join('<a href="#" onclick="document.body.classList.remove(\'mo\')">%s<span>›</span></a>' % E_(p.split(" (")[0]) for p in navs + ([] if any(x.startswith("İletişim") for x in navs) else ["İletişim"])), cta, phone)
-    hdr = drawer + '<header class="top"><div class="w"><button class="bur" onclick="document.body.classList.add(\'mo\')" aria-label="Menü"><i></i><i></i><i></i></button><a class="lg" href="#">%s</a><nav><span class="hasm">%s ▾%s</span>%s</nav><div class="hr">%s<a class="b p s" href="#iletisim">%s</a></div></div></header>' % (
-        E_(nm), E_(navs[0].split(" (")[0]), mega, "".join('<a href="#">%s</a>' % E_(p.split(" (")[0]) for p in navs[1:]), '<a class="cart" href="#" aria-label="Sepet">Sepet <b id="sbc">0</b></a>' if shop else '<a class="tel" href="tel:+905320000000">%s</a>' % phone, cta)
+        logo(), "".join('<a href="#" onclick="document.body.classList.remove(\'mo\')">%s<span>›</span></a>' % E_(p.split(" (")[0]) for p in navs + ([] if any(x.startswith("İletişim") for x in navs) else ["İletişim"])), cta, phone)
+    hdr = drawer + '<header class="top"><div class="w"><button class="bur" onclick="document.body.classList.add(\'mo\')" aria-label="Menü"><i></i><i></i><i></i></button><a class="lg" href="#" aria-label="%s">%s</a><nav><span class="hasm">%s ▾%s</span>%s</nav><div class="hr">%s<a class="b p s" href="#iletisim">%s</a></div></div></header>' % (
+        E_(nm), logo(), E_(navs[0].split(" (")[0]), mega, "".join('<a href="#">%s</a>' % E_(p.split(" (")[0]) for p in navs[1:]), '<a class="cart" href="#" aria-label="Sepet">Sepet <b id="sbc">0</b></a>' if shop else '<a class="tel" href="tel:+905320000000">%s</a>' % phone, cta)
     ftr = '<footer><div class="w fg"><div><b class="lg">%s</b><p>%s · %s</p></div><div><b>Sayfalar</b>%s</div><div><b>Kurumsal</b><a>Hakkımızda</a><a>KVKK</a><a>Çerez politikası</a>%s</div><div><b>İletişim</b><a>%s</a><a>Bornova / İzmir</a></div></div><div class="w cp">© 2026 %s · onlinekaydet ile yapıldı</div></footer>' % (
-        E_(nm), E_(sec), E_(LBL[fam]), "".join("<a>%s</a>" % E_(p.split(" (")[0]) for p in pages[:6]), "<a>Mesafeli satış sözleşmesi</a><a>İade koşulları</a>" if shop else "", phone, E_(nm))
+        logo(), E_(sec), E_(LBL[fam]), "".join("<a>%s</a>" % E_(p.split(" (")[0]) for p in pages[:6]), "<a>Mesafeli satış sözleşmesi</a><a>İade koşulları</a>" if shop else "", phone, E_(nm))
     mbar = '<div class="mb"><a href="tel:+905320000000">Ara</a><a href="#">WhatsApp</a><a class="p" href="#iletisim">%s</a></div>' % cta
     fhf, fbf = FAMN.get(fh, fh), FAMN.get(fb, fb)
     css = CSS.replace("--DK", dk).replace("--AC", ac).replace("--SF", sf).replace("--FH", "'%s'" % fhf).replace("--FB", "'%s'" % fbf).replace("--RR", "%dpx" % RAD[i])
@@ -202,6 +206,9 @@ footer{background:var(--dk);color:rgba(255,255,255,.78);padding:60px 0 0;font-si
 @media(max-width:600px){h1{font-size:30px}h2{font-size:24px}.lead{font-size:16px;margin:12px 0 20px}.b{min-height:44px;padding:0 18px;font-size:14px}.b.s{min-height:38px}.top>.w{height:52px}.top.sm>.w{height:48px}.lg{font-size:19px}.cart{font-size:14px}.bur{padding:8px}.bur i{width:20px}
 .drw{padding:14px 16px}.dh{font-size:18px;margin-bottom:8px}.dh button{width:38px;height:38px;font-size:15px}.drw>a:not(.b){padding:12px 2px;font-size:16px}.drw .b{margin-top:16px;min-height:44px}.drw .tl{padding:10px;font-size:15px;border:0}
 .mb{grid-template-columns:1fr 1fr 1.3fr}.mb a{min-height:46px;font-size:14px}.back{bottom:58px;padding:7px 11px;font-size:12px}.fm{grid-template-columns:1fr}.fm input{min-height:44px}.sec{padding:48px 0}.hd{margin-bottom:26px}}
+.lm{display:inline-flex;align-items:center;gap:10px;font:700 21px/1 --FH,serif;color:var(--dk);white-space:nowrap}.lm i{display:grid;place-items:center;width:38px;height:38px;background:var(--ac);color:#fff;font:700 15px/1 --FH,serif;font-style:normal;letter-spacing:.02em;border-radius:50%}.lm i.r{border-radius:10px}.lm i.h{border-radius:4px 16px 4px 16px}.lm i.d{border-radius:50% 50% 50% 4px}
+footer .lm,.drw .lm{color:#fff}footer .lm i,.drw .lm i{box-shadow:0 0 0 2px rgba(255,255,255,.25)}
+@media(max-width:600px){.lm{font-size:17px;gap:8px}.lm i{width:30px;height:30px;font-size:12px}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}.in>*,.rv0{opacity:1;transform:none}}"""
 
 
