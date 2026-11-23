@@ -80,6 +80,10 @@ form.fm{display:grid;gap:14px;border:1px solid var(--ln);padding:24px;background
 .fin h2{font-size:clamp(46px,11vw,180px);-webkit-text-stroke:2px var(--ink);color:transparent}.fin h2 span{display:block;-webkit-text-stroke:0;color:var(--ac)}.fin .btn{margin-top:5vh}
 footer{padding:44px clamp(18px,4vw,64px) 32px;border-top:1px solid var(--ln);display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:24px}footer b{font:700 32px/1 var(--hf);text-transform:uppercase}footer p{color:var(--mut);font-size:14px}
 @media(max-width:860px){nav.top ul{display:none}.hud{grid-template-columns:minmax(0,1fr)}.cp{min-height:30vh}.gauge{display:none}.plate{padding:14px}.plate input{min-height:50px;font-size:22px}.rd{grid-template-columns:minmax(0,1fr)}.trk{overflow:visible}.pin{overflow-x:auto}.st .sp span{font-size:10px}.tr:hover{padding-left:0}}
+
+@media(max-width:860px){.mb{grid-template-columns:1fr 1fr 1.6fr;background:#0a0b0d;border-top:3px solid var(--ac)}.mb a{font-family:var(--hf);font-size:15px;letter-spacing:.04em;min-height:60px}.mb a.p{background:#f4d03f;color:#111}
+.mm{justify-content:flex-start;padding-top:110px;counter-reset:n}.mm a{font:700 clamp(34px,9vw,52px)/1 var(--hf);text-transform:uppercase;display:flex;gap:16px;align-items:baseline;counter-increment:n}.mm a:before{content:'0' counter(n);font:600 13px var(--mono);color:var(--ac)}}
+footer{background:#0a0b0d}
 @media(prefers-reduced-motion:reduce){.cap{opacity:1;transform:none;position:static}.cp{min-height:0}#hero{height:auto}.stage{height:auto;min-height:80svh}.pin{overflow-x:auto}}
 '''
 JS = '''

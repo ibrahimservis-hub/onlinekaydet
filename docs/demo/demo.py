@@ -134,6 +134,9 @@ nav.top{transition:background .3s,backdrop-filter .3s}nav.top.solid{background:c
 footer{padding:48px clamp(18px,4vw,64px) 34px;border-top:1px solid var(--ln);display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:24px}
 footer b{font:400 34px/1 var(--hf);text-transform:uppercase}footer p{color:var(--mut);font-size:14px}footer .dm{grid-column:1/-1;font:500 12px var(--mono);color:var(--mut)}
 @media(max-width:860px){.hint{display:none}nav.top ul{display:none}.sv,.bk{grid-template-columns:minmax(0,1fr)}.sv .l{position:static}.paper{transform:none}.gg{grid-template-columns:repeat(2,minmax(0,1fr))}.gg figure:nth-child(n){grid-column:span 1;grid-row:span 1}.gg figure:nth-child(1){grid-column:span 2}.cd[data-p='-1']{transform:translateX(-70%%) translateZ(-220px) rotateY(32deg)}.cd[data-p='1']{transform:translateX(70%%) translateZ(-220px) rotateY(-32deg)}.stage .btn{left:clamp(18px,4vw,64px);right:auto;bottom:calc(14vh - 70px)}.cap{bottom:24vh}.days .op b{font-size:16px}}
+
+@media(max-width:860px){.mb{grid-template-columns:1fr 1.7fr;border-top:1px solid var(--ln)}.mb a:nth-child(2){display:none}.mb a{font:400 20px var(--hf);letter-spacing:.06em}.mb a.p{background:transparent;color:var(--ac);border-left:1px solid var(--ln)}
+.mm{align-items:center;text-align:center}.mm a{border-bottom:0;font-family:var(--hf);text-transform:uppercase;font-size:clamp(46px,14vw,80px)}.mm small{text-align:center}}
 @media(prefers-reduced-motion:reduce){.mq div{animation:none}.cap{opacity:1;transform:none;position:static;padding:90px 18px 20px}.cap:not(:first-of-type){display:none}.gg figure{clip-path:none}.gg img{transform:none}#hero{height:auto}.stage{height:70svh}.hint,.prog{display:none}}
 '''
 
@@ -235,7 +238,7 @@ def render(s):
     return '''<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>%(title)s</title>
 <meta name="description" content="%(name)s için sinematik, kaydırmayla ilerleyen site. Hizmet fişi, ekip ve adım adım randevu penceresi."><meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?%(fams)s&display=swap">
-<style>%(css)s</style><style>%(mcss)s</style></head><body>
+<style>%(mcss)s</style><style>%(css)s</style></head><body>
 <div id="pre" role="status"><div><b>%(name)s</b><i><span id="pn">0</span>%%</i></div></div>
 <nav class="top"><a class="lg" href="#" aria-label="%(name)s ana sayfa">%(name)s<small>%(sub)s</small></a><ul>%(nav)s</ul><a class="btn" href="#randevu">Randevu</a></nav>
 <main><section id="hero" aria-label="Açılış"><div class="stage"><img class="poster" src="%(poster)s" alt="" fetchpriority="high"><video id="hv" muted playsinline preload="auto" poster="%(poster)s" src="%(vurl)s" aria-hidden="true"></video>%(cap)s<a class="btn" href="#fis">%(hcta)s</a><div class="hint">KAYDIR</div><div class="prog"><i></i></div></div></section>

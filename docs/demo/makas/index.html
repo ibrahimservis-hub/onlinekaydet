@@ -2,6 +2,18 @@
 <meta name="description" content="MAKAS için sinematik, kaydırmayla ilerleyen site. Hizmet fişi, ekip ve adım adım randevu penceresi."><meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Mono:wght@500;600;700&family=Manrope:wght@400;500;700&display=swap">
 <style>
+.hm{display:none;width:48px;height:48px;border:1.5px solid currentColor;background:transparent;color:inherit;cursor:pointer;position:relative;margin-left:10px}
+.hm i{position:absolute;left:12px;right:12px;height:2px;background:currentColor;transition:transform .3s,top .3s,opacity .3s}.hm i:nth-child(1){top:16px}.hm i:nth-child(2){top:23px}.hm i:nth-child(3){top:30px}
+.hm[aria-expanded=true] i:nth-child(1){top:23px;transform:rotate(45deg)}.hm[aria-expanded=true] i:nth-child(2){opacity:0}.hm[aria-expanded=true] i:nth-child(3){top:23px;transform:rotate(-45deg)}
+.mm{position:fixed;inset:0;z-index:70;background:var(--bg);color:var(--ink);display:flex;flex-direction:column;justify-content:center;gap:6px;padding:90px 28px 110px;transform:translateY(-100%);transition:transform .5s cubic-bezier(.7,0,.2,1);visibility:hidden}
+.mm.on{transform:none;visibility:visible}.mm a{font:400 clamp(38px,11vw,64px)/1.1 var(--hf);text-transform:var(--mmt,none);text-decoration:none;padding:6px 0;border-bottom:1px solid var(--ln)}
+.mm a:active{color:var(--ac)}.mm small{margin-top:18px;font:500 12px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--mut)}
+.mb{display:none}
+@media(max-width:860px){nav.top>.btn{display:none}.hm{display:inline-block;margin-left:auto}.cartbtn+.hm{margin-left:10px}body{padding-bottom:64px}nav.top{z-index:80!important}
+.mb{display:grid;grid-template-columns:1fr 1fr 1.5fr;position:fixed;left:0;right:0;bottom:0;z-index:75;background:var(--bg);border-top:1px solid var(--ln);padding-bottom:env(safe-area-inset-bottom)}
+.mb a{min-height:56px;display:grid;place-items:center;font:700 13px var(--mono);letter-spacing:.08em;text-transform:uppercase;text-decoration:none;color:var(--ink)}.mb a+a{border-left:1px solid var(--ln)}.mb a.p{background:var(--ac);color:#fff}}
+footer .cl{display:grid;gap:6px}footer .cl a{color:var(--mut);font-size:14px;text-decoration:none}footer .cl a:hover{color:var(--ac)}footer .cr{grid-column:1/-1;font:500 12px var(--mono);color:var(--mut);border-top:1px solid var(--ln);padding-top:16px}
+</style><style>
 :root{--bg:#0b0908;--ink:#f4efe8;--mut:#a89e92;--ac:#e0572a;--ac2:#8c1d18;--paper:#f3eee4;--hf:'Anton',Impact,sans-serif;--mono:'Space Mono',monospace;--bf:'Manrope',system-ui,sans-serif;--ln:rgba(255,255,255,.16)}
 *{box-sizing:border-box;margin:0}html{overflow-x:clip}body{overflow-x:clip;background:var(--bg);color:var(--ink);font:400 17px/1.55 var(--bf);-webkit-font-smoothing:antialiased}
 img,video{display:block;max-width:100%}a{color:inherit}
@@ -115,19 +127,10 @@ nav.top{transition:background .3s,backdrop-filter .3s}nav.top.solid{background:c
 footer{padding:48px clamp(18px,4vw,64px) 34px;border-top:1px solid var(--ln);display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:24px}
 footer b{font:400 34px/1 var(--hf);text-transform:uppercase}footer p{color:var(--mut);font-size:14px}footer .dm{grid-column:1/-1;font:500 12px var(--mono);color:var(--mut)}
 @media(max-width:860px){.hint{display:none}nav.top ul{display:none}.sv,.bk{grid-template-columns:minmax(0,1fr)}.sv .l{position:static}.paper{transform:none}.gg{grid-template-columns:repeat(2,minmax(0,1fr))}.gg figure:nth-child(n){grid-column:span 1;grid-row:span 1}.gg figure:nth-child(1){grid-column:span 2}.cd[data-p='-1']{transform:translateX(-70%) translateZ(-220px) rotateY(32deg)}.cd[data-p='1']{transform:translateX(70%) translateZ(-220px) rotateY(-32deg)}.stage .btn{left:clamp(18px,4vw,64px);right:auto;bottom:calc(14vh - 70px)}.cap{bottom:24vh}.days .op b{font-size:16px}}
+
+@media(max-width:860px){.mb{grid-template-columns:1fr 1.7fr;border-top:1px solid var(--ln)}.mb a:nth-child(2){display:none}.mb a{font:400 20px var(--hf);letter-spacing:.06em}.mb a.p{background:transparent;color:var(--ac);border-left:1px solid var(--ln)}
+.mm{align-items:center;text-align:center}.mm a{border-bottom:0;font-family:var(--hf);text-transform:uppercase;font-size:clamp(46px,14vw,80px)}.mm small{text-align:center}}
 @media(prefers-reduced-motion:reduce){.mq div{animation:none}.cap{opacity:1;transform:none;position:static;padding:90px 18px 20px}.cap:not(:first-of-type){display:none}.gg figure{clip-path:none}.gg img{transform:none}#hero{height:auto}.stage{height:70svh}.hint,.prog{display:none}}
-</style><style>
-.hm{display:none;width:48px;height:48px;border:1.5px solid currentColor;background:transparent;color:inherit;cursor:pointer;position:relative;margin-left:10px}
-.hm i{position:absolute;left:12px;right:12px;height:2px;background:currentColor;transition:transform .3s,top .3s,opacity .3s}.hm i:nth-child(1){top:16px}.hm i:nth-child(2){top:23px}.hm i:nth-child(3){top:30px}
-.hm[aria-expanded=true] i:nth-child(1){top:23px;transform:rotate(45deg)}.hm[aria-expanded=true] i:nth-child(2){opacity:0}.hm[aria-expanded=true] i:nth-child(3){top:23px;transform:rotate(-45deg)}
-.mm{position:fixed;inset:0;z-index:70;background:var(--bg);color:var(--ink);display:flex;flex-direction:column;justify-content:center;gap:6px;padding:90px 28px 110px;transform:translateY(-100%);transition:transform .5s cubic-bezier(.7,0,.2,1);visibility:hidden}
-.mm.on{transform:none;visibility:visible}.mm a{font:400 clamp(38px,11vw,64px)/1.1 var(--hf);text-transform:var(--mmt,none);text-decoration:none;padding:6px 0;border-bottom:1px solid var(--ln)}
-.mm a:active{color:var(--ac)}.mm small{margin-top:18px;font:500 12px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--mut)}
-.mb{display:none}
-@media(max-width:860px){nav.top>.btn{display:none}.hm{display:inline-block;margin-left:auto}.cartbtn+.hm{margin-left:10px}body{padding-bottom:64px}nav.top{z-index:80}
-.mb{display:grid;grid-template-columns:1fr 1fr 1.5fr;position:fixed;left:0;right:0;bottom:0;z-index:75;background:var(--bg);border-top:1px solid var(--ln);padding-bottom:env(safe-area-inset-bottom)}
-.mb a{min-height:56px;display:grid;place-items:center;font:700 13px var(--mono);letter-spacing:.08em;text-transform:uppercase;text-decoration:none;color:var(--ink)}.mb a+a{border-left:1px solid var(--ln)}.mb a.p{background:var(--ac);color:#fff}}
-footer .cl{display:grid;gap:6px}footer .cl a{color:var(--mut);font-size:14px;text-decoration:none}footer .cl a:hover{color:var(--ac)}footer .cr{grid-column:1/-1;font:500 12px var(--mono);color:var(--mut);border-top:1px solid var(--ln);padding-top:16px}
 </style></head><body>
 <div id="pre" role="status"><div><b>MAKAS</b><i><span id="pn">0</span>%</i></div></div>
 <nav class="top"><a class="lg" href="#" aria-label="MAKAS ana sayfa">MAKAS<small>BERBER KULÜBÜ</small></a><ul><li><a href="#stm">Kulüp</a></li><li><a href="#fis">Hizmetler</a></li><li><a href="#ekip">Ustalar</a></li><li><a href="#galeri">Galeri</a></li></ul><a class="btn" href="#randevu">Randevu</a></nav>
@@ -219,7 +222,7 @@ addEventListener('load',function(){if(window.ScrollTrigger)ScrollTrigger.refresh
 (function(){var $=function(s,r){return (r||document).querySelector(s)},$$=function(s,r){return [].slice.call((r||document).querySelectorAll(s))};var nav=$('nav.top');if(!nav)return;var ul=$('ul',nav);var items=ul?$$('a',ul):[];
  var btn=document.createElement('button');btn.className='hm';btn.type='button';btn.setAttribute('aria-label','Menüyü aç');btn.setAttribute('aria-expanded','false');btn.innerHTML='<i></i><i></i><i></i>';nav.appendChild(btn);
  var mm=document.createElement('div');mm.className='mm';mm.id='mm';mm.innerHTML=items.map(function(a){return '<a href="'+a.getAttribute('href')+'">'+a.textContent+'</a>'}).join('')+'<a href="'+MOB.cta[1]+'" style="color:var(--ac)">'+MOB.cta[0]+'</a><small>'+MOB.addr+'</small>';document.body.appendChild(mm);btn.setAttribute('aria-controls','mm');
- function set(on){btn.setAttribute('aria-expanded',on);btn.setAttribute('aria-label',on?'Menüyü kapat':'Menüyü aç');mm.classList.toggle('on',on);document.documentElement.style.overflow=on?'hidden':'';if(window._lenis){on?_lenis.stop():_lenis.start()}}
+ function set(on){btn.setAttribute('aria-expanded',on);btn.setAttribute('aria-label',on?'Menüyü kapat':'Menüyü aç');mm.classList.toggle('on',on);document.body.classList.toggle('mo',on);document.documentElement.style.overflow=on?'hidden':'';if(window._lenis){on?_lenis.stop():_lenis.start()}}
  btn.onclick=function(){set(btn.getAttribute('aria-expanded')!=='true')};$$('a',mm).forEach(function(a){a.onclick=function(){set(false)}});addEventListener('keydown',function(e){if(e.key==='Escape')set(false)});
  var bar=document.createElement('div');bar.className='mb';bar.innerHTML='<a href="tel:+905320000000">Ara</a><a href="https://wa.me/905320000000">WhatsApp</a><a class="p" href="'+MOB.cta[1]+'">'+MOB.cta[0]+'</a>';document.body.appendChild(bar);
 })();

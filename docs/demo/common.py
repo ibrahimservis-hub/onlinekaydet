@@ -40,7 +40,7 @@ MOB_CSS = """
 .mm.on{transform:none;visibility:visible}.mm a{font:400 clamp(38px,11vw,64px)/1.1 var(--hf);text-transform:var(--mmt,none);text-decoration:none;padding:6px 0;border-bottom:1px solid var(--ln)}
 .mm a:active{color:var(--ac)}.mm small{margin-top:18px;font:500 12px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--mut)}
 .mb{display:none}
-@media(max-width:860px){nav.top>.btn{display:none}.hm{display:inline-block;margin-left:auto}.cartbtn+.hm{margin-left:10px}body{padding-bottom:64px}nav.top{z-index:80}
+@media(max-width:860px){nav.top>.btn{display:none}.hm{display:inline-block;margin-left:auto}.cartbtn+.hm{margin-left:10px}body{padding-bottom:64px}nav.top{z-index:80!important}
 .mb{display:grid;grid-template-columns:1fr 1fr 1.5fr;position:fixed;left:0;right:0;bottom:0;z-index:75;background:var(--bg);border-top:1px solid var(--ln);padding-bottom:env(safe-area-inset-bottom)}
 .mb a{min-height:56px;display:grid;place-items:center;font:700 13px var(--mono);letter-spacing:.08em;text-transform:uppercase;text-decoration:none;color:var(--ink)}.mb a+a{border-left:1px solid var(--ln)}.mb a.p{background:var(--ac);color:#fff}}
 footer .cl{display:grid;gap:6px}footer .cl a{color:var(--mut);font-size:14px;text-decoration:none}footer .cl a:hover{color:var(--ac)}footer .cr{grid-column:1/-1;font:500 12px var(--mono);color:var(--mut);border-top:1px solid var(--ln);padding-top:16px}
@@ -49,7 +49,7 @@ MOB_JS = """
 (function(){var $=function(s,r){return (r||document).querySelector(s)},$$=function(s,r){return [].slice.call((r||document).querySelectorAll(s))};var nav=$('nav.top');if(!nav)return;var ul=$('ul',nav);var items=ul?$$('a',ul):[];
  var btn=document.createElement('button');btn.className='hm';btn.type='button';btn.setAttribute('aria-label','Menüyü aç');btn.setAttribute('aria-expanded','false');btn.innerHTML='<i></i><i></i><i></i>';nav.appendChild(btn);
  var mm=document.createElement('div');mm.className='mm';mm.id='mm';mm.innerHTML=items.map(function(a){return '<a href="'+a.getAttribute('href')+'">'+a.textContent+'</a>'}).join('')+'<a href="'+MOB.cta[1]+'" style="color:var(--ac)">'+MOB.cta[0]+'</a><small>'+MOB.addr+'</small>';document.body.appendChild(mm);btn.setAttribute('aria-controls','mm');
- function set(on){btn.setAttribute('aria-expanded',on);btn.setAttribute('aria-label',on?'Menüyü kapat':'Menüyü aç');mm.classList.toggle('on',on);document.documentElement.style.overflow=on?'hidden':'';if(window._lenis){on?_lenis.stop():_lenis.start()}}
+ function set(on){btn.setAttribute('aria-expanded',on);btn.setAttribute('aria-label',on?'Menüyü kapat':'Menüyü aç');mm.classList.toggle('on',on);document.body.classList.toggle('mo',on);document.documentElement.style.overflow=on?'hidden':'';if(window._lenis){on?_lenis.stop():_lenis.start()}}
  btn.onclick=function(){set(btn.getAttribute('aria-expanded')!=='true')};$$('a',mm).forEach(function(a){a.onclick=function(){set(false)}});addEventListener('keydown',function(e){if(e.key==='Escape')set(false)});
  var bar=document.createElement('div');bar.className='mb';bar.innerHTML='<a href="tel:+905320000000">Ara</a><a href="https://wa.me/905320000000">WhatsApp</a><a class="p" href="'+MOB.cta[1]+'">'+MOB.cta[0]+'</a>';document.body.appendChild(bar);
 })();
@@ -57,4 +57,4 @@ MOB_JS = """
 def page(title, desc, fams, css, body, js, c='{}', mob=None):
     return ('<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>%s</title><meta name="description" content="%s"><meta name="robots" content="noindex">'
             '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="%s"><style>%s</style></head><body>%s'
-            '<noscript><style>#pre{display:none}</style></noscript><script>const C=%s;</script><script src="../lib/gsap.min.js"></script><script src="../lib/ScrollTrigger.min.js"></script><script src="../lib/lenis.min.js"></script><script>window.MOB=%s;%s%s</script></body></html>') % (title, desc, gf(*fams), css + MOB_CSS, body, c, __import__('json').dumps(mob or {}, ensure_ascii=False), BOOT, js.replace('OK.start(function(){', 'OK.start(function(){' + MOB_JS, 1))
+            '<noscript><style>#pre{display:none}</style></noscript><script>const C=%s;</script><script src="../lib/gsap.min.js"></script><script src="../lib/ScrollTrigger.min.js"></script><script src="../lib/lenis.min.js"></script><script>window.MOB=%s;%s%s</script></body></html>') % (title, desc, gf(*fams), MOB_CSS + css, body, c, __import__('json').dumps(mob or {}, ensure_ascii=False), BOOT, js.replace('OK.start(function(){', 'OK.start(function(){' + MOB_JS, 1))
