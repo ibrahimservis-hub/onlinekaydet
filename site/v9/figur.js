@@ -85,9 +85,3 @@ function tick(now){if(t0===null)t0=now;const k=cv.width/W;ctx.setTransform(k,0,0
  ctx.globalAlpha=1;requestAnimationFrame(tick)}
 
 })();
-/* mobil: figür yana kaydırılabilir; ilk görünüşte bir kez hafifçe kaydırıp ipucu ver */
-(function(){try{var s=document.querySelector('.hero .sahne.fg');if(!s||!matchMedia('(max-width:700px)').matches||matchMedia('(prefers-reduced-motion:reduce)').matches)return;
-var done=false,io=new IntersectionObserver(function(e){if(done||!e[0].isIntersecting)return;done=true;io.disconnect();
-var to=Math.round((s.scrollWidth-s.clientWidth)*.55),t0=null,d=1400;
-function st(t){if(s.scrollLeft>8&&t0===null)return;if(t0===null)t0=t;var p=Math.min((t-t0)/d,1),q=p<.5?p*2:(1-p)*2;s.scrollLeft=to*(q*q*(3-2*q));if(p<1)requestAnimationFrame(st);else s.scrollLeft=0}
-setTimeout(function(){requestAnimationFrame(st)},600)},{threshold:.6});io.observe(s)}catch(e){}})();
