@@ -18,6 +18,25 @@ RAD = [10, 14, 4, 6, 18, 10, 2, 22, 14, 18, 16, 12, 4, 0, 20, 12, 10, 4, 8, 6]
 CTA = {"servis": "Servis iste", "randevu": "Randevu al", "magaza": "Alışverişe başla", "yemek": "Rezervasyon", "proje": "İlanlara bak", "kurs": "Ön kayıt"}
 
 
+# hero, nav, cards, head, foot, mode
+SK = {1: ("poster", "classic", "rows", "num", "cols", "light"), 2: ("split", "pill", "nums", "left", "light", "tint"),
+      3: ("giant", "overlay", "tiles", "split", "big", "dark"), 4: ("overlay", "overlay", "rows", "num", "cols", "dark"),
+      5: ("arch", "centered", "img", "center", "light", "tint"), 6: ("tall", "classic", "tiles", "split", "cols", "light"),
+      7: ("frame", "centered", "rows", "center", "big", "dark"), 8: ("arch", "pill", "img", "left", "light", "light"),
+      9: ("frame", "classic", "img", "num", "light", "tint"), 10: ("bento", "pill", "tiles", "left", "big", "tint"),
+      11: ("tall", "centered", "nums", "center", "light", "light"), 12: ("split", "centered", "rows", "left", "light", "light"),
+      13: ("giant", "overlay", "tiles", "num", "big", "dark"), 14: ("bento", "centered", "img", "center", "cols", "light"),
+      15: ("arch", "pill", "tiles", "center", "light", "tint"), 16: ("tall", "classic", "img", "left", "big", "tint"),
+      17: ("frame", "pill", "nums", "split", "cols", "dark"), 18: ("overlay", "centered", "rows", "center", "big", "dark"),
+      19: ("poster", "classic", "img", "split", "cols", "light"), 20: ("poster", "pill", "nums", "num", "big", "tint")}
+
+
+def _rgb(h): return [int(h[k:k + 2], 16) for k in (1, 3, 5)]
+def _hex(r): return "#%02x%02x%02x" % tuple(max(0, min(255, int(v))) for v in r)
+def mix(a, b, t): return _hex([x + (y - x) * t for x, y in zip(_rgb(a), _rgb(b))])
+def lum(h): r, g, b = _rgb(h); return (.299 * r + .587 * g + .114 * b) / 255
+
+
 def page(i, t, c):
     nm, sec, fam, pal, fn, secs, pages, works, _ = t
     dk, ac, sf = pal
@@ -33,6 +52,7 @@ def page(i, t, c):
     _shape = ["", "r", "h", "d"][(i + 1) % 4]
     logo = lambda w=False: logo_uret.make(i + 1, t, w).replace('height="72"', 'class="lgo"')
     fonts = "&".join("family=" + GF[f] for f in dict.fromkeys([fh, fb]) if f in GF)
+    S = SK[i + 1]
     out = []
 
     def btn(t_, cls="p"):
@@ -43,11 +63,34 @@ def page(i, t, c):
             " dk" if dark else "", "".join('<label><span>%s</span><input placeholder="%s"></label>' % (E_(f), E_(f)) for f in fields), E_(b))
 
     def head(eyebrow, h2, p=""):
-        return '<div class="hd"><span class="ey">%s</span><h2>%s</h2>%s</div>' % (E_(eyebrow), E_(h2), '<p>%s</p>' % E_(p) if p else "")
+        return '<div class="hd %s"><h2>%s</h2>%s</div>' % (S[3], E_(h2), '<p>%s</p>' % E_(p) if p else "")
+
+    def hero_html():
+        f = c.get("form"); k = S[0]
+        h1 = "<h1>%s</h1>" % E_(c["h1"]); sub = '<p class="lead">%s</p>' % E_(c["sub"])
+        acts = '<div class="row">%s%s</div>' % (btn(cta), '<a class="b o" href="tel:+905320000000">%s</a>' % phone)
+        fb = c.get("fbtn", cta)
+        if k == "split":
+            return '<section class="h h-split"><div class="w g2"><div class="htx in">%s%s%s</div><div class="hpic">%s%s</div></div></section>' % (h1, sub, acts, vid(), '<div class="fcard">%s</div>' % form(f, fb) if f else "")
+        if k == "giant":
+            return '<section class="h h-giant">%s<div class="shade b"></div><div class="w in">%s%s%s</div></section>' % (vid(), h1, sub, form(f, fb, True) if f else acts)
+        if k == "arch":
+            return '<section class="h h-arch"><div class="w g2"><div class="htx in">%s%s%s</div><div class="arch">%s</div></div></section>' % (h1, sub, form(f, fb) if f else acts, vid())
+        if k == "bento":
+            return '<section class="h h-bento"><div class="w bg"><div class="t1">%s<div class="shade b"></div><div class="tx in">%s%s%s</div></div><div class="t2"><img src="%s" alt=""></div><div class="t3"><img src="%s" alt=""></div><a class="t4" href="#iletisim"><b>%s</b><span>→</span></a></div></section>' % (vid(), h1, sub, acts, ph(1, 700, 700), ph(2, 700, 500), E_(cta))
+        if k == "frame":
+            return '<section class="h h-frame"><div class="w in ct">%s%s%s</div><div class="w"><div class="frm">%s</div>%s</div></section>' % (h1, sub, "" if f else acts, vid(), '<div class="fcard">%s</div>' % form(f, fb) if f else "")
+        if k == "tall":
+            return '<section class="h h-tall"><div class="w tl"><div class="tv">%s</div><div class="htx in">%s%s%s</div></div></section>' % (vid(), h1, sub, form(f, fb) if f else acts)
+        if k == "poster":
+            return '<section class="h h-poster"><div class="pt"><div class="pi in">%s%s%s</div></div><div class="pv">%s</div></section>' % (h1, sub, form(f, fb) if f else acts, vid())
+        return '<section class="h h-over">%s<div class="shade"></div><div class="w in"><div class="oc">%s%s%s</div></div></section>' % (vid(), h1, sub, form(f, fb) if f else acts)
 
     for s in secs:
         code, label = s.split(":", 1)
-        if code in ("hf",):
+        if code in ("hf", "hs", "hq", "hb", "hp"):
+            out.append(hero_html())
+        elif code == "__hf":
             f = c.get("form")
             out.append('<section class="hf">%s<div class="shade"></div><div class="w in"><span class="ey l">%s</span><h1>%s</h1><p class="lead">%s</p>%s</div></section>' % (
                 vid(), E_(sec), E_(c["h1"]), E_(c["sub"]), form(f, c.get("fbtn", cta), True) if f else '<div class="row">%s%s</div>' % (btn(cta), btn("Menüyü gör" if fam == "yemek" else "Paketler", "o l"))))
@@ -64,8 +107,8 @@ def page(i, t, c):
             out.append('<section class="br"><div class="w"><span>%s</span><div class="mq"><div class="mqi">%s%s</div></div></div></section>' % ("Servis verdiğimiz markalar" if fam == "servis" else "Çalıştığımız markalar", bb, bb))
         elif code in ("c3", "c4", "sv"):
             cards = c["cards"][:6 if code == "sv" else (3 if code == "c3" else 4)]
-            out.append('<section class="sec"><div class="w">%s<div class="cards n%d">%s</div></div></section>' % (head(label.split("(")[0].strip().split(" + ")[0], {"servis": "Ne yapıyoruz?", "randevu": "Hizmetlerimiz", "kurs": "Kurslarımız"}.get(fam, "Hizmetler"), "Fiyatlar başlangıç fiyatıdır; kesin tutarı işe başlamadan söyleriz." if any(x[2] for x in cards) else ""), min(len(cards), 3 if len(cards) in (3, 6) else 4),
-                "".join('<a class="card" href="#iletisim"><img loading="lazy" src="%s" alt="%s"><div><h3>%s</h3><p>%s</p><div class="pr"><b>%s</b><span>%s →</span></div></div></a>' % (ph(k + 1, 700, 480), E_(a), E_(a), E_(d), E_(p), cta) for k, (a, d, p) in enumerate(cards))))
+            out.append('<section class="sec"><div class="w">%s<div class="cards n%d k-%s">%s</div></div></section>' % (head(label.split("(")[0].strip().split(" + ")[0], {"servis": "Ne yapıyoruz?", "randevu": "Hizmetlerimiz", "kurs": "Kurslarımız"}.get(fam, "Hizmetler"), "Fiyatlar başlangıç fiyatıdır; kesin tutarı işe başlamadan söyleriz." if any(x[2] for x in cards) else ""), min(len(cards), 3 if len(cards) in (3, 6) else 4), S[2],
+                "".join('<a class="card" href="#iletisim"><i class="no">%02d</i><img loading="lazy" src="%s" alt="%s"><div><h3>%s</h3><p>%s</p><div class="pr"><b>%s</b><span>%s →</span></div></div></a>' % (k + 1, ph(k + 1, 700, 480), E_(a), E_(a), E_(d), E_(p), cta) for k, (a, d, p) in enumerate(cards))))
         elif code == "pk":
             cards = c["cards"][:3]
             out.append('<section class="sec sf"><div class="w">%s<div class="pk">%s</div></div></section>' % (head("Paketler", "Size uygun paketi seçin"), "".join('<div class="pkc%s">%s<h3>%s</h3><p>%s</p><b class="pp">%s</b><ul><li>Online ödeme</li><li>SMS hatırlatma</li><li>Ücretsiz iptal</li></ul><a class="b %s" href="#iletisim">Satın al</a></div>' % (
@@ -124,17 +167,29 @@ def page(i, t, c):
         E_(navs[0].split(" (")[0]), "".join('<a href="#">%s</a>' % E_(x) for x in items), "".join('<a href="#">%s</a>' % E_(p.split(" (")[0]) for p in navs[1:]), ph(3, 600, 400), E_({"servis": "Kış öncesi bakımda %15 indirim", "randevu": "İlk randevuya özel %10", "magaza": "Sezon sonu indirimi", "yemek": "Hafta içi öğle menüsü"}.get(fam, "Bu ay ücretsiz danışmanlık")))
     drawer = '<div class="drw" id="drw"><div class="dh"><b>%s</b><button onclick="document.body.classList.remove(\'mo\')" aria-label="Kapat">✕</button></div>%s<a class="b p" href="#iletisim" onclick="document.body.classList.remove(\'mo\')">%s</a><a class="tl" href="tel:+905320000000">%s</a></div>' % (
         logo(True), "".join('<a href="#" onclick="document.body.classList.remove(\'mo\')">%s<span>›</span></a>' % E_(p.split(" (")[0]) for p in navs + ([] if any(x.startswith("İletişim") for x in navs) else ["İletişim"])), cta, phone)
-    hdr = drawer + '<header class="top"><div class="w"><button class="bur" onclick="document.body.classList.add(\'mo\')" aria-label="Menü"><i></i><i></i><i></i></button><a class="lg" href="#" aria-label="%s">%s</a><nav><span class="hasm">%s ▾%s</span>%s</nav><div class="hr">%s<a class="b p s" href="#iletisim">%s</a></div></div></header>' % (
-        E_(nm), logo(), E_(navs[0].split(" (")[0]), mega, "".join('<a href="#">%s</a>' % E_(p.split(" (")[0]) for p in navs[1:]), '<a class="cart" href="#" aria-label="Sepet">Sepet <b id="sbc">0</b></a>' if shop else '<a class="tel" href="tel:+905320000000">%s</a>' % phone, cta)
+    hdr = drawer + '<header class="top nv-' + S[1] + '"><div class="w"><button class="bur" onclick="document.body.classList.add(\'mo\')" aria-label="Menü"><i></i><i></i><i></i></button><a class="lg" href="#" aria-label="%s">%s</a><nav><span class="hasm">%s ▾%s</span>%s</nav><div class="hr">%s<a class="b p s" href="#iletisim">%s</a></div></div></header>' % (
+        E_(nm), logo(S[5] == "dark" or S[1] == "overlay"), E_(navs[0].split(" (")[0]), mega, "".join('<a href="#">%s</a>' % E_(p.split(" (")[0]) for p in navs[1:]), '<a class="cart" href="#" aria-label="Sepet">Sepet <b id="sbc">0</b></a>' if shop else '<a class="tel" href="tel:+905320000000">%s</a>' % phone, cta)
     ftr = '<footer><div class="w fg"><div><b class="lg">%s</b><p>%s · %s</p></div><div><b>Sayfalar</b>%s</div><div><b>Kurumsal</b><a>Hakkımızda</a><a>KVKK</a><a>Çerez politikası</a>%s</div><div><b>İletişim</b><a>%s</a><a>Bornova / İzmir</a></div></div><div class="w cp">© 2026 %s · onlinekaydet ile yapıldı</div></footer>' % (
-        logo(True), E_(sec), E_(LBL[fam]), "".join("<a>%s</a>" % E_(p.split(" (")[0]) for p in pages[:6]), "<a>Mesafeli satış sözleşmesi</a><a>İade koşulları</a>" if shop else "", phone, E_(nm))
+        logo(S[4] != "light"), E_(sec), E_(LBL[fam]), "".join("<a>%s</a>" % E_(p.split(" (")[0]) for p in pages[:6]), "<a>Mesafeli satış sözleşmesi</a><a>İade koşulları</a>" if shop else "", phone, E_(nm))
+    ftr = ftr.replace("<footer>", '<footer class="f-%s">' % S[4], 1)
+    if S[4] == "big":
+        ftr = ftr.replace('<div class="w cp">', '<div class="w fgiant" aria-hidden="true">%s</div><div class="w cp">' % E_(nm), 1)
+    ink_on_ac = "#111111" if lum(ac) > .6 else "#ffffff"
+    if S[5] == "dark":
+        bgc = mix(dk, "#000000", .55); cardc = mix(dk, "#ffffff", .07); sfc = mix(dk, "#000000", .3)
+        modecss = ":root{--bg:%s;--card:%s;--sf:%s;--ink:#f2f3f5;--mut:#a9afb8;--ln:rgba(255,255,255,.14);}" % (bgc, cardc, sfc)
+    else:
+        modecss = ":root{--bg:%s;--card:#fff;--ink:#16181c}" % ("#ffffff" if S[5] == "light" else sf)
+    modecss += ":root{--onac:%s}" % ink_on_ac
     mbar = '<div class="mb"><a href="tel:+905320000000">Ara</a><a href="#">WhatsApp</a><a class="p" href="#iletisim">%s</a></div>' % cta
     fhf, fbf = FAMN.get(fh, fh), FAMN.get(fb, fb)
     css = CSS.replace("--DK", dk).replace("--AC", ac).replace("--SF", sf).replace("--FH", "'%s'" % fhf).replace("--FB", "'%s'" % fbf).replace("--RR", "%dpx" % RAD[i])
     upper = "text-transform:uppercase;letter-spacing:.01em;" if fh in ("Oswald", "Anton", "Barlow Condensed") else ""
-    return '<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>%s · %s</title><link rel="preconnect" href="https://fonts.gstatic.com"><link href="https://fonts.googleapis.com/css2?%s&display=swap" rel="stylesheet"><style>%s h1,h2{%s}</style></head><body>%s%s%s%s<a class="back" href="index.html">← Tüm temalar</a><script>%s</script></body></html>' % (
-        E_(nm), E_(sec), fonts, css, upper, hdr, "".join(out), ftr, mbar, JS)
+    return '<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>%s · %s</title><link rel="preconnect" href="https://fonts.gstatic.com"><link href="https://fonts.googleapis.com/css2?%s&display=swap" rel="stylesheet"><style>%s h1,h2{%s}</style></head><body data-mode="%s">%s<main>%s</main>%s%s<a class="back" href="index.html">← Tüm temalar</a><script>%s</script></body></html>' % (
+        E_(nm), E_(sec), fonts, css + modecss + SKINCSS.replace("--FH", "'%s'" % fhf).replace("--FB", "'%s'" % fbf), upper, S[5], hdr, "".join(out), ftr, mbar, JS)
 
+
+SKINCSS = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "skin.css.txt")).read()
 
 CSS = """:root{--dk:--DK;--ac:--AC;--sf:--SF;--r:--RR;--ink:#16181c;--mut:#5d636c;--ln:rgba(0,0,0,.1)}
 *{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}body{font:16px/1.6 --FB,system-ui,sans-serif;color:var(--ink);background:#fff;overflow-x:hidden;padding-bottom:0}
@@ -221,7 +276,7 @@ if(R){document.querySelectorAll('video').forEach(function(v){v.pause()});return}
 var io=new IntersectionObserver(function(es){es.forEach(function(x){if(!x.isIntersecting)return;var t=x.target;io.unobserve(t);t.classList.add('vis');
  if(t.dataset.n!==undefined){var raw=t.dataset.n,m=raw.match(/[\d.,]+/);if(!m)return;var n=parseFloat(m[0].replace(/\./g,'').replace(',','.')),dec=m[0].indexOf(',')>-1||/^\d\.\d$/.test(m[0]),k=0,st=performance.now();
   (function f(now){var p=Math.min(1,(now-st)/1400),v=n*(1-Math.pow(1-p,3));var s=dec?v.toFixed(1):Math.round(v).toLocaleString('tr-TR');t.textContent=raw.replace(m[0],s);if(p<1)requestAnimationFrame(f)})(st)}})},{threshold:.25});
-document.querySelectorAll('.hd,.cards .card,.pkc,.st li,.prg .pc,.cat a,.tm>div,.gl img,b[data-n]').forEach(function(e,i){e.classList.add('rv0');e.style.transitionDelay=(i%4)*70+'ms';io.observe(e)});
+document.querySelectorAll('.hd,.gl img,b[data-n]').forEach(function(e,i){e.classList.add('rv0');e.style.transitionDelay=(i%4)*70+'ms';io.observe(e)});
 document.querySelectorAll('.sl1').forEach(function(s){var k=0;setInterval(function(){k=(k+1)%s.children.length;s.scrollTo({left:s.children[k].offsetLeft-s.offsetLeft,behavior:'smooth'})},4200)});
 })();"""
 
