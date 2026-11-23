@@ -1,0 +1,713 @@
+[
+ {
+  "ad": "Isı Usta",
+  "sektor": "Kombi · Klima servisi",
+  "aile": "servis",
+  "renk": [
+   "#0f2a3d",
+   "#e8502b",
+   "#f4efe8"
+  ],
+  "font": "Archivo / Inter",
+  "bolum": [
+   "hq:Giriş + 'Arıza bildir' formu (marka, sorun, telefon)",
+   "br:Servis verilen markalar",
+   "sv:Hizmetler + başlangıç fiyatı",
+   "cl:Kombi hata kodu sorgulama",
+   "st:4 adımda servis",
+   "nm:Yıl, servis sayısı, ilçe",
+   "gl:Atölye ve saha fotoğrafları",
+   "rv:Müşteri yorumları",
+   "fq:Sık sorulanlar",
+   "mp:Servis bölgeleri + harita"
+  ],
+  "sayfa": [
+   "Hizmetler",
+   "Hizmet detayı (her hizmet)",
+   "Hata kodları",
+   "Servis takip",
+   "Bölgeler",
+   "İletişim"
+  ],
+  "islev": [
+   "Arıza/servis talebi → panele iş kaydı",
+   "Servis takip no ile durum sorgulama",
+   "Online randevu saati",
+   "Yedek parça mini mağaza (sepet+ödeme)",
+   "WhatsApp + ara butonu"
+  ],
+  "foto": "kombi tamiri, teknisyen, kalorifer peteği, klima montajı"
+ },
+ {
+  "ad": "Beyaz Servis",
+  "sektor": "Beyaz eşya servisi",
+  "aile": "servis",
+  "renk": [
+   "#112b3c",
+   "#1f9d8b",
+   "#f2f6f5"
+  ],
+  "font": "Manrope / Manrope",
+  "bolum": [
+   "hs:Yarım foto giriş + 'Hangi cihaz?' seçici",
+   "c4:Cihaz kartları (çamaşır, bulaşık, buzdolabı, fırın)",
+   "qf:Hızlı servis talebi",
+   "st:Nasıl çalışıyoruz",
+   "cl:Tamir mi yeni mi hesaplayıcı",
+   "pk:Bakım paketleri",
+   "rv:Yorumlar",
+   "fq:SSS",
+   "mp:İletişim"
+  ],
+  "sayfa": [
+   "Cihazlar",
+   "Cihaz detay",
+   "Bakım paketleri",
+   "Servis takip",
+   "İletişim"
+  ],
+  "islev": [
+   "Servis talebi → iş kaydı",
+   "Servis takip",
+   "Bakım paketi satın al (ödeme)",
+   "Randevu saati"
+  ],
+  "foto": "çamaşır makinesi tamiri, buzdolabı, teknisyen çanta"
+ },
+ {
+  "ad": "Volt & Su",
+  "sektor": "Elektrik · Tesisat ustası",
+  "aile": "servis",
+  "renk": [
+   "#1a1a1a",
+   "#f5c518",
+   "#f7f5ef"
+  ],
+  "font": "Barlow Condensed / Barlow",
+  "bolum": [
+   "hq:Giriş + 'Acil usta çağır' büyük buton",
+   "c3:Elektrik / Tesisat / Su kaçağı",
+   "sv:Fiyat listesi (keşif ücreti dahil)",
+   "ba:Önce / sonra işler",
+   "nm:7/24, ortalama varış süresi",
+   "rv:Yorumlar",
+   "fq:SSS",
+   "cta:Hemen ara bandı",
+   "mp:Bölgeler"
+  ],
+  "sayfa": [
+   "Hizmetler",
+   "Fiyatlar",
+   "İşlerimiz",
+   "İletişim"
+  ],
+  "islev": [
+   "Acil çağrı formu → iş kaydı",
+   "Keşif randevusu",
+   "Teklif iste (fotoğraf yükleyerek)",
+   "Ara / WhatsApp"
+  ],
+  "foto": "elektrikçi pano, tesisatçı boru, su kaçağı cihazı"
+ },
+ {
+  "ad": "Motor Atölye",
+  "sektor": "Oto servis",
+  "aile": "servis",
+  "renk": [
+   "#16181d",
+   "#d7262f",
+   "#efefef"
+  ],
+  "font": "Oswald / Inter",
+  "bolum": [
+   "hf:Tam foto giriş + plaka ile randevu",
+   "c4:Periyodik bakım, fren, motor, lastik",
+   "pk:Bakım paketleri fiyatlı",
+   "tr:Araç durumu sorgula (plaka)",
+   "gl:Atölye",
+   "br:Çalışılan markalar",
+   "rv:Yorumlar",
+   "mp:Adres + çalışma saati"
+  ],
+  "sayfa": [
+   "Hizmetler",
+   "Bakım paketleri",
+   "Araç takip",
+   "Kampanyalar",
+   "İletişim"
+  ],
+  "islev": [
+   "Plaka ile randevu",
+   "Araç servis durumu sorgu",
+   "Bakım paketi online öde",
+   "Lastik/yedek parça mağazası"
+  ],
+  "foto": "oto servis lift, mekanik, lastik değişimi"
+ },
+ {
+  "ad": "Pırıl Temizlik",
+  "sektor": "Temizlik şirketi",
+  "aile": "servis",
+  "renk": [
+   "#0e3b43",
+   "#58c4a3",
+   "#f3faf7"
+  ],
+  "font": "Nunito / Nunito",
+  "bolum": [
+   "hq:Giriş + anlık fiyat hesaplayıcı (m², oda)",
+   "c3:Ev / ofis / inşaat sonrası",
+   "st:Rezervasyon adımları",
+   "pk:Paketler",
+   "nm:Rakamlar",
+   "ba:Önce/sonra",
+   "rv:Yorumlar",
+   "fq:SSS",
+   "mp:Hizmet bölgeleri"
+  ],
+  "sayfa": [
+   "Hizmetler",
+   "Fiyat hesapla",
+   "Kurumsal",
+   "İletişim"
+  ],
+  "islev": [
+   "Fiyat hesapla → rezervasyon (tarih/saat)",
+   "Online ödeme / kapora",
+   "Düzenli temizlik aboneliği",
+   "Teklif formu (kurumsal)"
+  ],
+  "foto": "temizlik ekibi, ofis temizliği, mop, cam silme"
+ },
+ {
+  "ad": "Yük Nakliyat",
+  "sektor": "Evden eve nakliyat",
+  "aile": "servis",
+  "renk": [
+   "#1b2a4a",
+   "#ff8a00",
+   "#f5f3ee"
+  ],
+  "font": "Sora / Figtree",
+  "bolum": [
+   "hq:Giriş + 'Nereden - nereye' teklif formu",
+   "c4:Evden eve, ofis, eşya depolama, asansörlü",
+   "st:Taşınma süreci",
+   "cl:Ev büyüklüğü → tahmini fiyat",
+   "gl:Araç filosu",
+   "nm:Rakamlar",
+   "rv:Yorumlar",
+   "fq:SSS",
+   "mp:İletişim"
+  ],
+  "sayfa": [
+   "Hizmetler",
+   "Teklif al",
+   "Depolama",
+   "İletişim"
+  ],
+  "islev": [
+   "Teklif formu → panel teklif",
+   "Teklif onay linki",
+   "Taşınma takvimi",
+   "Ara / WhatsApp"
+  ],
+  "foto": "nakliye kamyonu, koli, asansörlü taşıma"
+ },
+ {
+  "ad": "Makas",
+  "sektor": "Kuaför · Berber",
+  "aile": "randevu",
+  "renk": [
+   "#1c1917",
+   "#c8a27a",
+   "#f7f3ee"
+  ],
+  "font": "Fraunces / Inter",
+  "bolum": [
+   "hb:Giriş + 'Hemen randevu' (hizmet, usta, saat)",
+   "sv:Hizmet + fiyat + süre",
+   "tm:Ustalar (randevu ustaya bağlı)",
+   "gl:Lookbook galeri",
+   "pk:Paketler (gelin, damat)",
+   "rv:Yorumlar",
+   "cta:Hediye çeki",
+   "mp:Adres + saatler"
+  ],
+  "sayfa": [
+   "Hizmetler",
+   "Ekip",
+   "Galeri",
+   "Randevu",
+   "Ürünler",
+   "İletişim"
+  ],
+  "islev": [
+   "Gerçek randevu takvimi (boş saatler)",
+   "Usta seçimi",
+   "SMS hatırlatma",
+   "Bakım ürünleri mağazası",
+   "Hediye çeki satışı"
+  ],
+  "foto": "kuaför salonu, saç kesimi, berber, fön"
+ },
+ {
+  "ad": "Lumi Estetik",
+  "sektor": "Güzellik · estetik merkezi",
+  "aile": "randevu",
+  "renk": [
+   "#2d1f2b",
+   "#d9a5a0",
+   "#fbf6f4"
+  ],
+  "font": "Cormorant / Manrope",
+  "bolum": [
+   "hs:Yarım foto giriş + randevu",
+   "c3:Cilt bakımı, lazer, kalıcı makyaj",
+   "sv:Uygulamalar fiyat/seans",
+   "pk:Seans paketleri",
+   "ba:Önce/sonra (izinli)",
+   "tm:Uzmanlar",
+   "fq:SSS",
+   "mp:İletişim"
+  ],
+  "sayfa": [
+   "Uygulamalar",
+   "Uygulama detayı",
+   "Paketler",
+   "Uzmanlar",
+   "Randevu",
+   "İletişim"
+  ],
+  "islev": [
+   "Randevu (uzman+uygulama)",
+   "Seans paketi online satın al",
+   "Ön danışma formu",
+   "Kampanya kuponu"
+  ],
+  "foto": "cilt bakımı, spa yüz bakımı, güzellik salonu"
+ },
+ {
+  "ad": "Gülüş Diş",
+  "sektor": "Diş kliniği",
+  "aile": "randevu",
+  "renk": [
+   "#0b2e4f",
+   "#2fa4d9",
+   "#f3f8fb"
+  ],
+  "font": "DM Serif / DM Sans",
+  "bolum": [
+   "hs:Giriş + muayene randevusu",
+   "c4:İmplant, ortodonti, beyazlatma, çocuk diş",
+   "tm:Hekimler",
+   "st:İlk muayene süreci",
+   "nm:Rakamlar",
+   "gl:Klinik",
+   "fq:SSS",
+   "bl:Ağız sağlığı yazıları",
+   "mp:İletişim"
+  ],
+  "sayfa": [
+   "Tedaviler",
+   "Tedavi detayı",
+   "Hekimlerimiz",
+   "Randevu",
+   "Blog",
+   "İletişim"
+  ],
+  "islev": [
+   "Hekime göre randevu",
+   "Tedavi bilgi formu",
+   "Hatırlatma SMS",
+   "Blog yazıları"
+  ],
+  "foto": "diş kliniği, diş hekimi, ünit, gülümseme"
+ },
+ {
+  "ad": "Pati Vet",
+  "sektor": "Veteriner kliniği",
+  "aile": "randevu",
+  "renk": [
+   "#173a2e",
+   "#f08a4b",
+   "#f7f4ec"
+  ],
+  "font": "Fredoka / Nunito",
+  "bolum": [
+   "hb:Giriş + randevu (hayvan türü)",
+   "c4:Muayene, aşı, kısırlaştırma, bakım",
+   "cl:Aşı takvimi hesaplayıcı",
+   "tm:Veterinerler",
+   "pr:Mama & aksesuar mağazası",
+   "gl:Klinik",
+   "fq:SSS",
+   "mp:Acil hat + harita"
+  ],
+  "sayfa": [
+   "Hizmetler",
+   "Aşı takvimi",
+   "Pet shop",
+   "Randevu",
+   "İletişim"
+  ],
+  "islev": [
+   "Randevu",
+   "Aşı hatırlatma SMS",
+   "Mama/aksesuar mağazası (sepet, kargo)",
+   "Acil ara"
+  ],
+  "foto": "veteriner köpek muayene, kedi, klinik"
+ },
+ {
+  "ad": "Denge Diyet",
+  "sektor": "Diyetisyen",
+  "aile": "randevu",
+  "renk": [
+   "#20372a",
+   "#8bc34a",
+   "#f8faf3"
+  ],
+  "font": "Lora / Inter",
+  "bolum": [
+   "hs:Giriş + ücretsiz ön görüşme",
+   "c3:Kilo yönetimi, sporcu, online diyet",
+   "cl:Vücut kitle indeksi hesapla",
+   "pk:Online program paketleri",
+   "st:Süreç",
+   "bl:Tarifler / yazılar",
+   "fq:SSS",
+   "mp:İletişim"
+  ],
+  "sayfa": [
+   "Programlar",
+   "Paketler",
+   "Tarifler",
+   "Randevu",
+   "İletişim"
+  ],
+  "islev": [
+   "Online / yüz yüze randevu",
+   "Paket satın al (ödeme)",
+   "Ön bilgi formu",
+   "Blog"
+  ],
+  "foto": "sağlıklı tabak, diyetisyen danışma, sebze"
+ },
+ {
+  "ad": "İç Ses",
+  "sektor": "Psikolog · danışmanlık",
+  "aile": "randevu",
+  "renk": [
+   "#2b2f3a",
+   "#7c9cbf",
+   "#f6f5f2"
+  ],
+  "font": "Newsreader / Inter",
+  "bolum": [
+   "hs:Sakin giriş + ilk görüşme randevusu",
+   "c3:Bireysel, çift, çocuk-ergen",
+   "tm:Uzmanlar",
+   "st:Görüşme nasıl ilerler",
+   "pk:Seans ücretleri",
+   "bl:Yazılar",
+   "fq:SSS (gizlilik)",
+   "mp:İletişim"
+  ],
+  "sayfa": [
+   "Hizmetler",
+   "Uzmanlar",
+   "Online görüşme",
+   "Yazılar",
+   "İletişim"
+  ],
+  "islev": [
+   "Randevu (online / yüz yüze)",
+   "Seans ödemesi",
+   "Gizli ön form",
+   "Hatırlatma"
+  ],
+  "foto": "sakin terapi odası, koltuk, danışmanlık"
+ },
+ {
+  "ad": "Form Stüdyo",
+  "sektor": "Spor salonu · pilates",
+  "aile": "randevu",
+  "renk": [
+   "#111111",
+   "#c6ff3d",
+   "#f4f4f1"
+  ],
+  "font": "Anton / Inter",
+  "bolum": [
+   "hf:Tam foto giriş + ücretsiz deneme dersi",
+   "kr:Haftalık ders programı (kontenjanlı)",
+   "pk:Üyelik paketleri",
+   "tm:Eğitmenler",
+   "gl:Salon",
+   "nm:Rakamlar",
+   "fq:SSS",
+   "mp:İletişim"
+  ],
+  "sayfa": [
+   "Dersler",
+   "Program",
+   "Üyelik",
+   "Eğitmenler",
+   "İletişim"
+  ],
+  "islev": [
+   "Derse kayıt (kontenjan)",
+   "Üyelik satın al (ödeme)",
+   "Deneme dersi formu",
+   "Hatırlatma"
+  ],
+  "foto": "pilates reformer, spor salonu, fitness"
+ },
+ {
+  "ad": "Atlas Butik",
+  "sektor": "Giyim · butik e-ticaret",
+  "aile": "magaza",
+  "renk": [
+   "#151515",
+   "#b08d57",
+   "#f6f4f0"
+  ],
+  "font": "Playfair / Inter",
+  "bolum": [
+   "hp:Kampanya slaytı + yeni gelenler",
+   "cat:Kategoriler (kadın, erkek, aksesuar)",
+   "pr:Çok satanlar",
+   "cta:Kampanya bandı + kupon",
+   "pr:Yeni sezon",
+   "c4:Kargo, iade, güvenli ödeme, taksit",
+   "bl:Stil önerileri",
+   "mp:İletişim"
+  ],
+  "sayfa": [
+   "Kategori listesi (filtre)",
+   "Ürün detayı (beden, renk)",
+   "Sepet",
+   "Ödeme",
+   "Hesabım / siparişlerim",
+   "Sipariş takip",
+   "Yasal sayfalar"
+  ],
+  "islev": [
+   "Gerçek sepet + ödeme",
+   "Varyant (beden/renk) stok",
+   "Kupon",
+   "Sipariş takip",
+   "Pazaryeri stok eşleme"
+  ],
+  "foto": "butik giyim, askılık, moda ürün"
+ },
+ {
+  "ad": "Bahar Çiçek",
+  "sektor": "Çiçekçi",
+  "aile": "magaza",
+  "renk": [
+   "#2e2a24",
+   "#e0607e",
+   "#fbf6f1"
+  ],
+  "font": "Fraunces / Nunito",
+  "bolum": [
+   "hp:Giriş + 'Bugün teslim' vitrin",
+   "cat:Gül, orkide, buket, saksı, özel gün",
+   "pr:Çok satanlar",
+   "cl:Teslimat saati ve semt seç",
+   "c3:Aynı gün teslim, not kartı, foto ile teslim",
+   "rv:Yorumlar",
+   "mp:İletişim"
+  ],
+  "sayfa": [
+   "Kategori",
+   "Ürün detayı (not kartı)",
+   "Sepet",
+   "Ödeme",
+   "Sipariş takip",
+   "Kurumsal"
+  ],
+  "islev": [
+   "Sepet + ödeme",
+   "Teslim tarihi/saati seçimi",
+   "Kart notu",
+   "Sipariş takip SMS"
+  ],
+  "foto": "çiçek buketi, gül, orkide"
+ },
+ {
+  "ad": "Fırın 1923",
+  "sektor": "Pastane · fırın",
+  "aile": "magaza",
+  "renk": [
+   "#3a2418",
+   "#d98e32",
+   "#fbf5ec"
+  ],
+  "font": "DM Serif / Figtree",
+  "bolum": [
+   "hp:Giriş + günün ürünleri",
+   "cat:Pasta, kurabiye, börek, ekmek",
+   "pr:Siparişe özel pastalar",
+   "qf:Özel pasta sipariş formu (kişi, tarih, yazı)",
+   "gl:Vitrin",
+   "c3:Gel al / adrese teslim",
+   "mp:Şubeler"
+  ],
+  "sayfa": [
+   "Ürünler",
+   "Özel pasta",
+   "Sepet",
+   "Ödeme",
+   "Şubeler"
+  ],
+  "islev": [
+   "Sepet + ödeme (gel-al / teslimat)",
+   "Özel pasta talebi → teklif",
+   "Teslim saati",
+   "SMS bildirim"
+  ],
+  "foto": "pasta, fırın, kurabiye, pastane vitrini"
+ },
+ {
+  "ad": "Teknofix",
+  "sektor": "Telefon tamir + aksesuar",
+  "aile": "magaza",
+  "renk": [
+   "#0d1117",
+   "#3b82f6",
+   "#f4f6fa"
+  ],
+  "font": "Space Grotesk / Inter",
+  "bolum": [
+   "hq:Giriş + model seç → tamir fiyatı",
+   "c4:Ekran, batarya, kamera, şarj soketi",
+   "tr:Tamir durumu sorgula",
+   "pr:Aksesuar mağazası",
+   "st:Nasıl çalışır",
+   "rv:Yorumlar",
+   "fq:SSS",
+   "mp:İletişim"
+  ],
+  "sayfa": [
+   "Tamir fiyatları",
+   "Tamir takip",
+   "Aksesuar mağazası",
+   "Ürün detayı",
+   "Sepet/ödeme",
+   "İletişim"
+  ],
+  "islev": [
+   "Model → fiyat → tamir kaydı",
+   "Tamir takip sorgu",
+   "Aksesuar sepet+ödeme",
+   "Kargo ile tamir formu"
+  ],
+  "foto": "telefon tamiri, ekran değişimi, aksesuar"
+ },
+ {
+  "ad": "Sofra",
+  "sektor": "Restoran · lokanta",
+  "aile": "yemek",
+  "renk": [
+   "#231a14",
+   "#c0392b",
+   "#f7f1e8"
+  ],
+  "font": "Playfair / Inter",
+  "bolum": [
+   "hf:Tam foto giriş + rezervasyon / paket sipariş",
+   "mn:Menü (kategori sekmeli, fiyatlı, fotoğraflı)",
+   "c3:Salon, paket, catering",
+   "gl:Mekân ve yemek",
+   "rv:Yorumlar",
+   "cta:Grup / özel gün rezervasyonu",
+   "mp:Adres + saatler"
+  ],
+  "sayfa": [
+   "Menü",
+   "Paket sipariş",
+   "Rezervasyon",
+   "Galeri",
+   "İletişim"
+  ],
+  "islev": [
+   "Online paket sipariş (sepet, ödeme)",
+   "Masa rezervasyonu",
+   "QR menü",
+   "Yemek platformu sipariş aktarımı"
+  ],
+  "foto": "restoran masa, kebap, meze, şef"
+ },
+ {
+  "ad": "Anahtar Emlak",
+  "sektor": "Emlak ofisi",
+  "aile": "proje",
+  "renk": [
+   "#14213d",
+   "#2a9d8f",
+   "#f5f5f2"
+  ],
+  "font": "Sora / Inter",
+  "bolum": [
+   "hs:Giriş + ilan arama (satılık/kiralık, il/ilçe, oda)",
+   "il:Öne çıkan ilanlar",
+   "c3:Sat, kirala, değerleme",
+   "cl:Kredi / kira hesaplayıcı",
+   "tm:Danışmanlar",
+   "nm:Rakamlar",
+   "mp:Ofis"
+  ],
+  "sayfa": [
+   "İlanlar (filtre)",
+   "İlan detayı (galeri, harita)",
+   "Değerleme talebi",
+   "Danışmanlar",
+   "İletişim"
+  ],
+  "islev": [
+   "İlan listeleme ve filtre",
+   "İlan için görüşme randevusu",
+   "Değerleme talep formu",
+   "WhatsApp ilan paylaş"
+  ],
+  "foto": "modern daire salon, emlak, ev dış cephe"
+ },
+ {
+  "ad": "Direksiyon",
+  "sektor": "Sürücü kursu",
+  "aile": "kurs",
+  "renk": [
+   "#0f172a",
+   "#ef4444",
+   "#f6f7f9"
+  ],
+  "font": "Archivo / Inter",
+  "bolum": [
+   "hs:Giriş + ön kayıt formu",
+   "c4:B, A, A2, engelli sürücü",
+   "pk:Kurs ücretleri + taksit",
+   "kr:Dönem / sınav takvimi",
+   "st:Ehliyet süreci",
+   "gl:Araç filosu",
+   "fq:SSS",
+   "mp:İletişim"
+  ],
+  "sayfa": [
+   "Kurslar",
+   "Ücretler",
+   "Takvim",
+   "Ön kayıt",
+   "İletişim"
+  ],
+  "islev": [
+   "Ön kayıt → panel kayıt",
+   "Taksitli ödeme linki",
+   "Ders/sınav hatırlatma SMS",
+   "Takvim"
+  ],
+  "foto": "sürücü kursu aracı, direksiyon dersi"
+ }
+]
