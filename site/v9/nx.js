@@ -12,7 +12,7 @@ document.addEventListener('click',function(e){$$('.ust details[open]').forEach(f
 $$('.ust details').forEach(function(d){d.addEventListener('toggle',function(){if(d.open)$$('.ust details').forEach(function(o){if(o!==d)o.open=false})})});
 // modül sekmeleri
 var tb=$$('.mod .liste button'),kr=$$('.mod .kart'),sy=$('#msay');
-function sec(i){tb.forEach(function(b,k){var on=k===i;b.classList.toggle('on',on);b.setAttribute('aria-selected',on?'true':'false');b.tabIndex=on?0:-1});kr.forEach(function(c,k){c.classList.toggle('on',k===i)});if(sy)sy.textContent=('0'+(i+1)).slice(-2)}
+function sec(i){tb.forEach(function(b,k){var on=k===i;b.classList.toggle('on',on);b.setAttribute('aria-selected',on?'true':'false');b.tabIndex=on?0:-1});kr.forEach(function(c,k){c.classList.toggle('on',k===i);var v=c.querySelector('video');if(v){if(k===i&&!RM){try{v.currentTime=0;v.play()}catch(e){}}else v.pause()}});if(sy)sy.textContent=('0'+(i+1)).slice(-2)}
 tb.forEach(function(b,i){b.addEventListener('click',function(){sec(i)});b.addEventListener('keydown',function(e){var n=e.key==='ArrowDown'||e.key==='ArrowRight'?1:e.key==='ArrowUp'||e.key==='ArrowLeft'?-1:0;if(n){e.preventDefault();var j=(i+n+tb.length)%tb.length;sec(j);tb[j].focus()}})});
 if(tb.length)sec(0);
 // görünür olunca
