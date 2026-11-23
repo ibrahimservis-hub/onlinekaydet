@@ -202,6 +202,16 @@ label.f>textarea{min-height:70px;resize:vertical}
 .egrp .c.err{border-color:#f0c9c4;box-shadow:0 0 0 1px #f0c9c4}
 .egrp .c.sel2{outline:2px solid var(--blue);outline-offset:1px}
 .ent{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:11px}
+.eg{border:1px solid var(--line);border-radius:10px;background:#fff;margin-bottom:12px;overflow:hidden}
+.eg.ac{border-color:#c9d3e6}
+.egh{width:100%;display:flex;align-items:center;gap:14px;padding:14px 16px;min-height:62px;background:none;border:0;text-align:left;font:inherit;color:var(--ink);cursor:pointer}
+.egh:hover{background:#f7f9fd}
+.egt{flex:1;min-width:0}.egt b{display:block;font-size:15px;font-weight:650}.egt small{display:block;font-size:12.5px;color:var(--mut);margin-top:2px}
+.egr{display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:flex-end;font-size:12.5px}
+.egc{flex:none;width:20px;height:20px;transition:transform .2s;color:var(--mut)}.eg.ac .egc{transform:rotate(180deg)}
+.egb{padding:4px 14px 14px;border-top:1px solid var(--line);background:#fafbfd}.egb .ent{margin-top:12px}
+.egbar{display:flex;gap:8px;justify-content:flex-end;margin-bottom:10px}
+@media(max-width:700px){.egh{flex-wrap:wrap;gap:6px 10px;padding:14px}.egt{flex:1 1 calc(100% - 40px)}.egr{order:3;flex:1 1 100%;justify-content:flex-start}.egc{order:2}.egb{padding:4px 10px 12px}}
 .ent .e{border:1px solid var(--line);border-radius:6px;background:#fff;padding:13px 14px}
 .ent .e .tp3{display:flex;align-items:flex-start;gap:10px}
 .ent .e b{display:block;font-size:14px;font-weight:650}
@@ -484,7 +494,7 @@ label.f>input,label.f>select,label.f>textarea{min-height:34px;font-size:13px;bor
  #toast{bottom:calc(88px + env(safe-area-inset-bottom))}
 }
 .mmenu{display:grid;gap:16px}.mg .mgt{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;letter-spacing:.02em;text-transform:uppercase;color:var(--mut);margin-bottom:8px}
-.mg .mgl{display:grid;grid-template-columns:1fr 1fr;gap:8px}.mg .mgl a{display:flex;align-items:center;min-height:46px;padding:0 14px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);text-decoration:none;font-weight:600;font-size:14.5px}.mg .mgl a:active{background:#eef3fc}
+.mg .mgl{display:grid;grid-template-columns:1fr 1fr;gap:8px}.mg .mgl a{display:flex;align-items:center;min-height:48px;padding:6px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);text-decoration:none;font-weight:600;font-size:14px;line-height:1.25;hyphens:none;overflow-wrap:normal;word-break:normal;text-wrap:balance}.mg .mgl a:active{background:#eef3fc}
 .mmenu #out2{min-height:46px;justify-content:center}
 .svbk{margin-top:14px;padding:12px;border:1px solid var(--n300,#d9dee7);border-radius:10px;background:#f8fafc}
 .svbt{font-weight:700;font-size:13.5px;margin-bottom:8px}.svbt small{font-weight:500;color:var(--mut);margin-left:6px}
@@ -1357,7 +1367,7 @@ document.addEventListener('click',async function(ev){
  else if(a==='cashedit'){var xr=(CUR.kasaRows||[]).filter(function(r){return r.id===id})[0];if(xr)cashEdit(xr)}
  else if(a==='newfor'){closeM();apptForm({name:t.dataset.n,phone:t.dataset.p})}
  else if(a==='more'){ev.preventDefault();var shown={};document.querySelectorAll('#mbar a[data-rs]').forEach(function(x){shown[x.getAttribute('href').slice(1)]=1});
-  modal('Menü','<div class="mmenu">'+GR.map(function(g){return '<div class="mg"><div class="mgt"><svg class="i"><use href="#'+g.ik+'"/></svg>'+esc(g.ad)+'</div><div class="mgl">'+g.rs.map(function(r){return '<a href="#'+r[0]+'" data-a="close">'+esc(r[1])+'</a>'}).join('')+'</div></div>'}).join('')+'<button class="btn d" id="out2" type="button">Çıkış yap</button></div>');$('#out2').onclick=function(){closeM();logout()}}
+  modal('Menü','<div class="mmenu">'+GR.map(function(g){return '<div class="mg"><div class="mgt"><svg class="i"><use href="#'+g.ik+'"/></svg>'+esc(g.ad)+'</div><div class="mgl">'+g.rs.map(function(r){return '<a href="#'+r[0]+'" data-a="close">'+esc(r[1]).replace(/-/g,'\u2011')+'</a>'}).join('')+'</div></div>'}).join('')+'<button class="btn d" id="out2" type="button">Çıkış yap</button></div>');$('#out2').onclick=function(){closeM();logout()}}
  else if(a==='chip'){t.classList.toggle('on');calcTot()}
  else if(a==='chip2'||a==='color'){if(a==='color'){document.querySelectorAll('#cols .sw').forEach(function(c){c.classList.remove('on')})}t.classList.toggle('on',a==='color'?true:undefined)}
  else if(a==='open'){await detail(id)}
@@ -3016,12 +3026,6 @@ V.entegrasyon=async function(){var F=CUR.ef=CUR.ef||{q:'',group:'',state:''};
  var c=r.counts||{};
  var h=head('Entegrasyonlar','Anahtarlarınızı kendiniz girersiniz · deneme yapılmadan “bağlı” yazmayız, hata sebebiyle görünür',
   '<button class="btn" data-a="ent-kayit">İşlem kaydı</button><button class="btn p" data-a="ent-hepsini-dene">Bağlantıları dene</button>');
- h+='<div class="egrp">'+CUR.egroups.map(function(g){
-  var cl=g.hata?'err':(g.bagli?'on':'');
-  return '<button class="c '+cl+(F.group===g.id?' sel2':'')+'" data-a="eseg-g" data-v="'+g.id+'">'
-   +'<b>'+esc(g.name)+'</b><small>'+esc(g.desc||'')+'</small>'
-   +'<div class="ln2"><span class="st2 '+(g.bagli?'g2':'w2')+'">'+(g.bagli?g.bagli+' bağlı':'bağlı yok')+'</span>'
-   +(g.hata?'<span class="st2 r2">'+g.hata+' hata</span>':'<span class="note">'+g.n+' hazır</span>')+'</div></button>'}).join('')+'</div>';
  h+='<div class="card"><div class="fbar"><input type="search" id="eq" placeholder="Entegrasyon ara: iyzico, Aras, Paraşüt, Nebim…" value="'+esc(F.q)+'">'
   +'<select id="egrp"><option value="">Tüm türler</option>'+CUR.egroups.map(function(g){
     return '<option value="'+g.id+'"'+(F.group===g.id?' selected':'')+'>'+esc(g.name)+'</option>'}).join('')+'</select></div>'
@@ -3029,21 +3033,33 @@ V.entegrasyon=async function(){var F=CUR.ef=CUR.ef||{q:'',group:'',state:''};
     return '<button class="chip '+(F.state===s[0]?'on':'')+'" data-a="eseg" data-v="'+s[0]+'">'+s[1]+'<small>'+(s[2]||0)+'</small></button>'}).join('')+'</div>'
   +'<div id="elist" class="pad"></div></div>';
  $('#main').innerHTML=h;entCiz()};
-function entCiz(){var F=CUR.ef,q=(F.q||'').toLowerCase();
+function entKart(i){var st=EST[i.state]||EST.yok,cl=i.state==='bagli'?'on2':(i.state==='hata'?'err':'');
+ var bilgi=i.state==='hata'?i.err:(i.state==='bagli'?((i.mode==='canli'?'Canlı':'Test')+(i.last_ok?' · son işlem '+esc(i.last_ok.slice(5,16).replace('T',' ')):'')):'');
+ return '<div class="e '+cl+'"><div class="tp3"><span class="lg2">'+entKisa(i.name)+'</span>'
+  +'<div style="flex:1"><b>'+esc(i.name)+'</b><small>'+esc(i.desc||'')+'</small></div></div>'
+  +'<div class="ft2"><span class="st2 '+st[1]+'2">'+st[0]+'</span>'
+  +'<span class="note" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(bilgi)+'</span>'
+  +'<button class="btn s'+(i.state==='yok'?' p':'')+'" data-a="ent-ac" data-id="'+esc(i.id)+'">'
+  +(i.state==='yok'?'Bağlan':'Ayarlar')+'</button></div></div>'}
+function entCiz(){var F=CUR.ef,q=(F.q||'').toLowerCase();F.open=F.open||{};
  var rows=(CUR.ents||[]).filter(function(i){
   return (!F.group||i.group===F.group)&&(!F.state||i.state===F.state)
    &&(!q||(i.name+' '+i.desc).toLowerCase().indexOf(q)>-1)});
  var el=$('#elist');if(!el)return;
  if(!rows.length){el.innerHTML='<div class="empty">Bu süzgece uyan entegrasyon yok.</div>';return}
- el.innerHTML='<div class="ent">'+rows.map(function(i){
-  var st=EST[i.state]||EST.yok,cl=i.state==='bagli'?'on2':(i.state==='hata'?'err':'');
-  var bilgi=i.state==='hata'?i.err:(i.state==='bagli'?((i.mode==='canli'?'Canlı':'Test')+(i.last_ok?' · son işlem '+esc(i.last_ok.slice(5,16).replace('T',' ')):'')):'');
-  return '<div class="e '+cl+'"><div class="tp3"><span class="lg2">'+entKisa(i.name)+'</span>'
-   +'<div style="flex:1"><b>'+esc(i.name)+'</b><small>'+esc(i.desc||'')+'</small></div></div>'
-   +'<div class="ft2"><span class="st2 '+st[1]+'2">'+st[0]+'</span>'
-   +'<span class="note" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(bilgi)+'</span>'
-   +'<button class="btn s'+(i.state==='yok'?' p':'')+'" data-a="ent-ac" data-id="'+esc(i.id)+'">'
-   +(i.state==='yok'?'Bağlan':'Ayarlar')+'</button></div></div>'}).join('')+'</div>'}
+ var filtre=!!(q||F.state||F.group),by={};rows.forEach(function(i){(by[i.group]=by[i.group]||[]).push(i)});
+ var ord={bagli:0,hata:1,kurulum:2,yok:3};
+ var html=(CUR.egroups||[]).filter(function(g){return by[g.id]}).map(function(g){
+  var it=by[g.id].slice().sort(function(x,y){return (ord[x.state]-ord[y.state])||x.name.localeCompare(y.name,'tr')});
+  var acik=filtre||(F.open[g.id]!==undefined?F.open[g.id]:(g.bagli>0||g.hata>0));
+  var rozet=(g.hata?'<span class="st2 r2">'+g.hata+' hata</span>':'')+(g.bagli?'<span class="st2 g2">'+g.bagli+' bağlı</span>':'<span class="st2 w2">bağlı yok</span>');
+  return '<section class="eg'+(acik?' ac':'')+'"><button class="egh" data-a="eg-ac" data-v="'+g.id+'" aria-expanded="'+(acik?'true':'false')+'">'
+   +'<span class="egt"><b>'+esc(g.name)+'</b><small>'+esc(g.desc||'')+'</small></span>'
+   +'<span class="egr">'+rozet+'<span class="note">'+it.length+' seçenek</span></span>'
+   +'<svg class="i egc" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>'
+   +(acik?'<div class="egb"><div class="ent">'+it.map(entKart).join('')+'</div></div>':'')+'</section>'}).join('');
+ var tum=(CUR.egroups||[]).length>1&&!filtre?'<div class="egbar"><button class="btn s" data-a="eg-hepsi" data-v="1">Tümünü aç</button><button class="btn s" data-a="eg-hepsi" data-v="0">Tümünü kapat</button></div>':'';
+ el.innerHTML=tum+html}
 function entForm(i){
  var alan=i.fields.map(function(f){
   var v=f.secret?f.value:f.value;
@@ -3087,6 +3103,8 @@ async function entKayit(){var r=await api('/yp/integrations/log/son');
 /* ---------------- entegrasyon olayları ---------------- */
 document.addEventListener('click',function(ev){var b=ev.target.closest('[data-a]');if(!b)return;var a=b.dataset.a;
  if(a==='eseg'){CUR.ef.state=b.dataset.v;entCiz()}
+ else if(a==='eg-ac'){var gid=b.dataset.v,ac=b.getAttribute('aria-expanded')==='true';CUR.ef.open=CUR.ef.open||{};CUR.ef.open[gid]=!ac;entCiz()}
+ else if(a==='eg-hepsi'){CUR.ef.open=CUR.ef.open||{};(CUR.egroups||[]).forEach(function(g){CUR.ef.open[g.id]=b.dataset.v==='1'});entCiz()}
  else if(a==='eseg-g'){CUR.ef.group=CUR.ef.group===b.dataset.v?'':b.dataset.v;V.entegrasyon().catch(fail)}
  else if(a==='ent-ac'){entAc(b.dataset.id).catch(fail)}
  else if(a==='ent-kayit'){entKayit().catch(fail)}

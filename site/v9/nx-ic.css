@@ -52,7 +52,7 @@ body.nxi{background:var(--nxbg)!important;font-family:var(--fb)!important;color:
 .nxm.ac{display:block;animation:mi .25s ease both}@keyframes mi{from{opacity:0;transform:translateY(-8px)}}
 .nxm b{display:block;font:600 12px var(--fm);letter-spacing:.14em;text-transform:uppercase;color:var(--org2);margin:22px 0 6px}
 .nxm a{display:block;padding:12px 0;font:600 20px var(--fd);text-decoration:none;color:var(--ink);border-bottom:1px solid var(--line)}
-.nxm .nxbt{margin-top:20px;width:100%;font:600 16px var(--fb);color:#fff;border-bottom:0}
+.nxm .nxbt{margin-top:20px;width:100%;font:600 16px var(--fb);color:#fff;border-bottom:0;display:flex;justify-content:center;align-items:center;padding:14px 20px;text-align:center;box-sizing:border-box}
 
 /* alt bilgi: koyu, numaralı sütunlar, büyük filigran */
 .nxf{background:var(--navy);color:#e9e9ee;padding:110px 0 0;position:relative;overflow:hidden}
