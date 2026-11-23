@@ -403,6 +403,13 @@ def register(api_router, db, deps):
             st["delivered_at"] = _now()
         await db.yp_orders.update_one({"id": o["id"]}, {"$set": st})
         await log(o["id"], new, _t(payload.get("note"), 200) or STATES[new])
+        try:
+            import musteri_mail, notify
+            ev = musteri_mail.YP_DURUM.get(new)
+            if ev:
+                notify._bg(musteri_mail.yp_olay(db, ev, await get_order(o["id"])))
+        except Exception:                                          # noqa: BLE001
+            pass
         return {"ok": True, "item": view(await get_order(o["id"]))}
 
     @api_router.put("/yp/orders/{oid}")
@@ -626,6 +633,13 @@ def register(api_router, db, deps):
             st["refund"] = _num(payload.get("refund"), r.get("refund"))
         await db.yp_returns.update_one({"id": r["id"]}, {"$set": st, "$push": {"timeline": {
             "at": _now(), "by": "panel", "state": new, "note": _t(payload.get("note"), 200) or RSTATES[new]}}})
+        try:
+            import musteri_mail, notify
+            ev = {"onay": "iade_onaylandi", "tamam": "iade_odendi"}.get(new) if new != cur else None
+            if ev:
+                notify._bg(musteri_mail.yp_olay(db, ev, await get_order(r["order"]), await db.yp_returns.find_one({"id": r["id"]}, {"_id": 0})))
+        except Exception:                                          # noqa: BLE001
+            pass
         return {"ok": True, "item": await db.yp_returns.find_one({"id": r["id"]}, {"_id": 0})}
 
     # ------------------------------------------------------------ rapor

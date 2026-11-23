@@ -2936,10 +2936,14 @@ async def _fetch_url(u):                                               # hızlı
 
 
 urun.register(api_router, db, {"require_admin": require_admin, "fetch_url": _fetch_url})
+import musteri_mail  # müşteri sipariş e-postaları
+import marka_seo  # marka sayfaları + SEO şablonları
 import meta_capi  # Meta Conversions API + Facebook/Instagram katalog akışı
 import kategori  # kategori ağacı (ağaç, taşıma, silme+aktarma, SEO, pazaryeri bağlama)
 kategori.register(api_router, db, {"require_admin": require_admin})
 meta_capi.register(api_router, db, {"require_admin": require_admin})
+marka_seo.register(api_router, db, {"require_admin": require_admin})
+musteri_mail.register(api_router, db, {"require_admin": require_admin})
 import pazaryeri  # pazaryeri eşleştirme ve stok senkronu
 pazaryeri.register(api_router, db, {"require_admin": require_admin, "channel_push": None})
 

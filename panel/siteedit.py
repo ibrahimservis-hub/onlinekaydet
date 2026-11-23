@@ -1051,7 +1051,17 @@ def register(api_router, db, deps):
         if p == "robots.txt" and host:
             return "User-agent: *\nAllow: /\nSitemap: https://%s/sitemap.xml\n" % host, "text/plain"
         if p == "sitemap.xml" and host and ctx:
-            return sitegen.sitemap(ctx, host, [x["slug"] for x in d.get("pages", []) if x["slug"] not in {i["slug"] for i in sitegen.page_index(ctx)}], str(d.get("updated_at") or "")), "application/xml"
+            _ex = [x["slug"] for x in d.get("pages", []) if x["slug"] not in {i["slug"] for i in sitegen.page_index(ctx)}]
+            if ctx.get("shop_on"):
+                try:
+                    import marka_seo
+                    _ex.append("magaza")
+                    _pg = {q["slug"]: q async for q in db.shop_brand_pages.find({}, {"_id": 0, "slug": 1, "hidden": 1, "noindex": 1})}
+                    _ex += ["magaza/marka/" + s_ for s_ in (await marka_seo.marka_listesi(db)) if not (_pg.get(s_) or {}).get("hidden") and not (_pg.get(s_) or {}).get("noindex")]
+                    _ex += ["magaza/urun/" + str(r_.get("slug") or r_.get("id")) async for r_ in db.shop_products.find({"active": True, "noindex": {"$ne": True}}, {"_id": 0, "slug": 1, "id": 1}).limit(5000)]
+                except Exception:                                             # noqa: BLE001
+                    pass
+            return sitegen.sitemap(ctx, host, _ex, str(d.get("updated_at") or "")), "application/xml"
         bs = await blok_sayfa(p, ctx, dev) if ctx else None
         if bs:                                                     # panelde kurulmuş bölüm sayfası temanın önüne geçer
             return bs, "text/html"
@@ -1064,9 +1074,9 @@ def register(api_router, db, deps):
             return None
         if p in ("", "index"):
             h = home
-        elif (p in ("magaza", "hesabim") or re.fullmatch(r"magaza/urun/[^/]{1,120}", p)) and ctx and (ctx.get("shop_on") or (p == "hesabim" and ((await db.app_settings.find_one({"_id": "yp_uyelik"}, {"_id": 0, "on": 1})) or {}).get("on"))):
+        elif (p in ("magaza", "hesabim") or re.fullmatch(r"magaza/(urun|marka)/[^/]{1,120}", p) or p == "magaza/markalar") and ctx and (ctx.get("shop_on") or (p == "hesabim" and ((await db.app_settings.find_one({"_id": "yp_uyelik"}, {"_id": 0, "on": 1})) or {}).get("on"))):
             body = storefront.shop_page() if p.startswith("magaza") else storefront.account_page(bool(ctx.get("shop_on")))
-            ttl = "Mağaza" if p == "magaza" else "Hesabım"
+            ttl = "Mağaza" if p.startswith("magaza") else "Hesabım"
             if p.startswith("magaza/urun/"):
                 try:
                     from urllib.parse import unquote
@@ -1077,9 +1087,39 @@ def register(api_router, db, deps):
                 if not pr:
                     return None
                 ttl = pr["name"]
-            h = compose_page(await themed_home(ctx), ((pr or {}).get("seo_title") or (ttl + " · " + ctx["name"])) if p.startswith("magaza/urun/") else (ttl + " · " + ctx["name"]), body)
+                try:
+                    import marka_seo
+                    _full = await db.shop_products.find_one({"$or": [{"slug": unquote(p[12:])}, {"id": unquote(p[12:])}], "active": True}, {"_id": 0, "brand": 1, "category": 1, "model": 1, "price": 1, "name": 1})
+                    _t, _d = marka_seo.urun_seo({**pr, **(_full or {})}, await marka_seo.templates(db), ctx["name"])
+                    if _t:
+                        pr["seo_title"] = _t
+                    if _d and not pr.get("seo_desc"):
+                        pr["seo_desc"] = _d
+                except Exception:                                             # noqa: BLE001
+                    pass
+            bpg = None
+            if p.startswith("magaza/marka/"):
+                import marka_seo
+                from urllib.parse import unquote as _uq
+                bpg = await marka_seo.marka_sayfasi(db, _uq(p[13:]))
+                if not bpg:
+                    return None
+                ttl = bpg["name"]
+            h = compose_page(await themed_home(ctx), ((pr or {}).get("seo_title") or (ttl + " · " + ctx["name"])) if p.startswith("magaza/urun/") else (bpg["seo_title"] if bpg else (ttl + " · " + ctx["name"])), body)
             if not h:
                 return None
+            if bpg:
+                import html as _hh
+                ek = ""
+                if bpg.get("seo_desc"):
+                    h = re.sub(r'<meta name="description"[^>]*>', "", h)
+                    ek += '<meta name="description" content="%s"><meta property="og:description" content="%s">' % (_hh.escape(bpg["seo_desc"]), _hh.escape(bpg["seo_desc"]))
+                ek += '<meta property="og:title" content="%s">' % _hh.escape(bpg["seo_title"])
+                if bpg.get("logo"):
+                    ek += '<meta property="og:image" content="%s">' % _hh.escape(bpg["logo"])
+                if bpg.get("noindex"):
+                    ek += '<meta name="robots" content="noindex,follow">'
+                h = h.replace("</head>", ek + "</head>", 1)
             if p.startswith("magaza/urun/") and pr:
                 import html as _hh
                 ds = (pr.get("seo_desc") or pr.get("short") or "").strip()

@@ -625,6 +625,12 @@ def register(api_router, db, deps):
             r = await db.shop_orders.update_one({"id": o["id"], "status": "odeme_bekliyor"}, {"$set": {"status": "onaylandi", "updated_at": now_iso(),
                 "payment": {**(o.get("payment") or {}), "method": "kart", "status": "odendi", "provider": "iyzico", "payment_id": res.get("paymentId"), "amount": o["total"], "at": now_iso()}},
                 "$push": {"history": {"status": "onaylandi", "at": now_iso(), "by": "iyzico"}}})
+            if r.modified_count:
+                try:
+                    import musteri_mail
+                    shopmod.notify._bg(musteri_mail.shop_olay(db, "siparis_onaylandi", {**o, "status": "onaylandi"}))
+                except Exception:                      # noqa: BLE001
+                    pass
             if not r.modified_count and o["status"] == "iptal":
                 # ödeme süresi dolup stok bırakılmışken para geldi: sipariş iptal kalmaz, elle ilgilenilsin
                 await db.shop_orders.update_one({"id": o["id"]}, {"$set": {"flag": "iptal_siparise_odeme_geldi", "updated_at": now_iso()}})

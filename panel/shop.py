@@ -658,6 +658,13 @@ def register(api_router, db, deps):
         if upd:
             upd["updated_at"] = _now()
             await db.shop_orders.update_one({"id": oid}, {"$set": upd})
+            try:
+                import musteri_mail
+                _ev = musteri_mail.shop_durum_olayi(upd.get("status")) if upd.get("status") and upd["status"] != o.get("status") else None
+                if _ev:
+                    notify._bg(musteri_mail.shop_olay(db, _ev, {**o, **upd}))
+            except Exception:                                      # noqa: BLE001
+                pass
             if upd.get("status") == "teslim_edildi" and o.get("status") != "teslim_edildi" and getattr(api_router, "uye_puan_kazan", None):
                 try:
                     await api_router.uye_puan_kazan((o.get("customer") or {}).get("phone"), o.get("total"), "siparis:" + oid, "Sipariş")
@@ -832,7 +839,17 @@ def register(api_router, db, deps):
         d = await db.shop_products.find_one({"$or": [{"slug": slug}, {"id": slug}], "active": True}, {"_id": 0})
         if not d:
             raise HTTPException(404, "Ürün bulunamadı")
-        return await b2b.uygula(db, await b2b.dealer_req(request), public_product(d), True)
+        out = public_product(d)
+        try:
+            import marka_seo
+            t_, ds_ = marka_seo.urun_seo(d, await marka_seo.templates(db), await marka_seo.firma_adi(db))
+            if t_ and not out.get("seo_title"):
+                out["seo_title"] = t_
+            out["seo_desc"] = ds_
+            out["brand_slug"] = marka_seo.slugify(d.get("brand", ""))
+        except Exception:                                          # noqa: BLE001
+            pass
+        return await b2b.uygula(db, await b2b.dealer_req(request), out, True)
 
     # ---- gelişmiş mağaza: sayfalı arama, facet, benzer ürünler, sitemap (additive)
     def lite(r):
@@ -1120,6 +1137,13 @@ def register(api_router, db, deps):
         try:
             asyncio.create_task(meta_capi.purchase(db, order, payload.get("mk"), client_ip(request), request.headers.get("user-agent", ""),
                                                    request.headers.get("x-forwarded-host") or request.headers.get("host") or ""))
+        except Exception:      # noqa: BLE001
+            pass
+        try:
+            import musteri_mail
+            await notify._t(musteri_mail.shop_olay(db, "siparis_alindi", order))
+            if order["status"] == "onaylandi":
+                await notify._t(musteri_mail.shop_olay(db, "siparis_onaylandi", order))
         except Exception:      # noqa: BLE001
             pass
         try:
