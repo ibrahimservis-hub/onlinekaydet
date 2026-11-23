@@ -62,7 +62,7 @@ def belge(p):
         "warranty_months": 0, "unit": p.get("unit") or "Adet", "supplier": p.get("supplier") or "",
         "tags": list(p.get("tags") or []), "seo_title": seo.get("title") or "", "seo_desc": (seo.get("desc") or "")[:170],
         "seo_keywords": seo.get("keywords") or "", "canonical": seo.get("canonical") or "", "noindex": bool(seo.get("noindex")),
-        "img_alt": seo.get("alt") or "", "video": p.get("video") or "", "related": list(p.get("related") or []),
+        "img_alt": seo.get("alt") or "", "video": p.get("video") or "", "related": list(p.get("related") or []), "personalization": list(p.get("personalization") or []),
         "min_qty": urun._int(p.get("min_qty"), 1), "max_qty": urun._int(p.get("max_qty")),
         "channels": kanallar, "src": {"panel": True}, "updated_at": p.get("updated_at") or urun._now(),
     }

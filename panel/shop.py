@@ -20,6 +20,7 @@ from fastapi import Depends, HTTPException, Request
 
 import notify
 import meta_capi
+import urun_kisisel
 import ortak
 import shop_legal
 import eticaret_plus
@@ -252,10 +253,65 @@ async def stock_changed(db, ids):
         pass
 
 
+def ozellik_parse(a):
+    """'Renk:Kırmızı|Renk:Mavi|Beden:M' → {'Renk': {'Kırmızı','Mavi'}, 'Beden': {'M'}} (anahtar noktasız ve $'sız olmalı)."""
+    out = {}
+    for part in str(a or "").split("|")[:16]:
+        k, _, v = part.partition(":")
+        k, v = k.strip()[:40], v.strip()[:40]
+        if k and v and "." not in k and not k.startswith("$"):
+            out.setdefault(k, set()).add(v)
+    return out
+
+
+def ozellik_flt(k, vals):
+    return {"$or": [{"specs": {"$elemMatch": {"k": k, "v": {"$in": vals}}}},
+                    {"variants": {"$elemMatch": {"active": {"$ne": False}, "opts." + k: {"$in": vals}}}}]}
+
+
+def ozellik_map(r):
+    """Üründeki öznitelikler: özellik listesi + seçenek (renk/beden…) değerleri. {anahtar: {değer}}"""
+    m = {}
+    for s in (r.get("specs") or []):
+        k, v = str(s.get("k") or "").strip()[:40], str(s.get("v") or "").strip()
+        if k and v and len(v) <= 40 and "." not in k:
+            m.setdefault(k, set()).add(v)
+    for vr in (r.get("variants") or []):
+        if vr.get("active", True) is False:
+            continue
+        for k, v in (vr.get("opts") or {}).items():
+            k, v = str(k).strip()[:40], str(v).strip()
+            if k and v and len(v) <= 40:
+                m.setdefault(k, set()).add(v)
+    return m
+
+
+def ozellik_facet(rows, sel, max_keys=6, max_vals=14):
+    """Mağaza filtreleri: en az 2 üründe geçen, 2-14 farklı değeri olan öznitelikler. Her anahtarın sayıları, diğer seçimler uygulanarak hesaplanır."""
+    maps = [ozellik_map(r) for r in rows]
+    cover, vals = {}, {}
+    for m in maps:
+        for k, vs in m.items():
+            cover[k] = cover.get(k, 0) + 1
+            vals.setdefault(k, set()).update(vs)
+    keys = [k for k in cover if k in sel or (cover[k] >= 2 and 2 <= len(vals[k]) <= max_vals)]
+    keys.sort(key=lambda k: (k not in sel, -cover[k], k))
+    out = []
+    for k in keys[:max_keys]:
+        cnt = {}
+        for m in maps:
+            if all(any(x in m.get(kk, ()) for x in vv) for kk, vv in sel.items() if kk != k):
+                for v in m.get(k, ()):
+                    cnt[v] = cnt.get(v, 0) + 1
+        if cnt:
+            out.append({"key": k, "values": [{"v": v, "count": c, "on": v in sel.get(k, ())} for v, c in sorted(cnt.items(), key=lambda x: (-x[1], x[0]))[:max_vals * 2]]})
+    return out
+
+
 def public_product(d: dict) -> dict:
     out = {k: d.get(k) for k in ("id", "slug", "name", "brand", "model", "category", "price", "old_price", "short", "description",
                                  "specs", "images", "badge", "featured", "sku", "gtin", "barcode", "img_alt", "video", "free_ship",
-                                 "delivery_days", "unit", "seo_title", "min_qty", "max_qty")}
+                                 "delivery_days", "unit", "seo_title", "min_qty", "max_qty", "personalization")}
     st = d.get("stock", 0)
     out["in_stock"] = (not d.get("track_stock", True)) or st > 0
     vs = [v for v in (d.get("variants") or []) if v.get("active", True)]
@@ -784,10 +840,10 @@ def register(api_router, db, deps):
         return {"id": r["id"], "slug": r.get("slug", r["id"]), "name": r["name"], "brand": r.get("brand", ""), "category": r.get("category", ""),
                 "price": r.get("price", 0), "old_price": r.get("old_price", 0), "short": (r.get("short") or "")[:140], "img": (r.get("images") or [""])[0],
                 "badge": r.get("badge", ""), "featured": bool(r.get("featured")), "in_stock": (not r.get("track_stock", True)) or st > 0,
-                "has_var": bool([v for v in (r.get("variants") or []) if v.get("active", True)])}
+                "has_var": bool([v for v in (r.get("variants") or []) if v.get("active", True)]), "has_pz": bool(r.get("personalization"))}
 
     @api_router.get("/public/shop/search")
-    async def pub_search(brand: str = "", category: str = "", q: str = "", sort: str = "pop", max: float = 0, page: int = 1, per: int = 24, min: float = 0, in_stock: bool = False, request: Request = None, discount: bool = False):
+    async def pub_search(brand: str = "", category: str = "", q: str = "", sort: str = "pop", max: float = 0, page: int = 1, per: int = 24, min: float = 0, in_stock: bool = False, request: Request = None, discount: bool = False, a: str = ""):
         await require_shop()
         per = builtins.min(60, builtins.max(6, per))
         page = builtins.max(1, page)
@@ -821,6 +877,10 @@ def register(api_router, db, deps):
             import re as _re
             rx = {"$regex": _re.escape(q.strip()), "$options": "i"}
             flt["$or"] = [{"name": rx}, {"brand": rx}, {"model": rx}, {"category": rx}, {"sku": rx}]
+        sel = ozellik_parse(a)
+        fl_base = dict(flt)
+        if sel:
+            flt["$and"] = flt.get("$and", []) + [ozellik_flt(k, list(v)) for k, v in sel.items()]
         order = {"asc": [("price", 1)], "desc": [("price", -1)], "name": [("name", 1)], "new": [("created_at", -1)]}.get(sort, [("featured", -1), ("sort", 1), ("created_at", -1)])
         total = await db.shop_products.count_documents(flt)
         rows = await db.shop_products.find(flt, {"_id": 0, "description": 0, "specs": 0}).sort(order).skip((page - 1) * per).limit(per).to_list(per)
@@ -834,10 +894,39 @@ def register(api_router, db, deps):
             if (not category or c == category) and b:
                 bc[slugify(b)] = bc.get(slugify(b), 0) + 1
         bd = await b2b.dealer_req(request)
-        return {"items": [await b2b.uygula(db, bd, lite(r)) for r in rows], "total": total, "page": page, "per": per,
+        cand = await db.shop_products.find(fl_base, {"_id": 0, "specs": 1, "variants.opts": 1, "variants.active": 1}).to_list(4000)
+        return {"items": [await b2b.uygula(db, bd, lite(r)) for r in rows], "total": total, "page": page, "per": per, "attrs": ozellik_facet(cand, sel),
                 "categories": sorted([{"name": k, "count": v} for k, v in cc.items()], key=lambda x: -x["count"]),
                 "brands": sorted([{"slug": k, "name": bmap.get(k, k), "count": v} for k, v in bc.items()], key=lambda x: x["name"]),
                 "brand_name": bmap.get(brand, ""), "tree": (await __import__("kategori").agac_acik(db, cc))}
+
+    @api_router.get("/public/shop/cart-suggest")
+    async def pub_cart_suggest(ids: str = "", n: int = 4, request: Request = None):
+        """Sepettekilere uygun tamamlayıcı ürünler: önce 'birlikte satılacak' seçimleri, sonra aynı kategorideki öne çıkanlar."""
+        await require_shop()
+        have = [i for i in re.split(r"[,\s]+", ids)[:30] if i]
+        n = builtins.max(1, builtins.min(8, n))
+        if not have:
+            return {"items": []}
+        proj = {"_id": 0, "description": 0, "specs": 0}
+        cur = await db.shop_products.find({"id": {"$in": have}}, {"_id": 0, "related": 1, "category": 1}).to_list(30)
+        want = []
+        for c in cur:
+            for i in c.get("related") or []:
+                if i not in have and i not in want:
+                    want.append(i)
+        out = []
+        if want:
+            by = {r["id"]: r for r in await db.shop_products.find({"active": True, "id": {"$in": want}}, proj).to_list(60)}
+            out = [by[i] for i in want if i in by and ((not by[i].get("track_stock", True)) or by[i].get("stock", 0) > 0)]
+        if len(out) < n:
+            cats = list({c.get("category") for c in cur if c.get("category")})
+            if cats:
+                skip = set(have) | {r["id"] for r in out}
+                fill = await db.shop_products.find({"active": True, "category": {"$in": cats}, "id": {"$nin": list(skip)}}, proj).sort([("featured", -1), ("sort", 1)]).to_list(20)
+                out += [r for r in fill if (not r.get("track_stock", True)) or r.get("stock", 0) > 0][: n - len(out)]
+        bd = await b2b.dealer_req(request)
+        return {"items": [await b2b.uygula(db, bd, lite(r)) for r in out[:n]]}
 
     @api_router.get("/public/shop/related/{slug}")
     async def pub_related(slug: str, request: Request, n: int = 12):
@@ -978,11 +1067,13 @@ def register(api_router, db, deps):
             if p.get("track_stock", True) and have < qty:
                 raise HTTPException(422, f"'{p['name']}'{' (' + v['label'] + ')' if v else ''} için yeterli stok yok (kalan: {max(0, have)})")
             unit = await b2b.fiyat(db, dealer, p, v, (v or p)["price"])
+            custom, cfee = urun_kisisel.uygula(p, it.get("custom"))
+            unit = round(unit + cfee, 2)
             line = round(unit * qty, 2)
             subtotal += line
             items.append({"product_id": p["id"], "name": p["name"], "brand": p.get("brand", ""), "model": p.get("model", ""), "price": unit,
                           "qty": qty, "line_total": line, "image": ((v or {}).get("image") or (p.get("images") or [""])[0]),
-                          "variant_id": vid, "variant": (v or {}).get("label", ""), "sku": (v or p).get("sku", ""), "track": p.get("track_stock", True)})
+                          "variant_id": vid, "variant": " · ".join([x for x in ((v or {}).get("label", ""), urun_kisisel.ozet(custom)) if x]), "custom": custom, "sku": (v or p).get("sku", ""), "track": p.get("track_stock", True)})
         shipping = 0.0 if (cfg["free_shipping_over"] and subtotal >= cfg["free_shipping_over"]) else float(cfg["shipping_fee"] or 0)
         if cfg["min_order"] and subtotal < cfg["min_order"]:
             raise HTTPException(422, "Minimum sipariş tutarı %.2f TL" % cfg["min_order"])

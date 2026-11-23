@@ -8,6 +8,7 @@ görsel, marka, stok kodu ve fiyat çıkarılır; kullanıcı yalnız fiyat ve s
 """
 import html as _html
 import kategori
+import urun_kisisel
 import json
 import re
 import uuid
@@ -378,6 +379,7 @@ def clean(p, old=None):
            "backorder": bool(p.get("backorder")), "featured": bool(p.get("featured")), "badge": _t(p.get("badge"), 24),
            "short": _t(p.get("short"), 240),
            "related": [_t(i, 24) for i in (p.get("related") or [])[:12] if _t(i, 24)],
+           "personalization": urun_kisisel.temizle(p.get("personalization")),
            "desc": str(p.get("desc") or "")[:12000], "specs": specs,
            "cost": _num(p.get("cost")), "price": price, "sale_price": sale, "vat": vat,
            "stock": _int(p.get("stock")), "track_stock": False if p.get("track_stock") is False else True,
