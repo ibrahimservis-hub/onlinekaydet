@@ -4,7 +4,7 @@ import os, json, base64, glob
 R = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 files = {}
 t = lambda k, p: files.__setitem__(k, open(os.path.join(R, p), encoding='utf-8').read())
-for f in ('demo.py', 'server.py', 'siparis.py', 'sitegen.py', 'yp_ui.html', 'sahip/index.html'):
+for f in ('demo.py', 'server.py', 'siparis.py', 'sitegen.py', 'yp_ui.html', 'sahip/index.html', 'kategori.py', 'shop.py', 'shop_sync.py', 'storefront.py', 'urun.py', 'urun_ayna.py'):
     t('app/' + f, 'panel/' + f)
 for f in ('gen4.py', 'fetch_photos.py', 'ill/make_ill.py'):
     t('themes/' + f, 'themes/' + f)
