@@ -130,7 +130,42 @@ def _whatsapp(row):
     return True, "", "Bağlantı çalışıyor.%s" % ((" Numara: " + ad) if ad else "")
 
 
-PROBES = {"verimor": _verimor, "iletimerkezi": _iletimerkezi, "trendyol": _trendyol,
+def _meta_pixel(row):
+    if not _a(row, "token"):
+        return True, "", "Piksel kimliği kaydedildi. Dönüşüm API anahtarı girilmediği için siparişler yalnız tarayıcıdan ölçülür."
+    r = _istek("GET", "https://graph.facebook.com/v21.0/%s" % _a(row, "id"), params={"access_token": _a(row, "token"), "fields": "name"})
+    if r.status_code >= 400:
+        try:
+            m = (r.json().get("error") or {}).get("message") or ""
+        except Exception:                                          # noqa: BLE001
+            m = ""
+        return False, "Meta kabul etmedi: %s" % (m or "kod %s" % r.status_code)[:140], ""
+    try:
+        ad = r.json().get("name") or ""
+    except Exception:                                              # noqa: BLE001
+        ad = ""
+    return True, "", "Bağlantı çalışıyor.%s Siparişler sunucudan da bildirilecek." % ((" Piksel: " + ad + ".") if ad else "")
+
+
+def _facebook_catalog(row):
+    if not _a(row, "token"):
+        return True, "", "Katalog kimliği kaydedildi. Ürün akışı adresi hazır; erişim anahtarı yalnız bağlantıyı denemek için gerekir."
+    r = _istek("GET", "https://graph.facebook.com/v21.0/%s" % _a(row, "catalog_id"), params={"access_token": _a(row, "token"), "fields": "name,product_count"})
+    if r.status_code >= 400:
+        try:
+            m = (r.json().get("error") or {}).get("message") or ""
+        except Exception:                                          # noqa: BLE001
+            m = ""
+        return False, "Meta kabul etmedi: %s" % (m or "kod %s" % r.status_code)[:140], ""
+    try:
+        d = r.json()
+        ek = " Katalog: %s, %s ürün." % (d.get("name") or "", d.get("product_count", 0))
+    except Exception:                                              # noqa: BLE001
+        ek = ""
+    return True, "", "Bağlantı çalışıyor.%s" % ek
+
+
+PROBES = {"meta_pixel": _meta_pixel, "facebook_catalog": _facebook_catalog, "verimor": _verimor, "iletimerkezi": _iletimerkezi, "trendyol": _trendyol,
           "smtp": _smtp, "whatsapp": _whatsapp}
 
 YOK = ("Bilgiler kaydedildi ve alanlar denetlendi. Bu sağlayıcının ücretsiz sorgulanabilen "

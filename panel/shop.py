@@ -4,6 +4,7 @@
 - Mağaza: ürünler, adım adım sipariş, havale (EFT) bilgileri (admin düzenler), sipariş durumları
 - Müşteri hesabı: telefon + şifre ile basit üyelik; servis geçmişi, cihazlar, siparişler
 """
+import asyncio
 import builtins
 import copy
 import hashlib
@@ -18,6 +19,7 @@ import jwt
 from fastapi import Depends, HTTPException, Request
 
 import notify
+import meta_capi
 import ortak
 import shop_legal
 import eticaret_plus
@@ -1024,6 +1026,11 @@ def register(api_router, db, deps):
             pass
         await eticaret_plus.webhook_gonder(db, "siparis.olustu", {"order_no": order["order_no"], "total": total, "status": order["status"], "musteri": name, "telefon": phone, "odeme": pm_id,
                                                           "urunler": [{"ad": i["name"], "adet": i["qty"], "fiyat": i["price"]} for i in items]})
+        try:
+            asyncio.create_task(meta_capi.purchase(db, order, payload.get("mk"), client_ip(request), request.headers.get("user-agent", ""),
+                                                   request.headers.get("x-forwarded-host") or request.headers.get("host") or ""))
+        except Exception:      # noqa: BLE001
+            pass
         try:
             rk = order.get("risk") or {}
             risk_not = (" · RİSK: %s (%s)" % (rk["seviye"].upper(), ", ".join(rk["nedenler"]))) if rk.get("seviye") in ("orta", "yuksek") and rk.get("bildir", True) else ""

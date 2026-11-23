@@ -368,7 +368,7 @@ _SHOP_INT = ["iyzico", "paytr", "param", "sipay", "craftgate", "banka_pos",
              "yurtici", "aras", "mng", "ptt", "surat", "ups", "sendeo", "hepsijet", "kolaygelsin",
              "parasut", "birfatura", "uyumsoft", "izibiz", "nes", "edm", "qnb_efinans", "gib_earsiv",
              "nebim", "logo", "mikro", "netsis", "dia", "akinsoft",
-             "tiktok_pixel", "google_merchant"]
+             "tiktok_pixel", "google_merchant", "facebook_catalog"]
 _SHOP_REP = ["satis", "kar", "kanal", "iade_rapor", "stok_devir", "sepet_terk", "kampanya_etki"]
 
 SECTOR_PACKS = {
