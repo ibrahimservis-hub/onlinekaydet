@@ -801,7 +801,9 @@ def register(api_router, db, deps):
         elif brand:
             flt["brand"] = "__yok__"
         if category:
-            flt["category"] = category
+            import kategori
+            _ad = await kategori.adlar_icin(db, category)
+            flt["category"] = {"$in": _ad} if _ad is not None else category
         pr_ = {}
         if max and max > 0:
             pr_["$lte"] = max
@@ -833,7 +835,7 @@ def register(api_router, db, deps):
         return {"items": [await b2b.uygula(db, bd, lite(r)) for r in rows], "total": total, "page": page, "per": per,
                 "categories": sorted([{"name": k, "count": v} for k, v in cc.items()], key=lambda x: -x["count"]),
                 "brands": sorted([{"slug": k, "name": bmap.get(k, k), "count": v} for k, v in bc.items()], key=lambda x: x["name"]),
-                "brand_name": bmap.get(brand, "")}
+                "brand_name": bmap.get(brand, ""), "tree": (await __import__("kategori").agac_acik(db, cc))}
 
     @api_router.get("/public/shop/related/{slug}")
     async def pub_related(slug: str, request: Request, n: int = 12):

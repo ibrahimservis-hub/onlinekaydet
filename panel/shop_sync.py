@@ -171,48 +171,7 @@ def register(api_router, db, deps):
         if mk not in ch.MARKETS or not ch.MARKETS[mk]["live"]:
             raise HTTPException(404, "Bu pazaryeri henüz desteklenmiyor")
 
-    # ------------------------------------------------------------------ iç kategori ağacı
-    @api_router.get("/shop/categories")
-    async def cat_list(_: dict = adm):
-        rows = await db.shop_categories.find({}, {"_id": 0}).sort([("sort", 1), ("name", 1)]).to_list(2000)
-        used = {}
-        async for p in db.shop_products.find({}, {"_id": 0, "category_id": 1}):
-            used[p.get("category_id", "")] = used.get(p.get("category_id", ""), 0) + 1
-        return [{**r, "products": used.get(r["id"], 0)} for r in rows]
-
-    @api_router.post("/shop/categories")
-    async def cat_add(payload: dict, _: dict = adm):
-        name = str(payload.get("name", "")).strip()[:80]
-        if len(name) < 2:
-            raise HTTPException(422, "Kategori adı gerekli")
-        parent = str(payload.get("parent") or "")
-        if parent and not await db.shop_categories.find_one({"id": parent}, {"_id": 1}):
-            raise HTTPException(422, "Üst kategori bulunamadı")
-        if await db.shop_categories.find_one({"name": name, "parent": parent}, {"_id": 1}):
-            raise HTTPException(409, "Bu kategori zaten var")
-        doc = {"id": str(uuid.uuid4()), "name": name, "parent": parent, "sort": int(_f(payload.get("sort"), 100)), "created_at": _now()}
-        await db.shop_categories.insert_one(dict(doc))
-        return doc
-
-    @api_router.put("/shop/categories/{cid}")
-    async def cat_edit(cid: str, payload: dict, _: dict = adm):
-        c = await db.shop_categories.find_one({"id": cid}, {"_id": 0})
-        if not c:
-            raise HTTPException(404, "Kategori yok")
-        name = str(payload.get("name", c["name"])).strip()[:80]
-        if len(name) < 2:
-            raise HTTPException(422, "Kategori adı gerekli")
-        await db.shop_categories.update_one({"id": cid}, {"$set": {"name": name, "sort": int(_f(payload.get("sort"), c.get("sort", 100)))}})
-        await db.shop_products.update_many({"category_id": cid}, {"$set": {"category": name}})        # ürünlerdeki ad hep ağaçla aynı kalır
-        return {"ok": True}
-
-    @api_router.delete("/shop/categories/{cid}")
-    async def cat_del(cid: str, _: dict = adm):
-        if await db.shop_products.count_documents({"category_id": cid}) or await db.shop_categories.count_documents({"parent": cid}):
-            raise HTTPException(409, "Kategoride ürün veya alt kategori var; önce taşıyın")
-        await db.shop_categories.delete_one({"id": cid})
-        await db.market_catmap.delete_many({"category_id": cid})
-        return {"ok": True}
+    # iç kategori ağacı: kategori.py (shop_categories tek kaynak)
 
     # ------------------------------------------------------------------ pazaryeri eşlemeleri
     @api_router.get("/shop/channels")

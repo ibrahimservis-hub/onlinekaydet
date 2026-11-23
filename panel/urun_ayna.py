@@ -74,7 +74,11 @@ async def ayna(db, pid):
     if not p:
         await db.shop_products.delete_one({"id": pid, "src.panel": True})
         return
-    await db.shop_products.update_one({"id": pid}, {"$set": belge(p),
+    doc = belge(p)
+    ids = [i for i in (p.get("cat_ids") or []) if i]
+    if ids:
+        doc["category_id"], doc["category_ids"] = ids[0], ids
+    await db.shop_products.update_one({"id": pid}, {"$set": doc,
                                                    "$setOnInsert": {"id": pid, "sold": 0, "sort": 100, "created_at": p.get("created_at") or urun._now()}},
                                       upsert=True)
     try:

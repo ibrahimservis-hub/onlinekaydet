@@ -47,16 +47,24 @@ with sync_playwright() as pw:
         assert pg.locator(".ues").count() >= 8
         pg.fill("#uef input[name=name]", "Test Kombi Pompası 24 kW")
         assert pg.input_value("#uef input[name=slug]") == "test-kombi-pompasi-24-kw"
+        pg.evaluate("ueGit('genel')"); 
         pg.fill("#uef input[name=short]", "Sessiz çalışan pompa")
         pg.fill("#uef textarea[name=desc]", "Kombiler için sirkülasyon pompası. Orijinal yedek parça, 2 yıl garantili.")
+        pg.evaluate("ueGit('fiyat')"); 
         pg.fill("#uef input[name=price]", "1200"); pg.fill("#uef input[name=cost]", "700")
+        pg.evaluate("ueGit('stok')"); 
         pg.fill("#uef input[name=sku]", "POMPA-24")
-        pg.fill("#uecat", "Pompa"); pg.click("[data-a=ue-cat]")
+        pg.evaluate("ueGit('kat')"); 
+        pg.click("[data-a=ue-katsec]"); pg.fill("#kpn", "Pompa"); pg.click("[data-a=kp-yeni]"); pg.wait_for_timeout(400); pg.click("[data-a=kp-tamam]")
         pg.fill("#uetag", "kombi"); pg.click("[data-a=ue-tag]")
+        pg.evaluate("ueGit('ozellik')"); 
         pg.click("[data-a=ue-spec]"); pg.fill("#uespecs input[data-sp=k]", "Güç"); pg.fill("#uespecs input[data-sp=v]", "24 kW")
+        pg.evaluate("ueGit('seo')"); 
         pg.fill("#uef input[name=seo_title]", "Kombi Pompası 24 kW | Test")
+        pg.evaluate("ueGit('kargo')"); 
         pg.fill("#uef input[name=en]", "20"); pg.fill("#uef input[name=boy]", "20"); pg.fill("#uef input[name=yuk]", "30")
         pg.wait_for_timeout(500)
+        pg.evaluate("ueGit('kanal')"); 
         ks = pg.evaluate("Object.keys(UE.ch).filter(function(k){return k!=='site'})")
         if ks:
             k = ks[0]
@@ -114,6 +122,7 @@ with sync_playwright() as pw:
     t("Bağlantıdan ürün ekle: kaynak yapıştır → düzenleyici dolu açılır", h)
     def tp():
         H2 = TK()
+        c.put("/api/yp/integrations/trendyol", headers=H2, json={"on": True, "keys": {"seller_id": "123", "api_key": "k", "api_secret": "s"}})
         for n in range(2): c.post("/api/yp/products", headers=H2, json={"name": "Toplu %d" % n, "price": 300, "cost": 100, "stock": 5, "sku": "TP%d" % n})
         pg.evaluate("V.urun().catch(function(){})"); pg.wait_for_selector(".gr tbody input[type=checkbox]", timeout=8000)
         pg.locator(".gr tbody input[type=checkbox]").nth(0).check(); pg.locator(".gr tbody input[type=checkbox]").nth(1).check()
@@ -129,20 +138,20 @@ with sync_playwright() as pw:
     def yz():
         pg.evaluate("V.urun().catch(function(){})"); pg.wait_for_selector("[data-a=urun-yeni]", timeout=8000)
         pg.click("[data-a=urun-yeni]"); pg.wait_for_selector("#uef")
-        pg.fill("#uef input[name=name]", "Baxi Eco Plaka Eşanjör"); pg.fill("#uef input[name=short]", "Elle yazılmış kısa metin")
+        pg.fill("#uef input[name=name]", "Baxi Eco Plaka Eşanjör"); pg.evaluate("ueGit('genel')"); pg.fill("#uef input[name=short]", "Elle yazılmış kısa metin")
         pg.click("[data-a=ue-yaz][data-v=gen]"); pg.wait_for_selector("#uyf", timeout=6000)
         assert pg.locator("#uyf input[name=short]").is_checked() is False, "dolu alan varsayılan değişmemeli"
         assert pg.locator("#uyf input[name=desc]").is_checked()
         pg.click("[data-a=ue-yaz-uygula]"); pg.wait_for_selector("#uyf", state="detached")
         assert pg.input_value("#uef input[name=short]") == "Elle yazılmış kısa metin"
         assert "Baxi Eco Plaka" in pg.input_value("#uef textarea[name=desc]")
-        pg.click("[data-a=ue-yaz][data-v=seo]"); pg.wait_for_selector("#uyf"); pg.click("[data-a=ue-yaz-uygula]")
+        pg.evaluate("ueGit('seo')"); pg.click("[data-a=ue-yaz][data-v=seo]"); pg.wait_for_selector("#uyf"); pg.click("[data-a=ue-yaz-uygula]")
         assert pg.input_value("#uef input[name=seo_title]").startswith("Baxi")
     t("Düzenleyici: yazı öner (dolu alan korunur, boş alan dolar)", yz)
     def vr():
         pg.evaluate("V.urun().catch(function(){})"); pg.wait_for_selector("[data-a=urun-yeni]", timeout=8000)
         pg.click("[data-a=urun-yeni]"); pg.wait_for_selector("#uef")
-        pg.fill("#uef input[name=name]", "Varyantlı Gömlek"); pg.fill("#uef input[name=price]", "900")
+        pg.fill("#uef input[name=name]", "Varyantlı Gömlek"); pg.evaluate("ueGit('fiyat')"); pg.fill("#uef input[name=price]", "900"); pg.evaluate("ueGit('varyant')")
         pg.click("[data-a=ue-axekle]"); pg.fill("[data-axn=\"0\"]", "Renk"); pg.dispatch_event("[data-axn=\"0\"]", "change")
         for v in ("Beyaz", "Mavi"):
             pg.fill("[data-axv=\"0\"]", v); pg.press("[data-axv=\"0\"]", "Enter")
@@ -159,7 +168,7 @@ with sync_playwright() as pw:
         full = c.get("/api/yp/products/" + r["id"], headers=TK()).json(); full = full.get("item") or full
         assert len(full["variants"]) == 4 and full["stock"] == 12 and [a["ad"] for a in full["var_axes"]] == ["Renk", "Beden"], full["var_axes"]
         assert full["variants"][0]["sku"] == "GM-B-M" and full["variants"][1]["price"] == 950
-        pg.wait_for_selector("[data-a=urun-ac]"); pg.click("[data-a=urun-ac][data-id=\"%s\"]" % r["id"]); pg.wait_for_selector("#uevar .uetb tbody tr")
+        pg.wait_for_selector("[data-a=urun-ac]"); pg.click("[data-a=urun-ac][data-id=\"%s\"]" % r["id"]); pg.wait_for_selector("#uef"); pg.evaluate("ueGit('varyant')"); pg.wait_for_selector("#uevar .uetb tbody tr")
         assert pg.locator("#uevar .uetb tbody tr").count() == 4
     t("Düzenleyici: renk/beden tanımla, kombinasyon üret, stok/fiyat, kaydet", vr)
     assert not errs, errs

@@ -2936,6 +2936,8 @@ async def _fetch_url(u):                                               # hızlı
 
 
 urun.register(api_router, db, {"require_admin": require_admin, "fetch_url": _fetch_url})
+import kategori  # kategori ağacı (ağaç, taşıma, silme+aktarma, SEO, pazaryeri bağlama)
+kategori.register(api_router, db, {"require_admin": require_admin})
 import pazaryeri  # pazaryeri eşleştirme ve stok senkronu
 pazaryeri.register(api_router, db, {"require_admin": require_admin, "channel_push": None})
 

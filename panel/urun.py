@@ -7,6 +7,7 @@ Hızlı ekleme: verilen sayfanın JSON-LD ve OpenGraph etiketlerinden ad, açık
 görsel, marka, stok kodu ve fiyat çıkarılır; kullanıcı yalnız fiyat ve stoğu onaylar.
 """
 import html as _html
+import kategori
 import json
 import re
 import uuid
@@ -44,11 +45,18 @@ def kanal_listesi(yemek):
             if (k == "site" or k in FOOD_CH) == bool(yemek) or k == "site"]
 
 async def _kanallar_aktif(db):
-    """Kanal listesi + 'aktif': kendi site her zaman; pazaryeri/yemek platformu yalnız Entegrasyonlar'dan açıksa."""
+    """Kanal listesi + 'aktif': kendi site her zaman; pazaryeri/yemek platformu yalnız API anahtarı girilmişse."""
     out = kanal_listesi(await yemek_firma(db))
-    on = {r["id"] for r in await db.yp_integrations.find({"on": True}, {"_id": 0, "id": 1}).to_list(400)}
+    keyed = set()
+    for r in await db.yp_integrations.find({"on": True}, {"_id": 0, "id": 1, "keys": 1}).to_list(400):
+        if any(str(v).strip() for v in (r.get("keys") or {}).values()):
+            keyed.add(r["id"])
+    cfg = ((await db.app_settings.find_one({"_id": "sp_modules"}, {"_id": 0}) or {}).get("config") or {})
+    for mk, c in cfg.items():
+        if isinstance(c, dict) and any(str(v).strip() for v in c.values()):
+            keyed.add(mk)
     for k in out:
-        k["aktif"] = k["id"] == "site" or k["id"] in on
+        k["aktif"] = k["id"] == "site" or k["id"] in keyed
     return out
 
 
@@ -517,6 +525,7 @@ def register(api_router, db, deps):
     @api_router.post("/yp/products")
     async def add(payload: dict, user: dict = Depends(adm)):
         o = clean(payload)
+        await kategori.coz(db, o, payload.get("cat_ids"))
         if o["sku"] and await db.yp_products.find_one({"sku": o["sku"]}, {"_id": 1}):
             raise HTTPException(422, "Bu stok kodu başka üründe kullanılıyor")
         o.update({"id": uuid.uuid4().hex[:12], "low_at": _int(payload.get("low_at"), 5),
@@ -534,6 +543,7 @@ def register(api_router, db, deps):
     async def put(pid: str, payload: dict, _: dict = Depends(adm)):
         p = await one(pid)
         o = clean(dict(p, **payload), p)
+        await kategori.coz(db, o, payload.get("cat_ids") if "cat_ids" in payload else (None if "cat" in payload or "cats" in payload else p.get("cat_ids")))
         if o["sku"] and await db.yp_products.find_one({"sku": o["sku"], "id": {"$ne": pid}}, {"_id": 1}):
             raise HTTPException(422, "Bu stok kodu başka üründe kullanılıyor")
         o["updated_at"] = _now()
@@ -591,6 +601,9 @@ def register(api_router, db, deps):
                 up["status"] = "draft" if payload.get("status") == "draft" else "live"
             elif op == "cat":
                 up["cat"] = _t(payload.get("cat"), 80)
+                if up["cat"]:
+                    up["cats"] = [up["cat"]]
+                    await kategori.coz(db, up)
             elif op == "brand":
                 up["brand"] = _t(payload.get("brand"), 60)
             elif op == "sale":

@@ -71,10 +71,10 @@ with sync_playwright() as p:
     def d():
         pg.click("[data-a=urun-yeni]"); pg.wait_for_selector("#uef", timeout=5000)
         pg.fill("#uef input[name=name]", "Termal İçlik")
-        pg.fill("#uef input[name=price]", "249"); pg.fill("#uef input[name=cost]", "90")
-        pg.fill("#uef input[name=stock]", "25")
-        pg.fill("#uecat", "İç Giyim"); pg.click("[data-a=ue-cat]")
-        assert "Kâr" in pg.inner_text("#uekar"), "kârlılık anında hesaplanmalı"
+        pg.evaluate("ueGit('fiyat')"); pg.fill("#uef input[name=price]", "249"); pg.fill("#uef input[name=cost]", "90")
+        pg.evaluate("ueGit('stok')"); pg.fill("#uef input[name=stock]", "25")
+        pg.evaluate("ueGit('kat')"); pg.click("[data-a=ue-katsec]"); pg.fill("#kpn", "İç Giyim"); pg.click("[data-a=kp-yeni]"); pg.wait_for_timeout(400); pg.click("[data-a=kp-tamam]")
+        pg.evaluate("ueGit('fiyat')"); assert "Kâr" in pg.inner_text("#uekar"), "kârlılık anında hesaplanmalı"
         pg.click("[data-a=ue-kaydet][data-v=publish]") if pg.locator("[data-a=ue-kaydet][data-v=publish]").count() else pg.click("[data-a=ue-kaydet].p")
         pg.wait_for_timeout(1500)
         pg.goto(pg.url.split("#")[0] + "#urun"); pg.wait_for_selector("#ulist", timeout=8000); pg.wait_for_timeout(800)
