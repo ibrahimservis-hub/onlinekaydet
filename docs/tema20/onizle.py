@@ -4,6 +4,7 @@ import os, html, re
 from pano import T, LBL
 from foto import F, url, video
 from icerik import C, SSS
+from logo_ikon import IK
 E_ = html.escape
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "onizleme"); os.makedirs(OUT, exist_ok=True)
 GF = {"Archivo": "Archivo:wght@500;700;800", "Inter": "Inter:wght@400;500;600;700", "Manrope": "Manrope:wght@400;600;700;800", "Barlow Condensed": "Barlow+Condensed:wght@600;700",
@@ -28,8 +29,8 @@ def page(i, t, c):
     phone = "0532 000 00 00"
     _w = [x for x in re.split(r"[\s&]+", nm) if x and x[0].isalpha()]
     _ini = (_w[0][0] + _w[1][0]) if len(_w) > 1 else nm[:2]
-    _shape = ["", "r", "h", "d"][i % 4]
-    logo = lambda: '<span class="lm"><i class="%s">%s</i><span>%s</span></span>' % (_shape, E_(_ini.upper()), E_(nm))
+    _shape = ["", "r", "h", "d"][(i + 1) % 4]
+    logo = lambda: '<span class="lm"><i class="%s"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">%s</svg></i><span>%s</span></span>' % (_shape, IK[i+1], E_(nm))
     fonts = "&".join("family=" + GF[f] for f in dict.fromkeys([fh, fb]) if f in GF)
     out = []
 
@@ -206,9 +207,9 @@ footer{background:var(--dk);color:rgba(255,255,255,.78);padding:60px 0 0;font-si
 @media(max-width:600px){h1{font-size:30px}h2{font-size:24px}.lead{font-size:16px;margin:12px 0 20px}.b{min-height:44px;padding:0 18px;font-size:14px}.b.s{min-height:38px}.top>.w{height:52px}.top.sm>.w{height:48px}.lg{font-size:19px}.cart{font-size:14px}.bur{padding:8px}.bur i{width:20px}
 .drw{padding:14px 16px}.dh{font-size:18px;margin-bottom:8px}.dh button{width:38px;height:38px;font-size:15px}.drw>a:not(.b){padding:12px 2px;font-size:16px}.drw .b{margin-top:16px;min-height:44px}.drw .tl{padding:10px;font-size:15px;border:0}
 .mb{grid-template-columns:1fr 1fr 1.3fr}.mb a{min-height:46px;font-size:14px}.back{bottom:58px;padding:7px 11px;font-size:12px}.fm{grid-template-columns:1fr}.fm input{min-height:44px}.sec{padding:48px 0}.hd{margin-bottom:26px}}
-.lm{display:inline-flex;align-items:center;gap:10px;font:700 21px/1 --FH,serif;color:var(--dk);white-space:nowrap}.lm i{display:grid;place-items:center;width:38px;height:38px;background:var(--ac);color:#fff;font:700 15px/1 --FH,serif;font-style:normal;letter-spacing:.02em;border-radius:50%}.lm i.r{border-radius:10px}.lm i.h{border-radius:4px 16px 4px 16px}.lm i.d{border-radius:50% 50% 50% 4px}
+.lm{display:inline-flex;align-items:center;gap:10px;font:700 21px/1 --FH,serif;color:var(--dk);white-space:nowrap}.lm i{display:grid;place-items:center;width:42px;height:42px;background:var(--ac);color:#fff;font:700 15px/1 --FH,serif;font-style:normal;letter-spacing:.02em;border-radius:50%}.lm i.r{border-radius:10px}.lm i.h{border-radius:4px 16px 4px 16px}.lm i svg{width:60%;height:60%}.lm i.d{border-radius:50% 50% 50% 4px}
 footer .lm,.drw .lm{color:#fff}footer .lm i,.drw .lm i{box-shadow:0 0 0 2px rgba(255,255,255,.25)}
-@media(max-width:600px){.lm{font-size:17px;gap:8px}.lm i{width:30px;height:30px;font-size:12px}}
+@media(max-width:600px){.lm{font-size:17px;gap:8px}.lm i{width:32px;height:32px}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}.in>*,.rv0{opacity:1;transform:none}}"""
 
 
