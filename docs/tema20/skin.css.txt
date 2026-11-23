@@ -37,3 +37,4 @@ main{counter-reset:sec}
 @media(max-width:600px){.h-giant h1{font-size:clamp(40px,12vw,60px)}.h-split,.h-arch,.h-tall{padding:28px 0 40px}.h-frame{padding:36px 0 40px}.k-tiles .card{aspect-ratio:4/3}.nv-overlay{background:rgba(12,14,17,.9)}.k-nums .card .no{font-size:40px}}
 
 @media(max-width:600px){.pi,.pt{min-width:0}.pt .fm,.h .fm{grid-template-columns:1fr}.pt .fm input{min-width:0}.h-poster{overflow:hidden}}
+@media(max-width:480px){.fg{grid-template-columns:1fr}footer .lgo{max-width:100%;height:auto;max-height:44px}}
