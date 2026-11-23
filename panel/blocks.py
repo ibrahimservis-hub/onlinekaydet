@@ -356,7 +356,7 @@ def S(sid, name, terms, blocks, modules, integrations, reports, flow="randevu", 
 _BASE_BLOCKS = ["hero", "hizmet_liste", "galeri", "ekip", "yorumlar", "sss", "harita", "saatler", "iletisim_form",
                 "mobil_bar", "footer", "menu_gorunum", "logo_bolum", "kvkk", "cerez"]
 _BASE_INT = ["google_isletme", "netgsm", "iletimerkezi", "verimor", "mutlucell", "masgsm", "whatsapp",
-             "smtp", "ga4", "search_console", "google_ads", "meta_pixel", "canli_destek", "havale", "kapida"]
+             "smtp", "gtm", "ga4", "search_console", "google_ads", "meta_pixel", "canli_destek", "havale", "kapida"]
 _BASE_REP = ["ciro", "musteri", "personel", "kasa"]
 _SHOP_BLOCKS = ["v_indirim", "v_coksatan", "v_yeni", "v_kategori", "v_marka", "v_serit", "v_buyuk_kart",
                 "guvence", "odeme_logo", "taksit", "siparis_takip", "uyelik", "sepet_hatirlat", "story",

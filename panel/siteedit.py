@@ -19,6 +19,7 @@ from fastapi.responses import HTMLResponse, Response
 import shop as shopmod
 import shop_legal
 import cerez as cerez_mod
+import olcum as olcum_mod
 import dil as dil_mod
 import uyelik as dil_mod_uyelik
 import duyuru as duyuru_mod
@@ -1192,6 +1193,11 @@ def register(api_router, db, deps):
                 pv = ""
             if pv:
                 r = (r[0].replace("</body>", pv + "</body>", 1), r[1])
+        if r and not inline_ and str(r[1]).startswith("text/html") and "</head>" in r[0] and 'id="okolc"' not in r[0]:
+            try:
+                r = (olcum_mod.ekle(r[0], await olcum_mod.ayar(db)), r[1])
+            except Exception:                                      # noqa: BLE001
+                pass
         if r and not inline_ and str(r[1]).startswith("text/html") and "</body>" in r[0] and 'id="okck"' not in r[0]:
             try:
                 ck = ep_mod.cark_html(await ep_mod._cfg(db, "yp_cark", ep_mod.CARK_DEF))

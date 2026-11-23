@@ -151,6 +151,8 @@ CATALOG = [
     P("migros_yemek", "pazaryeri", "Migros Yemek", [F("token", "Erişim anahtarı", True), F("orders_url", "Sipariş adresi", ipucu="Migros'un size verdiği sipariş adresi"), F("komisyon", "Komisyon oranı % (kâr hesabı için)", zorunlu=False, tip="number")],
       "Siparişler 1-2 dakikada bir kendiliğinden listenize gelir. Migros'tan entegrasyon erişimi gerekir."),
     # --- ölçüm ve reklam
+    P("gtm", "olcum", "Google Etiket Yöneticisi (GTM)", [F("id", "Kapsayıcı kimliği", ipucu="GTM- ile başlar")],
+      "Tüm etiketleri tek yerden yönetin. Açıksa GA4 ve Ads etiketlerini bu kapsayıcıdan kurun; ikisini birden girerseniz sayfa iki kez ölçülür.", test=False),
     P("ga4", "olcum", "Google Analytics 4", [F("id", "Ölçüm kimliği", ipucu="G- ile başlar")],
       "Ziyaretçi ve dönüşüm ölçümü", test=False),
     P("search_console", "olcum", "Google Search Console",
@@ -252,6 +254,8 @@ def check(pid, keys, mode="test"):
     if eksik:
         return False, "Şu alanlar boş: %s" % ", ".join(eksik)
     v = lambda k: _t(keys.get(k), 400)                             # noqa: E731
+    if pid == "gtm" and not re.match(r"^GTM-[A-Z0-9]{4,10}$", v("id").upper()):
+        return False, "Kapsayıcı kimliği GTM- ile başlamalı (örnek: GTM-ABC1234)"
     if pid == "ga4" and not re.match(r"^G-[A-Z0-9]{4,}$", v("id").upper()):
         return False, "Ölçüm kimliği G- ile başlamalı (örnek: G-ABC123DEF4)"
     if pid == "google_ads" and not re.match(r"^AW-\d{6,}$", v("id").upper()):
