@@ -75,7 +75,7 @@ def page(i, t, c):
             if code == "ba":
                 out.append('<section class="sec"><div class="w">%s<div class="ba"><figure><img loading="lazy" src="%s" alt=""><figcaption>Önce</figcaption></figure><figure><img loading="lazy" src="%s" alt=""><figcaption>Sonra</figcaption></figure></div></div></section>' % (head("İşlerimiz", "Önce ve sonra"), ph(5, 900, 640), ph(6, 900, 640)))
             else:
-                out.append('<section class="sec"><div class="w">%s<div class="gl">%s</div></div></section>' % (head("Galeri", "Bizden kareler"), "".join('<img loading="lazy" src="%s" alt="">' % ph(k + 2, 800, 800) for k in range(5))))
+                out.append('<section class="sec"><div class="w">%s<div class="gl">%s</div></div></section>' % (head("Galeri", "Bizden kareler"), "".join('<img src="%s" alt="">' % ph(k + 2, 800, 800) for k in range(5))))
         elif code == "tm":
             out.append('<section class="sec sf"><div class="w">%s<div class="tm">%s</div></div></section>' % (head("Ekip", "Uzmanlarımız", "Randevunuzu dilediğiniz uzmana alabilirsiniz."), "".join('<div><i>%s</i><h3>%s</h3><span>%s</span><a href="#iletisim">Randevu al →</a></div>' % (E_("".join(w[0] for w in p.split(" · ")[0].replace("Dt. ", "").replace("Dr. ", "").split()[:2])), E_(p.split(" · ")[0]), E_(p.split(" · ")[1] if " · " in p else "")) for p in c.get("team", ["Usta 1 · kesim", "Usta 2 · renk"]))))
         elif code == "rv":
@@ -134,7 +134,7 @@ h1,h2,h3{font-family:--FH,serif;line-height:1.1;color:var(--dk)}h1{font-size:cla
 .lg{font:700 22px --FH,serif;color:var(--dk)}.top nav{display:flex;gap:22px;font-weight:600;font-size:15px;color:#3b3f45}.top nav a:hover{color:var(--ac)}.hr{margin-left:auto;display:flex;align-items:center;gap:16px}.tel{font-weight:700;color:var(--dk)}
 .cart{font-weight:700}.cart b{background:var(--ac);color:#fff;border-radius:99px;padding:1px 8px;font-size:13px;margin-left:4px}
 .hf{min-height:600px;display:flex;align-items:center;background-size:cover;background-position:center;color:#fff;padding:80px 0}.hf h1{color:#fff;max-width:760px}.hf .lead{color:rgba(255,255,255,.88)}
-.hs{background:var(--sf);padding:56px 0 64px}.g2{display:grid;grid-template-columns:1.05fr 1fr;gap:48px;align-items:center}.hpic{position:relative}.hpic img{width:100%;aspect-ratio:5/5.4;object-fit:cover;border-radius:calc(var(--r)*1.6)}
+.hs{background:var(--sf);padding:56px 0 64px}.g2{display:grid;grid-template-columns:1.05fr 1fr;gap:48px;align-items:center}.hpic{position:relative}.hpic img{width:100%;aspect-ratio:5/5.4;min-height:0;object-fit:cover;border-radius:calc(var(--r)*1.6)}
 .fcard{position:absolute;left:-40px;right:30px;bottom:-30px;background:#fff;border-radius:var(--r);padding:18px;box-shadow:0 24px 50px -20px rgba(0,0,0,.35)}.trust{margin-top:22px;color:var(--mut);font-size:14px}.trust b{color:var(--dk)}
 .fm{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;align-items:end}.fm label span{display:block;font-size:12px;font-weight:700;color:var(--mut);margin-bottom:4px}
 .fm input{width:100%;min-height:48px;border:1.5px solid var(--ln);border-radius:calc(var(--r)*.7);padding:0 14px;font:inherit;font-size:15px;background:#fff}.fm .ok{grid-column:1/-1;color:#15803d;font-weight:700}
@@ -170,7 +170,7 @@ footer{background:var(--dk);color:rgba(255,255,255,.78);padding:60px 0 0;font-si
 .mb{display:none}.back{position:fixed;right:14px;bottom:14px;z-index:50;background:#111;color:#fff;font:600 13px system-ui;padding:10px 14px;border-radius:99px;box-shadow:0 8px 24px -8px #000}
 @media(max-width:900px){.top nav,.tel{display:none}.g2,.tb{grid-template-columns:1fr}.cards.n3,.cards.n4,.pk,.rv,.tm,.st,.nm .w,.perk .w,.mp2{grid-template-columns:1fr 1fr}.prg,.cat{grid-template-columns:repeat(2,1fr)}.fg{grid-template-columns:1fr 1fr}
 .fcard{position:static;margin-top:-60px;margin-inline:12px}.hpg{grid-template-columns:1fr;grid-template-rows:420px 180px 180px;height:auto}.hpg .big{grid-row:auto}.gl{grid-template-columns:1fr 1fr;grid-template-rows:200px 140px 140px}.gl img:first-child{grid-column:span 2;grid-row:auto}.pkc.on{transform:none}}
-@media(max-width:600px){.sec{padding:58px 0}.cards.n3,.cards.n4,.pk,.rv,.st,.mp2,.ba{grid-template-columns:1fr}.hf{min-height:540px}.top .w{height:62px;gap:12px}.hr .b{display:none}
+@media(max-width:600px){.hpic img{aspect-ratio:4/3}.sec{padding:58px 0}.cards.n3,.cards.n4,.pk,.rv,.st,.mp2,.ba{grid-template-columns:1fr}.hf{min-height:540px}.top .w{height:62px;gap:12px}.hr .b{display:none}
 .mb{display:grid;grid-template-columns:1fr 1fr 1.4fr;position:sticky;bottom:0;z-index:30;background:#fff;border-top:1px solid var(--ln)}.mb a{min-height:56px;display:grid;place-items:center;font-weight:700;font-size:15px}.mb a.p{background:var(--ac);color:#fff}.back{bottom:70px}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}"""
 
