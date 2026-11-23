@@ -18,3 +18,10 @@
 .hero .sahne.fg{height:auto!important;margin-top:0}
 .hero .sahne.fg>*{animation:none}
 @media(max-width:900px){.hero .sahne.fg{height:auto!important;margin:18px -8px 0}}
+
+/* mobil: yazılar okunsun diye figür ekrandan geniş tutulur, parmakla yana kaydırılır */
+@media(max-width:700px){
+ .hero .sahne.fg{overflow-x:auto;overflow-y:hidden;margin:18px -18px 0;-webkit-overflow-scrolling:touch;scrollbar-width:none;scroll-snap-type:x proximity;touch-action:pan-x pan-y}
+ .hero .sahne.fg::-webkit-scrollbar{display:none}
+ .hero .sahne.fg .fgw{width:170%;max-width:none;scroll-snap-align:start}
+}
