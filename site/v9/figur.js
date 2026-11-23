@@ -60,7 +60,7 @@ function tick(now){if(t0===null)t0=now;const k=cv.width/W;ctx.setTransform(k,0,0
  // ortam: figürden sola kopan kareler (fareyle itilir), üstünde yanıp sönen pikseller
  for(let q=0;q<3;q++){const x=430+Math.random()*260,y=150+Math.random()*600,[r,g,b]=px(x,y);if(b>r+40&&r+g+b<500)parts.push({x,y,vx:-(.4+Math.random()*1.6),vy:(Math.random()-.6)*.5,l:0,m:130+Math.random()*150,s:5+Math.random()*9,c:`rgb(${r},${g},${b})`})}
  parts=parts.filter(p=>p.l<p.m);for(const p of parts){p.l++;const dx=p.x-ptr.x,dy=p.y-ptr.y,d2=dx*dx+dy*dy;if(d2<9000){const f=(9000-d2)/9000*1.8,d=Math.sqrt(d2)||1;p.x+=dx/d*f;p.y+=dy/d*f}
-  p.x+=p.vx;p.y+=p.vy+Math.sin(p.l/30)*.2;ctx.globalAlpha=Math.sin(Math.PI*p.l/p.m)*.9;ctx.fillStyle=p.c;ctx.fillRect(p.x,p.y,p.s,p.s)}
+  p.x+=p.vx;p.y+=p.vy+Math.sin(p.l/30)*.2;if(CH.some(c=>p.x>c.b[0]-8&&p.x<c.b[2]+8&&p.y>c.b[1]-8&&p.y<c.b[3]+8))continue;ctx.globalAlpha=Math.sin(Math.PI*p.l/p.m)*.9;ctx.fillStyle=p.c;ctx.fillRect(p.x,p.y,p.s,p.s)}
  if(Math.random()<.45){const x=640+Math.random()*330,y=80+Math.random()*620,[r,g,b]=px(x,y);if(b>r+40)tw.push({x:x-x%11,y:y-y%11,l:0})}
  tw=tw.filter(t=>t.l<40);for(const t of tw){t.l++;ctx.globalAlpha=Math.sin(Math.PI*t.l/40)*.85;ctx.fillStyle='#8cc6ff';ctx.fillRect(t.x,t.y,9,9)}
  // onay halkası hafifçe süzülür
