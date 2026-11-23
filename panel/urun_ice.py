@@ -31,6 +31,8 @@ ALAN = [  # (alan, şablon başlığı, takma adlar)
     ("img1", "Görsel 1", ["gorsel 1", "gorsel", "resim", "resim 1", "image", "gorsel linki"]),
     ("img2", "Görsel 2", ["gorsel 2", "resim 2"]),
     ("img3", "Görsel 3", ["gorsel 3", "resim 3"]),
+    ("img4", "Görsel 4", ["gorsel 4", "resim 4"]),
+    ("img5", "Görsel 5", ["gorsel 5", "resim 5"]),
     ("status", "Durum", ["durum", "status", "yayin"]),
     ("group", "Ana stok kodu", ["ana stok kodu", "ana kod", "grup", "parent", "ana urun kodu"]),
     ("o1n", "Seçenek 1 adı", ["secenek 1 adi", "varyant 1 adi"]),
@@ -77,6 +79,76 @@ def sablon_csv():
     for r in ornek:
         w.writerow(r)
     return "﻿" + buf.getvalue()
+
+
+def sablon_xlsx(markalar=(), kategoriler=()):
+    """Örnek satırlı, açıklamalı Excel şablonu (base64 için bayt döner)."""
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, PatternFill, Alignment
+    from openpyxl.worksheet.datavalidation import DataValidation
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Ürünler"
+    bas = [b for _a, b, _x in ALAN]
+    ws.append(bas)
+    ornek = [
+        {"Ürün adı": "Keten Gömlek", "Stok kodu": "KG-01", "Barkod": "8690000000014", "Kategori": "Gömlek", "Marka": "Nevermore", "Alış fiyatı": 400, "Satış fiyatı": 900,
+         "KDV": 20, "Stok": 10, "Açıklama": "Yumuşak dokulu keten gömlek", "Görsel 1": "https://site.com/gorsel1.jpg", "Görsel 2": "https://site.com/gorsel2.jpg", "Durum": "Yayında"},
+        {"Ürün adı": "Tişört", "Stok kodu": "TS-B-M", "Kategori": "Tişört", "Marka": "Nevermore", "Alış fiyatı": 100, "Satış fiyatı": 300, "İndirimli fiyat": 250, "KDV": 20, "Stok": 5,
+         "Görsel 1": "https://site.com/tisort.jpg", "Durum": "Yayında", "Ana stok kodu": "TS", "Seçenek 1 adı": "Renk", "Seçenek 1 değeri": "Beyaz", "Seçenek 2 adı": "Beden", "Seçenek 2 değeri": "M"},
+        {"Stok kodu": "TS-B-L", "Satış fiyatı": 300, "Stok": 3, "Ana stok kodu": "TS", "Seçenek 1 adı": "Renk", "Seçenek 1 değeri": "Beyaz", "Seçenek 2 adı": "Beden", "Seçenek 2 değeri": "L"},
+    ]
+    for o in ornek:
+        ws.append([o.get(b, "") for b in bas])
+    for c in ws[1]:
+        c.font = Font(bold=True, color="FFFFFF")
+        c.fill = PatternFill("solid", fgColor="1F3A5F")
+        c.alignment = Alignment(wrap_text=True, vertical="center")
+    for i, b in enumerate(bas, start=1):
+        ws.column_dimensions[ws.cell(1, i).column_letter].width = max(14, min(34, len(b) + 6))
+    ws.freeze_panes = "A2"
+    for r in range(2, 2002):                       # barkod ve stok kodu metin kalsın (bilimsel gösterim olmasın)
+        for col in (2, 3):
+            ws.cell(r, col).number_format = "@"
+    ac = wb.create_sheet("Açıklama")
+    ac.append(["Sütun", "Ne yazılır", "Zorunlu"])
+    yaz = {"name": ("Ürünün adı", "Evet"), "sku": ("Benzersiz stok kodu; güncellemede eşleşme için kullanılır", "Önerilir"), "barcode": ("EAN/GTIN; hücre Metin biçiminde olmalı", "Hayır"),
+           "cat": ("Kategori adı; yoksa oluşturulur", "Hayır"), "brand": ("Markalar sayfasındaki adla aynı yazın; yoksa otomatik eklenir", "Hayır"), "model": ("Model adı", "Hayır"),
+           "cost": ("Alış fiyatı (sayı)", "Hayır"), "price": ("KDV dâhil satış fiyatı", "Evet"), "sale_price": ("İndirimli fiyat; boşsa indirim yok", "Hayır"), "vat": ("0, 1, 10 ya da 20", "Hayır"),
+           "stock": ("Stok adedi", "Hayır"), "desc": ("Ürün açıklaması", "Hayır"), "status": ("Yayında ya da Taslak", "Hayır"),
+           "group": ("Renk/beden gibi seçenekli ürünlerde aynı değeri taşıyan satırlar tek ürün olur", "Seçenekli ürünlerde")}
+    for a, b, _x in ALAN:
+        if a.startswith("img"):
+            ac.append([b, "Tam görsel bağlantısı (https://…). Bir hücreye birden fazlasını | ile ayırarak yazabilirsiniz", "Hayır"])
+        elif a in yaz:
+            ac.append([b, yaz[a][0], yaz[a][1]])
+        else:
+            ac.append([b, "Seçenekli ürünlerde renk/beden adı ve değeri (örn. Renk → Beyaz)", "Seçenekli ürünlerde"])
+    for c in ac[1]:
+        c.font = Font(bold=True)
+    ac.column_dimensions["A"].width = 22
+    ac.column_dimensions["B"].width = 90
+    ac.column_dimensions["C"].width = 20
+    if markalar:
+        mk = wb.create_sheet("Markalar")
+        mk.append(["Kayıtlı markalarınız"])
+        for m in markalar:
+            mk.append([m])
+        mk["A1"].font = Font(bold=True)
+        mk.column_dimensions["A"].width = 30
+        dv = DataValidation(type="list", formula1="=Markalar!$A$2:$A$%d" % (len(markalar) + 1), allow_blank=True, showErrorMessage=False)
+        ws.add_data_validation(dv)
+        dv.add("E2:E2001")
+    if kategoriler:
+        kt = wb.create_sheet("Kategoriler")
+        kt.append(["Kayıtlı kategorileriniz"])
+        for m in kategoriler:
+            kt.append([m])
+        kt["A1"].font = Font(bold=True)
+        kt.column_dimensions["A"].width = 30
+    buf = io.BytesIO()
+    wb.save(buf)
+    return buf.getvalue()
 
 
 def oku(raw, ad):
@@ -147,7 +219,7 @@ def kur(satirlar, eslesme):
                         raise HTTPException(422, "%s sayı olmalı: %s" % (ETIKET[a], v))
                     p[a] = urun._num(v)
             imgs = []
-            for a in ("img1", "img2", "img3"):
+            for a in ("img1", "img2", "img3", "img4", "img5"):
                 for u in re.split(r"[|\s]+", _hucre(s0, eslesme, a)):
                     if u:
                         if not re.match(r"^(https?://|/)", u):
@@ -194,7 +266,13 @@ def register(api_router, db, deps):
 
     @api_router.get("/yp/products/import/template")
     async def sablon(_: dict = adm):
-        return {"ok": True, "name": "urun-sablonu.csv", "csv": sablon_csv(), "alanlar": [{"alan": a, "baslik": b} for a, b, _x in ALAN]}
+        mk = [b["name"] async for b in db.brands.find({"is_active": {"$ne": False}}, {"_id": 0, "name": 1}).sort("name", 1)]
+        kt = sorted({str(x) for x in await db.yp_products.distinct("cat") if x})[:300]
+        try:
+            xl = base64.b64encode(sablon_xlsx(mk, kt)).decode()
+        except Exception:                                          # noqa: BLE001
+            xl = ""
+        return {"ok": True, "name": "urun-sablonu.csv", "xlsx": xl, "xlsx_name": "urun-yukleme-sablonu.xlsx", "csv": sablon_csv(), "alanlar": [{"alan": a, "baslik": b} for a, b, _x in ALAN]}
 
     @api_router.post("/yp/products/import/parse")
     async def parse(payload: dict, _: dict = adm):
@@ -305,6 +383,9 @@ def register(api_router, db, deps):
                 await db.yp_products.update_one({"id": x["id"]}, {"$set": doc})
                 ids.append(x["id"])
                 gunc += 1
+        for bn in {str(x["doc"].get("brand") or "").strip() for x in plan} - {""}:   # listede olmayan markalar otomatik eklenir
+            if not await db.brands.find_one({"name": {"$regex": "^" + re.escape(bn) + "$", "$options": "i"}}, {"_id": 1}):
+                await db.brands.insert_one({"id": str(uuid.uuid4()), "name": bn, "logo_url": "", "is_active": True, "created_at": urun._now()})
         for pid in ids:                                                  # aynayı yükleme bitince, ürün başına bir kez
             await urun._ayna(db, pid)
         await db.yp_import_jobs.update_one({"id": j["id"]}, {"$set": {"state": "bitti", "errors": hatalar, "rows": [], "sonuc": {"ekle": ekle, "guncelle": gunc}}})

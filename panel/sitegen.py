@@ -718,13 +718,22 @@ def block_images(html):
     return [{"i": i, "pid": str(el.get("data-i") or el.get("data-p")), "tag": el.name} for i, el in enumerate(img_nodes(soup))]
 
 
+ADD_BASE = 1000
+
+
 def edit_imgs(html, ed, url_of, reg=None):
     """ed: {sıra: yüklenen resim anahtarı}. Resim, lightbox ve tema betiği yeni adresi kullansın diye data-i/data-p 'u<anahtar>' olur."""
     from bs4 import BeautifulSoup
     soup = BeautifulSoup(html, "html.parser")
     nodes = img_nodes(soup)
     done = False
+    adds = []
     for k, v in ed.items():
+        if str(k).isdigit() and int(k) >= ADD_BASE:        # bölüme sonradan eklenen resimler
+            u_ = url_of(str(v))
+            if u_:
+                adds.append((int(k), u_, str(v)))
+            continue
         try:
             el = nodes[int(k)]
         except (ValueError, IndexError):
@@ -750,6 +759,16 @@ def edit_imgs(html, ed, url_of, reg=None):
         if reg is not None:
             reg[uid] = url
         done = True
+    if adds:
+        root = soup.find(True, class_="ed") or soup.find(True)
+        if root is not None:
+            strip = soup.new_tag("div", attrs={"class": "yp-add", "style": "display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;max-width:1200px;margin:0 auto;padding:16px 20px"})
+            for _i, u_, v_ in sorted(adds):
+                if reg is not None:
+                    reg["u" + v_] = u_
+                strip.append(soup.new_tag("img", attrs={"src": u_, "alt": "", "loading": "lazy", "style": "width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:12px;display:block"}))
+            root.append(strip)
+            done = True
     return str(soup) if done else html
 
 

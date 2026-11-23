@@ -37,7 +37,8 @@ def mix(a, b, t): return _hex([x + (y - x) * t for x, y in zip(_rgb(a), _rgb(b))
 def lum(h): r, g, b = _rgb(h); return (.299 * r + .587 * g + .114 * b) / 255
 
 
-def page(i, t, c):
+def page(i, t, c, ext=None):
+    ext = ext or {}
     nm, sec, fam, pal, fn, secs, pages, works, _ = t
     dk, ac, sf = pal
     fh, fb = [x.strip() for x in fn.split("/")]
@@ -59,8 +60,8 @@ def page(i, t, c):
         return '<a class="b %s" href="#iletisim">%s</a>' % (cls, E_(t_))
 
     def form(fields, b, dark=False):
-        return '<form class="fm%s" onsubmit="event.preventDefault();this.querySelector(\'.ok\').hidden=false">%s<button class="b p">%s</button><p class="ok" hidden>Talebiniz alındı, 15 dakika içinde dönüyoruz.</p></form>' % (
-            " dk" if dark else "", "".join('<label><span>%s</span><input placeholder="%s"></label>' % (E_(f), E_(f)) for f in fields), E_(b))
+        return '<form class="fm%s" onsubmit="%s">%s<button class="b p">%s</button><p class="ok" hidden>Talebiniz alındı, 15 dakika içinde dönüyoruz.</p></form>' % (
+            " dk" if dark else "", ("return OK.go(this,'%s')" % ext["form_to"]) if ext.get("form_to") else "event.preventDefault();this.querySelector('.ok').hidden=false", "".join('<label><span>%s</span><input placeholder="%s"></label>' % (E_(f), E_(f)) for f in fields), E_(b))
 
     def head(eyebrow, h2, p=""):
         return '<div class="hd %s"><h2>%s</h2>%s</div>' % (S[3], E_(h2), '<p>%s</p>' % E_(p) if p else "")
@@ -140,7 +141,7 @@ def page(i, t, c):
         elif code == "pr":
             prods = c.get("products") or [("Ürün", "250 ₺")] * 5
             out.append('<section class="sec"><div class="w">%s<div class="prg">%s</div></div></section>' % (head("Mağaza", "Çok satanlar" if fam == "magaza" else "Online mağaza", "Sepete ekleyin, kapınıza gelsin."), "".join(
-                '<div class="pc"><img loading="lazy" src="%s" alt="%s"><h3>%s</h3><div><b>%s</b><button class="b p s" onclick="var x=document.getElementById(\'sbc\');x.textContent=+x.textContent+1">Sepete ekle</button></div></div>' % (ph(k + 3, 600, 720), E_(a), E_(a), E_(p)) for k, (a, p) in enumerate(prods))))
+                '<div class="pc" data-id="p%d" data-n="%s" data-p="%s" data-img="%s"><a href="urun-%d.html"><img loading="lazy" src="%s" alt="%s"><h3>%s</h3></a><div><b>%s</b><button class="b p s" onclick="OK.addP(this)">Sepete ekle</button></div></div>' % (k + 1, E_(a), E_(p), ph(k + 3, 300, 360), k + 1, ph(k + 3, 600, 720), E_(a), E_(a), E_(p)) for k, (a, p) in enumerate(prods))))
         elif code == "cat":
             out.append('<section class="sec"><div class="w">%s<div class="cat">%s</div></div></section>' % (head("Kategoriler", "Ne arıyorsunuz?"), "".join('<a style="background-image:linear-gradient(0deg,rgba(0,0,0,.55),transparent 60%%),url(%s)"><b>%s</b></a>' % (ph(k + 1, 600, 700), E_(a)) for k, (a, _, _) in enumerate(c["cards"][:5]))))
         elif code == "mn":
@@ -160,8 +161,14 @@ def page(i, t, c):
     if c.get("perks") and fam == "magaza":
         out.insert(3, '<section class="perk"><div class="w">%s</div></section>' % "".join("<div><b>%s</b><span>%s</span></div>" % (E_(a), E_(b)) for a, b in c["perks"]))
 
+    if ext.get("content") is not None:
+        out = [ext["content"]]
     navs = [p for p in pages if not p.startswith(("Sepet", "Ödeme", "Hesabım", "Yasal", "Ürün detay", "Hizmet detay", "Cihaz detay", "Uygulama detay", "Tedavi detay", "İlan detay"))][:5]
+    if ext.get("nav"):
+        navs = [l for l, _ in ext["nav"]]
     shop = fam == "magaza" or any("mağaza" in w.lower() or "sepet" in w.lower() for w in works)
+    if ext.get("nav"):
+        shop = ext.get("shop", False)
     items = [x[0] for x in c.get("cards", [])][:6]
     mega = '<div class="mega"><div class="w mg"><div><b>%s</b>%s</div><div><b>Hızlı erişim</b>%s</div><a class="mgp" style="background-image:linear-gradient(0deg,rgba(0,0,0,.6),transparent 60%%),url(%s)"><span>Kampanya</span><b>%s</b></a></div></div>' % (
         E_(navs[0].split(" (")[0]), "".join('<a href="#">%s</a>' % E_(x) for x in items), "".join('<a href="#">%s</a>' % E_(p.split(" (")[0]) for p in navs[1:]), ph(3, 600, 400), E_({"servis": "Kış öncesi bakımda %15 indirim", "randevu": "İlk randevuya özel %10", "magaza": "Sezon sonu indirimi", "yemek": "Hafta içi öğle menüsü"}.get(fam, "Bu ay ücretsiz danışmanlık")))
@@ -170,7 +177,7 @@ def page(i, t, c):
     hdr = drawer + '<header class="top nv-' + S[1] + '"><div class="w"><button class="bur" onclick="document.body.classList.add(\'mo\')" aria-label="Menü"><i></i><i></i><i></i></button><a class="lg" href="#" aria-label="%s">%s</a><nav><span class="hasm">%s ▾%s</span>%s</nav><div class="hr">%s<a class="b p s" href="#iletisim">%s</a></div></div></header>' % (
         E_(nm), logo(S[5] == "dark" or S[1] == "overlay"), E_(navs[0].split(" (")[0]), mega, "".join('<a href="#">%s</a>' % E_(p.split(" (")[0]) for p in navs[1:]), '<a class="cart" href="#" aria-label="Sepet">Sepet <b id="sbc">0</b></a>' if shop else '<a class="tel" href="tel:+905320000000">%s</a>' % phone, cta)
     ftr = '<footer><div class="w fg"><div><b class="lg">%s</b><p>%s · %s</p></div><div><b>Sayfalar</b>%s</div><div><b>Kurumsal</b><a>Hakkımızda</a><a>KVKK</a><a>Çerez politikası</a>%s</div><div><b>İletişim</b><a>%s</a><a>Bornova / İzmir</a></div></div><div class="w cp">© 2026 %s · onlinekaydet ile yapıldı</div></footer>' % (
-        logo(S[4] != "light"), E_(sec), E_(LBL[fam]), "".join("<a>%s</a>" % E_(p.split(" (")[0]) for p in pages[:6]), "<a>Mesafeli satış sözleşmesi</a><a>İade koşulları</a>" if shop else "", phone, E_(nm))
+        logo(S[4] != "light"), E_(sec), E_(LBL[fam]), "".join("<a>%s</a>" % E_(p.split(" (")[0]) for p in (ext.get("foot_labels") or (navs if ext.get("nav") else pages[:6]))), "<a>Mesafeli satış sözleşmesi</a><a>İade koşulları</a>" if shop else "", phone, E_(nm))
     ftr = ftr.replace("<footer>", '<footer class="f-%s">' % S[4], 1)
     if S[4] == "big":
         ftr = ftr.replace('<div class="w cp">', '<div class="w fgiant" aria-hidden="true">%s</div><div class="w cp">' % E_(nm), 1)
@@ -185,8 +192,27 @@ def page(i, t, c):
     fhf, fbf = FAMN.get(fh, fh), FAMN.get(fb, fb)
     css = CSS.replace("--DK", dk).replace("--AC", ac).replace("--SF", sf).replace("--FH", "'%s'" % fhf).replace("--FB", "'%s'" % fbf).replace("--RR", "%dpx" % RAD[i])
     upper = "text-transform:uppercase;letter-spacing:.01em;" if fh in ("Oswald", "Anton", "Barlow Condensed") else ""
-    return '<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>%s · %s</title><link rel="preconnect" href="https://fonts.gstatic.com"><link href="https://fonts.googleapis.com/css2?%s&display=swap" rel="stylesheet"><style>%s h1,h2{%s}</style></head><body data-mode="%s">%s<main>%s</main>%s%s<a class="back" href="index.html">← Tüm temalar</a><script>%s</script></body></html>' % (
+    html_ = '<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>%s · %s</title><link rel="preconnect" href="https://fonts.gstatic.com"><link href="https://fonts.googleapis.com/css2?%s&display=swap" rel="stylesheet"><style>%s h1,h2{%s}</style></head><body data-mode="%s">%s<main>%s</main>%s%s<a class="back" href="index.html">← Tüm temalar</a><script>%s</script></body></html>' % (
         E_(nm), E_(sec), fonts, css + modecss + SKINCSS.replace("--FH", "'%s'" % fhf).replace("--FB", "'%s'" % fbf), upper, S[5], hdr, "".join(out), ftr, mbar, JS)
+
+    if ext:
+        L = ext.get("links", {})
+        for lab, href in L.items():
+            e = E_(lab)
+            html_ = html_.replace('<a href="#">%s</a>' % e, '<a href="%s">%s</a>' % (href, e))
+            html_ = html_.replace('<span class="hasm">%s ▾' % e, '<span class="hasm"><a href="%s">%s</a> ▾' % (href, e))
+            html_ = html_.replace("<a href=\"#\" onclick=\"document.body.classList.remove('mo')\">%s<span>" % e, "<a href=\"%s\" onclick=\"document.body.classList.remove('mo')\">%s<span>" % (href, e))
+            html_ = html_.replace("<a>%s</a>" % e, '<a href="%s">%s</a>' % (href, e))
+        html_ = html_.replace('href="#iletisim"', 'href="%s"' % ext.get("cta", "iletisim.html"))
+        html_ = html_.replace('<a class="lg" href="#"', '<a class="lg" href="%s"' % ext.get("home", "index.html"))
+        html_ = html_.replace('<a class="cart" href="#"', '<a class="cart" href="%s"' % ext.get("cart", "sepet.html"))
+        html_ = html_.replace('<a href="index.html">', '<a href="%s">' % ext.get("home", "index.html"))
+        html_ = html_.replace('<a class="back" href="index.html">← Tüm temalar</a>', '<a class="back" href="%s">← Tüm temalar</a>' % ext.get("back", "../../onizleme/index.html"))
+        if ext.get("title"):
+            html_ = re.sub(r"<title>.*?</title>", "<title>%s · %s</title>" % (E_(ext["title"]), E_(nm)), html_, 1)
+        html_ = html_.replace("</style>", ext.get("css", "") + "</style>", 1)
+        html_ = html_.replace("<script>" + JS, "<script>" + ext.get("lib", "") + JS + ext.get("js", ""), 1)
+    return html_
 
 
 SKINCSS = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "skin.css.txt")).read()

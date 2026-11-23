@@ -741,7 +741,8 @@ def register(api_router, db, deps):
         if name not in org:
             raise HTTPException(404, "Bölüm yok")
         cur = ((ctx["p"].get("imgedits") or {}).get(ctx["th"]["slug"], {}) or {}).get(name, {})
-        return {"images": [dict(x, thumb="https://images.pexels.com/photos/%s/pexels-photo-%s.jpeg?auto=compress&cs=tinysrgb&w=400" % (x["pid"], x["pid"]), k=cur.get(str(x["i"]), "")) for x in sitegen.block_images(org[name])]}
+        return {"images": [dict(x, thumb="https://images.pexels.com/photos/%s/pexels-photo-%s.jpeg?auto=compress&cs=tinysrgb&w=400" % (x["pid"], x["pid"]), k=cur.get(str(x["i"]), "")) for x in sitegen.block_images(org[name])],
+                "adds": [{"i": int(i), "k": v} for i, v in sorted(cur.items(), key=lambda z: int(z[0])) if str(i).isdigit() and int(i) >= sitegen.ADD_BASE], "base": sitegen.ADD_BASE}
 
     @api_router.get("/site/preview")
     async def preview(path: str = "/", dev: str = "", _: dict = Depends(require_admin)):
