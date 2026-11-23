@@ -403,6 +403,9 @@ def register(api_router, db, deps):
             st["delivered_at"] = _now()
         await db.yp_orders.update_one({"id": o["id"]}, {"$set": st})
         await log(o["id"], new, _t(payload.get("note"), 200) or STATES[new])
+        if new == "teslim":
+            import dis_siparis
+            await dis_siparis.kasaya_isle(db, o["id"])
         try:
             import musteri_mail, notify
             ev = musteri_mail.YP_DURUM.get(new)
@@ -492,6 +495,9 @@ def register(api_router, db, deps):
                     st["delivered_at"] = _now()
                 await db.yp_orders.update_one({"id": oid}, {"$set": st})
                 await log(oid, new, "toplu işlem")
+                if new == "teslim":
+                    import dis_siparis
+                    await dis_siparis.kasaya_isle(db, oid)
             elif op == "cargo":
                 if cur in ("teslim", "iptal"):
                     skip.append({"no": no, "why": "%s siparişte kargo değişmez" % STATES[cur]})
