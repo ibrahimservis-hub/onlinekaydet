@@ -9,7 +9,7 @@ function wire(box){
  var hp=document.createElement('input');hp.name='website';hp.tabIndex=-1;hp.autocomplete='off';hp.setAttribute('aria-hidden','true');hp.style.cssText='position:absolute;left:-9999px;width:1px;height:1px;opacity:0';box.appendChild(hp);
  var msg=document.createElement('div');msg.setAttribute('role','status');msg.style.cssText='grid-column:1/-1;font-weight:600;font-size:14px;margin-top:8px;min-height:0';box.appendChild(msg);
  var btn=box.querySelector('a.bt,button.bt');if(!btn)return;btn.removeAttribute('href');btn.style.cursor='pointer';
- var form=(box.closest('section')&&box.closest('section').id)||(location.pathname.split('/').pop().replace('.html','')||'ana-sayfa');
+ var form=box.dataset.form||(box.closest('section')&&box.closest('section').id)||(location.pathname.split('/').pop().replace('.html','')||'ana-sayfa');
  btn.addEventListener('click',function(e){e.preventDefault();if(btn.dataset.busy)return;
   var sec=val(box,'sektör'),d={name:val(box,'ad soyad'),phone:val(box,'telefon'),firm:val(box,'firma'),sector:sec==='Seçiniz'?'':sec,form:form,website:hp.value,extra:{}};
   var us=val(box,'ustanız');if(us)d.extra.usta=us;var ms=val(box,'mesajınız');if(ms)d.extra.mesaj=ms;var tu=val(box,'türü');if(tu)d.extra.tur=tu;if(window.OK_CTX)for(var k in window.OK_CTX)d.extra[k]=window.OK_CTX[k];

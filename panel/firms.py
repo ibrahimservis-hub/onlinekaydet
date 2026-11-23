@@ -35,10 +35,18 @@ MODULE_PREFIX = {"muhasebe": ("finance", "cash", "accounting", "receivables", "p
 ALL_MODS = ["servis", "personel", "muhasebe", "rapor", "sms", "magaza", "site", "pazarlama",
             "bakim", "teklif", "bayi", "qr", "atama", "takip", "odeme", "efatura", "portal", "arayan", "randevu", "eticaret"]
 DEFAULT_PACKAGES = {
-    "baslangic": {"name": "Başlangıç", "price": 0, "modules": ["servis", "personel"]},
-    "profesyonel": {"name": "Profesyonel", "price": 0, "modules": ["servis", "personel", "muhasebe", "rapor", "sms"]},
-    "tam": {"name": "Tam Paket", "price": 0, "modules": ["servis", "personel", "muhasebe", "rapor", "sms", "magaza", "site", "pazarlama", "randevu"]},
-    "kurumsal": {"name": "Kurumsal", "price": 0, "modules": list(ALL_MODS)},
+    "baslangic": {"name": "Başlangıç", "price": 990, "yearly": 9900, "modules": ["servis", "personel"],
+                  "tagline": "Tek başına çalışan ya da küçük ekip.",
+                  "features": ["İş ve servis kayıtları", "Ekip, yetki, iş yükü", "Sektörel iş akışı ve dosya", "Yazdırılabilir imzalı belge"]},
+    "profesyonel": {"name": "Profesyonel", "price": 1990, "yearly": 19900, "modules": ["servis", "personel", "muhasebe", "rapor", "sms"],
+                    "tagline": "Kasayı, raporu ve müşteri mesajını da panelden yürütenler.",
+                    "features": ["Başlangıç'taki her şey", "Muhasebe ve kasa", "17 hazır rapor", "SMS ve mesaj şablonları", "Prim, maaş, avans hesabı"]},
+    "tam": {"name": "Tam Paket", "price": 3490, "yearly": 34900, "modules": ["servis", "personel", "muhasebe", "rapor", "sms", "magaza", "site", "pazarlama", "randevu"],
+            "tagline": "Web sitesi, online randevu ve satışla yeni müşteri isteyenler.",
+            "features": ["Profesyonel'deki her şey", "Web sitesi ve hazır temalar", "Site editörü, SEO, alan adı", "Online randevu", "Yedek parça mağazası", "Pazarlama ve kampanya"]},
+    "kurumsal": {"name": "Kurumsal", "price": 5990, "yearly": 59900, "modules": list(ALL_MODS),
+                 "tagline": "Teklif, online tahsilat, bayi ve saha takibi gereken ekipler.",
+                 "features": ["Tam Paket'teki her şey", "Bayi (B2B) ve müşteri portalı", "Teklif, ödeme linki, e-arşiv", "Bakım hatırlatma, QR etiket", "Canlı saha takibi, otomatik atama"]},
 }
 DEFAULT_FEATURES = {"customer_add": True}
 FEATURE_LABELS = {"customer_add": "Müşteriyi kendi ekleme"}
@@ -204,11 +212,27 @@ def register(api_router, db, deps):
         for k, v in (body.get("packages") or {}).items():
             if not re.match(r"^[a-z0-9_]{2,30}$", k):
                 raise HTTPException(status_code=400, detail="Paket anahtarı geçersiz")
-            items[k] = {"name": str(v.get("name") or k)[:40], "price": float(v.get("price") or 0), "modules": list(ALL_MODS) if k == "kurumsal" else clean_modules(v.get("modules"))}
+            feats = [" ".join(str(x).split())[:90] for x in (v.get("features") or []) if str(x).strip()][:12]
+            items[k] = {"name": str(v.get("name") or k)[:40], "price": float(v.get("price") or 0), "yearly": float(v.get("yearly") or 0),
+                        "tagline": " ".join(str(v.get("tagline") or "").split())[:140], "features": feats,
+                        "modules": list(ALL_MODS) if k == "kurumsal" else clean_modules(v.get("modules"))}
         if not items:
             raise HTTPException(status_code=400, detail="En az bir paket olmalı")
         await db.main().app_settings.update_one({"_id": "packages"}, {"$set": {"items": items}}, upsert=True)
         return {"packages": items}
+
+    @api_router.get("/public/packages")
+    async def packages_public():
+        """Sitedeki fiyat sayfası için: yönetimde düzenlenen ad, fiyat, açıklama ve madde listesi."""
+        out = []
+        for k, v in (await packages_get()).items():
+            d = DEFAULT_PACKAGES.get(k, {})
+            price = float(v.get("price") or 0)
+            out.append({"id": k, "name": v.get("name") or k, "price": price,
+                        "yearly": float(v.get("yearly") or 0) or (price * 10 if price else 0),
+                        "tagline": v.get("tagline") or d.get("tagline") or "", "features": v.get("features") or d.get("features") or [],
+                        "modules": len(v.get("modules") or [])})
+        return {"packages": out}
 
     _MOD = {}
 
