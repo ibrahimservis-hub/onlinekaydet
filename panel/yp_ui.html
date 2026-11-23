@@ -1499,7 +1499,7 @@ function ktSecenek(rows,haric,sec){var yasak={};if(haric){haric.forEach(function
 async function ktYukle(){KT.rows=await api('/shop/categories');CUR.ktree=KT.rows;KT.sel={}}
 V.kategori=async function(){await ktYukle();ktCiz()};
 function ktCiz(){var q=KT.q.trim().toLowerCase(),rows=q?KT.rows.filter(function(r){return (r.path||r.name).toLowerCase().indexOf(q)>-1}):ktAgac(KT.rows,true),n=Object.keys(KT.sel).length;
- var h=head('Kategoriler','Ürünlerinizi ağaçta düzenleyin. Satırı sürükleyip başka kategorinin üstüne bırakarak alt kategori yapın.','<button class="btn p" data-a="kt-yeni" data-p="">Ana kategori ekle</button>');
+ var h=head('Kategoriler','Satırdaki rakam ürün sayısıdır. Kategori, içinde ürün olunca sitenizde görünür. Başka kategorinin üstüne sürükleyerek alt kategori yapabilirsiniz.','<button class="btn p" data-a="kt-yeni" data-p="">Ana kategori ekle</button>');
  h+='<div class="card"><div class="pad" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><input id="ktq" value="'+esc(KT.q)+'" placeholder="Kategori ara" style="flex:1;min-width:180px;border:1px solid #d0d5dd;border-radius:8px;padding:9px 11px;min-height:40px">'
   +'<button class="btn s" data-a="kt-ac-hepsi">Tümünü aç</button><button class="btn s" data-a="kt-kapat-hepsi">Tümünü kapat</button>'+(n?'<b style="margin-left:6px">'+n+' seçili</b><button class="btn s d" data-a="kt-silsec">Seçilileri sil</button>':'')+'</div>'
   +'<div class="kttree" id="kttree">'+(rows.length?rows.map(function(r){var ac=KT.open[r.id];return '<div class="ktr'+(r.active===false?' off':'')+'" draggable="true" data-id="'+esc(r.id)+'" style="padding-left:'+(q?10:10+r.depth*22)+'px">'
