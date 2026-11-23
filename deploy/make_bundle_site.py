@@ -29,5 +29,10 @@ for dp, _dn, fns in os.walk(S + '/tema-onizleme/yeni'):
     for fn in sorted(fns):
         rel = os.path.relpath(os.path.join(dp, fn), S)
         if fn.endswith(('.html', '.css', '.js', '.svg')): txt(rel)
+# sinematik demo siteler (docs/demo -> /demo/)
+for dp, _dn, fns in os.walk(R + '/docs/demo'):
+    for fn in sorted(fns):
+        if fn.endswith(('.html', '.js')):
+            files['docroot/demo/' + os.path.relpath(os.path.join(dp, fn), R + '/docs/demo')] = open(os.path.join(dp, fn), encoding='utf-8').read()
 json.dump({'files': files, 'edits': []}, open(R + '/deploy/bundle_site.json', 'w', encoding='utf-8'), ensure_ascii=False)
 print(len(files), 'dosya', os.path.getsize(R + '/deploy/bundle_site.json') // 1024, 'KB')
