@@ -104,7 +104,7 @@ with TestClient(s.app) as c:
         r = pub("get", "/api/public/shop/legal/mesafeli-satis-sozlesmesi"); assert r.status_code == 200 and "Mesafeli" in r.json()["html"], r.text
         assert c.put("/api/shop/settings", headers=O, json={"legal": {"seller_title": "Mağaza Ltd. Şti.", "address": "Ankara", "tax_no": "1234567890"}}).status_code == 200
         r = pub("get", "/api/public/shop/legal/mesafeli-satis-sozlesmesi"); assert "Mağaza Ltd. Şti." in r.json()["html"]
-        a = c.get("/api/shop/legal", headers=O).json(); assert "E-posta" in a["missing"] and len(a["docs"]) == 6
+        a = c.get("/api/shop/legal", headers=O).json(); assert isinstance(a["missing"], list) and len(a["docs"]) == 9
         assert c.put("/api/shop/legal/gizlilik-kvkk", headers=O, json={"html": "<script>x</script>" + "a" * 60}).status_code == 422
         assert c.put("/api/shop/legal/gizlilik-kvkk", headers=O, json={"html": "<p>" + "Özel gizlilik metni. " * 5 + "</p>"}).status_code == 200
         assert "Özel gizlilik" in pub("get", "/api/public/shop/legal/gizlilik-kvkk").json()["html"]
@@ -122,7 +122,7 @@ with TestClient(s.app) as c:
         assert "/mesafeli-satis-sozlesmesi" in r.text and "/iptal-iade-cayma" in r.text and "/gizlilik-kvkk" in r.text, "footer'da yasal bağlantılar olmalı"
         r = c.get("/api/public/hosted-site?p=%2Fmesafeli-satis-sozlesmesi", headers=H); assert r.status_code == 200 and "Mağaza Ltd. Şti." in r.text and "Cayma hakkı" in r.text, r.text[:300]
         c.put("/api/site/features", headers=O, json={"shop_enabled": False})
-        r = c.get("/api/public/hosted-site?p=%2F", headers=H); assert "/mesafeli-satis-sozlesmesi" not in r.text, "mağaza kapalıyken yasal bağlantı görünmez"
+        r = c.get("/api/public/hosted-site?p=%2F", headers=H); assert "/mesafeli-satis-sozlesmesi" not in r.text, "mağaza kapalı ve e-ticaret modülü yokken satış metni görünmez"
         c.put("/api/site/features", headers=O, json={"shop_enabled": True})
     t("yayındaki sitede mağaza açıkken footer'a yasal bağlantılar eklenir, sayfalar tema içinde açılır", site)
 print("OK", len(ok)); [print(" +", n) for n in ok]

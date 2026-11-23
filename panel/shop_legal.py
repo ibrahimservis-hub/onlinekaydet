@@ -12,10 +12,14 @@ import html as _h
 SLUGS = [
     ("mesafeli-satis-sozlesmesi", "Mesafeli Satış Sözleşmesi"),
     ("on-bilgilendirme-formu", "Ön Bilgilendirme Formu"),
-    ("iptal-iade-cayma", "İptal, İade ve Cayma Hakkı"),
+    ("iptal-iade-cayma", "İade Koşulları"),
     ("teslimat-ve-kargo", "Teslimat ve Kargo Koşulları"),
-    ("gizlilik-kvkk", "Gizlilik ve KVKK Aydınlatma Metni"),
+    ("gizlilik-kvkk", "KVKK Aydınlatma Metni"),
+    ("gizlilik-guvenlik", "Gizlilik ve Güvenlik"),
     ("cerez-politikasi", "Çerez Politikası"),
+    ("uyelik-sozlesmesi", "Üyelik Sözleşmesi"),
+    ("ticari-ileti-izni", "Ticari Elektronik İleti İzni"),
+    ("randevu-iptal-kosullari", "Randevu ve İptal Koşulları"),
 ]
 TITLES = dict(SLUGS)
 # Sipariş verirken onaylanması gereken belgeler
@@ -155,6 +159,95 @@ def _doc_cerez(s, shop):
 _BUILD = {"mesafeli-satis-sozlesmesi": _doc_sozlesme, "on-bilgilendirme-formu": _doc_onbilgi, "iptal-iade-cayma": _doc_iade,
           "teslimat-ve-kargo": _doc_teslimat, "gizlilik-kvkk": _doc_gizlilik, "cerez-politikasi": _doc_cerez}
 
+def _doc_gizlilik_genel(s, shop):
+    return f"""
+<h2>Veri sorumlusu</h2>{seller_block(s)}
+<h2>İşlenen kişisel veriler</h2>
+<p>Ad soyad, telefon, e-posta, talep ve randevu bilgileriniz, bize ilettiğiniz mesaj ve belgeler ile sitenin kullanımına ilişkin teknik veriler (IP adresi, tarayıcı bilgisi).</p>
+<h2>İşleme amaçları</h2>
+<p>Taleplerinize ve randevularınıza dönüş yapmak, hizmeti sunmak, faturalandırma ve satış sonrası destek sağlamak, yasal yükümlülükleri yerine getirmek.</p>
+<h2>Hukuki sebepler</h2>
+<p>Sözleşmenin kurulması ve ifası (KVKK m.5/2-c), hukuki yükümlülük (m.5/2-ç), meşru menfaat (m.5/2-f) ve gerektiğinde açık rızanız (m.5/1).</p>
+<h2>Aktarım</h2>
+<p>Verileriniz, hizmetin gerektirdiği ölçüde SMS ve e-posta hizmet sağlayıcılarına, muhasebe/mali müşavire ve yetkili kamu kurumlarına aktarılabilir. Yurt dışına aktarım yapılması halinde KVKK m.9 kurallarına uyulur.</p>
+<h2>Saklama süresi</h2>
+<p>Verileriniz ilgili mevzuatta öngörülen süreler ve amacın gerektirdiği süre boyunca saklanır; sonra silinir, yok edilir veya anonim hale getirilir.</p>
+<h2>Haklarınız (KVKK m.11)</h2>
+<p>Verilerinizin işlenip işlenmediğini öğrenme, bilgi talep etme, düzeltme, silme ve yok edilmesini isteme, aktarılan üçüncü kişileri bilme, itiraz etme ve zararın giderilmesini talep etme haklarına sahipsiniz.</p>
+<p>Başvurularınızı {e(s.get('email') or s.get('kep') or 'yukarıdaki iletişim bilgileri')} üzerinden iletebilirsiniz.</p>"""
+
+
+def _doc_cerez_genel(s, shop):
+    return f"""
+<p>Sitemiz, düzgün çalışabilmesi için gerekli çerez ve tarayıcı depolama teknolojilerini kullanır.</p>
+<h2>Zorunlu kullanımlar</h2>
+<p>Sitenin açılması, formların çalışması ve güvenlik için gereken veriler pazarlama amacıyla kullanılmaz.</p>
+<h2>İsteğe bağlı kullanımlar</h2>
+<p>Ziyaretçi istatistiği veya reklam ölçümü için kullanılan araçlar yalnızca onayınızla çalışır. Tercihinizi sayfanın altındaki “Çerez tercihleri” bağlantısından değiştirebilir, tarayıcı ayarlarınızdan çerezleri silebilirsiniz.</p>
+<h2>İletişim</h2><p>Sorularınız için: {e(s.get('email') or s.get('phone') or 'iletişim bilgileri')}.</p>"""
+
+
+def _doc_guvenlik(s, shop):
+    return f"""
+<p>{e(s.get('seller_title') or 'Firmamız')} olarak ziyaretçilerimizin ve müşterilerimizin bilgilerinin güvenliğini önemsiyoruz.</p>
+<h2>Bağlantı güvenliği</h2>
+<p>Sitemize erişim SSL (https) ile şifrelenir. Formlara yazdığınız bilgiler bu şifreli bağlantı üzerinden iletilir.</p>
+<h2>Ödeme güvenliği</h2>
+<p>Kartla ödeme yapılan durumlarda kart bilgileriniz bu sitede saklanmaz; ödeme, lisanslı ödeme kuruluşunun 3D Secure korumalı sayfasında alınır.</p>
+<h2>Verilerin korunması</h2>
+<p>Kişisel verilere yalnızca yetkili çalışanlarımız erişir; şifreler geri döndürülemez biçimde saklanır. Verilerinizin nasıl işlendiği KVKK Aydınlatma Metni’nde açıklanmıştır.</p>
+<h2>Güvenlik bildirimi</h2>
+<p>Bir güvenlik açığı fark ederseniz {e(s.get('email') or s.get('phone') or 'iletişim bilgilerimiz')} üzerinden bize bildirin.</p>
+<h2>Satıcı bilgileri</h2>{seller_block(s)}"""
+
+
+def _doc_uyelik(s, shop):
+    return f"""
+<h2>Taraflar</h2>{seller_block(s)}
+<p>Bu sözleşme, siteye üye olan kişi (“Üye”) ile yukarıda bilgileri yer alan firma arasında üyelik hesabının kullanımına ilişkin kuralları belirler.</p>
+<h2>Üyelik</h2>
+<p>Üye, kayıt sırasında doğru ve güncel bilgi vermeyi kabul eder. Hesap bilgilerinin ve şifrenin gizliliği Üye’nin sorumluluğundadır; hesabın yetkisiz kullanımını fark eden Üye bunu derhal bildirir.</p>
+<h2>Hak ve yükümlülükler</h2>
+<p>Üye, siteyi hukuka ve genel ahlaka uygun kullanır; başkası adına üyelik oluşturmaz. Firma, kuralların ihlali halinde üyeliği askıya alma veya sonlandırma hakkını saklı tutar.</p>
+<h2>Kişisel veriler</h2>
+<p>Üyelik verileri KVKK Aydınlatma Metni’ne uygun işlenir.</p>
+<h2>Üyeliğin sona ermesi</h2>
+<p>Üye, hesabını dilediği zaman kapatabilir veya {e(s.get('email') or 'yukarıdaki iletişim bilgileri')} üzerinden kapatılmasını isteyebilir.</p>
+<h2>Değişiklik</h2>
+<p>Firma, bu sözleşmeyi güncelleyebilir; güncel metin sitede yayınlanır.</p>"""
+
+
+def _doc_ileti(s, shop):
+    return f"""
+<h2>Gönderici</h2>{seller_block(s)}
+<h2>İzin kapsamı</h2>
+<p>6563 sayılı Elektronik Ticaretin Düzenlenmesi Hakkında Kanun uyarınca; kampanya, indirim, duyuru ve tanıtım amaçlı ticari elektronik iletilerin (SMS, e-posta, arama, anlık bildirim) tarafınıza gönderilmesine verdiğiniz izin bu metinde açıklanır.</p>
+<h2>İznin verilmesi</h2>
+<p>İzin, formdaki ilgili kutucuğu işaretleyerek isteğe bağlı olarak verilir. İzin vermemeniz hizmet almanıza engel olmaz.</p>
+<h2>İznin geri alınması</h2>
+<p>İznizi dilediğiniz zaman, hiçbir gerekçe göstermeden geri alabilirsiniz. Her iletide ret yolu belirtilir; ayrıca {e(s.get('email') or s.get('phone') or 'iletişim bilgileri')} üzerinden de talep edebilirsiniz. Talebiniz en geç 3 iş günü içinde işleme alınır.</p>
+<h2>Kişisel veriler</h2>
+<p>İzin verdiğiniz iletişim bilgileri KVKK Aydınlatma Metni’ne uygun şekilde işlenir.</p>"""
+
+
+def _doc_randevu(s, shop):
+    gun = shop.get("cancel_hours") or 24
+    return f"""
+<h2>Randevu</h2>{seller_block(s)}
+<p>Randevunuz, seçtiğiniz gün ve saat için size ayrılır. Randevu bilgileriniz telefon ve mesajla teyit edilebilir.</p>
+<h2>İptal ve değişiklik</h2>
+<p>Randevunuzu iptal etmek veya değiştirmek için en az {e(gun)} saat önceden {e(s.get('phone') or s.get('email') or 'bize ulaşın')} üzerinden haber vermenizi rica ederiz.</p>
+<h2>Gelinmeyen randevular</h2>
+<p>Haber verilmeden gelinmeyen randevular nedeniyle ayrılan süre başkasına verilemediğinden, tekrarlanması halinde yeni randevular için ön ödeme istenebilir.</p>
+<h2>Gecikme</h2>
+<p>Gecikmelerde hizmet süresi kısalabilir veya randevu yeniden planlanabilir.</p>
+<h2>Ücret ve ödeme</h2>
+<p>Hizmet ücreti hizmetin verildiği anda ya da önceden bildirilen şekilde ödenir.</p>"""
+
+
+_BUILD.update({"gizlilik-guvenlik": _doc_guvenlik, "uyelik-sozlesmesi": _doc_uyelik, "ticari-ileti-izni": _doc_ileti, "randevu-iptal-kosullari": _doc_randevu})
+
+
 CSS = ('<style>.lg{max-width:860px;margin:0 auto;padding:48px 20px 72px;line-height:1.7}.lg h1{font-size:clamp(1.6rem,4vw,2.3rem);margin:0 0 6px}'
        '.lg h2{font-size:1.15rem;margin:26px 0 6px}.lg .lg-d{color:#6b7280;font-size:.85rem;margin:0 0 20px}.lg-t{border-collapse:collapse;margin:8px 0}'
        '.lg-t th{text-align:left;padding:4px 14px 4px 0;vertical-align:top;white-space:nowrap}.lg-t td{padding:4px 0}</style>')
@@ -162,6 +255,8 @@ CSS = ('<style>.lg{max-width:860px;margin:0 auto;padding:48px 20px 72px;line-hei
 
 def default_html(slug: str, seller: dict, shop: dict) -> str:
     f = _BUILD.get(slug)
+    if (shop or {}).get("_genel"):                       # mağazasız site: sipariş/kargo anlatımı olmayan sade metinler
+        f = {"gizlilik-kvkk": _doc_gizlilik_genel, "cerez-politikasi": _doc_cerez_genel}.get(slug, f)
     return f(seller, shop) if f else ""
 
 

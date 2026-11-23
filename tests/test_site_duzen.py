@@ -47,6 +47,17 @@ with TestClient(s.app) as c:
             got = [x["k"] for x in c.get("/api/site/profile", headers=H).json()["profile"]["slides"]]
             assert got == [ks[1], ks[0], ks[2]], got
         t("▶ ile sıra değişti ve kaydedildi", d)
+        pg.click("[data-a=sitetab][data-t=yasal]"); pg.wait_for_selector("[data-a=ys-duzenle]", timeout=8000)
+        def e(): assert len(pg.query_selector_all("[data-a=ys-duzenle]")) >= 5 and pg.query_selector("#ysb input[name=seller_title]").input_value() == "Site Duzen"
+        t("yasal sekmesi: metinler ve otomatik firma unvanı", e)
+        pg.screenshot(path="/tmp/sd_yasal.png")
+        pg.click("[data-a=ys-duzenle][data-s=gizlilik-kvkk]"); pg.wait_for_selector("#ysed")
+        pg.evaluate("document.getElementById('ysed').innerHTML+='<p>Özel eklenen paragraf: verileriniz yalnızca bizde kalır ve üçüncü kişilerle paylaşılmaz.</p>'")
+        pg.click("[data-a=ys-kaydet]"); pg.wait_for_timeout(1500)
+        def f():
+            d = [x for x in c.get("/api/yp/yasal", headers=H).json()["docs"] if x["slug"] == "gizlilik-kvkk"][0]
+            assert d["custom"] and "Özel eklenen paragraf" in d["html"] and not errs, errs
+        t("metin ekranda düzenlenip kaydedildi", f)
         br.close()
 print("OK %d" % len(ok) if not bad else "HATA %d/%d" % (len(bad), len(ok) + len(bad)))
 os._exit(0)

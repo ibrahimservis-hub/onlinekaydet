@@ -70,7 +70,7 @@ with TestClient(s.app) as c:
     def h_():
         h1 = c.get("/api/site/preview", headers=H).text
         assert 'id="okc"' not in h1 and "okCerez" not in h1, "kapalıyken sitede görünmemeli"
-        assert c.get("/api/site/preview?path=/cerez-politikasi", headers=H).status_code == 404, "kapalıyken politika sayfası da olmamalı"
+        assert c.get("/api/site/preview?path=/cerez-politikasi", headers=H).status_code == 200, "yasal metinler bant kapalıyken de otomatik gelir"
     t("kapalıyken ne band ne politika sayfası vardır", h_)
 
     def i():

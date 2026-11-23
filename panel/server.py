@@ -2954,6 +2954,8 @@ import siparis
 siparis.register(api_router, db, {"require_admin": require_admin})
 import fatura
 fatura.register(api_router, db, {"require_admin": require_admin})
+import yasal
+yasal.register(api_router, db, {"require_admin": require_admin})
 
 import entegrasyon
 import entg_probe

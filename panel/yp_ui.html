@@ -1032,7 +1032,7 @@ V.raporEski=async function(){var k=CUR.rr||'ay',r=rng(k==='uc'?'uc':k),d=await a
  $('#main').innerHTML=h};
 /* ---------------- WEB SİTEM ---------------- */
 var ST={tab:'bolum',ed:''};
-var STAB=[['bolum','Bölümler'],['tasarim','Tasarım'],['gorsel','Görseller'],['bilgi','Bilgiler'],['menu','Menü']];
+var STAB=[['bolum','Bölümler'],['tasarim','Tasarım'],['gorsel','Görseller'],['bilgi','Bilgiler'],['yasal','Yasal metinler'],['menu','Menü']];
 function stabs(){return '<div class="stabs" role="tablist">'+STAB.map(function(x){var on=ST.tab===x[0];
  return '<button role="tab" data-a="sitetab" data-t="'+x[0]+'"'+(on?' class="on"':'')+' aria-selected="'+on+'">'+x[1]+'</button>'}).join('')+'</div>'}
 V.site=async function(){
@@ -1048,6 +1048,7 @@ async function siteTab(){var el=$('#sl');if(!el)return;var t=ST.tab;
  if(t==='tasarim'){el.innerHTML=stTema()+logoCard()+stPromo()+stBook()}
  else if(t==='gorsel'){el.innerHTML=mediaCards();loadThemeImgs()}
  else if(t==='bilgi'){el.innerHTML=stBilgi()}
+ else if(t==='yasal'){el.innerHTML='<div class="card"><div class="pad note">Yükleniyor…</div></div>';await yasalCiz()}
  else if(t==='menu'){el.innerHTML=stMenu();loadMenu()}
  else{if(!ST.ed)ST.ed=BX.eng||'tema';el.innerHTML=stBolum();
   if(ST.ed==='blok'){await bxPages()}else{loadBlocks()}}
@@ -2790,6 +2791,25 @@ function selBar(k){if(!SEL[k].length)return '<span id="selbar-'+k+'" hidden></sp
   +'<span class="sp"></span><button class="btn s" data-a="sel-bos" data-k="siparis">Seçimi bırak</button></div>'}
 function yazdir(html){var w=window.open('','_blank');if(!w)return toast('Yazdırma penceresi engellendi, tarayıcı izni verin',true);
  w.document.open();w.document.write(html);w.document.close()}
+/* ---- Yasal metinler: modüle göre otomatik gelir, firma bilgisiyle dolar, istenirse düzenlenir ---- */
+async function yasalCiz(){var el=$('#sl');if(!el)return;var r=await api('/yp/yasal');CUR.ys=r;
+ var h='<div class="card"><div class="hd"><h2>Firma bilgileri</h2></div><form id="ysb" class="pad" style="display:grid;gap:12px"><div class="note">Metinlerdeki satıcı bilgileri <b>firma kaydınızdan otomatik</b> dolar. Bir alanı değiştirirseniz bütün metinlerde sizin yazdığınız görünür; boş bırakırsanız yine otomatik dolar.'+(r.eksik.length?' <b style="color:#b42318">Eksik: '+r.eksik.map(esc).join(', ')+'.</b>':'')+'</div><div class="g2">'
+  +r.bilgi.map(function(x){return '<label class="f">'+esc(x.ad)+(x.kaynak==='oto'?' <span class="tag b" style="margin-left:6px">otomatik</span>':x.kaynak==='elle'?' <span class="tag g" style="margin-left:6px">sizin yazdığınız</span>':' <span class="tag y" style="margin-left:6px">boş</span>')+'<input name="'+x.k+'" maxlength="'+x.max+'" value="'+esc(x.v)+'"></label>'}).join('')
+  +'</div><div class="mf"><button class="btn p">Bilgileri kaydet</button></div></form></div>';
+ h+='<div class="card"><div class="hd"><h2>Sitenizdeki metinler</h2><div class="sp"></div><span class="note">'+(r.shop?'E-ticaret açık: satış metinleri dahil':'Sitenize uygun metinler')+'</span></div><div class="pad" style="padding-top:0"><div class="note" style="margin-bottom:10px">Bu metinler sitenizin en altında (footer) bağlantı olarak görünür. İsterseniz metni kendiniz değiştirin, “Varsayılana dön” ile eskisine dönün ya da footer’da göstermeyin. '+esc(r['not'])+'</div>'
+  +r.docs.map(function(d){return '<div class="row" style="grid-template-columns:1fr auto;align-items:center;gap:10px"><div><div class="t" style="font-size:14.5px">'+esc(d.title)+'</div><div class="m">'+(d.custom?'Sizin yazdığınız metin':'Otomatik hazırlanan metin')+(d.gizli?' · footer’da gizli':'')+'</div></div><span style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end"><button class="btn s" data-a="ys-duzenle" data-s="'+d.slug+'">Metni düzenle</button>'+(d.custom?'<button class="btn s" data-a="ys-reset" data-s="'+d.slug+'">Varsayılana dön</button>':'')+'<button class="btn s" data-a="ys-gizle" data-s="'+d.slug+'" data-g="'+(d.gizli?0:1)+'">'+(d.gizli?'Footer’da göster':'Footer’dan kaldır')+'</button></span></div>'}).join('')+'</div></div>';
+ el.innerHTML=h;pvKip()}
+document.addEventListener('submit',async function(ev){var f=ev.target;if(!f||f.id!=='ysb')return;ev.preventDefault();var b={};[].slice.call(f.elements).forEach(function(e){if(e.name)b[e.name]=e.value});
+ try{await api('/yp/yasal/bilgi',{method:'PUT',body:b});toast('Bilgiler kaydedildi, metinler güncellendi');await yasalCiz();preview()}catch(e){fail(e)}});
+document.addEventListener('click',async function(ev){var t=ev.target.closest&&ev.target.closest('[data-a^="ys-"]');if(!t)return;var a=t.dataset.a,sl=t.dataset.s;
+ try{
+  if(a==='ys-duzenle'){var d=CUR.ys.docs.filter(function(x){return x.slug===sl})[0];
+   modal(d.title,'<div class="note" style="margin-bottom:8px">Yazıyı doğrudan düzenleyin. Başlık ve madde işareti için düğmeleri kullanın.</div><div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap"><button type="button" class="btn s" data-a="ys-fmt" data-c="bold">Kalın</button><button type="button" class="btn s" data-a="ys-fmt" data-c="h2">Başlık</button><button type="button" class="btn s" data-a="ys-fmt" data-c="p">Düz yazı</button><button type="button" class="btn s" data-a="ys-fmt" data-c="ul">Madde işareti</button></div><div id="ysed" contenteditable="true" style="min-height:300px;max-height:56vh;overflow:auto;border:1px solid var(--line);border-radius:8px;padding:14px;background:#fff;line-height:1.65">'+d.html+'</div><div class="mf"><button type="button" class="btn" data-a="close">Vazgeç</button><button type="button" class="btn p" data-a="ys-kaydet" data-s="'+sl+'">Kaydet</button></div>',true)}
+  else if(a==='ys-fmt'){var c=t.dataset.c;document.getElementById('ysed').focus();if(c==='bold')document.execCommand('bold');else if(c==='ul')document.execCommand('insertUnorderedList');else document.execCommand('formatBlock',false,c)}
+  else if(a==='ys-kaydet'){var h=document.getElementById('ysed').innerHTML;await api('/yp/yasal/'+sl,{method:'PUT',body:{html:h}});closeM();toast('Metin kaydedildi, sitenizde yayında');await yasalCiz()}
+  else if(a==='ys-reset'){if(await ask('Metin ilk hazırlanan haline dönsün mü? Yazdıklarınız silinir.','Varsayılana dön')){await api('/yp/yasal/'+sl,{method:'PUT',body:{reset:true}});toast('Varsayılana döndü');await yasalCiz()}}
+  else if(a==='ys-gizle'){await api('/yp/yasal/'+sl,{method:'PUT',body:{gizli:t.dataset.g==='1'}});toast(t.dataset.g==='1'?'Footer’dan kaldırıldı':'Footer’a eklendi');await yasalCiz();preview()}
+ }catch(e){fail(e)}});
 /* ---- Faturalar: siparişlerden toplu hazırlanan fatura taslakları ---- */
 async function faturaListe(){var r=await api('/yp/invoices');CUR.fatura=r.rows;
  modal('Faturalar ('+r.n+')','<div class="note" style="margin-bottom:10px">Fatura taslağı siparişin kalemlerinden KDV ayrılarak hazırlanır. “Dosyaya aktar” ile tüm faturaları tek dosyada e-fatura/e-arşiv entegratörünüzün toplu yükleme ekranına verirsiniz; yüklediklerinizi “Kesildi” olarak işaretleyin.</div>'

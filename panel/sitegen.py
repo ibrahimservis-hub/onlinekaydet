@@ -1056,7 +1056,9 @@ def footer_logo(h, ctx):
 
 def footer_links(ctx, idx):
     links = ['<a href="/%s">%s</a>' % (x["slug"], E(x["title"])) for x in idx if x["kind"] in ("about", "services", "gallery", "process", "faq", "regions", "contact", "custom")]
-    legal = ['<a href="/%s">%s</a>' % (k, E(t)) for k, t in (ctx.get("legal") or [])]       # mağaza açıksa yasal metinler (mevzuat gereği her sayfadan erişilebilir)
+    legal = ['<a href="/%s">%s</a>' % (k, E(t)) for k, t in (ctx.get("legal") or [])]
+    if (ctx.get("cerez") or {}).get("on") and legal:       # çerez bandı açıksa ziyaretçi tercihini buradan değiştirebilir
+        legal.append('<a href="#cerez-tercihleri" onclick="if(window.okCerez){okCerez.sor()}return false">Çerez tercihleri</a>')       # mağaza açıksa yasal metinler (mevzuat gereği her sayfadan erişilebilir)
     links += ['<a href="%s">%s</a>' % (h, E(l)) for h, l in _sector_links(ctx)]
     if ctx.get("shop_on"):
         links += ['<a href="/magaza">Mağaza</a>', '<a href="/hesabim">Hesabım / Giriş</a>']

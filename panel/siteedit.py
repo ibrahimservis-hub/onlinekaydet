@@ -168,12 +168,8 @@ def register(api_router, db, deps):
         mods = None if mods is None else list(mods)
         shop_ok = bool(feats.get("shop_enabled")) and (mods is None or "magaza" in mods)   # paket Mağaza'yı içermiyorsa tema bölümü de yayında olmaz
         cz = dict(cerez_mod.VARSAYILAN, **((await db.app_settings.find_one({"_id": "cerez"}, {"_id": 0})) or {}))
-        if shop_ok:
-            legal = list(shop_legal.SLUGS)
-        elif cz.get("on"):                      # çerez bandı açıkken politika ve aydınlatma metni her sitede açılır
-            legal = [x for x in shop_legal.SLUGS if x[0] in ("cerez-politikasi", "gizlilik-kvkk")]
-        else:
-            legal = []
+        import yasal
+        legal = await yasal.footer_listesi(db, shop_ok)               # modüle göre gereken yasal metinler, otomatik
         ctx = {"modules": mods, "cerez": cz, "th": th, "brand": brand, "name": name, "tel": tel, "p": p, "sector": sector, "logo": logo, "city": prof.get("city") or "", "legal": legal, "shop_on": shop_ok, "dev": dev,
                 "img": (lambda k: imgs.get(k, "")) if inline else (lambda k: "/api/public/site-img/" + k),
                 "logo_abs": "/api/public/site-logo" if lg else ""}
@@ -1163,9 +1159,9 @@ def register(api_router, db, deps):
             if not h:
                 return None
         elif ctx and p in {k for k, _ in (ctx.get("legal") or [])}:
-            sc = await db.app_settings.find_one({"_id": "shop_settings"}, {"_id": 0}) or {}
-            cfg = {**shopmod.SHOP_DEFAULT, **sc}
-            body = shop_legal.page(p, shopmod.merge_legal(cfg.get("legal")), cfg, cfg.get("legal_docs"), str(cfg.get("updated_at") or ""))
+            import yasal
+            cfg, lgl = await yasal.cfg_ve_satici(db, ctx.get("shop_on"))
+            body = shop_legal.page(p, lgl, cfg, cfg.get("legal_docs"), str(cfg.get("updated_at") or ""))
             h = compose_page(await themed_home(ctx), shop_legal.TITLES[p] + " · " + ctx["name"], body)
             if not h:
                 return None

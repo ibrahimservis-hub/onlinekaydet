@@ -358,6 +358,11 @@ def register(api_router, db, deps):
         d = await get_doc("shop_settings", SHOP_DEFAULT)
         d["payments"] = merge_pay(d.get("payments"))
         d["legal"] = merge_legal(d.get("legal"))
+        try:
+            import yasal
+            d["legal"], _k = await yasal.satici(db, d["legal"])      # firma kaydından otomatik doldur
+        except Exception:                                              # noqa: BLE001
+            pass
         return d
 
     async def card_ready() -> bool:
@@ -1000,7 +1005,8 @@ def register(api_router, db, deps):
     async def admin_legal(_: dict = Depends(require_admin)):
         cfg = await shop_cfg()
         docs = []
-        for k, t in shop_legal.SLUGS:
+        import yasal
+        for k, t in [x for x in shop_legal.SLUGS if x[0] in yasal.SHOP + yasal.COMMON]:
             c = (cfg.get("legal_docs") or {}).get(k) or {}
             docs.append({"slug": k, "title": t, "custom": bool(c.get("html")), "html": shop_legal.doc_html(k, cfg["legal"], cfg, cfg.get("legal_docs")),
                          "default_html": shop_legal.default_html(k, cfg["legal"], cfg), "checkout": k in shop_legal.CHECKOUT_DOCS})
