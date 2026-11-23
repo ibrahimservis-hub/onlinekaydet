@@ -39,6 +39,22 @@ const ease=t=>t<0?0:t>1?1:t*t*(3-2*t);
 function comet(path,len,t,col,w){const n=14;for(let k=0;k<n;k++){const tt=t-k*.012;if(tt<0||tt>1)continue;const p=path.getPointAtLength(len*tt);ctx.globalAlpha=(1-k/n)*.9;ctx.fillStyle=col;ctx.beginPath();ctx.arc(p.x,p.y,w*(1-k/n*.6),0,7);ctx.fill()}}
 function pill(x,y,txt,a){ctx.globalAlpha=a;ctx.font='600 15px "IBM Plex Mono",ui-monospace,monospace';ctx.textAlign='center';ctx.textBaseline='middle';const w=ctx.measureText(txt).width+24;
  ctx.shadowColor='rgba(11,37,87,.35)';ctx.shadowBlur=10;ctx.fillStyle='#0b2557';ctx.beginPath();ctx.roundRect(x-w/2,y-15,w,30,15);ctx.fill();ctx.shadowBlur=0;ctx.fillStyle='#fff';ctx.fillText(txt,x+4,y+1);ctx.fillStyle='#f07a1a';ctx.beginPath();ctx.arc(x-w/2+11,y,3.2,0,7);ctx.fill()}
+
+const MAP='000000111111111100000000111111111100|011111111111011000111111111111111111|000111111111100001111111111111111110|000001111111100001111111111111111110|000000111111000001111111111111111000|000000011100000011111111011011100000|000000001100000011111110010110000000|000000000011110000111110000001110000|000000000011111000011110000001111000|000000000011110000011111000000111100|000000000001110000011100000001111100|000000000001100000001000000000011000|000000000001000000000000000000000000|000000000001000000000000000000000000|000000000000000000000000000000000000|111111111111111111111111111111111111|111111111111111111111111111111111111'.split('|'),isL=(la,lo)=>{const r=Math.min(16,Math.max(0,Math.floor((90-la*180/Math.PI)/10)-1)),c=Math.floor(((lo*180/Math.PI)%360)/10)%36;return MAP[r][c]==='1'};
+const GX=1082,GY=465,GR=48,GP=[];for(let la=-75;la<=80;la+=7)for(let lo=0;lo<360;lo+=7){GP.push([la*Math.PI/180,lo*Math.PI/180])}
+function globe(now){const th=now/2600;ctx.save();
+ const rg=ctx.createRadialGradient(GX-16,GY-18,6,GX,GY,GR+4);rg.addColorStop(0,'#e9f3ff');rg.addColorStop(.7,'#cfe2ff');rg.addColorStop(1,'#a9c9fb');
+ ctx.globalAlpha=1;ctx.fillStyle=rg;ctx.beginPath();ctx.arc(GX,GY,GR,0,7);ctx.fill();
+ ctx.beginPath();ctx.arc(GX,GY,GR,0,7);ctx.clip();
+ ctx.strokeStyle='rgba(29,95,209,.35)';ctx.lineWidth=1;
+ for(let k=0;k<6;k++){const l=th+k*Math.PI/6,rx=Math.abs(Math.cos(l))*GR;ctx.beginPath();ctx.ellipse(GX,GY,rx,GR,0,0,7);ctx.stroke()}
+ for(const la of [-50,-25,0,25,50]){const r=la*Math.PI/180,y=GY-Math.sin(r)*GR,rx=Math.cos(r)*GR;ctx.beginPath();ctx.ellipse(GX,y,rx,rx*.18,0,0,7);ctx.stroke()}
+ for(const p of GP){const lo=p[1]+th,z=Math.cos(p[0])*Math.cos(lo);if(z<0)continue;const x=GX+Math.cos(p[0])*Math.sin(lo)*GR,y=GY-Math.sin(p[0])*GR;
+  const land=isL(p[0],p[1]);const s=(land?3.6:1.8)*(.55+z*.45);
+  ctx.globalAlpha=(land?.95:.45)*(.35+z*.65);ctx.fillStyle=land?(z>.6?'#0b2557':'#1d5fd1'):'#3b8cff';ctx.fillRect(x-s/2,y-s/2,s,s)}
+ ctx.restore();ctx.globalAlpha=1;
+ const sh=ctx.createRadialGradient(GX-20,GY-22,2,GX-20,GY-22,30);sh.addColorStop(0,'rgba(255,255,255,.7)');sh.addColorStop(1,'rgba(255,255,255,0)');ctx.fillStyle=sh;ctx.beginPath();ctx.arc(GX,GY,GR,0,7);ctx.fill();
+ ctx.strokeStyle='rgba(11,37,87,.55)';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(GX,GY,GR,0,7);ctx.stroke()}
 function tick(now){if(t0===null)t0=now;const k=cv.width/W;ctx.setTransform(k,0,0,k,0,0);ctx.clearRect(0,0,W,H);
  const n=Math.floor((now-t0)/CYC),s=((now-t0)%CYC)/1000,C=CH[n%4],T=TL[(n*3)%8];
  // 1) kutu parlar, sinyal kablodan figüre akar
@@ -63,6 +79,7 @@ function tick(now){if(t0===null)t0=now;const k=cv.width/W;ctx.setTransform(k,0,0
   p.x+=p.vx;p.y+=p.vy+Math.sin(p.l/30)*.2;if(CH.some(c=>p.x>c.b[0]-8&&p.x<c.b[2]+8&&p.y>c.b[1]-8&&p.y<c.b[3]+8))continue;ctx.globalAlpha=Math.sin(Math.PI*p.l/p.m)*.9;ctx.fillStyle=p.c;ctx.fillRect(p.x,p.y,p.s,p.s)}
  if(Math.random()<.45){const x=640+Math.random()*330,y=80+Math.random()*620,[r,g,b]=px(x,y);if(b>r+40)tw.push({x:x-x%11,y:y-y%11,l:0})}
  tw=tw.filter(t=>t.l<40);for(const t of tw){t.l++;ctx.globalAlpha=Math.sin(Math.PI*t.l/40)*.85;ctx.fillStyle='#8cc6ff';ctx.fillRect(t.x,t.y,9,9)}
+ globe(now);
  // onay halkası hafifçe süzülür
  document.getElementById('fgrg').setAttribute('transform',`translate(0 ${Math.sin(now/900)*2})`);
  ctx.globalAlpha=1;requestAnimationFrame(tick)}
