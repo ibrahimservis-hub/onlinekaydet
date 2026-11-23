@@ -24,5 +24,10 @@ for rel in ('v9/nx.css', 'v9/nx.js', 'v9/nx-ic.css', 'v9/nx-ic.js', 'v9/paket.js
 for d, exts in (('v9/img/nx', ('.webp', '.jpg')), ('v9/img/vid', ('.mp4',))):
     for f in sorted(os.listdir(S + '/' + d)):
         if f.endswith(exts): bin_(d + '/' + f)
+# 20 yeni sektör teması (çok sayfalı canlı önizleme)
+for dp, _dn, fns in os.walk(S + '/tema-onizleme/yeni'):
+    for fn in sorted(fns):
+        rel = os.path.relpath(os.path.join(dp, fn), S)
+        if fn.endswith(('.html', '.css', '.js', '.svg')): txt(rel)
 json.dump({'files': files, 'edits': []}, open(R + '/deploy/bundle_site.json', 'w', encoding='utf-8'), ensure_ascii=False)
 print(len(files), 'dosya', os.path.getsize(R + '/deploy/bundle_site.json') // 1024, 'KB')
