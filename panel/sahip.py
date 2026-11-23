@@ -200,7 +200,7 @@ def register(app, api_router, db, deps):
 
         def dest(rel):
             parts = str(rel).split("/")
-            if parts[0] not in roots or ".." in parts or not parts[-1] or not parts[-1].endswith((".py", ".js", ".html", ".json", ".css", ".txt", ".svg", ".xml", ".webp", ".png", ".jpg", ".woff2")):
+            if parts[0] not in roots or ".." in parts or not parts[-1] or not parts[-1].endswith((".py", ".js", ".html", ".json", ".css", ".txt", ".svg", ".xml", ".webp", ".png", ".jpg", ".woff2", ".mp4")):
                 raise HTTPException(422, "İzin verilmeyen yol: %s" % rel)
             root = roots[parts[0]]
             path = os.path.normpath(os.path.join(root, *parts[1:]))

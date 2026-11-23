@@ -5,7 +5,7 @@ R = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 files = {}
 t = lambda k, p: files.__setitem__(k, open(os.path.join(R, p), encoding='utf-8').read())
 for f in ('demo.py', 'server.py', 'siparis.py', 'sitegen.py', 'yp_ui.html', 'sahip/index.html', 'kategori.py', 'shop.py', 'shop_sync.py', 'storefront.py', 'urun.py', 'urun_ayna.py',
-          'blocks.py', 'entegrasyon.py', 'entg_probe.py', 'marka_seo.py', 'meta_capi.py', 'musteri_mail.py', 'olcum.py', 'siteedit.py', 'sp_ext.py', 'urun_kisisel.py'):
+          'blocks.py', 'entegrasyon.py', 'entg_probe.py', 'marka_seo.py', 'meta_capi.py', 'musteri_mail.py', 'olcum.py', 'siteedit.py', 'sp_ext.py', 'urun_kisisel.py', 'sahip.py'):
     t('app/' + f, 'panel/' + f)
 for f in ('gen4.py', 'fetch_photos.py', 'ill/make_ill.py'):
     t('themes/' + f, 'themes/' + f)
