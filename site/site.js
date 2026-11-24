@@ -12,7 +12,7 @@ document.addEventListener('click',function(e){
  if(!msg){msg=document.createElement('div');msg.setAttribute('data-v','');msg.setAttribute('role','alert');msg.style.cssText='grid-column:1/-1;font-weight:700;font-size:14px;color:#b42318';box.insertBefore(msg,b)}
  if(!ok||(nm&&!nm.value.trim())){
   e.preventDefault();e.stopImmediatePropagation();
-  msg.textContent=(nm&&!nm.value.trim())?'Lütfen adınızı yazın.':'Lütfen geçerli bir telefon numarası yazın (ör. 0544 444 40 04).';
+  msg.textContent=(nm&&!nm.value.trim())?'Lütfen adınızı yazın.':'Lütfen geçerli bir telefon numarası yazın (ör. 05xx xxx xx xx).';
   tel.setAttribute('aria-invalid',!ok);(nm&&!nm.value.trim()?nm:tel).focus();
  }else{msg.textContent='';tel.removeAttribute('aria-invalid')}
 },true);
