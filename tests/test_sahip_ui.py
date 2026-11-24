@@ -28,9 +28,9 @@ with sync_playwright() as pw:
     pg.fill("#le", os.environ.get("ADMIN_EMAIL", "admin@servis.com")); pg.fill("#lp", os.environ.get("ADMIN_PASSWORD", "admin123"))
     pg.click("button[type=submit]"); pg.wait_for_selector(".tbar", timeout=15000); pg.wait_for_timeout(800)
     def a():
-        assert pg.locator(".side nav a").count() == 6
+        assert pg.locator(".side nav a").count() == 7
         assert pg.locator(".gtabs").count() == 0  # Genel Bakış tek sayfa
-    t("rayda 6 grup, genel bakışta sekme yok", a)
+    t("rayda 7 grup, genel bakışta sekme yok", a)
     def b():
         pg.click(".side nav a:nth-child(2)"); pg.wait_for_selector(".gtabs", timeout=5000)
         tabs = pg.locator(".gtabs a").all_inner_texts()
