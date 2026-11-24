@@ -161,4 +161,11 @@ html,body{touch-action:pan-y pinch-zoom;overscroll-behavior-x:none}
 .hm[aria-expanded="true"]:before,.hm[aria-expanded="true"]:after{background:#0b1220!important}
 .mm-bt{padding-top:30px;background:linear-gradient(to bottom,#faf8f300,#faf8f3 42%)}
 }
-@media(max-width:1060px){.mmenu.mm{padding-top:78px!important}.mm .mm-try.v2 .mm-t1{align-self:center}}
+@media(max-width:1060px){.mmenu.mm{padding-top:118px!important}.mm .mm-try.v2 .mm-t1{align-self:center}}
+@media(max-width:1060px){
+.hm[aria-expanded="true"]{width:46px;height:46px;border-radius:50%!important;background:#0b1220!important;box-shadow:0 6px 18px rgba(11,18,32,.28)}
+.hm[aria-expanded="true"]:before,.hm[aria-expanded="true"]:after{background:#fff!important;left:14px!important;right:14px!important;height:2.5px!important}
+.hm[aria-expanded="true"]:before{top:15px;transform:translateY(8px) rotate(45deg)!important}
+.hm[aria-expanded="true"]:after{top:31px;transform:translateY(-8px) rotate(-45deg)!important}
+.hm[aria-expanded="true"] span{opacity:0!important}
+}
