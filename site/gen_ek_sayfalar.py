@@ -6,6 +6,7 @@ D = os.path.dirname(os.path.abspath(__file__)); os.chdir(D)
 src = open('gen_seo_karsilastirma.py', encoding='utf-8').read()
 pre = src[:src.index('RIV = {')]
 exec(compile(pre, 'gen_seo_pre', 'exec'))
+from ek_icerik import EK, TERIM_EK, KARISTIRILAN, SABLON_EK, SABLON_NEDEN, SABLON_SSS_EK, MESAJ_ILKE, MESAJ_ZAMAN, HUB_SSS
 G = json.load(open(os.path.join(D, 'ent_gruplar.json'), encoding='utf-8'))
 NEW = []
 _page = page
@@ -60,17 +61,22 @@ GRUP = {
 }
 def grup_sayfa(k, g):
     ad_g, alt, items = G[k]
+    X = EK[k]; SSS = g['sss'] + X['sss']
     liste = ''.join('<li><b>%s</b>: %s</li>' % (um(a), um(b)) for a, b in items)
     diger = ''.join('<a href="%s">%s</a>' % (v['fn'], v['ad']) for kk, v in GRUP.items() if kk != k)
     body = (STIL + sec('Nedir?', '<p>%s</p>' % g['ne'])
             + sec('Bağlanabilen servisler (%d)' % len(items), '<ul>%s</ul><p class="mini">Liste panelin Bağlantılar ekranıyla aynıdır. Tüm gruplar için <a href="entegrasyonlar.html">Entegrasyonlar</a> sayfasına bakın.</p>' % liste, tint=True)
+            + sec('Bu bağlantı size ne sağlar?', '<ul>%s</ul>' % ''.join('<li>%s</li>' % x for x in X['neden']))
             + sec('Panelden nasıl bağlanır?', '<ol style="max-width:760px;line-height:1.8;padding-left:20px">%s</ol>' % ''.join('<li>%s</li>' % x for x in g['adim']))
             + sec('Bilmeniz gerekenler', '<ul>%s</ul>' % ''.join('<li>%s</li>' % x for x in g['dikkat']), tint=True)
-            + faq('Sık sorulan sorular', g['sss']) 
+            + sec('Başlamadan önce hazırlık listesi', '<ul>%s</ul>' % ''.join('<li>%s</li>' % x for x in X['hazirlik']))
+            + sec('Sık yapılan hatalar', '<ul>%s</ul>' % ''.join('<li>%s</li>' % x for x in X['hata']), tint=True)
+            + sec('Seçerken neye bakmalı?', '<ul>%s</ul><p class="mini">Bu ölçütler genel bir rehberdir; fiyat ve koşullar için ilgili firmanın güncel sözleşmesine bakın.</p>' % ''.join('<li>%s</li>' % x for x in X['olcut']))
+            + faq('Sık sorulan sorular', SSS) 
             + sec('Diğer entegrasyon grupları', '<p style="line-height:2.2">%s</p>' % ' · '.join(['<a href="%s">%s</a>' % (v['fn'], v['ad']) for kk, v in GRUP.items() if kk != k]))
             + cta())
     desc = '%s: %s bağlanabilir. %s Panelden nasıl bağlandığı ve dikkat edilecekler.' % (g['ad'], ', '.join(um(a) for a, b in items[:5]), g['ne'][:90])
-    return page(g['fn'], '%s | OnlineKaydet' % g['ad'], desc[:300], '<a href="entegrasyonlar.html">Entegrasyonlar</a> / ' + g['ad'], g['ad'], '%d servisle bağlanır. Panelden nasıl bağlandığını ve nelere dikkat edeceğinizi anlatıyoruz.' % len(items), body, ld=faq_ld(g['sss']))
+    return page(g['fn'], '%s | OnlineKaydet' % g['ad'], desc[:300], '<a href="entegrasyonlar.html">Entegrasyonlar</a> / ' + g['ad'], g['ad'], '%d servisle bağlanır. Panelden nasıl bağlandığını ve nelere dikkat edeceğinizi anlatıyoruz.' % len(items), body, ld=faq_ld(SSS))
 
 # ---------- 2. Sözlük ----------
 TERIM = [
@@ -111,12 +117,16 @@ TERIM = [
  ('Sektör terimi', 'Aynı işlemin sektöre göre farklı adı: servis formu, dava dosyası, muayene, iş emri gibi.'),
 ]
 def sozluk():
+    TERIM.extend(TERIM_EK)
     TERIM.sort(key=lambda x: x[0].lower().replace('ı', 'i'))
     li = ''.join('<div class="r" id="%s"><b>%s</b><span>%s</span></div>' % (re.sub(r'[^a-z0-9]+', '-', a.lower().translate(str.maketrans('çğıöşü', 'cgiosu'))).strip('-'), a, b) for a, b in TERIM)
-    body = (STIL + '<section class="kk"><div class="w"><div class="kt">%s</div><p class="mini">Tanımlar genel bilgi niteliğindedir; vergi ve hukuk konularında mali müşaviriniz ya da avukatınıza danışın.</p></div></section>' % li + cta())
+    body = (STIL + '<section class="kk"><div class="w"><div class="kt">%s</div><p class="mini">Tanımlar genel bilgi niteliğindedir; vergi ve hukuk konularında mali müşaviriniz ya da avukatınıza danışın.</p></div></section>' % li
+            + sec('Sık karıştırılan terimler', '<div class="kt">%s</div>' % ''.join('<div class="r"><b>%s</b><span>%s</span></div>' % x for x in KARISTIRILAN), tint=True)
+            + sec('Bir servis kaydı nasıl ilerler?', '<ol style="max-width:760px;line-height:1.8;padding-left:20px"><li>Cihaz ya da iş <b>servis kaydı</b> olarak açılır, müşteriye bir <b>takip numarası</b> verilir.</li><li>Gerekirse <b>fiyat teklifi</b> hazırlanır; müşteri onaylayınca iş <b>iş emri</b> olarak teknisyene atanır.</li><li>Kullanılan <b>yedek parça</b> ve işçilik kayda geçer; <b>maliyet</b> ortaya çıkar.</li><li>İş bitince <b>tahsilat</b> alınır, <b>cari hesap</b> ve <b>kasa</b> güncellenir; gerekirse fatura kesilir.</li><li>Yapılan işe <b>garanti belgesi</b> verilir; <b>bakım hatırlatma</b> ile müşteri bir sonraki bakımda geri çağrılır.</li></ol>')
+            + cta())
     ld = {"@context": "https://schema.org", "@type": "DefinedTermSet", "name": "Servis ve işletme sözlüğü", "hasDefinedTerm": [{"@type": "DefinedTerm", "name": a, "description": b} for a, b in TERIM]}
     return page('sozluk.html', 'Servis ve işletme sözlüğü: %d terim | OnlineKaydet' % len(TERIM), 'Servis kaydı, cari hesap, sanal POS, e-arşiv, KVKK, İYS gibi servis ve işletme terimlerinin kısa, açık tanımları.',
-                'Sözlük', 'Servis ve işletme sözlüğü', 'Servis işinde ve küçük işletmede sık geçen %d terimin kısa tanımı.' % len(TERIM), body, ld=ld)
+                'Sözlük', 'Servis ve işletme sözlüğü', 'Servis işinde ve küçük işletmede sık geçen %d terimin kısa tanımı; karıştırılan kavramların farkı ve bir servis kaydının yolculuğu.' % len(TERIM), body, ld=ld)
 
 # ---------- 3. Şablonlar ----------
 YAZ = ('<style>.sb{max-width:860px;border:1px solid #cfd3de;border-radius:10px;background:#fff;padding:28px}.sb h3{margin:0 0 14px;font:700 20px var(--fd,inherit)}'
@@ -155,20 +165,29 @@ MESAJ = [
 ]
 def sablon(s):
     body = (YAZ + STIL + '<section class="kk yz"><div class="w">%s<p class="mini">%s</p><p class="kopya"><a class="bt" href="#" onclick="window.print();return false">Yazdır</a></p></div></section>' % (s['govde'], s['not_'])
-            + faq('Sık sorulan sorular', s['sss']) + cta('Bu formları panelden otomatik üretin', 'Servis formu, teklif ve makbuz panelde sektörünüzün kendi adıyla hazırlanır. 7 gün ücretsiz deneyin.'))
-    return page(s['fn'], s['ba'] + ' | OnlineKaydet', s['desc'], '<a href="sablonlar.html">Şablonlar</a> / ' + s['ad'], s['ad'], s['lead'], body, ld=faq_ld(s['sss']))
+            + sec('Bu belge neden gerekli?', '<ul>%s</ul>' % ''.join('<li>%s</li>' % x for x in SABLON_NEDEN[s['fn']]))
+            + (sec('Nasıl doldurulur?', '<ol style="max-width:760px;line-height:1.8;padding-left:20px">%s</ol>' % ''.join('<li>%s</li>' % x for x in SABLON_EK[s['fn']]['nasil'])) 
+               + sec('Sık yapılan hatalar', '<ul>%s</ul>' % ''.join('<li>%s</li>' % x for x in SABLON_EK[s['fn']]['hata']), tint=True)
+               + sec('Saklama', '<p>%s</p>' % SABLON_EK[s['fn']]['sakla']))
+            + faq('Sık sorulan sorular', s['sss'] + SABLON_SSS_EK[s['fn']]) + cta('Bu formları panelden otomatik üretin', 'Servis formu, teklif ve makbuz panelde sektörünüzün kendi adıyla hazırlanır. 7 gün ücretsiz deneyin.'))
+    return page(s['fn'], s['ba'] + ' | OnlineKaydet', s['desc'], '<a href="sablonlar.html">Şablonlar</a> / ' + s['ad'], s['ad'], s['lead'], body, ld=faq_ld(s['sss'] + SABLON_SSS_EK[s['fn']]))
 def mesaj_sayfa():
     li = ''.join('<div class="r"><b>%s</b><span>%s</span></div>' % (a, html.escape(b)) for a, b in MESAJ)
     sss = [('{ad} gibi alanlar ne işe yarar?', 'Süslü parantezli alanlar, mesaj gönderilirken müşterinin kendi bilgisiyle değişen yer tutuculardır. Kendi mesajınıza göre düzenleyebilirsiniz.'),
            ('Toplu mesaj atabilir miyim?', 'Ticari amaçlı toplu ileti için alıcıların onayı gerekir (İYS ve KVKK). Servis durumu gibi bilgilendirme mesajları ayrı değerlendirilir; emin değilseniz uzmana danışın.')]
-    body = (STIL + '<section class="kk"><div class="w"><div class="kt">%s</div><p class="mini">Metinleri kendi işinize göre değiştirin. Bu sayfa hukuki danışmanlık değildir.</p></div></section>' % li + faq('Sık sorulan sorular', sss) + cta())
+    body = (STIL + '<section class="kk"><div class="w"><div class="kt">%s</div><p class="mini">Metinleri kendi işinize göre değiştirin. Bu sayfa hukuki danışmanlık değildir.</p></div></section>' % li + sec('Hangi mesaj ne zaman?', '<div class="kt">%s</div>' % ''.join('<div class="r"><b>%s</b><span>%s</span></div>' % x for x in MESAJ_ZAMAN), tint=True)
+            + sec('İyi bir müşteri mesajının ilkeleri', '<ul>%s</ul>' % ''.join('<li>%s</li>' % x for x in MESAJ_ILKE))
+            + faq('Sık sorulan sorular', sss) + cta())
     return page('musteri-mesaj-sablonlari.html', 'Müşteri mesaj şablonları: randevu, teslim, ödeme | OnlineKaydet', 'Randevu hatırlatma, cihaz teslim, fiyat teklifi, bakım ve ödeme hatırlatma mesajları için kopyalayıp kullanabileceğiniz örnek şablonlar.',
                 '<a href="sablonlar.html">Şablonlar</a> / Mesaj şablonları', 'Müşteri mesaj şablonları', 'SMS ve WhatsApp için kısa, net %d örnek mesaj.' % len(MESAJ), body, ld=faq_ld(sss))
 def hub():
     kart = [('servis-formu-sablonu.html', 'Servis formu', 'Cihaz teslim alırken doldurulan boş form.'), ('fiyat-teklifi-sablonu.html', 'Fiyat teklifi', 'Kalem, KDV ve toplamlı teklif formu.'),
             ('garanti-belgesi-sablonu.html', 'Garanti belgesi', 'Yapılan işe verilen yazılı güvence.'), ('musteri-mesaj-sablonlari.html', 'Mesaj şablonları', 'Randevu, teslim ve ödeme hatırlatma metinleri.')]
     li = ''.join('<div class="r"><b><a href="%s">%s</a></b><span>%s</span></div>' % k for k in kart)
-    body = STIL + '<section class="kk"><div class="w"><div class="kt">%s</div><p class="mini">Hepsi örnektir; kendi işinize ve mevzuata göre uyarlayın. Panelde bu belgeler sektörünüzün adlarıyla hazır gelir.</p></div></section>' % li + cta()
+    body = (STIL + '<section class="kk"><div class="w"><div class="kt">%s</div><p class="mini">Hepsi örnektir; kendi işinize ve mevzuata göre uyarlayın. Panelde bu belgeler sektörünüzün adlarıyla hazır gelir.</p></div></section>' % li
+            + sec('Hangi belge ne zaman kullanılır?', '<ol style="max-width:760px;line-height:1.8;padding-left:20px"><li><b>Servis formu</b>: cihaz teslim alınırken.</li><li><b>Fiyat teklifi</b>: işe başlamadan önce, fiyatı müşteriye bildirirken.</li><li><b>Garanti belgesi</b>: iş tamamlanıp teslim edilirken.</li><li><b>Mesaj şablonları</b>: sürecin her adımında müşteriyi bilgilendirmek için.</li></ol>', tint=True)
+            + sec('Şablonları kullanırken', '<ul><li>Kendi unvanınızı, adresinizi ve logonuzu ekleyin.</li><li>KVKK aydınlatma ve cihaz saklama koşullarını kendi işinize göre yazın.</li><li>Tutar ve KDV bilgisini mali müşavirinizle kontrol edin.</li><li>Her belgenin bir nüshasını saklayın.</li></ul>')
+            + faq('Sık sorulan sorular', HUB_SSS) + cta())
     return page('sablonlar.html', 'Servis şablonları: form, teklif, garanti, mesaj | OnlineKaydet', 'Yazdırılabilir servis formu, fiyat teklifi, garanti belgesi ve müşteri mesaj şablonları.', 'Şablonlar', 'Servis şablonları', 'Servis işinde en çok gereken dört belge ve mesaj örneği.', body)
 
 def sitemap():
