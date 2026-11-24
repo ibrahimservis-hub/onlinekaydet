@@ -97,6 +97,15 @@ def compose_page(home: str, title: str, content: str):
         head = re.sub(r"<meta[^>]+name=[\"']description[\"'][^>]*>", "", head, flags=re.I)
         hd = re.search(r"<header\b.*?</header>", home, re.S | re.I)
         ft = re.findall(r"<footer\b.*?</footer>", home, re.S | re.I)
+        if re.search(r'<nav class="top"', home) and 'data-ok="boot"' in home:                 # sinematik temalar: menü <nav class="top">, betikler bölünmüş
+            nv = re.search(r'<nav class="top".*?</nav>', home, re.S)
+            sc = "".join(re.findall(r'<script data-ok="(?:boot|mob)">.*?</script>', home, re.S))
+            nv_h = nv.group(0).replace('<nav class="top"', '<nav class="top solid"', 1)
+            pgcss = ('<style>.spx-pg{max-width:860px;margin:0 auto;padding:130px clamp(20px,5vw,60px) 90px;color:var(--ink);font:400 17px/1.7 var(--bf,system-ui)}'
+                     '.spx-pg h1,.spx-pg h2,.spx-pg h3{font-family:var(--hf);line-height:1.15;margin:1.4em 0 .5em}.spx-pg h1{margin-top:0;font-size:clamp(34px,5vw,56px)}'
+                     '.spx-pg a{color:var(--ac)}.spx-pg table{border-collapse:collapse;width:100%}.spx-pg td,.spx-pg th{border:1px solid var(--ln);padding:8px 10px;text-align:left}</style>')
+            return ("<!DOCTYPE html><html lang=\"tr\"><head>%s<title>%s</title>%s</head>%s%s<main class=\"spx-pg\">%s</main>%s%s</body></html>"
+                    % (head, _html.escape(title), pgcss, bm.group(0), nv_h, content, ft[-1] if ft else "", sc))
         if not hd and not ft:
             return None
         scripts = "".join(re.findall(r"<script\b(?![^>]*\bsrc=[\"']?https?://(?:www\.)?(?:googletagmanager|google-analytics))[^>]*>.*?</script>", home[bm.end():], re.S | re.I))

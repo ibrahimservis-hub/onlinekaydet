@@ -72,7 +72,7 @@ SHIM = ("const C=(function(){var r=document.querySelector('.cdata>[data-t]');fun
 def conv(i, slug, sector, name):
     h = open(os.path.join(DEMO, slug, "index.html"), encoding="utf-8").read()
     # örnek adres ve notlar -> sitegen'in tanıdığı kalıp
-    h = re.sub(r"Örnek Mah\.(?: ·)? ?Ankara", ADR, h)
+    h = re.sub(r"Örnek \w+\.(?:,? Örnek \w+\.)?(?: ·)? ?Ankara", ADR, h)
     h = h.replace(" · Örnek tasarım", "").replace("Örnek tasarım", "")
     soup = BeautifulSoup(h, "html.parser")
     body = soup.body
@@ -131,6 +131,15 @@ def conv(i, slug, sector, name):
             data = json.loads(m.group(1).replace("\\/", "/"))
             cdata = '<div class="ed" data-nm="Etkileşimli veriler"><div class="cdata" hidden style="display:none">%s</div></div>' % _node(data)
             tail[k] = t_.replace("const C=" + m.group(1) + ";", SHIM, 1)
+    for k, t_ in enumerate(tail):                      # ana betik bölünür: iç sayfalar yalnız önyükleme + mobil menüyü alır
+        if t_.startswith("<script>window.MOB="):
+            m2 = t_.rfind("\n(function(){var $=function(s,r)")
+            m3 = t_.find("\n})();", m2) + len("\n})();") if m2 > 0 else -1
+            e1 = t_.find("scrub:scrub}})();")
+            e1 = e1 + len("scrub:scrub}})();") if e1 > 0 else t_.find(";\n", 0) + 1       # önyükleme yoksa yalnız window.MOB satırı
+            if 0 < e1 <= m2 and m3 > m2:
+                tail[k] = ('<script data-ok="boot">' + t_[len("<script>"):e1] + '</script><script data-ok="mob">' + t_[m2:m3] + "</script><script>"
+                           + t_[e1:m2] + t_[m3:])
     bh = ['<div class="ed" data-nm="%s">%s</div>' % (n, x) for n, x in blocks]
     body_html = (str(pre) if pre else "") + "".join(bh[:-1]) + cdata + bh[-1] + "".join(tail)
     head = str(soup.head)
