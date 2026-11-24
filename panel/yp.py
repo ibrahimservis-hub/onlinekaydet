@@ -220,6 +220,45 @@ def register(api_router, db, deps):
         await db.app_settings.update_one({"_id": "yp_rehber"}, {"$set": {"gizli": bool(payload.get("gizli", True))}}, upsert=True)
         return {"ok": True}
 
+    @api_router.get("/yp/lisans")
+    async def lisans(_: dict = Depends(adm)):
+        """Ana sayfadaki lisans/demo kartı: demo mu, bitiş tarihi, kalan süre, paket adı."""
+        import tenant
+        cur = tenant.current() or ""
+        fid = cur.split("_f_", 1)[1] if "_f_" in cur else ""
+        f = await db.main().firms.find_one({"id": fid}, {"_id": 0}) if fid else None
+        if not f:
+            return {"var": False}
+        pkg, pkg_ad = f.get("package") or "", ""
+        try:
+            import firms as _f
+            pk = (await _f.API["packages"]()).get(pkg) or {}
+            pkg_ad = pk.get("name") or pkg
+        except Exception:                                          # noqa: BLE001
+            pkg_ad = pkg
+        now = datetime.now(timezone.utc)
+        bit = None
+        try:
+            bit = datetime.fromisoformat(str(f.get("expires_at") or "").replace("Z", "+00:00"))
+            if bit.tzinfo is None:
+                bit = bit.replace(tzinfo=timezone.utc)
+        except ValueError:
+            bit = None
+        bas = None
+        try:
+            bas = datetime.fromisoformat(str(f.get("created_at") or "").replace("Z", "+00:00"))
+            if bas.tzinfo is None:
+                bas = bas.replace(tzinfo=timezone.utc)
+        except ValueError:
+            bas = None
+        sn = int((bit - now).total_seconds()) if bit else None
+        toplam = int((bit - bas).total_seconds()) if bit and bas and bit > bas else None
+        tr = timezone(timedelta(hours=3))
+        return {"var": True, "demo": bool(f.get("demo")), "paket": pkg, "paket_ad": pkg_ad, "firma": f.get("demo_firma") or f.get("name") or "",
+                "bitis": bit.astimezone(tr).strftime("%Y-%m-%d %H:%M") if bit else "", "kalan_sn": sn, "toplam_sn": toplam,
+                "satin_url": "https://onlinekaydet.com/satin-al.html?paket=%s&sektor=%s" % (pkg if pkg and not f.get("demo") else "", f.get("sector") or ""),
+                "askida": f.get("status") == "askida"}
+
     @api_router.get("/yp/boot")
     async def boot(user: dict = Depends(adm)):
         st = await staff_all()
