@@ -40,6 +40,9 @@ def _gorsel(v):
     return m.group(1), base64.b64encode(ham).decode()
 
 
+VARSAYILAN_BASLIK = "Bize güvenen markalar"
+
+
 def register(api_router, db, deps):
     require_admin = deps["require_admin"]
 
@@ -51,10 +54,14 @@ def register(api_router, db, deps):
         if current():
             raise HTTPException(403, "Bu işlem yalnız ana yönetim içindir")
 
+    async def baslik():
+        d = await main().referans_ayar.find_one({"id": "ayar"}, {"_id": 0, "baslik": 1})
+        return VARSAYILAN_BASLIK if d is None or "baslik" not in d else str(d["baslik"])
+
     @api_router.get("/public/referanslar")
     async def pub_list():
         rows = await main().referans_logo.find({"active": True}, {"_id": 0, "id": 1, "name": 1, "link": 1, "v": 1}).sort("order", 1).to_list(60)
-        return {"logolar": [{"id": r["id"], "name": r.get("name", ""), "link": r.get("link", ""), "src": "/api/public/referans/%s/logo?v=%s" % (r["id"], r.get("v", 1))} for r in rows]}
+        return {"baslik": await baslik(), "logolar": [{"id": r["id"], "name": r.get("name", ""), "link": r.get("link", ""), "src": "/api/public/referans/%s/logo?v=%s" % (r["id"], r.get("v", 1))} for r in rows]}
 
     @api_router.get("/public/referans/{rid}/logo")
     async def pub_logo(rid: str):
@@ -71,7 +78,14 @@ def register(api_router, db, deps):
         rows = await main().referans_logo.find({}, {"_id": 0, "data": 0}).sort("order", 1).to_list(200)
         for r in rows:
             r["src"] = "/api/public/referans/%s/logo?v=%s" % (r["id"], r.get("v", 1))
-        return {"logolar": rows}
+        return {"logolar": rows, "baslik": await baslik(), "varsayilan": VARSAYILAN_BASLIK}
+
+    @api_router.put("/admin/referans-baslik")
+    async def adm_baslik(payload: dict, _: dict = Depends(require_admin)):
+        need_main()
+        b = str(payload.get("baslik", "")).strip()[:80]
+        await main().referans_ayar.update_one({"id": "ayar"}, {"$set": {"baslik": b}}, upsert=True)
+        return {"ok": True, "baslik": b}
 
     @api_router.get("/admin/referans/{rid}/logo")
     async def adm_logo(rid: str, _: dict = Depends(require_admin)):

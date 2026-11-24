@@ -5,4 +5,4 @@ function yap(l){var T=b.querySelector('.rft');T.textContent='';var n=l.length,re
  var a=document.createElement('div');a.className='rfg';set.forEach(function(x){a.appendChild(kart(x,false))});
  var c=a.cloneNode(false);c.setAttribute('aria-hidden','true');set.forEach(function(x){c.appendChild(kart(x,true))});
  T.appendChild(a);T.appendChild(c);T.style.setProperty('--rfs',Math.max(24,set.length*4.2)+'s');b.hidden=false}
-fetch('/api/public/referanslar',{cache:'no-cache'}).then(function(r){return r.ok?r.json():null}).then(function(j){if(j&&j.logolar&&j.logolar.length)yap(j.logolar)}).catch(function(){})})();
+fetch('/api/public/referanslar',{cache:'no-cache'}).then(function(r){return r.ok?r.json():null}).then(function(j){if(j&&j.logolar&&j.logolar.length){var h=b.querySelector('.rfb');if(h){if(typeof j.baslik==='string'){h.textContent=j.baslik}h.hidden=!h.textContent}yap(j.logolar)}}).catch(function(){})})();

@@ -42,6 +42,14 @@ with TestClient(s.app) as c:
         assert c.put("/api/admin/referans/" + S["a"], json={"image": PNG}, headers=A).status_code == 200
         assert c.get("/api/admin/referans", headers=A).json()["logolar"][1]["v"] == 2
     t("kapatma, düzenleme, görsel yenileme", duzenle)
+    def baslik():
+        assert c.get("/api/public/referanslar").json()["baslik"] == "Bize güvenen markalar"
+        assert c.put("/api/admin/referans-baslik", json={"baslik": "Birlikte çalıştıklarımız"}, headers=A).status_code == 200
+        assert c.get("/api/public/referanslar").json()["baslik"] == "Birlikte çalıştıklarımız"
+        assert c.get("/api/admin/referans", headers=A).json()["baslik"] == "Birlikte çalıştıklarımız"
+        assert TestClient(s.app).put("/api/admin/referans-baslik", json={"baslik": "x"}).status_code in (401, 403)
+        assert c.put("/api/admin/referans-baslik", json={"baslik": ""}, headers=A).status_code == 200 and c.get("/api/public/referanslar").json()["baslik"] == ""
+    t("başlık yönetimden değişir, boş bırakılırsa gizlenir", baslik)
     def sil():
         assert c.delete("/api/admin/referans/" + S["a"], headers=A).status_code == 200
         assert len(c.get("/api/admin/referans", headers=A).json()["logolar"]) == 1
