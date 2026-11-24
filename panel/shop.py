@@ -62,6 +62,9 @@ SHOP_DEFAULT = {
     "min_order": 0.0,              # en az sepet tutarı (0 = yok)
     "card_hold_minutes": 60,       # kartla ödemesi tamamlanmayan siparişin stok tutma süresi
     "havale_hold_hours": 72,       # havalesi gelmeyen siparişin stok tutma süresi
+    "delivery": {"enabled": False, "days_ahead": 7, "min_hours": 24, "required": False, "off_days": [6],
+                 "slots": ["09:00-12:00", "12:00-17:00", "17:00-21:00"]},      # teslimat günü/saat aralığı seçimi (off_days: 0=Pzt … 6=Paz)
+    "gift": {"enabled": False, "fee": 0.0, "note_max": 200},                   # hediye paketi ücreti + hediye notu
     "legal": {},                   # bkz. LEGAL_DEFAULT (satıcı bilgileri: yasal metinlerde kullanılır)
     "legal_docs": {},              # {slug: {"html": özel metin}} — boşsa otomatik metin kullanılır
 }
@@ -358,12 +361,29 @@ def register(api_router, db, deps):
         d = await get_doc("shop_settings", SHOP_DEFAULT)
         d["payments"] = merge_pay(d.get("payments"))
         d["legal"] = merge_legal(d.get("legal"))
+        for k in ("delivery", "gift"):
+            d[k] = {**SHOP_DEFAULT[k], **(d.get(k) if isinstance(d.get(k), dict) else {})}
         try:
             import yasal
             d["legal"], _k = await yasal.satici(db, d["legal"])      # firma kaydından otomatik doldur
         except Exception:                                              # noqa: BLE001
             pass
         return d
+
+    def delivery_options(cfg):
+        """Müşterinin seçebileceği teslimat günleri (sunucu hesaplar; sipariş anında aynı liste doğrulanır)."""
+        dv = cfg["delivery"]
+        if not dv.get("enabled"):
+            return {"enabled": False}
+        from datetime import datetime as _dt, timedelta as _td, timezone as _tz
+        start = _dt.now(_tz.utc) + _td(hours=3) + _td(hours=int(dv["min_hours"]))
+        days, d = [], start.date()
+        names = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"]
+        while len(days) < int(dv["days_ahead"]) and (d - start.date()).days < 60:
+            if d.weekday() not in dv["off_days"]:
+                days.append({"date": d.isoformat(), "label": "%s %s" % (d.strftime("%d.%m.%Y"), names[d.weekday()])})
+            d += _td(days=1)
+        return {"enabled": True, "required": bool(dv["required"]), "slots": dv["slots"], "days": days}
 
     async def card_ready() -> bool:
         return bool(await iyzico_keys(db))
@@ -521,6 +541,30 @@ def register(api_router, db, deps):
             if not any(m["enabled"] for m in pm.values()):
                 raise HTTPException(422, "En az bir ödeme yöntemi açık olmalı.")
             cur["payments"] = pm
+        if isinstance(payload.get("delivery"), dict):
+            dv, p = {**cur["delivery"]}, payload["delivery"]
+            dv["enabled"] = bool(p.get("enabled", dv["enabled"]))
+            dv["required"] = bool(p.get("required", dv["required"]))
+            dv["days_ahead"] = int(builtins.min(30, builtins.max(1, _f(p.get("days_ahead"), dv["days_ahead"]))))
+            dv["min_hours"] = int(builtins.min(240, builtins.max(0, _f(p.get("min_hours"), dv["min_hours"]))))
+            if isinstance(p.get("off_days"), list):
+                dv["off_days"] = sorted({int(x) for x in p["off_days"] if str(x).isdigit() and 0 <= int(x) <= 6})
+            if isinstance(p.get("slots"), list):
+                sl = []
+                for x in p["slots"][:8]:
+                    x = str(x).strip()[:20]
+                    if x and x not in sl:
+                        sl.append(x)
+                dv["slots"] = sl
+            if dv["enabled"] and not dv["slots"]:
+                raise HTTPException(422, "Teslimat saati seçimini açmak için en az bir saat aralığı ekleyin.")
+            cur["delivery"] = dv
+        if isinstance(payload.get("gift"), dict):
+            g, p = {**cur["gift"]}, payload["gift"]
+            g["enabled"] = bool(p.get("enabled", g["enabled"]))
+            g["fee"] = builtins.max(0.0, round(_f(p.get("fee"), g["fee"]), 2))
+            g["note_max"] = int(builtins.min(500, builtins.max(40, _f(p.get("note_max"), g["note_max"]))))
+            cur["gift"] = g
         if isinstance(payload.get("legal"), dict):
             lg = merge_legal({**cur.get("legal", {}), **payload["legal"]})
             for k in ("seller_title", "tax_office", "tax_no", "mersis", "kep", "address", "email", "phone", "carrier", "return_address", "delivery_days"):
@@ -990,6 +1034,7 @@ def register(api_router, db, deps):
         return {"title": ttl, "subtitle": s["subtitle"], "shipping_fee": s["shipping_fee"], "free_shipping_over": s["free_shipping_over"],
                 "terms": s["terms"], "contact_phone": s["contact_phone"] or lg.get("phone", ""), "payment_note": s["payment_note"],
                 "payment_methods": await methods_public(s), "cod_max_total": s["cod_max_total"], "min_order": s["min_order"],
+                "delivery": delivery_options(s), "gift": {"enabled": bool(s["gift"]["enabled"]), "fee": s["gift"]["fee"], "note_max": s["gift"]["note_max"]},
                 "legal_docs": [{"slug": k, "title": t, "checkout": k in shop_legal.CHECKOUT_DOCS} for k, t in shop_legal.SLUGS]}
 
     # ------------------------------------------------------------------ yasal metinler
@@ -1101,7 +1146,22 @@ def register(api_router, db, deps):
         if cfg["min_order"] and subtotal < cfg["min_order"]:
             raise HTTPException(422, "Minimum sipariş tutarı %.2f TL" % cfg["min_order"])
         cod_fee = float(avail[pm_id]["fee"]) if pm_id in COD_METHODS else 0.0
-        total = round(subtotal + shipping + cod_fee, 2)
+        delivery, gift, gift_fee = None, None, 0.0
+        dop = delivery_options(cfg)
+        dp = payload.get("delivery") if isinstance(payload.get("delivery"), dict) else {}
+        if dop.get("enabled"):
+            dd, ds = str(dp.get("date") or "").strip(), str(dp.get("slot") or "").strip()
+            if dop["required"] and not (dd and ds):
+                raise HTTPException(422, "Teslimat günü ve saat aralığını seçin.")
+            if dd or ds:
+                if dd not in {x["date"] for x in dop["days"]} or ds not in dop["slots"]:
+                    raise HTTPException(422, "Seçtiğiniz teslimat günü/saati artık uygun değil. Lütfen yeniden seçin.")
+                delivery = {"date": dd, "slot": ds, "label": next(x["label"] for x in dop["days"] if x["date"] == dd)}
+        gp = payload.get("gift") if isinstance(payload.get("gift"), dict) else {}
+        if cfg["gift"]["enabled"] and gp.get("wrap"):
+            gift_fee = float(cfg["gift"]["fee"] or 0)
+            gift = {"wrap": True, "fee": gift_fee, "note": str(gp.get("note") or "").strip()[:int(cfg["gift"]["note_max"])]}
+        total = round(subtotal + shipping + cod_fee + gift_fee, 2)
         await b2b.kontrol(db, dealer, subtotal, total, pm_id)
         if pm_id in COD_METHODS and cfg["cod_max_total"] and total > cfg["cod_max_total"]:
             raise HTTPException(422, "Kapıda ödeme en fazla %.2f TL'lik siparişlerde kullanılabilir. Lütfen kart veya havale seçin." % cfg["cod_max_total"])
@@ -1120,6 +1180,7 @@ def register(api_router, db, deps):
             "customer": {"name": name, "phone": phone, "email": email, "city": str(cu.get("city", "")).strip()[:60],
                          "district": str(cu.get("district", "")).strip()[:60], "address": address},
             "note": str(payload.get("note", "")).strip()[:500], "items": items, "subtotal": round(subtotal, 2), "shipping": shipping, "cod_fee": cod_fee, "total": total,
+            "delivery": delivery, "gift": gift, "gift_fee": gift_fee,
             "account_id": acc["id"] if acc else "", "phone_key": phone_key(phone), "admin_note": "", "tracking_no": "", "carrier": "",
             "payment": {"method": pm_id, "label": avail[pm_id]["label"], "status": "kapida_tahsil" if pm_id in COD_METHODS else ("cari" if pm_id == "cari" else "bekliyor"), "amount": total},
             "consent": {"terms": True, "at": _now(), "ip": client_ip(request), "docs": shop_legal.CHECKOUT_DOCS,
@@ -1155,10 +1216,11 @@ def register(api_router, db, deps):
         try:
             rk = order.get("risk") or {}
             risk_not = (" · RİSK: %s (%s)" % (rk["seviye"].upper(), ", ".join(rk["nedenler"]))) if rk.get("seviye") in ("orta", "yuksek") and rk.get("bildir", True) else ""
-            await notify.notify_owner_t(db, f"Yeni mağaza siparişi {order['order_no']}: {name} · {total:.2f} TL" + risk_not, kind="shop_order")
+            ek = (" · TESLİMAT: %s %s" % (delivery["label"], delivery["slot"]) if delivery else "") + (" · HEDİYE PAKETİ" + (": " + gift["note"] if gift and gift.get("note") else "") if gift else "")
+            await notify.notify_owner_t(db, f"Yeni mağaza siparişi {order['order_no']}: {name} · {total:.2f} TL" + risk_not + ek, kind="shop_order")
         except Exception:      # noqa: BLE001
             pass
-        return {"ok": True, "order_no": order["order_no"], "total": total, "shipping": shipping, "subtotal": order["subtotal"], "cod_fee": cod_fee,
+        return {"ok": True, "order_no": order["order_no"], "total": total, "shipping": shipping, "delivery": delivery, "gift": gift, "subtotal": order["subtotal"], "cod_fee": cod_fee,
                 "payment_method": pm_id, "next": "iyzico" if pm_id == "kart" else ("havale" if pm_id == "havale" else ("cari" if pm_id == "cari" else "kapida")),
                 "bank_accounts": cfg["bank_accounts"] if pm_id == "havale" else [], "payment_note": cfg["payment_note"] if pm_id == "havale" else "",
                 "contact_phone": cfg["contact_phone"]}
@@ -1170,7 +1232,7 @@ def register(api_router, db, deps):
         if not o or phone_key(phone) != o.get("phone_key"):
             raise HTTPException(404, "Sipariş bulunamadı. Numara ve telefonu kontrol edin.")
         cfg = await shop_cfg()
-        out = {k: o[k] for k in ("order_no", "status", "items", "subtotal", "shipping", "total", "created_at", "tracking_no", "carrier", "history", "payment")}
+        out = {k: o.get(k) for k in ("order_no", "status", "items", "subtotal", "shipping", "total", "created_at", "tracking_no", "carrier", "history", "payment", "delivery", "gift")}
         out["customer"] = {"name": o["customer"]["name"]}
         if o["status"] in ("odeme_bekliyor", "odeme_bildirildi"):
             out["bank_accounts"], out["payment_note"] = cfg["bank_accounts"], cfg["payment_note"]

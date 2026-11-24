@@ -244,7 +244,8 @@ async def haberver_tara(db, host=""):
     return n
 
 
-SEPET_DEF = {"oto": False, "bekleme_dk": 120, "metin": "Merhaba {ad}, sepetinizde ürünler sizi bekliyor. Tamamlamak için: {link}"}
+SEPET_DEF = {"oto": False, "bekleme_dk": 120, "kanal": "whatsapp", "kupon": "",
+             "metin": "Merhaba {ad}, sepetinizde ürünler sizi bekliyor. Tamamlamak için: {link}"}
 
 
 def sepet_durum(c, now=None):
@@ -256,14 +257,20 @@ def sepet_durum(c, now=None):
     return "terk" if (now - t) >= timedelta(minutes=60) else "aktif"
 
 
-async def sepet_hatirla(db, c, host, metin):
-    """Sepet sahibine SMS gider; aynı sepete ikinci kez gitmez."""
+async def sepet_hatirla(db, c, host, metin, kanal="sms", kupon=""):
+    """Sepet sahibine WhatsApp (olmazsa SMS) gider; aynı sepete ikinci kez gitmez."""
     import notify
     ad = (c.get("name") or "").split(" ")[0] or "değerli müşterimiz"
     link = "https://%s/magaza" % host if host else "/magaza"
-    r = await notify.send(db, "sms", c.get("phone", ""), metin.replace("{ad}", ad).replace("{link}", link), kind="sepet_hatirlat", ref="sepet:" + c["id"])
-    if (r or {}).get("status") == "sent":
-        await db.shop_carts.update_one({"id": c["id"]}, {"$set": {"hatirlatildi": _now()}})
+    txt = metin.replace("{ad}", ad).replace("{link}", link).replace("{kupon}", kupon or "")
+    if kupon and "{kupon}" not in metin:
+        txt += " Kupon kodunuz: " + kupon
+    r = None
+    for ch in (["whatsapp", "sms"] if kanal == "whatsapp" else ["sms"]):
+        r = await notify.send(db, ch, c.get("phone", ""), txt, kind="sepet_hatirlat", ref="sepet:" + c["id"])
+        if (r or {}).get("status") == "sent":
+            await db.shop_carts.update_one({"id": c["id"]}, {"$set": {"hatirlatildi": _now(), "hatirlatma_kanal": ch}})
+            break
     return r
 
 
@@ -496,6 +503,10 @@ def register(api_router, db, deps):
             c["bekleme_dk"] = max(60, min(2880, int(_num(payload["bekleme_dk"], 120))))
         if "metin" in payload and str(payload["metin"]).strip():
             c["metin"] = str(payload["metin"]).strip()[:300]
+        if payload.get("kanal") in ("whatsapp", "sms"):
+            c["kanal"] = payload["kanal"]
+        if "kupon" in payload:
+            c["kupon"] = re.sub(r"[^A-Za-z0-9_-]", "", str(payload["kupon"]))[:30].upper()
         await db.app_settings.update_one({"_id": "yp_sepet"}, {"$set": c}, upsert=True)
         return c
 
@@ -508,9 +519,9 @@ def register(api_router, db, deps):
             raise HTTPException(422, "Bu müşterinin telefonu yok")
         cfg = await _cfg(db, "yp_sepet", SEPET_DEF)
         host = request.headers.get("x-forwarded-host") or request.headers.get("host") or ""
-        r = await sepet_hatirla(db, c, host, cfg["metin"])
+        r = await sepet_hatirla(db, c, host, cfg["metin"], cfg.get("kanal", "sms"), cfg.get("kupon", ""))
         if (r or {}).get("status") != "sent":
-            raise HTTPException(422, "SMS gönderilemedi. SMS bağlantınızı kontrol edin.")
+            raise HTTPException(422, "Mesaj gönderilemedi. WhatsApp / SMS bağlantınızı kontrol edin.")
         return {"ok": True}
 
     try:
@@ -524,7 +535,7 @@ def register(api_router, db, deps):
                 esik = (datetime.now(timezone.utc) - timedelta(minutes=int(cfg["bekleme_dk"]))).isoformat()
                 async for c in d.shop_carts.find({"updated_at": {"$lte": esik}, "hatirlatildi": {"$in": ["", None]}}, {"_id": 0}).limit(50):
                     if c.get("phone"):
-                        await sepet_hatirla(d, c, "", cfg["metin"])
+                        await sepet_hatirla(d, c, "", cfg["metin"], cfg.get("kanal", "sms"), cfg.get("kupon", ""))
             except Exception:      # noqa: BLE001
                 pass
         governance.HOOKS.append(_sepet_hook)

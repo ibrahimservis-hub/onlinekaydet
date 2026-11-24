@@ -5617,6 +5617,16 @@
         (p[3] ? '<div style="max-width:140px">' + mgIn('mg_fee_' + p[0], 'Hizmet bedeli ₺', m.fee || 0, 'number', '', 'min="0"') + '</div>' : '') + '</div>'; }).join('') +
       '<div class="spx-g" style="margin-top:10px">' + mgIn('mg_cod', 'Kapıda ödeme en fazla (₺, 0 = sınırsız)', c.cod_max_total || 0, 'number') + mgIn('mg_min', 'Minimum sipariş tutarı (₺)', c.min_order || 0, 'number') + '</div>' +
       '<div style="margin-top:10px"><button class="spx-b p" id="mg_pay_s">Ödeme ayarlarını kaydet</button></div></div>';
+    var dv = c.delivery || {}, gf = c.gift || {}, GN = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
+    h += '<div class="spx-card" id="mg_dlv"><b>Teslimat zamanı ve hediye paketi</b><small style="display:block;color:#64748b">Açarsanız ödeme adımında müşteri teslimat gününü ve saat aralığını seçer, isterse hediye paketi ve not ekler. Seçimler siparişte ve bildirimde görünür.</small>' +
+      '<div class="mg-row"><label class="spx-sw"><input type="checkbox" id="mg_dv_on"' + (dv.enabled ? ' checked' : '') + '><i></i></label><div><b>Teslimat gün ve saati seçilsin</b></div></div>' +
+      '<div class="spx-g" style="margin-top:8px">' + mgIn('mg_dv_days', 'Kaç gün ilerisi seçilebilsin', dv.days_ahead || 7, 'number', '', 'min="1" max="30"') + mgIn('mg_dv_min', 'En erken (saat sonra)', dv.min_hours == null ? 24 : dv.min_hours, 'number', '', 'min="0"') +
+      mgIn('mg_dv_slots', 'Saat aralıkları (virgülle)', (dv.slots || []).join(', '), 'text', '09:00-12:00, 12:00-17:00') + '</div>' +
+      '<div style="margin-top:8px"><span style="font-size:13px;color:#64748b">Teslimat yapılmayan günler: </span>' + GN.map(function (n, i) { return '<label style="margin-right:10px"><input type="checkbox" class="mg_off" value="' + i + '"' + ((dv.off_days || []).indexOf(i) > -1 ? ' checked' : '') + '> ' + n + '</label>'; }).join('') +
+      '<label style="margin-left:6px"><input type="checkbox" id="mg_dv_req"' + (dv.required ? ' checked' : '') + '> Seçim zorunlu olsun</label></div>' +
+      '<div class="mg-row" style="margin-top:12px"><label class="spx-sw"><input type="checkbox" id="mg_gf_on"' + (gf.enabled ? ' checked' : '') + '><i></i></label><div><b>Hediye paketi ve hediye notu</b></div></div>' +
+      '<div class="spx-g" style="margin-top:8px">' + mgIn('mg_gf_fee', 'Hediye paketi ücreti ₺ (0 = ücretsiz)', gf.fee || 0, 'number', '', 'min="0"') + mgIn('mg_gf_len', 'Not en fazla (karakter)', gf.note_max || 200, 'number', '', 'min="40" max="500"') + '</div>' +
+      '<div style="margin-top:10px"><button class="spx-b p" id="mg_dlv_s">Kaydet</button></div></div>';
     var f = function (k, l, ph) { return mgIn('mg_lg_' + k, l, lg[k], 'text', ph); };
     h += '<div class="spx-card" id="mg_leg"><b>Satıcı bilgileri (yasal metinlerde kullanılır)</b><small style="display:block;color:#64748b">Mesafeli satış sözleşmesi, iade ve gizlilik metinleri bu bilgilerle otomatik dolar. Eksik bilgi müşteriye boş görünür; lütfen tamamlayın.</small><div class="spx-g" style="margin-top:8px">' +
       f('seller_title', 'Ticari unvan') + f('tax_office', 'Vergi dairesi') + f('tax_no', 'Vergi / TC no') + f('mersis', 'MERSİS no') + f('kep', 'KEP adresi') + f('email', 'E-posta') + f('phone', 'Telefon') + f('address', 'Adres') +
@@ -5628,6 +5638,12 @@
     $('#mg_pay_s').onclick = function () {
       var o = {}; P.forEach(function (p) { o[p[0]] = { enabled: $('#mg_pm_' + p[0]).checked }; if (p[3]) o[p[0]].fee = parseFloat($('#mg_fee_' + p[0]).value) || 0; });
       call('PUT', '/shop/settings', { payments: o, cod_max_total: parseFloat($('#mg_cod').value) || 0, min_order: parseFloat($('#mg_min').value) || 0 }).then(function () { toast('Ödeme ayarları kaydedildi'); }).catch(fail);
+    };
+    $('#mg_dlv_s').onclick = function () {
+      var off = [].slice.call(document.querySelectorAll('.mg_off:checked')).map(function (x) { return +x.value; });
+      call('PUT', '/shop/settings', { delivery: { enabled: $('#mg_dv_on').checked, required: $('#mg_dv_req').checked, days_ahead: +$('#mg_dv_days').value || 7, min_hours: +$('#mg_dv_min').value || 0, off_days: off,
+        slots: $('#mg_dv_slots').value.split(',').map(function (x) { return x.trim(); }).filter(Boolean) }, gift: { enabled: $('#mg_gf_on').checked, fee: parseFloat($('#mg_gf_fee').value) || 0, note_max: +$('#mg_gf_len').value || 200 } })
+        .then(function () { toast('Teslimat ve hediye ayarları kaydedildi'); }).catch(fail);
     };
     $('#mg_leg_s').onclick = function () {
       var o = {}; ['seller_title', 'tax_office', 'tax_no', 'mersis', 'kep', 'email', 'phone', 'address', 'carrier', 'delivery_days', 'return_address'].forEach(function (k) { o[k] = $('#mg_lg_' + k).value; });
