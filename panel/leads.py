@@ -64,6 +64,12 @@ def register(api_router, db, deps):
             "status": "yeni", "note": "", "created_at": datetime.now(timezone.utc).isoformat(),
         }
         await main().leads.insert_one(doc)
+        try:
+            import baglanti
+            await baglanti.bildir(main(), "lead.yeni", "Yeni talep: %s · %s · %s %s" % (name, phone, doc["form"] or "form", doc["sector"]),
+                                  {"id": doc["id"], "name": name, "phone": phone, "form": doc["form"], "sector": doc["sector"]})
+        except Exception:                                      # noqa: BLE001
+            pass
         return {"ok": True, "id": doc["id"]}
 
     @api_router.get("/admin/leads")

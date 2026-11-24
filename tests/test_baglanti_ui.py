@@ -27,7 +27,7 @@ with sync_playwright() as pw:
     try:
         pg.evaluate("location.hash='#baglanti'"); pg.wait_for_selector(".bgc", timeout=8000)
         tx = pg.inner_text("body")
-        for w in ("Google Analytics 4", "Instagram işletme hesabı", "Facebook sayfası", "WhatsApp Business (Cloud API)", "iyzico (kredi kartı)", "Stripe"):
+        for w in ("Google Analytics 4", "Instagram işletme hesabı", "Facebook sayfası", "WhatsApp Business (Cloud API)", "iyzico (kredi kartı)", "Stripe", "Kullanımda:", "Yalnız kayıt:"):
             assert w in tx, w
         pg.screenshot(path="/tmp/bg_liste.png", full_page=True)
         pg.click("#bg_facebook_sayfa button:has-text('Bağla')"); pg.wait_for_selector(".mdl")

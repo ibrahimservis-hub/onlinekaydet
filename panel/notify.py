@@ -82,7 +82,26 @@ def _merge(base, over):
 
 async def get_settings(db) -> dict:
     s = await db.app_settings.find_one({"_id": "global"}, {"_id": 0}) or {}
-    return _merge(DEFAULTS, s.get("notify") or {})
+    cfg = _merge(DEFAULTS, s.get("notify") or {})
+    if not tenant.current():                                   # ana hesap: Bağlantılar ekranındaki açık bağlantılar boşlukları doldurur
+        try:
+            import baglanti
+            if not (cfg["smtp"].get("host")):
+                k = await baglanti.anahtar(db, "smtp")
+                if k:
+                    cfg["smtp"].update(host=k["host"], port=int(k.get("port") or 587), user=k.get("user", ""), password=k.get("pass", ""), from_addr=k.get("from", ""), tls=True)
+                else:
+                    for pid in ("resend", "sendgrid"):
+                        k = await baglanti.anahtar(db, pid)
+                        if k:
+                            cfg["mail_api"] = {"tur": pid, "key": k["api_key"], "from": k["from"]}
+                            break
+            k = await baglanti.anahtar(db, "whatsapp")
+            if k:
+                cfg["wa_cloud"] = {"phone_id": k["phone_id"], "token": k["token"]}
+        except Exception:                                      # noqa: BLE001
+            pass
+    return cfg
 
 
 def masked(cfg: dict) -> dict:
@@ -276,9 +295,42 @@ def _send_smtp(cfg, to, text, subject):
     return "ok"
 
 
+def _send_mail_api(cfg, to, text, subject):
+    m = cfg["mail_api"]
+    if m["tur"] == "resend":
+        r = requests.post("https://api.resend.com/emails", headers={"Authorization": "Bearer " + m["key"]}, timeout=20,
+                          json={"from": m["from"], "to": [to], "subject": subject or "ServisPlus bildirimi", "text": text})
+    else:
+        r = requests.post("https://api.sendgrid.com/v3/mail/send", headers={"Authorization": "Bearer " + m["key"]}, timeout=20,
+                          json={"personalizations": [{"to": [{"email": to}]}], "from": {"email": m["from"]},
+                                "subject": subject or "ServisPlus bildirimi", "content": [{"type": "text/plain", "value": text}]})
+    if r.status_code >= 300:
+        raise RuntimeError("%s %s: %s" % (m["tur"], r.status_code, r.text[:160]))
+    return "ok"
+
+
+def _send_wa_cloud(cfg, to, text):
+    w = cfg["wa_cloud"]
+    r = requests.post("https://graph.facebook.com/v21.0/%s/messages" % w["phone_id"], headers={"Authorization": "Bearer " + w["token"]}, timeout=20,
+                      json={"messaging_product": "whatsapp", "to": norm_msisdn(to), "type": "text", "text": {"body": text}})
+    if r.status_code >= 300:
+        try:
+            e = r.json().get("error") or {}
+        except Exception:                                      # noqa: BLE001
+            e = {}
+        if e.get("code") == 131047:
+            raise RuntimeError("WhatsApp: kişiyle son 24 saatte yazışılmadığı için onaylı şablon mesajı gerekir")
+        raise RuntimeError("WhatsApp %s: %s" % (r.status_code, (e.get("message") or r.text)[:160]))
+    return ((r.json().get("messages") or [{}])[0]).get("id", "")
+
+
 def _dispatch(cfg, channel, to, text, subject):
     if channel == "email":
+        if cfg.get("mail_api") and not cfg["smtp"].get("host"):
+            return _send_mail_api(cfg, to, text, subject)
         return _send_smtp(cfg, to, text, subject)
+    if channel == "whatsapp" and cfg.get("wa_cloud"):
+        return _send_wa_cloud(cfg, to, text)
     prov = cfg["provider"]
     if prov == "webhook":
         return _send_webhook(cfg, channel, to, text, subject)

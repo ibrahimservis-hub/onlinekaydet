@@ -452,6 +452,14 @@ async def captcha_cfg():
     on = bool((d.get("flags") or {}).get("turnstile"))
     if on and c.get("site_key") and c.get("secret_key"):
         return c["site_key"], c["secret_key"]
+    if not tenant.current():                                    # Bağlantılar ekranındaki Turnstile
+        try:
+            import baglanti
+            k = await baglanti.anahtar(db, "turnstile")
+            if k:
+                return k["site_key"], k["secret"]
+        except Exception:                                       # noqa: BLE001
+            pass
     return None
 
 @api_router.get("/auth/captcha-config")

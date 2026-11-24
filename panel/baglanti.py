@@ -46,6 +46,26 @@ def F(key, label, gizli=False, zorunlu=True, ipucu="", tip="text", secenek=None)
     return d
 
 
+# Anahtarı gerçekten kullanan özellik bağlı olanlar. Diğerleri yalnız kayıt: ilgili özellik henüz yok,
+# ekranda bu açıkça yazılır ki "bağlı" görünüp işlevsiz kalan bir kart olmasın.
+CANLI = {"gsc": "Search Console verisi Bugün sayfasında okunur.",
+         "ga4": "onlinekaydet.com sayfalarına ölçüm kodu eklenir; deneme talebi 'generate_lead' sayılır.",
+         "gtm": "onlinekaydet.com sayfalarına Etiket Yöneticisi eklenir.",
+         "google_ads": "Sayfa etiketi ve deneme talebi dönüşümü onlinekaydet.com'da çalışır.",
+         "meta_pixel": "onlinekaydet.com'da Pixel çalışır; deneme talebi 'Lead' sayılır.",
+         "tiktok_pixel": "onlinekaydet.com'da TikTok Pixel çalışır.",
+         "clarity": "onlinekaydet.com'da Clarity ısı haritası çalışır.",
+         "linkedin": "onlinekaydet.com'da LinkedIn etiketi çalışır.",
+         "turnstile": "Yönetim ve panel girişlerinde robot koruması açılır.",
+         "smtp": "Sistem e-postaları bu sunucudan gider (Bildirim ayarında SMTP boşsa).",
+         "resend": "Sistem e-postaları Resend ile gider (SMTP boşsa).",
+         "sendgrid": "Sistem e-postaları SendGrid ile gider (SMTP ve Resend boşsa).",
+         "whatsapp": "Bildirim kanalı 'WhatsApp' olan mesajlar Cloud API ile gider. 24 saat içinde yazışılmamış kişiye Meta şablon ister.",
+         "telegram": "Yeni deneme talebi ve talep formu Telegram'a düşer.",
+         "webhook": "Yeni talep olayı imzalı olarak adresinize gönderilir.",
+         "openai": "Ana hesapta yapay zekâ anahtarı boşsa bu anahtar kullanılır."}
+
+
 def P(pid, group, name, fields, desc="", where="", test=True, public=None):
     """where: anahtarın alındığı yer (kısa yönerge). public: sayfaya basılabilecek herkese açık alanlar."""
     return {"id": pid, "group": group, "name": name, "fields": fields, "desc": desc, "where": where,
@@ -74,8 +94,6 @@ CATALOG = [
     P("google_login", "google", "Google ile giriş", [F("client_id", "İstemci kimliği", ipucu=".apps.googleusercontent.com ile biter"),
                                                    F("client_secret", "İstemci gizli anahtarı", True)],
       "Kullanıcılar Google hesabıyla girer", "console.cloud.google.com > OAuth izin ekranı ve Kimlik bilgileri", test=False, public=["client_id"]),
-    P("recaptcha", "google", "Google reCAPTCHA", [F("site_key", "Site anahtarı"), F("secret", "Gizli anahtar", True)],
-      "Form ve deneme isteklerinde robot koruması", "google.com/recaptcha/admin", public=["site_key"]),
     # ---------------------------------------------------------------- Meta
     P("meta_pixel", "meta", "Meta Pixel ve Conversions API", [F("id", "Piksel kimliği"),
                                                               F("token", "Conversions API anahtarı", True, zorunlu=False,
@@ -135,8 +153,6 @@ CATALOG = [
     # ---------------------------------------------------------------- Altyapı
     P("cloudflare", "altyapi", "Cloudflare", [F("token", "API belirteci", True), F("zone_id", "Bölge kimliği", zorunlu=False)],
       "Alan adı DNS kayıtlarını panelden yönetmek", "dash.cloudflare.com > Profil > API belirteçleri"),
-    P("anthropic", "altyapi", "Claude (yapay zekâ)", [F("api_key", "API anahtarı", True)],
-      "Metin önerisi, sektör içeriği ve destek yanıtı", "console.anthropic.com > API Keys"),
     P("openai", "altyapi", "OpenAI", [F("api_key", "API anahtarı", True)], "Yedek yapay zekâ sağlayıcısı", "platform.openai.com > API keys"),
     P("webhook", "altyapi", "Giden webhook", [F("url", "Adres (https://...)"), F("secret", "İmza anahtarı", True, zorunlu=False)],
       "Yeni firma, ödeme ve talep olaylarını kendi sisteminize gönderir", "", test=False),
@@ -299,17 +315,6 @@ def _p_google_maps(k):
     return False, "Google kabul etmedi: %s %s" % (st, (d.get("error_message") or "")[:120]), ""
 
 
-def _p_recaptcha(k):
-    r = _istek("POST", "https://www.google.com/recaptcha/api/siteverify", data={"secret": k["secret"], "response": "baglanti-denemesi"})
-    try:
-        e = r.json().get("error-codes") or []
-    except Exception:                                              # noqa: BLE001
-        return False, "Google yanıtı okunamadı", ""
-    if "invalid-input-secret" in e or "missing-input-secret" in e:
-        return False, "Gizli anahtar geçersiz. Site anahtarıyla karıştırmış olabilirsiniz.", ""
-    return True, "", "Gizli anahtar kabul edildi."
-
-
 def _p_turnstile(k):
     r = _istek("POST", "https://challenges.cloudflare.com/turnstile/v0/siteverify", data={"secret": k["secret"], "response": "baglanti-denemesi"})
     try:
@@ -381,15 +386,6 @@ def _p_cloudflare(k):
     return True, "", "Bağlantı çalışıyor (belirteç %s)." % (d.get("result") or {}).get("status", "etkin")
 
 
-def _p_anthropic(k):
-    r = _istek("GET", "https://api.anthropic.com/v1/models", headers={"x-api-key": k["api_key"], "anthropic-version": "2023-06-01"})
-    if r.status_code in (401, 403):
-        return False, "Anthropic anahtarı kabul etmedi.", ""
-    if r.status_code >= 400:
-        return False, "Anthropic yanıt vermedi (kod %s)." % r.status_code, ""
-    return True, "", "Bağlantı çalışıyor, anahtar kabul edildi."
-
-
 def _p_openai(k):
     r = _istek("GET", "https://api.openai.com/v1/models", headers={"Authorization": "Bearer " + k["api_key"]})
     if r.status_code in (401, 403):
@@ -418,9 +414,9 @@ def _p_sendgrid(k):
 
 
 PROBES = {"facebook_sayfa": _p_facebook_sayfa, "instagram": _p_instagram, "meta_katalog": _p_meta_katalog, "meta_pixel": _p_meta_pixel,
-          "whatsapp": _p_whatsapp, "smtp": _p_smtp, "google_maps": _p_google_maps, "recaptcha": _p_recaptcha, "turnstile": _p_turnstile,
+          "whatsapp": _p_whatsapp, "smtp": _p_smtp, "google_maps": _p_google_maps, "turnstile": _p_turnstile,
           "stripe": _p_stripe, "paypal": _p_paypal, "iyzico": _p_iyzico, "telegram": _p_telegram, "cloudflare": _p_cloudflare,
-          "anthropic": _p_anthropic, "openai": _p_openai, "resend": _p_resend, "sendgrid": _p_sendgrid}
+          "openai": _p_openai, "resend": _p_resend, "sendgrid": _p_sendgrid}
 
 YOK = ("Bilgiler kaydedildi ve biçimi denetlendi. Bu bağlantının ücretsiz sorgulanabilen bir doğrulama ucu olmadığı için "
        "canlı deneme yapılmadı; ilk gerçek kullanımda doğrulanır.")
@@ -448,7 +444,7 @@ def gorunum(p, row):
     return {"id": p["id"], "group": p["group"], "name": p["name"], "desc": p["desc"], "where": p["where"], "can_test": p["can_test"],
             "fields": [dict(f, value=(mask(ac(keys.get(f["key"]))) if f["secret"] else _t(keys.get(f["key"]))),
                             filled=bool(keys.get(f["key"]))) for f in p["fields"]],
-            "on": on, "ok": ok, "state": durum, "err": row.get("err") or "", "msg": row.get("msg") or "",
+            "live": p["id"] in CANLI, "effect": CANLI.get(p["id"], ""), "on": on, "ok": ok, "state": durum, "err": row.get("err") or "", "msg": row.get("msg") or "",
             "last_ok": row.get("last_ok") or "", "at": row.get("at") or ""}
 
 
@@ -587,6 +583,30 @@ def register(api_router, db, deps):
             ks = row.get("keys") or {}
             out[pid] = {k: ks.get(k, "") for k in p["public"] if ks.get(k)}
         return out
+
+
+def _tg(k, metin):
+    _istek("POST", "https://api.telegram.org/bot%s/sendMessage" % k["token"], json={"chat_id": k["chat_id"], "text": metin[:3500]})
+
+
+def _hook(k, olay, veri):
+    import json
+    gov = json.dumps({"olay": olay, "veri": veri, "zaman": _now()}, ensure_ascii=False)
+    h = {"Content-Type": "application/json"}
+    if k.get("secret"):
+        h["X-OnlineKaydet-Imza"] = hmac.new(k["secret"].encode(), gov.encode(), hashlib.sha256).hexdigest()
+    _istek("POST", k["url"], data=gov.encode(), headers=h)
+
+
+async def bildir(db, olay, metin, veri=None):
+    """Yeni talep gibi olayları açık Telegram ve webhook bağlantılarına gönderir. Asla istisna fırlatmaz."""
+    for pid, fn in (("telegram", lambda k: _tg(k, metin)), ("webhook", lambda k: _hook(k, olay, veri or {}))):
+        try:
+            k = await anahtar(db, pid)
+            if k:
+                await asyncio.to_thread(fn, k)
+        except Exception:                                          # noqa: BLE001
+            pass
 
 
 async def anahtar(db, pid):

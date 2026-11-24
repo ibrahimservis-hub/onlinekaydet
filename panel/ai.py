@@ -4,6 +4,7 @@ arama kaydı çözümleme (ses→metin→özet). Anahtar panelden girilir; anaht
 GİZLİLİK: Metne gömülü telefon numaraları, e-posta ve uzun rakam dizileri sağlayıcıya gitmeden önce maskelenir.
 NOT: Canlı bir sağlayıcıyla denenmedi; testler sahte yanıtla yapıldı. Ses/fotoğraf özellikleri sağlayıcının modeline bağlıdır.
 """
+import tenant
 import asyncio
 import base64
 import json
@@ -38,7 +39,16 @@ def register(api_router, db, deps):
 
     async def cfg():
         d = await db.app_settings.find_one({"_id": "ai"}, {"_id": 0}) or {}
-        return {**DEFAULTS, **d}
+        c = {**DEFAULTS, **d}
+        if not c.get("api_key") and not tenant.current():       # ana hesap: Bağlantılar ekranındaki OpenAI anahtarı
+            try:
+                import baglanti
+                k = await baglanti.anahtar(db, "openai")
+                if k:
+                    c.update(api_key=k["api_key"], enabled=True)
+            except Exception:                                  # noqa: BLE001
+                pass
+        return c
 
     async def guard(user):
         c = await cfg()

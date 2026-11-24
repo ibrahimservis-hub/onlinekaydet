@@ -14,13 +14,13 @@ def t(n, f):
 class R:
     def __init__(self, code=200, j=None): self.status_code = code; self._j = j or {}; self.text = str(j)
     def json(self): return self._j
-CAGRI = []
+CAGRI = []; CAGRIKW = []
 def sahte(yontem, url, **kw):
-    CAGRI.append((yontem, url))
+    CAGRI.append((yontem, url)); CAGRIKW.append((url, kw))
     if "graph.facebook.com" in url and "bozuk" in str(kw.get("params")): return R(400, {"error": {"message": "Invalid OAuth access token"}})
     if "graph.facebook.com" in url: return R(200, {"name": "Servis Plus", "fan_count": 1200})
     if "api.stripe.com" in url: return R(200, {"object": "balance"})
-    if "recaptcha" in url: return R(200, {"success": False, "error-codes": ["invalid-input-response"]})
+    if "turnstile" in url: return R(200, {"success": False, "error-codes": ["invalid-input-response"]})
     if "geocode" in url: return R(200, {"status": "REQUEST_DENIED", "error_message": "API key invalid"})
     if "iyzipay" in url: return R(200, {"status": "success"})
     return R(404)
@@ -31,7 +31,7 @@ with TestClient(s.app) as c:
     def g():
         r = c.get("/api/admin/baglanti", headers=A).json()
         ids = {i["id"] for i in r["items"]}
-        for x in ("ga4", "google_maps", "recaptcha", "meta_pixel", "facebook_sayfa", "instagram", "whatsapp", "iyzico", "stripe", "paypal", "smtp", "telegram"):
+        for x in ("ga4", "google_maps", "turnstile", "meta_pixel", "facebook_sayfa", "instagram", "whatsapp", "iyzico", "stripe", "paypal", "smtp", "telegram"):
             assert x in ids, x
         assert {x["id"] for x in r["groups"]} >= {"google", "meta", "whatsapp", "odeme"}
         assert r["counts"]["bagli"] == 0
@@ -80,10 +80,10 @@ with TestClient(s.app) as c:
     t("GA4 biçim denetimi ve herkese açık kimlik", f)
 
     def h():
-        c.put("/api/admin/baglanti/recaptcha", headers=A, json={"keys": {"site_key": "6Lsite", "secret": "6Lgizli0000"}, "on": True})
-        c.post("/api/admin/baglanti/recaptcha/test", headers=A)
+        c.put("/api/admin/baglanti/turnstile", headers=A, json={"keys": {"site_key": "6Lsite", "secret": "6Lgizli0000"}, "on": True})
+        c.post("/api/admin/baglanti/turnstile/test", headers=A)
         o = c.get("/api/public/olcum").json()
-        assert o["recaptcha"] == {"site_key": "6Lsite"}, o
+        assert o["turnstile"] == {"site_key": "6Lsite"}, o
         assert "6Lgizli0000" not in str(o)
     t("herkese açık uç gizli anahtarı asla vermiyor", h)
 
@@ -117,6 +117,52 @@ with TestClient(s.app) as c:
         c.cookies.clear(); sc = c.get("/api/admin/baglanti").status_code; assert sc in (401, 403), sc
         r = c.post("/api/auth/login", json={"email": "admin@servis.com", "password": "admin123"})
     t("yönetici girişi olmadan erişilemiyor", l)
+
+    # ---- gerçekten kullanılıyor mu
+    import asyncio, requests, notify
+    loop = asyncio.new_event_loop()
+    GIDEN = []
+    class RR(R):
+        pass
+    def post(url, **kw):
+        GIDEN.append((url, kw)); return RR(200, {"messages": [{"id": "wamid.1"}], "ok": True})
+    requests.post = post
+    def u1():
+        r = c.get("/api/auth/captcha-config").json()
+        assert r["enabled"] and r["site_key"] == "6Lsite", r
+    t("Turnstile açılınca giriş robot koruması devreye giriyor", u1)
+
+    def u2():
+        c.put("/api/admin/baglanti/smtp", headers=A, json={"keys": {"host": "smtp.x.com", "port": "587", "user": "u", "pass": "pw12345678", "from": "bilgi@onlinekaydet.com"}, "on": True})
+        cfg = loop.run_until_complete(notify.get_settings(s.db))
+        assert cfg["smtp"]["host"] == "smtp.x.com" and cfg["smtp"]["password"] == "pw12345678" and cfg["smtp"]["from_addr"] == "bilgi@onlinekaydet.com", cfg["smtp"]
+    t("SMTP açılınca bildirim motoru onu kullanıyor", u2)
+
+    def u3():
+        c.put("/api/admin/baglanti/whatsapp", headers=A, json={"keys": {"phone_id": "1055", "token": "EAAwa123456"}, "on": True})
+        cfg = loop.run_until_complete(notify.get_settings(s.db))
+        notify._dispatch(cfg, "whatsapp", "05321112233", "Randevunuz yarın 10:00", "")
+        url, kw = GIDEN[-1]
+        assert "graph.facebook.com/v21.0/1055/messages" in url and kw["json"]["to"] == "905321112233", (url, kw)
+        assert kw["headers"]["Authorization"] == "Bearer EAAwa123456"
+    t("WhatsApp açılınca mesaj Cloud API ile gidiyor", u3)
+
+    def u4():
+        c.put("/api/admin/baglanti/telegram", headers=A, json={"keys": {"token": "123456:ABCDEFGHIJKLMNOPQRSTUV", "chat_id": "99"}, "on": True})
+        c.put("/api/admin/baglanti/webhook", headers=A, json={"keys": {"url": "https://hook.example.com/ok", "secret": "imza1"}, "on": True})
+        r = c.post("/api/public/lead", json={"name": "Ayşe Kaya", "phone": "05324445566", "form": "ana-sayfa"})
+        assert r.status_code == 200, r.text
+        us = [u for u, _ in CAGRIKW]
+        assert any("api.telegram.org/bot123456:" in u and u.endswith("/sendMessage") for u in us), us
+        h = [k for u, k in CAGRIKW if "hook.example.com" in u][-1]
+        assert h["headers"].get("X-OnlineKaydet-Imza") and b"lead.yeni" in h["data"], h
+    t("yeni talep Telegram'a ve imzalı webhook'a gidiyor", u4)
+
+    def u5():
+        c.put("/api/admin/baglanti/openai", headers=A, json={"keys": {"api_key": "sk-test1234"}, "on": True})
+        import ai
+        assert "api_key" in str(ai.DEFAULTS)
+    t("yapay zekâ anahtarı kaydı", u5)
 
 print("OK", len(ok)); [print("FAIL", n, "\n", tb) for n, tb in bad]
 sys.exit(1 if bad else 0)
