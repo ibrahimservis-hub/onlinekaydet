@@ -1,0 +1,67 @@
+# -*- coding: utf-8 -*-
+"""Teknofix: telefon tamir. Koyu zemin, mavi ışık, ızgara; marka/model seçip onarım tablosu, durum takibi, aksesuar şeridi."""
+import json
+from common import *
+IDX = 16
+f = foto.F[IDX]
+ph = lambda k, w=900: foto.url(f[k % len(f)], w)
+MODEL = {'iPhone 13': (1.0, '45 dk'), 'iPhone 14': (1.15, '45 dk'), 'Samsung Galaxy S23': (1.1, '60 dk'), 'Xiaomi Redmi Note 12': (0.7, '40 dk'), 'Huawei P30': (0.8, '60 dk')}
+ISL = [('Ekran değişimi', 2400), ('Batarya değişimi', 900), ('Şarj soketi', 700), ('Arka kapak camı', 1100), ('Kamera onarımı', 1500), ('Sıvı teması temizliği', 800)]
+CSS = '''
+:root{--bg:#0d1117;--ink:#e8eefc;--mut:#8a97b0;--ac:#3b82f6;--ac2:#10223f;--ln:rgba(232,238,252,.12);--hf:'Space Grotesk',system-ui,sans-serif;--mono:'Inter',sans-serif;--bf:'Inter',system-ui,sans-serif}
+body{background:var(--bg);color:var(--ink);font:400 17px/1.6 var(--bf);background-image:linear-gradient(var(--ln) 1px,transparent 1px),linear-gradient(90deg,var(--ln) 1px,transparent 1px);background-size:64px 64px;background-attachment:fixed}
+h1,h2,h3{font-family:var(--hf);font-weight:700;letter-spacing:-.04em;line-height:.98;overflow-wrap:break-word;min-width:0}
+.btn{border-radius:10px;font-family:var(--bf);font-weight:700;font-size:15px;text-transform:none;letter-spacing:0}
+nav.top{position:fixed;inset:0 0 auto 0;z-index:50;display:flex;align-items:center;gap:28px;padding:16px clamp(20px,4vw,56px);background:rgba(13,17,23,.8);backdrop-filter:blur(14px);border-bottom:1px solid var(--ln);color:var(--ink)}
+.lg{font:700 24px var(--hf);letter-spacing:-.04em;text-decoration:none;margin-right:auto}.lg b{color:var(--ac)}
+nav.top ul{display:flex;gap:28px;list-style:none;padding:0}nav.top li a{font:500 15px var(--bf);text-decoration:none;color:var(--mut)}nav.top li a:hover{color:#fff}
+nav.top .btn{background:var(--ac);color:#fff;padding:11px 22px}
+.hero{min-height:100svh;display:grid;grid-template-columns:1.1fr .9fr;align-items:center;gap:3vw;padding:110px clamp(20px,4vw,56px) 60px;max-width:1500px;margin:auto;position:relative}
+.hero:before{content:'';position:absolute;left:55%;top:50%;width:60vw;height:60vw;max-width:800px;max-height:800px;transform:translate(-50%,-50%);background:radial-gradient(closest-side,rgba(59,130,246,.35),transparent);pointer-events:none}
+.hero h1{font-size:clamp(54px,8vw,136px);position:relative}.hero h1 em{font-style:normal;background:linear-gradient(90deg,#60a5fa,#3b82f6 60%,#93c5fd);-webkit-background-clip:text;background-clip:text;color:transparent}.hero p{max-width:26em;color:var(--mut);margin:22px 0 30px;font-size:19px;position:relative}.hero .bt{display:flex;gap:12px;flex-wrap:wrap;position:relative}
+.hero .btn.p{background:var(--ac);color:#fff;padding:17px 30px;box-shadow:0 0 40px -6px rgba(59,130,246,.8)}.hero .btn.g{border:1px solid var(--ln);color:var(--ink);background:rgba(255,255,255,.04);padding:17px 28px}
+.hero .im{position:relative;aspect-ratio:4/5;max-height:76vh;border-radius:24px;overflow:hidden;border:1px solid var(--ln);justify-self:end;width:min(100%,520px)}.hero .im img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.hero .chip{position:absolute;z-index:2;background:rgba(13,17,23,.85);backdrop-filter:blur(10px);border:1px solid var(--ln);border-radius:14px;padding:12px 16px;font:600 14px/1.25 var(--bf)}.hero .c1{left:14px;bottom:14px}.hero .c2{right:14px;top:14px}.hero .chip small{display:block;color:var(--mut);font-weight:500}
+section.s{padding:min(15vh,140px) clamp(20px,4vw,56px) 4vh;max-width:1380px;margin:auto}
+.hd h2{font-size:clamp(42px,6.4vw,104px);margin-bottom:5vh}.hd h2 em{font-style:normal;color:var(--ac)}
+.rp{border:1px solid var(--ln);border-radius:24px;background:rgba(16,34,63,.45);backdrop-filter:blur(6px);overflow:hidden}.rp .top2{display:flex;gap:10px;flex-wrap:wrap;padding:20px;border-bottom:1px solid var(--ln)}.rp .top2 button{min-height:48px;padding:0 20px;border:1px solid var(--ln);border-radius:10px;background:transparent;color:var(--ink);font:600 15px var(--bf);cursor:pointer;transition:all .2s}.rp .top2 button:hover{border-color:var(--ac)}.rp .top2 button[aria-pressed=true]{background:var(--ac);border-color:var(--ac);color:#fff;box-shadow:0 0 30px -6px rgba(59,130,246,.9)}
+.rp .row{display:grid;grid-template-columns:1fr auto auto 130px;gap:20px;align-items:center;padding:20px 24px;border-bottom:1px solid var(--ln);transition:background .2s}.rp .row:hover{background:rgba(59,130,246,.08)}.rp .row b{font:600 20px var(--hf);letter-spacing:-.02em}.rp .row span{color:var(--mut)}.rp .row i{font:700 24px var(--hf);font-style:normal;text-align:right}.rp .row .bk{min-height:42px;border:1px solid var(--ac);background:transparent;color:var(--ac);border-radius:10px;font:700 14px var(--bf);cursor:pointer}.rp .row .bk:hover{background:var(--ac);color:#fff}
+.rp .ft{padding:18px 24px;color:var(--mut);font-size:15px}
+.tr{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;counter-reset:s}.tr div{border:1px solid var(--ln);border-radius:20px;padding:28px;background:rgba(255,255,255,.03);counter-increment:s}.tr div:before{content:counter(s);display:grid;place-items:center;width:42px;height:42px;border-radius:50%;background:var(--ac2);border:1px solid var(--ac);color:#93c5fd;font:700 18px var(--hf);margin-bottom:16px}.tr h3{font-size:28px;margin-bottom:8px}.tr p{color:var(--mut)}
+.ak{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;padding:0 clamp(20px,4vw,56px) 14px;margin:0 calc(-1*clamp(20px,4vw,56px));scrollbar-width:none}.ak::-webkit-scrollbar{display:none}.ak figure{flex:0 0 min(260px,66vw);margin:0;scroll-snap-align:start;border:1px solid var(--ln);border-radius:20px;overflow:hidden;background:rgba(255,255,255,.03);transition:transform .3s,border-color .3s}.ak figure:hover{transform:translateY(-4px);border-color:var(--ac)}.ak .im{aspect-ratio:1/1;position:relative}.ak img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.ak figcaption{padding:14px 16px;font:600 16px var(--bf);display:flex;justify-content:space-between}.ak figcaption span{color:var(--ac)}
+.sr{margin:8vh 0 0;border:1px solid var(--ln);border-radius:24px;padding:clamp(24px,4vw,50px);background:linear-gradient(135deg,rgba(59,130,246,.2),rgba(16,34,63,.5));display:grid;grid-template-columns:1fr 1fr;gap:5vw;align-items:center}.sr h2{font-size:clamp(36px,4.6vw,72px)}.sr form{display:flex;gap:10px;flex-wrap:wrap}.sr input{flex:1 1 220px;min-height:56px;border:1px solid var(--ln);background:rgba(13,17,23,.7);border-radius:10px;padding:0 18px;color:var(--ink);font:500 17px var(--bf)}.sr input::placeholder{color:var(--mut)}
+.sr .btn{background:var(--ac);color:#fff;min-height:56px;padding:0 28px;border:0;cursor:pointer}.sr .out{display:none;grid-column:1/-1;border:1px solid var(--ac);border-radius:14px;padding:18px 20px;background:rgba(13,17,23,.6)}.sr .out.on{display:block}.sr .stp{display:flex;gap:6px;margin-top:12px}.sr .stp i{flex:1;height:6px;border-radius:4px;background:var(--ln)}.sr .stp i.on{background:var(--ac);box-shadow:0 0 12px var(--ac)}
+footer{border-top:1px solid var(--ln);padding:60px clamp(20px,4vw,56px) 30px;margin-top:8vh;display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:40px;background:rgba(13,17,23,.9)}footer b{font:700 28px var(--hf)}footer b i{color:var(--ac);font-style:normal}footer a{display:block;color:var(--mut);text-decoration:none;padding:3px 0}footer a:hover{color:#fff}footer p{color:var(--mut)}
+@media(max-width:860px){
+nav.top ul,nav.top>.btn{display:none}nav.top{padding:12px 16px}nav.top .hm{margin-left:auto;border-radius:10px}
+.hero{grid-template-columns:1fr;padding-top:90px}.hero .im{order:-1;max-height:38vh;width:100%;aspect-ratio:16/10;justify-self:stretch}.tr,.sr,footer{grid-template-columns:1fr}
+.rp .row{grid-template-columns:1fr auto;gap:6px 14px;padding:16px}.rp .row span{grid-column:1}.rp .row .bk{grid-column:1/-1}
+.mb{left:10px;right:10px;bottom:10px;background:rgba(16,34,63,.92);backdrop-filter:blur(14px);border:1px solid var(--ln);border-radius:16px;grid-template-columns:1fr 1fr 1.5fr;padding:5px;gap:4px}.mb a{min-height:50px;border-radius:11px;color:var(--ink);font:700 15px var(--bf);letter-spacing:0;text-transform:none}.mb a+a{border:0}.mb a.p{background:var(--ac);color:#fff;box-shadow:0 0 24px -4px rgba(59,130,246,.9)}
+.mm{background:#0a0e14;inset:0;padding:90px 22px 110px;--ln:rgba(232,238,252,.12);--ac:#3b82f6;--mut:#8a97b0}.mm a{font:700 clamp(40px,12vw,64px)/1.1 var(--hf);letter-spacing:-.04em;color:var(--ink);border-bottom:1px solid var(--ln);padding:12px 0}.mm small{color:var(--mut);font:500 14px var(--bf);text-transform:none;letter-spacing:0}
+footer{padding-bottom:110px}}
+'''
+JS = '''
+OK.start(function(){var $=OK.$,$$=OK.$$,money=OK.money,rd=OK.reduce;
+ if(!rd){gsap.from('.hero h1',{y:50,opacity:0,duration:1,ease:'power4.out'});gsap.from('.hero .tx>*:not(h1),.hero .bt',{y:24,opacity:0,stagger:.1,duration:.8,delay:.4});gsap.from('.hero .im',{scale:.92,opacity:0,duration:1.1,ease:'power3.out'});gsap.from('.chip',{y:20,opacity:0,stagger:.2,duration:.7,delay:1});
+  gsap.utils.toArray('.hd h2,.tr div,.ak figure,.sr').forEach(function(e,i){gsap.from(e,{y:46,opacity:0,duration:.8,delay:(i%3)*.08,scrollTrigger:{trigger:e,start:'top 92%'}})})}
+ var m='iPhone 13';function sh(k){m=k;$$('.top2 button').forEach(function(b){b.setAttribute('aria-pressed',b.dataset.k===k)});var d=C.m[k];$('#rows').innerHTML=C.i.map(function(x){return '<div class="row"><b>'+x[0]+'</b><span>'+d[1]+'</span><i>'+money(Math.round(x[1]*d[0]/10)*10)+'</i><button class="bk" type="button">Randevu al</button></div>'}).join('');$$('.row .bk').forEach(function(b){b.onclick=function(){b.textContent='Eklendi';b.style.background='var(--ac)';b.style.color='#fff'}})}
+ $$('.top2 button').forEach(function(b){b.onclick=function(){sh(b.dataset.k)}});sh(m);
+ $('#fm').onsubmit=function(e){e.preventDefault();var o=$('#fo'),n=Math.abs(($('#fk').value||'x').length)%4+1;o.innerHTML='<b>'+$('#fk').value+'</b> kayıt numaralı cihazın durumu: <b>'+['Teşhis','Parça bekleniyor','Onarımda','Teslime hazır'][n-1]+'</b><div class="stp">'+[1,2,3,4].map(function(i){return '<i class="'+(i<=n?'on':'')+'"></i>'}).join('')+'</div>';o.classList.add('on')};
+});
+'''
+def render():
+    top = ''.join('<button type="button" data-k="%s" aria-pressed="false">%s</button>' % (k, k) for k in MODEL)
+    ak = ''.join('<figure><div class="im"><img src="%s" alt="%s" loading="lazy"></div><figcaption>%s<span>%s</span></figcaption></figure>' % (ph(k, 600), n, n, p) for n, p, k in [('Kılıf', '250 ₺', 1), ('Ekran koruyucu', '150 ₺', 2), ('Hızlı şarj aleti', '450 ₺', 3), ('Kablosuz kulaklık', '1.200 ₺', 4), ('Powerbank', '800 ₺', 5)])
+    body = f'''<div id="pre" role="status"><div><b>TEKNOFIX</b><i><span id="pn">0</span>%</i></div></div>
+<nav class="top"><a class="lg" href="#">Tekno<b>fix</b></a><ul><li><a href="#onarim">Onarım</a></li><li><a href="#takip">Cihaz takibi</a></li><li><a href="#aksesuar">Aksesuar</a></li></ul><a class="btn" href="#onarim">Fiyat gör</a></nav>
+<main><header class="hero" id="hero"><div class="tx"><h1>Kırık ekran, <em>45 dakikada</em> yenilenir.</h1><p>Telefon ve tablet onarımı. Önce modeli seç, fiyatı gör. Beklerken kahveni iç, cihazını al.</p><div class="bt"><a class="btn p" href="#onarim">Fiyatı öğren</a><a class="btn g" href="#takip">Cihazım nerede?</a></div></div><div class="im"><img src="{ph(0, 1100)}" alt="Teknisyen telefon ekranı değiştiriyor" fetchpriority="high"><div class="chip c1">Garanti<small>Takılan parçaya 6 ay</small></div><div class="chip c2">Aynı gün<small>Çoğu onarım</small></div></div></header>
+<section class="s" id="onarim"><div class="hd"><h2>Modelini <em>seç</em></h2></div><div class="rp"><div class="top2" role="group" aria-label="Model">{top}</div><div id="rows"></div><div class="ft">Fiyatlar örnektir. Kesin tutarı cihaz incelendikten sonra söyleriz, onayınız olmadan işlem yapılmaz.</div></div>
+<div class="tr" style="margin-top:6vh"><div><h3>Getir</h3><p>Cihazı mağazaya getir ya da kuryeyle gönder.</p></div><div><h3>Teşhis</h3><p>Ücretsiz bakılır, arıza ve fiyat yazılı söylenir.</p></div><div><h3>Teslim al</h3><p>Onarılan cihaz test edilerek, faturayla teslim edilir.</p></div></div></section>
+<section class="s" id="aksesuar"><div class="hd"><h2>Aksesuar <em>tezgâhı</em></h2></div><div class="ak">{ak}</div>
+<div class="sr" id="takip"><div><h2>Cihazım nerede?</h2></div><form id="fm"><input id="fk" required placeholder="Kayıt numarası" aria-label="Kayıt numarası"><button class="btn" type="submit">Sorgula</button></form><div class="out" id="fo" aria-live="polite"></div></div></section></main>
+<footer><div><b>Tekno<i>fix</i></b><p>Telefon ve tablet onarımı · Örnek Cad. Ankara</p></div><div><p>Sayfalar</p><a href="#onarim">Onarım</a><a href="#takip">Cihaz takibi</a><a href="#aksesuar">Aksesuar</a></div><div><p>İletişim</p><a href="tel:+905320000000">Ara</a><a href="https://wa.me/905320000000">WhatsApp</a></div></footer>'''
+    c = json.dumps(dict(m={k: list(v) for k, v in MODEL.items()}, i=ISL), ensure_ascii=False)
+    return page('Teknofix Telefon Tamiri', 'Telefon ve tablet onarımı. Aynı gün, garantili.', ['Space+Grotesk:wght@500;700', 'Inter:wght@400;500;600;700'], BASE_CSS + CSS, body, JS, c, dict(cta=['Fiyat gör', '#onarim'], addr='Örnek Cad. · Ankara'))
+if __name__ == '__main__':
+    import os
+    os.makedirs(R + '/tekno', exist_ok=True); open(R + '/tekno/index.html', 'w', encoding='utf-8').write(render()); print('tekno ok')

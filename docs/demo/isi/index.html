@@ -1,0 +1,98 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Isı Usta Kombi ve Klima Servisi</title><meta name="description" content="Kombi, klima ve tesisat servisi. Aynı gün usta."><meta name="robots" content="noindex"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;800;900&family=Inter:wght@400;600;700;800&display=swap"><style>
+.hm{display:none;width:48px;height:48px;border:1.5px solid currentColor;background:transparent;color:inherit;cursor:pointer;position:relative;margin-left:10px}
+.hm i{position:absolute;left:12px;right:12px;height:2px;background:currentColor;transition:transform .3s,top .3s,opacity .3s}.hm i:nth-child(1){top:16px}.hm i:nth-child(2){top:23px}.hm i:nth-child(3){top:30px}
+.hm[aria-expanded=true] i:nth-child(1){top:23px;transform:rotate(45deg)}.hm[aria-expanded=true] i:nth-child(2){opacity:0}.hm[aria-expanded=true] i:nth-child(3){top:23px;transform:rotate(-45deg)}
+.mm{position:fixed;inset:0;z-index:70;background:var(--bg);color:var(--ink);display:flex;flex-direction:column;justify-content:center;gap:6px;padding:90px 28px 110px;transform:translateY(-100%);transition:transform .5s cubic-bezier(.7,0,.2,1);visibility:hidden}
+.mm.on{transform:none;visibility:visible}.mm a{font:400 clamp(38px,11vw,64px)/1.1 var(--hf);text-transform:var(--mmt,none);text-decoration:none;padding:6px 0;border-bottom:1px solid var(--ln)}
+.mm a:active{color:var(--ac)}.mm small{margin-top:18px;font:500 12px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--mut)}
+.mb{display:none}
+@media(max-width:860px){nav.top>.btn{display:none}.hm{display:inline-block;margin-left:auto}.cartbtn+.hm{margin-left:10px}body{padding-bottom:64px}nav.top{z-index:80!important}
+.mb{display:grid;grid-template-columns:1fr 1fr 1.5fr;position:fixed;left:0;right:0;bottom:0;z-index:75;background:var(--bg);border-top:1px solid var(--ln);padding-bottom:env(safe-area-inset-bottom)}
+.mb a{min-height:56px;display:grid;place-items:center;font:700 13px var(--mono);letter-spacing:.08em;text-transform:uppercase;text-decoration:none;color:var(--ink)}.mb a+a{border-left:1px solid var(--ln)}.mb a.p{background:var(--ac);color:#fff}}
+footer .cl{display:grid;gap:6px}footer .cl a{color:var(--mut);font-size:14px;text-decoration:none}footer .cl a:hover{color:var(--ac)}footer .cr{grid-column:1/-1;font:500 12px var(--mono);color:var(--mut);border-top:1px solid var(--ln);padding-top:16px}
+*{box-sizing:border-box;margin:0}html{overflow-x:clip}body{overflow-x:clip;-webkit-font-smoothing:antialiased}img,video{display:block;max-width:100%}a{color:inherit}
+.lenis.lenis-smooth{scroll-behavior:auto!important}:focus-visible{outline:3px solid var(--ac);outline-offset:3px}
+#pre{position:fixed;inset:0;z-index:100;display:grid;place-items:center;background:var(--bg);transition:opacity .6s,visibility .6s}#pre.off{opacity:0;visibility:hidden}
+#pre b{display:block;font:400 clamp(44px,11vw,140px)/1 var(--hf);text-transform:uppercase;text-align:center}#pre i{display:block;text-align:center;font:600 14px var(--mono);font-style:normal;color:var(--mut);margin-top:10px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:48px;padding:0 22px;background:var(--ac);color:#fff;border:0;font:700 13px var(--mono);letter-spacing:.1em;text-transform:uppercase;text-decoration:none;cursor:pointer;transition:transform .15s,filter .15s}
+.btn:hover{transform:translateY(-2px);filter:brightness(1.08)}.btn:active{transform:scale(.98)}
+@media(prefers-reduced-motion:reduce){*{animation:none!important}}
+:root{--bg:#f4efe8;--ink:#0f2a3d;--mut:#4d6272;--ac:#e8502b;--ac2:#0f2a3d;--ln:rgba(15,42,61,.2);--hf:'Archivo',system-ui,sans-serif;--mono:'Inter',sans-serif;--bf:'Inter',system-ui,sans-serif}
+body{background:var(--bg);color:var(--ink);font:400 17px/1.6 var(--bf)}
+h1,h2,h3{font-family:var(--hf);font-weight:900;letter-spacing:-.035em;line-height:.95;text-transform:uppercase;overflow-wrap:break-word;min-width:0}
+.btn{border-radius:0;font-family:var(--bf);font-weight:800;font-size:15px;text-transform:none;letter-spacing:0}
+.tape{height:14px;background:repeating-linear-gradient(-45deg,var(--ac) 0 18px,var(--ink) 18px 36px)}
+nav.top{position:fixed;inset:0 0 auto 0;z-index:50;display:flex;align-items:center;gap:28px;padding:16px clamp(20px,4vw,56px);background:var(--ink);color:#fff}
+.lg{font:900 24px var(--hf);text-transform:uppercase;letter-spacing:-.03em;text-decoration:none;margin-right:auto}.lg b{color:var(--ac)}
+nav.top ul{display:flex;gap:26px;list-style:none;padding:0}nav.top li a{font:700 14px var(--bf);text-decoration:none}nav.top li a:hover{color:var(--ac)}
+nav.top .tel{background:var(--ac);color:#fff;padding:12px 22px;font-weight:800;text-decoration:none}
+.hero{padding-top:70px;background:var(--ink);color:#fff;position:relative}
+.hero .g{display:grid;grid-template-columns:1.05fr .95fr;min-height:calc(100svh - 84px)}
+.hero .tx{padding:clamp(40px,7vh,90px) clamp(20px,4vw,56px);display:flex;flex-direction:column;justify-content:center}
+.hero h1{font-size:clamp(54px,8.4vw,150px)}.hero h1 em{font-style:normal;color:var(--ac)}.hero p{max-width:25em;margin:24px 0 30px;color:#c9d6df;font-size:19px}
+.hero .bt{display:flex;gap:12px;flex-wrap:wrap}.hero .btn.p{background:var(--ac);color:#fff;padding:18px 30px}.hero .btn.g2{border:2px solid #fff;color:#fff;background:transparent;padding:16px 28px}
+.hero .im{position:relative;min-height:50vh;overflow:hidden}.hero .im img{position:absolute;inset:-4% 0;width:100%;height:108%;object-fit:cover}
+.hero .badge{position:absolute;left:-36px;bottom:40px;z-index:3;background:var(--ac);color:#fff;padding:20px 26px;font:900 26px/1 var(--hf);text-transform:uppercase;transform:rotate(-3deg)}
+section.s{padding:min(15vh,140px) clamp(20px,4vw,56px) 4vh;max-width:1400px;margin:auto}
+.hd h2{font-size:clamp(46px,7.4vw,120px);margin-bottom:5vh}.hd h2 em{font-style:normal;color:var(--ac)}
+.dg{display:grid;grid-template-columns:1fr 1.1fr;gap:0;border:3px solid var(--ink)}
+.dg .ls{display:flex;flex-direction:column}.dg .ls button{text-align:left;min-height:72px;padding:0 24px;border:0;border-bottom:3px solid var(--ink);background:transparent;color:var(--ink);font:800 20px var(--bf);cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:background .2s,padding .25s}
+.dg .ls button:last-child{border-bottom:0}.dg .ls button:hover{padding-left:34px}.dg .ls button:after{content:'→';font-weight:900}.dg .ls button[aria-pressed=true]{background:var(--ac);color:#fff}
+.dg .rs{background:var(--ink);color:#fff;padding:clamp(26px,4vw,52px);display:flex;flex-direction:column;gap:18px}.dg .rs h3{font-size:clamp(34px,4vw,58px);color:var(--ac)}.dg .rs p{color:#c9d6df}
+.dg .kv{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:rgba(255,255,255,.2);margin-top:6px}.dg .kv div{background:var(--ink);padding:16px 14px}.dg .kv small{display:block;color:#9bb0bf;font-weight:600;font-size:13px}.dg .kv b{font:900 24px var(--hf)}
+.dg .rs .btn{background:var(--ac);color:#fff;padding:16px 26px;align-self:flex-start;margin-top:8px}
+.st{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border:3px solid var(--ink);counter-reset:s}.st div{padding:30px 24px;border-right:3px solid var(--ink);counter-increment:s}.st div:last-child{border-right:0}.st div:before{content:'0' counter(s);font:900 64px var(--hf);color:var(--ac);display:block;line-height:1;margin-bottom:12px}.st h3{font-size:26px;margin-bottom:8px}.st p{color:var(--mut)}
+.br{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:6vh}.br .im{aspect-ratio:4/3;position:relative;overflow:hidden}.br img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .7s}.br .im:hover img{transform:scale(1.04)}
+.cl{background:var(--ac);color:#fff;padding:min(12vh,110px) clamp(20px,4vw,56px)}.cl>div{max-width:1400px;margin:auto;display:grid;grid-template-columns:1fr 1fr;gap:5vw;align-items:end}.cl h2{font-size:clamp(46px,7.6vw,124px)}.cl form{display:grid;gap:10px}.cl input,.cl select{min-height:56px;border:3px solid var(--ink);background:#fff;padding:0 16px;font:600 17px var(--bf);color:var(--ink);border-radius:0}.cl .btn{background:var(--ink);color:#fff;min-height:58px;border:0;cursor:pointer}.cl .ok{display:none;background:var(--ink);padding:14px;font-weight:700}.cl .ok.on{display:block}
+footer{background:var(--ink);color:#fff;padding:60px clamp(20px,4vw,56px) 30px;display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:40px}footer b{font:900 32px var(--hf);text-transform:uppercase}footer a{display:block;color:#fff;text-decoration:none;padding:3px 0}footer a:hover{color:var(--ac)}footer p{color:#9bb0bf}
+@media(max-width:860px){
+nav.top ul,nav.top>.tel{display:none}nav.top{padding:12px 16px}nav.top .hm{margin-left:auto;border-radius:0}
+.hero .g{grid-template-columns:1fr;min-height:0}.hero .im{order:-1;min-height:34vh}.hero .badge{left:12px;bottom:12px;font-size:20px}.hero h1{font-size:clamp(48px,15vw,90px)}
+.dg,.st,.br,.cl>div,footer{grid-template-columns:1fr}.st div{border-right:0;border-bottom:3px solid var(--ink)}.st div:last-child{border-bottom:0}.dg .kv{grid-template-columns:1fr}
+.mb{left:0;right:0;bottom:0;background:var(--ink);border:0;border-top:4px solid var(--ac);border-radius:0;grid-template-columns:1fr 1fr;padding:0 0 max(0px,env(safe-area-inset-bottom))}.mb a{min-height:60px;border-radius:0;color:#fff;font:800 16px var(--bf);letter-spacing:0;text-transform:none}.mb a:nth-child(2){display:none}.mb a+a{border-left:1px solid rgba(255,255,255,.2)}.mb a.p{background:var(--ac)}
+.mm{background:var(--ac);color:#fff;inset:0;padding:90px 20px 110px;--ln:rgba(255,255,255,.35);--ac:#0f2a3d;--mut:#ffe2d8}.mm a{font:900 clamp(46px,14vw,80px)/1 var(--hf);text-transform:uppercase;letter-spacing:-.03em;color:#fff;border-bottom:4px solid var(--ink);padding:10px 0}.mm small{color:#ffe2d8;font:700 14px var(--bf);text-transform:none;letter-spacing:0}
+footer{padding-bottom:110px}}
+</style></head><body><div id="pre" role="status"><div><b>ISI USTA</b><i><span id="pn">0</span>%</i></div></div>
+<nav class="top"><a class="lg" href="#">Isı<b>.</b>Usta</a><ul><li><a href="#ariza">Arıza</a></li><li><a href="#surec">Nasıl çalışır</a></li><li><a href="#cagri">Çağır</a></li></ul><a class="tel" href="tel:+905320000000">Hemen ara</a></nav>
+<main><header class="hero" id="hero"><div class="g"><div class="tx"><h1>Kombin <em>yanmıyor</em> mu?</h1><p>Kombi, klima ve doğalgaz tesisatı için aynı gün servis. Önce arıza ve fiyat, sonra işçilik.</p><div class="bt"><a class="btn p" href="#ariza">Arızayı seç</a><a class="btn g2" href="tel:+905320000000">Hemen ara</a></div></div><div class="im"><img src="https://images.pexels.com/photos/34938439/pexels-photo-34938439.jpeg?auto=compress&cs=tinysrgb&w=1400" alt="Teknisyen kombi bakımı yapıyor" fetchpriority="high"><div class="badge">Aynı gün servis</div></div></div></header><div class="tape"></div>
+<section class="s" id="ariza"><div class="hd"><h2>Sorun <em>ne?</em></h2></div><div class="dg"><div class="ls" role="group" aria-label="Arıza"><button type="button" data-k="Kombi çalışmıyor" aria-pressed="false">Kombi çalışmıyor</button><button type="button" data-k="Radyatör ısınmıyor" aria-pressed="false">Radyatör ısınmıyor</button><button type="button" data-k="Klima soğutmuyor" aria-pressed="false">Klima soğutmuyor</button><button type="button" data-k="Su damlatıyor" aria-pressed="false">Su damlatıyor</button><button type="button" data-k="Yıllık bakım" aria-pressed="false">Yıllık bakım</button></div><div class="rs"><h3 id="t"></h3><p id="d"></p><div class="kv"><div><small>Süre</small><b id="du"></b></div><div><small>Başlangıç fiyatı</small><b id="pr"></b></div><div><small>Gelme süresi</small><b id="wh"></b></div></div><a class="btn" href="#cagri">Usta çağır</a></div></div></section>
+<section class="s" id="surec"><div class="hd"><h2>Dört adımda <em>servis</em></h2></div><div class="st"><div><h3>Ara</h3><p>Arızayı anlat, tahmini fiyatı söyleyelim.</p></div><div><h3>Randevu</h3><p>Sana uygun saatte usta yola çıkar.</p></div><div><h3>Tespit</h3><p>Usta bakar, yapılacak işi ve fiyatı yazar.</p></div><div><h3>Onayla</h3><p>Sen onaylarsan işe başlanır, garanti belgesi verilir.</p></div></div>
+<div class="br"><div class="im"><img src="https://images.pexels.com/photos/5463582/pexels-photo-5463582.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Klima bakımı" loading="lazy"></div><div class="im"><img src="https://images.pexels.com/photos/34938442/pexels-photo-34938442.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Kombi parçası değişimi" loading="lazy"></div><div class="im"><img src="https://images.pexels.com/photos/7859953/pexels-photo-7859953.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Tesisat kontrolü" loading="lazy"></div></div></section>
+<section class="cl" id="cagri"><div><h2>Usta<br>çağır.</h2><form id="fm"><input id="fn" required placeholder="Adınız" aria-label="Adınız" autocomplete="name"><select id="fs" aria-label="Arıza"><option>Kombi çalışmıyor</option><option>Radyatör ısınmıyor</option><option>Klima soğutmuyor</option><option>Su damlatıyor</option><option>Yıllık bakım</option></select><button class="btn" type="submit">Beni arayın</button><p class="ok" id="fo" aria-live="polite"></p></form></div></section></main><div class="tape"></div>
+<footer><div><b>Isı Usta</b><p>Kombi ve klima servisi · Ankara</p></div><div><p>Sayfalar</p><a href="#ariza">Arıza</a><a href="#surec">Nasıl çalışır</a><a href="#cagri">Çağır</a></div><div><p>İletişim</p><a href="tel:+905320000000">Ara</a><a href="https://wa.me/905320000000">WhatsApp</a></div></footer><noscript><style>#pre{display:none}</style></noscript><script>const C={"s": {"Kombi çalışmıyor": ["Basınç, ateşleme veya pompa kontrolü", "60-90 dk", 650, "Aynı gün"], "Radyatör ısınmıyor": ["Petek temizliği ve hava alma", "90-120 dk", 800, "24 saat içinde"], "Klima soğutmuyor": ["Gaz kontrolü ve filtre temizliği", "60 dk", 700, "Aynı gün"], "Su damlatıyor": ["Conta ve bağlantı kontrolü", "45-60 dk", 550, "Aynı gün"], "Yıllık bakım": ["Kombi tam bakım ve verim ölçümü", "60 dk", 900, "Randevuyla"]}};</script><script src="../lib/gsap.min.js"></script><script src="../lib/ScrollTrigger.min.js"></script><script src="../lib/lenis.min.js"></script><script>window.MOB={"cta": ["Usta çağır", "#cagri"], "addr": "Ankara"};
+window.OK=(function(){var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+var $=function(s,r){return (r||document).querySelector(s)},$$=function(s,r){return [].slice.call((r||document).querySelectorAll(s))};
+var money=function(n){return Math.round(n).toLocaleString('tr-TR')+' ₺'};
+function start(cb){var n=0,pre=$('#pre'),num=$('#pn');function done(){pre.classList.add('off');setTimeout(function(){pre.remove()},800)}
+ var iv=setInterval(function(){n=Math.min(100,n+Math.ceil(Math.random()*9));num.textContent=n;if(n>=100){clearInterval(iv);setTimeout(done,250)}},45);
+ if(!(window.gsap&&window.ScrollTrigger&&window.Lenis)){pre.remove();return}
+ gsap.registerPlugin(ScrollTrigger);
+ if(!reduce){var lenis=new Lenis({lerp:.09,smoothWheel:true});lenis.on('scroll',ScrollTrigger.update);gsap.ticker.add(function(t){lenis.raf(t*1000)});gsap.ticker.lagSmoothing(0);window._lenis=lenis;
+  $$('a[href^="#"]').forEach(function(a){a.addEventListener('click',function(e){var t=$(a.getAttribute('href'));if(t){e.preventDefault();lenis.scrollTo(t,{offset:0})}})})}
+ var nav=$('nav.top');if(nav)ScrollTrigger.create({trigger:'#hero',start:'bottom 80px',end:'max',onToggle:function(t){nav.classList.toggle('solid',t.isActive)}});
+ $$('.rv').forEach(function(h){if(!reduce)gsap.from(h,{y:60,opacity:0,duration:1,ease:'power3.out',scrollTrigger:{trigger:h,start:'top 88%'}})});
+ cb();addEventListener('load',function(){ScrollTrigger.refresh()})}
+/* video kaydırmayla: onP(progress) her güncellemede çağrılır */
+function scrub(trigger,video,onP){var target=0,cur=0,dur=0;if(video){video.addEventListener('loadedmetadata',function(){dur=video.duration||0;video.pause()});if(video.readyState>0)dur=video.duration||0;video.addEventListener('error',function(){video.style.display='none'})}
+ if(reduce){onP&&onP(0);return}
+ ScrollTrigger.create({trigger:trigger,start:'top top',end:'bottom bottom',onUpdate:function(s){target=s.progress;onP&&onP(s.progress)}});
+ gsap.ticker.add(function(){cur+=(target-cur)*.12;if(video&&dur&&Math.abs(video.currentTime-cur*dur)>.03){try{video.currentTime=cur*dur}catch(e){}}})}
+return {reduce:reduce,$:$,$$:$$,money:money,start:start,scrub:scrub}})();
+
+OK.start(function(){
+(function(){var $=function(s,r){return (r||document).querySelector(s)},$$=function(s,r){return [].slice.call((r||document).querySelectorAll(s))};var nav=$('nav.top');if(!nav)return;var ul=$('ul',nav);var items=ul?$$('a',ul):[];
+ var btn=document.createElement('button');btn.className='hm';btn.type='button';btn.setAttribute('aria-label','Menüyü aç');btn.setAttribute('aria-expanded','false');btn.innerHTML='<i></i><i></i><i></i>';nav.appendChild(btn);
+ var mm=document.createElement('div');mm.className='mm';mm.id='mm';mm.innerHTML=items.map(function(a){return '<a href="'+a.getAttribute('href')+'">'+a.textContent+'</a>'}).join('')+'<a href="'+MOB.cta[1]+'" style="color:var(--ac)">'+MOB.cta[0]+'</a><small>'+MOB.addr+'</small>';document.body.appendChild(mm);btn.setAttribute('aria-controls','mm');
+ function set(on){btn.setAttribute('aria-expanded',on);btn.setAttribute('aria-label',on?'Menüyü kapat':'Menüyü aç');mm.classList.toggle('on',on);document.body.classList.toggle('mo',on);document.documentElement.style.overflow=on?'hidden':'';if(window._lenis){on?_lenis.stop():_lenis.start()}}
+ btn.onclick=function(){set(btn.getAttribute('aria-expanded')!=='true')};$$('a',mm).forEach(function(a){a.onclick=function(){set(false)}});addEventListener('keydown',function(e){if(e.key==='Escape')set(false)});
+ var bar=document.createElement('div');bar.className='mb';bar.innerHTML='<a href="tel:+905320000000">Ara</a><a href="https://wa.me/905320000000">WhatsApp</a><a class="p" href="'+MOB.cta[1]+'">'+MOB.cta[0]+'</a>';document.body.appendChild(bar);
+})();
+var $=OK.$,$$=OK.$$,money=OK.money,rd=OK.reduce;
+ if(!rd){gsap.from('.hero h1',{xPercent:-8,opacity:0,duration:1,ease:'power4.out'});gsap.from('.hero .tx>*:not(h1)',{y:30,opacity:0,stagger:.12,duration:.8,delay:.4});gsap.from('.badge',{scale:0,rotate:-20,duration:.7,delay:.9,ease:'back.out(2)'});
+  gsap.to('.hero .im img',{yPercent:8,ease:'none',scrollTrigger:{trigger:'.hero',start:'top top',end:'bottom top',scrub:true}});
+  gsap.utils.toArray('.hd h2,.st div,.br .im').forEach(function(e,i){gsap.from(e,{y:50,opacity:0,duration:.8,delay:(i%4)*.07,scrollTrigger:{trigger:e,start:'top 92%'}})})}
+ function sh(k){var d=C.s[k];$$('.ls button').forEach(function(b){b.setAttribute('aria-pressed',b.dataset.k===k)});$('#t').textContent=k;$('#d').textContent=d[0];$('#du').textContent=d[1];$('#pr').textContent=money(d[2])+'+';$('#wh').textContent=d[3]}
+ $$('.ls button').forEach(function(b){b.onclick=function(){sh(b.dataset.k)}});sh('Kombi çalışmıyor');
+ $('#fm').onsubmit=function(e){e.preventDefault();var o=$('#fo');o.textContent='Teşekkürler '+$('#fn').value+'. "'+$('#fs').value+'" için usta yönlendiriyoruz, kısa süre içinde arayacağız.';o.classList.add('on')};
+});
+</script></body></html>
