@@ -18,3 +18,5 @@
 .hero .sahne.fg{height:auto!important;margin-top:0}
 .hero .sahne.fg>*{animation:none}
 @media(max-width:900px){.hero .sahne.fg{height:auto!important;margin:18px -8px 0}}
+
+.hero .sahne.fgx{max-width:1040px;margin:0 auto 28px}
