@@ -35,9 +35,9 @@ with sync_playwright() as pw:
     # kayıt aç, parçayı stoktan seçerek tamamla
     j = rq.post(B + "/jobs/quick", headers=H, json={"customer_name": "Stok Müşteri", "customer_phone": "05321110099", "fault_description": "Pompa arızası", "assigned_technician_id": tid}).json(); jid = j.get("id") or j["job"]["id"]
     rq.put(B + "/jobs/" + jid, headers=H, json={"status": "basladi"})
-    go("servis", "#svlist table, #svlist .empty"); pg.fill("#svq", "Stok Müşteri"); pg.wait_for_timeout(900); pg.click("[data-a=sv-ac]"); pg.wait_for_selector("[data-a=sv-kapat]")
+    go("servis", "#svlist .svk, #svlist .empty"); pg.fill("#svq", "Stok Müşteri"); pg.wait_for_timeout(900); pg.click("[data-a=sv-ac]"); pg.wait_for_selector("[data-a=sv-kapat]")
     t("detayda atölyeye al düğmesi (işlemde)", pg.locator("[data-a=x-at-form]").count() == 1)
-    pg.click("[data-a=sv-kapat]"); pg.wait_for_selector("#svpt .ps"); pg.select_option("#svpt .ps", pid); pg.fill("#svpt .pq", "2"); pg.fill("#svw", "Pompa değişti"); pg.fill("#svl", "100"); pg.click("[data-a=sv-kapat-ok]"); pg.wait_for_timeout(1500)
+    pg.click("[data-a=sv-kapat]"); pg.click("[data-a=sv-parca]"); pg.wait_for_selector("#svpt .ps"); pg.select_option("#svpt .ps", pid); pg.fill("#svpt .pq", "2"); pg.fill("#svw", "Pompa değişti"); pg.fill("#svl", "100"); pg.click("[data-a=sv-kapat-ok]"); pg.wait_for_timeout(1500)
     pp = [p for p in rq.get(B + "/parts", headers=H).json() if p["id"] == pid][0]; t("stoktan 2 adet düştü (5→3)", pp["stock_qty"] == 3)
     jj = rq.get(B + "/jobs/" + jid, headers=H).json(); t("kayıtta part_id ve toplam 1100", jj["parts_used"][0].get("part_id") == pid and jj["total_amount"] == 1100)
     pg.click("[data-a=sv-seg][data-v=tamamlandi]"); pg.wait_for_timeout(800); pg.fill("#svq", "Stok Müşteri"); pg.wait_for_timeout(900); pg.click("[data-a=sv-ac]"); pg.wait_for_selector("[data-a=sv-fis]")
@@ -57,7 +57,7 @@ with sync_playwright() as pw:
     # --- atölye
     j2 = rq.post(B + "/jobs/quick", headers=H, json={"customer_name": "Atölye Müşteri", "customer_phone": "05325550011", "fault_description": "Kart arızası", "assigned_technician_id": tid}).json(); j2id = j2.get("id") or j2["job"]["id"]
     rq.put(B + "/jobs/" + j2id, headers=H, json={"status": "basladi"})
-    go("servis", "#svlist table, #svlist .empty"); pg.click('[data-a=sv-seg][data-v=""]'); pg.fill("#svq", "Atölye Müşteri"); pg.wait_for_timeout(900); pg.click("[data-a=sv-ac]"); pg.wait_for_selector("[data-a=x-at-form]"); pg.click("[data-a=x-at-form]"); pg.wait_for_selector("#xs1")
+    go("servis", "#svlist .svk, #svlist .empty"); pg.click('[data-a=sv-seg][data-v=""]'); pg.fill("#svq", "Atölye Müşteri"); pg.wait_for_timeout(900); pg.click("[data-a=sv-ac]"); pg.wait_for_selector("[data-a=x-at-form]"); pg.click("[data-a=x-at-form]"); pg.wait_for_selector("#xs1")
     pg.set_input_files("#xaf2", "/tmp/atl.jpg")
     for sid in ("#xs1", "#xs2"):
         bx = pg.locator(sid).bounding_box(); pg.mouse.move(bx["x"] + 30, bx["y"] + 30); pg.mouse.down(); pg.mouse.move(bx["x"] + 120, bx["y"] + 70, steps=6); pg.mouse.move(bx["x"] + 60, bx["y"] + 100, steps=6); pg.mouse.up()
@@ -84,7 +84,7 @@ with sync_playwright() as pw:
     j3 = rq.post(B + "/jobs/quick", headers=H, json={"customer_name": "Tekrar Müşteri", "customer_phone": "05324440077", "fault_description": "Aynı arıza", "assigned_technician_id": tid}).json(); j3id = j3.get("id") or j3["job"]["id"]
     rq.put(B + "/jobs/" + j3id, headers=H, json={"status": "basladi"}); rq.put(B + "/jobs/" + j3id, headers=H, json={"status": "tamamlandi", "work_done": "x", "parts_none": True, "labor_fee": 100})
     n_before = len(rq.get(B + "/jobs?q=Tekrar", headers=H).json())
-    go("servis", "#svlist table, #svlist .empty"); pg.click('[data-a=sv-seg][data-v=""]'); pg.fill("#svq", "Tekrar Müşteri"); pg.wait_for_timeout(1000); pg.click("[data-a=sv-ac]"); pg.wait_for_selector("[data-a=x-job-tekrar]")
+    go("servis", "#svlist .svk, #svlist .empty"); pg.click('[data-a=sv-seg][data-v=""]'); pg.fill("#svq", "Tekrar Müşteri"); pg.wait_for_timeout(1000); pg.click("[data-a=sv-ac]"); pg.wait_for_selector("[data-a=x-job-tekrar]")
     pg.select_option("#xtu", index=1); pg.click("[data-a=x-job-tekrar]"); pg.wait_for_timeout(1500)
     after = rq.get(B + "/jobs?q=Tekrar", headers=H).json(); t("tekrar atama çalıştı (kayıt yeniden atandı)", len(after) >= 1 and any(x["status"] in ("atandi", "yeni") for x in after) or len(after) > n_before)
     # --- sil: stok ve kasa geri alınır
@@ -101,19 +101,19 @@ with sync_playwright() as pw:
     go("sayar", "#xye"); t("site yorumu ve telefon bölümü", "Telefon numaralarını düzelt" in pg.inner_text("#main"))
     pg.select_option("#xye", "1"); pg.fill("#xyt", "Yorumlar"); pg.click("[data-a=x2-yorum]"); pg.wait_for_timeout(900); sr = rq.get(B + "/site-reviews-settings", headers=H).json(); t("site yorumu ayarı kaydedildi", sr["enabled"] and sr["title"] == "Yorumlar")
     pg.click("[data-a=x2-tel][data-v='0']"); pg.wait_for_selector("text=Zaten doğru"); t("telefon raporu açıldı", True); pg.keyboard.press("Escape")
-    go("servis", "#svlist table, #svlist .empty"); t("servis uyarı şeridi", pg.locator("#xuy").count() in (0, 1))
+    go("servis", "#svlist .svk, #svlist .empty"); t("servis uyarı şeridi", pg.locator("#xuy").count() in (0, 1))
     # --- logo, belge tasarımı, kayıt fotoğrafı
     go("sayar", "#xdlogo"); pg.set_input_files("#xdlogo", "/tmp/atl.jpg"); pg.wait_for_function("document.querySelector('#xdlg').value.length>5", timeout=8000); pg.fill("#xda", "#aa3300") if False else pg.evaluate("document.querySelector('#xda').value='#aa3300'"); pg.select_option("#xdp", "80mm"); pg.click("[data-a=x3-tasarim]"); pg.wait_for_timeout(900)
     pdz = rq.get(B + "/settings", headers=H).json()["pdf_design"]; t("belge tasarımı kaydedildi (renk, 80mm, logo)", pdz["accent"] == "#aa3300" and pdz["paper"] == "80mm" and pdz["logo"].startswith("/api/files/"))
     pg.click("[data-a=x-marka-yeni]"); pg.wait_for_selector("#xmlogo"); pg.fill("#xmn", "Logolu Marka"); pg.set_input_files("#xmlogo", "/tmp/atl.jpg"); pg.wait_for_function("document.querySelector('#xmlg').value.length>5", timeout=8000); pg.click("[data-a=x-marka-ok]"); pg.wait_for_timeout(1000)
     t("marka logosu yüklendi", any(b["name"] == "Logolu Marka" and b["logo_url"].startswith("/api/files/") for b in rq.get(B + "/brands", headers=H).json()))
     j4 = rq.post(B + "/jobs/quick", headers=H, json={"customer_name": "Foto Müşteri", "customer_phone": "05323330044", "fault_description": "Foto", "assigned_technician_id": tid}).json(); j4id = j4.get("id") or j4["job"]["id"]
-    go("servis", "#svlist table, #svlist .empty"); pg.click('[data-a=sv-seg][data-v=""]'); pg.fill("#svq", "Foto Müşteri"); pg.wait_for_timeout(1000); pg.click("[data-a=sv-ac]"); pg.wait_for_selector(".xjf[data-v=before]", state="attached")
+    go("servis", "#svlist .svk, #svlist .empty"); pg.click('[data-a=sv-seg][data-v=""]'); pg.fill("#svq", "Foto Müşteri"); pg.wait_for_timeout(1000); pg.click("[data-a=sv-ac]"); pg.wait_for_selector(".xjf[data-v=before]", state="attached")
     pg.set_input_files(".xjf[data-v=before]", "/tmp/atl.jpg"); pg.wait_for_timeout(2500)
     ph = rq.get(B + "/jobs/" + j4id, headers=H).json()["photos_before"]; t("kayıt fotoğrafı yüklendi", len(ph) == 1 and ph[0].startswith("/api/files/"))
     pg.fill("#svq", "Foto Müşteri"); pg.wait_for_timeout(900); pg.click("[data-a=sv-ac]"); pg.wait_for_selector("[data-a=x3-fsil]"); pg.screenshot(path="/tmp/x-foto.png"); pg.click("[data-a=x3-fsil]"); pg.wait_for_timeout(1200); t("kayıt fotoğrafı silindi", rq.get(B + "/jobs/" + j4id, headers=H).json()["photos_before"] == [])
     rq.put(B + "/jobs/" + j4id, headers=H, json={"status": "basladi"}); rq.put(B + "/jobs/" + j4id, headers=H, json={"status": "tamamlandi", "work_done": "x", "parts_none": True, "labor_fee": 50})
-    pg.reload(); pg.wait_for_selector("#nav"); go("servis", "#svlist table, #svlist .empty"); pg.click('[data-a=sv-seg][data-v=""]'); pg.fill("#svq", "Foto Müşteri"); pg.wait_for_timeout(1000); pg.click("[data-a=sv-ac]"); pg.wait_for_selector("[data-a=sv-fis]")
+    pg.reload(); pg.wait_for_selector("#nav"); go("servis", "#svlist .svk, #svlist .empty"); pg.click('[data-a=sv-seg][data-v=""]'); pg.fill("#svq", "Foto Müşteri"); pg.wait_for_timeout(1000); pg.click("[data-a=sv-ac]"); pg.wait_for_selector("[data-a=sv-fis]")
     with ctx.expect_page() as np2: pg.click("[data-a=sv-fis]")
     fp2 = np2.value; fp2.wait_for_load_state(); html = fp2.content(); t("fiş tasarımı uygulandı (renk, logo, 80mm)", "#aa3300" in html and "max-width:300px" in html and "<img" in html and "Deneme Servis" in html)
     t("JavaScript hatası yok", not errs)
