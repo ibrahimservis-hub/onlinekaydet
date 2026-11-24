@@ -1,0 +1,64 @@
+# -*- coding: utf-8 -*-
+"""Volt & Su: elektrik ve tesisat. Siyah + sarı, dar condensed; bölünmüş iki panelli hero (hover'da genişler), fiyat listesi sekmesi."""
+import json
+from common import *
+IDX = 2
+f = foto.F[IDX]
+ph = lambda k, w=900: foto.url(f[k % len(f)], w)
+FIY = {'Elektrik': [('Priz / anahtar değişimi', 250), ('Avize montajı', 400), ('Sigorta panosu bakımı', 900), ('Kaçak akım araştırması', 750)],
+       'Tesisat': [('Musluk / batarya değişimi', 350), ('Tıkanıklık açma', 600), ('Su kaçağı tespiti', 900), ('Klozet rezervuarı tamiri', 450)]}
+CSS = '''
+:root{--bg:#f7f5ef;--ink:#1a1a1a;--mut:#6b675c;--ac:#f5c518;--ac2:#1a1a1a;--ln:rgba(26,26,26,.2);--hf:'Barlow Condensed',Impact,sans-serif;--mono:'Barlow',sans-serif;--bf:'Barlow',system-ui,sans-serif}
+body{background:var(--bg);color:var(--ink);font:500 18px/1.55 var(--bf)}
+h1,h2,h3{font-family:var(--hf);font-weight:800;text-transform:uppercase;letter-spacing:-.005em;line-height:.9;overflow-wrap:break-word;min-width:0}
+.btn{border-radius:0;font-family:var(--hf);font-weight:700;font-size:20px;text-transform:uppercase;letter-spacing:.04em}
+nav.top{position:fixed;inset:0 0 auto 0;z-index:50;display:flex;align-items:center;gap:28px;padding:14px clamp(20px,4vw,56px);background:var(--ink);color:#fff}
+.lg{font:800 30px var(--hf);text-transform:uppercase;text-decoration:none;margin-right:auto}.lg b{color:var(--ac)}
+nav.top ul{display:flex;gap:26px;list-style:none;padding:0}nav.top li a{font:700 20px var(--hf);text-transform:uppercase;letter-spacing:.04em;text-decoration:none}nav.top li a:hover{color:var(--ac)}nav.top .btn{background:var(--ac);color:var(--ink);padding:9px 22px}
+.hero{display:flex;height:100svh;min-height:600px;padding-top:62px;background:var(--ink)}
+.hero .pn{flex:1;position:relative;overflow:hidden;color:#fff;transition:flex .7s cubic-bezier(.7,0,.2,1);display:flex;align-items:flex-end;padding:clamp(24px,4vw,56px)}.hero .pn:hover{flex:1.6}.hero .pn+.pn{border-left:6px solid var(--ac)}
+.hero .pn img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.55;transition:transform 1s,opacity .5s}.hero .pn:hover img{transform:scale(1.05);opacity:.75}.hero .pn:after{content:'';position:absolute;inset:0;background:linear-gradient(transparent 40%,rgba(0,0,0,.8))}
+.hero .pn div{position:relative;z-index:2}.hero h1{font-size:clamp(90px,15vw,260px);color:var(--ac)}.hero .pn:nth-child(2) h1{color:#fff}.hero p{max-width:20em;margin:14px 0 20px;font-size:20px}.hero .btn{display:inline-block;background:var(--ac);color:var(--ink);padding:14px 30px}
+.em{background:var(--ac);color:var(--ink);padding:18px clamp(20px,4vw,56px);display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap}.em b{font:800 clamp(26px,3.4vw,48px)/1 var(--hf);text-transform:uppercase}.em a{background:var(--ink);color:#fff;padding:12px 30px;font:700 22px var(--hf);text-transform:uppercase;text-decoration:none}
+section.s{padding:min(14vh,130px) clamp(20px,4vw,56px) 4vh;max-width:1380px;margin:auto}
+.hd h2{font-size:clamp(56px,9vw,150px);margin-bottom:4vh}.hd h2 em{font-style:normal;background:var(--ac);padding:0 .1em}
+.fy{border:4px solid var(--ink)}.fy .tb{display:grid;grid-template-columns:1fr 1fr}.fy .tb button{min-height:76px;border:0;background:transparent;font:800 36px var(--hf);text-transform:uppercase;cursor:pointer;color:var(--ink);transition:background .2s}.fy .tb button+button{border-left:4px solid var(--ink)}.fy .tb button:hover{background:#ece8da}.fy .tb button[aria-pressed=true]{background:var(--ink);color:var(--ac)}
+.fy .row{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:20px 24px;border-top:4px solid var(--ink);font:700 clamp(20px,2.4vw,30px) var(--hf);text-transform:uppercase;transition:background .2s,padding .25s}.fy .row:hover{background:var(--ac);padding-left:34px}.fy .row b{font:800 clamp(30px,3.6vw,52px) var(--hf)}
+.fy .nt{padding:14px 24px;border-top:4px solid var(--ink);color:var(--mut);font-size:16px}
+.gl{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:8vh;border:4px solid var(--ink)}.gl div{padding:30px 24px;border-right:4px solid var(--ink)}.gl div:last-child{border-right:0}.gl b{font:800 clamp(56px,6vw,96px)/1 var(--hf);display:block}.gl p{font-weight:700}
+.im3{display:grid;grid-template-columns:2fr 1fr 1fr;gap:14px;margin-top:8vh}.im3 div{aspect-ratio:4/5;position:relative;overflow:hidden;background:#ddd}.im3 div:first-child{aspect-ratio:auto}.im3 img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:grayscale(.3);transition:transform .8s,filter .5s}.im3 div:hover img{transform:scale(1.04);filter:none}
+.cl{background:var(--ac);padding:min(12vh,110px) clamp(20px,4vw,56px);margin-top:8vh}.cl>div{max-width:1380px;margin:auto;display:grid;grid-template-columns:1fr 1fr;gap:5vw;align-items:end}.cl h2{font-size:clamp(60px,10vw,170px)}.cl form{display:grid;gap:10px}.cl input,.cl select{min-height:60px;border:4px solid var(--ink);background:#fff;padding:0 16px;font:700 20px var(--bf);border-radius:0;color:var(--ink)}.cl .btn{background:var(--ink);color:var(--ac);min-height:64px;border:0;cursor:pointer;font-size:26px}.cl .ok{display:none;background:var(--ink);color:#fff;padding:14px 16px;font-weight:700}.cl .ok.on{display:block}
+footer{background:var(--ink);color:#fff;padding:60px clamp(20px,4vw,56px) 30px;display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:40px}footer b{font:800 44px var(--hf);text-transform:uppercase;color:var(--ac)}footer a{display:block;color:#fff;text-decoration:none;padding:3px 0}footer a:hover{color:var(--ac)}footer p{color:#a8a496}
+@media(max-width:860px){
+nav.top ul,nav.top>.btn{display:none}nav.top{padding:10px 16px}nav.top .hm{margin-left:auto;border-radius:0}
+.hero{flex-direction:column;height:auto;min-height:100svh}.hero .pn{min-height:calc((100svh - 62px)/2);padding:22px}.hero .pn+.pn{border-left:0;border-top:6px solid var(--ac)}.hero .pn:hover{flex:1}.hero h1{font-size:clamp(80px,26vw,140px)}.hero p{font-size:17px;margin:6px 0 12px}
+.gl,.im3,.cl>div,footer{grid-template-columns:1fr}.gl div{border-right:0;border-bottom:4px solid var(--ink)}.gl div:last-child{border-bottom:0}.im3 div:first-child{aspect-ratio:4/3}.fy .tb button{font-size:28px}
+.mb{left:0;right:0;bottom:0;background:var(--ac);border:0;border-top:4px solid var(--ink);border-radius:0;grid-template-columns:1fr 1fr;padding:0 0 max(0px,env(safe-area-inset-bottom))}.mb a{min-height:62px;border-radius:0;color:var(--ink);font:800 24px var(--hf);letter-spacing:.02em;text-transform:uppercase}.mb a:nth-child(2){display:none}.mb a+a{border-left:4px solid var(--ink)}.mb a.p{background:var(--ink);color:var(--ac)}
+.mm{background:var(--ac);color:var(--ink);inset:0;padding:84px 20px 110px;--ln:var(--ink);--ac:#1a1a1a;--mut:#1a1a1a}.mm a{font:800 clamp(72px,24vw,130px)/.95 var(--hf);text-transform:uppercase;color:var(--ink);border-bottom:4px solid var(--ink);padding:6px 0}.mm small{color:var(--ink);font:700 16px var(--bf);text-transform:none;letter-spacing:0}
+footer{padding-bottom:110px}}
+'''
+JS = '''
+OK.start(function(){var $=OK.$,$$=OK.$$,money=OK.money,rd=OK.reduce;
+ if(!rd){gsap.from('.hero .pn',{yPercent:12,opacity:0,duration:1,stagger:.15,ease:'power4.out'});gsap.from('.hero h1',{xPercent:-10,opacity:0,duration:1,delay:.3,stagger:.15,ease:'power4.out'});
+  gsap.utils.toArray('.hd h2,.gl div,.im3 div,.cl h2').forEach(function(e,i){gsap.from(e,{y:50,opacity:0,duration:.8,delay:(i%4)*.06,scrollTrigger:{trigger:e,start:'top 92%'}})});
+  $$('.gl b').forEach(function(e){var v=+e.dataset.v,o={n:0};ScrollTrigger.create({trigger:e,start:'top 88%',once:true,onEnter:function(){gsap.to(o,{n:v,duration:1.4,ease:'power2.out',onUpdate:function(){e.textContent=Math.round(o.n)+(e.dataset.s||'')}})}})})}
+ function sh(k){$$('.fy .tb button').forEach(function(b){b.setAttribute('aria-pressed',b.dataset.k===k)});$('#rw').innerHTML=C.f[k].map(function(x){return '<div class="row"><span>'+x[0]+'</span><b>'+money(x[1])+'</b></div>'}).join('')}
+ $$('.fy .tb button').forEach(function(b){b.onclick=function(){sh(b.dataset.k)}});sh('Elektrik');
+ $('#fm').onsubmit=function(e){e.preventDefault();var o=$('#fo');o.textContent='Tamam '+$('#fn').value+'. '+$('#fk').value+' ustası için seni arıyoruz.';o.classList.add('on')};
+});
+'''
+def render():
+    body = f'''<div id="pre" role="status"><div><b>VOLT &amp; SU</b><i><span id="pn">0</span>%</i></div></div>
+<nav class="top"><a class="lg" href="#">Volt<b>&amp;</b>Su</a><ul><li><a href="#fiyat">Fiyatlar</a></li><li><a href="#guven">Neden biz</a></li><li><a href="#usta">Usta çağır</a></li></ul><a class="btn" href="#usta">Usta çağır</a></nav>
+<main><header class="hero" id="hero"><a class="pn" href="#fiyat"><img src="{ph(0, 1400)}" alt="Elektrik panosu üzerinde çalışan usta"><div><h1>Volt</h1><p>Priz, pano, aydınlatma, kaçak akım. Sigortası atan evin ustası.</p><span class="btn">Elektrik fiyatları</span></div></a><a class="pn" href="#fiyat"><img src="{ph(1, 1400)}" alt="Tesisat tamiri yapan usta"><div><h1>Su</h1><p>Musluk, tıkanıklık, kaçak, rezervuar. Damlayan her şeyin ustası.</p><span class="btn">Tesisat fiyatları</span></div></a></header>
+<div class="em"><b>Acil mi? Aynı gün usta kapında.</b><a href="tel:+905320000000">Hemen ara</a></div>
+<section class="s" id="fiyat"><div class="hd"><h2>Fiyat <em>listesi</em></h2></div><div class="fy"><div class="tb" role="group" aria-label="Alan"><button type="button" data-k="Elektrik" aria-pressed="false">Elektrik</button><button type="button" data-k="Tesisat" aria-pressed="false">Tesisat</button></div><div id="rw"></div><div class="nt">Fiyatlar başlangıç içindir, malzeme ayrıdır. Kesin tutar yerinde söylenir.</div></div>
+<div class="gl" id="guven"><div><b data-v="6" data-s=" ay">0</b><p>İşçilik garantisi</p></div><div><b data-v="24" data-s=" saat">0</b><p>Acil çağrıya dönüş süresi</p></div><div><b data-v="0" data-s=" ₺">0</b><p>Keşif ücreti</p></div><div><b data-v="1" data-s=" ustam">0</b><p>Aynı usta baştan sona</p></div></div>
+<div class="im3"><div><img src="{ph(2, 1000)}" alt="Elektrik tesisatı" loading="lazy"></div><div><img src="{ph(3, 700)}" alt="Tesisat boruları" loading="lazy"></div><div><img src="{ph(4, 700)}" alt="Usta aletleri" loading="lazy"></div></div></section>
+<section class="cl" id="usta"><div><h2>Usta<br>çağır.</h2><form id="fm"><input id="fn" required placeholder="Adınız" aria-label="Adınız" autocomplete="name"><select id="fk" aria-label="Alan"><option>Elektrik</option><option>Tesisat</option></select><button class="btn" type="submit">Beni arayın</button><p class="ok" id="fo" aria-live="polite"></p></form></div></section></main>
+<footer><div><b>Volt &amp; Su</b><p>Elektrik ve tesisat ustası · Ankara</p></div><div><p>Sayfalar</p><a href="#fiyat">Fiyatlar</a><a href="#guven">Neden biz</a><a href="#usta">Usta çağır</a></div><div><p>İletişim</p><a href="tel:+905320000000">Ara</a><a href="https://wa.me/905320000000">WhatsApp</a></div></footer>'''
+    c = json.dumps(dict(f=FIY), ensure_ascii=False)
+    return page('Volt & Su Elektrik ve Tesisat', 'Elektrik ve tesisat ustası. Aynı gün, garantili.', ['Barlow+Condensed:wght@700;800', 'Barlow:wght@500;700'], BASE_CSS + CSS, body, JS, c, dict(cta=['Usta çağır', '#usta'], addr='Ankara'))
+if __name__ == '__main__':
+    import os
+    os.makedirs(R + '/volt', exist_ok=True); open(R + '/volt/index.html', 'w', encoding='utf-8').write(render()); print('volt ok')
