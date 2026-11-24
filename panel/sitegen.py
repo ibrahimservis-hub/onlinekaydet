@@ -502,7 +502,10 @@ def apply_profile(raw, th, ctx):
         if b[0] == "Menü":
             nv = "".join('<a href="%s%s%s">%s</a>' % (pb, x["slug"], ps, E(x["title"])) for x in navs[:2] if x["slug"] not in _linked(b[1], pb, ps))
             nv += "".join('<a href="%s%s%s">%s</a>' % (pb, h.lstrip("/"), ps, E(l)) for h, l in _sector_links(ctx) if h not in b[1])
-            b[1] = b[1].replace("</nav>", nv + "</nav>", 1) if "</nav>" in b[1] else b[1]
+            if nv and 'class="top"' in b[1] and "</ul>" in b[1]:            # sinematik temalar: bağlantılar listenin içine (mobilde tam ekran menüye de girer)
+                b[1] = b[1].replace("</ul>", re.sub(r"(<a [^>]*>.*?</a>)", r"<li>\1</li>", nv) + "</ul>", 1)
+            else:
+                b[1] = b[1].replace("</nav>", nv + "</nav>", 1) if "</nav>" in b[1] else b[1]
         elif b[0] == "Mobil menü":
             nv = "".join('<a href="%s%s%s">%s</a>' % (pb, x["slug"], ps, E(x["title"])) for x in navs if x["slug"] not in _linked(b[1], pb, ps))
             nv += "".join('<a href="%s%s%s">%s</a>' % (pb, h.lstrip("/"), ps, E(l)) for h, l in _sector_links(ctx) if h not in b[1])
