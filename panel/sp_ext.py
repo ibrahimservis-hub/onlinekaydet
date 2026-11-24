@@ -302,7 +302,12 @@ def register(api_router, db, deps):
         prods = await db.shop_products.find({"active": True}, {"_id": 0}).to_list(2000)
         esc = lambda x: (str(x or "")).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
         items = []
+        import kategori as _kt
+        akis = await _kt.akis_haritasi(db)
         for p in prods:
+            _k = akis.get((p.get("category") or "").strip()) or {}
+            _kx = (f"<g:product_type>{esc(_k.get('yol') or p.get('category'))}</g:product_type>" if (_k.get("yol") or p.get("category")) else "") + \
+                  (f"<g:google_product_category>{esc(_k['google'])}</g:google_product_category>" if _k.get("google") else "")
             img = (p.get("images") or [""])[0]
             if img.startswith("/"):
                 img = PANEL_URL + img
@@ -310,7 +315,7 @@ def register(api_router, db, deps):
             items.append(f"<item><g:id>{esc(p['id'])}</g:id><title>{esc(p['name'])}</title><description>{esc(p.get('description') or p.get('short') or p['name'])}</description>"
                          f"<link>{PUBLIC_SITE}/magaza/?urun={esc(p.get('slug', p['id']))}</link>" + (f"<g:image_link>{esc(img)}</g:image_link>" if img else "") +
                          f"<g:availability>{av}</g:availability><g:price>{float(p.get('price', 0)):.2f} TRY</g:price><g:brand>{esc(p.get('brand') or brand)}</g:brand>"
-                         f"<g:condition>new</g:condition>" + (f"<g:mpn>{esc(p['sku'])}</g:mpn>" if p.get("sku") else "<g:identifier_exists>no</g:identifier_exists>") + "</item>")
+                         f"<g:condition>new</g:condition>" + _kx + (f"<g:mpn>{esc(p['sku'])}</g:mpn>" if p.get("sku") else "<g:identifier_exists>no</g:identifier_exists>") + "</item>")
         xml = ('<?xml version="1.0" encoding="UTF-8"?><rss xmlns:g="http://base.google.com/ns/1.0" version="2.0"><channel><title>ServisPlus Mağaza</title>'
                f"<link>{PUBLIC_SITE}</link><description>ServisPlus ürünleri</description>{''.join(items)}</channel></rss>")
         return Response(xml, media_type="application/xml")

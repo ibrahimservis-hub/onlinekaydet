@@ -1071,6 +1071,8 @@ def register(api_router, db, deps):
                     _ex.append("magaza")
                     _pg = {q["slug"]: q async for q in db.shop_brand_pages.find({}, {"_id": 0, "slug": 1, "hidden": 1, "noindex": 1})}
                     _ex += ["magaza/marka/" + s_ for s_ in (await marka_seo.marka_listesi(db)) if not (_pg.get(s_) or {}).get("hidden") and not (_pg.get(s_) or {}).get("noindex")]
+                    import kategori as _kt
+                    _ex += await _kt.kategori_adresleri(db)
                     _ex += ["magaza/urun/" + str(r_.get("slug") or r_.get("id")) async for r_ in db.shop_products.find({"active": True, "noindex": {"$ne": True}}, {"_id": 0, "slug": 1, "id": 1}).limit(5000)]
                 except Exception:                                             # noqa: BLE001
                     pass
@@ -1087,7 +1089,7 @@ def register(api_router, db, deps):
             return None
         if p in ("", "index"):
             h = home
-        elif (p in ("magaza", "hesabim") or re.fullmatch(r"magaza/(urun|marka)/[^/]{1,120}", p) or p == "magaza/markalar") and ctx and (ctx.get("shop_on") or (p == "hesabim" and ((await db.app_settings.find_one({"_id": "yp_uyelik"}, {"_id": 0, "on": 1})) or {}).get("on"))):
+        elif (p in ("magaza", "hesabim") or re.fullmatch(r"magaza/(urun|marka|kategori)/[^/]{1,120}", p) or p == "magaza/markalar") and ctx and (ctx.get("shop_on") or (p == "hesabim" and ((await db.app_settings.find_one({"_id": "yp_uyelik"}, {"_id": 0, "on": 1})) or {}).get("on"))):
             body = storefront.shop_page() if p.startswith("magaza") else storefront.account_page(bool(ctx.get("shop_on")))
             ttl = "Mağaza" if p.startswith("magaza") else "Hesabım"
             if p.startswith("magaza/urun/"):
@@ -1110,6 +1112,14 @@ def register(api_router, db, deps):
                         pr["seo_desc"] = _d
                 except Exception:                                             # noqa: BLE001
                     pass
+            kpg = None
+            if p.startswith("magaza/kategori/"):
+                import kategori as _kt2
+                from urllib.parse import unquote as _uq2
+                kpg = await _kt2.kategori_sayfasi(db, _uq2(p[16:]))
+                if not kpg:
+                    return None
+                ttl = kpg["name"]
             bpg = None
             if p.startswith("magaza/marka/"):
                 import marka_seo
@@ -1118,9 +1128,26 @@ def register(api_router, db, deps):
                 if not bpg:
                     return None
                 ttl = bpg["name"]
-            h = compose_page(await themed_home(ctx), ((pr or {}).get("seo_title") or (ttl + " · " + ctx["name"])) if p.startswith("magaza/urun/") else (bpg["seo_title"] if bpg else (ttl + " · " + ctx["name"])), body)
+            h = compose_page(await themed_home(ctx), ((pr or {}).get("seo_title") or (ttl + " · " + ctx["name"])) if p.startswith("magaza/urun/") else (bpg["seo_title"] if bpg else (kpg["seo_title"] if kpg else (ttl + " · " + ctx["name"]))), body)
             if not h:
                 return None
+            if kpg:
+                import html as _hk
+                ek = '<meta property="og:title" content="%s">' % _hk.escape(kpg["og_title"] or kpg["seo_title"])
+                ds_ = kpg["og_desc"] or kpg["seo_desc"]
+                if kpg["seo_desc"]:
+                    h = re.sub(r'<meta name="description"[^>]*>', "", h)
+                    ek += '<meta name="description" content="%s">' % _hk.escape(kpg["seo_desc"])
+                if ds_:
+                    ek += '<meta property="og:description" content="%s">' % _hk.escape(ds_)
+                if kpg["kw"]:
+                    ek += '<meta name="keywords" content="%s">' % _hk.escape(kpg["kw"])
+                if kpg["og_img"]:
+                    ek += '<meta property="og:image" content="%s">' % _hk.escape(kpg["og_img"])
+                if kpg["noindex"]:
+                    ek += '<meta name="robots" content="noindex,follow">'
+                ek += '<link rel="canonical" href="/magaza/kategori/%s">' % _hk.escape(kpg["slug"])
+                h = h.replace("</head>", ek + "</head>", 1)
             if bpg:
                 import html as _hh
                 ek = ""

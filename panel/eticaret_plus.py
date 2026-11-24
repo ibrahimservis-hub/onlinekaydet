@@ -50,10 +50,11 @@ def _x(v):
     return _h.escape(str(v if v is not None else ""), quote=False)
 
 
-def feed_xml(urls, tur, rows, base, c):
+def feed_xml(urls, tur, rows, base, c, akis=None):
     """tur: akakce | cimri. rows: mağaza ürünleri."""
     out = ['<?xml version="1.0" encoding="UTF-8"?>', "<Products>"]
     for p in rows:
+        p = dict(p, category=((akis or {}).get((p.get("category") or "").strip()) or {}).get("yol") or p.get("category"))
         slug = p.get("slug") or p.get("id")
         img = (p.get("images") or [""])[0]
         if img.startswith("/"):
@@ -297,7 +298,8 @@ def register(api_router, db, deps):
             raise HTTPException(404, "Bu besleme kapalı")
         rows = await db.shop_products.find({"active": True}, {"_id": 0}).to_list(5000)
         host = request.headers.get("x-forwarded-host") or request.headers.get("host") or ""
-        return Response(feed_xml(None, tur, rows, "https://" + host, c), media_type="application/xml; charset=utf-8")
+        import kategori
+        return Response(feed_xml(None, tur, rows, "https://" + host, c, await kategori.akis_haritasi(db)), media_type="application/xml; charset=utf-8")
 
     @api_router.get("/public/feed/akakce.xml")
     async def feed_akakce(request: Request):

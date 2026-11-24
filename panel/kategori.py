@@ -29,12 +29,60 @@ def _t(v, n):
 
 ALANLAR = ("code", "adwords_name", "adwords_type")
 
+# Google ürün kategorisi (Merchant Center taksonomisi): üst düzey kategoriler ve sık kullanılan bir alt kategori.
+GOOGLE_KAT = [("1", "Animals & Pet Supplies"), ("166", "Apparel & Accessories"), ("8", "Arts & Entertainment"), ("537", "Baby & Toddler"),
+              ("111", "Business & Industrial"), ("141", "Cameras & Optics"), ("222", "Electronics"), ("412", "Food, Beverages & Tobacco"),
+              ("436", "Furniture"), ("632", "Hardware"), ("469", "Health & Beauty"), ("536", "Home & Garden"), ("5181", "Luggage & Bags"),
+              ("783", "Media"), ("922", "Office Supplies"), ("5605", "Religious & Ceremonial"), ("2092", "Software"), ("988", "Sporting Goods"),
+              ("1239", "Toys & Games"), ("888", "Vehicles & Parts"), ("8025", "Vehicles & Parts > Vehicle Parts & Accessories")]
+# Kategori adından Google kategorisi tahmini (ad içinde geçen kelimeye göre). Panelde değiştirilebilir.
+GOOGLE_TAHMIN = [("yedek parça|oto|araç|araba|lastik|jant|akü|kaplama|detailing", "8025"), ("kombi|klima|şofben|radyatör|tesisat|musluk|batarya|vana|boru", "632"),
+                 ("beyaz eşya|buzdolabı|çamaşır|bulaşık|fırın|ocak|süpürge|ütü", "536"), ("telefon|bilgisayar|laptop|tablet|kulaklık|şarj|kablo|televizyon|elektronik", "222"),
+                 ("kamera|güvenlik|lens", "141"), ("giyim|elbise|ayakkabı|çanta|aksesuar|saat|takı", "166"), ("kozmetik|güzellik|bakım|parfüm|saç|cilt|makyaj|sağlık", "469"),
+                 ("mobilya|koltuk|masa|sandalye|yatak|dolap", "436"), ("bahçe|ev|dekor|mutfak|aydınlatma|halı|perde", "536"), ("oyuncak|oyun", "1239"),
+                 ("bebek|çocuk", "537"), ("kırtasiye|ofis", "922"), ("spor|fitness|bisiklet|kamp", "988"), ("evcil|kedi|köpek|mama|akvaryum", "1"),
+                 ("gıda|içecek|kahve|çay|yiyecek|tatlı|market", "412"), ("kitap|müzik|film", "783"), ("yazılım|lisans", "2092"), ("hırdavat|el aleti|matkap|vida|boya", "632")]
+
+
+def google_tahmin(ad):
+    a = str(ad or "").lower()
+    for kelimeler, kod in GOOGLE_TAHMIN:
+        if any(k in a for k in kelimeler.split("|")):
+            return kod
+    return ""
+
+
+def _kat_google(rows):
+    """{kategori id: (yol, google kategorisi)}; Google değeri yoksa en yakın üst kategoriden gelir."""
+    by_id = {r["id"]: r for r in rows}
+    out = {}
+    for r in rows:
+        yol, g, cid, seen = [], "", r["id"], set()
+        while cid and cid in by_id and cid not in seen:
+            seen.add(cid)
+            yol.append(by_id[cid]["name"])
+            g = g or (by_id[cid].get("google_cat") or "")
+            cid = by_id[cid].get("parent") or ""
+        out[r["id"]] = (" > ".join(reversed(yol)), g)
+    return out
+
+
+async def akis_haritasi(db):
+    """Ürün akışları için: {kategori adı: {"yol": "Ana > Alt", "google": "kod ya da yol"}} (aynı ad birden çoksa ilki)."""
+    rows = [r for r in await tum(db) if r.get("active", True)]
+    kg = _kat_google(rows)
+    out = {}
+    for r in rows:
+        out.setdefault(r["name"], {"yol": kg[r["id"]][0], "google": kg[r["id"]][1]})
+    return out
+
+
 
 def _alanlar(p, c=None):
     """Düzenleme formundan gelen alanları temizle. c verilirse eksik alanlar eski değerde kalır."""
     c = c or {}
     out = {}
-    for k, n in (("code", 40), ("adwords_name", 120), ("adwords_type", 120)):
+    for k, n in (("code", 40), ("adwords_name", 120), ("adwords_type", 120), ("google_cat", 200)):
         if k in p or k not in c:
             out[k] = _t(p.get(k), n)
     for k, d in (("active", True), ("oos_last", False), ("list_variants", False), ("show_video", False), ("auto_video", False), ("native", False)):
@@ -160,6 +208,49 @@ async def adlar_icin(db, ref):
     return [by_id[i]["name"] for i in ids if by_id[i].get("active", True)]
 
 
+async def kategori_sayfasi(db, slug):
+    """Herkese açık kategori sayfası bilgisi (adres: /magaza/kategori/<slug>); gizli kategori için None."""
+    rows = await tum(db)
+    c = next((r for r in rows if r.get("slug") == slug and r.get("active", True)), None)
+    if not c:
+        return None
+    try:
+        import marka_seo
+        tpl, firma = await marka_seo.templates(db), await marka_seo.firma_adi(db)
+        v = {"kategori": c["name"], "firma": firma, "marka": "", "urun": "", "model": "", "fiyat": ""}
+        t0 = marka_seo.render(tpl.get("category_title") or "", v, 70)
+        d0 = marka_seo.render(tpl.get("category_desc") or "", v, 170)
+    except Exception:                                      # noqa: BLE001
+        t0, d0, firma = "", "", ""
+    seo = c.get("seo") or {}
+    soc = c.get("social") or {}
+    return {"id": c["id"], "slug": slug, "name": c["name"], "img": c.get("img", ""), "kw": seo.get("keywords", ""),
+            "seo_title": (seo.get("title") or "").strip() or t0 or (c["name"] + " · " + firma).strip(" ·"),
+            "seo_desc": (seo.get("desc") or "").strip() or d0, "noindex": bool(seo.get("noindex")),
+            "og_title": soc.get("title") or "", "og_desc": soc.get("desc") or "", "og_img": soc.get("img") or c.get("img", "")}
+
+
+async def kategori_adresleri(db):
+    """Site haritası için: ürünü olan, açık ve noindex olmayan kategorilerin adresleri (alt kategori ürünleri üste sayılır)."""
+    rows = await tum(db)
+    names = {}
+    async for p in db.shop_products.find({"active": True}, {"_id": 0, "category": 1}):
+        n = (p.get("category") or "").strip()
+        if n:
+            names[n] = names.get(n, 0) + 1
+    ch = _agac([r for r in rows if r.get("active", True)])
+    out = []
+
+    def say(r):
+        n = names.get(r["name"], 0) + sum(say(c) for c in ch.get(r["id"], []))
+        if n and not (r.get("seo") or {}).get("noindex") and r.get("slug"):
+            out.append("magaza/kategori/" + r["slug"])
+        return n
+    for r in ch.get("", []):
+        say(r)
+    return out
+
+
 async def agac_acik(db, sayim):
     """Sitede gösterilecek ağaç: yalnız etkin kategoriler; sayım ad bazlı (alt kategoriler üste toplanır)."""
     rows = [r for r in await tum(db) if r.get("active", True)]
@@ -234,6 +325,8 @@ def register(api_router, db, deps):
         doc = {"id": str(uuid.uuid4()), "name": name, "parent": parent, "sort": max([s.get("sort", 100) for s in sib] + [0]) + 10,
                "slug": await _benzersiz_slug(db, slugify(payload.get("slug") or name)), "created_at": _now()}
         doc.update(_alanlar(payload))
+        if not doc.get("google_cat"):
+            doc["google_cat"] = google_tahmin(name)                  # ad, üst kategori yoksa kelimeden tahmin edilir; panelde değiştirilebilir
         await db.shop_categories.insert_one(dict(doc))
         return doc
 
@@ -302,6 +395,57 @@ def register(api_router, db, deps):
         ps = await db.yp_products.find({"cat_ids": {"$in": ids}}, {"_id": 0, "id": 1, "name": 1, "sku": 1, "price": 1, "sale_price": 1, "stock": 1, "status": 1}).to_list(300)
         return {"items": ps, "n": len(ps)}
 
+    @api_router.get("/shop/categories/google")
+    async def cat_google(_: dict = Depends(adm)):
+        return [{"id": k, "name": n} for k, n in GOOGLE_KAT]
+
+    @api_router.post("/shop/categories/birlestir")
+    async def cat_birlestir(payload: dict, _: dict = Depends(adm)):
+        """Seçili kategorileri tek kategoride topla: ürünler hedefe taşınır, alt kategoriler hedefin altına geçer, kaynaklar silinir."""
+        ids = [str(i) for i in (payload.get("ids") or [])][:200]
+        target = str(payload.get("target") or "")
+        rows = await tum(db)
+        by_id = {r["id"]: r for r in rows}
+        if target not in by_id:
+            raise HTTPException(422, "Hedef kategori seçin")
+        kaynak = [i for i in ids if i in by_id and i != target]
+        if not kaynak:
+            raise HTTPException(422, "Birleştirmek için en az iki kategori seçin")
+        yasak = set(_torunlar(rows, target))
+        if any(i in yasak for i in kaynak):
+            raise HTTPException(422, "Alt kategori, üst kategorisiyle birleştirilemez: önce taşıyın")
+        yeni_ad = _t(payload.get("name"), 80)
+        moved = 0
+        for i in kaynak:
+            async for p in db.yp_products.find({"cat_ids": i}, {"_id": 0, "id": 1, "cat_ids": 1}):
+                new = [t for t in (p.get("cat_ids") or []) if t != i]
+                if target not in new:
+                    new.append(target)
+                moved += 1
+                names = [(yeni_ad if x == target and yeni_ad else by_id[x]["name"]) for x in new if x in by_id]
+                await db.yp_products.update_one({"id": p["id"]}, {"$set": {"cat_ids": new, "cats": names, "cat": names[0] if names else ""}})
+            await db.shop_categories.update_many({"parent": i}, {"$set": {"parent": target}})
+            await db.shop_categories.delete_one({"id": i})
+            await db.market_catmap.delete_many({"category_id": i})
+        if yeni_ad and yeni_ad != by_id[target]["name"]:
+            if await db.shop_categories.find_one({"name": yeni_ad, "parent": by_id[target].get("parent", ""), "id": {"$ne": target}}, {"_id": 1}):
+                raise HTTPException(409, "Aynı seviyede bu adda kategori var")
+            await db.shop_categories.update_one({"id": target}, {"$set": {"name": yeni_ad}})
+            by_id[target]["name"] = yeni_ad
+        # kaynak kategorinin Google kodu hedefte boşsa devral
+        if not by_id[target].get("google_cat"):
+            g = next((by_id[i].get("google_cat") for i in kaynak if by_id[i].get("google_cat")), "")
+            if g:
+                await db.shop_categories.update_one({"id": target}, {"$set": {"google_cat": g}})
+        # çocukları aynı adda çakışırsa sonuna numara ekleme yerine bırak (kardeş adı aynıysa birleşme yeniden denenebilir)
+        try:
+            import urun_ayna
+            async for p in db.yp_products.find({"cat_ids": target}, {"_id": 0, "id": 1}):
+                await urun_ayna.ayna(db, p["id"])
+        except Exception:                                  # noqa: BLE001
+            pass
+        return {"ok": True, "birlesen": len(kaynak), "aktarilan": moved}
+
     @api_router.post("/shop/categories/sil")
     async def cat_sil(payload: dict, _: dict = Depends(adm)):
         """Seçilileri sil. Ürünü olan kategoride target (hedef kategori) gerekir: ürünler oraya aktarılır. Alt kategoriler bir üste çıkar."""
@@ -341,6 +485,13 @@ def register(api_router, db, deps):
         except Exception:                                  # noqa: BLE001
             pass
         return {"ok": True, "silinen": len(ids), "aktarilan": moved}
+
+    @api_router.get("/public/shop/category-page/{slug}")
+    async def pub_cat_page(slug: str):
+        c = await kategori_sayfasi(db, slug)
+        if not c:
+            raise HTTPException(404, "Kategori yok")
+        return c
 
     @api_router.get("/public/shop/category-tree")
     async def pub_tree():

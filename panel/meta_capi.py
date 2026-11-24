@@ -124,7 +124,7 @@ def _x(v):
     return _h.escape(str(v if v is not None else ""), quote=False)
 
 
-def feed_xml(rows, base, firma):
+def feed_xml(rows, base, firma, akis=None):
     items = []
 
     def madde(p, vid="", vlabel="", price=None, stock=None, img=None, group=""):
@@ -154,8 +154,11 @@ def feed_xml(rows, base, firma):
         for u in extra:
             s.append("<g:additional_image_link>%s</g:additional_image_link>" % _x(u))
         s.append("<g:brand>%s</g:brand>" % _x(p.get("brand") or firma))
-        if p.get("category"):
-            s.append("<g:product_type>%s</g:product_type>" % _x(p["category"]))
+        _k = (akis or {}).get((p.get("category") or "").strip()) or {}
+        if _k.get("yol") or p.get("category"):
+            s.append("<g:product_type>%s</g:product_type>" % _x(_k.get("yol") or p["category"]))
+        if _k.get("google"):
+            s.append("<g:google_product_category>%s</g:google_product_category>" % _x(_k["google"]))
         if p.get("gtin"):
             s.append("<g:gtin>%s</g:gtin>" % _x(p["gtin"]))
         elif p.get("sku"):
@@ -191,7 +194,8 @@ def register(api_router, db, deps):
             raise HTTPException(404, "Bu besleme kapalı")
         rows = await db.shop_products.find({"active": True}, {"_id": 0}).to_list(5000)
         host = request.headers.get("x-forwarded-host") or request.headers.get("host") or ""
-        return Response(feed_xml(rows, "https://" + host, await firma_adi()), media_type="application/xml; charset=utf-8")
+        import kategori
+        return Response(feed_xml(rows, "https://" + host, await firma_adi(), await kategori.akis_haritasi(db)), media_type="application/xml; charset=utf-8")
 
     @api_router.get("/yp/meta")
     async def meta_durum(request: Request, _: dict = Depends(adm)):
