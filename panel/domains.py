@@ -317,9 +317,9 @@ def register(api_router, db, deps):
                 users = jobs = 0
             dl = doms.get(f["id"], [])
             items = [("Firma telefonu", bool(g.get("company_phone"))), ("Logo", bool(lg.get("data"))), ("Site teması seçildi", bool(br.get("theme"))),
-                     ("Alan adı bağlandı", any(x["status"] == "yayinda" for x in dl)), ("SMS doğrulandı", bool(ig.get("sms_verified"))),
+                     ("Alan adı bağlandı", any(x["status"] == "yayinda" for x in dl)), ("SMS gönderimi bağlandı", bool(ig.get("sms_verified"))),
                      ("Personel eklendi", users > 1), ("İlk servis kaydı", jobs > 0)]
-            out.append({"id": f["id"], "name": f.get("name", ""), "status": f.get("status", ""), "domains": [x["domain"] for x in dl],
+            out.append({"id": f["id"], "name": f.get("name", ""), "demo": bool(f.get("demo")), "demo_firma": f.get("demo_firma", ""), "contact_name": f.get("contact_name", ""), "status": f.get("status", ""), "domains": [x["domain"] for x in dl],
                         "items": [{"k": k, "ok": ok} for k, ok in items], "done": sum(1 for _, ok in items if ok), "total": len(items)})
         return {"firms": out}
 

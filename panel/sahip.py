@@ -624,7 +624,8 @@ def register(app, api_router, db, deps):
                      {"k": "kisi", "t": "Personel eklendi", "ok": users > 1, "auto": True},
                      {"k": "is", "t": "İlk servis kaydı açıldı", "ok": jobs > 0, "auto": True}]
             items += [{"k": k, "t": t, "ok": bool(done.get(k)), "auto": False} for k, t in MANUAL_STEPS]
-            return {"id": f["id"], "name": f.get("name", ""), "status": f.get("status", ""), "domains": [x["domain"] for x in dl],
+            return {"id": f["id"], "name": f.get("name", ""), "demo": bool(f.get("demo")), "demo_firma": f.get("demo_firma", ""), "contact_name": f.get("contact_name", ""),
+                    "status": f.get("status", ""), "domains": [x["domain"] for x in dl],
                     "items": items, "done": sum(1 for i in items if i["ok"]), "total": len(items), "note": m.get("note", "")}
         firms_l = await db.main().firms.find({"status": {"$ne": "silindi"}}, {"_id": 0}).sort("created_at", -1).to_list(300)
         out = await asyncio.gather(*[one(f) for f in firms_l])
