@@ -6,7 +6,7 @@ var KEYS=['strip','l1','l2','em','lead','bt','bb','bs','cta'],MAP={bt:'badge_top
 function ready(){document.documentElement.setAttribute('data-kok','1')}
 function paint(c){KEYS.forEach(function(k){set(k,c[MAP[k]||k])});if(c.accent)document.documentElement.style.setProperty('--ka',c.accent)}
 try{var cc=JSON.parse(localStorage.getItem('kamp-c')||'null');if(cc&&cc.strip){paint(cc);ready()}}catch(e){}
-setTimeout(ready,2500);
+setTimeout(ready,1200);
 function p2(n){return n<10?'0'+n:''+n}
 function tick(){document.documentElement.toggleAttribute('data-kend',!!end);var left=end?end-(Date.now()+off):0;
  var strip=document.querySelectorAll('[data-kc]'),box=document.querySelectorAll('[data-kt]');

@@ -3,7 +3,7 @@ kampanya titremesi düzeltmesini tüm sayfalara uygular. Tekrar çalıştırıla
 import pathlib, re, html
 from gen_mobil_menu import mm_html as _old_mm  # noqa: F401  (eski şablon; aşağıda yenisi kullanılır)
 
-V = "20241124b"
+V = "20241124e"
 T = pathlib.Path("hakkimizda.html").read_text(encoding="utf-8")
 PRE, POST = T[:T.index("<main")], T[T.index("</main>"):]
 j = T.index('id="teklif"'); k = T.rfind("<section", 0, j)
@@ -182,16 +182,16 @@ def kariyer():
 # ------------------------------------------------------------------ ORTAK YAMALAR
 MM_NEW = lambda cls, id_: (
     '<div class="%s mm" id="%s"><!--mm-->'
+    '<div class="mm-try v2"><span class="mm-rz"><b>7 GÜN</b><small>ÜCRETSİZ</small></span><p class="mm-t1">Satın almadan önce deneyin</p>'
+    '<p class="mm-t2">Kart bilgisi istenmez. Üç adımda kendi sitenizi ve panelinizi görün.</p>'
+    '<ul class="mm-ad"><li><i>1</i>Demo hesabınızı açın</li><li><i>2</i>Sektörünüzü ve temanızı seçin</li><li><i>3</i>Sipariş ve randevuları panelde izleyin</li></ul>'
+    '<a class="mm-cta" href="/demo.html">7 gün ücretsiz deneyin <i>→</i></a><p class="mm-not">Beğenmezseniz hesabınız kendiliğinden durur.</p></div>'
     '<nav class="mm-l" aria-label="Mobil menü">'
     '<details><summary>Ürün</summary><div><a href="/web-sitesi.html">Web sitesi</a><a href="/e-ticaret.html">E-ticaret</a><a href="/is-takibi.html">Randevu ve iş takibi</a><a href="/muhasebe-ve-stok.html">Muhasebe ve stok</a><a href="/ozellikler.html">Tüm özellikler</a></div></details>'
     '<details><summary>Çözümler</summary><div><a href="/cozumler.html#web">Web sitesi</a><a href="/cozumler.html#eticaret">E-ticaret</a><a href="/cozumler.html#baglanti">Pazaryeri ve bağlantılar</a><a href="/cozumler.html#is">Randevu ve iş takibi</a><a href="/cozumler.html#para">Muhasebe ve stok</a><a class="mm-all" href="/cozumler.html">Tüm çözümler</a></div></details>'
     '<a href="/temalar.html">Temalar</a><a href="/sektorler.html">Sektörler</a><a href="/fiyatlar.html">Paketler ve fiyatlar</a>'
     '<details><summary>Kaynaklar</summary><div><a href="/bilgi-bankasi.html">Bilgi bankası</a><a href="/blog.html">Blog</a><a href="/entegrasyonlar.html">Entegrasyonlar</a><a href="/hesaplama-araclari.html">Hesaplama araçları</a><a href="/destek.html">Destek</a></div></details>'
     '<details><summary>Kurumsal</summary><div><a href="/neden-onlinekaydet.html">Neden OnlineKaydet</a><a href="/hakkimizda.html">Hakkımızda</a><a href="/kariyer.html">Kariyer</a><a href="/bayilik.html">Bayilik</a><a href="/iletisim.html">İletişim</a></div></details></nav>'
-    '<div class="mm-try v2"><span class="mm-rz"><b>7 GÜN</b><small>ÜCRETSİZ</small></span><p class="mm-t1">Satın almadan önce deneyin</p>'
-    '<p class="mm-t2">Kart bilgisi istenmez. Üç adımda kendi sitenizi ve panelinizi görün.</p>'
-    '<ul class="mm-ad"><li><i>1</i>Demo hesabınızı açın</li><li><i>2</i>Sektörünüzü ve temanızı seçin</li><li><i>3</i>Sipariş ve randevuları panelde izleyin</li></ul>'
-    '<a class="mm-cta" href="/demo.html">7 gün ücretsiz deneyin <i>→</i></a><p class="mm-not">Beğenmezseniz hesabınız kendiliğinden durur.</p></div>'
     '<div class="mm-bt"><div class="mm-c"><a href="tel:+905444444004">Hemen arayın</a><a class="wa" href="https://wa.me/905444444004">WhatsApp</a></div><a class="mm-in" href="/uye-girisi">Üye girişi</a></div>'
     '<!--/mm--></div>') % (cls, id_)
 OLD = [(re.compile(r'<div class="nxm(?: mm)?" id="nxm">.*?(?:<!--/mm-->)?</div>(?=<!--/nxh-->)', re.S), "nxm", "nxm"),
@@ -219,7 +219,7 @@ def yama(t):
         f = t[fi:]
         f = f.replace('<a href="/temalar.html">Temalar</a>', '<a href="/cozumler.html">Çözümler</a><a href="/temalar.html">Temalar</a>', 1)
         f = f.replace('<a href="/hakkimizda.html">Hakkımızda</a>', '<a href="/neden-onlinekaydet.html">Neden OnlineKaydet</a><a href="/hakkimizda.html">Hakkımızda</a><a href="/kariyer.html">Kariyer</a>', 1)
-        f = f.replace('<a href="/cerez-politikasi.html">Çerez politikası</a>', '<a href="/cerez-politikasi.html">Çerez politikası</a> · <a href="#cerez" data-cerez-ac>Çerez tercihleri</a>', 1)
+        f = f.replace('<a href="/cerez-politikasi.html">Çerez politikası</a>', '<a href="/cerez-politikasi.html">Çerez politikası</a><a href="#cerez" data-cerez-ac>Çerez tercihleri</a>', 1)
         t = t[:fi] + f
     # baş kısım
     if "kurumsal.css" not in t:
