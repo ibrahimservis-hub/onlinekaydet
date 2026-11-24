@@ -29,6 +29,24 @@ SECTOR_MAP = {"kombi": "kombi", "klima": "klima", "beyaz eşya": "beyaz_esya", "
 import sektor_ek
 SECTOR_MAP.update(sektor_ek.SECTOR_WORDS)
 SECTOR_MAP.update({k: k for k in sektor_ek.NEW})
+# Araç bakım / yıkama / kaplama demoları: araç, plaka ve uygulama gerçek işe uygun görünür (paket adı = sektörün hizmet grubu)
+_ARAÇ = [("Volkswagen Passat 1.6 TDI", "06 KLM 214"), ("Toyota Corolla Hybrid", "06 FTR 581"), ("BMW 320i", "34 ABV 902"), ("Renault Clio 1.0", "06 ZGK 447"),
+         ("Fiat Egea Cross", "06 DNM 305"), ("Tesla Model Y", "34 EVT 118"), ("Hyundai Tucson", "06 HYT 760")]
+ARAC_DEMO = {
+    "oto_kaplama": [
+        ("Pasta cila", "Hare ve çizik giderme, 2 aşamalı pasta cila", "2 aşamalı pasta cila uygulandı, kaporta ve tamponlar parlatıldı.", "Pasta ve cila seti", 3500.0),
+        ("Seramik", "9H seramik kaplama (3 yıl koruma), boya düzeltme dahil", "Boya düzeltme yapıldı, 2 kat seramik kaplama uygulandı; kürlenme için 24 saat sonra teslim.", "Seramik kaplama sarfı", 12500.0),
+        ("Cam filmi", "Yan ve arka cam filmi, ön cama ısı filmi", "Cam filmleri uygulandı, kenar ve kabarcık kontrolü yapıldı.", "Cam filmi rulosu", 4200.0),
+        ("İç temizlik", "İç detay: koltuk, tavan ve plastik temizliği", "Koltuk ve tavan derin temizlendi, plastikler koruyucuyla yenilendi.", "İç temizlik kimyasalı", 2200.0)],
+    "oto_yikama": [
+        ("İç dış yıkama", "İç ve dış yıkama, cam ve jant silme", "İç dış yıkama yapıldı, cam ve jantlar silindi, torpido parlatıldı.", "Yıkama şampuanı ve cila", 650.0),
+        ("Detay", "Detaylı iç temizlik ve kaporta cilası", "İç detay temizlik ve kaporta cilası yapıldı, kokular giderildi.", "Detay temizlik seti", 2800.0),
+        ("Pasta cila", "Kaporta pasta cila, iki aşama", "İki aşamalı pasta cila uygulandı, hareler giderildi.", "Pasta ve cila seti", 3200.0),
+        ("Seramik / koruma", "Hızlı seramik koruma (1 yıl)", "Boya temizlendi, hızlı seramik koruma uygulandı.", "Koruma spreyi", 3800.0),
+        ("Filo aracı", "Filo aracı iç dış yıkama (haftalık)", "Filo aracı iç dış yıkandı, kayıt formu işlendi.", "Yıkama şampuanı", 450.0)],
+}
+
+
 CUSTOMERS = [("Ayşe Yıldız", "Atatürk Mah. 112. Sk. No:4/3", "Çankaya", "Ankara"), ("Mehmet Kaya", "Cumhuriyet Cd. No:27/8", "Kadıköy", "İstanbul"),
              ("Fatma Demir", "Yeni Mah. 1450 Sk. No:12", "Bornova", "İzmir"), ("Ali Çelik", "Fevzi Çakmak Cd. No:55/2", "Yenimahalle", "Ankara"),
              ("Zeynep Arslan", "Bahçelievler 7. Cd. No:9", "Nilüfer", "Bursa")]
@@ -249,24 +267,34 @@ def register(api_router, db, deps):
         faults = FAULTS.get(key) or ["Arıza"]
         _mdl, _wd, _pn = sektor_ek.DEMO_META.get(key, ("Örnek model", "Arıza giderildi, test edildi.", "Yedek parça"))
         plan = [("yeni", None), ("atandi", 0), ("yolda", 0), ("basladi", 1), ("tamamlandi", 0), ("tamamlandi", 1), ("tamamlandi", 0)]
+        _arac = ARAC_DEMO.get(key)
+        _brand_all = {b["name"]: b async for b in fdb.brands.find({}, {"_id": 0})} if _arac else {}
         for n, (st, ti) in enumerate(plan):
             c = custs[n % len(custs)]
             dev = None
-            if br:
-                dev = {"id": str(uuid.uuid4()), "customer_id": c["id"], "brand_id": br["id"], "brand_name": br["name"], "brand_logo": br.get("logo_url", ""),
-                       "type": sec["type"], "model": _mdl, "serial_no": f"DM{n:04d}", "created_at": _now()}
+            br_n, mdl_n, ser_n, flt_n, wd_n, pn_n, price_n = br, _mdl, f"DM{n:04d}", faults[n % len(faults)], _wd, _pn, None
+            if _arac:
+                _pk, _is, _yap, _urun, price_n = _arac[n % len(_arac)]
+                br_n = _brand_all.get(_pk) or br
+                mdl_n, ser_n = _ARAÇ[n % len(_ARAÇ)]
+                flt_n, wd_n, pn_n = _is, _yap, _urun
+            if br_n:
+                dev = {"id": str(uuid.uuid4()), "customer_id": c["id"], "brand_id": br_n["id"], "brand_name": br_n["name"], "brand_logo": br_n.get("logo_url", ""),
+                       "type": "araç" if _arac else sec["type"], "model": mdl_n, "serial_no": ser_n, "created_at": _now()}
                 await fdb.devices.insert_one(dev)
             t = techs[ti] if ti is not None else None
             when = datetime.now(timezone.utc) - timedelta(days=(7 - n) if st == "tamamlandi" else 0, hours=-n)
             labor, parts = (450.0 + 50 * n, 300.0 + 40 * n) if st == "tamamlandi" else (0.0, 0.0)
+            if _arac and st == "tamamlandi":
+                labor, parts = round(price_n * 0.8, 2), round(price_n * 0.2, 2)
             job = {"id": str(uuid.uuid4()), "job_number": f"DM-{1001 + n}", "customer_id": c["id"], "customer_name": c["name"],
                    "customer_phone": c["phone"], "customer_address": f'{c["address"]} {c["district"]} {c["city"]}',
-                   "device_id": dev["id"] if dev else "", "device_brand_id": br["id"] if br else "", "device_brand_name": br["name"] if br else "",
-                   "device_brand_logo": br.get("logo_url", "") if br else "", "device_model": _mdl, "device_type": sec["type"],
-                   "device_serial": dev["serial_no"] if dev else "", "fault_description": faults[n % len(faults)], "scheduled_at": when.strftime("%Y-%m-%dT%H:%M"),
+                   "device_id": dev["id"] if dev else "", "device_brand_id": br_n["id"] if br_n else "", "device_brand_name": br_n["name"] if br_n else "",
+                   "device_brand_logo": br_n.get("logo_url", "") if br_n else "", "device_model": mdl_n, "device_type": "araç" if _arac else sec["type"],
+                   "device_serial": dev["serial_no"] if dev else "", "fault_description": flt_n, "scheduled_at": when.strftime("%Y-%m-%dT%H:%M"),
                    "priority": "normal", "assigned_technician_id": t["id"] if t else "", "assigned_to_fu": "",
                    "assigned_technician_name": t["name"] if t else "", "technician_commission_percent": 30.0 if t else 0.0, "status": st,
-                   "work_done": _wd if st == "tamamlandi" else "", "parts_used": ([{"name": _pn, "qty": 1, "unit_price": parts}] if parts else []),
+                   "work_done": wd_n if st == "tamamlandi" else "", "parts_used": ([{"name": pn_n, "qty": 1, "unit_price": parts}] if parts else []),
                    "labor_fee": labor, "parts_total": parts, "total_amount": labor + parts,
                    "technician_commission_amount": round((labor + parts) * 0.3, 2) if st == "tamamlandi" else 0.0,
                    "photos_before": [], "photos_after": [], "signature_url": "", "tech_signature_url": "", "pdf_note": "", "cancel_reason": "",
