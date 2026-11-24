@@ -4051,7 +4051,7 @@ function svDetay(r){var L=svL(),st=SVST[r.status]||[r.status,'w'],kapali=['tamam
   +'<section class="dk"><div class="dr"><small>'+esc(L.faultL)+'</small><b>'+esc(r.fault_description||'—')+'</b></div>'
   +(r.work_done?'<div class="dr" style="margin-top:10px"><small>'+esc(L.doneL)+'</small><b>'+esc(r.work_done)+'</b></div>':'')
   +(r.cancel_reason?'<div class="dr" style="margin-top:10px"><small>İptal nedeni</small><b>'+esc(r.cancel_reason)+'</b></div>':'')
-  +'</section><div id="xfoto"></div>'+svTutarKart(r,L,kapali)+svBelgeKart(r,L,kapali);
+  +((r.total_amount||r.labor_fee)?'<div class="dr" style="margin-top:10px"><small>Tutar</small><b>'+tl(r.total_amount)+' <span class="note">(parça '+tl(r.parts_total)+' + işçilik '+tl(r.labor_fee)+')</span></b></div>':'')+'</section><div id="xfoto"></div>'+svBelgeKart(r,L,kapali);
  if(!kapali){h+='<div style="margin-top:14px;display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end"><label style="display:grid;gap:4px">'+esc(svKisi())+' ata / değiştir<select id="svu2" style="width:100%">'+svTechOpts(r.assigned_technician_id,'Seçin')+'</select></label><button class="btn" data-a="sv-ata" data-id="'+esc(r.id)+'">Ata</button></div>';
   h+='<div class="mf" style="margin-top:14px;flex-wrap:wrap">'+(SVNEXT[r.status]||[]).map(function(x){return '<button class="btn" data-a="sv-durum" data-v="'+x[0]+'" data-id="'+esc(r.id)+'">'+x[1]+'</button>'}).join('')
    +'<button class="btn p" data-a="sv-kapat" data-id="'+esc(r.id)+'">'+esc(L.finish)+'</button><button class="btn" data-a="sv-iptal" data-id="'+esc(r.id)+'" style="color:var(--bad)">İptal et</button></div>'}
