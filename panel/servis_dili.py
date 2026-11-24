@@ -248,9 +248,12 @@ ARCH = {
 
 # sektöre özgü ince ayarlar (iş akışı türünün üstüne biner)
 OVR = {
-    "cilingir": {"st": {"yeni": ["Çağrı alındı", "y"], "yolda": ["Çilingir yolda", "b"], "basladi": ["Kapıda, işlemde", "b"]}, "L": {"faultL": "Sorun / yapılacak iş", "faultPh": "Örn. Kapıda kaldım, kilit değişimi"}},
-    "gunes_enerjisi": {"st": {"basladi": ["Montajda", "b"]}, "next": {"atandi": [["yolda", "Sahaya çıktı"], ["basladi", "Montaja başla"]], "yolda": [["basladi", "Montaja başla"]]}},
+    "cilingir": {"st": {"yeni": ["Çağrı alındı", "y"], "yolda": ["Çilingir yolda", "b"], "basladi": ["Kapıda, işlemde", "b"]}, "L": {"faultL": "Sorun / yapılacak iş", "faultPh": "Örn. Kapıda kaldım, kilit değişimi", "serL": "", "serD": "", "brandL": "Kilit türü", "typeL": "Kapı türü", "typePh": "Örn. çelik kapı, araç"}},
+    "gunes_enerjisi": {"L": {"serD": "Sistem seri no", "serL": "Sistem seri no"}, "st": {"basladi": ["Montajda", "b"]}, "next": {"atandi": [["yolda", "Sahaya çıktı"], ["basladi", "Montaja başla"]], "yolda": [["basladi", "Montaja başla"]]}},
     "asansor": {"L": {"serD": "Asansör no", "serL": "Asansör no / etiket"}},
+    "su_aritma": {"L": {"serD": "Cihaz seri no", "serL": "Cihaz seri no"}},
+    "jenerator": {"L": {"serD": "Jeneratör seri no", "serL": "Jeneratör seri no"}},
+    "yazici_servis": {"L": {"serD": "Yazıcı seri no", "serL": "Yazıcı seri no"}},
     "telefon_tamir": {"L": {"brandL": "Marka", "modelL": "Model", "modelPh": "Örn. iPhone 13", "serL": "IMEI / seri no", "serD": "IMEI", "typeL": "Cihaz türü", "typePh": "Örn. telefon, tablet",
                            "faultPh": "Örn. Ekran kırık, şarj almıyor", "brandL2": "Marka"}, "ek": {"brand": "Marka", "part": "Parça", "dev_rep": "Cihaz türü"}},
     "ayakkabi_tamir": {"L": {"brandL": "İşlem türü", "faultPh": "Örn. Taban yapıştırma, topuk değişimi", "modelL": "Ayrıntı", "modelPh": "Renk, numara"}},

@@ -189,6 +189,47 @@ DEMO_META = {
     "guzellik": ("Cilt bakımı seansı", "Seans tamamlandı, sonraki randevu planlandı.", "Seans ürünü"),
 }
 
+# Sektöre özgü demo iş ayrıntısı: (model / ayrıntı, yapılan iş, kullanılan malzeme). Genel "Örnek iş" metni kalmasın.
+DEMO_META.update({
+    "lastikci": ("205/55 R16 kışlık lastik", "4 lastik değiştirildi, balans ve rot ayarı yapıldı.", "Lastik supap seti"),
+    "ayakkabi_tamir": ("Deri bot, 42 numara", "Taban yenilendi, topuk takıldı, boyandı.", "Taban ve yapıştırıcı"),
+    "telefon_tamir": ("iPhone 13", "Ekran değiştirildi, test edildi.", "Ekran ünitesi"),
+    "terzi": ("Takım elbise, 50 beden", "Paça ve kol kısaltıldı, bel daraltıldı, prova yapıldı.", "İplik ve astar"),
+    "kuru_temizleme": ("Takım elbise ve gömlek", "Kuru temizleme yapıldı, ütülendi ve askılandı.", "Temizleme solüsyonu"),
+    "hali_yikama": ("200x300 yün halı", "Yıkandı, kurutuldu ve paketlendi.", "Halı şampuanı"),
+    "asansor": ("4 duraklı yolcu asansörü", "Aylık bakım yapıldı, kabin kapısı ayarlandı.", "Makara ve yağ"),
+    "su_aritma": ("5 aşamalı arıtma cihazı", "Filtreler değiştirildi, basınç ayarlandı.", "Filtre seti"),
+    "jenerator": ("40 kVA dizel jeneratör", "Periyodik bakım yapıldı, yağ ve filtreler değiştirildi.", "Yağ filtresi"),
+    "yazici_servis": ("Lazer yazıcı", "Toner ve drum değiştirildi, test sayfası alındı.", "Toner"),
+    "gunes_enerjisi": ("5 kW çatı sistemi", "Panel temizliği ve inverter kontrolü yapıldı.", "Bağlantı konektörü"),
+    "cilingir": ("Çelik kapı kilidi", "Kapı açıldı, kilit değiştirildi, anahtar teslim edildi.", "Kilit göbeği"),
+    "bocek_ilaclama": ("2+1 daire", "İlaçlama yapıldı, 30 gün garanti belgesi verildi.", "İlaçlama solüsyonu"),
+    "havuz_bakim": ("8x4 m açık havuz", "Su analizi yapıldı, klor ve pH dengelendi, filtre temizlendi.", "Klor ve pH ayarlayıcı"),
+    "peyzaj": ("300 m² bahçe", "Çim ekimi ve sulama hattı tamamlandı.", "Çim tohumu ve damla sulama"),
+    "tadilat": ("90 m² daire, banyo", "Banyo yenilemesi tamamlandı, teslim edildi.", "Seramik ve yapıştırıcı"),
+    "cam_dograma": ("5 pencere, PVC", "Ölçü alındı, pencereler söküldü ve yenileri monte edildi.", "PVC profil ve cam"),
+    "surucu_kursu": ("B sınıfı, hafta sonu grubu", "Direksiyon dersi tamamlandı, sınav hazırlığı yapıldı.", "Ders kitabı seti"),
+    "src_kursu": ("SRC 2 grubu", "Ders tamamlandı, deneme sınavı yapıldı.", "Ders notları"),
+    "etut_merkezi": ("8. sınıf LGS grubu", "Matematik etüdü yapıldı, eksik konular tamamlandı.", "Soru bankası"),
+    "dil_okulu": ("İngilizce B1, akşam grubu", "Ders işlendi, konuşma pratiği yapıldı.", "Ders kitabı"),
+    "muzik_kursu": ("Gitar, başlangıç", "Ders tamamlandı, yeni parça çalışıldı.", "Nota ve pena seti"),
+    "anaokulu": ("4 yaş sınıfı", "Günlük program uygulandı, veliye bilgi verildi.", "Etkinlik malzemesi"),
+    "ozel_ders": ("9. sınıf matematik", "Ders işlendi, ödev verildi.", "Çalışma kâğıdı"),
+    "bilgisayar_kursu": ("Ofis programları grubu", "Ders işlendi, uygulama çalışması yapıldı.", "Ders notları"),
+    "avukat": ("İş davası, dosya incelemesi", "Dosya incelendi, dilekçe hazırlandı ve sunuldu.", "Harç ve posta gideri"),
+    "muhasebe": ("Aylık KDV beyannamesi", "Beyanname hazırlandı ve onaya gönderildi.", "Evrak ve dosyalama"),
+    "tercume": ("Yeminli çeviri, diploma", "Çeviri tamamlandı, noter onayı alındı.", "Noter onay gideri"),
+    "mimar": ("180 m² villa, ruhsat projesi", "Mimari proje çizildi ve belediyeye sunuldu.", "Plot ve baskı"),
+    "dugun_salonu": ("250 kişilik düğün", "Organizasyon tamamlandı, salon teslim alındı.", "Çiçek ve süsleme"),
+    "dj_muzik": ("Düğün, 5 saat", "Ekipman kuruldu, etkinlik sorunsuz tamamlandı.", "Ses ve ışık ekipmanı"),
+    "fotografci": ("Dış çekim, 3 saat", "Çekim yapıldı, seçilen kareler rötuşlanıp teslim edildi.", "Albüm baskısı"),
+    "tur_organizasyon": ("Günübirlik tur, 12 kişi", "Tur tamamlandı, katılımcı geri bildirimi alındı.", "Giriş biletleri"),
+    "kurye": ("Evrak paketi", "Paket alındı ve imza karşılığı teslim edildi.", "Zarf ve poşet"),
+    "transfer": ("Havalimanı transferi, 4 kişi", "Yolcular karşılandı ve otele bırakıldı.", "Otoyol ve köprü geçişi"),
+    "arac_kiralama": ("Hatchback, 3 günlük", "Araç teslim edildi, iade kontrolü yapıldı.", "Ek sigorta"),
+    "emlakci": ("3+1 kiralık daire", "Yer gösterimi yapıldı, kiracı adayı ile görüşüldü.", "Tanıtım baskısı"),
+})
+
 
 # Demo mağaza ürünleri (e-ticaret ve tekstil): (ad, marka, kategori, fiyat, eski fiyat, stok). Fotoğraf yoksa vitrinde ürüne özel çizim görünür.
 DEMO_URUN = {
