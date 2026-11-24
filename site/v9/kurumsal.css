@@ -109,3 +109,4 @@
 }
 @media(prefers-reduced-motion:reduce){.kz .kzcard{transition:none}.kz .kzcard:hover{transform:none}}
 .mm>*{flex-shrink:0}.mm .mm-try{flex-shrink:0}
+.ckb-b button.ckb-k{flex:1 1 100%}
