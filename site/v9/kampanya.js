@@ -5,7 +5,7 @@ function set(k,v){document.querySelectorAll('[data-k="'+k+'"]').forEach(function
 var KEYS=['strip','l1','l2','em','lead','bt','bb','bs','cta'],MAP={bt:'badge_top',bb:'badge_big',bs:'badge_sub'};
 function ready(){document.documentElement.setAttribute('data-kok','1')}
 function paint(c){KEYS.forEach(function(k){set(k,c[MAP[k]||k])});if(c.accent)document.documentElement.style.setProperty('--ka',c.accent)}
-try{var cc=JSON.parse(localStorage.getItem('kamp-c')||'null');if(cc&&cc.strip){paint(cc);ready()}}catch(e){}
+try{var cc=JSON.parse(localStorage.getItem('kamp-c')||'null');if(cc&&cc.strip&&!cc.always){paint(cc);ready();document.documentElement.setAttribute('data-kon','1')}}catch(e){}
 setTimeout(ready,1200);
 function p2(n){return n<10?'0'+n:''+n}
 function tick(){document.documentElement.toggleAttribute('data-kend',!!end);var left=end?end-(Date.now()+off):0;
@@ -18,6 +18,7 @@ function tick(){document.documentElement.toggleAttribute('data-kend',!!end);var 
 function load(){fetch('/api/public/campaign',{cache:'no-store'}).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(c){
  tries=0;off=c.now_ms-Date.now();end=c.end_ms||0;try{localStorage.setItem('kamp-c',JSON.stringify(c))}catch(e){}
  paint(c);ready();
+ if(c.always){document.documentElement.removeAttribute('data-kon');document.querySelectorAll('.kst,.kst2').forEach(function(s){s.remove()})}else document.documentElement.setAttribute('data-kon','1');
  document.querySelectorAll('.kst2').forEach(function(s){var x;try{x=sessionStorage.getItem('kst-x')}catch(e){}if(x===String(c.id)){s.remove();return}s.querySelectorAll('a').forEach(function(a){a.href=c.always?'/demo.html':'/fiyatlar.html#paketler'});var b=s.querySelector('button');if(b)b.onclick=function(){try{sessionStorage.setItem('kst-x',String(c.id))}catch(e){}s.remove()}});
  clearInterval(tm);tick();if(end)tm=setInterval(tick,1000)}).catch(function(){if(++tries<4)setTimeout(load,5000*tries);else ready()})}
 function hh(){var u=document.getElementById('ust'),k=document.querySelector('.kh');if(u&&k)k.style.setProperty('--hh',u.getBoundingClientRect().height+'px')}hh();addEventListener('resize',hh);addEventListener('load',hh);if(window.ResizeObserver){var u0=document.getElementById('ust');if(u0)new ResizeObserver(hh).observe(u0)}if(document.fonts&&document.fonts.ready)document.fonts.ready.then(hh);

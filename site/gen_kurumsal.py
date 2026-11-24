@@ -3,7 +3,7 @@ kampanya titremesi düzeltmesini tüm sayfalara uygular. Tekrar çalıştırıla
 import pathlib, re, html
 from gen_mobil_menu import mm_html as _old_mm  # noqa: F401  (eski şablon; aşağıda yenisi kullanılır)
 
-V = "20241124o"
+V = "20241124p"
 T = pathlib.Path("hakkimizda.html").read_text(encoding="utf-8")
 PRE, POST = T[:T.index("<main")], T[T.index("</main>"):]
 j = T.index('id="teklif"'); k = T.rfind("<section", 0, j)
