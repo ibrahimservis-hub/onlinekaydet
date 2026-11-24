@@ -152,14 +152,15 @@ with TestClient(s.app) as c:
 
     def j():
         f0 = loop.run_until_complete(s.db.main().firms.find_one({"login_email": FORM["email"]}))
-        r = yolla(sure="aylik").json(); assert r["tur"] == "yenileme"
+        r = yolla(sure="yillik").json(); assert r["tur"] == "yenileme"
+        assert yolla(sure="aylik").status_code == 422
         c.post("/api/public/satin-al/odeme", json={"no": r["no"], "k": r["k"], "yontem": "kart"})
         IYZ["detay"] = {"status": "success", "paymentStatus": "SUCCESS", "paidPrice": "%.2f" % r["fiyat"]["toplam"], "basketId": r["no"], "paymentId": "3"}
         POSTA.clear(); donus("tok%d" % len(IYZ["init"]))
         L = loop.run_until_complete(s.db.main().firms.find({"login_email": FORM["email"]}).to_list(5))
         assert len(L) == 1 and L[0]["expires_at"] > f0["expires_at"], (f0["expires_at"], L[0]["expires_at"])
         d = (__import__("datetime").datetime.fromisoformat(L[0]["expires_at"]) - __import__("datetime").datetime.fromisoformat(f0["expires_at"])).days
-        assert 29 <= d <= 31, d
+        assert 364 <= d <= 366, d
         assert "Şifre:" not in POSTA[0][1] and "mevcut şifrenizle" in POSTA[0][1].lower()
     t("aynı e-postayla alım yeni firma açmıyor, süreyi uzatıyor", j)
 

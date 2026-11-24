@@ -262,7 +262,9 @@ def register(api_router, db, deps):
         if payload.get("kabul") is not True: raise HTTPException(422, "Sözleşme ve aydınlatma metnini onaylayın")
         sek = str(payload.get("sektor") or "")
         if sek not in sektor.SECTORS: raise HTTPException(422, "Sektörünüzü seçin")
-        sure = payload.get("sure") if payload.get("sure") in ("aylik", "yillik", "iki_yil") else "yillik"
+        if payload.get("sure") == "aylik":
+            raise HTTPException(422, "En az 1 yıllık paket satın alınabilir")
+        sure = payload.get("sure") if payload.get("sure") in ("yillik", "iki_yil") else "yillik"
         fy = await fiyat(str(payload.get("paket") or ""), sure)
         mevcut = await M().firms.find_one({"login_email": email, "status": {"$ne": "silindi"}}, {"_id": 0, "id": 1})
         sid = uuid.uuid4().hex
