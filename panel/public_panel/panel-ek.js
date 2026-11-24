@@ -1865,6 +1865,24 @@
     if (PKGMODS || PKGBUSY || !FIRM) return;
     PKGBUSY = true; pcall('GET', '/firm/package').then(function (r) { PKGMODS = (r && r.modules) || false; }).catch(function () { PKGMODS = false; }).then(function () { PKGBUSY = false; });
   }
+  /* Sahip modülü değiştirince müşteri paneli sayfayı yenilemeden güncellensin: paket ve sektör modüllerini düzenli yeniden oku */
+  var PKGLAST = 0;
+  function yenilePkg() {
+    var tok = LS.get('token', ''); if (!tok || !FIRM || document.hidden) return;
+    var now = Date.now(); if (now - PKGLAST < 8000) return; PKGLAST = now;
+    pcall('GET', '/firm/package').then(function (r) {
+      var m = (r && r.modules) || false;
+      if (m && PKGMODS && m.join(',') !== PKGMODS.join(',')) { PKGMODS = m; PKGSIG = Date.now(); }
+      else if (m && !PKGMODS) PKGMODS = m;
+    }).catch(function () {});
+    fetch(location.origin + '/api/sector-terms', { headers: { Authorization: 'Bearer ' + tok } })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) { if (j) { window.__spxMods = j.modules || []; window.__spxKayit = !!j.kayit; } }).catch(function () {});
+  }
+  var PKGSIG = 0;
+  setInterval(yenilePkg, 15000);
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) { PKGLAST = 0; yenilePkg(); } });
+  window.addEventListener('focus', function () { PKGLAST = 0; yenilePkg(); });
   function canMenu(k) {
     var u = me(), r = u.admin_role || 'owner';
     if (k === '/admin/account') return true;
@@ -2761,7 +2779,7 @@
   function tick() {
     var asides = document.querySelectorAll('aside nav'); if (!asides.length) return;
     Array.prototype.forEach.call(asides, function (nav) {
-      var nl = nativeLinks(nav), sig = Object.keys(nl).join('|') + (FIRM ? '~F' + (PKGMODS ? PKGMODS.length : '') : '') + '#' + (me().admin_role || '') + (me().perms || []).join(',') + '@' + (window.__spxSectorKey || '') + (window.__spxKayit ? 'K' : '') + (window.__spxMods || []).join(''), own = nav.querySelector(':scope > [data-spx-own]');
+      var nl = nativeLinks(nav), sig = Object.keys(nl).join('|') + (FIRM ? '~F' + (PKGMODS ? PKGMODS.join(',') : '') : '') + '#' + (me().admin_role || '') + (me().perms || []).join(',') + '@' + (window.__spxSectorKey || '') + (window.__spxKayit ? 'K' : '') + (window.__spxMods || []).join(''), own = nav.querySelector(':scope > [data-spx-own]');
       if (own && own.getAttribute('data-sig') === sig) { Array.prototype.forEach.call(own.querySelectorAll('a.spx-it'), function (a) { var k = a.getAttribute('data-k') || 'ek:', bd = a.querySelector('.spx-bd:not(.spx-od)'), t = k === 'ek:onay' ? (window.__onayN ? String(window.__onayN) : '') : k.indexOf('ek:') === 0 ? '' : (badgeOf(nl[k]) || (ADMB && ADMB[k] ? (k === '/admin/governance' ? '!' : String(ADMB[k])) : '')); if (t && t !== '0') { if (!bd) { bd = document.createElement('span'); bd.className = 'spx-bd'; a.appendChild(bd); } bd.textContent = t; } else if (bd) bd.remove(); var od = a.querySelector('.spx-od'), ov2 = k === '/admin/jobs' && ADMB && (ADMB.jobs_overdue > 0 || ADMB.call_overdue > 0) ? (ADMB.jobs_overdue || 0) + (ADMB.call_overdue || 0) : 0; if (ov2) { if (!od) { od = document.createElement('span'); od.className = 'spx-bd spx-od'; od.style.background = '#f59e0b'; od.style.marginLeft = '4px'; od.title = 'Randevu saati geçmiş iş'; a.appendChild(od); } od.textContent = ov2 + ' ⏰'; } else if (od) od.remove(); }); markActive(); return; }
       var sKey = nav.closest('.fixed') ? 'm' : 'd', sTop = nav.scrollTop || MSCR[sKey] || 0;
       if (own) own.remove();

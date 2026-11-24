@@ -1,3 +1,4 @@
+import asyncio
 # -*- coding: utf-8 -*-
 """Firmalar: ServisPlus panelini kendi verisiyle kullanan müşteri firmalar (yalnız yönetici ekranı).
 
@@ -352,6 +353,17 @@ def register(api_router, db, deps):
                 "last_activity": last, "revenue_total": round(rev, 2), "revenue_month": round(rev_m, 2), "jobs_month": jobs_m,
                 "avg_ticket": round(rev / done, 2) if done else 0, "cancelled": by.get("iptal", 0) + by.get("gelmedi", 0)}
 
+    _STC = {}
+
+    async def stats_cached(f):
+        """Firma sayıları 30 sn önbelleklenir; liste her açılışta tüm firmaları yeniden saymasın."""
+        c = _STC.get(f["id"])
+        if c and time.time() - c[0] < 30:
+            return c[1]
+        v = await stats(f)
+        _STC[f["id"]] = (time.time(), v)
+        return v
+
     async def stats(f):
         fdb = db.firm(f["db"])
         try:
@@ -380,19 +392,24 @@ def register(api_router, db, deps):
         doms = {}
         async for d in db.main().firm_domains.find({}, {"_id": 0, "firm_id": 1, "domain": 1, "status": 1}):
             doms.setdefault(d.get("firm_id"), []).append({"domain": d.get("domain"), "status": d.get("status", "")})
-        for f in await db.main().firms.find({"status": {"$ne": "silindi"}}, {"_id": 0}).sort("created_at", -1).to_list(500):
-            f["domains"] = doms.get(f["id"], [])
-            f["stats"] = await stats(f)
-            try:
-                import sektor_dil
-                f["family"] = sektor_dil.family(f.get("sector") or "") or "servis"
-            except Exception:                              # noqa: BLE001
-                f["family"] = "servis"
-            f["has_logo"] = bool(f.pop("logo", ""))
-            f["expired"] = expired(f)
-            f["users"] = await db.main().firm_users.find({"firm_id": f["id"]}, {"_id": 0, "password_hash": 0}).sort("created_at", 1).to_list(10)
-            f.pop("db", None)
-            out.append(f)
+        sem = asyncio.Semaphore(8)
+
+        async def one(f):
+            async with sem:
+                f["domains"] = doms.get(f["id"], [])
+                f["stats"] = await stats_cached(f)
+                try:
+                    import sektor_dil
+                    f["family"] = sektor_dil.family(f.get("sector") or "") or "servis"
+                except Exception:                              # noqa: BLE001
+                    f["family"] = "servis"
+                f["has_logo"] = bool(f.pop("logo", ""))
+                f["expired"] = expired(f)
+                f["users"] = await db.main().firm_users.find({"firm_id": f["id"]}, {"_id": 0, "password_hash": 0}).sort("created_at", 1).to_list(10)
+                f.pop("db", None)
+                return f
+        rows = await db.main().firms.find({"status": {"$ne": "silindi"}}, {"_id": 0}).sort("created_at", -1).to_list(500)
+        out = list(await asyncio.gather(*[one(f) for f in rows]))
         return {"firms": out, "feature_labels": FEATURE_LABELS}
 
     @api_router.post("/admin/firms/sil")
@@ -426,6 +443,7 @@ def register(api_router, db, deps):
         except Exception:                                  # noqa: BLE001
             pass
         _ACC.clear()
+        _STC.clear()
         _MOD.clear()
         await audit(me, "FİRMA KALICI SİLDİ" if kalici else "FİRMA SİLDİ", ", ".join(adlar)[:300])
         return {"ok": True, "silinen": n}
@@ -527,6 +545,7 @@ def register(api_router, db, deps):
         if "modules" in upd:
             await sync_shop(f, upd["modules"], prev_mods)
         _ACC.clear()
+        _STC.clear()
         _MOD.clear()
         await push_settings(f)
         await audit(me, "FİRMA GÜNCELLEDİ", f["name"])
@@ -590,6 +609,7 @@ def register(api_router, db, deps):
                 await db.firm(f["db"]).users.update_many({"firm_owner": True}, {"$set": uset})
             n += 1
         _ACC.clear()
+        _STC.clear()
         _MOD.clear()
         await audit(me, "TOPLU İŞLEM", f"{act}={val} · {n} firma")
         return {"ok": True, "updated": n, "skipped": skipped}
@@ -739,6 +759,7 @@ def register(api_router, db, deps):
             raise HTTPException(status_code=400, detail="Değişiklik yok")
         r = await db.main().firm_users.update_one({"id": uid, "firm_id": f["id"]}, {"$set": upd})
         _ACC.clear()
+        _STC.clear()
         try:
             import governance as _g
             _g.FU_ROL.clear()
@@ -754,6 +775,7 @@ def register(api_router, db, deps):
             raise HTTPException(status_code=403, detail="Yalnızca ana hesap silebilir")
         r = await db.main().firm_users.delete_one({"id": uid, "firm_id": f["id"]})
         _ACC.clear()
+        _STC.clear()
         await audit(user, "FİRMA KULLANICI SİLDİ", f["name"])
         return {"ok": bool(r.deleted_count)}
 
@@ -762,6 +784,7 @@ def register(api_router, db, deps):
         need_main()
         r = await db.main().firm_users.delete_one({"id": uid, "firm_id": fid})
         _ACC.clear()
+        _STC.clear()
         await audit(me, "FİRMA KULLANICI SİLDİ", fid)
         return {"ok": bool(r.deleted_count)}
 
@@ -770,6 +793,7 @@ def register(api_router, db, deps):
         need_main()
         await db.main().firm_users.update_one({"id": uid, "firm_id": fid}, {"$set": {"active": bool(body.get("active", True))}})
         _ACC.clear()
+        _STC.clear()
         return {"ok": True}
 
     @api_router.get("/firm/me")
