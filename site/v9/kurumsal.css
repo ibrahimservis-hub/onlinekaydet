@@ -191,3 +191,5 @@ footer.alt .ok2,.nxf .ok2{position:relative}
 @media(max-width:1060px){.ust .logo img{max-width:176px!important}.nxh .logo img{max-width:164px!important;height:auto!important}}
 /* sürekli '7 gün deneme' şeridi kaldırıldı: yalnız gerçek kampanyada görünür */
 html:not([data-kon]) .kst,html:not([data-kon]) .kst2{display:none!important}
+/* kampanya şeridi ile logo şeridi arasındaki boşluk kapatıldı */
+.kst2+.nxh{padding-top:6px}
