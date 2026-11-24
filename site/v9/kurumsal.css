@@ -169,3 +169,14 @@ html,body{touch-action:pan-y pinch-zoom;overscroll-behavior-x:none}
 .hm[aria-expanded="true"]:after{top:31px;transform:translateY(-8px) rotate(-45deg)!important}
 .hm[aria-expanded="true"] span{opacity:0!important}
 }
+/* menü açıkken sayfa ve menü sabit: arka plan kaymaz, yatay hareket yok */
+html:has(.hm[aria-expanded="true"]),html:has(.hm[aria-expanded="true"]) body{overflow:hidden!important;overscroll-behavior:none;touch-action:none}
+.mmenu.mm{overscroll-behavior:contain;touch-action:pan-y;overflow-x:hidden;-webkit-overflow-scrolling:touch}
+.mmenu.mm *{max-width:100%}
+@media(max-width:1060px){
+.hm[aria-expanded="true"]{background:#d0345f!important;box-shadow:0 6px 18px rgba(208,52,95,.38)!important}
+}
+@media(max-width:1060px){
+.hm[aria-expanded="true"]{position:fixed!important;top:46px;right:18px;z-index:70;margin:0!important}
+.mmenu.mm{padding-top:104px!important}
+}
