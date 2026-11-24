@@ -137,7 +137,7 @@ def register(app, api_router, db, deps):
         now = _now()
         lim = (datetime.now(timezone.utc) + timedelta(days=days)).isoformat()
         soon, gone = [], []
-        for f in await db.main().firms.find({"status": {"$ne": "silindi"}}, {"_id": 0, "id": 1, "name": 1, "expires_at": 1, "status": 1, "package": 1, "phone": 1}).to_list(5000):
+        for f in await db.main().firms.find({"status": {"$ne": "silindi"}}, {"_id": 0, "id": 1, "name": 1, "expires_at": 1, "status": 1, "package": 1, "phone": 1, "demo": 1, "demo_firma": 1, "contact_name": 1}).to_list(5000):
             e = f.get("expires_at") or ""
             if not e:
                 continue
