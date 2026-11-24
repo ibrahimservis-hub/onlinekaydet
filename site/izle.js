@@ -1,6 +1,9 @@
 /* Ziyaret istatistiği: kişisel veri tutmaz. Rastgele oturum kimliği, sayfa, kaynak, cihaz. Tarayıcı "İzleme" kapalıysa çalışmaz. */
 (function(){
-if(navigator.doNotTrack==='1'||window.__okizle)return;window.__okizle=1;
+if(navigator.doNotTrack==='1'||window.__okizle)return;
+var izinli=function(){try{var c=JSON.parse(localStorage.getItem('ok_cerez')||'null');return !!(c&&c.olcum)}catch(e){return false}};
+if(!izinli()){document.addEventListener('ok-cerez',function h(e){if(e.detail&&e.detail.olcum){document.removeEventListener('ok-cerez',h);var x=document.createElement('script');x.src='/izle.js?k=1';document.head.appendChild(x)}});return}
+window.__okizle=1;
 var API=(window.OK_API||'')+'/api/public/track',sid='';
 try{sid=localStorage.getItem('ok_sid')||'';if(!sid){sid='s'+Math.random().toString(36).slice(2)+Date.now().toString(36);localStorage.setItem('ok_sid',sid)}}catch(e){sid='s'+Math.random().toString(36).slice(2)+Date.now().toString(36)}
 function send(o){o.sid=sid;o.path=location.pathname;o.host=location.hostname;try{fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(o),keepalive:true}).catch(function(){})}catch(e){}}
