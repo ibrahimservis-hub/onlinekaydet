@@ -3041,6 +3041,7 @@ import leads; leads.register(api_router, db, {"require_admin": require_admin})
 import kariyer; kariyer.register(api_router, db, {"require_admin": require_admin})
 import referans; referans.register(api_router, db, {"require_admin": require_admin})
 import sozlesme; sozlesme.register(api_router, db, {"require_admin": require_admin})
+import evrak; evrak.register(api_router, db, {"require_admin": require_admin})
 import site_kampanya; site_kampanya.register(api_router, db, {"require_admin": require_admin})
 import sahip_ek; sahip_ek.register(api_router, db, {"require_admin": require_admin})
 sp_ext.register(api_router, db, {"require_admin": require_admin, "get_current_user": get_current_user, "verify_password": verify_password,
