@@ -65,7 +65,7 @@ body.nxi{background:var(--nxbg)!important;font-family:var(--fb)!important;color:
 .nxf .ilt i{width:52px;height:52px;border-radius:50%;background:#121a29;display:grid;place-items:center;color:var(--org)}
 .nxf .ilt i svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .nxf .ilt a:after{content:"→";color:#8b90a0;transition:transform .2s}.nxf .ilt a:hover:after{transform:translateX(4px);color:var(--pink2)}
-.nxf .kol{display:grid;grid-template-columns:repeat(4,1fr);gap:40px;padding:56px 0 40px;border-top:1px solid #1c2333}
+.nxf .kol{display:grid;grid-template-columns:repeat(5,1fr);gap:32px;padding:56px 0 40px;border-top:1px solid #1c2333}
 .nxf .kol h3{display:flex;align-items:baseline;gap:12px;font:600 24px var(--fd);color:#fff;padding-bottom:18px;margin-bottom:12px;border-bottom:1px solid #263047}
 .nxf .kol h3 span{font:500 18px var(--fm);color:var(--org)}
 .nxf .kol a{display:flex;justify-content:space-between;align-items:center;text-decoration:none;padding:9px 0;font-size:16.5px;color:#c9ccd6;transition:color .2s}
