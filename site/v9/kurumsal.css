@@ -186,3 +186,6 @@ footer.alt .ok2,.nxf .ok2{position:relative}
 .ok2 .dnk{position:absolute;z-index:0;left:210px;top:-104px;width:280px;height:280px;pointer-events:none;-webkit-mask-image:linear-gradient(#000 62%,transparent 92%);mask-image:linear-gradient(#000 62%,transparent 92%)}
 .ok2 .ilt{position:relative;z-index:1}
 @media(max-width:900px){.ok2 .dnk{left:auto;right:-56px;top:-36px;width:226px;height:226px}}
+/* logo büyütüldü (üst şerit yüksekliği değişmez: düğmeler zaten 40-46px) */
+@media(min-width:1061px){.ust .logo img,.nxh .logo img{height:34px!important;width:auto}}
+@media(max-width:1060px){.ust .logo img{max-width:176px!important}.nxh .logo img{max-width:164px!important;height:auto!important}}
