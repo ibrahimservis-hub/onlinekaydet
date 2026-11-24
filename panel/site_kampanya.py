@@ -21,7 +21,7 @@ def _d(y, m, d, h=0):
 def _k(i, name, s, e, strip, l1, l2, em, lead, big="2 YIL AL", sub="1 YIL HEDİYE", accent="#d0345f", yearly=False):
     return {"id": i, "name": name, "start": s, "end": e, "strip": strip, "l1": l1, "l2": l2, "em": em, "lead": lead,
             "badge_top": "KAMPANYA", "badge_big": big, "badge_sub": sub, "accent": accent, "cta": "Kampanyayı yakalayın",
-            "active": True, "yearly": yearly, "always": False}
+            "active": True, "yearly": yearly, "always": False, "gift": True}
 
 
 SEED = [
@@ -58,7 +58,7 @@ SEED = [
        "Yeni sezona", "düzenli başlayın,", "2 yıl al, 1 yıl hediye.", "Okul, iş ve sezon açılışında sitenizi ve kayıtlarınızı toparlayın.", accent="#7a4fd0"),
     _k("29-ekim-2027", "29 Ekim Cumhuriyet Bayramı", _d(2027, 10, 20), _d(2027, 10, 30), "Cumhuriyet Bayramı'na özel: 2 yıl al, 1 yıl hediye",
        "Cumhuriyet", "Bayramı kutlu olsun,", "2 yıl al, 1 yıl hediye.", "Bayram haftasına özel kampanyayla işinizi dijitale taşıyın.", accent="#c8312b", yearly=True),
-    _k("ogretmenler-gunu-2027", "Öğretmenler Günü", _d(2027, 11, 15), _d(2027, 11, 25), "Öğretmenler Günü'ne özel: 2 yıl al, 1 yıl hediye",
+    _k("ogretmenler-gunu-2027", "Öğretmenler Günü", _d(2027, 11, 22), _d(2027, 11, 25), "Öğretmenler Günü'ne özel: 2 yıl al, 1 yıl hediye",
        "Öğretmenler Günü'ne", "özel fırsat,", "2 yıl al, 1 yıl hediye.", "Kurs, etüt ve özel ders veren işletmeler için randevu ve kayıt düzeni.", accent="#2a6fd6", yearly=True),
 ]
 
@@ -114,10 +114,19 @@ def _clean(p, cur=None):
     for k in ("start", "end"):
         if k in out and out[k] and not _parse(out[k]):
             raise HTTPException(422, "Tarih biçimi geçersiz")
-    for k in ("active", "yearly"):
+    for k in ("active", "yearly", "gift"):
         if k in p:
             out[k] = bool(p[k])
     return out
+
+
+async def hediye(db):
+    """Şu an yayında tarihli bir kampanya varsa ve hediye açıksa {'gun','ad','bitis'} döner; yoksa None."""
+    rs = await db.main().site_campaigns.find({}, {"_id": 0}).to_list(500) or [dict(x) for x in SEED]
+    c, end = pick(rs)
+    if not c or c.get("always") or not c.get("gift", True):
+        return None
+    return {"gun": 365, "ad": c.get("name", ""), "bitis": end.isoformat() if end else ""}
 
 
 def register(api_router, db, deps):
@@ -135,6 +144,8 @@ def register(api_router, db, deps):
         col = main().site_campaigns
         if not await col.find_one({}):
             await col.insert_many([dict(x) for x in SEED])
+        # eski tohum: Öğretmenler Günü 15 Kasım'da başlıyordu ve Efsane Kasım'ı gölgeliyordu
+        await col.update_one({"id": "ogretmenler-gunu-2027", "start": _d(2027, 11, 15)}, {"$set": {"start": _d(2027, 11, 22)}})
         return await col.find({}, {"_id": 0}).to_list(500)
 
     @api_router.get("/public/campaign")

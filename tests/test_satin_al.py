@@ -204,5 +204,29 @@ with TestClient(s.app) as c:
         pdf = c.get("/api/admin/satis/fatura/%s.pdf" % no, headers=A); assert pdf.content[:4] == b"%PDF"
     t("giriş bilgisini yeniden gönderme (yeni şifre) ve resmî e-Arşiv no işleme", n)
 
+    def iki():
+        import site_kampanya
+        from datetime import datetime
+        col = s.db.main().site_campaigns
+        loop.run_until_complete(col.delete_many({}))
+        loop.run_until_complete(col.insert_one({"id": "surekli", "name": "s", "strip": "x", "active": True, "always": True}))
+        # kampanya yokken (her zaman) hediye yok: 2 yıl = 730 gün, fiyat 2 x yıllık
+        r = oku(); pr = {x["id"]: x for x in r["paketler"]}["profesyonel"]
+        assert r["hediye"] is None and pr["iki_yil"]["gun"] == 730 and pr["iki_yil"]["matrah"] == pr["yillik"]["matrah"] * 2, pr["iki_yil"]
+        # yayında tarihli kampanya: +365 gün
+        now = datetime.now(site_kampanya.TR)
+        loop.run_until_complete(col.insert_one({"id": "t1", "name": "Deneme", "start": now.replace(year=now.year - 1).isoformat(), "end": now.replace(year=now.year + 1).isoformat(),
+                                                "strip": "x", "active": True, "yearly": False, "always": False, "gift": True}))
+        r = oku(); pr = {x["id"]: x for x in r["paketler"]}["profesyonel"]
+        assert r["hediye"]["gun"] == 365 and pr["iki_yil"]["gun"] == 1095 and pr["iki_yil"]["hediye_gun"] == 365, (r["hediye"], pr["iki_yil"])
+        # sipariş fiyatı sunucuda; istemci hediye gönderemez
+        o = yolla(email="iki@x.com", firma="Iki Ltd", sure="iki_yil", hediye_gun=9999).json()
+        assert o["fiyat"]["gun"] == 1095 and o["fiyat"]["sure"] == "iki_yil", o["fiyat"]
+        # hediye kapalıyken verilmez
+        loop.run_until_complete(col.update_one({"id": "t1"}, {"$set": {"gift": False}}))
+        assert oku()["hediye"] is None
+        loop.run_until_complete(col.delete_many({}))
+    t("2 yıllık alım: kampanyada +1 yıl hediye, kapalıyken yok, fiyat sunucuda", iki)
+
 print("OK", len(ok)); [print("FAIL", n, "\n", tb) for n, tb in bad]
 sys.exit(1 if bad else 0)

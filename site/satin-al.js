@@ -11,12 +11,13 @@ function yontem(){var c=document.querySelector('input[name=yontem]:checked');ret
 function bul(id){for(var i=0;i<D.paketler.length;i++)if(D.paketler[i].id===id)return D.paketler[i]}
 function ozet(){
   var p=bul(paket());if(!p)return;var f=p[sure()];
-  $("o1").textContent=p.name+" · "+(sure()==="yillik"?"yıllık":"aylık");$("o2").textContent=tl(f.matrah);
+  $("o1").textContent=p.name+" · "+({aylik:"aylık",yillik:"yıllık",iki_yil:"2 yıllık"}[sure()]);$("o2").textContent=tl(f.matrah);
   $("okd").textContent="KDV %"+f.kdv_oran;$("o3").textContent=tl(f.kdv);$("o4").textContent=tl(f.toplam);$("ob").textContent=tl(f.toplam);
-  $("o5").textContent=sure()==="yillik"?"Yıllık ödemede aylık "+tl(p.aylik.matrah)+" yerine "+tl(p.yillik.matrah/12)+"'ye denk gelir.":"";
+  var hg=D.hediye&&D.hediye.gun?Math.round(D.hediye.gun/365):0,hi=$("hedi");if(hi){hi.textContent=hg?"+"+hg+" yıl hediye":"";hi.style.display=hg?"":"none"}
+  $("o5").textContent=sure()==="yillik"?"Yıllık ödemede aylık "+tl(p.aylik.matrah)+" yerine "+tl(p.yillik.matrah/12)+"'ye denk gelir.":sure()==="iki_yil"?(hg?D.hediye.ad+" kampanyası: 2 yıl ödersiniz, "+(2+hg)+" yıl kullanırsınız. Aylık "+tl(f.matrah/(24+12*hg))+"'ye denk gelir.":"2 yıllık ödemede aylık "+tl(f.matrah/24)+"'ye denk gelir."):"";
   var a=p.aylik.matrah*12,y=p.yillik.matrah,k=a>0?Math.round((a-y)/p.aylik.matrah):0;
   $("hed").textContent=k>0?k+" ay hediye":"";$("hed").style.display=k>0?"":"none";
-  var l=document.querySelectorAll("#pk label");for(var i=0;i<l.length;i++){var pp=bul(l[i].getAttribute("for").slice(3));l[i].querySelector("em").textContent=tl(pp[sure()].matrah)+(sure()==="yillik"?" /yıl":" /ay")}
+  var l=document.querySelectorAll("#pk label");for(var i=0;i<l.length;i++){var pp=bul(l[i].getAttribute("for").slice(3));l[i].querySelector("em").textContent=tl(pp[sure()].matrah)+(sure()==="yillik"?" /yıl":sure()==="iki_yil"?" /2 yıl":" /ay")}
 }
 function ciz(){
   var pk=$("pk");pk.textContent="";

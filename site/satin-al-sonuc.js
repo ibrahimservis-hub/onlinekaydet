@@ -6,7 +6,7 @@ var n=0,tm=null,tl=function(v){v=Number(v)||0;return v.toLocaleString("tr-TR",{m
 function durumYaz(c,b,a){$("tk").className="tik "+c;$("bs").textContent=b;$("al").textContent=a}
 function sat(a,b){var d=document.createElement("div"),x=document.createElement("span"),y=document.createElement("b");x.textContent=a;y.textContent=b;d.appendChild(x);d.appendChild(y);$("cp").appendChild(d)}
 function dugme(t,h,i){var a=document.createElement("a");a.className="btn"+(i?" ikinci":"");a.href=h;a.textContent=t;$("ak").appendChild(a)}
-function ozet(o){$("cp").hidden=false;$("cp").textContent="";sat("Sipariş no",o.no);sat("Paket",o.paket_ad+" · "+(o.sure==="yillik"?"yıllık":"aylık"));sat("Tutar (KDV dahil)",tl(o.toplam));if(o.fatura_no)sat("Fatura no",o.fatura_no);if(o.bitis)sat("Kullanım bitişi",o.bitis.slice(0,10).split("-").reverse().join("."))}
+function ozet(o){$("cp").hidden=false;$("cp").textContent="";sat("Sipariş no",o.no);sat("Paket",o.paket_ad+" · "+({aylik:"aylık",yillik:"yıllık",iki_yil:"2 yıllık"}[o.sure]||"")+(o.hediye_gun?" + "+Math.round(o.hediye_gun/365)+" yıl hediye":""));sat("Tutar (KDV dahil)",tl(o.toplam));if(o.fatura_no)sat("Fatura no",o.fatura_no);if(o.bitis)sat("Kullanım bitişi",o.bitis.slice(0,10).split("-").reverse().join("."))}
 function adim(L){$("nx").hidden=false;$("nx").textContent="";L.forEach(function(t,i){var p=document.createElement("p"),b=document.createElement("b"),s=document.createElement("span");b.textContent=i+1;s.textContent=t;p.appendChild(b);p.appendChild(s);$("nx").appendChild(p)})}
 function ciz(o){
   $("ak").textContent="";ozet(o);var d=o.durum;

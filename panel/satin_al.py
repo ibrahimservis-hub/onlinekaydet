@@ -152,6 +152,16 @@ def fatura_pdf(fa, ayar):
     return buf.getvalue()
 
 
+def sure_ad(fy):
+    return {"aylik": "aylık", "yillik": "yıllık", "iki_yil": "2 yıllık"}.get(fy["sure"], fy["sure"])
+
+
+def sure_ay(fy):
+    if fy["sure"] == "iki_yil":
+        return "24 ay" + (" + %d ay hediye" % (fy.get("hediye_gun", 0) // 30 // 12 * 12) if fy.get("hediye_gun") else "")
+    return "12 ay" if fy["sure"] == "yillik" else "1 ay"
+
+
 # ---------------------------------------------------------------- kayıt
 def register(api_router, db, deps):
     adm = deps["require_admin"]
@@ -183,10 +193,17 @@ def register(api_router, db, deps):
             raise HTTPException(422, "Bu paket satın alınamıyor")
         aylik = float(pk["price"])
         yillik = float(pk.get("yearly") or 0) or aylik * 10
-        matrah = para(aylik if sure == "aylik" else yillik)
+        matrah = para(aylik if sure == "aylik" else yillik * 2 if sure == "iki_yil" else yillik)
+        gun = 30 if sure == "aylik" else 365 if sure == "yillik" else 730
+        hd = None
+        if sure == "iki_yil":
+            import site_kampanya
+            hd = await site_kampanya.hediye(db)
+            if hd:
+                gun += hd["gun"]
         oran = float(a["kdv"])
         kdv = para(matrah * oran / 100)
-        return {"paket": paket, "paket_ad": pk.get("name") or paket, "sure": sure, "gun": 30 if sure == "aylik" else 365,
+        return {"paket": paket, "paket_ad": pk.get("name") or paket, "sure": sure, "gun": gun, "hediye_gun": hd["gun"] if hd else 0, "hediye_ad": hd["ad"] if hd else "",
                 "matrah": matrah, "kdv_oran": oran, "kdv": kdv, "toplam": para(matrah + kdv), "aylik": aylik, "yillik": para(yillik)}
 
     async def yontemler():
@@ -201,7 +218,7 @@ def register(api_router, db, deps):
     def acik(o):
         """Müşteriye dönecek sipariş görünümü (erişim kodu ve iç alanlar yok)."""
         return {"no": o["no"], "durum": o["durum"], "durum_ad": DURUMLAR.get(o["durum"], o["durum"]), "paket_ad": o["fiyat"]["paket_ad"],
-                "sure": o["fiyat"]["sure"], "toplam": o["fiyat"]["toplam"], "email": o["musteri"]["email"], "yontem": o.get("yontem", ""),
+                "sure": o["fiyat"]["sure"], "hediye_gun": o["fiyat"].get("hediye_gun", 0), "toplam": o["fiyat"]["toplam"], "email": o["musteri"]["email"], "yontem": o.get("yontem", ""),
                 "tur": o.get("tur", "yeni"), "hata": o.get("odeme_hata", ""), "fatura_no": (o.get("fatura") or {}).get("no", ""),
                 "bitis": o.get("bitis", ""), "giris": o["durum"] == "tamamlandi"}
 
@@ -214,9 +231,10 @@ def register(api_router, db, deps):
             if float(v.get("price") or 0) <= 0:
                 continue
             out.append({"id": k, "name": v.get("name") or k, "modules": len(v.get("modules") or []), "tagline": v.get("tagline") or "",
-                        "aylik": await fiyat(k, "aylik", a), "yillik": await fiyat(k, "yillik", a)})
+                        "aylik": await fiyat(k, "aylik", a), "yillik": await fiyat(k, "yillik", a), "iki_yil": await fiyat(k, "iki_yil", a)})
         import sektor
-        return {"paketler": out, "kdv": a["kdv"], "yontemler": await yontemler(),
+        import site_kampanya
+        return {"paketler": out, "kdv": a["kdv"], "hediye": await site_kampanya.hediye(db), "yontemler": await yontemler(),
                 "sektorler": [{"id": k, "ad": (v.get("name") or v.get("label") or k)} for k, v in sektor.SECTORS.items()]}
 
     @api_router.post("/public/satin-al/siparis")
@@ -244,7 +262,7 @@ def register(api_router, db, deps):
         if payload.get("kabul") is not True: raise HTTPException(422, "Sözleşme ve aydınlatma metnini onaylayın")
         sek = str(payload.get("sektor") or "")
         if sek not in sektor.SECTORS: raise HTTPException(422, "Sektörünüzü seçin")
-        sure = payload.get("sure") if payload.get("sure") in ("aylik", "yillik") else "yillik"
+        sure = payload.get("sure") if payload.get("sure") in ("aylik", "yillik", "iki_yil") else "yillik"
         fy = await fiyat(str(payload.get("paket") or ""), sure)
         mevcut = await M().firms.find_one({"login_email": email, "status": {"$ne": "silindi"}}, {"_id": 0, "id": 1})
         sid = uuid.uuid4().hex
@@ -299,7 +317,7 @@ def register(api_router, db, deps):
                            "gsmNumber": "+90" + m["telefon"], "email": m["email"], "identityNumber": m["vergi_no"] if len(m["vergi_no"]) == 11 else "11111111111",
                            "registrationAddress": m["adres"], "ip": ip, "city": m["il"], "country": "Turkey"},
                  "shippingAddress": adres, "billingAddress": adres,
-                 "basketItems": [{"id": fy["paket"], "name": "OnlineKaydet %s (%s)" % (fy["paket_ad"], "yıllık" if fy["sure"] == "yillik" else "aylık"),
+                 "basketItems": [{"id": fy["paket"], "name": "OnlineKaydet %s (%s)" % (fy["paket_ad"], sure_ad(fy)),
                                   "category1": "Yazılım aboneliği", "itemType": "VIRTUAL", "price": "%.2f" % fy["toplam"]}]}
         r = await asyncio.to_thread(iyzico_cagri, k, "/payment/iyzipos/checkoutform/initialize/auth/ecom", govde)
         if r.get("status") != "success" or not (r.get("token") and (r.get("paymentPageUrl") or r.get("checkoutFormContent"))):
@@ -423,7 +441,7 @@ def register(api_router, db, deps):
         fa = {"id": uuid.uuid4().hex, "no": "%s%d%06d" % (a["seri"], yil, await sayac("fatura_%d" % yil)), "siparis_id": o["id"], "siparis_no": o["no"],
               "tarih": datetime.now(TR).strftime("%d.%m.%Y"), "odeme": "Kredi kartı" if (o.get("odeme") or {}).get("yontem") == "kart" else "Havale / EFT",
               "musteri": {"unvan": m["firma"], "vkn": m["vergi_no"], "vd": m["vd"], "adres": m["adres"], "il": m["il"], "email": m["email"]},
-              "kalem": {"ad": "OnlineKaydet %s (%s)" % (fy["paket_ad"], "12 ay" if fy["sure"] == "yillik" else "1 ay"), "matrah": fy["matrah"],
+              "kalem": {"ad": "OnlineKaydet %s (%s)" % (fy["paket_ad"], sure_ay(fy)), "matrah": fy["matrah"],
                         "kdv_oran": fy["kdv_oran"], "kdv": fy["kdv"], "toplam": fy["toplam"]}, "created_at": _now()}
         await M().satis_fatura.insert_one(dict(fa))
         return fa
@@ -438,7 +456,7 @@ def register(api_router, db, deps):
         giris = ("Giriş: %s/giris\nKullanıcı adı: %s\nŞifre: {{SIFRE}}\nİlk girişte şifrenizi değiştirmenizi öneririz." % (a["site_url"].rstrip("/"), m["email"])
                  if sifre else "Mevcut şifrenizle girmeye devam edebilirsiniz: %s/giris" % a["site_url"].rstrip("/"))
         govde = ("Merhaba %s,\n\nÖdemeniz alındı, teşekkür ederiz.\n\nPaket: %s (%s)\nTutar: %s ₺ (KDV dahil)\nSipariş no: %s\nPanel süreniz: %s\n\n%s\n\nFatura belgeniz: %s\n\nSorularınız için bu e-postaya yanıt verebilirsiniz.\n\nOnlineKaydet"
-                 % (m["ad"].split(" ")[0], fy["paket_ad"], "12 ay" if fy["sure"] == "yillik" else "1 ay", tl(fy["toplam"]), o["no"],
+                 % (m["ad"].split(" ")[0], fy["paket_ad"], sure_ay(fy), tl(fy["toplam"]), o["no"],
                     (o.get("bitis") or "")[:10], giris, link))
         cfg = await notify.get_settings(M())
         r = await notify.send(M(), "email", m["email"], govde.replace("{{SIFRE}}", sifre), subject="OnlineKaydet siparişiniz ve giriş bilgileriniz",
