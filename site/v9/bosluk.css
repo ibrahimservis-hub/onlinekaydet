@@ -15,3 +15,7 @@ a.rfk:hover{transform:translateY(-2px)}
 @media(prefers-reduced-motion:reduce){.rft{animation:none;width:auto;flex-wrap:wrap;justify-content:center}.rfg+.rfg{display:none}.rfm{-webkit-mask-image:none;mask-image:none}}
 @media(max-width:900px){.nx .kh .g{min-height:0!important;padding-bottom:14px!important}.nx .kh+.hero{padding-top:28px}}
 .nx .kh+.hero{padding-top:0!important}.nx .kh+.hero .adim{margin-top:0;border-top:0;padding-top:28px}
+.nx .sec{padding:56px 0}.nx .uu{padding-top:44px!important;padding-bottom:44px!important}.nx .ifade .alt{margin-top:30px}.nx .kh+.hero .adim{padding-top:20px}.nx footer.alt{padding-top:64px}.nx .hero{padding-bottom:0}
+.nx .ifade h2{margin-bottom:22px}
+@media(max-width:900px){.nx .kh .g{padding-bottom:6px!important}.nx .rfs{padding-bottom:22px}}
+@media(max-width:640px){.nx .sec{padding:36px 0}.nx .uu{padding-top:30px!important;padding-bottom:30px!important}.nx footer.alt{padding-top:44px}}
