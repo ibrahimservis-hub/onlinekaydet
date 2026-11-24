@@ -119,8 +119,8 @@ def blok(k, once):
     b.append('<section class="sec" id="neler-degisir"><div class="w"><p class="et">%s işinde</p><h2>%s işinde neler değişir?</h2><p class="lead">%s</p>%s</div></section>' % (E(ad), E(ad), E(pain + ' ' + gain), tablo(tip, ad, v)))
     b.append('<section class="sec" id="isinizi-gelistirin"><div class="w"><h2>%s işinizi nasıl geliştirir?</h2><div class="fg">%s</div><p class="sxy"><b>İpucu:</b> %s</p></div></section>' % (
         E(ad), ''.join('<div class="fk"><span class="no">%02d</span><h3>%s</h3><p>%s</p></div>' % (i + 1, E(a), E(t)) for i, (a, t) in enumerate(cards)), E(tipm)))
-    b.append('<section class="sec" id="kayit-akisi"><div class="w"><h2>Bir %s panelde nasıl ilerler?</h2>%s<p style="margin-top:18px"><b>%s:</b> %s.</p></div></section>' % (
-        E(nl), su.adim(v['steps'], v['side']), E(v['chk_t']), E('; '.join(v['chk'][:6]))))
+    b.append('<section class="sec" id="kayit-akisi"><div class="w"><h2>Müşterinizi uçtan uca takip edin: bir %s panelde nasıl ilerler?</h2><p class="uu-lead">Müşteri “%s” aşamasından “%s” aşamasına kadar aynı kayıtta kalır. Geçmişi isim ya da telefonla açarsınız; tahsilat kaydın içinde, kalan borç kasada görünür.</p>%s<p style="margin-top:18px"><b>%s:</b> %s.</p></div></section>' % (
+        E(nl), E(v['steps'][0]), E(v['steps'][-1]), su.adim(v['steps'], v['side']), E(v['chk_t']), E('; '.join(v['chk'][:6]))))
     tg = tema_gorsel(k)
     if tg:
         b.append('<section class="sec" id="sektor-tema"><div class="w"><h2>%s için hazır web sitesi teması</h2><p class="lead">Temayı seçer, yazı ve resimleri panelden değiştirirsiniz. Sitedeki formlar panele düşer.</p>'
