@@ -180,3 +180,9 @@ html:has(.hm[aria-expanded="true"]),html:has(.hm[aria-expanded="true"]) body{ove
 .hm[aria-expanded="true"]{position:fixed!important;top:46px;right:18px;z-index:70;margin:0!important}
 .mmenu.mm{padding-top:104px!important}
 }
+
+/* dönen dünya (canvas): ok işaretinin sağında */
+footer.alt .ok2,.nxf .ok2{position:relative}
+.ok2 .dnk{position:absolute;left:150px;top:-6px;width:170px;height:170px;pointer-events:none}
+footer.alt .ok2 .ilt,.nxf .ok2 .ilt{margin-top:46px}
+@media(max-width:900px){.ok2 .dnk{left:150px;top:-16px;width:150px;height:150px}footer.alt .ok2 .ilt,.nxf .ok2 .ilt{margin-top:34px}}

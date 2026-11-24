@@ -3,7 +3,7 @@ kampanya titremesi düzeltmesini tüm sayfalara uygular. Tekrar çalıştırıla
 import pathlib, re, html
 from gen_mobil_menu import mm_html as _old_mm  # noqa: F401  (eski şablon; aşağıda yenisi kullanılır)
 
-V = "20241124j"
+V = "20241124m"
 T = pathlib.Path("hakkimizda.html").read_text(encoding="utf-8")
 PRE, POST = T[:T.index("<main")], T[T.index("</main>"):]
 j = T.index('id="teklif"'); k = T.rfind("<section", 0, j)
@@ -230,9 +230,9 @@ def yama(t):
     # çerez betiği: izle.js'den önce
     if "/v9/cerez.js" not in t and "</body>" in t:
         if '<script src="/izle.js"' in t:
-            t = t.replace('<script src="/izle.js"', '<script src="/v9/cerez.js?v=%s" defer></script><script src="/izle.js"' % V, 1)
+            t = t.replace('<script src="/izle.js"', '<script src="/v9/dunya-nokta.js?v=1" defer></script><script src="/v9/cerez.js?v=%s" defer></script><script src="/izle.js"' % V, 1)
         else:
-            t = t.replace("</body>", '<script src="/v9/cerez.js?v=%s" defer></script></body>' % V, 1)
+            t = t.replace("</body>", '<script src="/v9/dunya-nokta.js?v=1" defer></script><script src="/v9/cerez.js?v=%s" defer></script></body>' % V, 1)
     return t
 
 
