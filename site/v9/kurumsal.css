@@ -156,3 +156,9 @@ html,body{touch-action:pan-y pinch-zoom;overscroll-behavior-x:none}
 .ust .sag .bt.p{display:none!important}
 .hm[aria-expanded="true"] span,.hm[aria-expanded="true"] span:before,.hm[aria-expanded="true"] span:after{background:#0b1220}
 }
+@media(max-width:1060px){
+.nxh:has(.hm[aria-expanded="true"]) .bar,.ust:has(.hm[aria-expanded="true"]) .bar{background:transparent!important;border-color:transparent!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+.hm[aria-expanded="true"]:before,.hm[aria-expanded="true"]:after{background:#0b1220!important}
+.mm-bt{padding-top:30px;background:linear-gradient(to bottom,#faf8f300,#faf8f3 42%)}
+}
+@media(max-width:1060px){.mmenu.mm{padding-top:78px!important}.mm .mm-try.v2 .mm-t1{align-self:center}}
