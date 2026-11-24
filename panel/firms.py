@@ -65,6 +65,7 @@ def expired(f):
 
 
 MAX_SUB = 3
+API = {}               # register içindeki işlevler: create, update, packages (satin_al.py çağırır)
 MAINT_LOOP = None
 GATE = None            # server.py ara katmanı: await GATE(db_adı, yol) -> engel mesajı | None
 ACCESS = None          # server.py ara katmanı çağırır: await ACCESS(db_adı, alt_kullanıcı_e-postası)
@@ -533,6 +534,8 @@ def register(api_router, db, deps):
         f["has_logo"] = bool(f.pop("logo", ""))
         f.pop("db", None)
         return f
+
+    API.update(create=firms_create, update=firms_update, packages=packages_get)   # satın alma motoru kullanır
 
     @api_router.post("/admin/bulk")
     async def bulk_action(body: dict, me: dict = Depends(require_admin)):

@@ -4,7 +4,9 @@ var cards=document.querySelectorAll('.pks .pk');if(!cards.length||!window.fetch)
 function tl(n){return Math.round(n).toLocaleString('tr-TR')}
 fetch((window.OK_API||'')+'/api/public/packages',{cache:'no-store'}).then(function(r){return r.ok?r.json():null}).then(function(j){
  if(!j||!j.packages||!j.packages.length)return;
- j.packages.forEach(function(p,i){var c=cards[i];if(!c)return;
+ var by={};[].forEach.call(cards,function(c){if(c.dataset.id)by[c.dataset.id]=c});
+ j.packages.forEach(function(p,i){var c=by[p.id]||cards[i];if(!c)return;c.dataset.id=p.id;
+  var al=c.querySelector('a.btn');if(al&&p.price>0){al.href='/satin-al.html?paket='+encodeURIComponent(p.id);al.textContent='Satın al'}
   var h=c.querySelector('.ph h3');if(h&&p.name)h.textContent=p.name;
   var m=c.querySelector('.ph span');if(m&&p.modules)m.textContent=p.modules+' modül';
   var k=c.querySelector('.kim');if(k&&p.tagline)k.textContent=p.tagline;

@@ -5,7 +5,7 @@ R = os.path.abspath(os.path.join(os.path.dirname(__file__), '..')); S = R + '/si
 files = {}
 def txt(rel): files['docroot/' + rel] = open(S + '/' + rel, encoding='utf-8').read()
 def bin_(rel): files['docroot/' + rel] = {'b64': base64.b64encode(open(S + '/' + rel, 'rb').read()).decode()}
-for rel in ('index.html', 'temalar.html', 'e-ticaret.html', 'web-sitesi.html', 'is-takibi.html', 'fiyatlar.html', 'sektorler.html', 'sss.html', 'ozellikler.html', 'hakkimizda.html', 'iletisim.html', 'v9/v9.css', 'v9/v10.css', 'v9/v11.css', 'v9/v12.css', 'v9/figur.css', 'v9/figur.js', 'v9/v9.js', 'v9/v10.js', 'v9/dunya.js', 'lead.js', 'izle.js', 'demo-akis.js', 'site.js', 'ara.html', 'v9/arama.js', 'v9/sx.js', 'v9/arama.json', 'sitemap.xml', 'robots.txt'): txt(rel)
+for rel in ('index.html', 'temalar.html', 'e-ticaret.html', 'web-sitesi.html', 'is-takibi.html', 'fiyatlar.html', 'satin-al.html', 'satin-al-sonuc.html', 'satin-al.css', 'satin-al.js', 'satin-al-sonuc.js', 'v9/paket.js', 'sektorler.html', 'sss.html', 'ozellikler.html', 'hakkimizda.html', 'iletisim.html', 'v9/v9.css', 'v9/v10.css', 'v9/v11.css', 'v9/v12.css', 'v9/figur.css', 'v9/figur.js', 'v9/v9.js', 'v9/v10.js', 'v9/dunya.js', 'lead.js', 'izle.js', 'demo-akis.js', 'site.js', 'ara.html', 'v9/arama.js', 'v9/sx.js', 'v9/arama.json', 'sitemap.xml', 'robots.txt'): txt(rel)
 import glob
 for f in sorted(glob.glob(S + '/v9/eski-*.css')): txt('v9/' + os.path.basename(f))
 for f in sorted(glob.glob(S + '/v9/kaynak/eski/*.html')): txt(os.path.basename(f))

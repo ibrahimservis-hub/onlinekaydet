@@ -2968,6 +2968,8 @@ import gsc
 gsc.register(api_router, db, {"require_admin": require_admin})
 import baglanti
 baglanti.register(api_router, db, {"require_admin": require_admin})
+import satin_al
+satin_al.register(api_router, db, {"require_admin": require_admin})
 
 import entegrasyon
 import entg_probe
