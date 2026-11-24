@@ -28,6 +28,23 @@ with TestClient(s.app) as c:
         r = c.get("/api/admin/firms/%s/sozlesme.pdf?paket=tam&sure=iki_yil&bedel=12000&kdv_dahil=1" % S["id"], headers=A); assert r.status_code == 200
         m = metin(r.content); assert "12.000" in m and "Tam Paket" in m and "2 yıllık" in m and "özel bedel" in m, m[:1500]
     t("özel bedel ve 2 yıllık", bedel)
+    def sureler():
+        for q, et, tut in (("m6", "6 aylık", "11.940"), ("m3", "3 aylık", "5.970"), ("m36", "3 yıllık", None), ("m18", "18 aylık", None), ("aylik", "1 aylık", None)):
+            r = c.get("/api/admin/firms/%s/sozlesme.pdf?paket=baslangic&sure=%s" % (S["id"], q), headers=A); assert r.status_code == 200, q
+            m = metin(r.content); assert et in m, (q, et)
+            if q == "m6": assert "5.940" in m or "5940" in m, m[m.index("BEDEL"):m.index("BEDEL")+200]
+    t("3/6/18/36 aylık süreler", sureler)
+    def font():
+        import satin_al, os as _os
+        orig = _os.path.exists; satin_al._FONT = None
+        _os.path.exists = lambda p: False if "DejaVu" in str(p) else orig(p)
+        try:
+            r = c.get("/api/admin/firms/%s/sozlesme.pdf" % S["id"], headers=A)
+        finally:
+            _os.path.exists = orig; satin_al._FONT = None
+        m = metin(r.content); assert "SÖZLEŞMESİ" in m and "Ayşe Yılmaz" in m and "SAĞLAYICI" in m, m[:300]
+        assert "DejaVuSans" in subprocess.run(["pdffonts", "/tmp/_sz.pdf"], capture_output=True, text=True).stdout
+    t("gömülü yazı tipi (sistem fontu yokken Türkçe)", font)
     def yetki():
         assert TestClient(s.app).get("/api/admin/firms/%s/sozlesme.pdf" % S["id"]).status_code in (401, 403)
         assert c.get("/api/admin/firms/yok/sozlesme.pdf", headers=A).status_code == 404

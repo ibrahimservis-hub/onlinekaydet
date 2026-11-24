@@ -97,6 +97,15 @@ def _font():
             pdfmetrics.registerFont(TTFont("OKSans-B", bold))
             _FONT = ("OKSans", "OKSans-B")
             return _FONT
+    try:                                                           # sistemde yazı tipi yoksa gömülü alt küme (Türkçe karakterler bozulmasın)
+        import base64
+        import pdf_font
+        pdfmetrics.registerFont(TTFont("OKSans", io.BytesIO(base64.b64decode(pdf_font.R))))
+        pdfmetrics.registerFont(TTFont("OKSans-B", io.BytesIO(base64.b64decode(pdf_font.B))))
+        _FONT = ("OKSans", "OKSans-B")
+        return _FONT
+    except Exception:                                              # noqa: BLE001
+        pass
     _FONT = ("Helvetica", "Helvetica-Bold")
     return _FONT
 

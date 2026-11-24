@@ -11,7 +11,21 @@ from fastapi.responses import Response
 import tenant
 
 BOS = "_" * 28
-SURELER = {"aylik": ("1 aylık", 30), "yillik": ("1 yıllık", 365), "iki_yil": ("2 yıllık", 730)}
+def sure_coz(sure):
+    """'aylik' | 'yillik' | 'iki_yil' | 'm<ay>' (ör. m6, m36) -> ay sayısı (1-120)"""
+    s = str(sure or "yillik")
+    ay = {"aylik": 1, "yillik": 12, "iki_yil": 24}.get(s)
+    if ay is None:
+        m = re.fullmatch(r"m(\d{1,3})", s)
+        ay = int(m.group(1)) if m else 12
+    return max(1, min(120, ay))
+
+
+def sure_bilgi(ay):
+    """(etiket, gün)"""
+    if ay % 12 == 0:
+        return "%d yıllık" % (ay // 12), ay // 12 * 365
+    return "%d aylık" % ay, ay * 30
 
 
 def tl(x):
@@ -168,12 +182,11 @@ def register(api_router, db, deps):
         if not pid:
             pid = next((k for k, x in pks.items() if float(x.get("price") or 0) > 0), "")
         pk = pks.get(pid) or {}
-        if sure not in SURELER:
-            sure = "yillik"
-        ad, gun = SURELER[sure]
+        ay = sure_coz(sure)
+        ad, gun = sure_bilgi(ay)
         aylik = float(pk.get("price") or 0)
         yillik = float(pk.get("yearly") or 0) or aylik * 10
-        matrah = aylik if sure == "aylik" else yillik * 2 if sure == "iki_yil" else yillik
+        matrah = yillik * ay / 12 if ay >= 12 else aylik * ay
         satis = await db.main().app_settings.find_one({"_id": "satis"}, {"_id": 0}) or {}
         oran = float(satis.get("kdv", 20.0))
         notu = ""
