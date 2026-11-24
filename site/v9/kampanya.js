@@ -14,6 +14,7 @@ function load(){fetch('/api/public/campaign',{cache:'no-store'}).then(function(r
  tries=0;off=c.now_ms-Date.now();end=c.end_ms||0;
  ['strip','l1','l2','em','lead','bt','bb','bs','cta'].forEach(function(k){set(k,c[{bt:'badge_top',bb:'badge_big',bs:'badge_sub'}[k]||k])});
  if(c.accent)document.documentElement.style.setProperty('--ka',c.accent);
+ document.querySelectorAll('.kst2').forEach(function(s){var x;try{x=sessionStorage.getItem('kst-x')}catch(e){}if(x===String(c.id)){s.remove();return}s.querySelectorAll('a').forEach(function(a){a.href=c.always?'/demo.html':'/fiyatlar.html#paketler'});var b=s.querySelector('button');if(b)b.onclick=function(){try{sessionStorage.setItem('kst-x',String(c.id))}catch(e){}s.remove()}});
  clearInterval(tm);tick();if(end)tm=setInterval(tick,1000)}).catch(function(){if(++tries<4)setTimeout(load,5000*tries)})}
 function hh(){var u=document.getElementById('ust'),k=document.querySelector('.kh');if(u&&k)k.style.setProperty('--hh',u.offsetHeight+'px')}hh();addEventListener('resize',hh);
 load();

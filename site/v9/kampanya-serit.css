@@ -1,0 +1,13 @@
+/* İç sayfalar: menünün üstünde sade kampanya şeridi */
+.kst2{position:relative;z-index:51;background:#0b1220;color:#dfe6f3;font:500 13.5px/1.3 var(--fb,system-ui);border-bottom:1px solid #ffffff14}
+.kst2 .in{max-width:1240px;margin:0 auto;padding:7px 52px 7px 28px;display:flex;align-items:center;justify-content:center;gap:12px;min-height:36px;box-sizing:border-box}
+.kst2 .tx{color:inherit;text-decoration:none;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.kst2 .tx:before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--ka,#d0345f);margin:0 9px 1px 0;vertical-align:middle;box-shadow:0 0 0 3px color-mix(in srgb,var(--ka,#d0345f) 30%,transparent)}
+.kst2 b{flex:none;font:600 12.5px/1 var(--fb,system-ui);font-variant-numeric:tabular-nums;color:#fff;background:#ffffff12;border:1px solid #ffffff1f;border-radius:6px;padding:4px 7px}
+.kst2 b:empty{display:none}
+.kst2 a.lk{flex:none;color:#fff;font-weight:600;text-decoration:none;border-bottom:1.5px solid var(--ka,#d0345f);padding-bottom:1px;transition:border-color .2s}
+.kst2 a.lk:hover{border-color:#fff}
+.kst2 button{position:absolute;right:14px;top:50%;translate:0 -50%;width:30px;height:30px;border:0;border-radius:8px;background:transparent;color:#9aa6bd;font-size:18px;line-height:1;cursor:pointer}
+.kst2 button:hover{background:#ffffff12;color:#fff}
+.kst2 button:focus-visible,.kst2 a.lk:focus-visible{outline:2px solid #fff;outline-offset:2px}
+@media(max-width:640px){.kst2{font-size:12.5px}.kst2 .in{padding:6px 44px 6px 14px;justify-content:flex-start;gap:8px}.kst2 a.lk{display:none}.kst2 .tx{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:1.35}.kst2 button{right:6px}}
