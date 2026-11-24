@@ -20,7 +20,7 @@ function load(){fetch('/api/public/campaign',{cache:'no-store'}).then(function(r
  paint(c);ready();
  document.querySelectorAll('.kst2').forEach(function(s){var x;try{x=sessionStorage.getItem('kst-x')}catch(e){}if(x===String(c.id)){s.remove();return}s.querySelectorAll('a').forEach(function(a){a.href=c.always?'/demo.html':'/fiyatlar.html#paketler'});var b=s.querySelector('button');if(b)b.onclick=function(){try{sessionStorage.setItem('kst-x',String(c.id))}catch(e){}s.remove()}});
  clearInterval(tm);tick();if(end)tm=setInterval(tick,1000)}).catch(function(){if(++tries<4)setTimeout(load,5000*tries);else ready()})}
-function hh(){var u=document.getElementById('ust'),k=document.querySelector('.kh');if(u&&k)k.style.setProperty('--hh',u.offsetHeight+'px')}hh();addEventListener('resize',hh);
+function hh(){var u=document.getElementById('ust'),k=document.querySelector('.kh');if(u&&k)k.style.setProperty('--hh',u.getBoundingClientRect().height+'px')}hh();addEventListener('resize',hh);addEventListener('load',hh);if(window.ResizeObserver){var u0=document.getElementById('ust');if(u0)new ResizeObserver(hh).observe(u0)}if(document.fonts&&document.fonts.ready)document.fonts.ready.then(hh);
 load();
 document.addEventListener('visibilitychange',function(){if(!document.hidden&&end&&end-(Date.now()+off)<=0)load()});
 })();
