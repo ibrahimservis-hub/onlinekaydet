@@ -987,6 +987,85 @@ def register(api_router, db, deps: dict):
             "recent": recent,
         }
 
+    @api_router.get("/analytics/history")
+    async def analytics_history(days: int = Query(7, ge=1, le=180), channel: str = "", q: str = "",
+                                skip: int = Query(0, ge=0), limit: int = Query(40, ge=1, le=100), _: dict = Depends(require_admin)):
+        """Geçmiş ziyaretler: her oturumun geliş kaynağı, gezdiği sayfalar sırasıyla, süre ve eylemleri."""
+        start_day = tr_day(tr_now() - timedelta(days=days - 1))
+        flt = {"day": {"$gte": start_day}}
+        if channel and channel in CHANNEL_LABELS:
+            flt["channel"] = channel
+        q = (q or "").strip()[:60]
+        if q:
+            rx = {"$regex": re.escape(q), "$options": "i"}
+            flt["$or"] = [{"landing_page": rx}, {"referrer": rx}, {"source_name": rx}, {"campaign": rx}, {"pages.path": rx}]
+        total = await db.visitor_sessions.count_documents(flt)
+        rows = await db.visitor_sessions.find(flt, {"_id": 0}).sort("first_seen", -1).skip(skip).limit(limit).to_list(limit)
+        out = []
+        for s_ in rows:
+            out.append({
+                "id": s_.get("id"), "first_seen": s_.get("first_seen"), "last_seen": s_.get("last_seen"),
+                "channel": s_.get("channel"), "channel_label": CHANNEL_LABELS.get(s_.get("channel"), s_.get("channel")),
+                "source_name": s_.get("source_name"), "campaign": s_.get("campaign"), "term": s_.get("term"),
+                "referrer": s_.get("referrer"), "landing_page": s_.get("landing_page"), "landing_query": s_.get("landing_query"),
+                "device": s_.get("device"), "browser": s_.get("browser"), "os": s_.get("os"), "screen": s_.get("screen"),
+                "pages_count": s_.get("pages_count", 0), "duration_sec": s_.get("duration_sec", 0),
+                "conv_call": s_.get("conv_call", 0), "conv_whatsapp": s_.get("conv_whatsapp", 0), "conv_form": s_.get("conv_form", 0),
+                "journey": [{"path": x.get("path"), "title": x.get("title"), "ts": x.get("ts")} for x in (s_.get("pages") or [])],
+                "events": [{"type": x.get("type"), "ts": x.get("ts"), "path": x.get("path")} for x in (s_.get("events") or [])],
+            })
+        return {"total": total, "skip": skip, "limit": limit, "items": out, "channels": CHANNEL_LABELS}
+
+    @api_router.get("/analytics/organic")
+    async def analytics_organic(days: int = Query(30, ge=1, le=180), _: dict = Depends(require_admin)):
+        """Organik (arama motorlarından gelen) ziyaretler: motor dağılımı, günlük seri, giriş sayfaları, dönüşüm, önceki dönemle kıyas."""
+        today = tr_now()
+        start_day = tr_day(today - timedelta(days=days - 1))
+        prev_start = tr_day(today - timedelta(days=2 * days - 1))
+        day_list = [tr_day(today - timedelta(days=i)) for i in range(days - 1, -1, -1)]
+        proj = {"_id": 0, "pages": 0, "events": 0}
+        cur = await db.visitor_sessions.find({"day": {"$gte": start_day}}, proj).to_list(100000)
+        prev_org = await db.visitor_sessions.count_documents({"day": {"$gte": prev_start, "$lt": start_day}, "channel": "organik"})
+        org = [x for x in cur if x.get("channel") == "organik"]
+        free = [x for x in cur if x.get("channel") in ("sosyal", "referans", "direkt")]
+        eng = Counter((x.get("source_name") or "-") for x in org)
+        by_day = Counter(x.get("day") for x in org)
+        land = {}
+        for x in org:
+            r = land.setdefault(x.get("landing_page") or "/", {"page": x.get("landing_page") or "/", "sessions": 0, "conv": 0, "dur": 0, "pv": 0})
+            r["sessions"] += 1
+            r["conv"] += (x.get("conv_call", 0) + x.get("conv_whatsapp", 0) + x.get("conv_form", 0)) and 1 or 0
+            r["dur"] += x.get("duration_sec", 0)
+            r["pv"] += x.get("pages_count", 0)
+        landing = sorted(land.values(), key=lambda r: r["sessions"], reverse=True)[:15]
+        for r in landing:
+            r["avg_duration"] = round(r["dur"] / r["sessions"]) if r["sessions"] else 0
+            r["pages_per_visit"] = round(r["pv"] / r["sessions"], 1) if r["sessions"] else 0
+            r.pop("dur"), r.pop("pv")
+        tot = len(cur)
+        n = len(org)
+        conv = sum(1 for x in org if x.get("converted"))
+        bounce = sum(1 for x in org if x.get("pages_count", 0) <= 1 and not x.get("converted"))
+        sh = Counter(x.get("channel") for x in cur)
+        refs = Counter((x.get("source_name") or "-") for x in free if x.get("channel") == "referans")
+        new_by_week = Counter()
+        return {
+            "days": days,
+            "kpi": {"organic": n, "previous": prev_org, "change": (round((n - prev_org) * 100 / prev_org, 1) if prev_org else None),
+                    "share": round(n * 100 / tot, 1) if tot else 0, "total": tot, "conversions": conv,
+                    "conv_rate": round(conv * 100 / n, 1) if n else 0, "bounce_rate": round(bounce * 100 / n, 1) if n else 0,
+                    "avg_duration": round(sum(x.get("duration_sec", 0) for x in org) / n) if n else 0,
+                    "pages_per_visit": round(sum(x.get("pages_count", 0) for x in org) / n, 1) if n else 0},
+            "engines": [{"name": k, "value": v} for k, v in eng.most_common(10)],
+            "daily": [{"date": d, "label": datetime.strptime(d, "%Y-%m-%d").strftime("%d.%m"), "value": by_day.get(d, 0)} for d in day_list],
+            "landing": landing,
+            "devices": [{"name": k or "-", "value": v} for k, v in Counter(x.get("device") for x in org).most_common(5)],
+            "mix": [{"name": CHANNEL_LABELS.get(k, k), "value": v} for k, v in sh.most_common()],
+            "referrals": [{"name": k, "value": v} for k, v in refs.most_common(8)],
+            "terms": [{"name": k, "value": v} for k, v in Counter(x.get("term") for x in org if x.get("term")).most_common(10)],
+            "note": "Google arama kelimelerini paylaşmaz; hangi sayfadan girildiği ve motor bilgisi gösterilir. Aramaların kendisi için Search Console bağlantısı gerekir.",
+        }
+
     @api_router.get("/analytics/export")
     async def analytics_export(days: int = Query(30, ge=1, le=365), _: dict = Depends(require_admin)):
         start_day = tr_day(tr_now() - timedelta(days=days - 1))
