@@ -2958,6 +2958,8 @@ import yasal
 yasal.register(api_router, db, {"require_admin": require_admin})
 import gsc
 gsc.register(api_router, db, {"require_admin": require_admin})
+import baglanti
+baglanti.register(api_router, db, {"require_admin": require_admin})
 
 import entegrasyon
 import entg_probe
