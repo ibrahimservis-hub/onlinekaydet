@@ -1,0 +1,38 @@
+/* Kampanya: ana sayfa ilk ekran + fiyat kartı. Renk --ka ile kampanyadan gelir. */
+:root{--ka:#d0345f}
+.kh{background:#080e19;color:#fff;position:relative;overflow:hidden}
+.kh .kst{display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap;padding:9px 14px;background:var(--ka);color:#fff;font:600 13px/1.3 var(--fb,system-ui);text-align:center}
+.kh .kst b{font-variant-numeric:tabular-nums;background:rgba(0,0,0,.22);border-radius:6px;padding:2px 8px;letter-spacing:.02em}
+.kh .kst b:empty{display:none}
+.kh .g{display:grid;grid-template-columns:1.1fr .9fr;gap:36px;align-items:center;padding:56px 0 64px}
+.kh h1{font:700 clamp(34px,5.2vw,64px)/1.04 var(--fd,system-ui);color:#fff;letter-spacing:-.01em}
+.kh h1 span{display:block}
+.kh h1 em{display:block;font-style:normal;color:var(--ka);filter:brightness(1.45) saturate(1.1)}
+.kh .lead{color:#c9d2e3;margin-top:18px;max-width:34em}
+.kh .cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px}
+.kh .bt.o{border-color:#ffffff66;color:#fff}
+.kh .not{margin-top:16px;color:#9aa6bd}
+.kh .foto{position:relative;justify-self:center;width:min(100%,420px);aspect-ratio:4/5}
+.kh .foto img{width:100%;height:100%;object-fit:cover;border-radius:999px 999px 28px 28px;display:block;-webkit-mask-image:linear-gradient(#000 78%,transparent);mask-image:linear-gradient(#000 78%,transparent)}
+.kh .rz{position:absolute;left:-14px;top:16%;background:var(--ka);color:#fff;border-radius:18px;padding:10px 16px;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.35);animation:khpop .7s .3s both cubic-bezier(.2,1.4,.4,1)}
+.kh .rz small{display:block;font:600 10.5px/1 var(--fb,system-ui);letter-spacing:.08em;opacity:.9}
+.kh .rz b{display:block;font:700 24px/1.1 var(--fd,system-ui);margin:3px 0}
+.kh .cp{position:absolute;background:#fff;color:#131314;border-radius:30px;padding:7px 13px;font:600 12.5px/1 var(--fb,system-ui);box-shadow:0 8px 22px rgba(0,0,0,.3);animation:khfl 5s ease-in-out infinite}
+.kh .cp.a{right:-8px;top:30%}.kh .cp.b{right:6%;bottom:22%;animation-delay:-1.6s}.kh .cp.c{left:4%;bottom:12%;animation-delay:-3.2s}
+.kh .w>.g>*{animation:khup .7s both cubic-bezier(.2,.8,.2,1)}.kh .w>.g>.foto{animation-delay:.12s}
+@keyframes khup{from{opacity:0;transform:translateY(18px)}}
+@keyframes khpop{from{opacity:0;transform:scale(.7)}}
+@keyframes khfl{50%{transform:translateY(-7px)}}
+.kh+.hero{padding-top:34px}
+.kk{padding:34px 0 0}.kk-in{display:grid;grid-template-columns:1fr auto;gap:28px;align-items:center;background:#080e19;color:#fff;border-radius:16px;padding:30px 34px;border-left:6px solid var(--ka)}
+.kk h2{font:700 clamp(24px,3vw,36px)/1.12 var(--fd,system-ui);color:#fff}.kk h2 span,.kk h2 em{display:inline}.kk h2 em{font-style:normal;color:var(--ka);filter:brightness(1.45)}
+.kk p{color:#c9d2e3;margin-top:8px}.kk .et{color:var(--ka);filter:brightness(1.45);font-weight:700;letter-spacing:.06em;font-size:12.5px;margin:0 0 8px}
+.kk-s{display:grid;gap:14px;justify-items:end}.kk-t{display:flex;gap:8px}.kk-t div{background:#ffffff14;border-radius:10px;padding:8px 12px;min-width:58px;text-align:center}.kk-t b{display:block;font:700 24px/1 var(--fd,system-ui);font-variant-numeric:tabular-nums}.kk-t small{font-size:11px;color:#9aa6bd}
+.kk-t[hidden]{display:none}
+@media(max-width:820px){.kh .g{grid-template-columns:1fr;padding:30px 0 120px;gap:20px}.kh .foto{width:min(86%,340px)}.kh .rz{left:-6px}.kk-in{grid-template-columns:1fr;padding:24px 20px}.kk-s{justify-items:start}}
+@media(max-width:820px){.kh .cta{display:none}.kh .not{display:none}}
+.kmb{display:none}
+@media(max-width:820px){.kmb{display:grid;grid-template-columns:1fr 1fr;gap:10px;position:fixed;left:0;right:0;bottom:0;z-index:40;padding:34px 14px calc(14px + env(safe-area-inset-bottom));background:linear-gradient(to bottom,#080e1900,#080e19cc 45%,#080e19)}
+ .kmb a{display:flex;align-items:center;justify-content:center;min-height:50px;border-radius:12px;font-weight:700;text-decoration:none;color:#fff;border:1.5px solid #ffffff66}.kmb a.f{background:#25a55a;border-color:#25a55a}
+ body.kmb-on .mbar{display:none}body.kmb-on{padding-bottom:0}}
+@media(prefers-reduced-motion:reduce){.kh *{animation:none!important}}
