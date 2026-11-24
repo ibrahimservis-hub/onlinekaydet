@@ -75,9 +75,9 @@ footer.alt2 .kart svg{display:block;overflow:visible;height:32px;width:52px}foot
 .sade .sssd summary{cursor:pointer;font-weight:600;padding:14px 0;color:var(--murekkep)}
 .sade .sssd p{margin:0 0 14px}
 @media(max-width:800px){.sade .sg{grid-template-columns:1fr;gap:36px}.sayi{grid-template-columns:1fr !important}}
-#temalar .tkg>*:nth-child(n+10){display:none !important}
-#temalar .flt{display:none}
-@media(max-width:700px){#temalar .tkg>*:nth-child(n+7){display:none !important}.fbant .fg2>*:nth-child(n+4){display:none}}
+#temalar .tkg:not(.acik)>*:nth-child(n+10){display:none !important}
+#temalar .tkg>*[hidden]{display:none !important}
+@media(max-width:700px){#temalar .tkg:not(.acik)>*:nth-child(n+7){display:none !important}.fbant .fg2>*:nth-child(n+4){display:none}}
 
 /* sektör sayfası zengin bölümler */
 #neler-degisir h2,#isinizi-gelistirin h2,#kayit-akisi h2,#sss h2{margin-bottom:22px;max-width:none}
