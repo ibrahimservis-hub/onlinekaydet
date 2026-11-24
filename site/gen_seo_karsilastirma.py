@@ -46,7 +46,7 @@ OURS = [('Servis ve iş kayıtları', 'Sektörün kendi adıyla (servis formu, d
         ('Müşteriye mesaj', 'SMS ve mesaj şablonları, bakım hatırlatma, QR etiket'),
         ('Web sitesi', 'Hazır tema, her bölümü düzenlenen site editörü, SEO başlıkları, kendi alan adınız'),
         ('Online randevu ve mağaza', 'Siteden randevu, yedek parça mağazası; Kurumsal pakette e-ticaret ve pazaryerleri'),
-        ('Fiyat', 'Aylık 990 ₺ + KDV\'den başlar; yıllık ödemede 2 ay bizden. İlk ay ücretsiz')]
+        ('Fiyat', 'Aylık 990 ₺ + KDV\'den başlar; yıllık ödemede 2 ay bizden. 7 gün ücretsiz')]
 RIV = {
  'takip-online': dict(ad='Takip Online', url='takiponline.com', ne='bulut tabanlı teknik servis yazılımı',
    bilgi=[('Servis kaydı', 'Müşteri, cihaz, marka, servis türü ve teslim bilgileriyle kasiyer ekranından kayıt açılır'),
@@ -89,7 +89,7 @@ def tablo(r):
             % (r['ad'], kt(r['bilgi']), kt(OURS), NOT))
 def rakip(slug, r):
     fn = '%s-alternatifi.html' % slug
-    soru = [('%s yerine OnlineKaydet kullanılır mı?' % r['ad'], 'Evet. Servis kaydı, usta takibi, kasa ve raporlar OnlineKaydet\'te de var. Geçerken kayıtlarınızı Excel\'den aktarmanıza yardım ediyoruz; önce ücretsiz ilk ayda kendi işinizle deneyin.'),
+    soru = [('%s yerine OnlineKaydet kullanılır mı?' % r['ad'], 'Evet. Servis kaydı, usta takibi, kasa ve raporlar OnlineKaydet\'te de var. Geçerken kayıtlarınızı Excel\'den aktarmanıza yardım ediyoruz; önce ücretsiz 7 günde kendi işinizle deneyin.'),
             ('OnlineKaydet\'in %s\'dan farkı ne?' % r['ad'], r['fark']),
             ('Fiyatı ne kadar?', 'OnlineKaydet 990 ₺ + KDV\'den (aylık) başlar; yıllık ödemede iki ay bizden. Paketlerin satır satır içeriği fiyatlar sayfasında.'),
             ('Hangi durumda %s daha uygun olabilir?' % r['ad'], r['uygun'])]
@@ -98,7 +98,7 @@ def rakip(slug, r):
             + sec('%s mı, OnlineKaydet mi?' % r['ad'], '<p>%s</p>' % r['uygun'])
             + faq('Sık sorulan sorular', soru) + cta())
     page(fn, '%s alternatifi: OnlineKaydet ile karşılaştırma' % r['ad'],
-         '%s (%s) ile OnlineKaydet\'i karşılaştırın: ürünün kendi sayfasında yazanlar, OnlineKaydet\'te olanlar ve hangi durumda hangisi uygun. Fiyat 990 ₺ + KDV\'den, ilk ay ücretsiz.' % (r['ad'], r['ne']),
+         '%s (%s) ile OnlineKaydet\'i karşılaştırın: ürünün kendi sayfasında yazanlar, OnlineKaydet\'te olanlar ve hangi durumda hangisi uygun. Fiyat 990 ₺ + KDV\'den, 7 gün ücretsiz.' % (r['ad'], r['ne']),
          '<a href="servis-takip-programi-karsilastirma.html">Servis takip programı karşılaştırma</a> / %s' % r['ad'],
          '%s alternatifi: OnlineKaydet ile karşılaştırma' % r['ad'],
          '%s ile OnlineKaydet\'in neyi nasıl yaptığını, ürünlerin kendi anlattıklarına göre yan yana koyduk.' % r['ad'],
@@ -141,15 +141,15 @@ def fiyat():
          'Servis takip programı fiyatları: OnlineKaydet Başlangıç 990 ₺, Profesyonel 1.990 ₺, Tam Paket 3.490 ₺, Kurumsal 5.990 ₺ (aylık + KDV). Pakette neler var, satır satır.',
          'Servis takip programı fiyatları', 'Servis takip programı fiyatları', 'Dört paket, içinde ne olduğu açık yazıyor. Yıllık ödemede iki ay bizden.', body, ld=faq_ld(soru))
 def ucretsiz():
-    soru = [('Ücretsiz servis takip programı var mı?', 'OnlineKaydet\'te ilk ay ücretsiz denersiniz; sonrasında paket fiyatı geçerlidir. Tamamen ücretsiz programlar genelde kayıt ya da modül sayısını sınırlar.'),
+    soru = [('Ücretsiz servis takip programı var mı?', 'OnlineKaydet\'te 7 gün ücretsiz denersiniz; sonrasında paket fiyatı geçerlidir. Tamamen ücretsiz programlar genelde kayıt ya da modül sayısını sınırlar.'),
             ('Excel ile servis takibi yeterli mi?', 'Az kayıtta yeterli olabilir. Kayıt, usta ve tahsilat arttıkça müşteri geçmişini aramak, kimin ne kadar borçlu olduğunu bulmak ve ustaya iş atamak Excel\'de zorlaşır.'),
             ('Crack\'li ya da kaynağı belirsiz programlar güvenli mi?', 'Değil. Müşteri kayıtlarınız ve telefon numaraları KVKK kapsamındadır; kaynağı belirsiz bir yazılıma vermek hem veri hem hukuk riski taşır.')]
-    body = (STIL + sec('Ücretsiz seçeneklerin sınırı', '<ul><li><b>Excel ve defter:</b> maliyeti yok, ama müşteri geçmişi ve alacak aramakla kaybolur.</li><li><b>Sınırlı ücretsiz sürüm:</b> kayıt, kullanıcı ya da modül sayısını kısıtlayabilir; kısıtı önceden okuyun.</li><li><b>Kaynağı belirsiz program:</b> müşteri verinizi riske atar, KVKK sorumluluğu size kalır.</li><li><b>Deneme süreli ürün:</b> kendi işinizle denemek en güvenlisi; OnlineKaydet\'te ilk ay ücretsiz.</li></ul>')
-            + sec('OnlineKaydet\'te ilk ay ücretsiz', '<p style="max-width:720px;line-height:1.7">Kayıt açın, ustalarınızı ekleyin, birkaç gerçek servis kaydı girin. Beğenmezseniz devam etmenize gerek yok. Beğenirseniz Başlangıç paketi 990 ₺ + KDV\'den başlar. Paket içerikleri <a href="fiyatlar.html">fiyatlar sayfasında</a>.</p>', tint=True)
+    body = (STIL + sec('Ücretsiz seçeneklerin sınırı', '<ul><li><b>Excel ve defter:</b> maliyeti yok, ama müşteri geçmişi ve alacak aramakla kaybolur.</li><li><b>Sınırlı ücretsiz sürüm:</b> kayıt, kullanıcı ya da modül sayısını kısıtlayabilir; kısıtı önceden okuyun.</li><li><b>Kaynağı belirsiz program:</b> müşteri verinizi riske atar, KVKK sorumluluğu size kalır.</li><li><b>Deneme süreli ürün:</b> kendi işinizle denemek en güvenlisi; OnlineKaydet\'te 7 gün ücretsiz.</li></ul>')
+            + sec('OnlineKaydet\'te 7 gün ücretsiz', '<p style="max-width:720px;line-height:1.7">Kayıt açın, ustalarınızı ekleyin, birkaç gerçek servis kaydı girin. Beğenmezseniz devam etmenize gerek yok. Beğenirseniz Başlangıç paketi 990 ₺ + KDV\'den başlar. Paket içerikleri <a href="fiyatlar.html">fiyatlar sayfasında</a>.</p>', tint=True)
             + faq('Sık sorulan sorular', soru) + cta())
     page('ucretsiz-servis-takip-programi.html', 'Ücretsiz servis takip programı: seçenekler ve sınırları',
-         'Ücretsiz servis takip programı arıyorsanız: Excel, sınırlı ücretsiz sürümler ve deneme süreli ürünlerin farkı. OnlineKaydet\'te ilk ay ücretsiz.',
-         'Ücretsiz servis takip programı', 'Ücretsiz servis takip programı: neye dikkat etmeli?', 'Ücretsiz seçenekler neyi karşılıyor, nerede sınırlanıyor, ve ilk ayı ücretsiz denemek ne demek.', body, ld=faq_ld(soru))
+         'Ücretsiz servis takip programı arıyorsanız: Excel, sınırlı ücretsiz sürümler ve deneme süreli ürünlerin farkı. OnlineKaydet\'te 7 gün ücretsiz.',
+         'Ücretsiz servis takip programı', 'Ücretsiz servis takip programı: neye dikkat etmeli?', 'Ücretsiz seçenekler neyi karşılıyor, nerede sınırlanıyor, ve 7 gün ücretsiz denemek ne demek.', body, ld=faq_ld(soru))
 if __name__ == '__main__':
     out = [rakip(s, r) for s, r in RIV.items()] + [hub(), fiyat(), ucretsiz()]
     for n in ('servis-takip-programi-karsilastirma.html', 'servis-takip-programi-fiyatlari.html', 'ucretsiz-servis-takip-programi.html'): pass

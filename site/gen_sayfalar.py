@@ -78,7 +78,7 @@ FORM = ('<div class="frm"><div><label for="f1">Ad soyad</label><input id="f1" au
  '<div><label for="f4">Sektör</label><select id="f4"><option>Seçiniz</option><option>Kombi</option><option>Klima</option><option>Beyaz eşya</option><option>Elektronik</option><option>Bilgisayar</option><option>Tesisat</option><option>Elektrik</option><option>Güvenlik</option></select></div>'
  '<a class="bt" href="#">Beni arayın</a><small>Bilgileriniz yalnızca sizinle iletişim için kullanılır (KVKK).</small></div>')
 
-def cta(title='Servis işinizi bu hafta düzene sokalım', text='Formu doldurun, sektörünüze göre kurulumu birlikte planlayalım. İlk ay ücretsiz.', sid='kayit'):
+def cta(title='Servis işinizi bu hafta düzene sokalım', text='Formu doldurun, sektörünüze göre kurulumu birlikte planlayalım. 7 gün ücretsiz.', sid='kayit'):
     return ('<section id="'+sid+'" class="dkk"><div class="w"><div class="fc"><div><h2>%s</h2><p>%s</p><a class="big" href="tel:05444444004">%s</a></div>%s</div></div></section>'
             % (title, text, TEL, FORM))
 
@@ -101,7 +101,7 @@ def p_iletisim():
       '<a class="cc" href="https://wa.me/905444444004?text=Merhaba%%2C%%20OnlineKaydet%%20hakk%%C4%%B1nda%%20bilgi%%20almak%%20istiyorum." rel="noopener" target="_blank">%s<b>WhatsApp</b><span class="cbig">Mesaj yazın</span><p>Soru sorun, ekran görüntüsü gönderin.</p></a>'
       '<a class="cc" href="/giris">%s<b>Müşteri girişi</b><span class="cbig">Panele gir</span><p>Mevcut müşteriler ve ustalar için.</p></a>'
       '</div></div></section>' % (ic('tel', 'o'), TEL, ic('chat', 'g'), ic('user', 'b')))
-    body += cta('Sizi arayalım', 'Formu doldurun, sektörünüzü not alalım ve kurulum için sizi arayalım. İlk ay ücretsiz, kurulum ve veri aktarımı dahil.', 'form')
+    body += cta('Sizi arayalım', 'Formu doldurun, sektörünüzü not alalım ve kurulum için sizi arayalım. 7 gün ücretsiz, kurulum ve veri aktarımı dahil.', 'form')
     return page('iletisim.html', 'İletişim | OnlineKaydet', 'OnlineKaydet ile iletişime geçin: telefon 0544 444 40 04, WhatsApp veya form. Servis takip programı için kurulum ve demo talebi.',
         'İletişim', 'Bizimle iletişime geçin', 'Telefonla arayın, WhatsApp\'tan yazın ya da formu doldurun; sektörünüze göre kurulumu birlikte planlayalım.',
         body, acts='<a class="bt" href="tel:05444444004">%s</a><a class="bt l" href="#form">Formu doldur</a>' % TEL)
@@ -198,9 +198,9 @@ def p_neden():
     body += ('<section><div class="w"><div class="sh one"><h2>Nasıl başlarsınız</h2></div><ol class="seq steps">'
       '<li><i></i><time>1</time><div><b>Arayın ya da form doldurun</b><p>Sektörünüzü ve usta sayınızı öğreniriz.</p></div></li>'
       '<li><i></i><time>2</time><div><b>Kurulumu biz yaparız</b><p>Firma bilgileriniz, marka ve modeller, tema ve fiş biçimi hazırlanır.</p></div></li>'
-      '<li><i></i><time>3</time><div><b>Ustalarınız çalışmaya başlar</b><p>İlk ay ücretsiz; sonrasında paketinizi seçersiniz.</p></div></li></ol></div></section>')
+      '<li><i></i><time>3</time><div><b>Ustalarınız çalışmaya başlar</b><p>7 gün ücretsiz; sonrasında paketinizi seçersiniz.</p></div></li></ol></div></section>')
     body += cta()
-    return page('neden-onlinekaydet.html', 'Neden OnlineKaydet? | Servis Takip Programı', 'Servis kaydı, usta takibi, SMS ve web sitesi tek yerde. OnlineKaydet teknik servisler için hazırlandı; kurulumu biz yaparız, ilk ay ücretsiz.',
+    return page('neden-onlinekaydet.html', 'Neden OnlineKaydet? | Servis Takip Programı', 'Servis kaydı, usta takibi, SMS ve web sitesi tek yerde. OnlineKaydet teknik servisler için hazırlandı; kurulumu biz yaparız, 7 gün ücretsiz.',
         'Neden OnlineKaydet?', 'Servis işi için yapılmış bir program', 'Genel amaçlı bir yazılımı servise uydurmak yerine, servis kaydı ve usta takibi için baştan yazıldı.', body)
 
 # ---------------- 6. BLOG ----------------

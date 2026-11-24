@@ -167,7 +167,7 @@ faq = [
 ]
 main = ('<main><section class="pb" id="icerik"><div class="w"><div><p class="kr"><a href="/">Ana sayfa</a> / Destek</p><h1>Destek ve rehberler</h1>'
   '<p class="lead">Önce aşağıdaki adım adım rehberlere bakın; ürün eklemeden pazaryerine, restoran menüsünden etikete her işlem var. Bulamazsanız bize yazın ya da arayın.</p>'
-  '<div class="cta"><a class="btn fil" href="tel:+905444444004">0544 444 40 04</a><a class="btn bos" href="https://wa.me/905444444004" rel="noopener" target="_blank">WhatsApp’tan yazın</a><a class="btn duz" href="#sss">Sık sorulan sorular</a></div></div></div></section>'
+  '<div class="cta"><a class="btn fil" href="tel:+905444444004">Hemen arayın</a><a class="btn bos" href="https://wa.me/905444444004" rel="noopener" target="_blank">WhatsApp’tan yazın</a><a class="btn duz" href="#sss">Sık sorulan sorular</a></div></div></div></section>'
   '<section class="sec"><div class="w"><form action="/ara.html" role="search" class="araf araf2"><input type="search" name="q" placeholder="Rehberlerde ara: ürün ekleme, Trendyol, menü, etiket…" aria-label="Destekte ara"><button class="btn dolu" type="submit">Ara</button></form>'
   '<div class="bk">' + cards() + '</div></div></section>'
   '<section class="sec sss" id="sss"><div class="w g"><div class="b1"><p class="et">Sık sorulanlar</p><h2>Sık sorulan sorular</h2></div><div class="lst">' +

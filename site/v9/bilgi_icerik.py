@@ -138,4 +138,4 @@ add('baslangic','Başlangıç','İlk gün: hesabı açıp yayına almak','Demo, 
   ('Bilgilerinizi girin','Firma adı, telefon, hizmetler ya da ürünler ve resimleri panelden ekleyin.'),
   ('Alan adınızı bağlayın','Alan adı bağlama ve SSL pakete dahildir.'),
   ('Yayına alın','Siteniz yayına girer; randevu ve siparişler panelinize düşmeye başlar.'))+
- TIP('Takıldığınız yerde <a href="/iletisim.html">bize yazın</a> ya da 0544 444 40 04’ü arayın.'))
+ TIP('Takıldığınız yerde <a href="/iletisim.html">bize yazın</a> ya da <a href="tel:05444444004">bizi arayın</a>.'))
