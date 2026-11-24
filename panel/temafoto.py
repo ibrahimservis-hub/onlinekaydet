@@ -56,6 +56,15 @@ def register(api_router):
     @api_router.get("/public/tema-thumb/{slug}")
     async def tema_thumb(slug: str):
         f = os.path.join(HERE, "tema_thumb", slug + ".webp")
+        if re.fullmatch(r"c\d\d-[a-z]+", slug) and not os.path.isfile(f):          # sinematik temalar: önizleme resmi = temanın ilk gerçek fotoğrafı
+            try:
+                h = open(os.path.join(HERE, "..", "themes", "html", slug + ".html"), encoding="utf-8").read()
+                m = re.search(r'https://images\.pexels\.com/photos/(\d+)/([^"\'\s)&?]+)', h)
+                if m:
+                    from fastapi.responses import RedirectResponse
+                    return RedirectResponse("https://images.pexels.com/photos/%s/%s?auto=compress&cs=tinysrgb&w=520" % (m.group(1), m.group(2)), 302, headers={"Cache-Control": "public, max-age=86400"})
+            except OSError:
+                pass
         if not re.fullmatch(r"[a-z0-9-]{3,60}", slug) or not os.path.isfile(f):
             raise HTTPException(404, "Yok")
         return Response(open(f, "rb").read(), media_type="image/webp", headers={"Cache-Control": "public, max-age=86400"})

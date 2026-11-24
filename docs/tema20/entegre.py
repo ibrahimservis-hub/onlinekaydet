@@ -34,6 +34,41 @@ def var(h, k):
     return m.group(1) if m else None
 
 
+def _leaf(v):
+    from html import escape as E
+    if isinstance(v, bool):
+        return '<p data-t="b">%s</p>' % ("true" if v else "false")
+    if v is None:
+        return '<p data-t="z"></p>'
+    if isinstance(v, (int, float)):
+        return '<p data-t="n">%s</p>' % E(str(v))
+    if isinstance(v, str):
+        m = re.search(r"/photos/(\d+)/", v)
+        if v.startswith("https://images.pexels.com") and m:
+            return '<div data-t="s"><img data-i="%s" src="%s" alt="" loading="lazy"></div>' % (m.group(1), E(v, quote=True))
+        return '<p data-t="s">%s</p>' % E(v)
+    raise ValueError
+
+
+def _node(v):
+    from html import escape as E
+    if isinstance(v, dict):
+        return '<div data-t="o">' + "".join(('<p data-t="k">%s</p>%s' if not re.fullmatch(r"[a-z0-9_]{1,12}", k) else '<div data-t="k">%s</div>%s') % (E(k), _node(x)) for k, x in v.items()) + "</div>"
+    if isinstance(v, list):
+        return '<div data-t="a">' + "".join(_node(x) for x in v) + "</div>"
+    return _leaf(v)
+
+
+# etkileşimli kutuların verisi (const C) sayfada gizli HTML olur; panel yazı/görselleri düzenler, betik çalışırken bunu okur
+SHIM = ("const C=(function(){var r=document.querySelector('.cdata>[data-t]');function P(e){var t=e.getAttribute('data-t'),x;"
+        "if(t=='s'){x=e.querySelector('img');return x?x.getAttribute('src'):e.textContent.trim()}"
+        "if(t=='b')return e.textContent.trim()=='true';if(t=='z')return null;"
+        "if(t=='n')return parseFloat(e.textContent.trim().replace(',','.'))||0;"
+        "if(t=='a')return [].map.call(e.children,P);"
+        "var o={},k;[].forEach.call(e.children,function(c){if(c.getAttribute('data-t')=='k')k=c.textContent.trim();else o[k]=P(c)});return o}"
+        "return r?P(r):{}})();")
+
+
 def conv(i, slug, sector, name):
     h = open(os.path.join(DEMO, slug, "index.html"), encoding="utf-8").read()
     # örnek adres ve notlar -> sitegen'in tanıdığı kalıp
@@ -89,7 +124,15 @@ def conv(i, slug, sector, name):
     for el in body.find_all(True, recursive=False):
         if el.name in ("noscript", "script"):
             tail.append(str(el))
-    body_html = (str(pre) if pre else "") + "".join('<div class="ed" data-nm="%s">%s</div>' % (n, x) for n, x in blocks) + "".join(tail)
+    cdata = ""
+    for k, t_ in enumerate(tail):
+        m = re.search(r"const C=(.*?);</script>", t_ + "", re.S) if "const C=" in t_ else None
+        if m:
+            data = json.loads(m.group(1).replace("\\/", "/"))
+            cdata = '<div class="ed" data-nm="Etkileşimli veriler"><div class="cdata" hidden style="display:none">%s</div></div>' % _node(data)
+            tail[k] = t_.replace("const C=" + m.group(1) + ";", SHIM, 1)
+    bh = ['<div class="ed" data-nm="%s">%s</div>' % (n, x) for n, x in blocks]
+    body_html = (str(pre) if pre else "") + "".join(bh[:-1]) + cdata + bh[-1] + "".join(tail)
     head = str(soup.head)
     head = head.replace("</style>", ".ed{display:contents}</style>", 1)
     out = "<!doctype html><html lang=\"tr\">" + head + "<body>" + body_html + "</body></html>"
