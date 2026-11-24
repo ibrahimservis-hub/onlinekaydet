@@ -247,7 +247,7 @@ def register(api_router, db, deps):
         except Exception:                                          # noqa: BLE001
             akis = 0
         return {"firm": g.get("company_name") or "", "sector": key, "pack": pk.get("sector") or key,
-                "terms": terms(pk.get("sector") or key), "modules": list(mods), "eticaret": bool(eshop), "work_flows": akis,
+                "terms": terms(pk.get("sector") or key), "sv": __import__("servis_dili").build(PACKMAP.get(pk.get("sector") or key, pk.get("sector") or key)), "modules": list(mods), "eticaret": bool(eshop), "work_flows": akis,
                 "family": __import__("sektor_dil").family_of(key, pk.get("sector") or ""), "eski_panel": __import__("sektor_dil").family_of(key, pk.get("sector") or "") not in ("randevu", "siparis"),   # randevu ve sipariş işlerinde eski panel kapalı
                 "user": user.get("name") or user.get("email") or "", "staff": st, "services": sv,
                 "hours": {"start": B.get("start") or "09:00", "end": B.get("end") or "19:00", "closed": B.get("closed_weekdays") or [], "online": bool(B.get("enabled")),
