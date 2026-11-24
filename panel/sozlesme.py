@@ -54,8 +54,10 @@ def madde_listesi(f, fy, sat, mus, modul_adlari, bugun, bitis, no):
         ("1. TARAFLAR", [
             "<b>HİZMET SAĞLAYICI:</b> %s — VKN: %s, Vergi Dairesi: %s — Adres: %s — E-posta: %s (bundan sonra “OnlineKaydet” denir)." % (
                 v(sat["unvan"] or "OnlineKaydet"), v(sat["vkn"]), v(sat["vergi_dairesi"]), v(sat["adres"]), v(sat["eposta"])),
-            "<b>MÜŞTERİ:</b> %s — Yetkili: %s — Vergi No / TCKN: %s, Vergi Dairesi: %s — Adres: %s — Telefon: %s — E-posta (panel kullanıcı adı): %s (bundan sonra “Müşteri” denir)." % (
-                v(firma), v(mus["yetkili"]), v(mus["vkn"]), v(mus["vd"]), v(mus["adres"]), v(mus["telefon"]), v(mus["email"])),
+            "<b>MÜŞTERİ:</b> %s — Yetkili: %s — Vergi No / TCKN: %s, Vergi Dairesi: %s — Adres: %s%s — Telefon: %s — E-posta (panel kullanıcı adı): %s (bundan sonra “Müşteri” denir)." % (
+                v(firma), v(mus["yetkili"]), v(mus["vkn"]), v(mus["vd"]), v(mus["adres"]),
+                (" — MERSİS No: %s" % _esc(mus["mersis"]) if mus.get("mersis") else "") + (" — Ticaret Sicil No: %s" % _esc(mus["sicil"]) if mus.get("sicil") else ""),
+                v(mus["telefon"]), v(mus["email"])),
         ]),
         ("2. KONU", [
             "İşbu sözleşmenin konusu, OnlineKaydet'in internet üzerinden sunduğu servis/randevu/iş takibi, müşteri ve stok yönetimi, muhasebe ve web sitesi yazılımına (“Hizmet”) Müşteri'nin "
@@ -128,9 +130,11 @@ def pdf_olustur(f, fy, sat, modul_adlari, no):
     simdi = datetime.now(tr)
     bugun = simdi.strftime("%d.%m.%Y")
     bitis = (simdi + timedelta(days=fy["gun"])).strftime("%d.%m.%Y")
-    mus = {"unvan": (f.get("demo_firma") if f.get("demo") and f.get("demo_firma") else f.get("name")) or "", "yetkili": f.get("contact_name") or "",
-           "vkn": f.get("tax_no") or "", "vd": f.get("tax_office") or "", "adres": f.get("address") or "", "telefon": f.get("phone") or "",
-           "email": f.get("login_email") or f.get("email") or "", "sektor": f.get("sector_ad") or ""}
+    ky = f.get("kunye") or {}
+    mus = {"unvan": ky.get("unvan") or (f.get("demo_firma") if f.get("demo") and f.get("demo_firma") else f.get("name")) or "", "yetkili": ky.get("yetkili") or f.get("contact_name") or "",
+           "vkn": ky.get("vkn") or f.get("tax_no") or "", "vd": ky.get("vd") or f.get("tax_office") or "", "adres": ky.get("adres") or f.get("address") or "",
+           "telefon": ky.get("telefon") or f.get("phone") or "", "email": ky.get("eposta") or f.get("login_email") or f.get("email") or "",
+           "sektor": f.get("sector_ad") or "", "mersis": ky.get("mersis") or "", "sicil": ky.get("sicil") or ""}
     ink = colors.HexColor("#1d2433")
     st_b = ParagraphStyle("b", fontName=R, fontSize=9.2, leading=13.2, alignment=TA_JUSTIFY, textColor=ink, spaceAfter=4)
     st_h = ParagraphStyle("h", fontName=B, fontSize=10, leading=14, textColor=colors.HexColor("#b4244a"), spaceBefore=8, spaceAfter=3)
@@ -167,6 +171,40 @@ def pdf_olustur(f, fy, sat, modul_adlari, no):
 
 def register(api_router, db, deps):
     adm = deps["require_admin"]
+
+    KUNYE = ("unvan", "vd", "vkn", "adres", "yetkili", "telefon", "eposta", "mersis", "sicil")
+
+    @api_router.get("/admin/firms/{fid}/kunye")
+    async def kunye_oku(fid: str, _: dict = Depends(adm)):
+        """Sözleşmedeki müşteri bilgileri: kayıtlı künye, yoksa firma kartı."""
+        if tenant.current():
+            raise HTTPException(403, "Yalnızca platform sahibi")
+        f = await db.main().firms.find_one({"id": fid}, {"_id": 0})
+        if not f:
+            raise HTTPException(404, "Firma bulunamadı")
+        ky = f.get("kunye") or {}
+        var = {"unvan": (f.get("demo_firma") if f.get("demo") and f.get("demo_firma") else f.get("name")) or "", "vd": f.get("tax_office") or "", "vkn": f.get("tax_no") or "",
+               "adres": f.get("address") or "", "yetkili": f.get("contact_name") or "", "telefon": f.get("phone") or "", "eposta": f.get("login_email") or f.get("email") or ""}
+        return {k: ky.get(k) or var.get(k) or "" for k in KUNYE}
+
+    @api_router.put("/admin/firms/{fid}/kunye")
+    async def kunye_yaz(fid: str, payload: dict, _: dict = Depends(adm)):
+        if tenant.current():
+            raise HTTPException(403, "Yalnızca platform sahibi")
+        ky = {k: _t(payload.get(k), 300) for k in KUNYE}
+        vk = re.sub(r"\s+", "", ky["vkn"])
+        if vk and not (vk.isdigit() and len(vk) in (10, 11)):
+            raise HTTPException(422, "Vergi no 10 haneli, T.C. kimlik no 11 haneli olmalı")
+        ky["vkn"] = vk
+        upd = {"kunye": ky}
+        if ky["vkn"]:
+            upd["tax_no"] = ky["vkn"]
+        if ky["vd"]:
+            upd["tax_office"] = ky["vd"]
+        r = await db.main().firms.update_one({"id": fid}, {"$set": upd})
+        if not r.matched_count:
+            raise HTTPException(404, "Firma bulunamadı")
+        return {"ok": True}
 
     @api_router.get("/admin/firms/{fid}/sozlesme.pdf")
     async def sozlesme(fid: str, paket: str = "", sure: str = "yillik", bedel: str = "", kdv_dahil: int = 0, _: dict = Depends(adm)):
