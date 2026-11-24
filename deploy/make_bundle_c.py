@@ -9,6 +9,8 @@ files['app/themes.json'] = open(R + '/panel/themes.json', encoding='utf-8').read
 files['app/temafoto.py'] = open(R + '/panel/temafoto.py', encoding='utf-8').read()
 files['app/siteedit.py'] = open(R + '/panel/siteedit.py', encoding='utf-8').read()
 files['app/crm_extras.py'] = open(R + '/panel/crm_extras.py', encoding='utf-8').read()
+files['app/gsc.py'] = open(R + '/panel/gsc.py', encoding='utf-8').read()
+files['app/server.py'] = open(R + '/panel/server.py', encoding='utf-8').read()
 files['app/sahip/index.html'] = open(R + '/panel/sahip/index.html', encoding='utf-8').read()
 json.dump({'files': files, 'edits': []}, open(R + '/deploy/bundle_c.json', 'w', encoding='utf-8'), ensure_ascii=False)
 print(len(files), os.path.getsize(R + '/deploy/bundle_c.json') // 1024, 'KB')
