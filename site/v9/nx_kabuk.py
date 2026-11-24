@@ -4,7 +4,7 @@ Eski header/duyuru/footer kaldırılır. Tekrar çalıştırılabilir (işaretle
 Kullanım: python3 site/v9/nx_kabuk.py"""
 import os, re, glob
 S = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-V = '1123i'
+V = '1124a'
 ATLA = {'ana-sayfa-yeni.html', 'index.html', 'a-onizleme.html', 'ana-sayfa-astryx.html', 'yeni-ana-sayfa.html', 'temalar-live.html', 'tasarim-kuafor5.html', 'yon4.html', 'yon5.html', 'yon6.html', 'yon7.html'}
 IC = {'tel': '<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/>',
       'form': '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>'}
@@ -24,9 +24,9 @@ FTR = ('<!--nxf--><footer class="nxf"><div class="w">'
  '<div class="ilt"><a href="tel:+905444444004">' + ic('tel') + '<span>Bizi arayın</span></a><a href="/iletisim.html">' + ic('form') + '<span>İletişim formu</span></a></div></div></div>'
  '<div class="kol">'
  '<div><h3><span>01 //</span>Ürün</h3><a href="/temalar.html">Temalar</a><a href="/e-ticaret.html">E-ticaret</a><a href="/web-sitesi.html">Web sitesi editörü</a><a href="/is-takibi.html">Randevu ve iş takibi</a><a href="/muhasebe-ve-stok.html">Muhasebe ve stok</a><a href="/fiyatlar.html">Paketler</a></div>'
- '<div><h3><span>02 //</span>Sektörler</h3><a href="/sektor-kombi.html">Teknik servis</a><a href="/sektor-kuafor.html">Kuaför</a><a href="/sektor-eticaret.html">E-ticaret</a><a href="/tum-sektorler.html">Tüm sektörler</a></div>'
+ '<div><h3><span>02 //</span>Sektörler</h3><a href="/sektor-kombi.html">Teknik servis</a><a href="/sektor-kuafor.html">Kuaför</a><a href="/sektor-eticaret.html">E-ticaret</a><a href="/sektor-oto-servis.html">Oto servis</a><a href="/sektor-klima.html">Klima servisi</a><a href="/sektor-beyaz-esya.html">Beyaz eşya servisi</a><a href="/sektor-dis-klinigi.html">Diş kliniği</a><a href="/sektor-emlakci.html">Emlakçı</a><a href="/sektor-lokanta.html">Lokanta</a><a href="/sektor-guzellik.html">Güzellik salonu</a><a href="/tum-sektorler.html">Tüm sektörler</a></div>'
  '<div><h3><span>03 //</span>Kaynaklar</h3><a href="/blog.html">Blog</a><a href="/entegrasyonlar.html">Entegrasyonlar</a><a href="/bilgi-bankasi.html">Bilgi bankası</a><a href="/destek.html">Destek</a><a href="/hesaplama-araclari.html">Hesaplama araçları</a></div>'
- '<div><h3><span>04 //</span>E-ticaret bilgi bankası</h3><a href="/e-ticaret-bilgi-bankasi.html">Tüm rehberler</a><a href="/e-ticaret-nasil-yapilir.html">E-ticaret nasıl yapılır?</a><a href="/e-ticaret-sitesi-kurmak.html">E-ticaret sitesi kurmak</a><a href="/internetten-satis-nasil-yapilir.html">İnternetten satış</a><a href="/trendyolda-satis-yapmak.html">Trendyol\'da satış</a><a href="/pinterest-nedir.html">Pinterest nedir?</a><a href="/online-is-fikirleri.html">Online iş fikirleri</a><a href="/youtube-para-kazanma.html">YouTube para kazanma</a></div>'
+ '<div><h3><span>04 //</span>Rehberler</h3><a href="/e-ticaret-bilgi-bankasi.html">Tüm rehberler</a><a href="/e-ticaret-nasil-yapilir.html">E-ticaret nasıl yapılır?</a><a href="/e-ticaret-sitesi-kurmak.html">E-ticaret sitesi kurmak</a><a href="/internetten-satis-nasil-yapilir.html">İnternetten satış</a><a href="/trendyolda-satis-yapmak.html">Trendyol\'da satış</a><a href="/pinterest-nedir.html">Pinterest nedir?</a><a href="/online-is-fikirleri.html">Online iş fikirleri</a><a href="/youtube-para-kazanma.html">YouTube para kazanma</a></div>'
  '<div><h3><span>05 //</span>Kurumsal</h3><a href="/hakkimizda.html">Hakkımızda</a><a href="/iletisim.html">İletişim</a><a href="/bayilik.html">Bayilik</a><a href="/altyapi-ve-teknoloji.html">Altyapı ve teknoloji</a><a href="/bilgi-ve-veri-guvenligi.html">Veri güvenliği</a><a href="/kvkk.html">KVKK ve gizlilik</a></div>'
  '</div><div class="fil" aria-hidden="true">onlinekaydet</div>'
  '<div class="nxalt"><span>© 2026 OnlineKaydet</span><span><a href="/gizlilik.html">Gizlilik</a> · <a href="/cerez-politikasi.html">Çerez politikası</a> · <a href="/kullanim-kosullari.html">Kullanım koşulları</a> · <a href="/mesafeli-satis-iade.html">Mesafeli satış ve iade</a></span><span class="imza">KAYDET · TAKİP ET · BÜYÜ //</span></div>'
